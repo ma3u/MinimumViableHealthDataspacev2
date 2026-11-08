@@ -780,14 +780,19 @@
   "postgresDbs": [
     "cfm",
     "controlplane",
+    "controlplane_v1",
     "dataplane",
     "dataplane_omop",
     "identityhub",
+    "identityhub_v1",
     "issuerservice",
+    "issuerservice_v1",
     "keycloak",
     "redlinedb",
     "rogueissuer",
+    "rogueissuer_v1",
     "simplga",
+    "simplga_v1",
     "taskdb"
   ],
   "adrs": [
@@ -1344,23 +1349,23 @@
     "trivy": "0.69.3"
   },
   "lastUpdated": {
-    "/docs": "2026-11-02",
-    "/docs/user-guide": "2026-11-08",
+    "/docs": "2026-11-08",
+    "/docs/user-guide": "2026-11-07",
     "/docs/developer": "2026-11-08",
-    "/docs/developer/quality-gates": "2026-11-07",
+    "/docs/developer/quality-gates": "2026-11-08",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",
-    "/docs/developer/[slug]": "2026-11-05",
+    "/docs/developer/[slug]": "2026-11-08",
     "/docs/architecture": "2026-11-08",
-    "/docs/security": "2026-11-05",
-    "/docs/security/[slug]": "2026-11-05",
-    "/docs/klarbefund": "2026-11-05",
-    "/docs/ehds": "2026-11-05",
-    "/docs/ehds/glossary": "2026-11-04",
-    "/docs/ehds/[slug]": "2026-11-05",
-    "/docs/roadmap": "2026-11-02",
-    "/docs/operations": "2026-11-05",
-    "/docs/operations/[slug]": "2026-11-05",
-    "/docs/klarbefund/[slug]": "2026-11-05"
+    "/docs/security": "2026-11-08",
+    "/docs/security/[slug]": "2026-11-08",
+    "/docs/klarbefund": "2026-11-08",
+    "/docs/ehds": "2026-11-08",
+    "/docs/ehds/glossary": "2026-11-08",
+    "/docs/ehds/[slug]": "2026-11-08",
+    "/docs/roadmap": "2026-11-08",
+    "/docs/operations": "2026-11-08",
+    "/docs/operations/[slug]": "2026-11-08",
+    "/docs/klarbefund/[slug]": "2026-11-08"
   }
 }

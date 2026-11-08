@@ -8,10 +8,9 @@
  * also renders a few of them in German.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import mermaid from "mermaid";
 import { MESSAGES, type Area } from "@/messages";
 import { translate } from "@/lib/i18n/translate";
 import {
@@ -19,7 +18,6 @@ import {
   LANES,
   MILESTONES,
   STATUS_LABEL,
-  roadmapGantt,
   roadmapTargets,
 } from "@/lib/docs/roadmap";
 import facts from "@/app/docs/docs-facts.json";
@@ -39,13 +37,9 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/components/MermaidDiagram", () => ({
-  default: ({ chart, caption }: { chart: string; caption?: string }) => (
-    <figure>
-      <pre data-testid="mermaid-diagram">{chart}</pre>
-      <figcaption>{caption}</figcaption>
-    </figure>
-  ),
+// The timeline's own test draws it in German (RoadmapTimeline.test.tsx).
+vi.mock("@/components/docs/RoadmapTimeline", () => ({
+  default: () => <div data-testid="roadmap-timeline" />,
 }));
 
 // One document translated into German, as the generator writes the index.
@@ -157,7 +151,7 @@ describe("the docs pages' texts are in their dictionaries", () => {
     const toc = strings(page, /label: "((?:[^"\\]|\\.)*)"/g);
     const purposes = strings(page, /purpose:\s*"((?:[^"\\]|\\.)*)"/g);
     const layers = strings(page, /layer: "((?:[^"\\]|\\.)*)"/g);
-    expect(toc).toHaveLength(8);
+    expect(toc).toHaveLength(9);
     expect(purposes.length).toBeGreaterThan(25);
     const statuses = [...new Set(facts.adrs.map((a) => a.status))].filter(
       Boolean,
@@ -189,7 +183,11 @@ describe("the docs pages' texts are in their dictionaries", () => {
         ...MILESTONES.flatMap((m) => [m.label, m.detail]),
         ...Object.values(STATUS_LABEL),
         "{start} to {end}",
-        "Click a bar for its issue, a diamond for its source. The red line is today.",
+        "Drag to pan, Ctrl or ⌘ and the wheel to zoom. Click a bar or a diamond for its details; a double click opens its issue or source. The red line is today.",
+        "Edit in the GitHub Project",
+        "Open issue #{n}",
+        "Open the source",
+        "Milestone",
       ]),
     ).toEqual([]);
   });
@@ -197,21 +195,14 @@ describe("the docs pages' texts are in their dictionaries", () => {
 
 describe("the roadmap's chart in every language", () => {
   for (const lang of LANGS) {
-    const tr = (text: string, vars?: Record<string, string | number>) =>
-      translate(lang, "docsCommon", text, vars);
-
-    it(`${lang}: keeps the labels free of Mermaid's Gantt syntax and parses`, async () => {
+    it(`${lang}: has every lane, bar and marker label`, () => {
       for (const t of [
         ...LANES.map((l) => l.label),
         ...ITEMS.map((i) => i.short),
         ...MILESTONES.map((m) => m.label),
       ]) {
-        expect(tr(t), `${lang}: ${t}`).not.toMatch(/[:;#]/);
+        expect(MESSAGES[lang].docsCommon, `${lang}: ${t}`).toHaveProperty([t]);
       }
-      const chart = roadmapGantt(tr);
-      expect(chart).toContain(`  section ${tr("Identity and wallets")}\n`);
-      mermaid.initialize({ startOnLoad: false });
-      await expect(mermaid.parse(chart)).resolves.toBeTruthy();
     });
   }
 
@@ -219,10 +210,10 @@ describe("the roadmap's chart in every language", () => {
     const de = (text: string, vars?: Record<string, string | number>) =>
       translate("de", "docsCommon", text, vars);
     const label = roadmapTargets(de).find((t) => t.taskId === "i711")!.label;
-    expect(label).toContain("Blockiert");
-    expect(label).toContain("2026-11-01 bis 2027-03-26");
+    expect(label).toContain("Geplant");
+    expect(label).toContain("2026-11-09 bis 2027-03-26");
     expect(roadmapTargets().find((t) => t.taskId === "i711")!.label).toMatch(
-      /^#711 DSP compatibility kit .* \(P1, blocked, 2026-11-01 to 2027-03-26\)\. /,
+      /^#711 DSP compatibility kit .* \(P1, planned, 2026-11-09 to 2027-03-26\)\. /,
     );
   });
 });
@@ -250,18 +241,16 @@ describe("the pages in German", () => {
     expect(screen.getByText(/Zuletzt aktualisiert am/)).toBeInTheDocument();
   });
 
-  it("draws the roadmap's table and chart in German", async () => {
+  it("draws the roadmap's table and the Project link in German", async () => {
     localStorage.setItem("catalog-metadata-language", "de");
     render(<RoadmapDocsPage />);
     const items = (
       await screen.findByRole("heading", { level: 2, name: "Jeder Eintrag" })
     ).parentElement!;
-    expect(within(items).getAllByText("Blockiert").length).toBeGreaterThan(0);
-    await waitFor(() =>
-      expect(screen.getByTestId("mermaid-diagram").textContent).toContain(
-        "section Identität und Wallets",
-      ),
-    );
+    expect(within(items).getAllByText("Geplant").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "GitHub-Projekt" }),
+    ).toHaveAttribute("href", "https://github.com/users/ma3u/projects/1");
   });
 
   it("shows the architecture page's headings and service table in German", async () => {

@@ -6,14 +6,14 @@ requires-python = ">=3.12"
 dependencies = [
   "nats-py==2.16.0",
   "neo4j==6.4.1",
-  "pydantic==2.14.1",
+  "pydantic==2.14.2",
   "prometheus-client==0.26.0",
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest==9.2.0",
-  "pytest-asyncio==1.4.1",
+  "pytest-asyncio==1.4.1.post1",
   "ruff==0.17.3",
 ]
 

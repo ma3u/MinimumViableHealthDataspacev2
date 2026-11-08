@@ -33,9 +33,27 @@ export default function OperationsDocsPage() {
         </h1>
         <DocsLastUpdated page="/docs/operations" />
         <p className="text-(--text-secondary) text-lg">
-          <T area="docsCommon">
+          <T
+            area="docsCommon"
+            tags={{
+              e: (
+                <ExternalA href="https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng" />
+              ),
+              c5: (
+                <ExternalA href="https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf?__blob=publicationFile&v=3" />
+              ),
+              gs: (
+                <ExternalA href="https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/it-grundschutz_node.html" />
+              ),
+              tls: <ExternalA href="https://www.bsi.bund.de/dok/TR-02102" />,
+              app: <ExternalA href="https://www.bsi.bund.de/dok/TR-03161" />,
+              waf: (
+                <ExternalA href="https://learn.microsoft.com/en-us/azure/well-architected/" />
+              ),
+            }}
+          >
             {
-              "How the hub is operated and what it does under load. The operational guideline says which EHDS role runs which part and what the BSI standards ask of each; the dashboards page shows the three Grafana dashboards and how to read them; the load-test page holds the results of every load, stress and spike run, what each found and what changed because of it; the readiness assessment reads all of it against the Well-Architected Framework."
+              "How the hub is operated and what it does under load. The operational guideline says which <e>EHDS</e> role runs which part and what the BSI standards (<c5>C5</c5>, <gs>IT-Grundschutz</gs>, <tls>TR-02102</tls>, <app>TR-03161</app>) ask of each; the dashboards page shows the three Grafana dashboards and how to read them; the load-test page holds the results of every load, stress and spike run, what each found and what changed because of it; the readiness assessment reads all of it against the <waf>Well-Architected Framework</waf>."
             }
           </T>
         </p>
@@ -58,10 +76,11 @@ export default function OperationsDocsPage() {
                   />
                 ),
                 code: <code />,
+                k6: <ExternalA href="https://grafana.com/docs/k6/latest/" />,
               }}
             >
               {
-                "<a>Load and stress test</a> on the platform's Grafana: what k6 is doing, the proxy and the containers, one run per <code>testid</code>. Sign-in required; the stack stops off hours."
+                "<a>Load and stress test</a> on the platform's Grafana: what <k6>k6</k6> is doing, the proxy and the containers, one run per <code>testid</code>. Sign-in required; the stack stops off hours."
               }
             </T>
           </li>

@@ -718,101 +718,145 @@
   border-top: 1px solid var(--border);
 }
 
-/* ── Roadmap Gantt (/docs/roadmap) ─────────────────────────────────────────── */
-/* Mermaid draws the chart; RoadmapGantt.tsx wraps bars and markers in links
-   and numbers the bars (--i). Bars grow from their start date, one after the
-   other; milestones, which Mermaid rotates with a transform, fade in instead.
-   The reduced-motion rule above shortens both to nothing. */
-@keyframes roadmap-grow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+/* ── Roadmap timeline (/docs/roadmap) ──────────────────────────────────────── */
+/* vis-timeline draws the chart (RoadmapTimeline.tsx); these rules give it the
+   page's theme. Bars by status, as the legend names them: planned light with
+   an accent border, in progress filled accent, blocked danger, done grey. A
+   label longer than its bar runs on in the page's text colour, so the fills
+   are tints the same text reads on. */
+.roadmap-timeline {
+  height: 44rem;
 }
-@keyframes roadmap-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.roadmap-timeline:fullscreen,
+.roadmap-timeline.rt-full {
+  height: 100%;
+  padding: 1rem;
 }
-.roadmap-gantt rect.task:not(.milestone) {
-  transform-box: fill-box;
-  transform-origin: left center;
-  animation: roadmap-grow 0.7s ease-out both;
-  animation-delay: calc(var(--i, 0) * 45ms);
+.roadmap-timeline.rt-full {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
 }
-.roadmap-gantt rect.milestone {
-  animation: roadmap-fade 0.6s ease-out both;
-  animation-delay: calc(var(--i, 0) * 45ms);
+.roadmap-timeline .vis-timeline {
+  border: 0;
+  font-family: inherit;
+  background: var(--surface-card);
 }
-.roadmap-gantt a.roadmap-link {
+.roadmap-timeline .vis-panel.vis-left,
+.roadmap-timeline .vis-panel.vis-center,
+.roadmap-timeline .vis-panel.vis-top,
+.roadmap-timeline .vis-panel.vis-bottom,
+.roadmap-timeline .vis-labelset .vis-label,
+.roadmap-timeline .vis-foreground .vis-group {
+  border-color: var(--border);
+}
+.roadmap-timeline .vis-labelset .vis-label {
+  color: var(--text-primary);
+}
+.roadmap-timeline .vis-time-axis .vis-text {
+  color: var(--text-secondary);
+}
+.roadmap-timeline .vis-time-axis .vis-grid.vis-minor {
+  border-color: color-mix(in srgb, var(--border) 50%, transparent);
+}
+.roadmap-timeline .vis-time-axis .vis-grid.vis-major {
+  border-color: var(--border);
+}
+.roadmap-timeline .vis-current-time {
+  background: #e11d48;
+  width: 2px;
+}
+.roadmap-timeline .rt-lane {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+}
+.roadmap-timeline .vis-item {
+  border-width: 2px;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-primary);
   cursor: pointer;
 }
-.roadmap-gantt a.roadmap-link:hover rect,
-.roadmap-gantt a.roadmap-link:focus-visible rect {
-  filter: brightness(1.2) drop-shadow(0 0 3px var(--accent));
+.roadmap-timeline .vis-item.vis-range .vis-item-overflow {
+  overflow: visible;
 }
-.roadmap-gantt a.roadmap-link:hover text {
-  text-decoration: underline;
+.roadmap-timeline .vis-item .vis-item-content {
+  padding: 0.125rem 0.375rem;
 }
-/* Lanes, axis and outside labels follow the page's theme: Mermaid's own
-   colours for them (set with id selectors, hence !important) were unreadable
-   in dark mode. */
-.roadmap-gantt .sectionTitle,
-.roadmap-gantt .taskTextOutsideRight,
-.roadmap-gantt .taskTextOutsideLeft,
-.roadmap-gantt .tick text {
-  fill: var(--text-primary) !important;
+.roadmap-timeline .vis-item.rt-planned {
+  background: var(--accent-surface);
+  border-color: var(--accent);
 }
-.roadmap-gantt rect.section0,
-.roadmap-gantt rect.section2 {
-  fill: var(--surface) !important;
-  opacity: 1 !important;
+.roadmap-timeline .vis-item.rt-in-progress {
+  background: color-mix(in srgb, var(--accent) 40%, var(--surface-card));
+  border-color: var(--accent);
 }
-.roadmap-gantt rect.section1,
-.roadmap-gantt rect.section3 {
-  fill: var(--surface-2) !important;
-  opacity: 1 !important;
+.roadmap-timeline .vis-item.rt-blocked {
+  background: color-mix(in srgb, var(--danger) 40%, var(--surface-card));
+  border-color: var(--danger);
 }
-/* Bars by status, in the page's colours (the legend on /docs/roadmap names
-   them): planned light with an accent border, in progress solid accent,
-   blocked danger, done grey. Mermaid tags a bar task, active, crit or done. */
-.roadmap-gantt rect.task:not(.milestone) {
-  fill: var(--accent-surface) !important;
-  stroke: var(--accent) !important;
+.roadmap-timeline .vis-item.rt-done {
+  background: var(--surface-2);
+  border-color: var(--border-ui);
 }
-.roadmap-gantt rect.task[class*="active"] {
-  fill: var(--accent) !important;
+.roadmap-timeline .vis-item.vis-selected {
+  box-shadow: 0 0 0 3px #facc15;
+  z-index: 5;
 }
-.roadmap-gantt rect.task[class*="crit"] {
-  fill: var(--danger) !important;
-  stroke: var(--danger) !important;
+.roadmap-timeline .vis-item.rt-dim {
+  opacity: 0.2;
 }
-.roadmap-gantt rect.task[class*="done"]:not(.milestone) {
-  fill: var(--surface-2) !important;
-  stroke: var(--border-ui) !important;
+.roadmap-timeline .rt-prio {
+  display: inline-block;
+  margin-right: 0.3rem;
+  padding: 0 0.25rem;
+  border-radius: 0.2rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  color: var(--text-primary);
 }
-.roadmap-gantt rect.milestone {
-  fill: var(--accent) !important;
-  stroke: var(--accent) !important;
+.roadmap-timeline .rt-prio.rt-P1 {
+  background: var(--danger);
+  color: var(--surface-card);
 }
-.roadmap-gantt text.taskText {
-  fill: var(--text-primary) !important;
+.roadmap-timeline .vis-item.rt-milestone {
+  background: transparent;
+  border: 0;
+  font-style: italic;
 }
-.roadmap-gantt text.taskText[class*="active"],
-.roadmap-gantt text.taskText[class*="crit"] {
-  fill: var(--surface-card) !important;
+.roadmap-timeline .vis-item.rt-milestone .vis-dot {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: rotate(45deg);
 }
-/* On a phone the chart keeps a readable size and scrolls sideways; the
-   diagram box centres with flexbox, which would cut off an overflowing
-   chart's left side, so this one starts at the left. */
-.roadmap-gantt {
-  min-width: 56rem;
+.roadmap-timeline .vis-item.rt-milestone.vis-selected {
+  box-shadow: none;
 }
-[data-testid="roadmap-gantt"] figure > div {
-  justify-content: flex-start;
+.roadmap-timeline .vis-item.rt-milestone.vis-selected .vis-item-content {
+  outline: 2px solid #facc15;
+  border-radius: 0.25rem;
+}
+.roadmap-timeline .vis-tooltip {
+  max-width: 24rem;
+  white-space: normal !important;
+  font-family: inherit !important;
+  font-size: 0.75rem !important;
+  color: var(--text-primary) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border-ui) !important;
+  border-radius: 0.375rem !important;
+}
+/* On a phone the details go below the chart. */
+@media (max-width: 767px) {
+  .roadmap-timeline .rt-stage {
+    flex-direction: column;
+  }
+  .roadmap-timeline .rt-detail {
+    width: auto;
+    max-height: 40%;
+  }
 }

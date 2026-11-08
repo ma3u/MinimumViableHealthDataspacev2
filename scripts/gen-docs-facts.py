@@ -13,7 +13,7 @@ this script derives it from the code:
   uiPages          ui/src/app/**/page.tsx
   preCommitHooks   .pre-commit-config.yaml
   composeServices  docker-compose.yml + docker-compose.jad.yml
-  postgresDbs      jad/init-postgres.sql + POSTGRES_DB
+  postgresDbs      jad/init-postgres.sql + jad/init-postgres-edc1.sql + POSTGRES_DB
   adrs             docs/ADRs/ADR-*.md (id, title, status)
   complianceFloors scripts/compliance-baseline.json
   openapi          ui/public/openapi.yaml (version, paths, operations)
@@ -67,7 +67,7 @@ PAGES = {
     "/docs/developer/quality-gates": {
         "sources": ["ui/src/app/docs/developer/quality-gates/page.tsx"],
         "facts": ["preCommitHooks", "complianceFloors", "apiRoutes", "workflowJobs",
-                  "coverageThresholds", "toolVersions", "openapi"],
+                  "coverageThresholds", "toolVersions", "openapi", "composeServices"],
     },
     "/docs/developer/api": {
         "sources": ["ui/src/app/docs/developer/api/page.tsx", "ui/public/openapi.yaml"],
@@ -194,7 +194,11 @@ def compose_services():
 
 
 def postgres_dbs():
-    dbs = set(re.findall(r"CREATE DATABASE\s+\"?([A-Za-z0-9_]+)", read("jad/init-postgres.sql"), re.I))
+    # A fresh volume runs both files: keycloak, taskdb and the EDC 0.18
+    # databases, then the _v1 ones of the EDC 1.0 services (#881).
+    dbs = set()
+    for f in ("jad/init-postgres.sql", "jad/init-postgres-edc1.sql"):
+        dbs |= set(re.findall(r"CREATE DATABASE\s+\"?([A-Za-z0-9_]+)", read(f), re.I))
     jad = yaml.safe_load(read("docker-compose.jad.yml")).get("services", {})
     main_db = jad.get("postgres", {}).get("environment", {}).get("POSTGRES_DB")
     if main_db:

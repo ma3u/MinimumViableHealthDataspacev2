@@ -17,23 +17,27 @@ export const metadata = {
     "The security test report, threat models, the Klarbefund self-assessment and evidence, the report for health insurers and the bills of materials, published from the repository.",
 };
 
-/** The command and what it checks; the second is a key of docsCommon. */
+/** The command, what it checks (a key of docsCommon) and the file it runs. */
 const RUN_AGAIN = [
   [
     "scripts/security/generate-sbom.sh --check",
     "the bills still match the lockfiles",
+    "scripts/security/generate-sbom.sh",
   ],
   [
     "scripts/security/scan-repo.sh",
     "grype, npm audit, trivy, gitleaks, semgrep, hadolint, shellcheck",
+    "scripts/security/scan-repo.sh",
   ],
   [
     "scripts/security/check-hub-blackbox.sh",
     "48 anonymous checks of the live hub (exits 3 off hours)",
+    "scripts/security/check-hub-blackbox.sh",
   ],
   [
     "cd clients/ios && swift test --filter SecurityPostureTests",
     "the app's build-setting tests",
+    "clients/ios/Tests/SharedTests/SecurityPostureTests.swift",
   ],
 ];
 
@@ -56,10 +60,23 @@ export default function SecurityDocsPage() {
         <p className="text-(--text-secondary) text-lg">
           <T
             area="docsCommon"
-            tags={{ a: <Link href="/docs/operations" className="underline" /> }}
+            tags={{
+              a: <Link href="/docs/operations" className="underline" />,
+              r: (
+                <Link
+                  href="/docs/security/security-test-report"
+                  className="underline"
+                />
+              ),
+              v: (
+                <ExternalA
+                  href={`${REPO_URL}/blob/main/docs/ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md`}
+                />
+              ),
+            }}
           >
             {
-              "Security and data protection are tested by the project itself with tools anyone can run on the repository, and every finding is either fixed or named as open. The test of 2026-10-15 found ten findings, F1 to F10: after the fixes nine are closed and one is reviewed and accepted (F3, the published development default key of the local compose stack; Azure takes its keys from Vault). None of this is an independent penetration test or a certification. How the platform is operated for real, role by role, is the operational guideline in the <a>Operations section</a>."
+              "Security and data protection are tested by the project itself with tools anyone can run on the repository, and every finding is either fixed or named as open. <r>The test of 2026-10-15</r> found ten findings, F1 to F10: after the fixes nine are closed and one is reviewed and accepted (F3, the published development default key of the local compose stack; Azure takes its keys from <v>Vault</v>). None of this is an independent penetration test or a certification. How the platform is operated for real, role by role, is the operational guideline in the <a>Operations section</a>."
             }
           </T>
         </p>
@@ -99,10 +116,26 @@ export default function SecurityDocsPage() {
                     className="text-(--accent) underline"
                   />
                 ),
+                ts: (
+                  <a
+                    href={`${REPO_URL}/blob/main/.github/workflows/codeql.yml`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-(--accent) underline"
+                  />
+                ),
+                swift: (
+                  <a
+                    href={`${REPO_URL}/blob/main/.github/workflows/codeql-swift.yml`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-(--accent) underline"
+                  />
+                ),
               }}
             >
               {
-                "<a>Security scans in CI</a>: grype over the bills and trivy over the images on every push; CodeQL for TypeScript and Swift in their own workflows; results in the <tab>Security tab</tab>."
+                "<a>Security scans in CI</a>: grype over the bills and trivy over the images on every push; CodeQL for <ts>TypeScript</ts> and <swift>Swift</swift> in their own workflows; results in the <tab>Security tab</tab>."
               }
             </T>
           </li>
@@ -143,13 +176,20 @@ export default function SecurityDocsPage() {
         <div className="border border-(--border) rounded-xl overflow-x-auto">
           <table className="w-full text-sm">
             <tbody>
-              {RUN_AGAIN.map(([cmd, what]) => (
+              {RUN_AGAIN.map(([cmd, what, file]) => (
                 <tr
                   key={cmd}
                   className="border-b border-(--border) last:border-0"
                 >
                   <td className="px-4 py-2 whitespace-nowrap">
-                    <code className="text-xs">{cmd}</code>
+                    <a
+                      href={`${REPO_URL}/blob/main/${file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-(--accent) underline"
+                    >
+                      <code className="text-xs">{cmd}</code>
+                    </a>
                   </td>
                   <td className="px-4 py-2 text-(--text-secondary)">
                     <T area="docsCommon">{what}</T>

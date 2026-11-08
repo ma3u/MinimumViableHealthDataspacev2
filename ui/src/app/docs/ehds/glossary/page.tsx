@@ -1,6 +1,8 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ArrowLeft, ExternalLink, Languages } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { ExternalA } from "@/components/docs/ExternalA";
 import { REPO_URL } from "@/lib/docs/published-docs";
 import terminology from "@/lib/i18n/ehds-terminology.json";
 import { T } from "@/lib/i18n/translate";
@@ -18,6 +20,61 @@ const LANGS = [
   ["nl", "Nederlands"],
   ["es", "Español"],
 ] as const;
+
+/** The Regulation on EUR-Lex by its ELI, where every article has an anchor. */
+const EUR_LEX = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+
+/** Where an Article cell links: "Art. 55" to #art_55, "Art. 2(2)(e)" to the
+ *  paragraph, #002.002 (EUR-Lex anchors paragraphs, not points), "Title" to
+ *  the Regulation itself. */
+function articleHref(article: string): string {
+  const para = article.match(/^Art\. (\d+)\((\d+)\)/);
+  if (para) {
+    return `${EUR_LEX}#${para[1].padStart(3, "0")}.${para[2].padStart(3, "0")}`;
+  }
+  const whole = article.match(/^Art\. (\d+)$/);
+  return whole ? `${EUR_LEX}#art_${whole[1]}` : EUR_LEX;
+}
+
+/** A source a note names, linked where the note names it. */
+const NOTE_SOURCES: Record<string, [text: string, href: string][]> = {
+  "opt-out": [
+    ["Art. 21", "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_21"],
+  ],
+};
+
+/** A text with the given parts turned into links to their sources. */
+function withSources(
+  text: string,
+  sources: [text: string, href: string][] = [],
+): ReactNode {
+  const parts: ReactNode[] = [text];
+  for (const [needle, href] of sources) {
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (typeof part !== "string" || !part.includes(needle)) continue;
+      const at = part.indexOf(needle);
+      parts.splice(
+        i,
+        1,
+        part.slice(0, at),
+        <ExternalA key={href} href={href}>
+          {needle}
+        </ExternalA>,
+        part.slice(at + needle.length),
+      );
+      break;
+    }
+  }
+  return <>{parts}</>;
+}
+
+/** Where the "checked by" line links: the script and the Publications
+ *  Office's repository it reads. */
+const CHECKED_BY_SOURCES: [text: string, tag: string][] = [
+  ["scripts/i18n/check-ehds-terminology.py", "script"],
+  ["Cellar", "cellar"],
+];
 
 type Term = {
   id: string;
@@ -47,9 +104,9 @@ export default function EhdsGlossaryPage() {
         </h1>
         <DocsLastUpdated page="/docs/ehds/glossary" />
         <p className="text-(--text-secondary) text-lg">
-          <T area="docsCommon">
+          <T area="docsCommon" tags={{ e: <ExternalA href={EUR_LEX} /> }}>
             {
-              "The terms of Regulation (EU) 2025/327 the hub uses, in each language of its interface, as the Official Journal writes them. Every translation in the interface and in the dataset descriptions takes its term from this list; a variant the Regulation does not use fails the build."
+              "The terms of <e>Regulation (EU) 2025/327</e> the hub uses, in each language of its interface, as the Official Journal writes them. Every translation in the interface and in the dataset descriptions takes its term from this list; a variant the Regulation does not use fails the build."
             }
           </T>
         </p>
@@ -82,7 +139,9 @@ export default function EhdsGlossaryPage() {
                 className="border-t border-(--border) align-top"
               >
                 <td className="px-3 py-2 whitespace-nowrap text-(--text-secondary)">
-                  {t.article}
+                  <ExternalA href={articleHref(t.article)}>
+                    {t.article}
+                  </ExternalA>
                   {t.doc && (
                     <Link
                       href={t.doc}
@@ -122,7 +181,7 @@ export default function EhdsGlossaryPage() {
           .map((t) => (
             <li key={t.id} lang="en">
               <span className="font-medium text-(--text-primary)">{t.en}</span>:{" "}
-              {t.note}
+              {withSources(t.note ?? "", NOTE_SOURCES[t.id])}
             </li>
           ))}
       </ul>
@@ -135,7 +194,21 @@ export default function EhdsGlossaryPage() {
           area="docsCommon"
           vars={{
             date: terminology.source.checkedOn,
-            who: terminology.source.checkedBy,
+            // The script and Cellar become links: their names are marked as
+            // tags here, after translation, as {who} is not translated.
+            who: CHECKED_BY_SOURCES.reduce(
+              (who, [text, tag]) =>
+                who.replace(text, `<${tag}>${text}</${tag}>`),
+              terminology.source.checkedBy,
+            ),
+          }}
+          tags={{
+            script: (
+              <ExternalA
+                href={`${REPO_URL}/blob/main/scripts/i18n/check-ehds-terminology.py`}
+              />
+            ),
+            cellar: <ExternalA href="https://op.europa.eu/en/web/cellar" />,
           }}
         >
           {"Checked on {date} by {who}."}

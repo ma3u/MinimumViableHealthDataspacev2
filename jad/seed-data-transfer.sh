@@ -1,23 +1,30 @@
 #!/usr/bin/env bash
 # =============================================================================
-# seed-data-transfer.sh — Phase 4d: Data Plane Transfer via DCore
+# seed-data-transfer.sh: seed phase 7, pull transfers through siglet (EDC 1.0)
 # =============================================================================
-# Demonstrates end-to-end data retrieval through the DCore data plane:
-#   1. CRO PharmaCo Research AG retrieves FHIR Patient data via data plane (EDR token)
-#   2. HDAB MedReg DE retrieves HealthDCAT-AP catalog via data plane
-#   3. Verifies audit logging in Neo4j (TransferEvent nodes)
+# Pulls data over the transfers phases 5 and 6 left STARTED (#881, ADR-078):
+#   1. CRO PharmaCo Research AG pulls FHIR patients with siglet's token
+#   2. HDAB MedReg DE pulls the HealthDCAT-AP catalogue the same way
+#   3. Checks the audit trail in Neo4j (TransferEvent nodes)
+#   4. Rewrites three tracked UI fixtures, ui/public/mock/{transfers,
+#      negotiations,fhir_bundles}.json; restore them with git checkout -- if
+#      you did not mean to refresh them
 #
-# The data plane proxies requests to the Neo4j Query Proxy, which translates
-# HTTP calls into Cypher queries and returns FHIR R4 / HealthDCAT-AP JSON-LD.
+# For each STARTED consumer transfer, the consumer's siglet holds the access
+# token and the provider's endpoint (GET /tokens/{participantContextId}/
+# {transferId}). The endpoint is /dataspace/data on the provider's Neo4j Query
+# Proxy, which checks the token against siglet's keys and serves the dataset
+# it names as FHIR R4 or HealthDCAT-AP JSON-LD (jad/siglet-edc1.toml).
 #
 # Prerequisites:
-#   - All 18 Docker services running (docker compose -f docker-compose.jad.yml up -d)
+#   - The default compose stack running (docker compose -f docker-compose.yml
+#     -f docker-compose.jad.yml up -d, or ./scripts/bootstrap-jad.sh)
 #   - seed-data-assets.sh completed (assets registered)
 #   - seed-contract-negotiation.sh completed (contracts FINALIZED, transfers STARTED)
 #   - OR seed-federated-catalog.sh completed (HDAB catalog transfer STARTED)
 #
 # Usage:
-#   ./jad/seed-data-transfer.sh
+#   ./jad/seed-data-transfer.sh      (or ./jad/seed-all.sh --only 7)
 # =============================================================================
 
 set -euo pipefail
@@ -80,11 +87,11 @@ cypher_query() {
 }
 
 # =============================================================================
-header "Phase 4d: Data Plane Transfer via DCore"
+header "Phase 7: Pull transfers through siglet"
 # =============================================================================
 
 # -- Step 1: Verify transfer processes exist ----------------------------------
-header "Step 1 — Verify Active Transfer Processes"
+header "Step 1: Verify Active Transfer Processes"
 
 step "Checking CONSUMER transfer processes in state=600 (STARTED)..."
 ACTIVE_TRANSFERS=$(docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -t -A -c "
@@ -103,8 +110,8 @@ echo "$ACTIVE_TRANSFERS" | while IFS='|' read -r asset type tpid; do
   ok "  ${type}: ${asset} (tp=${tpid:0:8}...)"
 done
 
-# -- Step 2: CRO retrieves FHIR Patient data via data plane ------------------
-header "Step 2 — CRO PharmaCo Research AG: Retrieve FHIR Patient Data"
+# -- Step 2: CRO pulls FHIR Patient data with siglet's token ----------------
+header "Step 2: CRO PharmaCo Research AG pulls FHIR Patient Data"
 
 FHIR_ASSET=""
 for candidate in fhir-patient-everything fhir-patient-search; do
@@ -120,7 +127,7 @@ fi
 
 ok "EDR for ${FHIR_ASSET}: endpoint ${FHIR_ENDPOINT} (token held, not shown)"
 
-step "Fetching FHIR Patient Bundle via data plane (limit 5)..."
+step "Pulling a FHIR Patient Bundle from the provider's proxy (limit 5)..."
 FHIR_RESPONSE=$(pull "$FHIR_ENDPOINT" "$FHIR_TOKEN" "?_count=5")
 
 FHIR_TOTAL=$(echo "$FHIR_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin)['total'])")
@@ -135,8 +142,8 @@ FHIR_FULL=$(pull "$FHIR_ENDPOINT" "$FHIR_TOKEN")
 FHIR_FULL_TOTAL=$(echo "$FHIR_FULL" | python3 -c "import json,sys; print(json.load(sys.stdin)['total'])")
 ok "Full response: ${FHIR_FULL_TOTAL} patients returned"
 
-# -- Step 3: HDAB retrieves HealthDCAT-AP catalog via data plane --------------
-header "Step 3 — HDAB MedReg DE: Retrieve HealthDCAT-AP Catalog"
+# -- Step 3: HDAB pulls the HealthDCAT-AP catalogue with siglet's token -----
+header "Step 3: HDAB MedReg DE pulls the HealthDCAT-AP Catalogue"
 
 step "Extracting EDR for healthdcatap-catalog..."
 read -r CATALOG_ENDPOINT CATALOG_TOKEN <<<"$(get_edr "healthdcatap-catalog")" || true
@@ -147,7 +154,7 @@ if [ -z "${CATALOG_TOKEN:-}" ]; then
 else
   ok "EDR endpoint: ${CATALOG_ENDPOINT} (token held, not shown)"
 
-  step "Fetching HealthDCAT-AP catalog via data plane..."
+  step "Pulling the HealthDCAT-AP catalogue from the provider's proxy..."
   CATALOG_RESPONSE=$(pull "$CATALOG_ENDPOINT" "$CATALOG_TOKEN")
 
   CATALOG_TYPE=$(echo "$CATALOG_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin).get('@type','unknown'))")
@@ -168,7 +175,7 @@ for ds in data.get('dcat:dataset', []):
 fi
 
 # -- Step 4: Verify audit trail in Neo4j --------------------------------------
-header "Step 4 — Verify Audit Trail (TransferEvent nodes in Neo4j)"
+header "Step 4: Verify Audit Trail (TransferEvent nodes in Neo4j)"
 
 step "Waiting for audit events to be written..."
 sleep 2
@@ -189,7 +196,7 @@ for row in data['results'][0]['data']:
 "
 
 # -- Step 5: Seed UI mock data (100 transfers + FHIR bundles) ----------------
-header "Step 5 — Seed UI Mock Data (100 Transfers + FHIR Bundles)"
+header "Step 5: Seed UI Mock Data (100 Transfers + FHIR Bundles)"
 
 SCRIPTS_DIR="$(cd "$(dirname "$0")/.." && pwd)/scripts"
 UI_MOCK_DIR="$(cd "$(dirname "$0")/.." && pwd)/ui/public/mock"
@@ -211,28 +218,28 @@ else
 fi
 
 # -- Step 6: Summary ----------------------------------------------------------
-header "Phase 4d Results Summary"
+header "Phase 7 Results Summary"
 
 echo ""
 echo "  ┌─────────────────────────────────────────────────────────┐"
-echo "  │  Data Plane Transfer via DCore — Phase 4d Complete      │"
+echo "  │  Pull transfers through siglet: phase 7 complete        │"
 echo "  ├─────────────────────────────────────────────────────────┤"
 echo "  │                                                         │"
-echo "  │  ✓ CRO PharmaCo Research AG retrieved ${FHIR_FULL_TOTAL} FHIR patients via DCore     │"
-echo "  │  ✓ Query params proxied through data plane (_count=5)   │"
+echo "  │  ✓ CRO PharmaCo Research AG pulled ${FHIR_FULL_TOTAL} FHIR patients     │"
+echo "  │  ✓ Query params passed through to the proxy (_count=5)  │"
 if [ -n "$CATALOG_TOKEN" ]; then
-echo "  │  ✓ HDAB MedReg DE retrieved ${CATALOG_DS_COUNT} HealthDCAT-AP datasets     │"
+echo "  │  ✓ HDAB MedReg DE pulled ${CATALOG_DS_COUNT} HealthDCAT-AP datasets        │"
 fi
 echo "  │  ✓ ${AUDIT_COUNT} audit events recorded in Neo4j               │"
-echo "  │  ✓ Ed25519 JWT bearer tokens validated by data plane    │"
-echo "  │  ✓ 100 UI transfer mocks + 12 FHIR bundle samples      │"
+echo "  │  ✓ The proxy checked siglet's tokens against its keys   │"
+echo "  │  ✓ 100 UI transfer mocks + 12 FHIR bundle samples       │"
 echo "  │                                                         │"
 echo "  │  Data Flow:                                             │"
-echo "  │  Consumer → Data Plane (EDR token)                      │"
-echo "  │          → Neo4j Query Proxy (Cypher)                   │"
+echo "  │  Consumer → its siglet (token and endpoint)             │"
+echo "  │          → provider's Neo4j Query Proxy /dataspace/data │"
 echo "  │          → Neo4j 5-Layer Knowledge Graph                │"
-echo "  │          → FHIR R4 / HealthDCAT-AP JSON-LD response    │"
+echo "  │          → FHIR R4 / HealthDCAT-AP JSON-LD response     │"
 echo "  │                                                         │"
 echo "  └─────────────────────────────────────────────────────────┘"
 echo ""
-ok "Phase 4d: Data Plane Transfer via DCore — COMPLETE"
+ok "Phase 7: pull transfers through siglet, COMPLETE"

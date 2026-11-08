@@ -13,7 +13,7 @@ The full JAD stack runs **15 Docker services** via `docker-compose.yml` + `docke
 | Traefik         | :80 / :8090   | traefik.localhost  | API gateway & reverse proxy                                     | none                |
 | PostgreSQL 17   | :5432         | none               | Runtime store (databases below)                                 | none                |
 | Vault           | :8200         | vault.localhost    | Secrets, file storage; `vault-unseal` unseals it on start       | none                |
-| Keycloak        | :8080 / :9000 | keycloak.localhost | OIDC SSO (realm: edcv, 7 users)                                 | PostgreSQL          |
+| Keycloak        | :8080 / :9000 | keycloak.localhost | OIDC SSO (realm: edcv, 8 demo users)                            | PostgreSQL          |
 | NATS            | :4222 / :8222 | nats.localhost     | Async event mesh (JetStream)                                    | none                |
 | Control Plane   | :11003        | cp.localhost       | DSP 2025-1 + Management API `v5`                                | PG, Vault, NATS, KC |
 | siglet          | internal      | none               | Data plane: signalling, and the access tokens of pull transfers | Vault               |

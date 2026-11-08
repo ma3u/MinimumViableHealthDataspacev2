@@ -1,8 +1,8 @@
 ---
 source: docs/klarbefund/evidence.md
-sourceHash: fc5bb296ce79d86a900f5cca02fcf97d746c0622fb87b553939e7d62d0325723
+sourceHash: 7c2b7e94b548f61b7ebe4ed9448a049016bd56c3d61e55467c5ccbc8a16167af
 language: de
-summary: "Der Genauigkeits-Benchmark, die Paritätsprüfung des Wörterbuchs, das Laufprotokoll und was noch fehlt."
+summary: Der Genauigkeits-Benchmark, die Paritätsprüfung des Wörterbuchs, das Laufprotokoll und was noch fehlt.
 ---
 
 # Klarbefund: Belege
@@ -11,10 +11,10 @@ Was eine Prüferin oder ein Prüfer außerhalb dieses Projekts an Klarbefund, de
 für Laborbefunde ([#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)),
 überprüfen kann und was noch fehlt. Geschrieben für die erste Frage einer Krankenversicherung, eines
 Krankenhauses oder eines Auditors: _Ist die Extraktion richtig, sind die Daten sicher, und ist
-dies ein Medizinprodukt?_ Datenschutz, BSI TR-03161 und Regulierung werden
+dies ein Medizinprodukt?_ Datenschutz, [BSI TR-03161](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03161/TR-03161-1.pdf?__blob=publicationFile&v=2) und Regulierung werden
 in [`self-assessment.md`](self-assessment.md) bewertet; wie man all dies
 auf einem Mac ausführt, steht in [`run-on-mac.md`](run-on-mac.md). Die Beschreibung für die Nutzerinnen und Nutzer steht in
-[`README.md`](README.md), die Entwicklerseite in
+[`user-guide.md`](user-guide.md), die Entwicklerseite in
 [`clients/ios/README.md`](../../clients/ios/README.md).
 
 Klarbefund ist Open Source unter der [Apache License 2.0](../../LICENSE). Das
@@ -24,32 +24,32 @@ die damit verbundenen Pflichten für Datenschutz und Sicherheit.
 
 ## Status
 
-- Bei der Einreichung zur HL7 AI Challenge 2026 (Einsendeschluss 2026-06-30) war Klarbefund
+- Bei der Einreichung zur [HL7 AI Challenge 2026](https://blog.hl7.org/how-the-2026-hl7-ai-challenge-is-helping-shape-the-future-of-responsible-ai-in-healthcare) (Einsendeschluss 2026-06-30) war Klarbefund
   ein Prototyp. Die Auszeichnung ("Open Solution") ging an die EHDS-Plattform in
   diesem Repository.
 - In der Präsentation der Gewinner wurde die App als Live-Demo gezeigt.
 - Sie ist in TestFlight, durch Apples Beta-Prüfung für externe Tester freigegeben
   ([ADR-050](../ADRs/ADR-050-klarbefund-beta-by-public-testflight-link.md)).
-- Sie liest Apple Health (HealthKit, nur lesend) und verbindet sich mit dem Demo-Hub,
+- Sie liest Apple Health ([HealthKit](https://developer.apple.com/documentation/healthkit), nur lesend) und verbindet sich mit dem Demo-Hub,
   dessen Sekundärnutzung in der sicheren Verarbeitungsumgebung des Hubs läuft
-  ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)).
+  ([ADR-037](../ADRs/ADR-037-secure-processing-environment-confidential-computing.md), [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)).
 
 ## Was bereits belegt ist
 
-| Aussage                                                                      | Beleg                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ein verschlechterter Scan verliert Zeilen, er erfindet nie Werte             | `Tests/SharedTests/ScanningTests.swift`: synthetische Blätter mit Schräglage, Blendung, schwachem Licht, Unschärfe und niedriger Auflösung, mit Vision gelesen; jeder codierte Wert, der nicht auf dem Blatt steht, lässt den Test scheitern |
-| Deutsche Zahlenregeln (Dezimalkomma, `1.240` = 1240, `0.300`)                | `Tests/SharedTests/LabLineParserTests.swift`                                                                                                                                                                                                 |
-| Die Einheit bestimmt den LOINC-Code; Urin ist nie Serum                      | `LabLineParserTests.swift`, `RealScanLessonsTests.swift` (Layouts von 19 echten Scans, jeder Wert erfunden)                                                                                                                                  |
-| Nichts wird stillschweigend verworfen                                        | Selbsttest (`-MBSelfTest`, 27 Prüfungen): Jede gedruckte Zeile endet als codiert, nicht zugeordnet oder ungelesen                                                                                                                            |
-| OCR-Werte bleiben vorläufig                                                  | Provenienzmodell (`Sources/Shared/Provenance.swift`): Nur die eigene PDF-Textebene eines Labors ergibt FHIR `final`                                                                                                                          |
-| Ein echter Scan kann ohne das Telefon oder das Bild erneut abgespielt werden | `swift run ScanReplay`, `swift run LabFile`; beide verweigern Pfade innerhalb dieses Repositorys                                                                                                                                             |
-| Exporte sind standardkonform                                                 | FHIR-R4-Bundle mit LOINC und UCUM (`FhirBundleParityTests.swift`), OMOP CDM v5.4 (`OmopExportTests.swift`)                                                                                                                                   |
-| Daten bleiben standardmäßig auf dem Gerät                                    | Texterkennung und Analyse auf dem Gerät, Verschlüsselung pro Eintrag, kein iCloud-Backup, getrennte Einwilligungen, Export und Löschung ([README](README.md#privacy-and-safety))                                                             |
+| Aussage                                                                      | Beleg                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ein verschlechterter Scan verliert Zeilen, er erfindet nie Werte             | [`Tests/SharedTests/ScanningTests.swift`](../../clients/ios/Tests/SharedTests/ScanningTests.swift): synthetische Blätter mit Schräglage, Blendung, schwachem Licht, Unschärfe und niedriger Auflösung, mit Vision gelesen; jeder codierte Wert, der nicht auf dem Blatt steht, lässt den Test scheitern                                                          |
+| Deutsche Zahlenregeln (Dezimalkomma, `1.240` = 1240, `0.300`)                | [`Tests/SharedTests/LabLineParserTests.swift`](../../clients/ios/Tests/SharedTests/LabLineParserTests.swift)                                                                                                                                                                                                                                                     |
+| Die Einheit bestimmt den LOINC-Code; Urin ist nie Serum                      | [`LabLineParserTests.swift`](../../clients/ios/Tests/SharedTests/LabLineParserTests.swift), [`RealScanLessonsTests.swift`](../../clients/ios/Tests/SharedTests/RealScanLessonsTests.swift) (Layouts von 19 echten Scans, jeder Wert erfunden)                                                                                                                    |
+| Nichts wird stillschweigend verworfen                                        | Selbsttest ([`-MBSelfTest`](developer-guide.md#the-self-test), 27 Prüfungen): Jede gedruckte Zeile endet als codiert, nicht zugeordnet oder ungelesen                                                                                                                                                                                                            |
+| OCR-Werte bleiben vorläufig                                                  | Provenienzmodell ([`Sources/Shared/Provenance.swift`](../../clients/ios/Sources/Shared/Provenance.swift)): Nur die eigene PDF-Textebene eines Labors ergibt [FHIR `final`](https://hl7.org/fhir/R4/valueset-observation-status.html)                                                                                                                             |
+| Ein echter Scan kann ohne das Telefon oder das Bild erneut abgespielt werden | [`swift run ScanReplay`](../../clients/ios/Tools/ScanReplay), [`swift run LabFile`](../../clients/ios/Tools/LabFile); beide verweigern Pfade innerhalb dieses Repositorys                                                                                                                                                                                        |
+| Exporte sind standardkonform                                                 | [FHIR-R4-Bundle](https://hl7.org/fhir/R4/bundle.html) mit LOINC und [UCUM](https://ucum.org/ucum) ([`FhirBundleParityTests.swift`](../../clients/ios/Tests/SharedTests/FhirBundleParityTests.swift)), [OMOP CDM v5.4](https://ohdsi.github.io/CommonDataModel/cdm54.html) ([`OmopExportTests.swift`](../../clients/ios/Tests/SharedTests/OmopExportTests.swift)) |
+| Daten bleiben standardmäßig auf dem Gerät                                    | Texterkennung und Analyse auf dem Gerät, Verschlüsselung pro Eintrag, kein iCloud-Backup, getrennte Einwilligungen, Export und Löschung ([`user-guide.md`](user-guide.md#privacy-and-safety))                                                                                                                                                                    |
 
 ## Genauigkeit messen
 
-`ExtractionAccuracy` (`clients/ios/Sources/Shared/ExtractionAccuracy.swift`)
+`ExtractionAccuracy` ([`clients/ios/Sources/Shared/ExtractionAccuracy.swift`](../../clients/ios/Sources/Shared/ExtractionAccuracy.swift))
 vergleicht eine Extraktion Feld für Feld mit einer von Hand geprüften Wahrheit: Wert mit
 seinem Vergleichsoperator, Einheit, LOINC-Code (oder die erwartete Verweigerung), gedruckter Referenzbereich
 und Labordatum. Seine Kennzahlen:
@@ -63,18 +63,18 @@ und Labordatum. Seine Kennzahlen:
 
 Zwei Arten, es auszuführen:
 
-1. **Synthetischer Benchmark, in der CI.** `AccuracyBenchmarkTests` rendert das
+1. **Synthetischer Benchmark, in der CI.** [`AccuracyBenchmarkTests`](../../clients/ios/Tests/SharedTests/AccuracyBenchmarkTests.swift) rendert das
    synthetische Panel unter neun Scanbedingungen, liest es mit Vision und stellt sicher,
    dass unter jeder Bedingung null stille Fehler auftreten. Lokal: `cd clients/ios && swift test`; ist
    `KLARBEFUND_BENCHMARK_OUT=<file>` gesetzt, werden die Zählwerte dort als JSON geschrieben.
-   Ein Job `ios-unit-tests` für `.github/workflows/test.yml` (ausstehend, YAML in
+   Ein Job `ios-unit-tests` für [`.github/workflows/test.yml`](../../.github/workflows/test.yml) (ausstehend, YAML in
    [`run-on-mac.md`](run-on-mac.md#4-put-the-swift-suite-into-ci)) führt die
    gesamte Swift-Suite auf `macos-26` aus und bewahrt dieses JSON als das
    Artefakt `klarbefund-accuracy-benchmark` auf; bis er eingebunden ist, baut die CI nur das
    Target `Shared`. Es sind keine echten Daten beteiligt, daher kann das JSON so veröffentlicht werden,
    wie es ist.
 2. **Pilot mit echten Befunden, nie im Repository.** Eine teilnehmende Person exportiert
-   Diagnosedaten aus der App (ADR-038), und neben jede
+   Diagnosedaten aus der App ([ADR-038](../ADRs/ADR-038-scan-retained-diagnostics-export.md)), und neben jede
    `diagnostics.json` wird aus dem Papierbefund eine `truth.json` geschrieben:
 
    ```json
@@ -124,7 +124,7 @@ Stichprobenumfang des Piloten wird neben jeder Zahl angegeben.
 ## Laufprotokoll
 
 Die Checkliste in [`run-on-mac.md`](run-on-mac.md) wurde zuletzt am 2026-10-15 ausgeführt, bei
-Commit `1474295d` dieses Branches, auf macOS 26.7.1 mit Xcode 26 (Swift 6.4).
+Commit [`1474295d`](https://github.com/ma3u/MinimumViableHealthDataspacev2/commit/1474295d) des Branches `feat/186-klarbefund-accuracy-evidence`, auf macOS 26.7.1 mit Xcode 26 (Swift 6.4).
 Alles Folgende ist der synthetische Benchmark; kein echter Befund war beteiligt, daher werden die
 Zählwerte so veröffentlicht, wie sie in
 [`accuracy-benchmark.json`](accuracy-benchmark.json) stehen, der Datei, die der Lauf geschrieben hat.
@@ -167,10 +167,10 @@ bereits tat.
 
 ## Offen
 
-| Thema                                   | Was fehlt                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Zweckbestimmung (MDR)                   | Eine schriftliche Qualifizierung nach MDCG 2019-11 Rev.1. Der Grenzfall ist der Trendbildschirm, der Werte gegenüber veröffentlichten Bereichen einfärbt (ADR-039); die Position des Projekts ist, dass ein Vergleich mit einer zitierten Zahl kein Befund ist. Ein externes Gutachten.                                                                                                                                                                                |
-| Betreiber des gehosteten Erklärdienstes | Erklärungen laufen standardmäßig auf dem Gerät. Die Person kann zum gehosteten Dienst wechseln (Standard Azure OpenAI, EU-Datenzone; Anthropic als Opt-in, Vereinigte Staaten) oder zu ihrem eigenen Azure-OpenAI- oder Anthropic-Konto. Wer den gehosteten Dienst betreibt, verarbeitet Gesundheitsdaten und muss diese Rolle dokumentieren (Verzeichnis von Verarbeitungstätigkeiten, Auftragsverarbeitungsverträge).                                                |
-| Datenschutz                             | Datenflussdiagramm und eine Vorlage für eine Datenschutz-Folgenabschätzung für einen Betreiber.                                                                                                                                                                                                                                                                                                                                                                        |
-| Sicherheit                              | Bedrohungsmodell, SBOM und ein selbst durchgeführter Sicherheitstest existieren seit 2026-10-15 (`docs/security/threat-model-klarbefund.md`, `docs/sbom/`, `docs/security/security-test-report-2026-10-15.md`). Die App sperrt sich seit 2026-10-15 mit Face ID oder dem Gerätecode (ADR-060). Offen: ein unabhängiger Penetrationstest und die Lückenliste auf Anforderungsebene gegen BSI TR-03161 Teil 1. CodeQL läuft bei jeder iOS-Änderung (`codeql-swift.yml`). |
-| Genauigkeit im Pilot                    | Wahrheitsdateien und aggregierte Zählwerte aus echten Befunden, wie oben.                                                                                                                                                                                                                                                                                                                                                                                              |
+| Thema                                   | Was fehlt                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zweckbestimmung (MDR)                   | Eine schriftliche Qualifizierung nach [MDCG 2019-11 Rev.1](https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en). Der Grenzfall ist der Trendbildschirm, der Werte gegenüber veröffentlichten Bereichen einfärbt ([ADR-039](../ADRs/ADR-039-published-reference-ranges.md)); die Position des Projekts ist, dass ein Vergleich mit einer zitierten Zahl kein Befund ist. Ein externes Gutachten.                                                                                                                                                                                                                                                                                                |
+| Betreiber des gehosteten Erklärdienstes | Erklärungen laufen standardmäßig auf dem Gerät. Die Person kann zum gehosteten Dienst wechseln (Standard [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/deployment-types#data-zone-standard), EU-Datenzone; Anthropic als Opt-in, Vereinigte Staaten) oder zu ihrem eigenen Azure-OpenAI- oder Anthropic-Konto. Wer den gehosteten Dienst betreibt, verarbeitet Gesundheitsdaten und muss diese Rolle dokumentieren (Verzeichnis von Verarbeitungstätigkeiten, Auftragsverarbeitungsverträge).                                                                                                                                                                                                  |
+| Datenschutz                             | Datenflussdiagramm und eine Vorlage für eine [Datenschutz-Folgenabschätzung](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_35) für einen Betreiber.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Sicherheit                              | Bedrohungsmodell, SBOM und ein selbst durchgeführter Sicherheitstest existieren seit 2026-10-15 ([`docs/security/threat-model-klarbefund.md`](../security/threat-model-klarbefund.md), [`docs/sbom/`](../sbom/README.md), [`docs/security/security-test-report-2026-10-15.md`](../security/security-test-report-2026-10-15.md)). Die App sperrt sich seit 2026-10-15 mit Face ID oder dem Gerätecode ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md)). Offen: ein unabhängiger Penetrationstest und die Lückenliste auf Anforderungsebene gegen BSI TR-03161 Teil 1. CodeQL läuft bei jeder iOS-Änderung ([`codeql-swift.yml`](../../.github/workflows/codeql-swift.yml)). |
+| Genauigkeit im Pilot                    | Wahrheitsdateien und aggregierte Zählwerte aus echten Befunden, wie oben.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |

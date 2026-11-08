@@ -1,15 +1,14 @@
 /**
  * The roadmap behind /docs/roadmap (ui/src/lib/docs/roadmap.ts): its data must
- * stay consistent with the plan (#725), and the Mermaid source generated from
- * it must parse, or the page shows a render error where the chart should be.
+ * stay consistent with the plan (#725) and with the GitHub Project the plan
+ * is edited in (scripts/sync-roadmap-project.mjs).
  */
 import { describe, it, expect } from "vitest";
-import mermaid from "mermaid";
 import {
   ITEMS,
   LANES,
   MILESTONES,
-  roadmapGantt,
+  ROADMAP_PROJECT,
   roadmapTargets,
 } from "@/lib/docs/roadmap";
 
@@ -40,15 +39,27 @@ describe("the roadmap data", () => {
 
   it("carries the plan's P1 items and the Iceberg spike under #716", () => {
     const p1 = ITEMS.filter((i) => i.priority === "P1" && i.status !== "done");
-    expect(p1.map((i) => i.issue).sort()).toEqual([708, 709, 710, 711]);
+    // #710 is done (2026-10-28); #934 carries the Simpl use case to March 2027.
+    expect(p1.map((i) => i.issue).sort()).toEqual([708, 709, 711, 934]);
     const spike = ITEMS.find((i) => i.issue === 649);
     expect(spike?.lane).toBe("processing");
     expect(spike?.note).toContain("#716");
   });
 
-  it("keeps labels free of the characters Mermaid's Gantt syntax uses", () => {
-    for (const i of ITEMS) expect(i.short, `#${i.issue}`).not.toMatch(/[:;#]/);
-    for (const m of MILESTONES) expect(m.label, m.id).not.toMatch(/[:;#]/);
+  it("keeps the bar labels short", () => {
+    for (const i of ITEMS)
+      expect(i.short.length, `#${i.issue}`).toBeLessThan(40);
+    for (const m of MILESTONES) expect(m.label.length, m.id).toBeLessThan(30);
+  });
+
+  it("names the GitHub Project the plan is edited in", () => {
+    expect(ROADMAP_PROJECT).toBe("https://github.com/users/ma3u/projects/1");
+  });
+
+  it("gives every bar and marker an id of its own, usable as an anchor", () => {
+    const ids = roadmapTargets().map((t) => t.taskId);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^(i\d+|m_\w+)$/);
   });
 
   it("links every bar to its issue and every milestone to an https source", () => {
@@ -64,31 +75,67 @@ describe("the roadmap data", () => {
     }
     for (const t of targets) expect(t.href).toMatch(/^https:\/\//);
   });
-});
 
-describe("the generated Gantt chart", () => {
-  const chart = roadmapGantt();
-
-  it("parses", async () => {
-    mermaid.initialize({ startOnLoad: false });
-    await expect(mermaid.parse(chart)).resolves.toBeTruthy();
+  it("links every tagged part of a title, a note or a lane driver, and uses every link", () => {
+    const texts = [
+      ...LANES.map((l) => ({ id: l.id, texts: [l.driver], links: l.links })),
+      ...ITEMS.map((i) => ({
+        id: `#${i.issue}`,
+        texts: [i.title, i.note],
+        links: i.links,
+      })),
+    ];
+    for (const { id, texts: parts, links } of texts) {
+      const tags = parts.flatMap((t) =>
+        [...t.matchAll(/<(\w+)>[\s\S]*?<\/\1>/g)].map((m) => m[1]),
+      );
+      for (const tag of tags)
+        expect(links, `${id} <${tag}>`).toHaveProperty(tag);
+      for (const [tag, href] of Object.entries(links ?? {})) {
+        expect(tags, `${id} ${tag} is never used`).toContain(tag);
+        expect(href, `${id} ${tag}`).toMatch(/^(https:\/\/|\/docs\/)/);
+      }
+    }
   });
 
-  it("has a section per lane, a bar per item and a marker per milestone", () => {
-    for (const l of LANES) expect(chart).toContain(`  section ${l.label}\n`);
-    for (const i of ITEMS)
-      expect(chart).toContain(`i${i.issue}, ${i.start}, ${i.end}`);
-    expect(chart.match(/:milestone, /g)).toHaveLength(MILESTONES.length);
+  it("cites the EHDS by article on EUR-Lex, never by a front page", () => {
+    const item = (n: number) => ITEMS.find((i) => i.issue === n)!;
+    // Art. 53 sets the purposes; Art. 54 is prohibited secondary use.
+    expect(item(717).title).toContain("<a53>Art. 53</a53> purposes");
+    expect(item(717).links?.a53).toBe(
+      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_53",
+    );
+    expect(item(716).links?.a73).toMatch(/#art_73$/);
+    expect(LANES.find((l) => l.id === "processing")?.links?.a68).toMatch(
+      /#art_68$/,
+    );
   });
 
-  it("marks status the way the legend says: active, crit, done", () => {
-    expect(chart).toMatch(/708 EUDI Wallet sign-in :active, i708,/);
-    expect(chart).toMatch(/711 DSP kit vs Simpl :crit, i711,/);
-    expect(chart).toMatch(/700 HealthDCAT-AP R8 :done, i700,/);
+  it("dates the milestones as their sources do", () => {
+    const m = (id: string) => MILESTONES.find((x) => x.id === id)!;
+    // 2026/2099 Art. 4(2): assurance level high "From 26 March 2030".
+    expect(m("assurance-high").date).toBe("2030-03-26");
+    expect(m("assurance-high").href).toBe(
+      "https://eur-lex.europa.eu/eli/reg_impl/2026/2099/oj/eng#004.002",
+    );
+    // eudi-wallet.gov.de says "ab Anfang 2027", no day: the marker sits at
+    // the start of the year and says so.
+    expect(m("d-you").date).toBe("2027-01-01");
+    expect(m("d-you").label).toBe("d-you early 2027");
+    // No source gives a Council position on COM(2025) 838.
+    expect(m("business-wallet").detail).not.toMatch(/Council's position/);
+    expect(m("business-wallet").href).toContain("2025/0358(COD)");
+    expect(m("ehds-2027").detail).not.toMatch(/with the EUDI Wallet/);
+    // The Hamburg page: "planned to be made available in GitLab in the second
+    // half of October 2026". The Innsbruck page has its own roadmap items.
+    expect(m("hamburg").date).toBe("2026-10-16");
+    expect(m("innsbruck").href).toContain("roadmap-items-innsbruck-5.0");
   });
 
-  it("draws at a fixed width, since Mermaid measures 0 for its render element", () => {
-    expect(chart).toMatch(/useWidth: \d{4}/);
-    expect(chart).toContain("todayMarker");
+  it("writes the tooltips without the link tags", () => {
+    for (const t of roadmapTargets()) expect(t.label).not.toMatch(/<\/?\w+>/);
+    expect(roadmapTargets().find((t) => t.taskId === "i717")!.label).toContain(
+      "Applications: Art. 53 purposes, Art. 81 complaints",
+    );
   });
 });
