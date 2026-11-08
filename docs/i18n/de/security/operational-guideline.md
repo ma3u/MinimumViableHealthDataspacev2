@@ -1,6 +1,6 @@
 ---
 source: docs/security/operational-guideline.md
-sourceHash: 2e2292a441f4fee979f6778b256eb6258aeb74ff7d23dc85d151632f90d1bd91
+sourceHash: cda73eed51ddcd75a00e2878048e1b4858e79919d648f2093499e68858cbdf28
 language: de
 summary: "Wie man den Hub und Klarbefund wirklich betreibt: welche EHDS-Rolle (Verordnung (EU) 2025/327) welchen Teil betreibt, was BSI C5, IT-Grundschutz, TR-02102 und TR-03161 von jedem Teil verlangen, die Fristen bei Vorfällen, die Aufbewahrung und die Go-live-Checkliste je Rolle."
 ---
@@ -255,7 +255,7 @@ gerendert mit [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh). 
 [DSGVO Art. 33](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_33) und [34](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_34),
 [NIS2 Art. 23](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng#art_23) in der Umsetzung
 im [BSIG](https://www.gesetze-im-internet.de/bsig_2025/__32.html) und [Verordnung (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng)
-Art. [63 Abs. 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63 Abs. 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) und [73 Abs. 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003); die Tabelle oben nennt jede einzelne.
+Art. [63 Abs. 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63 Abs. 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) und [73 Abs. 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003), die Tabelle oben nennt jede einzelne; dazu [64 Abs. 2 Buchst. h](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#064.002), das das Diagramm zeigt: Ob ein Gesundheitsdatennutzer einen eigenen Verstoß gemeldet hat, wird bei der Geldbuße der Zugangsstelle berücksichtigt.
 
 Die Fristen stehen nicht zur Verhandlung des Betreibers: Dem Verantwortlichen gehören die
 Fristen der DSGVO, dem Betreiber die der NIS2, der Zugangsstelle die des EHDS. Die

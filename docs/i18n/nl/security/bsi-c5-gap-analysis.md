@@ -1,6 +1,6 @@
 ---
 source: docs/security/bsi-c5-gap-analysis.md
-sourceHash: f2f072ff9dc53e3376024ef3168e8ec01ee91442ca87a26607fa79cb28b74d1d
+sourceHash: b212e547bb02a27db757cd94e3fa4f4671618032e3c29e5b39c7350f19c35aa3
 language: nl
 summary: De hub tegen de criteriacatalogus BSI C5:2020, gemeten aan de beveiligingsmaatregelen en audits van de beveiligde verwerkingsomgeving van art. 73 EHDS.
 ---
@@ -79,9 +79,9 @@ Elk criteriumnummer verwijst naar zijn pagina in de pdf van C5:2020, en de titel
 
 ### COS: Communicatiebeveiliging
 
-| Criterium                                                                                                                                                    | Titel in de catalogus (Engelse versie)                           | Demostatus | Waar de hub staat                                                                                                                                                                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [COS-06](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf?__blob=publicationFile&v=5#page=86) | Segregation of data traffic in jointly used network environments | ⚠️         | Alleen de hub en Keycloak hebben publieke ingress; de rest staat op interne ingress in één Container Apps-omgeving ([dreigingsmodel, I-02 en I-05](threat-model.md#information-disclosure-openbaarmaking-van-informatie)); geen private endpoints |
+| Criterium                                                                                                                                                    | Titel in de catalogus (Engelse versie)                           | Demostatus | Waar de hub staat                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [COS-06](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf?__blob=publicationFile&v=5#page=86) | Segregation of data traffic in jointly used network environments | ⚠️         | Alleen de hub en Keycloak hebben publieke ingress; de rest staat op interne ingress in één Container Apps-omgeving, behalve de PostgreSQL Flexible Server, die daarbuiten op een openbaar endpoint staat waarvan de firewall elke Azure-dienst toelaat, een geaccepteerd risico ([dreigingsmodel, I-02 en I-05](threat-model.md#information-disclosure-openbaarmaking-van-informatie)); geen private endpoints |
 
 ### DEV: Aanschaf, ontwikkeling en wijziging van informatiesystemen
 

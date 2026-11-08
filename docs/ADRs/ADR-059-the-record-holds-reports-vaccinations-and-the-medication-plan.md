@@ -3,7 +3,9 @@
 ## Status
 
 Accepted, 2026-10-15. Issue #186 (Klarbefund) and the test database the
-demo hub seeds.
+demo hub seeds. The category count in Context and Consequences is superseded
+by [ADR-081](ADR-081-the-record-covers-three-of-the-six-art-14-categories.md)
+(2026-11-09); the decision stands.
 
 ## Context
 

@@ -1,6 +1,6 @@
 ---
 source: docs/security/operational-guideline.md
-sourceHash: 2e2292a441f4fee979f6778b256eb6258aeb74ff7d23dc85d151632f90d1bd91
+sourceHash: cda73eed51ddcd75a00e2878048e1b4858e79919d648f2093499e68858cbdf28
 language: fr
 summary: "Comment exploiter réellement le hub et Klarbefund : quel rôle de l’EEDS (règlement (UE) 2025/327) exploite quelle partie, ce que BSI C5, IT-Grundschutz, TR-02102 et TR-03161 exigent de chaque partie, les délais en cas d’incident, la conservation et la liste de contrôle de mise en production par rôle."
 ---
@@ -255,7 +255,7 @@ rendu avec [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh). Les
 art. [33](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_33) et [34](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_34) du RGPD,
 de l’[art. 23 de NIS2](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng#art_23) tel que transposé
 dans le [BSIG](https://www.gesetze-im-internet.de/bsig_2025/__32.html), et du [règlement (UE) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng),
-art. [63, paragraphe 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63, paragraphe 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) et [73, paragraphe 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003) ; le tableau ci-dessus nomme chacun d’eux.
+art. [63, paragraphe 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63, paragraphe 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) et [73, paragraphe 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003), que le tableau ci-dessus nomme chacun ; et [64, paragraphe 2, point h)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#064.002), que montre le diagramme : le fait qu’un utilisateur de données de santé ait signalé sa propre violation est pris en compte lorsque l’organisme responsable de l’accès fixe une amende.
 
 Les délais ne sont pas négociables par l’exploitant : le responsable du traitement détient ceux du
 RGPD, l’exploitant ceux de NIS2, l’organisme responsable de l’accès ceux de l’EEDS. La
