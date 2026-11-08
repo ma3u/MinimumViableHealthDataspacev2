@@ -2,12 +2,13 @@ import Link from "next/link";
 import { ArrowLeft, ChartGantt, ExternalLink } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { LinkedText } from "@/components/docs/LinkedText";
-import RoadmapGantt from "@/components/docs/RoadmapGantt";
+import RoadmapTimeline from "@/components/docs/RoadmapTimeline";
 import {
   ITEMS,
   LANES,
   REPO,
   ROADMAP_PLANNED_ON,
+  ROADMAP_PROJECT,
   SRC,
   STATUS_LABEL,
   ehdsArt,
@@ -18,7 +19,7 @@ import { T } from "@/lib/i18n/translate";
 export const metadata = {
   title: "Roadmap",
   description:
-    "The roadmap to 2031 as a Gantt chart: the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets, Simpl-Open, and the issues each one sets, with the drivers behind them.",
+    "The roadmap to 2031 as an interactive timeline: the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets, Simpl-Open, and the issues each one sets, with the drivers behind them.",
 };
 
 /** A link in a text, opened in a new tab. */
@@ -198,6 +199,13 @@ export default function RoadmapDocsPage() {
             }
           </T>
         </p>
+        <p className="text-(--text-secondary) mt-2">
+          <T area="docsCommon" tags={{ p: inlineLink(ROADMAP_PROJECT) }}>
+            {
+              "The plan is edited in the <p>GitHub Project</p>: drag a bar in its Roadmap view, or change a start, a target, a priority or a status. This page draws the same plan with its notes and sources."
+            }
+          </T>
+        </p>
       </div>
 
       <section aria-labelledby="chart">
@@ -224,7 +232,7 @@ export default function RoadmapDocsPage() {
             <T area="docsCommon">{"Red line: today"}</T>
           </li>
         </ul>
-        <RoadmapGantt />
+        <RoadmapTimeline />
       </section>
 
       <section aria-labelledby="drivers" className="mt-10">

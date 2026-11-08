@@ -1,5 +1,5 @@
 /**
- * The roadmap to 2031 as data: what /docs/roadmap draws as a Gantt chart.
+ * The roadmap to 2031 as data: what /docs/roadmap draws as a timeline.
  *
  * The source of truth is the plan issue #725 and the section "Roadmap to 2035:
  * EHDS, wallets and Simpl" of docs/planning-health-dataspace-v2.md. Milestones
@@ -89,6 +89,10 @@ const untagged = (text: string) =>
 
 export const ROADMAP_PLANNED_ON = "2026-11-08";
 
+/** The GitHub Project where the plan is edited: its Roadmap view draws the
+ *  same bars. scripts/sync-roadmap-project.mjs carries edits between the two. */
+export const ROADMAP_PROJECT = "https://github.com/users/ma3u/projects/1";
+
 export type LaneId =
   | "regulation"
   | "identity"
@@ -176,7 +180,7 @@ export interface RoadmapItem {
   /** The GitHub issue number; also the item's id. */
   issue: number;
   lane: LaneId;
-  /** The bar's label in the chart: no colon, semicolon or hash (Mermaid syntax). */
+  /** The bar's label in the chart: a few words, no colon, semicolon or hash. */
   short: string;
   title: string;
   priority: Priority;
@@ -582,9 +586,10 @@ export const MILESTONES: readonly Milestone[] = [
 
 export const issueUrl = issue;
 
-/** The chart's task id for an item or a milestone (Mermaid ids: letters, digits, _). */
-const itemTaskId = (n: number) => `i${n}`;
-const milestoneTaskId = (id: string) => `m_${id.replace(/[^a-z0-9]/gi, "_")}`;
+/** The chart's id for an item or a milestone, also its anchor: #i934, #m_hamburg. */
+export const itemTaskId = (n: number) => `i${n}`;
+export const milestoneTaskId = (id: string) =>
+  `m_${id.replace(/[^a-z0-9]/gi, "_")}`;
 
 /** Every bar and marker: its task id, where a click goes, and what it says. */
 export function roadmapTargets(tr?: Translate): {
@@ -611,58 +616,4 @@ export function roadmapTargets(tr?: Translate): {
       label: `${m.date}: ${t(m.label)}. ${t(m.detail)}`,
     })),
   ];
-}
-
-const TAG: Record<Status, string> = {
-  done: "done, ",
-  "in-progress": "active, ",
-  blocked: "crit, ",
-  planned: "",
-};
-
-/** The width the chart is drawn at, in SVG units, before it is scaled to the page. */
-const GANTT_WIDTH = 1400;
-
-/** The roadmap as a Mermaid Gantt chart, one section per lane. A
- *  translation of a label keeps clear of the Gantt syntax's colon, semicolon
- *  and hash, as the English does. */
-export function roadmapGantt(tr: Translate = english): string {
-  const lines = [
-    // Mermaid measures the width of its temporary render element, which is 0
-    // in the browser; a fixed drawing width that useMaxWidth scales to the page
-    // avoids an empty chart. leftPadding makes room for the lane names.
-    "---",
-    "config:",
-    "  gantt:",
-    `    useWidth: ${GANTT_WIDTH}`,
-    "    useMaxWidth: true",
-    "    leftPadding: 170",
-    "    barHeight: 22",
-    "    fontSize: 12",
-    "    sectionFontSize: 13",
-    "---",
-    "gantt",
-    "  dateFormat YYYY-MM-DD",
-    "  axisFormat %Y-%m",
-    "  tickInterval 6month",
-    `  todayMarker stroke-width:3px,stroke:#e11d48,opacity:0.8`,
-  ];
-  for (const lane of LANES) {
-    lines.push(`  section ${tr(lane.label)}`);
-    for (const m of MILESTONES.filter((x) => x.lane === lane.id)) {
-      lines.push(
-        `    ${tr(m.label)} :milestone, ${milestoneTaskId(m.id)}, ${
-          m.date
-        }, 0d`,
-      );
-    }
-    for (const i of ITEMS.filter((x) => x.lane === lane.id)) {
-      lines.push(
-        `    ${i.issue} ${tr(i.short)} :${TAG[i.status]}${itemTaskId(
-          i.issue,
-        )}, ${i.start}, ${i.end}`,
-      );
-    }
-  }
-  return lines.join("\n");
 }
