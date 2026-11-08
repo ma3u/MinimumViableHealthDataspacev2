@@ -12,5 +12,7 @@
   "Hide details": "Details ausblenden",
   "Sign in required": "Anmeldung erforderlich",
   "Skip to main content": "Zum Hauptinhalt springen",
-  "Diagram render error: {error}": "Fehler beim Zeichnen des Diagramms: {error}"
+  "Diagram render error: {error}": "Fehler beim Zeichnen des Diagramms: {error}",
+  "Legal notice": "Impressum",
+  "Privacy policy": "Datenschutzerklärung"
 }

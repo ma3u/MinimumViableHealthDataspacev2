@@ -35,6 +35,27 @@ export function apiAnswersOffline(pathname: string): boolean {
   );
 }
 
+/**
+ * Pages that still answer while the demo is offline, because they need no
+ * backend and must not disappear at night: the legal notice and the privacy
+ * policy have to be reachable at all times (§ 5 DDG, Art. 13 GDPR), and
+ * crawlers read the robots file, the sitemap and llms.txt whenever they come.
+ */
+const OFFLINE_ALLOWED_PAGES = [
+  "/impressum",
+  "/datenschutz",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/llms.txt",
+  "/opengraph-image",
+];
+
+export function pageAnswersOffline(pathname: string): boolean {
+  return OFFLINE_ALLOWED_PAGES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
 /** The same page on the static site, which has no sign-in and no backend. */
 export function staticSiteUrl(pathAndQuery: string): string {
   const path = pathAndQuery.startsWith("/") ? pathAndQuery : `/${pathAndQuery}`;

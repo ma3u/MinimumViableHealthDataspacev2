@@ -7,6 +7,9 @@ import AuthProvider from "@/components/AuthProvider";
 import PersonaFromQuery from "@/components/PersonaFromQuery";
 import { Suspense } from "react";
 import { T } from "@/lib/i18n/translate";
+import SiteFooter from "@/components/SiteFooter";
+import { STATIC_SITE_URL } from "@/lib/offline-mode";
+import { REPO_URL } from "@/lib/docs/published-docs";
 
 // Resolve the canonical base URL for metadata (og:image, canonical links, etc.).
 // - Azure prod:     https://ehds.mabu.red
@@ -20,9 +23,31 @@ const SITE_URL =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "European Health Data Space | Interactive Demo",
+  title: {
+    default: "European Health Data Space | Interactive Demo",
+    template: "%s | European Health Data Space",
+  },
   description:
     "Interactive demo of the European Health Data Space (EHDS). Explore FHIR R4 clinical records, OMOP CDM analytics, and DSP contract negotiation across 7 participant roles with 127 synthetic patients.",
+  keywords: [
+    "European Health Data Space",
+    "EHDS",
+    "Regulation (EU) 2025/327",
+    "Dataspace Protocol",
+    "Eclipse EDC",
+    "FHIR R4",
+    "OMOP CDM",
+    "HealthDCAT-AP",
+    "health data access body",
+    "secure processing environment",
+  ],
+  authors: [{ name: "Matthias Buchhorn", url: REPO_URL }],
+  // The static site is the address search engines index (it never goes
+  // offline and needs no sign-in). Its pages name themselves; the live site
+  // names the static copy in a Link header from middleware.ts instead.
+  ...(process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
+    ? { alternates: { canonical: "./" } }
+    : {}),
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -48,6 +73,38 @@ export const metadata: Metadata = {
       "Explore cross-border health data sharing with 7 demo personas, 127 synthetic patients, and 5,300+ knowledge graph nodes.",
     // Uses app/opengraph-image.tsx automatically via Next.js metadata conventions.
   },
+};
+
+// What the site is, for search engines and AI answers that read schema.org:
+// the demo as a website, and the code behind it.
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${STATIC_SITE_URL}/#website`,
+      url: `${STATIC_SITE_URL}/`,
+      name: "European Health Data Space | Interactive Demo",
+      description:
+        "A reference implementation of the European Health Data Space (Regulation (EU) 2025/327): Dataspace Protocol, FHIR R4, OMOP CDM and HealthDCAT-AP in one knowledge graph, with synthetic patients only.",
+      inLanguage: ["en", "de", "es", "fr", "nl"],
+      author: { "@id": `${STATIC_SITE_URL}/#author` },
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      name: "Minimum Viable Health Dataspace v2",
+      codeRepository: REPO_URL,
+      programmingLanguage: ["TypeScript", "Java", "Cypher", "Python"],
+      license: `${REPO_URL}/blob/main/LICENSE`,
+      author: { "@id": `${STATIC_SITE_URL}/#author` },
+    },
+    {
+      "@type": "Person",
+      "@id": `${STATIC_SITE_URL}/#author`,
+      name: "Matthias Buchhorn",
+      url: `${STATIC_SITE_URL}/impressum`,
+    },
+  ],
 };
 
 export const viewport: Viewport = {
@@ -107,7 +164,14 @@ export default async function RootLayout({
           <main id="main-content" className="flex-1" role="main">
             {children}
           </main>
+          <SiteFooter />
         </AuthProvider>
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+        />
       </body>
     </html>
   );

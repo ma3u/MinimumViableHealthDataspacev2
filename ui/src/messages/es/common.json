@@ -12,5 +12,7 @@
   "Hide details": "Ocultar detalles",
   "Sign in required": "Inicio de sesión requerido",
   "Skip to main content": "Ir al contenido principal",
-  "Diagram render error: {error}": "Error al dibujar el diagrama: {error}"
+  "Diagram render error: {error}": "Error al dibujar el diagrama: {error}",
+  "Legal notice": "Aviso legal",
+  "Privacy policy": "Política de privacidad"
 }

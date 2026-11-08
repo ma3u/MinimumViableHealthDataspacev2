@@ -273,6 +273,17 @@ describe("middleware — Content-Security-Policy", () => {
   });
 });
 
+/* ── Canonical address ─────────────────────────────────────────────── */
+
+describe("middleware — canonical address", () => {
+  it("names the page's copy on the static site, the indexed one", async () => {
+    const res = await invoke("/docs/ehds/glossary");
+    expect(res.headers.get("Link")).toBe(
+      '<https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds/glossary>; rel="canonical"',
+    );
+  });
+});
+
 /* ── Off-hours mode (ADR-053) ──────────────────────────────────────── */
 
 describe("middleware — off-hours mode", () => {
@@ -295,6 +306,31 @@ describe("middleware — off-hours mode", () => {
       expect(res.headers.get("location")).toBeNull();
       expect(res.headers.get("Content-Security-Policy")).toContain("nonce-");
       expect(getTokenMock).not.toHaveBeenCalled();
+    }
+  });
+
+  it("answers the notice with a 503, so crawlers come back instead of indexing it", async () => {
+    vi.stubEnv("LIVE_DEMO_OFFLINE", "true");
+    const res = await invoke("/docs/roadmap");
+    expect(res.status).toBe(503);
+    expect(res.headers.get("Retry-After")).toBe("3600");
+    expect(res.headers.get("Link")).toBe(
+      '<https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/roadmap>; rel="canonical"',
+    );
+  });
+
+  it("keeps the legal pages and the crawler files answering off hours", async () => {
+    vi.stubEnv("LIVE_DEMO_OFFLINE", "true");
+    for (const p of [
+      "/impressum",
+      "/datenschutz",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/llms.txt",
+    ]) {
+      const res = await invoke(p);
+      expect(res.headers.get("x-middleware-rewrite"), p).toBeNull();
+      expect(res.status, p).toBe(200);
     }
   });
 

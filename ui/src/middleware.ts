@@ -4,6 +4,8 @@ import {
   STATIC_SITE_URL,
   apiAnswersOffline,
   isLiveDemoOffline,
+  pageAnswersOffline,
+  staticSiteUrl,
 } from "@/lib/offline-mode";
 
 /**
@@ -170,18 +172,32 @@ export default async function middleware(req: NextRequest) {
   const isDev = process.env.NODE_ENV !== "production";
   const csp = buildCsp(nonce, isDev);
 
+  // The static site is the address search engines index; every page here
+  // names its copy there (an HTTP header, as these pages are rendered per
+  // request).
+  const canonical = `<${staticSiteUrl(pathname)}>; rel="canonical"`;
+
   // Off hours (ADR-053): every backend is stopped, so every page is the
   // offline notice. A rewrite keeps the visitor's URL, which the notice reads
-  // to link the same page on the static site.
-  if (isLiveDemoOffline() && pathname !== "/offline") {
+  // to link the same page on the static site. It answers 503 with
+  // Retry-After, so a crawler comes back later instead of indexing the
+  // notice in place of the page.
+  if (
+    isLiveDemoOffline() &&
+    pathname !== "/offline" &&
+    !pageAnswersOffline(pathname)
+  ) {
     const offHeaders = new Headers(req.headers);
     offHeaders.set("x-nonce", nonce);
     offHeaders.set("Content-Security-Policy", csp);
     const res = NextResponse.rewrite(new URL("/offline", req.url), {
       request: { headers: offHeaders },
+      status: 503,
     });
     res.headers.set("Content-Security-Policy", csp);
     res.headers.set("Cache-Control", "no-store");
+    res.headers.set("Retry-After", "3600");
+    res.headers.set("Link", canonical);
     return res;
   }
 
@@ -227,6 +243,7 @@ export default async function middleware(req: NextRequest) {
 
   const res = NextResponse.next({ request: { headers: reqHeaders } });
   res.headers.set("Content-Security-Policy", csp);
+  res.headers.set("Link", canonical);
   return res;
 }
 
