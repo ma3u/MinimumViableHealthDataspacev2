@@ -31,6 +31,10 @@ export default function ImpressumPage() {
       <li>
         E-Mail: <a href={`mailto:${p.email}`}>{p.email}</a>
       </li>
+      <li>
+        GitHub: <a href={`${REPO_URL}/issues`}>Issues</a>,{" "}
+        <a href={`${REPO_URL}/discussions`}>Discussions</a>
+      </li>
       {p.phone && (
         <li>
           Telefon / Phone:{" "}
