@@ -32,6 +32,20 @@ it runs next to the JAD stack. On 2026-11-08 the TCK 1.0.2 passed all 65 tests
 against EDC 1.0.0-RC5. The nightly runs it (`compliance.yml`, job
 `eclipse-dsp-tck`).
 
+### The same TCK against Simpl-Open's connector
+
+```bash
+./scripts/run-eclipse-dsp-tck.sh --simpl   # simpl-edc 1.0.26 (compose profile simpl), report to test-results/dsp-tck-simpl
+```
+
+Simpl's published image, `simpl-edc` 1.0.26 (EDC 0.10.1), seeded through its
+Management API with the offers EDC seeds for its own run. It is amd64 only and
+takes about three minutes to boot emulated on arm64. It has no TCK hook, so
+the tests in which it acts as consumer, and the transfers that need a seeded
+agreement, cannot pass; the summary counts them apart. Not in the nightly: its
+result is a finding about Simpl, not a gate for the hub. The findings are in
+#711.
+
 ## Running them in the compose stack (#881)
 
 `docker-compose.jad.yml` runs the five EDC containers on these images, each on

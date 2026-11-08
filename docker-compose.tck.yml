@@ -93,3 +93,87 @@ services:
       # EDC's JSON-LD context for its own terms, from the same EDC test
       # resources (Apache-2.0)
       - ./jad/dsp-tck/dspace-edc-context-v1.jsonld:/etc/tck/dspace-edc-context-v1.jsonld:ro
+
+  # --- profile simpl: the same TCK against Simpl-Open's connector (#711) ---
+  # simpl-edc 1.0.26, the latest tag (2026-08-10), as Simpl publishes it; it
+  # builds on EDC 0.10.1. Contract signing and the external transfer trigger
+  # are off, so the TCK sees the connector's protocol behaviour alone. Its DSP
+  # token check reads region and clientId from a plain JSON token, the shape
+  # the TCK sends (SimplIdentityService). The test offers are seeded through
+  # its Management API by scripts/run-eclipse-dsp-tck.sh --simpl.
+  simpl-postgres:
+    image: postgres:17.7-alpine
+    profiles: [simpl]
+    environment:
+      POSTGRES_USER: simpl
+      POSTGRES_PASSWORD: simpl
+      POSTGRES_DB: simpl
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U simpl -d simpl"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  simpl-edc:
+    image: code.europa.eu:4567/simpl/simpl-open/development/gaia-x-edc/simpl-edc:1.0.26
+    platform: linux/amd64
+    profiles: [simpl]
+    depends_on:
+      simpl-postgres:
+        condition: service_healthy
+    ports:
+      # the Management API, for the seed only; loopback
+      - "127.0.0.1:19193:19193"
+    environment:
+      EDC_PARTICIPANT_ID: "simpl-provider"
+      EDC_COMPONENT_ID: "simpl-provider"
+      EDC_HOSTNAME: "simpl-edc"
+      WEB_HTTP_PORT: "19191"
+      WEB_HTTP_PATH: "/api"
+      WEB_HTTP_MANAGEMENT_PORT: "19193"
+      WEB_HTTP_MANAGEMENT_PATH: "/management"
+      WEB_HTTP_PROTOCOL_PORT: "19194"
+      WEB_HTTP_PROTOCOL_PATH: "/protocol"
+      WEB_HTTP_CONTROL_PORT: "19192"
+      WEB_HTTP_CONTROL_PATH: "/control"
+      WEB_HTTP_PUBLIC_PORT: "19291"
+      WEB_HTTP_PUBLIC_PATH: "/public"
+      # the throwaway Management API key of this local container, set by the runner
+      EDC_API_AUTH_KEY: "${SIMPL_MGMT_KEY:-tck-only}"
+      EDC_DSP_CALLBACK_ADDRESS: "http://simpl-edc:19194/protocol"
+      EDC_DATAPLANE_API_PUBLIC_BASEURL: "http://simpl-edc:19291/public"
+      EDC_DATASOURCE_DEFAULT_URL: "jdbc:postgresql://simpl-postgres:5432/simpl"
+      EDC_DATASOURCE_DEFAULT_USER: "simpl"
+      EDC_DATASOURCE_DEFAULT_PASSWORD: "simpl"
+      EDC_SQL_SCHEMA_AUTOCREATE: "true"
+      CONTRACTMANAGER_EXTENSION_ENABLED: "false"
+      TRANSFER_EXTENSION_ENABLED: "false"
+      EDC_DATAPLANE_EMBEDDED_ENABLED: "true"
+      # its MinIO extension refuses to boot without S3 settings; none is used here
+      FR_GXFS_S3_ACCESS_KEY: "unused"
+      FR_GXFS_S3_SECRET_KEY: "unused"
+      FR_GXFS_S3_ENDPOINT: "http://localhost:9000"
+      # the image starts with the OpenTelemetry agent; no collector here
+      OTEL_JAVAAGENT_ENABLED: "false"
+    healthcheck:
+      # it serves no health endpoint; any HTTP answer from the DSP port (a 401
+      # without a token) means the runtime is up. About three minutes when
+      # emulated on arm64.
+      test:
+        [
+          "CMD-SHELL",
+          "wget -S -O /dev/null http://localhost:19194/protocol/.well-known/dspace-version 2>&1 | grep -q 'HTTP/'",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 90
+
+  dsp-tck-simpl:
+    image: eclipsedataspacetck/dsp-tck-runtime:${DSP_TCK_VERSION:-1.0.2}
+    profiles: [simpl]
+    depends_on:
+      simpl-edc:
+        condition: service_healthy
+    volumes:
+      - ./jad/dsp-tck/simpl.properties:/etc/tck/config.properties:ro
+      - ./jad/dsp-tck/dspace-edc-context-v1.jsonld:/etc/tck/dspace-edc-context-v1.jsonld:ro
