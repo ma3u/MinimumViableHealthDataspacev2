@@ -1267,6 +1267,12 @@
       "file": "ADR-078-edc-1-on-container-apps-without-cfm.md",
       "title": "EDC 1.0 stays on Container Apps, and the hub provisions participants without CFM",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-080",
+      "file": "ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md",
+      "title": "A bonus programme receives a yes or no, never the data",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
