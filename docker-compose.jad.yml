@@ -847,6 +847,68 @@ services:
       retries: 15
       start_period: 30s
 
+  # Simpl-Open's own issuer, issuer-service-be 1.6.0 from code.europa.eu, as a
+  # Simpl data space's Governance Authority (#934 step 0a, ADR-064). It signs
+  # JSON-LD credentials with Ed25519Signature2020 under Simpl's published test
+  # identity, which scripts/run-simpl-issuer-interop.sh fetches into
+  # jad/simpl-issuer/data. That script starts both services (profile simpl).
+  simpl-vault:
+    image: python:3.13-alpine@sha256:1e1f6334529d1fb26a2ef619d7cffb30a7c7d7cc1cc7338ebee283a58d1aeaca
+    container_name: health-dataspace-simpl-vault
+    profiles: ["simpl"]
+    command: ["python", "-I", "/app/mini-vault.py"]
+    environment:
+      SIMPL_VAULT_TOKEN: "simpl-local-token"
+    volumes:
+      - ./jad/simpl-issuer/mini-vault.py:/app/mini-vault.py:ro
+      - ./jad/simpl-issuer/data:/data:ro
+    networks:
+      - edcv
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8200/v1/sys/health')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  simpl-issuer:
+    # Published for linux/amd64 only.
+    image: code.europa.eu:4567/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be:1.6.0@sha256:bbfb2682c0d325e6aa033c4d3f92e6e10200cd33708046da7e81c03a96bc044c
+    platform: linux/amd64
+    container_name: health-dataspace-simpl-issuer
+    profiles: ["simpl"]
+    environment:
+      API_KEY: "simpl-local-key"
+      VAULT_PATH: "http://simpl-vault:8200/"
+      VAULT_TOKEN: "simpl-local-token"
+      VAULT_SECRET_CONFIG_PATH: "kv/vc-issuer-service"
+      # Used only to verify credentials whose DID is not did:key, did:jwk or did:web.
+      EXTERNAL_DID_RESOLVER: "https://dev.uniresolver.io/1.0/identifiers/"
+      SIMPL_SERVICE_NAME: "simpl-vc-issuer-service"
+      SIMPL_SERVICE_VERSION: "1.6.0"
+    ports:
+      - "10043:8080" # /vcIssuerService/v1/credentials/{issue,verify}
+    networks:
+      - edcv
+    depends_on:
+      simpl-vault:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && printf \"GET /vcIssuerService/v1/health HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
   # ---------------------------------------------------------------------------
   # CFM Tenant Manager — Multi-tenant participant lifecycle
   # ---------------------------------------------------------------------------

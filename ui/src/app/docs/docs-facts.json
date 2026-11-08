@@ -731,6 +731,16 @@
         "ports": ["10033:10013"]
       },
       {
+        "name": "simpl-vault",
+        "profiles": ["simpl"],
+        "ports": []
+      },
+      {
+        "name": "simpl-issuer",
+        "profiles": ["simpl"],
+        "ports": ["10043:8080"]
+      },
+      {
         "name": "tenant-manager",
         "profiles": ["edc018"],
         "ports": ["11006:8080"]
@@ -1345,12 +1355,12 @@
   "lastUpdated": {
     "/docs": "2026-11-07",
     "/docs/user-guide": "2026-11-07",
-    "/docs/developer": "2026-11-07",
-    "/docs/developer/quality-gates": "2026-11-07",
+    "/docs/developer": "2026-11-08",
+    "/docs/developer/quality-gates": "2026-11-08",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",
     "/docs/developer/[slug]": "2026-11-07",
-    "/docs/architecture": "2026-11-07",
+    "/docs/architecture": "2026-11-08",
     "/docs/security": "2026-11-07",
     "/docs/security/[slug]": "2026-11-07",
     "/docs/klarbefund": "2026-11-07",
