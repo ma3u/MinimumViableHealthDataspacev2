@@ -314,7 +314,10 @@ did:web:identityhub%3A7083:pharmaco
 did:web:identityhub%3A7083:medreg
 did:web:identityhub%3A7083:lmc
 did:web:identityhub%3A7083:irs
+did:web:identityhub%3A7083:alphakasse       (AlphaKasse DE, second data space, #934)
 did:web:issuerservice%3A10016:issuer        (the issuer's own DID)
+did:web:simpl-ga-issuer%3A10016:simpl-ga    (Simpl test Governance Authority, #710)
+did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga  (its second data space's authority, #934)
 ```
 
 CFM creates the EDC-layer contexts locally; `scripts/azure/05-cp-participants.sh`

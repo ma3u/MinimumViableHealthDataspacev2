@@ -726,9 +726,24 @@
         "ports": ["10023:10013"]
       },
       {
+        "name": "wellbeing-ga-issuer",
+        "profiles": ["wellbeing"],
+        "ports": ["10053:10013"]
+      },
+      {
         "name": "rogue-issuer",
         "profiles": ["trust-check"],
         "ports": ["10033:10013"]
+      },
+      {
+        "name": "simpl-vault",
+        "profiles": ["simpl"],
+        "ports": []
+      },
+      {
+        "name": "simpl-issuer",
+        "profiles": ["simpl"],
+        "ports": ["10043:8080"]
       },
       {
         "name": "tenant-manager",
@@ -1263,6 +1278,12 @@
       "file": "ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md",
       "title": "E2E runs on the pull requests that can break it, and a failure is red",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-080",
+      "file": "ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md",
+      "title": "A bonus programme receives a yes or no, never the data",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

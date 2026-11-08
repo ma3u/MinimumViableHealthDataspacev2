@@ -112,6 +112,18 @@ describe("trusted issuers (#710)", () => {
     expect(ga?.name).toMatch(/fictional/);
   });
 
+  it("trusts the second data space's authority for membership only, run on demand (#934)", () => {
+    const ga = trusted.issuers.find((i) => i.alias === "wellbeing-ga");
+    expect(ga?.types).toEqual(["MembershipCredential"]);
+    expect(ga?.did).toBe("did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga");
+    expect(ga?.name).toMatch(/fictional/);
+    expect(ga?.environments).not.toContain("azure");
+    expect(service("wellbeing-ga-issuer")).toMatch(
+      /edc\.hostname: "wellbeing-ga-issuer"/,
+    );
+    expect(service("wellbeing-ga-issuer")).toMatch(/profiles: \["wellbeing"\]/);
+  });
+
   it("runs the authority as its own IssuerService, and the rogue issuer only on demand", () => {
     expect(service("simpl-ga-issuer")).toMatch(
       /edc\.hostname: "simpl-ga-issuer"/,

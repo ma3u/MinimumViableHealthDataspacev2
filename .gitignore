@@ -66,6 +66,9 @@ load-tests/results/*.json
 vault/init.json
 reports/
 
+# Simpl's published test identity, fetched by scripts/run-simpl-issuer-interop.sh (#934)
+jad/simpl-issuer/data/
+
 # Scalar API reference diagnostics (generated at dev time)
 .scalarDiagnostics/
 

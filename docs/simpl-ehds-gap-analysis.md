@@ -133,13 +133,59 @@ No public Simpl-Open repository implements DCP. Two consequences:
   EDC 0.10.1 and Simpl's own issuer would build DCP once now and again at the
   upgrade. The catch is the data plane: EDC 1.0 removes the data plane
   framework that Simpl's Kafka and object storage transfers extend.
-- **The hub's open question is the credential format, not the EDC version.**
-  ADR-064 assumes the IdentityHub can trust what a Governance Authority
-  issues. [#710](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/710) proved that with a stand-in authority running EDC's own
-  IssuerService; whether the IdentityHub verifies a JSON-LD credential with an
-  Ed25519 proof from Simpl's issuer service is untested. That test, and the
-  [DSP compatibility kit](https://github.com/eclipse-dataspacetck/dsp-tck) against `simpl-edc`, can run now on the published code
-  rather than waiting for Hamburg 4.1.
+- **The hub's open question was the credential format, not the EDC version,
+  and the answer is no, not yet.** ADR-064 assumes the IdentityHub can trust
+  what a Governance Authority issues. [#710](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/710) proved that with a stand-in
+  authority running EDC's own IssuerService. On 8 November 2026 the hub ran
+  Simpl's issuer itself ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934), step 0a):
+  `issuer-service-be` 1.6.0 on compose, signing a `MembershipCredential` for
+  Institut de Recherche Santé with Simpl's own published test identity. Simpl's
+  verify endpoint accepts the credential; the hub refuses the participant who
+  presents it. The barriers, in the order a presentation meets them:
+
+  | Where                                                | What stops it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | How it is known                                                                                         |
+  | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+  | Delivery                                             | Simpl's issuer has no DCP issuance flow: the credential comes back in the HTTP response, and the holder's operator stores it through the IdentityHub's Identity API, which accepts it without checking it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Observed: HTTP 204 on import                                                                            |
+  | 1. The IdentityHub builds the presentation           | The credential's JSON-LD contexts are remote: the one the request names and `https://w3id.org/security/suites/ed25519-2020/v1`, which Simpl's signer adds. EDC's document loader refuses the `https` scheme by default (`edc.jsonld.https.enabled`), so the IdentityHub cannot expand the credential and builds no presentation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Observed: `LOADING_DOCUMENT_FAILED`, URL scheme `https` not supported                                   |
+  | 2. The control plane verifies the credential's proof | `Ed25519Signature2020` has no signature suite: the control plane registers `JsonWebSignature2020` only ([`DcpCoreExtension.java` line 215 at `v1.0.0-RC5`](https://github.com/eclipse-edc/Connector/blob/v1.0.0-RC5/extensions/common/iam/decentralized-claims/decentralized-claims-core/src/main/java/org/eclipse/edc/iam/decentralizedclaims/core/DcpCoreExtension.java#L215)). The error hides the type: `String.join(",")` is called without the types ([`LdpVerifier.java` line 226](https://github.com/eclipse-edc/Connector/blob/v1.0.0-RC5/extensions/common/crypto/ldp-verifiable-credentials/src/main/java/org/eclipse/edc/verifiablecredentials/linkeddata/LdpVerifier.java#L226), still so on `main`)                                                                                                                          | Observed with remote contexts allowed and DEBUG logging: `No SignatureSuite found for proof type(s) ''` |
+  | 3. The control plane resolves the signing key        | The issuer is a `did:key`, and the control plane resolves keys through EDC's DID registry ([line 245](https://github.com/eclipse-edc/Connector/blob/v1.0.0-RC5/extensions/common/iam/decentralized-claims/decentralized-claims-core/src/main/java/org/eclipse/edc/iam/decentralizedclaims/core/DcpCoreExtension.java#L245)), which resolves `did:web` only. Simpl's issuer could sign as `did:web`, but it resolves one over https at `/.well-known/did.json` even for a DID with a path ([`VerificationMethodHandler.java` line 99 at `v1.6.0`](https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be/-/blob/v1.6.0/src/main/java/eu/europa/ec/simpl/vc_issuer_service/service/VerificationMethodHandler.java#L99)), which is not where the DID method puts it | From the source; not reached while 2 fails                                                              |
+  | 4. Trust                                             | The issuer's DID must be on the control plane's list for `MembershipCredential` ([`trusted-issuers.json`](../ui/src/content/trusted-issuers.json))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Configuration                                                                                           |
+
+  Two smaller things: the credential lists `VerifiableCredential` twice in
+  `type`, because the issuer adds it to the types the request already names
+  ([`VCIssuerService.java` line 55](https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be/-/blob/v1.6.0/src/main/java/eu/europa/ec/simpl/vc_issuer_service/service/VCIssuerService.java#L55)),
+  and the request names exactly one context, so the authority must publish one
+  for its membership terms at a stable https address.
+
+  Barrier 1 is configuration on the hub's side (preload the authority's
+  contexts rather than fetch them at verification). Barriers 2 and 3 could be
+  closed by an extension in the hub's EDC runtime, an `Ed25519Signature2020`
+  suite and a `did:key` resolver, or by a Simpl issuer that signs JWT
+  credentials under a resolvable `did:web`, which DCP 1.0 and EDC 1.0 already
+  verify. Decided on 9 November 2026: the hub does not build the extension.
+  It would keep a signature format alive that the hub does not otherwise
+  need, against the roadmap's principle of building only toward the
+  specifications that carry the EHDS, and it would not help with Simpl's own
+  connector, which presents no credential at all (below). The hub asks the
+  programme for JWT credentials under `did:web` instead
+  ([For the Simpl programme](#for-the-simpl-programme), 8). Rerun with
+  `./scripts/run-simpl-issuer-interop.sh` (`--diagnose` shows barrier 2); it
+  exits 3 while the hub refuses. The
+  [DSP compatibility kit](https://github.com/eclipse-dataspacetck/dsp-tck) against `simpl-edc` is #711.
+
+  Removing the four barriers lets the hub accept a Simpl credential. It does
+  not make Simpl's connector present one. `simpl-edc` 1.0.26 has no DCP: its
+  build carries no DCP module ([`pom.xml` at `v1.0.26`](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/pom.xml)),
+  and its `IdentityService` sends a plain JSON token (`region`, `audience`,
+  `clientId` and the `identityAttributes` it fetches from
+  `client.authenticationprovider.url`) and accepts such a token without
+  checking any signature
+  ([`SimplIdentityService.java` lines 39 to 83 at `v1.0.26`](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/src/main/java/eu/europa/ec/simpl/iam/service/SimplIdentityService.java#L39-83)).
+  The connector never asks for a presentation; authentication presumably sits
+  at Simpl's gateway, which was not checked. On compose a token without
+  `identityAttributes` makes it answer 500 (#711). A negotiation between the
+  hub and `simpl-edc` on a Governance Authority credential (#934, step 8)
+  therefore needs DCP in `simpl-edc` as well as the hub's half of the fix.
 
 ### Catalogue
 
@@ -340,7 +386,12 @@ the open question for the EHDS; which issuers are trusted for what is:
   issuer on no list makes the provider refuse the request, and the control
   plane names the issuer as not trusted for the type
   (`scripts/run-ehds-identity-checks.sh`, TRUST-6.1 to 6.5, on compose; CI runs
-  6.1 and 6.2 until its DSP path works). What a Governance Authority's
+  6.1 and 6.2 until its DSP path works). Since 2026-11-08 a second authority,
+  for a fictional "insurance and wellbeing" data space, admits the fictional
+  insurer AlphaKasse DE the same way, and the hub trusts it for
+  `MembershipCredential` only (#934, step 2; TRUST-6.6 to 6.9,
+  `scripts/seed-second-data-space.sh`): two data spaces, two authorities, one
+  connector. What a Governance Authority's
   credential carries maps onto the hub's credentials as follows; Simpl has not
   published its credential schema, so the left column is what its
   documentation describes, to be checked against the Hamburg 4.1 code (#711):
@@ -385,7 +436,12 @@ Comments on the proposed requirements and questions for the programme:
    evidence from the DSP technology compatibility kit. Its code builds on EDC
    0.10.1 ([section 2](#what-the-published-code-shows)): move to EDC 1.0 in
    the same step as SSI Tier 2, since DCP, the IdentityHub and the
-   IssuerService ship with it.
+   IssuerService ship with it. The
+   [DSP TCK 1.0.2](https://github.com/eclipse-dataspacetck/dsp-tck/releases/tag/v1.0.2)
+   passes 1 of 65 tests against `simpl-edc` 1.0.26, which announces DSP
+   `2024/1` and `v0.8` only; 46 of the failures need a test hook the
+   connector does not have, the other 17 are the protocol version
+   ([#711](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/711)).
 2. Make HealthDCAT-AP a profile of the DCAT-AP model adopted in Innsbruck, so a
    health data space can meet 2026/2098 without a second catalogue.
 3. Let BP02E express reductions by applicant category and a split between the
@@ -401,6 +457,15 @@ Comments on the proposed requirements and questions for the programme:
 7. In the DOME integration, accept EUDI PIDs and, once adopted, European
    Business Wallet mandates alongside LEAR credentials, and allow sector
    attributes on offerings (SPE certification, permit required).
+8. Let the Governance Authority's issuer speak DCP 1.0's issuance flow and
+   sign in a format EDC 1.0 verifies out of the box (a JWT credential under a
+   `did:web` resolved as the DID method defines it), and publish the JSON-LD
+   context of its membership credential at a stable address. Today a
+   credential from `issuer-service-be` 1.6.0 reaches an EDC 1.0 connector only
+   by hand and fails verification there
+   ([section 2](#what-the-published-code-shows); #934, step 0a). Give
+   `simpl-edc` DCP too: 1.0.26 neither presents a credential nor checks a
+   signature on the token it receives.
 
 ### For the hub
 
@@ -411,6 +476,14 @@ with its priority (P1 to P3) and the evidence that closes it.
    service in the IdentityHub and complete a negotiation on it, and run the
    DSP TCK against `simpl-edc`. Report the gaps to the programme
    ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934)).
+   The first half ran on 8 November 2026 and is refused at the barriers in
+   [section 2](#what-the-published-code-shows); the hub's half of the fix is
+   context preloading only, and the hub asks Simpl for JWT credentials under
+   `did:web` rather than build an `Ed25519Signature2020` and `did:key`
+   extension. The negotiation also needs DCP in `simpl-edc`, which 1.0.26
+   lacks. The DSP TCK ran the same day: 65 of 65 against the hub, 1 of 65
+   against `simpl-edc` 1.0.26, which offers DSP 2024/1 and v0.8 only
+   ([#711](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/711)).
 2. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource
    descriptions.
 3. Express the `fees.ts` schedule as a BP02E monetisation model and record what

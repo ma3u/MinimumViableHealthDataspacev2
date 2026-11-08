@@ -56,3 +56,14 @@ condition = "AND"
 paths = ['''services/eudi-wallet-backend/overlay/src/main/kotlin/.*/ApiDocsStubs\.kt''']
 regexTarget = "line"
 regexes = ['''_EXAMPLE = "(eyJ[A-Za-z0-9_-]+\.e30\.PLACEHOLDER|UExBQ0VIT0xERVI[A-Za-z0-9]*)"''']
+
+# A did:key is a public identifier: the multibase form of a public key, which
+# a verifier reads to check a signature. The one here is Simpl-Open's published
+# test issuer (#934 step 0a). Scoped to these two files and to lines that carry
+# a did:key, so a key or token anywhere else in them is still found.
+[[allowlists]]
+description = "Public did:key identifiers"
+condition = "AND"
+paths = ['''scripts/run-simpl-issuer-interop\.sh''', '''docs/simpl-ehds-gap-analysis\.md''']
+regexTarget = "line"
+regexes = ['''did:key:z6Mk[1-9A-HJ-NP-Za-km-z]{44}''']

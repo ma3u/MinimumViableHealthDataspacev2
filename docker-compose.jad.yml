@@ -399,6 +399,9 @@ services:
       # The fictional Simpl Governance Authority: membership of its data space.
       edc.iam.trustedissuer.simpl-ga.id: "did:web:simpl-ga-issuer%3A10016:simpl-ga"
       edc.iam.trustedissuer.simpl-ga.supportedtypes: '["MembershipCredential"]'
+      # A second data space's authority, for insurance and wellbeing (#934): membership only.
+      edc.iam.trustedissuer.wellbeing-ga.id: "did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga"
+      edc.iam.trustedissuer.wellbeing-ga.supportedtypes: '["MembershipCredential"]'
     ports:
       - "11003:8081" # Management API (external port from planning doc)
     networks:
@@ -802,6 +805,55 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # #934 step 2: the Governance Authority of a second data space, "insurance and
+  # wellbeing", which admits the fictional insurer AlphaKasse DE. The control
+  # plane trusts it for MembershipCredential only, as it trusts simpl-ga, so a
+  # participant of either data space can reach a hub provider. Started by
+  # scripts/seed-second-data-space.sh (profile wellbeing), which also creates
+  # its database: seed-test-issuer.sh names database and user after DB.
+  wellbeing-ga-issuer:
+    image: mvhd/edc-issuerservice:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: issuerservice
+        EDC_VERSION: 1.0.0-RC5
+    container_name: health-dataspace-wellbeing-ga-issuer
+    profiles: ["wellbeing"]
+    env_file:
+      - ./jad/issuerservice.env
+    environment:
+      <<: *test-issuer-env
+      edc.hostname: "wellbeing-ga-issuer"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/wellbeingga_v1"
+      edc.datasource.default.user: "wellbeingga_v1"
+      edc.datasource.default.password: "wellbeingga_v1"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/wellbeingga_v1"
+      edc.datasource.membership.user: "wellbeingga_v1"
+      edc.datasource.membership.password: "wellbeingga_v1"
+    ports:
+      - "10053:10013" # Issuer Admin API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:10010/api/check/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
   # An issuer on no trust list, #710. Started only by the identity checks
   # (profile trust-check) to show that a MembershipCredential it signs is
   # refused, then stopped again.
@@ -841,6 +893,68 @@ services:
         [
           "CMD-SHELL",
           "wget -q --spider http://127.0.0.1:10010/api/check/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  # Simpl-Open's own issuer, issuer-service-be 1.6.0 from code.europa.eu, as a
+  # Simpl data space's Governance Authority (#934 step 0a, ADR-064). It signs
+  # JSON-LD credentials with Ed25519Signature2020 under Simpl's published test
+  # identity, which scripts/run-simpl-issuer-interop.sh fetches into
+  # jad/simpl-issuer/data. That script starts both services (profile simpl).
+  simpl-vault:
+    image: python:3.13-alpine@sha256:1e1f6334529d1fb26a2ef619d7cffb30a7c7d7cc1cc7338ebee283a58d1aeaca
+    container_name: health-dataspace-simpl-vault
+    profiles: ["simpl"]
+    command: ["python", "-I", "/app/mini-vault.py"]
+    environment:
+      SIMPL_VAULT_TOKEN: "simpl-local-token"
+    volumes:
+      - ./jad/simpl-issuer/mini-vault.py:/app/mini-vault.py:ro
+      - ./jad/simpl-issuer/data:/data:ro
+    networks:
+      - edcv
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8200/v1/sys/health')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  simpl-issuer:
+    # Published for linux/amd64 only.
+    image: code.europa.eu:4567/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be:1.6.0@sha256:bbfb2682c0d325e6aa033c4d3f92e6e10200cd33708046da7e81c03a96bc044c
+    platform: linux/amd64
+    container_name: health-dataspace-simpl-issuer
+    profiles: ["simpl"]
+    environment:
+      API_KEY: "simpl-local-key"
+      VAULT_PATH: "http://simpl-vault:8200/"
+      VAULT_TOKEN: "simpl-local-token"
+      VAULT_SECRET_CONFIG_PATH: "kv/vc-issuer-service"
+      # Used only to verify credentials whose DID is not did:key, did:jwk or did:web.
+      EXTERNAL_DID_RESOLVER: "https://dev.uniresolver.io/1.0/identifiers/"
+      SIMPL_SERVICE_NAME: "simpl-vc-issuer-service"
+      SIMPL_SERVICE_VERSION: "1.6.0"
+    ports:
+      - "10043:8080" # /vcIssuerService/v1/credentials/{issue,verify}
+    networks:
+      - edcv
+    depends_on:
+      simpl-vault:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && printf \"GET /vcIssuerService/v1/health HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3' || exit 1",
         ]
       interval: 10s
       timeout: 5s

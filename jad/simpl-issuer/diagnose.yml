@@ -1,0 +1,26 @@
+# Overlay for `scripts/run-simpl-issuer-interop.sh --diagnose` (#934 step 0a).
+#
+# The default stack refuses a credential from Simpl's issuer before it says
+# why: the IdentityHub cannot load the credential's remote JSON-LD context,
+# and EDC 1.0 does not log why it refuses a presentation (#881). This lets the
+# IdentityHub and the control plane load https contexts and log at DEBUG, so
+# the next refusal names itself. The script puts both back afterwards.
+services:
+  identityhub:
+    command:
+      [
+        "sh",
+        "-c",
+        "exec java -Djava.security.egd=file:/dev/urandom -jar edc-runtime.jar --log-level=DEBUG",
+      ]
+    environment:
+      edc.jsonld.https.enabled: "true"
+  controlplane:
+    command:
+      [
+        "sh",
+        "-c",
+        "exec java -Djava.security.egd=file:/dev/urandom -jar edc-runtime.jar --log-level=DEBUG",
+      ]
+    environment:
+      edc.jsonld.https.enabled: "true"

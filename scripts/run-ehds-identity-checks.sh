@@ -673,12 +673,16 @@ run_scope_tests() {
 # The control plane trusts each issuer for the credential types it may issue,
 # and a fictional Simpl Governance Authority for MembershipCredential. These
 # run only where the containers can be inspected (compose and CI); they need
-# scripts/seed-simpl-ga.sh to have run. A credential whose type its issuer is
+# scripts/seed-simpl-ga.sh and scripts/seed-second-data-space.sh to have run. A credential whose type its issuer is
 # not listed for fails the whole presentation, so the refusal shows as a DSP
 # request answered 401, with the reason in the control plane's log.
 TRUST_PROVIDER_SLUG="alpha-klinik"
 TRUST_HOLDER_SLUG="irs"
 TRUST_GA_DID="did:web:simpl-ga-issuer%3A10016:simpl-ga"
+# #934 step 2: a second data space, whose authority admits AlphaKasse DE
+# (scripts/seed-second-data-space.sh).
+TRUST_WELLBEING_SLUG="alphakasse"
+TRUST_WELLBEING_GA_DID="did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga"
 TRUST_ROGUE_DID="did:web:rogue-issuer%3A10016:rogue"
 
 # The participant context id of a slug, from the control plane.
@@ -712,7 +716,7 @@ run_trust_tests() {
   local cp_env repo_dir test_id
   repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
   if ! cp_env=$(docker inspect health-dataspace-controlplane 2>/dev/null | jq -r '.[0].Config.Env[]' 2>/dev/null) || [ -z "$cp_env" ]; then
-    for test_id in TRUST-6.1 TRUST-6.2 TRUST-6.3 TRUST-6.4 TRUST-6.5; do
+    for test_id in TRUST-6.1 TRUST-6.2 TRUST-6.3 TRUST-6.4 TRUST-6.5 TRUST-6.6 TRUST-6.7 TRUST-6.8 TRUST-6.9; do
       skip "$test_id: control plane container not inspectable (not a local stack)"
       record_result "$test_id" "trust" "skipped" "container not inspectable"
     done
@@ -759,7 +763,7 @@ print("; ".join(problems))
   provider_did="did:web:identityhub%3A7083:${TRUST_PROVIDER_SLUG}"
   holder_ctx=$(trust_ctx "$TRUST_HOLDER_SLUG")
   if [ -z "$provider_ctx" ] || [ -z "$holder_ctx" ]; then
-    for test_id in TRUST-6.2 TRUST-6.3 TRUST-6.4 TRUST-6.5; do
+    for test_id in TRUST-6.2 TRUST-6.3 TRUST-6.4 TRUST-6.5 TRUST-6.6 TRUST-6.7 TRUST-6.8 TRUST-6.9; do
       fail "$test_id: no participant context for ${TRUST_PROVIDER_SLUG} or ${TRUST_HOLDER_SLUG}"
       record_result "$test_id" "trust" "failed" "participant missing"
     done
@@ -786,7 +790,7 @@ print("; ".join(problems))
   control_ctx=$(trust_ctx pharmaco)
   res=$(trust_catalog "${control_ctx:-none}" "$provider_ctx" "$provider_did")
   if [ "${res#* }" != "Catalog" ]; then
-    for test_id in TRUST-6.3 TRUST-6.4 TRUST-6.5; do
+    for test_id in TRUST-6.3 TRUST-6.4 TRUST-6.5 TRUST-6.6 TRUST-6.7 TRUST-6.8 TRUST-6.9; do
       skip "$test_id: a member with the hub's own membership (pharmaco) is refused too (${res}): the DSP path does not work here, so trust cannot be told apart"
       record_result "$test_id" "trust" "skipped" "DSP path not working"
     done
@@ -806,61 +810,108 @@ print("; ".join(problems))
     record_result "$test_id" "trust" "failed" "catalogue refused"
   fi
 
-  # 6.4 — A MembershipCredential from an issuer on no list is refused
-  test_id="TRUST-6.4"
-  local since rogue_ok=1
+  # 6.4 and 6.5 — A MembershipCredential from an issuer on no list is refused,
+  # and without it the holder is accepted again
+  trust_rogue_round "$TRUST_HOLDER_SLUG" "$holder_ctx" TRUST-6.4 TRUST-6.5 "$accepted_on_authority"
+
+  # 6.6 to 6.9 — A second data space (#934 step 2). Its Governance Authority
+  # admits AlphaKasse DE, which holds no credential from the hub's issuer.
+  local ak_ctx
+  ak_ctx=$(trust_ctx "$TRUST_WELLBEING_SLUG")
+  if [ -z "$ak_ctx" ]; then
+    for test_id in TRUST-6.6 TRUST-6.7 TRUST-6.8 TRUST-6.9; do
+      fail "$test_id: no participant context for ${TRUST_WELLBEING_SLUG} (run scripts/seed-second-data-space.sh)"
+      record_result "$test_id" "trust" "failed" "second data space not seeded"
+    done
+    return
+  fi
+
+  test_id="TRUST-6.6"
+  issuers=$(trust_membership_issuers "$ak_ctx" | sort -u)
+  if [ "$issuers" = "$TRUST_WELLBEING_GA_DID" ]; then
+    pass "$test_id: ${TRUST_WELLBEING_SLUG} holds its MembershipCredential from ${TRUST_WELLBEING_GA_DID} only"
+    record_result "$test_id" "trust" "passed"
+  else
+    fail "$test_id: ${TRUST_WELLBEING_SLUG}'s MembershipCredential issuers are [$(printf '%s' "$issuers" | tr '\n' ' ')], want ${TRUST_WELLBEING_GA_DID} alone (run scripts/seed-second-data-space.sh)"
+    record_result "$test_id" "trust" "failed" "membership not from the second authority alone"
+  fi
+
+  test_id="TRUST-6.7"
+  local ak_accepted=0
+  res=$(trust_catalog "$ak_ctx" "$provider_ctx" "$provider_did")
+  if [ "${res#* }" = "Catalog" ]; then
+    ak_accepted=1
+    pass "$test_id: ${TRUST_WELLBEING_SLUG} is admitted: it gets ${TRUST_PROVIDER_SLUG}'s catalogue on the second authority's credential"
+    record_result "$test_id" "trust" "passed"
+  else
+    fail "$test_id: catalogue request ${TRUST_WELLBEING_SLUG} -> ${TRUST_PROVIDER_SLUG} answered ${res} (does the control plane trust ${TRUST_WELLBEING_GA_DID}? TRUST-6.1)"
+    record_result "$test_id" "trust" "failed" "second data space participant refused"
+  fi
+
+  trust_rogue_round "$TRUST_WELLBEING_SLUG" "$ak_ctx" TRUST-6.8 TRUST-6.9 "$ak_accepted"
+}
+
+# Has the rogue issuer (profile trust-check) issue the holder a
+# MembershipCredential, checks that the provider then refuses the holder, and
+# that it is accepted again once the credential is gone. A credential whose
+# issuer is on no list fails the whole presentation. $1 holder slug, $2 its
+# context, $3 and $4 the two test ids, $5 1 when the holder was accepted on its
+# own credentials a moment ago.
+trust_rogue_round() {
+  local slug="$1" ctx="$2" refused_id="$3" after_id="$4" accepted_before="$5"
+  local repo_dir provider_ctx provider_did since res cp_log cred rogue_ok=1
+  repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  provider_ctx=$(trust_ctx "$TRUST_PROVIDER_SLUG")
+  provider_did="did:web:identityhub%3A7083:${TRUST_PROVIDER_SLUG}"
+
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   PROFILE=trust-check SERVICE=rogue-issuer CTX=rogue DB="${ROGUE_DB:-rogueissuer}" ADMIN_PORT=10033 \
-    HOLDERS="did:web:identityhub%3A7083:${TRUST_HOLDER_SLUG}" \
+    HOLDERS="did:web:identityhub%3A7083:${slug}" \
     "${repo_dir}/scripts/seed-test-issuer.sh" >/dev/null 2>&1 || rogue_ok=0
   if [ "$rogue_ok" -eq 1 ]; then
     ISSUER_DID="$TRUST_ROGUE_DID" EDC_ISSUER_URL=http://localhost:10033/api/admin ISSUER_CTX=rogue \
-      ONLY="$TRUST_HOLDER_SLUG" WAIT_SECONDS=60 \
+      ONLY="$slug" WAIT_SECONDS=60 \
       "${repo_dir}/scripts/request-participant-credentials.sh" >/dev/null 2>&1 || rogue_ok=0
   fi
   if [ "$rogue_ok" -ne 1 ]; then
-    fail "$test_id: could not have ${TRUST_ROGUE_DID} issue a MembershipCredential to ${TRUST_HOLDER_SLUG}"
-    record_result "$test_id" "trust" "failed" "rogue issuer setup"
+    fail "$refused_id: could not have ${TRUST_ROGUE_DID} issue a MembershipCredential to ${slug}"
+    record_result "$refused_id" "trust" "failed" "rogue issuer setup"
   else
-    res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
+    res=$(trust_catalog "$ctx" "$provider_ctx" "$provider_did")
     # Capture, then match: `docker logs | grep -q` fails under pipefail, as
     # grep closing the pipe on the first match gives docker logs a SIGPIPE.
-    local cp_log
     cp_log=$(docker logs --since "$since" health-dataspace-controlplane 2>&1 || true)
     if [ "${res#* }" != "Catalog" ] && [[ "$cp_log" == *"not supported for issuer '${TRUST_ROGUE_DID}'"* ]]; then
-      pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}: issuer not trusted for the type)"
-      record_result "$test_id" "trust" "passed"
-    elif [ "${res#* }" != "Catalog" ] && [ "$accepted_on_authority" -eq 1 ]; then
-      # EDC 1.0 refuses without logging the reason (#881). 6.3 accepted the same
-      # holder a moment ago, and the rogue credential is the only change, so the
-      # refusal is its; 6.5 checks that removing it restores access.
-      pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}); 6.3 accepted the holder without it"
-      record_result "$test_id" "trust" "passed" "refused once the rogue credential was added; not named in the log"
+      pass "$refused_id: a MembershipCredential from ${TRUST_ROGUE_DID} gets ${slug} refused (answered ${res%% *}: issuer not trusted for the type)"
+      record_result "$refused_id" "trust" "passed"
+    elif [ "${res#* }" != "Catalog" ] && [ "$accepted_before" -eq 1 ]; then
+      # EDC 1.0 refuses without logging the reason (#881). The same holder was
+      # accepted a moment ago, and the rogue credential is the only change, so
+      # the refusal is its; the next test checks that removing it restores access.
+      pass "$refused_id: a MembershipCredential from ${TRUST_ROGUE_DID} gets ${slug} refused (answered ${res%% *}); it was accepted without it"
+      record_result "$refused_id" "trust" "passed" "refused once the rogue credential was added; not named in the log"
     else
-      fail "$test_id: with a credential from ${TRUST_ROGUE_DID} the request answered ${res}, and the control plane did not name the issuer as untrusted"
-      record_result "$test_id" "trust" "failed" "untrusted issuer not refused"
+      fail "$refused_id: with a credential from ${TRUST_ROGUE_DID} the request for ${slug} answered ${res}, and the control plane did not name the issuer as untrusted"
+      record_result "$refused_id" "trust" "failed" "untrusted issuer not refused"
     fi
   fi
 
   # Clean up whatever happened above: the holder's rogue credentials and the
   # rogue issuer itself.
-  local cred
   for cred in $(docker exec health-dataspace-postgres psql -U ih -d "$IH_DB" -At -c \
-      "select id from credential_resource where participant_context_id='${holder_ctx}' and issuer_id='${TRUST_ROGUE_DID}'" 2>/dev/null); do
+      "select id from credential_resource where participant_context_id='${ctx}' and issuer_id='${TRUST_ROGUE_DID}'" 2>/dev/null); do
     curl -s -o /dev/null --max-time 20 -X DELETE -H "$(auth_header)" \
-      "${IDENTITY_API}/v1/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true
+      "${IDENTITY_API}/v1/participants/${ctx}/credentials/${cred}" 2>/dev/null || true
   done
   docker rm -f health-dataspace-rogue-issuer >/dev/null 2>&1 || true
 
-  # 6.5 — Without it the holder is accepted again
-  test_id="TRUST-6.5"
-  res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
+  res=$(trust_catalog "$ctx" "$provider_ctx" "$provider_did")
   if [ "${res#* }" = "Catalog" ]; then
-    pass "$test_id: after removing the untrusted credential, ${TRUST_HOLDER_SLUG} is accepted again"
-    record_result "$test_id" "trust" "passed"
+    pass "$after_id: after removing the untrusted credential, ${slug} is accepted again"
+    record_result "$after_id" "trust" "passed"
   else
-    fail "$test_id: after the clean-up the request still answered ${res}"
-    record_result "$test_id" "trust" "failed" "not accepted after clean-up"
+    fail "$after_id: after the clean-up the request for ${slug} still answered ${res}"
+    record_result "$after_id" "trust" "failed" "not accepted after clean-up"
   fi
 }
 
