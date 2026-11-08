@@ -65,7 +65,14 @@ vi.mock("vis-timeline/peer", () => ({ Timeline: vis.Timeline }));
 vi.mock("vis-data/peer", () => ({ DataSet: vis.DataSet }));
 
 import RoadmapTimeline from "@/components/docs/RoadmapTimeline";
-import { ITEMS, LANES, MILESTONES, ROADMAP_PROJECT } from "@/lib/docs/roadmap";
+import {
+  EPICS,
+  ITEMS,
+  LANES,
+  MILESTONES,
+  ROADMAP_PROJECT,
+  epicWindow,
+} from "@/lib/docs/roadmap";
 
 const latest = () => vis.timelines[vis.timelines.length - 1];
 
@@ -104,7 +111,38 @@ describe("RoadmapTimeline", () => {
         t.items.get(`m_${m.id.replace(/[^a-z0-9]/gi, "_")}`),
       ).toMatchObject({ type: "point", start: m.date, group: m.lane });
     }
+    for (const e of EPICS) {
+      const row = t.items.get(`e${e.issue}`)!;
+      expect(row).toMatchObject({
+        group: e.lane,
+        type: "range",
+        ...epicWindow(e),
+      });
+      expect(row.className).toContain("rt-epic");
+    }
     expect(t.options).toMatchObject({ showCurrentTime: true });
+  });
+
+  it("lists an epic's issues by priority when its bar is selected", async () => {
+    const t = await drawn();
+    act(() => t.handlers.select({ items: ["e963"] }));
+    const detail = await screen.findByTestId("roadmap-detail");
+    expect(detail).toHaveTextContent("Connector platform: EDC 1.0");
+    expect(detail).toHaveTextContent(/2 of 12 done/);
+    expect(screen.getByRole("link", { name: "#542" })).toHaveAttribute(
+      "href",
+      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/542",
+    );
+    expect(screen.getByRole("link", { name: "#97" })).toHaveClass(
+      "line-through",
+    );
+    expect(
+      screen.getByRole("link", { name: /Open epic #963/ }),
+    ).toHaveAttribute(
+      "href",
+      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/963",
+    );
+    expect(location.hash).toBe("#e963");
   });
 
   it("shows an issue's details with its sources when its bar is selected, and puts it in the address", async () => {
@@ -154,6 +192,9 @@ describe("RoadmapTimeline", () => {
     );
     expect(t.items.get("i708")!.className).not.toContain("rt-dim");
     expect(t.items.get("m_hamburg")!.className).toContain("rt-dim");
+    // #964 is a P2 epic, #963 a P1 one.
+    expect(t.items.get("e964")!.className).toContain("rt-dim");
+    expect(t.items.get("e963")!.className).not.toContain("rt-dim");
   });
 
   it("links the GitHub Project where the plan is edited", async () => {

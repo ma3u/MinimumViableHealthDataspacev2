@@ -20,17 +20,22 @@ import type { DataSet } from "vis-data";
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
 import { LinkedText } from "@/components/docs/LinkedText";
 import {
+  EPICS,
   ITEMS,
   LANES,
   MILESTONES,
   ROADMAP_PROJECT,
   STATUS_LABEL,
+  epicStatus,
+  epicTaskId,
+  epicWindow,
   issueUrl,
   itemTaskId,
   milestoneTaskId,
   roadmapTargets,
   type Milestone,
   type Priority,
+  type RoadmapEpic,
   type RoadmapItem,
   type Status,
   type Translate,
@@ -50,15 +55,20 @@ const MOMENT_LOCALES: Record<string, () => Promise<unknown>> = {
 
 const itemId = (i: RoadmapItem) => itemTaskId(i.issue);
 const milestoneId = (m: Milestone) => milestoneTaskId(m.id);
+const epicId = (e: RoadmapEpic) => epicTaskId(e.issue);
+const PRIORITIES = ["P1", "P2", "P3"] as const;
 
 type Selected =
   | { kind: "item"; item: RoadmapItem }
+  | { kind: "epic"; epic: RoadmapEpic }
   | { kind: "milestone"; milestone: Milestone };
 
 function find(id: string | null): Selected | null {
   if (!id) return null;
   const item = ITEMS.find((i) => itemId(i) === id);
   if (item) return { kind: "item", item };
+  const epic = EPICS.find((e) => epicId(e) === id);
+  if (epic) return { kind: "epic", epic };
   const milestone = MILESTONES.find((m) => milestoneId(m) === id);
   return milestone ? { kind: "milestone", milestone } : null;
 }
@@ -71,7 +81,8 @@ const esc = (s: string) =>
 
 /** What a filter leaves bright: the rest is dimmed, so the lanes keep their shape. */
 function matches(
-  i: RoadmapItem,
+  i: { issue: number; short: string; title: string; priority: Priority },
+  itemStatus: Status,
   status: Status | "",
   priority: Priority | "",
   query: string,
@@ -79,7 +90,7 @@ function matches(
 ): boolean {
   const q = query.trim().toLowerCase();
   return (
-    (!status || i.status === status) &&
+    (!status || itemStatus === status) &&
     (!priority || i.priority === priority) &&
     (!q ||
       `${i.issue} ${i.short} ${tr(i.short)} ${i.title} ${tr(i.title)}`
@@ -90,7 +101,8 @@ function matches(
 
 /**
  * The roadmap as an interactive timeline (vis-timeline): a lane per driver,
- * a bar per issue, a diamond per date set by law or by a programme. Drag to
+ * a hatched bar per epic at the top of its lane, a bar per dated issue, a
+ * diamond per date set by law or by a programme. Drag to
  * pan, Ctrl or ⌘ and the wheel to zoom; a click shows the details with every
  * source the note cites, a double click opens the issue or the source, and
  * #i934 in the address selects #934. Full screen takes the whole block. The
@@ -161,6 +173,18 @@ export default function RoadmapTimeline() {
           content: esc(tr(m.label)),
           title: esc(tooltips.get(milestoneId(m)) ?? ""),
         })),
+        ...EPICS.map((e, order) => ({
+          id: epicId(e),
+          order: 50 + order,
+          group: e.lane,
+          ...epicWindow(e),
+          type: "range" as const,
+          className: `rt-epic rt-${epicStatus(e)}`,
+          content: `<span class="rt-prio rt-${e.priority}">${
+            e.priority
+          }</span>${esc(tr("Epic"))} ${e.issue} ${esc(tr(e.short))}`,
+          title: esc(tooltips.get(epicId(e)) ?? ""),
+        })),
         ...ITEMS.map((i, order) => ({
           id: itemId(i),
           order: 100 + order,
@@ -215,7 +239,11 @@ export default function RoadmapTimeline() {
         const s = find(p.item);
         if (!s) return;
         window.open(
-          s.kind === "item" ? issueUrl(s.item.issue) : s.milestone.href,
+          s.kind === "item"
+            ? issueUrl(s.item.issue)
+            : s.kind === "epic"
+              ? issueUrl(s.epic.issue)
+              : s.milestone.href,
           "_blank",
           "noopener,noreferrer",
         );
@@ -242,7 +270,15 @@ export default function RoadmapTimeline() {
       ...ITEMS.map((i) => ({
         id: itemId(i),
         className: `rt-${i.status}${
-          matches(i, status, priority, query, tr) ? "" : " rt-dim"
+          matches(i, i.status, status, priority, query, tr) ? "" : " rt-dim"
+        }`,
+      })),
+      ...EPICS.map((e) => ({
+        id: epicId(e),
+        className: `rt-epic rt-${epicStatus(e)}${
+          matches(e, epicStatus(e), status, priority, query, tr)
+            ? ""
+            : " rt-dim"
         }`,
       })),
       ...MILESTONES.map((m) => ({
@@ -482,6 +518,8 @@ export default function RoadmapTimeline() {
                   />
                 </p>
               </>
+            ) : shown.kind === "epic" ? (
+              <EpicDetail epic={shown.epic} tr={tr} />
             ) : (
               <>
                 <p className="text-xs text-(--text-secondary)">
@@ -500,7 +538,9 @@ export default function RoadmapTimeline() {
                 href={
                   shown.kind === "item"
                     ? issueUrl(shown.item.issue)
-                    : shown.milestone.href
+                    : shown.kind === "epic"
+                      ? issueUrl(shown.epic.issue)
+                      : shown.milestone.href
                 }
                 target="_blank"
                 rel="noopener noreferrer"
@@ -508,7 +548,9 @@ export default function RoadmapTimeline() {
               >
                 {shown.kind === "item"
                   ? tr("Open issue #{n}", { n: shown.item.issue })
-                  : tr("Open the source")}{" "}
+                  : shown.kind === "epic"
+                    ? tr("Open epic #{n}", { n: shown.epic.issue })
+                    : tr("Open the source")}{" "}
                 <ExternalLink size={12} aria-hidden="true" />
               </a>
               <button
@@ -531,5 +573,75 @@ export default function RoadmapTimeline() {
         )}
       </p>
     </div>
+  );
+}
+
+/** An epic in the detail panel: its window, its progress and its issues by
+ *  priority, each a link; a click on one of the dated ones selects its bar. */
+function EpicDetail({ epic, tr }: { epic: RoadmapEpic; tr: Translate }) {
+  const w = epicWindow(epic);
+  const open = PRIORITIES.flatMap((p) => epic.open[p]);
+  const lane = LANES.find((l) => l.id === epic.lane)!;
+  return (
+    <>
+      <p className="text-xs text-(--text-secondary)">
+        {tr("Epic")} #{epic.issue} · {tr(lane.label)}
+      </p>
+      <p className="mt-1 mb-2 font-semibold text-(--text-primary)">
+        {tr(epic.title)}
+      </p>
+      <p className="mb-2 flex flex-wrap gap-1 text-xs">
+        <span className="rounded-full border border-(--border-ui) px-2">
+          {epic.priority}
+        </span>
+        <span className="rounded-full border border-(--border-ui) px-2">
+          {tr("{done} of {total} done", {
+            done: epic.done.length,
+            total: open.length + epic.done.length,
+          })}
+        </span>
+        <span className="rounded-full border border-(--border-ui) px-2">
+          {tr("{start} to {end}", w)}
+        </span>
+      </p>
+      <p className="mb-2 text-(--text-secondary)">
+        <LinkedText area="docsCommon" text={epic.note} links={epic.links} />
+      </p>
+      <EpicIssues epic={epic} tr={tr} />
+    </>
+  );
+}
+
+/** An epic's issues by priority, each a link to GitHub; closed ones last. */
+function EpicIssues({ epic, tr }: { epic: RoadmapEpic; tr: Translate }) {
+  const link = (n: number, done = false) => (
+    <a
+      key={n}
+      href={issueUrl(n)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`text-(--accent) underline ${done ? "line-through" : ""}`}
+    >
+      #{n}
+    </a>
+  );
+  const rows = [
+    ...PRIORITIES.filter((p) => epic.open[p].length).map((p) => ({
+      label: p,
+      links: epic.open[p].map((n) => link(n)),
+    })),
+    ...(epic.done.length
+      ? [{ label: tr("Done"), links: epic.done.map((n) => link(n, true)) }]
+      : []),
+  ];
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+      {rows.map((r) => (
+        <div key={r.label} className="contents">
+          <dt className="font-medium text-(--text-secondary)">{r.label}</dt>
+          <dd className="flex flex-wrap gap-x-2">{r.links}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

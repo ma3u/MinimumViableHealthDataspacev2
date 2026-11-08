@@ -12,16 +12,17 @@ globs:
 
 ## Frameworks
 
-| Scope            | Framework      | Config                                 |
-| ---------------- | -------------- | -------------------------------------- |
-| Unit / component | Vitest 5       | `ui/vitest.config.ts`                  |
-| E2E browser      | Playwright     | `ui/playwright.config.ts`              |
-| iOS unit         | Swift Testing  | `cd clients/ios && swift test`         |
-| iOS on screen    | XCUITest       | `clients/ios/Scripts/run-ui-tests.sh`  |
-| EHDS dataspace   | Our own checks | `scripts/run-ehds-dataspace-checks.sh` |
-| EHDS identity    | Our own checks | `scripts/run-ehds-identity-checks.sh`  |
-| EHDS API by role | Bruno          | `scripts/run-api-tests.sh <env>`       |
-| EHDS domain      | Custom         | `scripts/run-ehds-tests.sh`            |
+| Scope            | Framework       | Config                                 |
+| ---------------- | --------------- | -------------------------------------- |
+| Unit / component | Vitest 5        | `ui/vitest.config.ts`                  |
+| E2E browser      | Playwright      | `ui/playwright.config.ts`              |
+| iOS unit         | Swift Testing   | `cd clients/ios && swift test`         |
+| iOS on screen    | XCUITest        | `clients/ios/Scripts/run-ui-tests.sh`  |
+| DSP conformance  | Eclipse DSP TCK | `scripts/run-eclipse-dsp-tck.sh`       |
+| EHDS dataspace   | Our own checks  | `scripts/run-ehds-dataspace-checks.sh` |
+| EHDS identity    | Our own checks  | `scripts/run-ehds-identity-checks.sh`  |
+| EHDS API by role | Bruno           | `scripts/run-api-tests.sh <env>`       |
+| EHDS domain      | Custom          | `scripts/run-ehds-tests.sh`            |
 
 ## API Collection (Bruno)
 
@@ -140,7 +141,8 @@ npx playwright test --project=live   # requires JAD stack
   `scripts/select-e2e-specs.sh`); shared code runs every spec on three shards.
 - The nightly (`nightly.yml`) runs every spec and spec 19 against GitHub Pages.
   No Playwright step has `continue-on-error`: a failure is red and opens the
-  "Nightly suites failed" issue. Its report is the site's `/e2e-report/`.
+  "Nightly suites failed" issue. Its report is the site's `/e2e-report/`;
+  `pages.yml` redeploys when a nightly run finishes.
 - Before pushing a UI change: `scripts/run-e2e-local.sh --changed`, the same
   run on your machine.
 

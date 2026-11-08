@@ -99,7 +99,11 @@ export type LaneId =
   | "simpl"
   | "protocols"
   | "standards"
-  | "processing";
+  | "processing"
+  | "klarbefund"
+  | "operations"
+  | "quality"
+  | "demos";
 
 export interface Lane {
   id: LaneId;
@@ -147,6 +151,29 @@ export const LANES: readonly Lane[] = [
     label: "Permits and processing",
     driver: "<a68>Art. 68</a68> to <a73>73</a73>; Apache Iceberg",
     links: { a68: ehdsArt(68), a73: ehdsArt(73) },
+  },
+  // The lanes of the epics outside the six drivers (#964 to #967): no law or
+  // programme sets their dates, their priority does.
+  {
+    id: "klarbefund",
+    label: "Klarbefund and patient record",
+    driver: "A person's own data: <a3>Art. 3</a3>, the right of access",
+    links: { a3: ehdsArt(3) },
+  },
+  {
+    id: "operations",
+    label: "Security and operations",
+    driver: "Running the hub on Azure: secrets, logs, alerts and cost",
+  },
+  {
+    id: "quality",
+    label: "Quality and CI",
+    driver: "Checks that can fail and say why",
+  },
+  {
+    id: "demos",
+    label: "Demos and partners",
+    driver: "Access bodies and national programmes",
   },
 ];
 
@@ -584,12 +611,197 @@ export const MILESTONES: readonly Milestone[] = [
   },
 ];
 
+/** The deadline a priority sets (the page's intro); P3 sets none. */
+const DEADLINE: Readonly<Record<Priority, string | null>> = {
+  P1: "2027-03-26",
+  P2: "2029-03-26",
+  P3: null,
+};
+
+export interface RoadmapEpic {
+  /** The epic's GitHub issue: a parent issue labelled "epic"; also its id. */
+  issue: number;
+  lane: LaneId;
+  /** The bar's label in the chart: a few words, no colon, semicolon or hash. */
+  short: string;
+  title: string;
+  priority: Priority;
+  /** One sentence: what it collects. */
+  note: string;
+  links?: Readonly<Record<string, string>>;
+  /** Its open sub-issues by their priority in the Project, and its closed
+   *  ones. scripts/sync-roadmap-project.mjs check compares them with GitHub
+   *  and pull writes them here. */
+  open: Readonly<Record<Priority, readonly number[]>>;
+  done: readonly number[];
+}
+
+/** The epics: every open issue is a sub-issue of one, edited in the GitHub
+ *  Project (view "Epics"). An epic is not dated by hand; epicWindow() derives
+ *  its bar from its issues. #725 is the plan above the first four. */
+export const EPICS: readonly RoadmapEpic[] = [
+  {
+    issue: 959,
+    lane: "identity",
+    short: "Identity and wallets",
+    title: "Identity and wallets: EUDI Wallet, Business Wallet, Keycloak",
+    priority: "P1",
+    note: "Sign-in and attestations for citizens, health professionals and organisations: the EUDI Wallet under <a99>2026/2099</a99>, the European Business Wallet, and the Keycloak upgrade that carries both.",
+    links: { a99: SRC.a2099 },
+    open: { P1: [708, 709], P2: [182, 557, 712], P3: [] },
+    done: [],
+  },
+  {
+    issue: 960,
+    lane: "simpl",
+    short: "Simpl-Open interoperability",
+    title: "Simpl-Open interoperability",
+    priority: "P1",
+    note: "The hub working with Simpl-Open: one use case end to end, the DSP compatibility kit both ways, HealthDCAT-AP as a Simpl profile, permits as bilateral contracts, and the comments on Simpl's proposals.",
+    open: {
+      P1: [711, 934],
+      P2: [719, 720, 721, 722],
+      P3: [723, 724],
+    },
+    done: [],
+  },
+  {
+    issue: 961,
+    lane: "processing",
+    short: "Secondary use",
+    title: "Secondary use: permits, secure processing, opt-out and audit",
+    priority: "P1",
+    note: "Secondary use as it runs: applications and <a68>permits</a68>, the <a73>secure processing environment</a73>, the <a71>Art. 71</a71> opt-out, the policies the connector enforces, and the audit trail that proves it.",
+    links: { a68: ehdsArt(68), a73: ehdsArt(73), a71: ehdsArt(71) },
+    open: {
+      P1: [928],
+      P2: [204, 475, 587, 696, 716, 717, 833, 889, 915],
+      P3: [894],
+    },
+    done: [],
+  },
+  {
+    issue: 962,
+    lane: "standards",
+    short: "Standards and catalogue",
+    title: "Health standards and the dataset catalogue",
+    priority: "P1",
+    note: "FHIR, OMOP and HealthDCAT-AP: dataset descriptions to <a98>2026/2098</a98>, the EU catalogue and HealthData@EU, the exchange format, lab reports and the federated catalogue.",
+    links: { a98: SRC.a2098 },
+    open: {
+      P1: [514],
+      P2: [413, 697, 698, 713, 714, 715, 718, 929],
+      P3: [16, 20, 26, 884],
+    },
+    done: [],
+  },
+  {
+    issue: 963,
+    lane: "protocols",
+    short: "Connector platform",
+    title: "Connector platform: EDC 1.0 and the data planes",
+    priority: "P1",
+    note: "The connector the dataspace runs on: the move to <edc>EDC 1.0</edc>, the data planes, the TCKs and the protocol versions, and retiring CFM and EDC 0.18.",
+    links: { edc: SRC.edc },
+    open: {
+      P1: [542],
+      P2: [881, 888, 890, 930, 971, 972, 973],
+      P3: [891, 927],
+    },
+    done: [97, 755],
+  },
+  {
+    issue: 964,
+    lane: "klarbefund",
+    short: "Klarbefund",
+    title: "Klarbefund and the patient's own record",
+    priority: "P2",
+    note: "The Klarbefund app and what a person brings into their record: sign-in from the patient screen, scanned lab values, Apple Health trends, and the evidence for a pilot.",
+    open: { P1: [], P2: [473, 513, 655, 760], P3: [478] },
+    done: [],
+  },
+  {
+    issue: 965,
+    lane: "operations",
+    short: "Security and operations",
+    title: "Security, operations and cost on Azure",
+    priority: "P1",
+    note: "Running the hub safely and affordably: secrets and the database firewall, the NLQ's read-only session, Keycloak load, logs, traces and alerts, and the load tests.",
+    open: {
+      P1: [359, 442, 779],
+      P2: [435, 577, 585, 586],
+      P3: [519, 571],
+    },
+    done: [],
+  },
+  {
+    issue: 966,
+    lane: "quality",
+    short: "Quality and CI",
+    title: "Quality: tests, CI and documentation",
+    priority: "P1",
+    note: "Checks that can fail and say why: the end-to-end tests, API checks that pass on an empty answer, CI minutes and CodeQL, and the developer manual.",
+    open: { P1: [], P2: [375, 847], P3: [338, 765, 839] },
+    done: [951],
+  },
+  {
+    issue: 967,
+    lane: "demos",
+    short: "Demos and profiles",
+    title: "Demos and national profiles",
+    priority: "P2",
+    note: "Showing the hub to access bodies and national programmes, and what a multilingual demonstrator with national implementation profiles would take.",
+    open: { P1: [], P2: [27], P3: [782] },
+    done: [],
+  },
+];
+
+const PRIORITIES = ["P1", "P2", "P3"] as const;
+
+/** An epic's bar: from its first dated issue, or the planning date when it
+ *  has undated ones, to its last dated issue's end or the latest deadline
+ *  its undated issues' priorities set. */
+export function epicWindow(e: RoadmapEpic): { start: string; end: string } {
+  const dated = ITEMS.filter(
+    (i) =>
+      e.done.includes(i.issue) ||
+      PRIORITIES.some((p) => e.open[p].includes(i.issue)),
+  );
+  const undated = PRIORITIES.flatMap((p) =>
+    e.open[p].filter((n) => !ITEMS.some((i) => i.issue === n)).map(() => p),
+  );
+  const starts = dated.map((i) => i.start);
+  const ends = dated.map((i) => i.end);
+  if (undated.length) starts.push(ROADMAP_PLANNED_ON);
+  for (const p of undated) if (DEADLINE[p]) ends.push(DEADLINE[p]!);
+  if (!ends.length) ends.push(DEADLINE[e.priority] ?? "2031-03-26");
+  return { start: [...starts].sort()[0], end: [...ends].sort().at(-1)! };
+}
+
+/** An epic's status from its issues: done when none is open, in progress
+ *  when one is done or under way, planned otherwise. */
+export function epicStatus(e: RoadmapEpic): Status {
+  const open = PRIORITIES.flatMap((p) => e.open[p]);
+  if (!open.length) return "done";
+  const moving = ITEMS.some(
+    (i) => open.includes(i.issue) && i.status === "in-progress",
+  );
+  return moving || e.done.length ? "in-progress" : "planned";
+}
+
+/** The epic an issue belongs to, if any. */
+export const epicOf = (n: number) =>
+  EPICS.find(
+    (e) => e.done.includes(n) || PRIORITIES.some((p) => e.open[p].includes(n)),
+  );
+
 export const issueUrl = issue;
 
 /** The chart's id for an item or a milestone, also its anchor: #i934, #m_hamburg. */
 export const itemTaskId = (n: number) => `i${n}`;
 export const milestoneTaskId = (id: string) =>
   `m_${id.replace(/[^a-z0-9]/gi, "_")}`;
+export const epicTaskId = (n: number) => `e${n}`;
 
 /** Every bar and marker: its task id, where a click goes, and what it says. */
 export function roadmapTargets(tr?: Translate): {
@@ -610,6 +822,20 @@ export function roadmapTargets(tr?: Translate): {
         t(i.note),
       )}`,
     })),
+    ...EPICS.map((e) => {
+      const w = epicWindow(e);
+      const open = PRIORITIES.flatMap((p) => e.open[p]).length;
+      return {
+        taskId: epicTaskId(e.issue),
+        href: issueUrl(e.issue),
+        label: `${t("Epic")} #${e.issue} ${t(e.title)} (${e.priority}, ${status(
+          epicStatus(e),
+        )}, ${t("{start} to {end}", { start: w.start, end: w.end })}). ${t(
+          "{done} of {total} done",
+          { done: e.done.length, total: open + e.done.length },
+        )}. ${untagged(t(e.note))}`,
+      };
+    }),
     ...MILESTONES.map((m) => ({
       taskId: milestoneTaskId(m.id),
       href: m.href,

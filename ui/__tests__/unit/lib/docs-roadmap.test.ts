@@ -5,10 +5,15 @@
  */
 import { describe, it, expect } from "vitest";
 import {
+  EPICS,
   ITEMS,
   LANES,
   MILESTONES,
+  ROADMAP_PLANNED_ON,
   ROADMAP_PROJECT,
+  epicOf,
+  epicStatus,
+  epicWindow,
   roadmapTargets,
 } from "@/lib/docs/roadmap";
 
@@ -59,12 +64,14 @@ describe("the roadmap data", () => {
   it("gives every bar and marker an id of its own, usable as an anchor", () => {
     const ids = roadmapTargets().map((t) => t.taskId);
     expect(new Set(ids).size).toBe(ids.length);
-    for (const id of ids) expect(id).toMatch(/^(i\d+|m_\w+)$/);
+    for (const id of ids) expect(id).toMatch(/^(i\d+|e\d+|m_\w+)$/);
   });
 
   it("links every bar to its issue and every milestone to an https source", () => {
     const targets = roadmapTargets();
-    expect(targets).toHaveLength(ITEMS.length + MILESTONES.length);
+    expect(targets).toHaveLength(
+      ITEMS.length + EPICS.length + MILESTONES.length,
+    );
     for (const i of ITEMS) {
       expect(targets).toContainEqual(
         expect.objectContaining({
@@ -83,6 +90,11 @@ describe("the roadmap data", () => {
         id: `#${i.issue}`,
         texts: [i.title, i.note],
         links: i.links,
+      })),
+      ...EPICS.map((e) => ({
+        id: `epic #${e.issue}`,
+        texts: [e.title, e.note],
+        links: e.links,
       })),
     ];
     for (const { id, texts: parts, links } of texts) {
@@ -137,5 +149,49 @@ describe("the roadmap data", () => {
     expect(roadmapTargets().find((t) => t.taskId === "i717")!.label).toContain(
       "Applications: Art. 53 purposes, Art. 81 complaints",
     );
+  });
+
+  it("puts every issue in one epic at most, in a lane of its own", () => {
+    const lanes = LANES.map((l) => l.id);
+    const seen = new Map<number, number>();
+    for (const e of EPICS) {
+      expect(lanes, `epic #${e.issue}`).toContain(e.lane);
+      expect(e.short.length, `epic #${e.issue}`).toBeLessThan(30);
+      for (const n of [...e.open.P1, ...e.open.P2, ...e.open.P3, ...e.done]) {
+        expect(seen.get(n), `#${n} in #${e.issue}`).toBeUndefined();
+        seen.set(n, e.issue);
+      }
+    }
+    // Each of the four lanes outside the six drivers is one epic's.
+    for (const id of ["klarbefund", "operations", "quality", "demos"])
+      expect(EPICS.filter((e) => e.lane === id)).toHaveLength(1);
+    // A dated item's epic holds it at the item's priority, unless it is done.
+    for (const i of ITEMS) {
+      const e = epicOf(i.issue);
+      if (e && i.status !== "done")
+        expect(e.open[i.priority], `#${i.issue}`).toContain(i.issue);
+    }
+  });
+
+  it("draws an epic from its first issue to the deadline its issues set", () => {
+    const e = (n: number) => EPICS.find((x) => x.issue === n)!;
+    // #960 has only dated issues: #723 starts first, #720 and #721 end last.
+    expect(epicWindow(e(960))).toEqual({
+      start: "2026-10-28",
+      end: "2028-06-30",
+    });
+    // #964 has none: from the planning date to the P2 deadline.
+    expect(epicWindow(e(964))).toEqual({
+      start: ROADMAP_PLANNED_ON,
+      end: "2029-03-26",
+    });
+    for (const x of EPICS) {
+      const w = epicWindow(x);
+      expect(w.start <= w.end, `epic #${x.issue}`).toBe(true);
+    }
+    // #708 is under way and #951 is done; nothing in #967 has moved yet.
+    expect(epicStatus(e(959))).toBe("in-progress");
+    expect(epicStatus(e(966))).toBe("in-progress");
+    expect(epicStatus(e(967))).toBe("planned");
   });
 });

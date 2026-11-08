@@ -648,7 +648,7 @@ Coverage reports and Playwright HTML reports are uploaded as GitHub Actions arti
 | EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                                                             |
 
 > **Note:** every report here is generated in CI: `nightly.yml` runs the
-> suites and `pages.yml` publishes them. `e2e-report/` is the last nightly
+> suites and `pages.yml` publishes them when the night ends. `e2e-report/` is the last nightly
 > Playwright run (`ci-e2e-report/` is the same report under its old path).
 > Until 2026-11-07 `e2e-report/` was a report committed from a laptop run on
 > 2026-04-03; it is no longer in the repository.
