@@ -62,8 +62,9 @@ trap cleanup EXIT
 # passes to the container.
 #
 # post_simpl URL -d BODY: one Management API call that says what failed. The
-# DSP port can answer before the Management API does, so a 404 or a refused
-# connection is retried for a minute; any other error stops the run.
+# port can answer before EDC has registered the Management API (Jetty's
+# default servlet then says 404 or 405), so those, a 503 and a refused
+# connection are retried for a minute; any other error stops the run.
 post_simpl() {
   local url="$1" body="$3" code="" i
   for i in $(seq 1 30); do
@@ -71,7 +72,7 @@ post_simpl() {
       -H "x-api-key: $SIMPL_MGMT_KEY" -H "Content-Type: application/json" "$url" -d "$body" || echo 000)"
     case "$code" in
       2??) return 0 ;;
-      000 | 404) sleep 2 ;;
+      000 | 404 | 405 | 503) sleep 2 ;;
       *) break ;;
     esac
   done
