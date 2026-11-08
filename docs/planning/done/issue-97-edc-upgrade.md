@@ -1,8 +1,8 @@
 ---
 title: "Dependency refresh: EDC v0.18.0, Metaform JAD/CFM, OSS baseline (issue #97)"
-status: current
+status: done
 owner: ma3u
-updated: 2026-07-15
+updated: 2026-11-08
 adr: ../../ADRs/ADR-005-jad-cfm-source-builds.md
 ---
 

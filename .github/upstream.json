@@ -1,0 +1,75 @@
+{
+  "_comment": "What scripts/check-upstream-releases.py watches: the specifications, TCKs and components no package manager covers (Dependabot reads npm, pip, Gradle, Dockerfiles and compose). `known` is the newest release this repo has taken into account; move it in the change that takes the next one in. `prerelease: true` also reports release candidates. `issue` is where the work for a new release goes.",
+  "repos": [
+    {
+      "repo": "eclipse-edc/Connector",
+      "known": "v1.0.0-RC5",
+      "prerelease": true,
+      "where": "runtimes/edc/gradle/libs.versions.toml",
+      "issue": 930
+    },
+    {
+      "repo": "eclipse-edc/IdentityHub",
+      "known": "v1.0.0-RC5",
+      "prerelease": true,
+      "where": "runtimes/edc/gradle/libs.versions.toml",
+      "issue": 930
+    },
+    {
+      "repo": "eclipse-edc/FederatedCatalog",
+      "known": "v0.16.0",
+      "prerelease": false,
+      "where": "services/catalog-crawler/README.md",
+      "issue": 929
+    },
+    {
+      "repo": "eclipse-dataspace-protocol-base/DataspaceProtocol",
+      "known": "2025-1-err2",
+      "prerelease": false,
+      "where": ".claude/rules/api-conventions.md",
+      "issue": 972
+    },
+    {
+      "repo": "eclipse-dataspace-dcp/decentralized-claims-protocol",
+      "known": "v1.0.1",
+      "prerelease": false,
+      "where": ".claude/rules/api-conventions.md",
+      "issue": 972
+    },
+    {
+      "repo": "eclipse-dataplane-signaling/dataplane-signaling",
+      "known": "v1.0-RC4",
+      "prerelease": true,
+      "where": "siglet in docker-compose.jad.yml",
+      "issue": 972
+    },
+    {
+      "repo": "eclipse-dataspacetck/dsp-tck",
+      "known": "v1.0.2",
+      "prerelease": false,
+      "where": ".github/workflows/compliance.yml",
+      "issue": 971
+    },
+    {
+      "repo": "eclipse-dataspacetck/dcp-tck",
+      "known": "v1.2.1",
+      "prerelease": false,
+      "where": ".github/workflows/compliance.yml",
+      "issue": 971
+    },
+    {
+      "repo": "eclipse-dataspacetck/dps-tck",
+      "known": "v1.3.3",
+      "prerelease": false,
+      "where": ".github/workflows/compliance.yml",
+      "issue": 971
+    },
+    {
+      "repo": "eclipse-cfm/cfm",
+      "known": "v0.0.7",
+      "prerelease": false,
+      "where": "docker-compose.jad.yml (CFM services)",
+      "issue": 973
+    }
+  ]
+}

@@ -110,10 +110,9 @@ updates:
     labels: [dependencies, ci]
 
   # ── Container base images ──
-  # Dependabot reads FROM lines in Dockerfiles. It does NOT read
-  # docker-compose*.yml, so the infrastructure images pinned there
-  # (keycloak, postgres, neo4j, the JAD/EDC images) are covered by the
-  # scheduled Trivy scan in security-scan.yml instead.
+  # FROM lines in Dockerfiles. The images pinned in docker-compose*.yml
+  # (keycloak, postgres, neo4j, siglet, ...) are the docker-compose entry at
+  # the end; the scheduled Trivy scan in security-scan.yml scans them too.
   - package-ecosystem: docker
     directories:
       - /ui
@@ -154,3 +153,64 @@ updates:
         patterns: ["*"]
         update-types: [minor, patch]
     labels: [dependencies, scripts]
+
+  # ── EDC runtimes (Gradle version catalog) ──
+  # runtimes/edc/gradle/libs.versions.toml is the one place the EDC version is
+  # set (ADR-076). Every EDC module follows `version.ref = "edc"`, so a new EDC
+  # release arrives as one PR. That PR is the trigger of #930 (1.0.0 final):
+  # take it through the steps there, it is not a merge on green.
+  - package-ecosystem: gradle
+    directory: /runtimes/edc
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Europe/Berlin
+    groups:
+      edc:
+        patterns: ["org.eclipse.edc:*"]
+      edc-runtime-patch-minor:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    labels: [dependencies, edc]
+
+  # ── Compose images ──
+  # Dependabot matches every docker-compose*.yml here
+  # ((docker-)?compose(-\w+)?(\.[\w-]+)?\.ya?ml in dependabot-core's
+  # docker_compose/file_fetcher.rb). Azure does not read these files: it mirrors
+  # the images into ACR under the tags in scripts/azure/env.sh
+  # (scripts/azure/build-images.sh), so a bump here reaches Azure only when
+  # env.sh moves too.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    groups:
+      compose-patch-minor:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      # Built here or locally, not pulled: mvhd/* and ehds/* are local builds,
+      # ghcr.io/ma3u/* are this repo's images. The 1.0 launchers follow the
+      # Gradle entry above.
+      - dependency-name: "mvhd/*"
+      - dependency-name: "ehds/*"
+      - dependency-name: "ghcr.io/ma3u/*"
+      # JAD's demo data plane, tagged by commit; it goes with CFM and 0.18
+      # (#927, #888).
+      - dependency-name: "ghcr.io/metaform/*"
+      # Keycloak 27 is a planned migration with wallet support (#557).
+      - dependency-name: quay.io/keycloak/keycloak
+        update-types: [version-update:semver-major]
+      # Neo4j 5 to 2025.x changes the versioning and the Cypher defaults; it
+      # moves with the seeds and init-schema.cypher (#97).
+      - dependency-name: neo4j
+        update-types: [version-update:semver-major]
+      # Postgres follows the Flexible Server's major on Azure (ADR-041).
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
+    labels: [dependencies, docker]

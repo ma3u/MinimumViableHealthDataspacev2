@@ -1,8 +1,8 @@
 ---
 title: "Issue #97 Phase B — EDC v0.18 upgrade analysis (JAD lockstep)"
-status: current
+status: done
 owner: ma3u
-updated: 2026-07-15
+updated: 2026-11-08
 adr: ../../ADRs/ADR-029-dependency-version-pinning.md
 ---
 
