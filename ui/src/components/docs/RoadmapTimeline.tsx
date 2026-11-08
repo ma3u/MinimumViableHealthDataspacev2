@@ -70,7 +70,7 @@ const esc = (s: string) =>
   );
 
 /** What a filter leaves bright: the rest is dimmed, so the lanes keep their shape. */
-export function matches(
+function matches(
   i: RoadmapItem,
   status: Status | "",
   priority: Priority | "",
