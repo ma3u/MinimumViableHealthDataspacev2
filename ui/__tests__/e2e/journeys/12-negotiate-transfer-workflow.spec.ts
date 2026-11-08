@@ -6,16 +6,20 @@
  * end-to-end Negotiate→Transfer linkage (FINALIZED → STARTED).
  *
  * /negotiate, /data/transfer, /data/share are PROTECTED pages.
- * Tests use API-level assertions (no auth middleware on /api/*).
+ * Tests use API-level assertions. Middleware skips /api/*, but every route
+ * calls requireAuth() since #404 (ADR-044), so the API tests sign in first;
+ * J97 and J101 stay anonymous because they check the redirect.
  */
 import { test, expect } from "@playwright/test";
 import { expectSigninRedirect, apiGet } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () => {
   /* ── J92: Negotiations follow DSP protocol with correct fields ── */
   test("J92 — Negotiations have DSP protocol, state, and counterPartyId", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -25,7 +29,9 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
     expect(negs.length).toBeGreaterThanOrEqual(1);
 
     const neg = negs[0];
-    expect(neg.protocol).toMatch(/dataspace-protocol/);
+    // The DSP profile id the connector registers, not the DSP version string
+    // (#180): "dataspace-protocol-http:2025-1" is what it used to send.
+    expect(neg.protocol).toMatch(/^http-dsp-profile-2025-1$/);
     expect(neg.state).toBeTruthy();
     expect(neg.counterPartyId || neg.counterPartyAddress).toBeTruthy();
     expect(neg.assetId || neg["assetId"]).toBeTruthy();
@@ -35,6 +41,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
   test("J93 — Transfer API includes REQUESTED, STARTED, COMPLETED, and TERMINATED states", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -57,6 +64,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
   test("J94 — Transfer entries have contractId linking to negotiations", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -78,6 +86,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
   test("J95 — Finalized negotiations have corresponding transfer processes", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -101,6 +110,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
   test("J96 — Assets API returns entries with name, contenttype, and description", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const assets = await apiGet(page, "/api/assets");
     expect(Array.isArray(assets)).toBe(true);
     expect(assets.length).toBeGreaterThanOrEqual(1);
@@ -126,6 +136,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
 
   /* ── J98: Transfers use HttpData-PULL type ───────────────── */
   test("J98 — Transfers use HttpData-PULL transfer type", async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -142,6 +153,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
   test("J99 — Negotiations reference multiple counterparty DIDs", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -161,6 +173,7 @@ test.describe("L · Negotiation Workflow, Transfer Pipeline & Data Sharing", () 
 
   /* ── J100: Transfers have timestamps ────────────────────── */
   test("J100 — Transfer entries include stateTimestamp", async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData

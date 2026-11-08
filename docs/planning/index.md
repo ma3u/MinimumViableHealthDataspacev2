@@ -8,12 +8,11 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 ## current/
 
 - [issue-847-ci-minutes](current/issue-847-ci-minutes.md): CI job-minutes cut by about three quarters; nightly suites per [ADR-074](../ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)
+- [issue-951-e2e-visible](current/issue-951-e2e-visible.md): E2E fails visibly and runs on the pull requests that can break it, per [ADR-079](../ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)
 - [Roadmap to 2035: EHDS, wallets and Simpl](../planning-health-dataspace-v2.md#roadmap-to-2035-ehds-wallets-and-simpl): the dates, P1 to P3, plan #725 over issues #708 to #724, from the [gap analysis](../simpl-ehds-gap-analysis.md)
 - [issue-182-german-national-wallet-integration](current/issue-182-german-national-wallet-integration.md) — German EUDI Wallet (RP contract, self-hosted verifier, wallet-provider backend) **+ the #72 citizen consent demo** it enables (W7–W9)
 - [persona-journeys/registration-identification-exchange](../persona-journeys/registration-identification-exchange.md) — the seven-actor map: registration · identification · data exchange, primary and secondary use
 - [sbom-and-component-updates](current/sbom-and-component-updates.md) — SBOM, automated CVE scanning, evidence-based update queue
-- [issue-97-edc-upgrade](current/issue-97-edc-upgrade.md) — dependency refresh; Phase A done, Phase B in progress
-- [issue-97-phase-b-analysis](current/issue-97-phase-b-analysis.md) — EDC v0.18 breaking-change analysis + upstream-image strategy
 - [issue-20-leitlinien-ingestion](current/issue-20-leitlinien-ingestion.md) — AWMF Leitlinien Layer-6 ingestion (Docling)
 - [Issue #5 — completing the pentest checklist](current/issue-5-pentest-completion.md) — the five items that need a harness, not a probe
 - [issue-571-after-the-load-tests](current/issue-571-after-the-load-tests.md): the UI's size (ADR-061), the live runs left (`stress`, `spike`, `soak`, `signin`) and the decision on the trust centre register
@@ -31,6 +30,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## done/
 
+- [issue-97-edc-upgrade](done/issue-97-edc-upgrade.md) and [phase B](done/issue-97-phase-b-analysis.md): EDC 0.18 refresh, superseded by #881 (EDC 1.0); closed 2026-11-08. Upstream releases now reach #963 through Dependabot and the upstream watch
 - [issue-19-nlq-researcher](done/issue-19-nlq-researcher.md): NLQ for researchers, every criterion met live (closed 2026-10-04)
 - [issue-11-weekly-demo-reset](done/issue-11-weekly-demo-reset.md): superseded by ADR-053, everything stops off hours (closed 2026-10-04)
 - [eudi-wallet-cluster](done/eudi-wallet-cluster.md): #22, #24, #80 closed; the German wallet continues in #182

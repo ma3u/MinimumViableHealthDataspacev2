@@ -25,33 +25,92 @@ export const NO_FORGED_SESSION =
 // (2026-11-01). The roles stay as they are; specs depend on them.
 const TEST_MAIL_DOMAIN = "ci.test";
 
+// The Keycloak users of jad/keycloak-realm.json with the realm roles and the
+// mail a real sign-in gives them, so loginAs() can stand in for Keycloak where
+// there is none (E2E_FORGED_SESSIONS, see journeys/helpers.ts). Only loginAs()
+// uses the realm mail: the hub maps it to the user's participant (researcher
+// to PharmaCo, regulator to MedReg DE), which a journey that applies for a
+// permit or asks the NLQ needs. Every other forged session stays ci.test.
 const PERSONAS = {
   // Only the base role: /graph derives the "default" view from it, the view
   // an anonymous visitor got before #404.
   participant: { name: "Demo Participant", roles: ["EDC_USER_PARTICIPANT"] },
-  edcadmin: { name: "EDC Administrator", roles: ["EDC_ADMIN"] },
+  edcadmin: {
+    name: "EDC Administrator",
+    roles: ["EDC_ADMIN"],
+    realmMail: "admin@health-dataspace.local",
+  },
   researcher: {
     name: "Dr. Klaus Berger",
     roles: ["EDC_USER_PARTICIPANT", "DATA_USER"],
+    realmMail: "researcher@pharmaco.de",
+  },
+  clinicuser: {
+    name: "Dr. Sophie Richter",
+    roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
+    realmMail: "clinic@health-dataspace.local",
+  },
+  lmcuser: {
+    name: "Dr. Pieter van der Berg",
+    roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
+    realmMail: "lmc@limburg-mc.nl",
+  },
+  regulator: {
+    name: "Anke Hoffmann",
+    roles: ["HDAB_AUTHORITY"],
+    realmMail: "regulator@health-dataspace.local",
+  },
+  "regulator-es": {
+    name: "Ainhoa Etxeberria",
+    roles: ["HDAB_AUTHORITY"],
+    realmMail: "regulator-es@health-dataspace.local",
+  },
+  patient1: {
+    name: "Maria García",
+    roles: ["PATIENT"],
+    realmMail: "patient1@health-dataspace.local",
+  },
+  patient2: {
+    name: "Jan de Vries",
+    roles: ["PATIENT"],
+    realmMail: "patient2@limburg-mc.nl",
   },
 } as const;
 
 const MAX_AGE_SECONDS = 60 * 60;
 
-type Persona = keyof typeof PERSONAS;
+export type Persona = keyof typeof PERSONAS;
 
-async function forgeCookie(baseURL: string, persona: Persona) {
+export function isForgeablePersona(username: string): username is Persona {
+  return Object.prototype.hasOwnProperty.call(PERSONAS, username);
+}
+
+async function forgeCookie(
+  baseURL: string,
+  persona: Persona,
+  { realmMail = false }: { realmMail?: boolean } = {},
+) {
   const secret = process.env.NEXTAUTH_SECRET;
   if (!secret) return null;
 
   const now = Math.floor(Date.now() / 1000);
-  const profile = PERSONAS[persona];
+  const profile: {
+    name: string;
+    roles: readonly string[];
+    realmMail?: string;
+  } = PERSONAS[persona];
   const value = await encode({
     token: {
       name: profile.name,
-      email: `${persona}@${TEST_MAIL_DOMAIN}`,
+      email:
+        realmMail && profile.realmMail
+          ? profile.realmMail
+          : `${persona}@${TEST_MAIL_DOMAIN}`,
       sub: `e2e-${persona}-${now}`,
       preferred_username: persona,
+      // What the jwt callback in src/lib/auth.ts stores for a Keycloak login;
+      // a patient's own record is found by it.
+      preferredUsername: persona,
       roles: [...profile.roles],
       iat: now,
       exp: now + MAX_AGE_SECONDS,
@@ -102,8 +161,9 @@ export async function signedInRequest(
 export async function signInPage(
   page: Page,
   persona: Persona = "participant",
+  options: { realmMail?: boolean } = {},
 ): Promise<boolean> {
-  const cookie = await forgeCookie(BASE_URL, persona);
+  const cookie = await forgeCookie(BASE_URL, persona, options);
   if (!cookie) return false;
   await page.context().addCookies([cookie]);
   return true;

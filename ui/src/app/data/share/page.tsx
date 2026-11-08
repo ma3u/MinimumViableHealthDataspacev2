@@ -560,11 +560,7 @@ export default function DataSharePage() {
                   >
                     <button
                       className="w-full text-left p-4"
-                      aria-label={
-                        isOpen
-                          ? t("Collapse {name}", { name: assetLabel(a) })
-                          : t("Expand {name}", { name: assetLabel(a) })
-                      }
+                      aria-expanded={isOpen}
                       onClick={() => setExpanded(isOpen ? null : id)}
                     >
                       <div className="flex items-center justify-between">

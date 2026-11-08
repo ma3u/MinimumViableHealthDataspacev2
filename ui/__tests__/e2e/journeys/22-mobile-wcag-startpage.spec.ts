@@ -137,7 +137,8 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
 
   test("J267 — footer shows regulation references", async ({ page }) => {
     const footer = page.locator("footer");
-    await expect(footer).toContainText(/EHDS Art/i);
+    // The footer names the EHDS chapters the demo covers (#782), not one article.
+    await expect(footer).toContainText(/EHDS Chapters II and IV/i);
     await expect(footer).toContainText(/GDPR Art/i);
     await expect(footer).toContainText(/DSP 2025-1/i);
     await expect(footer).toContainText(/FHIR R4/i);
@@ -162,9 +163,13 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
     await expect(page.getByText(/cross-border access/i)).toBeVisible({
       timeout: T,
     });
-    await expect(page.getByText(/single-window approval/i)).toBeVisible({
-      timeout: T,
-    });
+    // The single window is the health data access body deciding one
+    // application (Art. 67 and 68), worded that way since #782.
+    await expect(page.getByText(/one application under Art\. 67/i)).toBeVisible(
+      {
+        timeout: T,
+      },
+    );
   });
 
   test("J269c — explains value for hospitals", async ({ page }) => {
@@ -212,13 +217,21 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
   test("J269g — standard cards link to official specs", async ({ page }) => {
     const standards = [
       { name: "HL7 FHIR R4", url: "hl7.org/fhir" },
-      { name: "Dataspace Protocol", url: "internationaldataspaces.org" },
+      // DSP links to the Eclipse specification since #471.
+      {
+        name: "Dataspace Protocol",
+        url: "eclipse-dataspace-protocol-base.github.io",
+      },
       { name: "OMOP Common Data Model", url: "ohdsi.github.io" },
     ];
     for (const { name, url } of standards) {
-      const card = page.getByText(name).first();
-      await expect(card).toBeVisible({ timeout: T });
-      const link = card.locator("xpath=ancestor::a");
+      // The card title is the exact name; the hero mentions "Dataspace
+      // Protocol" in running text outside any card.
+      const link = page
+        .locator("a")
+        .filter({ has: page.getByText(name, { exact: true }) })
+        .first();
+      await expect(link).toBeVisible({ timeout: T });
       const href = await link.getAttribute("href");
       expect(href).toContain(url);
     }
@@ -234,7 +247,10 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
   test("J269i — section descriptions explain each feature group", async ({
     page,
   }) => {
-    await expect(page.getByText(/5-layer knowledge graph/i)).toBeVisible({
+    // The Explore section lists its features since the card redesign (#467).
+    await expect(
+      page.getByText(/The persona overview, the HealthDCAT-AP/i),
+    ).toBeVisible({
       timeout: T,
     });
     await expect(page.getByText(/DSP data exchange lifecycle/i)).toBeVisible({
@@ -571,7 +587,10 @@ test.describe("U5: Start Page — Tablet Viewport", () => {
     if (IS_STATIC) await setPersona(page, "edcadmin");
 
     // Wait for feature cards
-    await expect(page.getByText(/Persona Overview/i)).toBeVisible({
+    // Exact, as the Explore description also names "the persona overview".
+    await expect(
+      page.getByText("Persona Overview", { exact: true }),
+    ).toBeVisible({
       timeout: T,
     });
     // Find the Explore section by its heading id

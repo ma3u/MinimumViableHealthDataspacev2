@@ -11,20 +11,36 @@
  *
  * Journey maps: docs/persona-journeys.md
  *
- * Tests run against dev server (localhost:3000) without Keycloak auth.
- * Protected pages verify redirect to sign-in.
+ * Since ADR-044 (#404) /catalog, /graph, /analytics, /query, /eehrxf and
+ * /patient are in PROTECTED_PATHS and their APIs need a session, so A, B, C,
+ * E and the content checks of F sign in first (a forged session, or skipped
+ * saying why). D and the home page checks of F stay signed out: they test
+ * what an anonymous visitor gets.
  * For persona-specific nav group tests, see 19-static-github-pages.spec.ts.
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { T, expectHeading, waitForDataLoad, skipIfNeo4jDown } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+
+/**
+ * The admin: the one persona every page here opens for, /query included
+ * (its navigation entry is EDC_ADMIN and HDAB_AUTHORITY only).
+ */
+async function signIn(page: Page) {
+  await signInOrSkip(page, test.skip, "edcadmin");
+}
 
 /* ======================================================================
    A. Public Page Accessibility (J420–J429)
    ====================================================================== */
 
 test.describe("A - Public Page Accessibility", () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
   test("J420 Catalog page loads with heading", async ({ page }) => {
     await page.goto(`${BASE}/catalog`, { waitUntil: "domcontentloaded" });
     await expectHeading(page, "Catalog");
@@ -75,7 +91,7 @@ test.describe("A - Public Page Accessibility", () => {
     ).toBeVisible({ timeout: T });
   });
 
-  test("J427 Patient Journey index page loads (public)", async ({ page }) => {
+  test("J427 Patient Journey index page loads", async ({ page }) => {
     await page.goto(`${BASE}/patient`, { waitUntil: "domcontentloaded" });
     await expect(
       page.locator("h1, h2", { hasText: /patient/i }).first(),
@@ -104,6 +120,10 @@ test.describe("A - Public Page Accessibility", () => {
    ====================================================================== */
 
 test.describe("B - Graph Explorer Persona Views", () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
   test("J430 Graph Explorer renders canvas or SVG", async ({ page }) => {
     await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
@@ -215,6 +235,10 @@ test.describe("B - Graph Explorer Persona Views", () => {
    ====================================================================== */
 
 test.describe("C - NLQ Query Page", () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
   test("J440 Query page has search input field", async ({ page }) => {
     await page.goto(`${BASE}/query`, { waitUntil: "domcontentloaded" });
     const input = page.locator(
@@ -236,7 +260,9 @@ test.describe("C - NLQ Query Page", () => {
 
   test("J442 Clicking example query fills search input", async ({ page }) => {
     await skipIfNeo4jDown(page);
-    await page.goto(`${BASE}/query`, { waitUntil: "domcontentloaded" });
+    // networkidle: the example buttons are server-rendered, and a click
+    // before hydration has no handler, so it would leave the input empty.
+    await page.goto(`${BASE}/query`, { waitUntil: "networkidle" });
     await waitForDataLoad(page);
     const exampleBtn = page.locator("button", { hasText: /patient/i }).first();
     if ((await exampleBtn.count()) > 0) {
@@ -244,8 +270,7 @@ test.describe("C - NLQ Query Page", () => {
       const input = page
         .locator("input[type='text'], input[type='search'], textarea")
         .first();
-      const value = await input.inputValue();
-      expect(value.length).toBeGreaterThan(0);
+      await expect(input).toHaveValue(/\S/, { timeout: T });
     }
   });
 
@@ -407,7 +432,11 @@ test.describe("D - Protected Page Auth Redirects", () => {
    ====================================================================== */
 
 test.describe("E - Page Stability", () => {
-  const publicPages = [
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
+  const pages = [
     { name: "Home", path: "/" },
     { name: "Graph", path: "/graph" },
     { name: "Catalog", path: "/catalog" },
@@ -418,18 +447,16 @@ test.describe("E - Page Stability", () => {
     { name: "Docs", path: "/docs" },
   ];
 
-  for (const { name, path } of publicPages) {
-    test(`J46${publicPages.indexOf({
-      name,
-      path,
-    })} ${name} page loads without page errors`, async ({ page }) => {
+  // J460 to J467, one per page.
+  pages.forEach(({ name, path }, i) => {
+    test(`J46${i} ${name} page loads without page errors`, async ({ page }) => {
       const errors: string[] = [];
       page.on("pageerror", (err) => errors.push(err.message));
       await page.goto(`${BASE}${path}`, { waitUntil: "domcontentloaded" });
       await waitForDataLoad(page);
       expect(errors).toHaveLength(0);
     });
-  }
+  });
 
   test("J468 No broken images on Graph page", async ({ page }) => {
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
@@ -462,6 +489,7 @@ test.describe("F - Content Integrity", () => {
   test("J470 Catalog shows HealthDCAT-AP dataset metadata", async ({
     page,
   }) => {
+    await signIn(page);
     await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/catalog`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
@@ -472,6 +500,7 @@ test.describe("F - Content Integrity", () => {
   });
 
   test("J471 Analytics shows OMOP-related content", async ({ page }) => {
+    await signIn(page);
     await page.goto(`${BASE}/analytics`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const omopContent = page.locator(
@@ -482,6 +511,7 @@ test.describe("F - Content Integrity", () => {
   });
 
   test("J472 EEHRxF page shows EU profile content", async ({ page }) => {
+    await signIn(page);
     await page.goto(`${BASE}/eehrxf`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const eehrxfContent = page.locator(
@@ -494,6 +524,7 @@ test.describe("F - Content Integrity", () => {
   test("J473 Patient index page shows journey-related content", async ({
     page,
   }) => {
+    await signIn(page);
     await page.goto(`${BASE}/patient`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const content = page.locator(
@@ -506,6 +537,7 @@ test.describe("F - Content Integrity", () => {
   test("J474 Graph Explorer shows node counts or statistics", async ({
     page,
   }) => {
+    await signIn(page);
     await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);

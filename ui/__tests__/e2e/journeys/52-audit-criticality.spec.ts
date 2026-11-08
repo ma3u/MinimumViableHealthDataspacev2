@@ -9,7 +9,7 @@
  *   PLAYWRIGHT_BASE_URL=http://localhost:3003 \
  *     npx playwright test __tests__/e2e/journeys/52-audit-criticality.spec.ts
  */
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Response } from "@playwright/test";
 import { loginAs, skipIfKeycloakDown } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
@@ -33,8 +33,22 @@ async function openAccessLogs(
   page: Page,
   lang: keyof typeof TEXTS = "en",
 ): Promise<boolean> {
-  await page.goto(`/admin/audit?lang=${lang}`);
-  await page.getByRole("button", { name: TEXTS[lang].tab }).first().click();
+  const auditResponse = (type: string) => (r: Response) =>
+    r.url().includes("/api/admin/audit?") && r.url().includes(`type=${type}`);
+  // The page loads its overview first and each tab fetches its own rows, and
+  // the page keeps whichever answer arrives last. Clicking the tab before the
+  // overview had answered let the slower overview replace the access logs:
+  // the rows went away mid-click ("element was detached") or the tab said
+  // "No access logs recorded" and the test skipped. So the overview first,
+  // then the tab and its rows.
+  await Promise.all([
+    page.waitForResponse(auditResponse("all"), { timeout: 20_000 }),
+    page.goto(`/admin/audit?lang=${lang}`),
+  ]);
+  await Promise.all([
+    page.waitForResponse(auditResponse("accesslogs"), { timeout: 20_000 }),
+    page.getByRole("button", { name: TEXTS[lang].tab }).first().click(),
+  ]);
   const rows = page.getByTestId("access-log-row");
   const empty = page.getByText(TEXTS[lang].empty);
   await expect(rows.first().or(empty)).toBeVisible({ timeout: 20_000 });

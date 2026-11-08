@@ -11,6 +11,9 @@ import { loginAs, skipIfKeycloakDown } from "./helpers";
 
 const PAGES = ["/", "/catalog", "/jurisdictions"];
 const LANGS = ["en", "de", "fr", "nl", "es"];
+/** The menu bar's name in each language: it follows the picker since #832. */
+const MAIN_NAV =
+  /^(Main navigation|Hauptnavigation|Navigation principale|Hoofdnavigatie|Navegación principal)$/;
 
 async function overflow(page: Page) {
   return page.evaluate(
@@ -77,7 +80,7 @@ for (const width of [1024, 1280]) {
     for (const lang of LANGS) {
       await page.goto(`/compliance?lang=${lang}`);
       await page.waitForLoadState("networkidle");
-      const bar = page.getByRole("navigation", { name: "Main navigation" });
+      const bar = page.getByRole("navigation", { name: MAIN_NAV });
       const box = await bar.boundingBox();
       expect(box!.height, `bar height in ${lang}`).toBeLessThanOrEqual(64);
       expect(await overflow(page), `page width in ${lang}`).toBeLessThanOrEqual(

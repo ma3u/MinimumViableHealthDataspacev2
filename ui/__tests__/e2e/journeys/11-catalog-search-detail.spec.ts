@@ -32,12 +32,13 @@ async function openDatasetDetail(page: Page) {
   await page.goto("/catalog");
   await expectHeading(page, "Dataset Catalog");
   await waitForDataLoad(page);
+  // The card's own button: the first one on the page belongs to whichever
+  // dataset sorts first, which on the demo graph is one without a legal basis.
   await page
-    .getByText("Synthea Synthetic FHIR R4 Patient Cohort")
-    .first()
-    .click();
-  await page
-    .getByRole("button", { name: "View dataset details" })
+    .locator(
+      "xpath=//h3[normalize-space()='Synthea Synthetic FHIR R4 Patient Cohort']" +
+        "/following::button[@data-testid='dataset-details'][1]",
+    )
     .first()
     .click();
 }

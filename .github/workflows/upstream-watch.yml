@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# Upstream watch: a new spec, TCK or component release becomes an issue (#963)
+# ---------------------------------------------------------------------------
+# Dependabot reads npm, pip, Gradle, Dockerfiles and compose files. The
+# specifications the hub implements (DSP, DCP, Data Plane Signaling), the TCKs
+# that check it and CFM have no package it could read, so nothing reported
+# their releases: the hub said "DSP 2025-1" with two errata out (#972).
+#
+# .github/upstream.json lists them with the release the repo knows.
+# scripts/check-upstream-releases.py asks GitHub for newer ones and, on the
+# schedule, opens one issue per repository and release ("Upstream release:
+# <repo> <tag>", labels dependencies and upstream). On a pull request that
+# changes the list it only reports, and fails when a `known` release does not
+# exist. Weekly, Monday before Dependabot's 04:00 Berlin run.
+# ---------------------------------------------------------------------------
+name: Upstream watch
+
+on:
+  schedule:
+    - cron: "17 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      open_issues:
+        description: "Open an issue per new release (off: only report)"
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - ".github/upstream.json"
+      - "scripts/check-upstream-releases.py"
+      - ".github/workflows/upstream-watch.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: upstream-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    name: Upstream releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/upstream.json
+            scripts/check-upstream-releases.py
+          sparse-checkout-cone-mode: false
+
+      - name: Report new releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPEN: ${{ github.event_name == 'schedule' || inputs.open_issues == true }}
+        run: |
+          set +e
+          if [ "$OPEN" = "true" ]; then
+            python3 scripts/check-upstream-releases.py --open-issues | tee watch.txt
+          else
+            python3 scripts/check-upstream-releases.py | tee watch.txt
+          fi
+          code=${PIPESTATUS[0]}
+          {
+            echo "### Upstream releases"
+            echo '```'
+            cat watch.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          # 1 is "a repository is behind", which is what the report is for;
+          # 2 is a repository that could not be asked or a wrong `known`.
+          [ "$code" -le 1 ]

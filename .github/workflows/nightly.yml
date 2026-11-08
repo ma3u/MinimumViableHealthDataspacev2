@@ -82,7 +82,8 @@ jobs:
         image: neo4j:5-community
         env:
           NEO4J_AUTH: neo4j/healthdataspace
-          NEO4J_PLUGINS: "[]"
+          # APOC: register-healthdcat-ap-r8.cypher needs apoc.text.
+          NEO4J_PLUGINS: '["apoc"]'
         ports:
           - 7474:7474
           - 7687:7687
@@ -129,15 +130,35 @@ jobs:
           unzip -q /tmp/cs.zip -d /tmp/cs
           echo "/tmp/cs/cypher-shell-5.26.0/bin" >> "$GITHUB_PATH"
 
-      - name: Seed Neo4j with schema and synthetic data
+      # The demo graph, by the runner that seeds Azure (neo4j/seed.sh), about
+      # 45 s. Until 2026-11-07 only the schema and the synthetic data were
+      # loaded, 123 nodes: every journey that reads credentials, trust
+      # centres, persona overviews or jurisdictions found nothing.
+      - name: Seed Neo4j with the demo graph
         working-directory: .
-        run: |
-          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/init-schema.cypher
-          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/insert-synthetic-schema-data.cypher
+        run: SEED_DIR=neo4j NEO4J_HOST=localhost bash neo4j/seed.sh
 
       - name: Run unit tests with coverage
         run: npx vitest run --coverage --reporter=json --outputFile=test-results.json
         continue-on-error: true
+
+      # The task store, the NLQ, the DSP audit trail and the JSON-LD
+      # catalogue answer through the proxy; without it they are 502 and about
+      # twenty journeys cannot run (2026-11-08).
+      - name: Start the neo4j-proxy
+        working-directory: services/neo4j-proxy
+        env:
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: healthdataspace
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          node dist/index.js > "$RUNNER_TEMP/neo4j-proxy.log" 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:9090/health > /dev/null 2>&1 && break
+            sleep 1
+          done
 
       - name: Build for E2E tests
         run: npx next build
@@ -174,45 +195,27 @@ jobs:
           NEXTAUTH_SECRET: ci-test-secret-not-for-production
           NEXTAUTH_URL: http://localhost:3000
 
+      # Every spec, the WCAG 2.2 AA audit (27) and the OWASP/BSI checks (28)
+      # included. A failure fails the job, so the report job below opens the
+      # "Nightly suites failed" issue. Until 2026-11-07 this step had
+      # continue-on-error: 293 failures a night reported green for weeks, and
+      # the WCAG and security specs ran a second time in steps of their own
+      # whose report overwrote this one on the site.
+      #
+      # E2E_FORGED_SESSIONS: there is no Keycloak here, so loginAs() signs in
+      # with a forged session of the realm user (journeys/helpers.ts). Before,
+      # every spec that signs in skipped, 564 tests a night.
       - name: Run Playwright E2E tests
-        # Informational only (continue-on-error): runs against the shared
-        # server above. This is the only E2E run in CI (#847). The cap was 10
-        # minutes so the tests could not delay the deploy; the 1145 tests
-        # take about that long, so the step was killed before Playwright
-        # wrote its HTML report. It delays nothing here, so it gets room to
-        # finish.
-        run: npx playwright test --project=chromium --retries=0 --workers=4
-        continue-on-error: true
-        timeout-minutes: 15
+        run: npx playwright test --project=chromium --retries=1 --workers=4
+        timeout-minutes: 30
         env:
           CI: true
+          E2E_FORGED_SESSIONS: "1"
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           NEXT_PUBLIC_STATIC_EXPORT: "false"
           NEO4J_URI: bolt://localhost:7687
           NEO4J_USER: neo4j
           NEO4J_PASSWORD: healthdataspace
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: WCAG 2.2 AA accessibility audit
-        run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium --retries=0
-        continue-on-error: true
-        timeout-minutes: 6
-        env:
-          CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: Security & penetration tests (OWASP/BSI)
-        run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50" --retries=0
-        continue-on-error: true
-        timeout-minutes: 6
-        env:
-          CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
           NEXTAUTH_SECRET: ci-test-secret-not-for-production
           NEXTAUTH_URL: http://localhost:3000
 
@@ -229,14 +232,16 @@ jobs:
       - name: Collect test reports
         if: always()
         run: |
-          mkdir -p reports/test-reports reports/ci-e2e-report
+          mkdir -p reports/test-reports reports/e2e-report reports/ci-e2e-report
           # Vitest coverage
           cp -r coverage/ reports/test-reports/coverage/ 2>/dev/null || true
           cp test-results.json reports/test-reports/ 2>/dev/null || true
-          # CI Playwright report goes to ci-e2e-report/ (chromium-only).
-          # The committed public/e2e-report/ (live + chromium from JAD stack)
-          # reaches the site through the static export.
-          cp -r playwright-report/* reports/ci-e2e-report/ 2>/dev/null || true
+          # The night's Playwright report is the site's /e2e-report/. Until
+          # 2026-11-07 that path served a report committed from a laptop run
+          # on 2026-04-03, with its 15 failures, and nothing replaced it.
+          # /ci-e2e-report/ stays as the same report for links that use it.
+          cp -r playwright-report/. reports/e2e-report/ 2>/dev/null || true
+          cp -r playwright-report/. reports/ci-e2e-report/ 2>/dev/null || true
           # Generate comprehensive test report dashboard
           node ../scripts/generate-test-report-page.js . reports/test-reports || echo "Report generation skipped"
 
@@ -247,6 +252,63 @@ jobs:
           name: pages-test-reports
           path: ui/reports/
           retention-days: 30
+
+  # -----------------------------------------------------------------------
+  # The static demo on GitHub Pages, as published: the static-only specs
+  # (19, 23, 37) against ma3u.github.io. No build and no database, about 3 min. The site is the
+  # last deploy of main, so a red result names what the public demo shows.
+  # -----------------------------------------------------------------------
+  static-site:
+    name: E2E static demo (GitHub Pages)
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run the static demo journeys
+        run: npx playwright test 19-static-github-pages 23-tab-isolated-sessions 37-ehds-secondary-use-journey --project=chromium --retries=1 --workers=4
+        env:
+          CI: true
+          NEXT_PUBLIC_STATIC_EXPORT: "true"
+          PLAYWRIGHT_BASE_URL: https://ma3u.github.io
+
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: static-site-report
+          path: ui/playwright-report/
+          retention-days: 14
 
   # -----------------------------------------------------------------------
   # Lighthouse performance budget. Moved from test.yml.
@@ -396,7 +458,7 @@ jobs:
   # -----------------------------------------------------------------------
   report:
     name: Report the night
-    needs: [gate, e2e, lighthouse, secret-scan, compliance]
+    needs: [gate, e2e, static-site, lighthouse, secret-scan, compliance]
     if: always() && github.event_name == 'schedule' && needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -408,6 +470,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           E2E: ${{ needs.e2e.result }}
+          STATIC_SITE: ${{ needs.static-site.result }}
           LIGHTHOUSE: ${{ needs.lighthouse.result }}
           SECRETS: ${{ needs.secret-scan.result }}
           COMPLIANCE: ${{ needs.compliance.result }}
@@ -417,9 +480,9 @@ jobs:
           open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "\"$title\" in:title" --json number,title \
             --jq "[.[] | select(.title == \"$title\")][0].number // \"\"")
-          results="E2E: $E2E, Lighthouse: $LIGHTHOUSE, Secret scan: $SECRETS, Protocol Compliance: $COMPLIANCE"
+          results="E2E: $E2E, Static demo: $STATIC_SITE, Lighthouse: $LIGHTHOUSE, Secret scan: $SECRETS, Protocol Compliance: $COMPLIANCE"
           body="$results. Commit ${GITHUB_SHA:0:8}, run $RUN_URL"
-          if [[ "$E2E $LIGHTHOUSE $SECRETS $COMPLIANCE" == *failure* ]]; then
+          if [[ "$E2E $STATIC_SITE $LIGHTHOUSE $SECRETS $COMPLIANCE" == *failure* ]]; then
             if [ -n "$open" ]; then
               gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "Still red. $body"
             else

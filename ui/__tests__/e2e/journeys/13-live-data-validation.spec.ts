@@ -75,9 +75,9 @@ test.describe("M · Live Data Validation", () => {
   test("J105 — Graph API returns nodes and relationships from Neo4j", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     // Every API route needs a session since #404 (ADR-044).
     await signInOrSkip(page, test.skip);
+    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/graph");
     expect(data.nodes).toBeDefined();
     expect(data.links || data.relationships).toBeDefined();
@@ -92,9 +92,9 @@ test.describe("M · Live Data Validation", () => {
   test("J106 — Graph Explorer page renders with Neo4j data", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     // Every API route needs a session since #404 (ADR-044).
     await signInOrSkip(page, test.skip);
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
     await waitForDataLoad(page);
     await expectHeading(page, "Graph");

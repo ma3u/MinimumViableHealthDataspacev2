@@ -1597,7 +1597,9 @@ export default function UserGuidePage() {
 
           <div
             id="spes"
-            className="rounded-xl border border-(--border) bg-(--surface-2) p-5"
+            // --surface, the card colour: on --surface-2 the dark indigo-400
+            // heading and links fell to 3.95:1 (WCAG 1.4.3).
+            className="rounded-xl border border-(--border) bg-(--surface) p-5"
           >
             <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-indigo-700 dark:text-indigo-400">
               <Server size={18} aria-hidden />{" "}
@@ -2281,7 +2283,9 @@ export default function UserGuidePage() {
           </FeatureCard>
           <div
             id="spe-attestation"
-            className="rounded-xl border border-(--border) bg-(--surface-2) p-5"
+            // --surface, the card colour: on --surface-2 the dark indigo-400
+            // heading and links fell to 3.95:1 (WCAG 1.4.3).
+            className="rounded-xl border border-(--border) bg-(--surface) p-5"
           >
             <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-indigo-700 dark:text-indigo-400">
               <Fingerprint size={18} aria-hidden />{" "}

@@ -47,8 +47,6 @@ const PAGES_BASE = "/MinimumViableHealthDataspacev2";
 const LIVE_HOST = "ehds.mabu.red";
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const REPO_BLOB = `${GITHUB_REPO}/blob/main`;
-const basePath =
-  process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ? PAGES_BASE : "";
 
 // The sources the text names, as deep links: the article, the spec section,
 // the release tag, the file and line.
@@ -2199,7 +2197,9 @@ npm run test:coverage  # With v8 coverage`}</pre>
                 </li>
                 <li>
                   <a
-                    href={`${basePath}/e2e-report/`}
+                    href={`https://ma3u.github.io${PAGES_BASE}/e2e-report/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 inline-flex items-center gap-1"
                   >
                     {t("Playwright Report")} <ExternalLink size={10} />
@@ -2632,9 +2632,9 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               },
               {
                 title: t("Playwright E2E Report"),
-                href: `${basePath}/e2e-report/`,
+                href: `https://ma3u.github.io${PAGES_BASE}/e2e-report/`,
                 desc: t("E2E test results with screenshots and traces"),
-                external: false,
+                external: true,
               },
               {
                 title: t("CI Workflow Runs"),

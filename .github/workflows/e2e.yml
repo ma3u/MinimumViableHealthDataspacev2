@@ -1,0 +1,208 @@
+# ---------------------------------------------------------------------------
+# E2E on a pull request: the specs the change can break, before it merges
+# ---------------------------------------------------------------------------
+# Until 2026-11-07 Playwright ran only once a night (nightly.yml, ADR-074),
+# with continue-on-error, so a pull request that changed a page never learned
+# which journeys it broke: 293 failures piled up and the night stayed green.
+#
+# scripts/select-e2e-specs.sh picks the specs from the diff: the specs that
+# changed and those that visit a changed route, or every spec when shared
+# code changed (lib, components, messages, config). Every spec is split over
+# three runners so the wall time stays under ten minutes; a change outside
+# ui/ that no spec exercises starts nothing. A draft runs nothing until it
+# is ready for review.
+#
+# Same environment as the nightly: a seeded Neo4j and the neo4j-proxy, no
+# EDC connector and no Keycloak, forged sessions for the realm users
+# (E2E_FORGED_SESSIONS, journeys/helpers.ts).
+# A failure fails the check; there is no continue-on-error.
+# ---------------------------------------------------------------------------
+name: E2E
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "ui/**"
+      - "neo4j/*.cypher"
+      - "neo4j/seed.sh"
+      - "services/neo4j-proxy/**"
+      - "scripts/select-e2e-specs.sh"
+      - ".github/workflows/e2e.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  select:
+    name: Select specs
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      specs: ${{ steps.pick.outputs.specs }}
+      shards: ${{ steps.pick.outputs.shards }}
+      total: ${{ steps.pick.outputs.total }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Specs the change can break
+        id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "pull_request" ] && ! git diff --quiet "origin/$BASE_REF"...HEAD -- scripts/select-e2e-specs.sh .github/workflows/e2e.yml; then
+            specs=all # the selection or this workflow changed: prove it on every spec
+          elif [ "$EVENT" = "pull_request" ]; then
+            specs=$(scripts/select-e2e-specs.sh "origin/$BASE_REF")
+          else
+            specs=all
+          fi
+          if [ "$specs" = "all" ]; then
+            echo 'shards=[1,2,3]' >>"$GITHUB_OUTPUT"
+            echo "total=3" >>"$GITHUB_OUTPUT"
+          else
+            echo 'shards=[1]' >>"$GITHUB_OUTPUT"
+            echo "total=1" >>"$GITHUB_OUTPUT"
+          fi
+          echo "specs=$specs" >>"$GITHUB_OUTPUT"
+          echo "Specs: $specs" >>"$GITHUB_STEP_SUMMARY"
+
+  e2e:
+    name: Playwright (${{ matrix.shard }}/${{ needs.select.outputs.total }})
+    needs: select
+    if: needs.select.outputs.specs != 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.select.outputs.shards) }}
+    services:
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/healthdataspace
+          NEO4J_PLUGINS: '["apoc"]'
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p healthdataspace 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: ./ui
+    env:
+      CI: true
+      E2E_FORGED_SESSIONS: "1"
+      PLAYWRIGHT_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_STATIC_EXPORT: "false"
+      NEO4J_URI: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: healthdataspace
+      NEO4J_PROXY_URL: http://localhost:9090
+      NEXTAUTH_SECRET: ci-test-secret-not-for-production
+      NEXTAUTH_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            ui/package-lock.json
+            services/neo4j-proxy/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Next.js build
+        uses: actions/cache@v6
+        with:
+          path: ui/.next/cache
+          key: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
+          restore-keys: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
+
+      - name: Seed Neo4j with the demo graph
+        working-directory: .
+        run: |
+          wget -q https://dist.neo4j.org/cypher-shell/cypher-shell-5.26.0.zip -O /tmp/cs.zip
+          unzip -q /tmp/cs.zip -d /tmp/cs
+          export PATH="/tmp/cs/cypher-shell-5.26.0/bin:$PATH"
+          SEED_DIR=neo4j NEO4J_HOST=localhost bash neo4j/seed.sh
+
+      # The task store, the NLQ, the DSP audit trail and the JSON-LD
+      # catalogue answer through the proxy; without it they are 502 and about
+      # twenty journeys cannot run (2026-11-08).
+      - name: Start the neo4j-proxy
+        working-directory: services/neo4j-proxy
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          node dist/index.js > "$RUNNER_TEMP/neo4j-proxy.log" 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:9090/health > /dev/null 2>&1 && break
+            sleep 1
+          done
+
+      - name: Build
+        run: npx next build
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Start the UI
+        run: |
+          npx next start -p 3000 &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/health > /dev/null 2>&1 && break
+            sleep 2
+          done
+
+      - name: Run Playwright
+        env:
+          SPECS: ${{ needs.select.outputs.specs }}
+          SHARD: ${{ matrix.shard }}/${{ needs.select.outputs.total }}
+        run: |
+          set -euo pipefail
+          args=(--project=chromium --retries=1 --workers=4 --shard="$SHARD")
+          if [ "$SPECS" = "all" ]; then
+            npx playwright test "${args[@]}"
+          else
+            read -r -a files <<<"$SPECS"
+            npx playwright test "${args[@]}" "${files[@]}"
+          fi
+
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-report-${{ matrix.shard }}
+          path: ui/playwright-report/
+          retention-days: 7

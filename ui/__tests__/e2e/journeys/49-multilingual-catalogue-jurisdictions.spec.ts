@@ -250,7 +250,7 @@ test.describe("Issue #782 · the interface follows the picker", () => {
       await picker.selectOption(lang);
       await expect(page.getByRole("button", { name: signIn })).toBeVisible();
       await expect(
-        page.getByRole("navigation", { name: "Main navigation" }),
+        page.getByRole("navigation", { name: MAIN_NAV }),
       ).toContainText(explore);
       await expect(page.getByRole("combobox", { name: language })).toHaveValue(
         lang,
@@ -582,12 +582,14 @@ test.describe("Issue #782 · the patient's pages follow the picker", () => {
   });
 });
 
+/** The menu bar's name in each language: it follows the picker since #832. */
+const MAIN_NAV =
+  /^(Main navigation|Hauptnavigation|Navigation principale|Hoofdnavigatie|Navegación principal)$/;
+
 /** The language picker in the menu bar (components/LanguagePicker.tsx). */
 function languagePicker(page: Page) {
   // By place, not by name: its label is "Sprache" once German is picked.
-  return page
-    .getByRole("navigation", { name: "Main navigation" })
-    .getByRole("combobox");
+  return page.getByRole("navigation", { name: MAIN_NAV }).getByRole("combobox");
 }
 
 /** The marks shown for English fallbacks: one per title, plus one per

@@ -45,6 +45,19 @@ function P(path: string): string {
 
 const PERSONA_KEY = "demo-persona";
 
+/**
+ * Only the static export draws the navigation from the demo persona
+ * (Navigation.tsx reads it behind IS_STATIC). A server build takes the roles
+ * from the session cookie, which every tab of a browser shares, so the nav
+ * journeys have nothing to observe there; the nightly's E2E step runs
+ * against a server build. The storage journeys (J265, J269) run in both.
+ */
+const NAV_FOLLOWS_DEMO_PERSONA =
+  process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+const NEEDS_STATIC_EXPORT =
+  "The navigation follows the demo persona only in the static export " +
+  "(NEXT_PUBLIC_STATIC_EXPORT=true); a server build reads the session";
+
 /** Inject demo persona into sessionStorage for the given page. */
 async function setPersona(page: Page, username: string): Promise<void> {
   await page.evaluate(
@@ -105,6 +118,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J261 ────────────────────────────────────────────────────────────────────
 
   test("J261 — edcadmin in Tab 1 sees admin nav groups", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     await gotoAndWait(tab1, "/graph");
     await setPersona(tab1, "edcadmin");
     await tab1.reload({ waitUntil: "networkidle" });
@@ -118,6 +132,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J262 ────────────────────────────────────────────────────────────────────
 
   test("J262 — patient1 in Tab 2 sees patient nav groups", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     await gotoAndWait(tab2, "/graph");
     await setPersona(tab2, "patient1");
     await tab2.reload({ waitUntil: "networkidle" });
@@ -130,6 +145,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J263 — Core regression: two tabs simultaneously ─────────────────────────
 
   test("J263 — Tab 1 (edcadmin) is unaffected when Tab 2 switches to patient1", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     // Set up Tab 1 as edcadmin
     await gotoAndWait(tab1, "/graph");
     await setPersona(tab1, "edcadmin");
@@ -157,6 +173,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J264 ────────────────────────────────────────────────────────────────────
 
   test("J264 — Tab 2 (patient1) is unaffected when Tab 1 switches to researcher", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     // Tab 2: patient1
     await gotoAndWait(tab2, "/graph");
     await setPersona(tab2, "patient1");
@@ -191,6 +208,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J266 ────────────────────────────────────────────────────────────────────
 
   test("J266 — sessionStorage persona survives page reload within same tab", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     await gotoAndWait(tab1, "/graph");
     await setPersona(tab1, "edcadmin");
 
@@ -205,6 +223,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J267 ────────────────────────────────────────────────────────────────────
 
   test("J267 — switching persona within Tab 1 does not affect Tab 2", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     // Both tabs start with their own persona
     await gotoAndWait(tab1, "/graph");
     await setPersona(tab1, "edcadmin");
@@ -230,6 +249,7 @@ test.describe("Tab-isolated demo personas (J261–J299)", () => {
   // ── J268 — Three-tab scenario ──────────────────────────────────────────────
 
   test("J268 — three simultaneous tabs each maintain independent personas", async () => {
+    test.skip(!NAV_FOLLOWS_DEMO_PERSONA, NEEDS_STATIC_EXPORT);
     const tab3 = await context.newPage();
 
     try {

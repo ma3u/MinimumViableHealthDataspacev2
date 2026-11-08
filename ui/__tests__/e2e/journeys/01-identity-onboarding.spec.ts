@@ -15,6 +15,7 @@ import {
   apiGet,
   skipIfNeo4jDown,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("A · Identity & Participant Management", () => {
   /* ── J01: Admin dashboard is protected (auth middleware) ──── */
@@ -27,6 +28,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J02 — All 5 participants registered in the network", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const data = await apiGet(page, "/api/participants");
     const participants = Array.isArray(data) ? data : data.participants || [];
     expect(participants.length).toBeGreaterThanOrEqual(5);
@@ -41,6 +43,7 @@ test.describe("A · Identity & Participant Management", () => {
 
   /* ── J03: Each participant has a DID identity ────────────── */
   test("J03 — Each participant has a valid DID identity", async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const data = await apiGet(page, "/api/participants");
     const participants = Array.isArray(data) ? data : data.participants || [];
 
@@ -55,6 +58,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J04 — Credentials exist for all participant holders", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
@@ -72,6 +76,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J05 — Both EHDS and DataQuality credential types exist", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;

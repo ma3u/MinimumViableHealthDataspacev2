@@ -9,10 +9,32 @@
  * Run with:  npx playwright test __tests__/e2e/journeys/14-trust-center.spec.ts
  *   or:      PLAYWRIGHT_BASE_URL=http://localhost:3003 npx playwright test
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { T, apiGet, skipIfNeo4jDown, expectHeading } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
+
+/**
+ * Wait until the trust centre section has loaded: its cards, or the line
+ * saying there are none. Counting the cards right after page.goto() read 0
+ * while the section still said "Loading trust centers…", so J139, J141 and
+ * J142 skipped as "not seeded" on a seeded graph.
+ */
+async function trustCentersLoaded(page: Page) {
+  await expect(
+    page
+      .getByTestId("trust-center-card")
+      .or(page.getByText(/No trust centers found/i))
+      .first(),
+  ).toBeVisible({ timeout: T });
+}
 
 test.describe("N · Trust Center: EHDS Art. 66 and 73", () => {
+  // /api/trust-center needs TRUST_CENTER_OPERATOR or EDC_ADMIN and /compliance
+  // HDAB_AUTHORITY or EDC_ADMIN; every API route needs a session (ADR-044).
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
+  });
+
   /* ── API: Trust Center status endpoint ────────────────────── */
 
   test("J130 — /api/trust-center returns trust centers array", async ({
@@ -140,17 +162,14 @@ test.describe("N · Trust Center: EHDS Art. 66 and 73", () => {
   }) => {
     await page.goto("/compliance");
     // Either trust center cards are shown (seeded) or fallback message
-    await expect(
-      page
-        .getByTestId("trust-center-card")
-        .or(page.getByText(/No trust centers found/i)),
-    ).toBeVisible({ timeout: T });
+    await trustCentersLoaded(page);
   });
 
   test("J139 — /compliance trust center card shows status and protocol", async ({
     page,
   }) => {
     await page.goto("/compliance");
+    await trustCentersLoaded(page);
 
     const cards = page.getByTestId("trust-center-card");
     const count = await cards.count();
@@ -189,6 +208,7 @@ test.describe("N · Trust Center: EHDS Art. 66 and 73", () => {
     page,
   }) => {
     await page.goto("/compliance");
+    await trustCentersLoaded(page);
 
     const cards = page.getByTestId("trust-center-card");
     const count = await cards.count();
@@ -213,6 +233,8 @@ test.describe("N · Trust Center: EHDS Art. 66 and 73", () => {
     page,
   }) => {
     await page.goto("/compliance");
+    // The sessions arrive with the trust centres, in the same response.
+    await trustCentersLoaded(page);
 
     const speTable = page.getByText(/Active SPE Sessions/i);
     const isVisible = await speTable.isVisible().catch(() => false);

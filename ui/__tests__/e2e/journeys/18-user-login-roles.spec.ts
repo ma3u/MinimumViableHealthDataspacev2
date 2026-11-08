@@ -9,7 +9,10 @@
  *   - Patient graph filter presets visible for patient1/patient2
  *
  * Prerequisites: Keycloak running on localhost:8080 with all 7 users created.
- * Tests are skipped automatically when Keycloak is unreachable.
+ * Tests are skipped automatically when Keycloak is unreachable. With forged
+ * sessions (E2E_FORGED_SESSIONS) everything but the login itself (J180-J186)
+ * runs without Keycloak. The graph tests sign in before the Neo4j probe,
+ * /api/graph, which needs a session (#404).
  *
  * Personas and roles (from README.md):
  *   edcadmin   → EDC_ADMIN              → edc-admin  → auto-selects admin persona
@@ -20,8 +23,14 @@
  *   patient1   → PATIENT                → patient    → sees Patient/Citizen + patient filters
  *   patient2   → PATIENT                → patient    → sees Patient/Citizen + patient filters
  */
-import { test, expect, type Page } from "@playwright/test";
-import { T, skipIfNeo4jDown, skipIfKeycloakDown, loginAs } from "./helpers";
+import { test, expect } from "@playwright/test";
+import {
+  T,
+  skipIfNeo4jDown,
+  skipIfKeycloakDown,
+  loginAs,
+  logout,
+} from "./helpers";
 
 // ── Demo user catalogue ────────────────────────────────────────────────────────
 
@@ -112,27 +121,11 @@ const DEMO_USERS: DemoUser[] = [
   },
 ];
 
-/** Sign out by clicking the UserMenu and the sign-out button. */
-async function logout(page: Page) {
-  const userMenu = page
-    .locator("nav")
-    .getByRole("button", { name: /user menu/i });
-  if (await userMenu.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await userMenu.click();
-    const signOut = page.getByRole("button", { name: /sign out/i });
-    if (await signOut.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await signOut.click();
-    }
-  }
-  // Fallback: navigate to home which clears session redirect
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-}
-
 // ── J180–J186: Keycloak login succeeds for all 7 users ────────────────────────
 
 test.describe("R · Multi-User Login — Keycloak authentication", () => {
   test.beforeEach(async () => {
-    await skipIfKeycloakDown();
+    await skipIfKeycloakDown({ realKeycloak: true });
   });
 
   for (const user of DEMO_USERS) {
@@ -169,8 +162,8 @@ test.describe("R · Graph persona — auto-derived from session role", () => {
   test("J190 — edcadmin graph shows EDC / Dataspace Admin persona", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "edcadmin", "edcadmin");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
     await expect(
       page.getByText("EDC / Dataspace Admin", { exact: false }),
@@ -181,8 +174,8 @@ test.describe("R · Graph persona — auto-derived from session role", () => {
   test("J191 — patient1 graph shows Patient / Citizen persona", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "patient1", "patient1");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
     await expect(
       page.getByText("Patient / Citizen", { exact: false }).first(),
@@ -193,8 +186,8 @@ test.describe("R · Graph persona — auto-derived from session role", () => {
   test("J192 — clinicuser graph shows Hospital / Data Holder persona", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "clinicuser", "clinicuser");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
     await expect(
       page.getByText("Hospital / Data Holder", { exact: false }),
@@ -205,8 +198,8 @@ test.describe("R · Graph persona — auto-derived from session role", () => {
   test("J193 — researcher graph shows Researcher / Data User persona", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "researcher", "researcher");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
     await expect(
       page.getByText("Researcher / Data User", { exact: false }),
@@ -225,8 +218,8 @@ test.describe("R · Patient graph — deep-link + filter presets", () => {
   test("J200 — /graph?persona=patient pre-selects Patient / Citizen view", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "patient1", "patient1");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph?persona=patient");
 
     // Persona indicator visible in sidebar
@@ -240,8 +233,8 @@ test.describe("R · Patient graph — deep-link + filter presets", () => {
   test("J201 — patient graph shows FILTER BY QUESTION presets", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "patient1", "patient1");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph?persona=patient");
 
     await expect(
@@ -268,8 +261,8 @@ test.describe("R · Patient graph — deep-link + filter presets", () => {
   test("J202 — patient2 graph also loads patient persona correctly", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     await loginAs(page, "patient2", "patient2");
+    await skipIfNeo4jDown(page);
     await page.goto("/graph?persona=patient");
 
     await expect(

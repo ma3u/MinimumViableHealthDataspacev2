@@ -228,7 +228,10 @@ export default function CompliancePage() {
 
         {/* ── Compliance Matrix ── */}
         <div className="mb-8">
-          <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
+          <h2
+            id="compliance-matrix-heading"
+            className="text-sm font-semibold mb-3 text-(--text-primary)"
+          >
             {t("Participant Compliance Matrix")}
           </h2>
           {optionsLoading ? (
@@ -240,7 +243,14 @@ export default function CompliancePage() {
               {t("No participants found in the knowledge graph.")}
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-(--border)">
+            // Focusable and named, so a keyboard can scroll the wide matrix
+            // sideways (WCAG 2.1.1; axe scrollable-region-focusable).
+            <div
+              role="region"
+              aria-labelledby="compliance-matrix-heading"
+              tabIndex={0}
+              className="overflow-x-auto rounded-lg border border-(--border)"
+            >
               <table className="text-xs w-full border-collapse">
                 <thead>
                   <tr className="bg-(--surface) text-(--text-secondary)">
@@ -606,7 +616,10 @@ export default function CompliancePage() {
                         {vc.credentialType}
                       </span>
                       {vc.participantRole && (
-                        <span className="text-xs px-2 py-0.5 rounded-sm bg-(--layer5)/20 text-(--layer5-text)">
+                        // On the card surface with a layer-5 border: a tint of
+                        // the layer colour behind its own text was 3.92:1 in
+                        // the dark theme (WCAG 1.4.3).
+                        <span className="text-xs px-2 py-0.5 rounded-sm border border-(--layer5)/40 bg-(--surface) text-(--layer5-text)">
                           {vc.participantRole}
                         </span>
                       )}

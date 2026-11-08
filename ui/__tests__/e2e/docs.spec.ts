@@ -9,13 +9,17 @@ import { test, expect } from "@playwright/test";
 const TIMEOUT = 15_000;
 
 test.describe("Documentation Content", () => {
-  test("Developer Guide contains Technology Stack section", async ({
+  // The "Technology Stack" section became "JAD Stack Architecture".
+  test("Developer Guide contains the stack architecture and testing sections", async ({
     page,
   }) => {
     await page.goto("/docs/developer");
     await expect(
-      page.locator("h2", { hasText: "Technology Stack" }),
+      page.locator("h2", { hasText: "JAD Stack Architecture" }),
     ).toBeVisible({ timeout: TIMEOUT });
+    await expect(page.locator("h2", { hasText: /^Testing$/ })).toBeVisible({
+      timeout: TIMEOUT,
+    });
   });
 
   test("Architecture page contains Mermaid diagram", async ({ page }) => {
@@ -28,8 +32,13 @@ test.describe("Documentation Content", () => {
 
   test("Docs overview links to sub-pages", async ({ page }) => {
     await page.goto("/docs");
-    await expect(page.locator("a[href='/docs/architecture']")).toBeVisible();
-    await expect(page.locator("a[href='/docs/developer']")).toBeVisible();
+    // The overview links to each page from its card and again from the text.
+    await expect(
+      page.locator("a[href='/docs/architecture']").first(),
+    ).toBeVisible();
+    await expect(
+      page.locator("a[href='/docs/developer']").first(),
+    ).toBeVisible();
   });
 });
 
