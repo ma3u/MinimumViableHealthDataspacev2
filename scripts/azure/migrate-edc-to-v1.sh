@@ -85,6 +85,7 @@ EOF
     identityhub) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}
 DB=identityhub_v1
+EDC_IAM_CREDENTIAL_REVOCATION_MIMETYPE=application/json
 EOF
       ;;
     issuerservice) cat <<EOF
@@ -218,7 +219,6 @@ LOCAL_ONLY = {
     r"^edc\.iam\.trustedissuer\.simpl-ga\.": "the Simpl test issuer runs only locally",
     r"^web\.http\.identity\.auth\.key$": "the local stack's API key",
     r"^edc\.ih\.api\.superuser\.key$": "the local stack's superuser key",
-    r"^edc\.iam\.credentia\.revocation\.mimetype$": "a typo in jad/identityhub.env, read by nothing",
 }
 DEPRECATED = {r"\.trusted-issuer\.": "1.0 reads edc.iam.trustedissuer",
               r"\.prefix-mapping$": "1.0 reads prefix.mapping"}
