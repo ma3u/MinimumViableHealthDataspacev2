@@ -134,7 +134,7 @@ describe("/docs/roadmap", () => {
   it("says the bars are planning windows and links the plan", () => {
     render(<RoadmapDocsPage />);
     expect(
-      screen.getByText(/the bars are\s+planning windows set on 2026-10-28/),
+      screen.getByText(/the bars are\s+planning windows set on 2026-11-08/),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "#725" })).toHaveAttribute(
       "href",
