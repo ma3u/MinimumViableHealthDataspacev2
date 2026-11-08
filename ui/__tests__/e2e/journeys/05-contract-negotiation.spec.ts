@@ -9,7 +9,8 @@
  * APIs (/api/tasks, /api/negotiations, /api/assets) have no middleware.
  */
 import { test, expect } from "@playwright/test";
-import { PARTICIPANT_NAMES, T, expectSigninRedirect, apiGet } from "./helpers";
+import { expectSigninRedirect, apiGet, apiGetTasksOrSkip } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("E · Contract Negotiation", () => {
   /* ── J31: Negotiate page is protected ────────────────────── */
@@ -20,7 +21,8 @@ test.describe("E · Contract Negotiation", () => {
 
   /* ── J32: Tasks API returns negotiations ─────────────────── */
   test("J32 — Tasks API includes negotiation entries", async ({ page }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
     expect(Array.isArray(tasks)).toBe(true);
 
@@ -32,7 +34,8 @@ test.describe("E · Contract Negotiation", () => {
 
   /* ── J33: Negotiations include FINALIZED state ───────────── */
   test("J33 — At least one negotiation is FINALIZED", async ({ page }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
 
     const finalized = tasks.filter(
@@ -46,7 +49,8 @@ test.describe("E · Contract Negotiation", () => {
   test("J34 — Negotiations exist for multiple participants", async ({
     page,
   }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
 
     const participants = new Set(
@@ -59,6 +63,7 @@ test.describe("E · Contract Negotiation", () => {
 
   /* ── J35: Per-participant negotiations via API ───────────── */
   test("J35 — Participant-scoped negotiations API works", async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -73,6 +78,7 @@ test.describe("E · Contract Negotiation", () => {
 
   /* ── J36: Negotiations use DSP protocol ──────────────────── */
   test("J36 — Negotiations follow DSP protocol", async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -95,6 +101,7 @@ test.describe("E · Contract Negotiation", () => {
   test("J37 — Assets API returns assets for multiple participants", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const assets = await apiGet(page, "/api/assets");
     expect(Array.isArray(assets)).toBe(true);
     expect(assets.length).toBeGreaterThanOrEqual(3);
@@ -110,8 +117,9 @@ test.describe("E · Contract Negotiation", () => {
   test("J38 — Terminated negotiation exists in task list or per-participant", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     // Check tasks first
-    const data = await apiGet(page, "/api/tasks");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
 
     // Also check per-participant negotiations
@@ -145,6 +153,7 @@ test.describe("E · Contract Negotiation", () => {
   test("J39 — Finalized negotiations include contractAgreementId", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData
@@ -167,6 +176,7 @@ test.describe("E · Contract Negotiation", () => {
   test("J40 — Cross-border negotiation involves different DID domains", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData

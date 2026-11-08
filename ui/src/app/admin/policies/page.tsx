@@ -1021,16 +1021,7 @@ export default function AdminPoliciesPage() {
                 >
                   <button
                     className="w-full text-left p-4"
-                    aria-label={t(
-                      isOpen ? "Collapse {name}" : "Expand {name}",
-                      {
-                        name:
-                          g.identity
-                            ?.replace("did:web:", "")
-                            .replace(/%3A/g, ":") ||
-                          g.participantId.slice(0, 16),
-                      },
-                    )}
+                    aria-expanded={isOpen}
                     onClick={() => setExpanded(isOpen ? null : g.participantId)}
                   >
                     <div className="flex items-center justify-between">

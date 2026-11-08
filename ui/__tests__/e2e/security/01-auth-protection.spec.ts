@@ -32,9 +32,13 @@ const PROTECTED_ROUTES = [
   "/compliance",
   "/data/share",
   "/negotiate",
+  // Public until ADR-044 (#404): every API route needs a session, so these
+  // pages send an anonymous visitor to sign in (PROTECTED_PATHS in middleware.ts).
+  "/catalog",
+  "/graph",
 ];
 
-const PUBLIC_ROUTES = ["/", "/catalog", "/graph", "/docs"];
+const PUBLIC_ROUTES = ["/", "/docs"];
 
 // ── SEC-01: Protected route → signin redirect ─────────────────────────────────
 

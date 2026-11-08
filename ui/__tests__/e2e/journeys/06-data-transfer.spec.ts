@@ -10,11 +10,10 @@
 import { test, expect } from "@playwright/test";
 import {
   T,
-  expectHeading,
   expectSigninRedirect,
-  waitForDataLoad,
   apiGet,
   skipIfNeo4jDown,
+  apiGetTasksOrSkip,
 } from "./helpers";
 import { signInOrSkip } from "../helpers/forged-session";
 
@@ -33,7 +32,8 @@ test.describe("F · Data Transfer & Viewing", () => {
 
   /* ── J43: Tasks API returns transfer entries ─────────────── */
   test("J43 — Tasks API includes transfer entries", async ({ page }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
     expect(Array.isArray(tasks)).toBe(true);
 
@@ -45,7 +45,8 @@ test.describe("F · Data Transfer & Viewing", () => {
 
   /* ── J44: Transfer states include STARTED or REQUESTING ──── */
   test("J44 — At least one in-progress transfer exists", async ({ page }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
 
     const inProgress = tasks.filter(
@@ -57,7 +58,8 @@ test.describe("F · Data Transfer & Viewing", () => {
 
   /* ── J45: Multiple transfer states exist ─────────────────── */
   test("J45 — Transfers span at least 2 different states", async ({ page }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
 
     const transferStates = new Set(
@@ -72,6 +74,7 @@ test.describe("F · Data Transfer & Viewing", () => {
   test("J46 — Audit API includes transfers and negotiations", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page);
     const audit = await apiGet(page, "/api/admin/audit");
     // Audit should have some transfer or negotiation data
@@ -86,12 +89,12 @@ test.describe("F · Data Transfer & Viewing", () => {
   test("J47 — Knowledge graph renders with clickable canvas", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
-
     // Every API route needs a session since #404 (ADR-044).
     await signInOrSkip(page, test.skip);
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
-    await expect(page.getByText("Data layers").first()).toBeVisible({
+    // The sidebar's "Data layers" became the "Layers" list of the Legend.
+    await expect(page.getByText("Layers", { exact: true })).toBeVisible({
       timeout: T,
     });
 
@@ -108,7 +111,8 @@ test.describe("F · Data Transfer & Viewing", () => {
 
   /* ── J48: Transfers span multiple participants ───────────── */
   test("J48 — Transfers involve multiple participants", async ({ page }) => {
-    const data = await apiGet(page, "/api/tasks");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetTasksOrSkip(page);
     const tasks = data.tasks || data;
 
     const transferParticipants = new Set(

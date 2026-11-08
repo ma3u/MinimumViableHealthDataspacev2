@@ -283,42 +283,46 @@ test.describe("Persona graph API — /api/graph?persona=", () => {
 
 // ── User guide role section ───────────────────────────────────────────────────
 
+// The guide's headings appear again in its table of contents, so each test
+// asks for the heading or the table cell, not for any text that matches.
 test.describe("User guide — persona & role section", () => {
   test("renders Personas & Roles heading", async ({ page }) => {
     await page.goto("/docs/user-guide");
-    await expect(page.getByText(/Personas.*Roles.*Who Uses What/i)).toBeVisible(
-      { timeout: T },
-    );
+    await expect(
+      page.getByRole("heading", { name: /Personas.*Roles.*Who Uses What/i }),
+    ).toBeVisible({ timeout: T });
   });
 
   test("shows all 5 demo usernames in the table", async ({ page }) => {
     await page.goto("/docs/user-guide");
-    await expect(page.getByText("edcadmin").first()).toBeVisible({
-      timeout: T,
-    });
-    await expect(page.getByText("clinicuser").first()).toBeVisible({
-      timeout: T,
-    });
-    await expect(page.getByText("researcher").first()).toBeVisible({
-      timeout: T,
-    });
-    await expect(page.getByText("regulator").first()).toBeVisible({
-      timeout: T,
-    });
+    for (const username of [
+      "edcadmin",
+      "clinicuser",
+      "researcher",
+      "regulator",
+    ]) {
+      await expect(
+        page.getByRole("cell", { name: username, exact: true }).first(),
+      ).toBeVisible({ timeout: T });
+    }
   });
 
   test("shows Menu Items per Role table", async ({ page }) => {
     await page.goto("/docs/user-guide");
-    await expect(page.getByText("Menu Items per Role")).toBeVisible({
-      timeout: T,
-    });
+    await expect(
+      page.getByRole("heading", { name: /Menu Items per Role/ }),
+    ).toBeVisible({ timeout: T });
   });
 
-  test("shows Graph Explorer Persona Views section", async ({ page }) => {
+  // "Graph Explorer — Persona Views" became "Persona Overview — one view per
+  // role" in #771.
+  test("shows the Persona Overview section", async ({ page }) => {
     await page.goto("/docs/user-guide");
-    await expect(page.getByText("Graph Explorer — Persona Views")).toBeVisible({
-      timeout: T,
-    });
+    await expect(
+      page.getByRole("heading", {
+        name: /Persona Overview.*one view per role/i,
+      }),
+    ).toBeVisible({ timeout: T });
   });
 
   test("shows persona graph screenshots for hospital view", async ({
@@ -336,9 +340,20 @@ test.describe("User guide — persona & role section", () => {
 
   test("shows sign-in persona cards screenshot", async ({ page }) => {
     await page.goto("/docs/user-guide");
-    await expect(page.getByText("Sign In: Demo Persona Cards")).toBeVisible({
-      timeout: T,
-    });
+    await expect(
+      page.getByRole("heading", { name: /Sign In: Demo Persona Cards/ }),
+    ).toBeVisible({ timeout: T });
+    // Since #771 the screenshot opens in a dialog from the card's button.
+    await page
+      .getByRole("button", {
+        name: "Show screenshot: Sign In: Demo Persona Cards",
+      })
+      .click();
+    await expect(
+      page.getByRole("dialog", {
+        name: "Screenshot: Sign In: Demo Persona Cards",
+      }),
+    ).toBeVisible({ timeout: T });
   });
 });
 

@@ -5,8 +5,8 @@
  * content (stat cards, timeline milestones, category cards, reference links)
  * and that the Compliance page has form elements and credential sections.
  *
- * /eehrxf is PUBLIC. /compliance is PROTECTED but we verify its
- * auth-redirect behavior plus compliance API content.
+ * /eehrxf and /compliance need a session (ADR-044): the specs sign in,
+ * except J78, which checks the redirect for an anonymous visitor.
  */
 import { test, expect } from "@playwright/test";
 import {
@@ -72,9 +72,9 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
   test("J75 — EEHRxF categories have Available/Partial/Gap badges", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
     await signInOrSkip(page, test.skip);
+    await skipIfNeo4jDown(page);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
@@ -84,12 +84,13 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
       timeout: T,
     });
 
-    // At least one of Available, Partial, or Gap badges should be in the page
-    const body = await page.textContent("body");
-    const hasAvailable = body?.includes("Available") ?? false;
-    const hasPartial = body?.includes("Partial") ?? false;
-    const hasGap = body?.includes("Gap") ?? false;
-    expect(hasAvailable || hasPartial || hasGap).toBe(true);
+    // At least one Available, Partial or Gap badge. The categories load after
+    // the stat cards ("Loading EEHRxF profiles…" has no spinner, so
+    // waitForDataLoad does not wait for it); reading the body text at once
+    // raced that load and failed whenever the server was busy.
+    await expect(
+      page.getByText(/^(Available|Partial|Gap)$/).first(),
+    ).toBeVisible({ timeout: T });
   });
 
   /* ── J76: EEHRxF page has reference links ──────────────── */
@@ -136,6 +137,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
 
   /* ── J79: Compliance API validates against Neo4j ─────── */
   test("J79 — Compliance validation API is reachable", async ({ page }) => {
+    // /api/graph and /api/credentials need a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page);
     // The compliance page uses graph queries — verify the API returns data
     const data = await apiGet(page, "/api/credentials");

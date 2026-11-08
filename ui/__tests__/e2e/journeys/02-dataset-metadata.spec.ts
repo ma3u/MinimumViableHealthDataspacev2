@@ -75,6 +75,7 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J09 — Catalog API contains OMOP CDM dataset entry", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const datasets = await apiGet(page, "/api/catalog");
     const omop = datasets.find(
       (d: { id?: string }) => d.id === "dataset:omop-cdm-v54-analytics",

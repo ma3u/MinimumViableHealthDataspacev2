@@ -38,13 +38,22 @@ function parseNeo4jTime(iso: string): number {
   return Date.parse(iso.replace(/(\.\d{3})\d+/, "$1"));
 }
 
-async function newestResearcherLog(page: Page): Promise<AccessLog | undefined> {
+/**
+ * The researcher's newest access, or the newest to `endpoint`. Other specs
+ * read as the researcher in parallel (federated stats, the query page), so
+ * the newest access overall need not be this spec's.
+ */
+async function newestResearcherLog(
+  page: Page,
+  endpoint?: string,
+): Promise<AccessLog | undefined> {
   const body = await apiGet(
     page,
-    "/api/admin/audit?type=accesslogs&limit=5" +
+    "/api/admin/audit?type=accesslogs&limit=50" +
       `&consumerDid=${encodeURIComponent(RESEARCHER_DID)}`,
   );
-  return (body.accesslogs as AccessLog[])[0];
+  const logs = body.accesslogs as AccessLog[];
+  return endpoint ? logs.find((l) => l.endpoint === endpoint) : logs[0];
 }
 
 test.describe("Issue #205 · access logs are recorded and shown", () => {
@@ -84,7 +93,7 @@ test.describe("Issue #205 · access logs are recorded and shown", () => {
     await expect
       .poll(
         async () => {
-          newest = await newestResearcherLog(aPage);
+          newest = await newestResearcherLog(aPage, "/nlq");
           return newest?.accessedAt ? parseNeo4jTime(newest.accessedAt) : 0;
         },
         {

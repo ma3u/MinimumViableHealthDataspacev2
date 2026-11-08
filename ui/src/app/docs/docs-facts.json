@@ -1257,6 +1257,12 @@
       "file": "ADR-078-edc-1-on-container-apps-without-cfm.md",
       "title": "EDC 1.0 stays on Container Apps, and the hub provisions participants without CFM",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-079",
+      "file": "ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md",
+      "title": "E2E runs on the pull requests that can break it, and a failure is red",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1343,23 +1349,23 @@
     "trivy": "0.69.3"
   },
   "lastUpdated": {
-    "/docs": "2026-11-07",
-    "/docs/user-guide": "2026-11-07",
-    "/docs/developer": "2026-11-07",
-    "/docs/developer/quality-gates": "2026-11-07",
+    "/docs": "2026-11-08",
+    "/docs/user-guide": "2026-11-08",
+    "/docs/developer": "2026-11-08",
+    "/docs/developer/quality-gates": "2026-11-08",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",
-    "/docs/developer/[slug]": "2026-11-07",
-    "/docs/architecture": "2026-11-07",
-    "/docs/security": "2026-11-07",
-    "/docs/security/[slug]": "2026-11-07",
-    "/docs/klarbefund": "2026-11-07",
-    "/docs/ehds": "2026-11-07",
-    "/docs/ehds/glossary": "2026-11-07",
-    "/docs/ehds/[slug]": "2026-11-07",
+    "/docs/developer/[slug]": "2026-11-08",
+    "/docs/architecture": "2026-11-08",
+    "/docs/security": "2026-11-08",
+    "/docs/security/[slug]": "2026-11-08",
+    "/docs/klarbefund": "2026-11-08",
+    "/docs/ehds": "2026-11-08",
+    "/docs/ehds/glossary": "2026-11-08",
+    "/docs/ehds/[slug]": "2026-11-08",
     "/docs/roadmap": "2026-11-08",
-    "/docs/operations": "2026-11-07",
-    "/docs/operations/[slug]": "2026-11-07",
-    "/docs/klarbefund/[slug]": "2026-11-07"
+    "/docs/operations": "2026-11-08",
+    "/docs/operations/[slug]": "2026-11-08",
+    "/docs/klarbefund/[slug]": "2026-11-08"
   }
 }

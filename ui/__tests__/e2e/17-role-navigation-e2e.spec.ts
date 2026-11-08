@@ -193,7 +193,8 @@ test.describe("DATA_HOLDER (clinicuser) — navigation", () => {
       page,
       "Explore",
       [
-        "Graph Explorer",
+        // The graph explorer left the navigation in #271 (#290).
+        "Persona Overview",
         "Dataset Catalog",
         "DCAT-AP Editor",
         "OMOP Analytics",
@@ -259,7 +260,9 @@ test.describe("DATA_USER (researcher) — navigation", () => {
   }) => {
     await loginAs(page, "researcher", "researcher");
     await expectDropdownItems(page, "My Researches", [
-      "Research Overview",
+      // Renamed from "Research Overview" with the researcher overview
+      // (#271 M4, #281).
+      "My Research in One View",
       "Browse Catalogs",
       "Discover Datasets",
       "Request Access",
@@ -364,7 +367,7 @@ test.describe("EDC_ADMIN (edcadmin) — navigation", () => {
   }) => {
     await loginAs(page, "edcadmin", "edcadmin");
     await expectDropdownItems(page, "Explore", [
-      "Graph Explorer",
+      "Persona Overview",
       "Dataset Catalog",
       "DCAT-AP Editor",
       "OMOP Analytics",
@@ -443,7 +446,7 @@ test.describe("Unauthenticated — navigation", () => {
     await expectDropdownItems(
       page,
       "Explore",
-      ["Graph Explorer", "Dataset Catalog", "Patient Journey", "EEHRxF"],
+      ["Persona Overview", "Dataset Catalog", "Patient Journey", "EEHRxF"],
       ["DCAT-AP Editor", "NLQ", "OMOP Analytics"],
     );
   });
@@ -600,6 +603,8 @@ test.describe("Login flow — Keycloak integration", () => {
   test("Keycloak login flow completes without 'Invalid redirect uri'", async ({
     page,
   }) => {
+    // A forged session never visits Keycloak, so it cannot show this error.
+    await skipIfKeycloakDown({ realKeycloak: true });
     await loginAs(page, "patient1", "patient1");
     // If we get here, the login succeeded without redirect URI errors
     // Verify we're on the app, not on a Keycloak error page
@@ -632,6 +637,7 @@ test.describe("Login flow — Keycloak integration", () => {
         kcUrl || "(unset)"
       }). Issue #28 Phase 2 has not landed. Skipping the in-domain assertion.`,
     );
+    await skipIfKeycloakDown({ realKeycloak: true });
 
     const visitedHosts = new Set<string>();
     page.on("framenavigated", (frame) => {

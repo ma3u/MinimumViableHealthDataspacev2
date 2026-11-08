@@ -251,7 +251,7 @@ describe("the second demo patient, P2 (#708)", () => {
 describe("wiring of the seed", () => {
   it("seed.sh runs the file on the full path and on the demo-only path, after the compliance matrix", () => {
     const runs = seedSh.match(
-      /run_file \/seed\/seed-persona-overview\.cypher/g,
+      /run_file "\$SEED_DIR"\/seed-persona-overview\.cypher/g,
     );
     expect(runs).toHaveLength(2);
     const full = seedSh.lastIndexOf("seed-persona-overview.cypher");

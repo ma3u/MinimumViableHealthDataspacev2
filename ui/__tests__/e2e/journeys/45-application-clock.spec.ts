@@ -156,7 +156,8 @@ test.describe("Issue #206 · the application and the Art. 68(4) clock", () => {
       .locator(`#complete-${applicationId}-namedPersons`)
       .fill("PharmaCo Research AG; Dr A. Weber; M. Costa (journey 45)");
     await form.getByRole("button", { name: "Send the missing items" }).click();
-    await expect(form.getByRole("status")).toContainText(
+    // The card confirms it: the form closes once the application is complete.
+    await expect(card.getByTestId("complete-received")).toContainText(
       "Complete application received",
       { timeout: 15_000 },
     );

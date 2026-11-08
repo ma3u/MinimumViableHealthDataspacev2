@@ -14,7 +14,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { T, skipIfKeycloakDown, loginAs } from "./helpers";
+import { T, skipIfKeycloakDown, loginAs, logout } from "./helpers";
 
 test.skip(
   process.env.NEXT_PUBLIC_STATIC_EXPORT === "true",
@@ -129,20 +129,6 @@ async function setTheme(page: Page, mode: "light" | "dark") {
     }
   }, mode);
   await page.waitForTimeout(300);
-}
-
-async function logout(page: Page) {
-  const userMenu = page
-    .locator("nav")
-    .getByRole("button", { name: /user menu/i });
-  if (await userMenu.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await userMenu.click();
-    const signOut = page.getByRole("button", { name: /sign out/i });
-    if (await signOut.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await signOut.click();
-    }
-  }
-  await page.goto("/", { waitUntil: "domcontentloaded" });
 }
 
 function formatViolations(
@@ -266,7 +252,10 @@ test.describe("J700–J799 — Authenticated WCAG 2.2 AA", () => {
 /* ── Summary ─────────────────────────────────────────────────────── */
 
 test("J799 Authenticated WCAG summary", async ({ page }) => {
-  test.setTimeout(180_000); // 7 roles × login/logout + axe scans
+  // 7 roles, 33 pages, each scanned in two themes: 66 axe runs. CI signs every
+  // role in since forged sessions (#951), so this no longer skips there, and
+  // 180 s ran out on a shared runner.
+  test.setTimeout(480_000);
   let keycloakReachable = true;
   try {
     await skipIfKeycloakDown();

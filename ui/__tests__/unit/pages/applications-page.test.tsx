@@ -212,7 +212,7 @@ describe("/applications", () => {
       within(form).getByRole("button", { name: "Send the missing items" }),
     );
     await waitFor(() =>
-      expect(within(form).getByRole("status")).toHaveTextContent(
+      expect(screen.getByTestId("complete-received")).toHaveTextContent(
         "Complete application received; the access body decides by 2026-12-25",
       ),
     );

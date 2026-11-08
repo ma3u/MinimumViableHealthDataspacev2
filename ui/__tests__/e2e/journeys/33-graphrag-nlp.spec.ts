@@ -21,12 +21,19 @@
  *     exist. For Azure: graphrag-deploy.yml workflow must have succeeded.
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
+import { forgedSessions } from "./helpers";
 import { keycloakLogin } from "../helpers/keycloak-login";
-import { signedInRequest, NO_FORGED_SESSION } from "../helpers/forged-session";
+import {
+  signedInRequest,
+  signInOrSkip,
+  NO_FORGED_SESSION,
+} from "../helpers/forged-session";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const API = `${BASE}/api`;
-const KC_AVAILABLE = Boolean(process.env.PLAYWRIGHT_KEYCLOAK_URL);
+// A Keycloak to sign in at, or loginAs()'s forged session (journeys/helpers.ts).
+const KC_AVAILABLE =
+  Boolean(process.env.PLAYWRIGHT_KEYCLOAK_URL) || forgedSessions();
 
 type BackendStatus = {
   chat: "azure-openai" | "openai" | "ollama" | "anthropic" | "none";
@@ -259,11 +266,14 @@ test.describe("D · /query UI", () => {
   test("J620 /query page reachable and renders the submit button", async ({
     page,
   }) => {
+    // /query sends a signed-out visitor to sign in since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto(`${BASE}/query`);
     await expect(page.getByRole("button", { name: /^Ask$/ })).toBeVisible();
   });
 
   test("J621 /query page surfaces example question chips", async ({ page }) => {
+    await signInOrSkip(page, test.skip);
     await page.goto(`${BASE}/query`);
     await expect(
       page.getByRole("button", { name: /How many patients are there/ }),

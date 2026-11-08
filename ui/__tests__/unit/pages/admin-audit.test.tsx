@@ -387,6 +387,41 @@ describe("AdminAuditPage", () => {
       await user.click(row);
       expect(screen.queryByTestId("access-log-detail")).not.toBeInTheDocument();
     });
+
+    // J911 found it in the browser: a click on Access Logs before the
+    // overview answered, and the overview's late answer replaced the tab's.
+    it("keeps the Access Logs rows when the overview answers late", async () => {
+      let answerOverview: (v: unknown) => void = () => {};
+      const lateOverview = new Promise((resolve) => {
+        answerOverview = resolve;
+      });
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url.includes("type=participants")) {
+          return mockResponse(MOCK_PARTICIPANTS);
+        }
+        if (url.includes("type=all")) {
+          return lateOverview.then(() => ({
+            ok: true,
+            json: () => Promise.resolve({ ...MOCK_AUDIT_DATA, accesslogs: [] }),
+          }));
+        }
+        return mockResponse(MOCK_AUDIT_DATA);
+      });
+      const user = userEvent.setup();
+      render(<AdminAuditPage />);
+      await user.click(screen.getByRole("button", { name: /Access Logs/ }));
+      expect(await screen.findAllByTestId("access-log-row")).not.toHaveLength(
+        0,
+      );
+
+      answerOverview(undefined);
+      await lateOverview;
+      await new Promise((r) => setTimeout(r, 0));
+      expect(screen.getAllByTestId("access-log-row")).not.toHaveLength(0);
+      expect(
+        screen.queryByText("No access logs recorded"),
+      ).not.toBeInTheDocument();
+    });
   });
 
   // ── Page header ──

@@ -37,7 +37,9 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /13-live-data-validation/,
+      // capture-screenshots writes the user guide's images into public/; it
+      // runs on purpose with --project=live, never as part of the suite.
+      testIgnore: /13-live-data-validation|capture-screenshots/,
     },
     {
       name: "live",
