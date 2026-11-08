@@ -61,6 +61,11 @@ REGISTRIES = {
     ),
     "quay.io": ("https://quay.io/v2/auth?scope=repository:{repo}:pull&service=quay.io", "quay.io"),
     "mcr.microsoft.com": (None, "mcr.microsoft.com"),
+    # The European Commission's GitLab, where Simpl-Open publishes its images (#934).
+    "code.europa.eu:4567": (
+        "https://code.europa.eu/jwt/auth?scope=repository:{repo}:pull&service=container_registry",
+        "code.europa.eu:4567",
+    ),
 }
 
 IMAGE_RE = re.compile(r"^\s*image:\s*[\"']?([^\"'\s#]+)", re.MULTILINE)

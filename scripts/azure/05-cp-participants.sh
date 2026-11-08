@@ -62,8 +62,9 @@ DID_HOST="${DID_HOST:-identityhub%3A7083}"
 # pharmaco (consumer) and medreg (operator); lmc and irs are seeded too so the
 # control plane and the identity hub agree on who exists. Idempotency matches on
 # the slug inside the identity, so a context created under the old .de DID is
-# left alone rather than duplicated.
-SLUGS=(alpha-klinik pharmaco medreg lmc irs)
+# left alone rather than duplicated. PARTICIPANT_SLUGS replaces the list, e.g.
+# "alphakasse" for the second data space (scripts/seed-second-data-space.sh).
+read -r -a SLUGS <<<"${PARTICIPANT_SLUGS:-alpha-klinik pharmaco medreg lmc irs}"
 PARTICIPANTS=()
 for _slug in "${SLUGS[@]}"; do
   PARTICIPANTS+=("${_slug}|did:web:${DID_HOST}:${_slug}")

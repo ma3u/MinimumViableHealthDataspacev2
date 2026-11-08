@@ -457,6 +457,20 @@ jobs:
           WAIT_SECONDS=120 \
             ./scripts/seed-simpl-ga.sh
 
+      # #934 step 2: a second data space, "insurance and wellbeing". Its
+      # Governance Authority (wellbeing-ga-issuer, profile wellbeing) admits
+      # AlphaKasse DE, a participant context with no credential from the hub's
+      # issuer; TRUST-6.6 to 6.9 check that it is admitted and an unlisted
+      # issuer's credential refused.
+      - name: The insurance and wellbeing authority admits AlphaKasse DE (#934)
+        run: |
+          COMPOSE_FILES=docker-compose.jad.yml \
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+          WAIT_SECONDS=120 \
+            ./scripts/seed-second-data-space.sh
+
       - name: Run DCP compliance suite
         run: |
           chmod +x scripts/run-ehds-identity-checks.sh

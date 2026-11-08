@@ -399,6 +399,9 @@ services:
       # The fictional Simpl Governance Authority: membership of its data space.
       edc.iam.trustedissuer.simpl-ga.id: "did:web:simpl-ga-issuer%3A10016:simpl-ga"
       edc.iam.trustedissuer.simpl-ga.supportedtypes: '["MembershipCredential"]'
+      # A second data space's authority, for insurance and wellbeing (#934): membership only.
+      edc.iam.trustedissuer.wellbeing-ga.id: "did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga"
+      edc.iam.trustedissuer.wellbeing-ga.supportedtypes: '["MembershipCredential"]'
     ports:
       - "11003:8081" # Management API (external port from planning doc)
     networks:
@@ -781,6 +784,55 @@ services:
       edc.datasource.membership.password: "simplga"
     ports:
       - "10023:10013" # Issuer Admin API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:10010/api/check/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # #934 step 2: the Governance Authority of a second data space, "insurance and
+  # wellbeing", which admits the fictional insurer AlphaKasse DE. The control
+  # plane trusts it for MembershipCredential only, as it trusts simpl-ga, so a
+  # participant of either data space can reach a hub provider. Started by
+  # scripts/seed-second-data-space.sh (profile wellbeing), which also creates
+  # its database: seed-test-issuer.sh names database and user after DB.
+  wellbeing-ga-issuer:
+    image: mvhd/edc-issuerservice:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: issuerservice
+        EDC_VERSION: 1.0.0-RC5
+    container_name: health-dataspace-wellbeing-ga-issuer
+    profiles: ["wellbeing"]
+    env_file:
+      - ./jad/issuerservice.env
+    environment:
+      <<: *test-issuer-env
+      edc.hostname: "wellbeing-ga-issuer"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/wellbeingga_v1"
+      edc.datasource.default.user: "wellbeingga_v1"
+      edc.datasource.default.password: "wellbeingga_v1"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/wellbeingga_v1"
+      edc.datasource.membership.user: "wellbeingga_v1"
+      edc.datasource.membership.password: "wellbeingga_v1"
+    ports:
+      - "10053:10013" # Issuer Admin API
     networks:
       - edcv
     depends_on:

@@ -28,10 +28,12 @@ Plus two Vault sidecars: `vault-unseal` initialises and unseals Vault, `vault-bo
 
 A pull transfer runs like this: the consumer's control plane negotiates, siglet issues the access token, and the consumer reads the token from its siglet (`GET /tokens/{participantContextId}/{transferId}`) and sends it to the provider's Neo4j Proxy at `/dataspace/data`, which serves the dataset the token names (`jad/siglet-edc1.toml`). siglet keeps its tokens in memory on this stack, so a restart of siglet loses every issued token; start the transfer again.
 
-Three compose profiles hold what the default stack leaves out:
+Five compose profiles hold what the default stack leaves out:
 
 - `edc018`: the EDC 0.18 services, the two DCore data planes (FHIR :11002, OMOP :11012), CFM's Tenant Manager (:11006) and Provision Manager (:11007), its four agents and shim, and the one-shot `jad-seed`. They are kept until #927 retires them; nothing in CI starts them.
 - `trust-check`: `rogue-issuer` (:10033), the untrusted issuer the identity checks must refuse.
+- `wellbeing`: `wellbeing-ga-issuer` (:10053), the Governance Authority of a second data space that admits AlphaKasse DE (#934). `scripts/seed-second-data-space.sh` starts it and seeds AlphaKasse; CI runs it before the identity checks.
+- `simpl`: `simpl-issuer` (:10043) and its `simpl-vault`, Simpl-Open's own issuer service, which `scripts/run-simpl-issuer-interop.sh` starts to test whether the hub accepts its credentials (#934 step 0a; today it does not).
 - `federated`: `neo4j-spe2` (:7475 / :7688), the second SPE.
 
 ## Prerequisites

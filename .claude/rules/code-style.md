@@ -85,6 +85,7 @@ All participant names in demo data, comments, and docs must be fictional:
 - DATA_HOLDER: AlphaKlinik Berlin, Limburg Medical Centre
 - DATA_USER: PharmaCo Research AG
 - HDAB: MedReg DE, Institut de Recherche Santé
+- Insurer in a second data space (#934): AlphaKasse DE
 - Forbidden: Charité, Bayer, BfArM, Zuyderland, INSERM, or any real organisation.
 - Exception: real org names (e.g. TK Krankenkasse, gematik) may appear ONLY behind the
   `NEXT_PUBLIC_DEMO_TK` build flag for live interoperability demos. The default build, committed

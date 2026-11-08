@@ -23,6 +23,14 @@
       "role": "A Simpl data space's Governance Authority: membership of its data space, accepted as membership of the hub's (ADR-064, decision 2). Institut de Recherche Santé holds its membership from it.",
       "types": ["MembershipCredential"],
       "environments": ["compose", "ci"]
+    },
+    {
+      "alias": "wellbeing-ga",
+      "did": "did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga",
+      "name": "Insurance and wellbeing data space, Governance Authority (fictional)",
+      "role": "A second data space's Governance Authority (#934): membership of its data space, accepted as membership of the hub's for that type only. AlphaKasse DE holds its membership from it.",
+      "types": ["MembershipCredential"],
+      "environments": ["compose", "ci"]
     }
   ]
 }

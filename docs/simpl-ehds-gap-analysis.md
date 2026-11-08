@@ -365,7 +365,12 @@ the open question for the EHDS; which issuers are trusted for what is:
   issuer on no list makes the provider refuse the request, and the control
   plane names the issuer as not trusted for the type
   (`scripts/run-ehds-identity-checks.sh`, TRUST-6.1 to 6.5, on compose; CI runs
-  6.1 and 6.2 until its DSP path works). What a Governance Authority's
+  6.1 and 6.2 until its DSP path works). Since 2026-11-08 a second authority,
+  for a fictional "insurance and wellbeing" data space, admits the fictional
+  insurer AlphaKasse DE the same way, and the hub trusts it for
+  `MembershipCredential` only (#934, step 2; TRUST-6.6 to 6.9,
+  `scripts/seed-second-data-space.sh`): two data spaces, two authorities, one
+  connector. What a Governance Authority's
   credential carries maps onto the hub's credentials as follows; Simpl has not
   published its credential schema, so the left column is what its
   documentation describes, to be checked against the Hamburg 4.1 code (#711):

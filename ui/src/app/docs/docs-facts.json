@@ -726,6 +726,11 @@
         "ports": ["10023:10013"]
       },
       {
+        "name": "wellbeing-ga-issuer",
+        "profiles": ["wellbeing"],
+        "ports": ["10053:10013"]
+      },
+      {
         "name": "rogue-issuer",
         "profiles": ["trust-check"],
         "ports": ["10033:10013"]
