@@ -219,10 +219,10 @@ describe("the roadmap's chart in every language", () => {
     const de = (text: string, vars?: Record<string, string | number>) =>
       translate("de", "docsCommon", text, vars);
     const label = roadmapTargets(de).find((t) => t.taskId === "i711")!.label;
-    expect(label).toContain("Blockiert");
-    expect(label).toContain("2026-11-01 bis 2027-03-26");
+    expect(label).toContain("Geplant");
+    expect(label).toContain("2026-11-09 bis 2027-03-26");
     expect(roadmapTargets().find((t) => t.taskId === "i711")!.label).toMatch(
-      /^#711 DSP compatibility kit .* \(P1, blocked, 2026-11-01 to 2027-03-26\)\. /,
+      /^#711 DSP compatibility kit .* \(P1, planned, 2026-11-09 to 2027-03-26\)\. /,
     );
   });
 });
@@ -256,7 +256,7 @@ describe("the pages in German", () => {
     const items = (
       await screen.findByRole("heading", { level: 2, name: "Jeder Eintrag" })
     ).parentElement!;
-    expect(within(items).getAllByText("Blockiert").length).toBeGreaterThan(0);
+    expect(within(items).getAllByText("Geplant").length).toBeGreaterThan(0);
     await waitFor(() =>
       expect(screen.getByTestId("mermaid-diagram").textContent).toContain(
         "section Identität und Wallets",

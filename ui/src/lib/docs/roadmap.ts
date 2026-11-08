@@ -4,7 +4,8 @@
  * The source of truth is the plan issue #725 and the section "Roadmap to 2035:
  * EHDS, wallets and Simpl" of docs/planning-health-dataspace-v2.md. Milestones
  * are dates set by law or by the programmes; bars are planning windows set on
- * 2026-10-28 and move when the plan does. Change both places together.
+ * 2026-10-28, the Simpl lane's again on 2026-11-08 (#934), and move when the
+ * plan does. Change both places together.
  */
 
 export const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -48,6 +49,12 @@ export const SRC = {
   /** Simpl-Open's architecture specification, which names its EDC connector. */
   simplArchitecture:
     "https://ssg-website-ad5a79.pages.code.europa.eu/resources/architecture",
+  /** Simpl's published connector: release 1.0.26 builds on EDC 0.10.1. */
+  simplEdcPom:
+    "https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/pom.xml#L16",
+  /** Simpl's own issuer: JSON-LD credentials with Ed25519 proofs, not DCP. */
+  simplIssuer:
+    "https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be/-/blob/v1.6.0/README.md#L29-32",
   hamburg:
     "https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-hamburg-4.1",
   innsbruck:
@@ -66,6 +73,10 @@ export const SRC = {
   adr063: `${REPO}/blob/main/docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md`,
   adr064: `${REPO}/blob/main/docs/ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md`,
   adr065: `${REPO}/blob/main/docs/ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md`,
+  /** The checks that a Governance Authority is trusted for its own types only. */
+  trustChecks: `${REPO}/blob/main/scripts/run-ehds-identity-checks.sh#L671-L715`,
+  /** The hub's fictional health insurer. */
+  alphaKasse: `${REPO}/blob/main/ui/src/lib/journey-config.ts#L36-L41`,
 } as const;
 
 /** An article of the EHDS (73), or one of its paragraphs ("073.001" is Art. 73(1)). */
@@ -76,7 +87,7 @@ export const ehdsArt = (n: number | string) =>
 const untagged = (text: string) =>
   text.replace(/<(\w+)>([\s\S]*?)<\/\1>/g, "$2");
 
-export const ROADMAP_PLANNED_ON = "2026-10-28";
+export const ROADMAP_PLANNED_ON = "2026-11-08";
 
 export type LaneId =
   | "regulation"
@@ -224,11 +235,27 @@ export const ITEMS: readonly RoadmapItem[] = [
     short: "Simpl issuer trust",
     title: "Trust a Simpl Governance Authority as a credential issuer",
     priority: "P1",
+    status: "done",
+    start: "2026-10-27",
+    end: "2026-10-28",
+    note: "Closed 2026-10-28: a fictional Governance Authority, trusted for its own credential types only (<adr>ADR-064, decision 2</adr>, <checks>TRUST-6.1 to 6.5</checks>).",
+    links: {
+      adr: `${SRC.adr064}?plain=1#L48-L51`,
+      checks: SRC.trustChecks,
+    },
+  },
+  {
+    issue: 934,
+    lane: "simpl",
+    short: "AlphaKasse bonus on Simpl",
+    title:
+      "One use case across two data spaces: <ak>AlphaKasse DE</ak> rewards an active year",
+    priority: "P1",
     status: "planned",
-    start: "2026-11-01",
+    start: "2026-11-09",
     end: "2027-03-26",
-    note: "<adr>ADR-064, decision 2</adr>.",
-    links: { adr: `${SRC.adr064}?plain=1#L48-L51` },
+    note: "First a credential from <iss>Simpl's own issuer</iss> in the IdentityHub, then a second data space; the insurer receives a yes or no, never the data (<a54>Art. 54</a54>).",
+    links: { ak: SRC.alphaKasse, iss: SRC.simplIssuer, a54: ehdsArt(54) },
   },
   {
     issue: 719,
@@ -239,7 +266,7 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2027-01-01",
     end: "2027-12-31",
-    note: "After the <inn>Innsbruck schema</inn>.",
+    note: "After <inn>Innsbruck</inn>, which makes DCAT-AP Simpl's metadata model.",
     links: { inn: SRC.innsbruck },
   },
   {
@@ -251,8 +278,8 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2027-04-01",
     end: "2028-03-31",
-    note: "After <i710>#710</i710>.",
-    links: { i710: issue(710) },
+    note: "After <i710>#710</i710>; the second data space of <i934>#934</i934> is the first step.",
+    links: { i710: issue(710), i934: issue(934) },
   },
   {
     issue: 723,
@@ -285,11 +312,16 @@ export const ITEMS: readonly RoadmapItem[] = [
     short: "DSP kit vs Simpl",
     title: "<tck>DSP compatibility kit</tck> against a Simpl-Open connector",
     priority: "P1",
-    status: "blocked",
-    start: "2026-11-01",
+    status: "planned",
+    start: "2026-11-09",
     end: "2027-03-26",
-    note: "Blocked until the <h41>Hamburg 4.1</h41> code is public.",
-    links: { tck: SRC.dspTck, h41: SRC.hamburg },
+    note: "Simpl's code is public: <pom>release 1.0.26 builds on EDC 0.10.1</pom>, older than <dsp>DSP 2025-1</dsp>; step 0b of <i934>#934</i934>.",
+    links: {
+      tck: SRC.dspTck,
+      pom: SRC.simplEdcPom,
+      dsp: SRC.dsp,
+      i934: issue(934),
+    },
   },
   {
     issue: 720,
@@ -522,9 +554,10 @@ export const MILESTONES: readonly Milestone[] = [
   {
     id: "hamburg",
     lane: "simpl",
-    date: "2026-10-15",
+    date: "2026-10-16",
     label: "Hamburg 4.1",
-    detail: "Simpl-Open release Hamburg 4.1, targeted for October 2026.",
+    detail:
+      "Simpl-Open 4.1.0, planned for GitLab in the second half of October 2026; the marker stands at the start of that half.",
     href: SRC.hamburg,
   },
   {
@@ -533,7 +566,7 @@ export const MILESTONES: readonly Milestone[] = [
     date: "2026-10-28",
     label: "Community Preview",
     detail:
-      "The proposed DOME integration and monetisation requirements (BP02E, BP02F, BP02G, SA12), open for comment.",
+      "Held online on 28 October 2026: the proposed DOME integration and monetisation requirements (BP02E, BP02F, BP02G, SA12). The hub's comments are #723 and #724.",
     href: SRC.communityPreview,
   },
   {
@@ -541,8 +574,9 @@ export const MILESTONES: readonly Milestone[] = [
     lane: "simpl",
     date: "2026-12-15",
     label: "Innsbruck 5.0",
-    detail: "Simpl-Open release Innsbruck 5.0, targeted for Q4 2026.",
-    href: SRC.simplStatus,
+    detail:
+      "Simpl-Open release Innsbruck 5.0, targeted for Q4 2026, with SSI Tier 2 (verifiable credentials and decentralised identifiers) and DCAT-AP as the metadata model. No day is set; the marker stands in mid-December. The hub recommends DCP v1.0 and EDC 1.0 in the same step (gap analysis, section 8).",
+    href: SRC.innsbruck,
   },
 ];
 

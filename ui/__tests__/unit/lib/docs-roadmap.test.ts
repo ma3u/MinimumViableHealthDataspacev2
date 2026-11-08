@@ -40,7 +40,8 @@ describe("the roadmap data", () => {
 
   it("carries the plan's P1 items and the Iceberg spike under #716", () => {
     const p1 = ITEMS.filter((i) => i.priority === "P1" && i.status !== "done");
-    expect(p1.map((i) => i.issue).sort()).toEqual([708, 709, 710, 711]);
+    // #710 is done (2026-10-28); #934 carries the Simpl use case to March 2027.
+    expect(p1.map((i) => i.issue).sort()).toEqual([708, 709, 711, 934]);
     const spike = ITEMS.find((i) => i.issue === 649);
     expect(spike?.lane).toBe("processing");
     expect(spike?.note).toContain("#716");
@@ -115,6 +116,10 @@ describe("the roadmap data", () => {
     expect(m("business-wallet").detail).not.toMatch(/Council's position/);
     expect(m("business-wallet").href).toContain("2025/0358(COD)");
     expect(m("ehds-2027").detail).not.toMatch(/with the EUDI Wallet/);
+    // The Hamburg page: "planned to be made available in GitLab in the second
+    // half of October 2026". The Innsbruck page has its own roadmap items.
+    expect(m("hamburg").date).toBe("2026-10-16");
+    expect(m("innsbruck").href).toContain("roadmap-items-innsbruck-5.0");
   });
 
   it("writes the tooltips without the link tags", () => {
@@ -142,7 +147,19 @@ describe("the generated Gantt chart", () => {
 
   it("marks status the way the legend says: active, crit, done", () => {
     expect(chart).toMatch(/708 EUDI Wallet sign-in :active, i708,/);
-    expect(chart).toMatch(/711 DSP kit vs Simpl :crit, i711,/);
+    expect(chart).toMatch(/710 Simpl issuer trust :done, i710,/);
+    expect(chart).toMatch(/711 DSP kit vs Simpl :i711,/);
+    // Nothing is blocked since Simpl's code went public (#711); a blocked
+    // item would be drawn crit.
+    const tag = {
+      done: "done, ",
+      "in-progress": "active, ",
+      blocked: "crit, ",
+      planned: "",
+    };
+    for (const i of ITEMS) {
+      expect(chart, `#${i.issue}`).toContain(`:${tag[i.status]}i${i.issue},`);
+    }
     expect(chart).toMatch(/700 HealthDCAT-AP R8 :done, i700,/);
   });
 
