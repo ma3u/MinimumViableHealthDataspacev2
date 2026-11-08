@@ -106,7 +106,7 @@ services:
   # only once the sidecar has done its job, and everything that depends on
   # vault being healthy waits for a usable Vault rather than a sealed one.
   vault:
-    image: hashicorp/vault:2.0
+    image: hashicorp/vault:2.2
     container_name: health-dataspace-vault
     command: ["vault", "server", "-config=/vault/config/vault.hcl"]
     environment:
@@ -136,7 +136,7 @@ services:
   # literal id "root" exists, which is what every service here is configured
   # with. Same script as the Azure Vault, scripts/vault-init-or-unseal.sh.
   vault-unseal:
-    image: hashicorp/vault:2.0
+    image: hashicorp/vault:2.2
     container_name: health-dataspace-vault-unseal
     user: "0"
     entrypoint:
@@ -158,7 +158,7 @@ services:
   # Keycloak — OAuth2/OIDC identity provider
   # ---------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:26.8.0
+    image: quay.io/keycloak/keycloak:26.8.2
     container_name: health-dataspace-keycloak
     command:
       - "start-dev"
@@ -215,7 +215,7 @@ services:
   # NATS — JetStream messaging bus
   # ---------------------------------------------------------------------------
   nats:
-    image: nats:2.14.3-alpine
+    image: nats:2.15.1-alpine
     container_name: health-dataspace-nats
     command: ["-c", "/etc/nats/nats.conf"]
     volumes:
@@ -249,7 +249,7 @@ services:
   # sidecar re-runs the idempotent bootstrap on every container start.
   # ---------------------------------------------------------------------------
   vault-bootstrap:
-    image: hashicorp/vault:2.0
+    image: hashicorp/vault:2.2
     container_name: health-dataspace-vault-bootstrap
     environment:
       VAULT_ADDR: "http://vault:8200"
@@ -1090,7 +1090,7 @@ services:
   # Runs once after all services are healthy, then exits.
   # ---------------------------------------------------------------------------
   jad-seed:
-    image: curlimages/curl:8.21.0
+    image: curlimages/curl:8.23.0
     container_name: health-dataspace-jad-seed
     entrypoint: ["/bin/sh", "/scripts/seed-jad.sh"]
     environment:

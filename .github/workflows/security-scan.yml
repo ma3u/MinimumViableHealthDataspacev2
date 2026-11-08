@@ -102,14 +102,14 @@ jobs:
         # images npm audit and Dependabot cannot reach. ghcr.io/ma3u/* images are
         # omitted: they are built from this repo and covered by the source scan.
         image:
-          - quay.io/keycloak/keycloak:26.8.0
+          - quay.io/keycloak/keycloak:26.8.2
           - postgres:17.7-alpine
-          - neo4j:5.26.28-community
-          - nats:2.14.3-alpine
+          - neo4j:5.26.32-community
+          - nats:2.15.1-alpine
           - traefik:v3.7
           - nginx:1.29-alpine
-          - hashicorp/vault:2.0
-          - curlimages/curl:8.21.0
+          - hashicorp/vault:2.2
+          - curlimages/curl:8.23.0
           # JAD's 0.18 data plane, still in docker-compose.jad.yml behind the
           # edc018 profile until #927; tagged by upstream git SHA, not
           # digest-pinned, so the tag can move. The EDC 1.0 launchers are built
