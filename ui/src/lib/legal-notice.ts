@@ -29,7 +29,7 @@ export const PROVIDER: {
 /** The date the two pages were last changed, shown on both. */
 export const LEGAL_LAST_UPDATED = "2026-11-08";
 
-export const PLACEHOLDER = /^\[.*\]$/;
+const PLACEHOLDER = /^\[.*\]$/;
 
 export function isComplete(): boolean {
   return !Object.values(PROVIDER).some(

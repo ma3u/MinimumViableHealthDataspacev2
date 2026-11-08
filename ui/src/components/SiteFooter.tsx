@@ -12,10 +12,7 @@ export default function SiteFooter() {
       className="border-t border-(--border) px-6 py-4 text-sm text-(--text-secondary)"
       data-testid="site-footer"
     >
-      <nav
-        aria-label="Legal"
-        className="max-w-7xl mx-auto flex flex-wrap gap-x-6 gap-y-2"
-      >
+      <div className="max-w-7xl mx-auto flex flex-wrap gap-x-6 gap-y-2">
         <Link href="/impressum" className="hover:text-(--text-primary)">
           <T area="common">{"Legal notice"}</T>
         </Link>
@@ -25,7 +22,7 @@ export default function SiteFooter() {
         <a href={REPO_URL} className="hover:text-(--text-primary)">
           GitHub
         </a>
-      </nav>
+      </div>
     </footer>
   );
 }
