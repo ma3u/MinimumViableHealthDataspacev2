@@ -413,10 +413,15 @@ export default function UserMenu() {
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-sm text-(--text-primary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
-        aria-label={t("User menu")}
       >
+        {/* Named by its content, not aria-label: an aria-label of "User menu"
+            left out the name a sighted user reads on the button, which voice
+            control users say to press it (WCAG 2.5.3). */}
+        <span className="sr-only">{t("User menu")}</span>
         <Shield size={14} className={shieldClass} />
-        <span className="max-w-[140px] truncate text-xs font-medium">
+        {/* Below sm the name, like the role chip, made the bar wider than a
+            phone (WCAG 1.4.10); the shield and the menu still say who it is. */}
+        <span className="hidden sm:inline-block max-w-[140px] truncate text-xs font-medium">
           {username}
           {IS_STATIC && (
             <span className="ml-1 text-[9px] text-amber-400">

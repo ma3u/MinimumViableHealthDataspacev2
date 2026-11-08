@@ -9,19 +9,25 @@
  *   J165–J170 — Hospital / Data Holder journey (who uses my data?)
  *   J171–J175 — HDAB Authority journey (approval chain governance)
  *
- * The /graph page and /api/graph itself are public. /api/graph/validate,
- * /api/catalog, /api/credentials, /api/compliance and /api/trust-center are
- * NOT — they call requireAuth() and answer 401 without a session, so the tests
- * that assert on them call loginAsAdmin() first (issue #115). Tests that only
- * touch public routes stay unauthenticated on purpose: that is what verifies
- * the public routes are still public.
+ * Since ADR-044 (#404) every API route needs a session and /graph is in
+ * PROTECTED_PATHS, so every test here signs in. The graph views sign in as
+ * the participant whose view they open (a forged session, or skipped saying
+ * why); /api/graph/validate, /api/catalog, /api/credentials, /api/compliance
+ * and /api/trust-center are asked as the admin, loginAsAdmin() (issue #115).
  */
 import { test, expect } from "@playwright/test";
 import { T, apiGet, loginAsAdmin, skipIfNeo4jDown } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 // ── J150–J154: API persona subgraphs ──────────────────────────────────────────
 
 test.describe("O · Persona Graph Views — API", () => {
+  // Any session may ask for any persona's view; the base participant role
+  // is the one that asks for nothing more.
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip, "participant");
+  });
+
   test("J150 — /api/graph (default) returns nodes and links", async ({
     page,
   }) => {
@@ -271,6 +277,10 @@ test.describe("O · Graph Validation", () => {
 // ── J165–J170: Hospital / Data Holder journey ─────────────────────────────────
 
 test.describe("O · Hospital / Data Holder Journey", () => {
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip, "clinicuser");
+  });
+
   test("J165 — Graph page renders persona indicator for hospital via URL", async ({
     page,
   }) => {
@@ -363,12 +373,21 @@ test.describe("O · Hospital / Data Holder Journey", () => {
 // ── J171–J175: HDAB Authority journey ────────────────────────────────────────
 
 test.describe("O · HDAB Authority Journey", () => {
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip, "regulator");
+  });
+
   test("J171 — Graph page shows HDAB Authority persona via URL", async ({
     page,
   }) => {
     await page.goto("/graph?persona=hdab");
-    await expect(page.getByText("HDAB Authority")).toBeVisible({ timeout: T });
-    await expect(page.getByText("Art. 45–53")).toBeVisible({ timeout: T });
+    // The sidebar's persona indicator; the user menu shows the regulator's
+    // role under the same name.
+    const sidebar = page.locator("#graph-sidebar-panel");
+    await expect(sidebar.getByText("HDAB Authority")).toBeVisible({
+      timeout: T,
+    });
+    await expect(sidebar.getByText("Art. 45–53")).toBeVisible({ timeout: T });
   });
 
   test("J172 — HDAB persona shows governance question", async ({ page }) => {

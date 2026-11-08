@@ -23,8 +23,10 @@ test.describe("Navigation — unauthenticated view", () => {
     const nav = page.locator("nav");
     const trigger = nav.getByRole("button", { name: /Explore/i });
     await trigger.click();
+    // The graph explorer left the navigation in #271 (#290); the persona
+    // overview took its place as the first Explore entry.
     await expect(
-      nav.getByRole("menuitem", { name: "Graph Explorer", exact: true }),
+      nav.getByRole("menuitem", { name: "Persona Overview", exact: true }),
     ).toBeVisible();
     await expect(
       nav.getByRole("menuitem", { name: /Dataset Catalog/ }),

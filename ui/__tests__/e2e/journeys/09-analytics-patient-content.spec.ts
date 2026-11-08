@@ -5,8 +5,8 @@
  * meaningful content beyond basic headings — stat cards, charts,
  * cohort badges, patient selectors, and timeline structure.
  *
- * All pages are PUBLIC (no auth required). Data comes from mock
- * fallback when Neo4j is unavailable.
+ * Both pages need a session: /analytics since #404 (ADR-044), /patient
+ * since #357. Data comes from mock fallback when Neo4j is unavailable.
  */
 import { test, expect } from "@playwright/test";
 import { T, expectHeading, waitForDataLoad, skipIfNeo4jDown } from "./helpers";
@@ -101,6 +101,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J66 — Patient Journey page shows 6 cohort stat badges", async ({
     page,
   }) => {
+    // /patient joined PROTECTED_PATHS in #357; any participant sees the cohort.
+    await signInOrSkip(page, test.skip);
     await skipIfNeo4jDown(page);
     await page.goto("/patient");
     await expectHeading(page, "Patient Journey");
@@ -125,6 +127,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J67 — Patient Journey page renders patient selector dropdown", async ({
     page,
   }) => {
+    // /patient joined PROTECTED_PATHS in #357; any participant sees the cohort.
+    await signInOrSkip(page, test.skip);
     await page.goto("/patient");
     await expectHeading(page, "Patient Journey");
     await waitForDataLoad(page);
@@ -143,6 +147,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J68 — Patient Journey page describes FHIR R4 clinical events", async ({
     page,
   }) => {
+    // /patient joined PROTECTED_PATHS in #357; any participant sees the cohort.
+    await signInOrSkip(page, test.skip);
     await page.goto("/patient");
     await expectHeading(page, "Patient Journey");
 
@@ -172,6 +178,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J70 — Patient Journey page has Catalog and Analytics nav links", async ({
     page,
   }) => {
+    // /patient joined PROTECTED_PATHS in #357; any participant sees the cohort.
+    await signInOrSkip(page, test.skip);
     await page.goto("/patient");
     await expectHeading(page, "Patient Journey");
 

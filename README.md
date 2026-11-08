@@ -647,44 +647,25 @@ Coverage reports and Playwright HTML reports are uploaded as GitHub Actions arti
 | CI E2E Report         | [ci-e2e-report/](https://ma3u.github.io/MinimumViableHealthDataspacev2/ci-e2e-report/)                             |
 | EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                                                             |
 
-> **Note:** `test-reports/` and `ci-e2e-report/` are generated during CI only
-> (by `nightly.yml`, published by `pages.yml`). The committed `e2e-report/` in `ui/public/` is the source
-> of truth for the live Playwright report — it includes results from both
-> chromium and live (JAD stack) test projects.
+> **Note:** every report here is generated in CI: `nightly.yml` runs the
+> suites and `pages.yml` publishes them when the night ends. `e2e-report/` is the last nightly
+> Playwright run (`ci-e2e-report/` is the same report under its old path).
+> Until 2026-11-07 `e2e-report/` was a report committed from a laptop run on
+> 2026-04-03; it is no longer in the repository.
 
-**Generating the E2E Report Locally:**
-
-The Playwright report (including the EHDS Journey Report) is generated
-automatically when you run E2E tests. To produce a report that includes
-live JAD stack tests:
+**Running the E2E suite locally the way CI does:**
 
 ```bash
-# 1. Start the full JAD stack (includes live UI on :3003)
-./scripts/bootstrap-jad.sh
-
-# 2. Run both chromium (mock) and live (JAD) E2E test projects
-cd ui
-PLAYWRIGHT_BASE_URL=http://localhost:3003 npx playwright test --project=chromium --project=live
-
-# 3. View the report locally
-open playwright-report/index.html          # interactive Playwright report
-open playwright-report/ehds-journey.html   # EHDS journey report
+./scripts/run-e2e-local.sh                 # every spec, about 12 minutes
+./scripts/run-e2e-local.sh --changed       # the specs your branch can break
+./scripts/run-e2e-local.sh journeys/12-    # one spec or a pattern
 ```
 
-**Publishing to GitHub Pages:**
-
-To update the committed E2E report that appears on GitHub Pages:
-
-```bash
-# Copy the local report to the committed public/ folder
-rm -rf ui/public/e2e-report
-cp -r ui/playwright-report ui/public/e2e-report
-
-# Commit and push — pages.yml will deploy it
-git add ui/public/e2e-report
-git commit -m "Update E2E report from local JAD stack run"
-git push
-```
+It starts a throwaway Neo4j with the demo graph and the neo4j-proxy, builds
+and starts the UI and runs Playwright with forged sessions for the Keycloak
+users, as the nightly and the pull request E2E do. EDC connector and Keycloak
+point at a closed port, as in CI, even when the compose stack runs. The report opens with
+`npx playwright show-report` in `ui/`.
 
 The report includes a screenshot for every test (captured automatically), traces on retries,
 and video recordings when tests are retried — making visual regression and debugging easy.

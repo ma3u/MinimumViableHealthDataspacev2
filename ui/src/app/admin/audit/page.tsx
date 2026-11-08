@@ -54,41 +54,54 @@ export default function AdminAuditPage() {
       .catch(() => {});
   }, []);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
-    const p = new URLSearchParams({ type: activeTab, limit: "50" });
-    if (filters.status) p.set("status", filters.status);
-    if (filters.dateFrom) p.set("dateFrom", filters.dateFrom);
-    if (filters.dateTo) p.set("dateTo", filters.dateTo);
-    if (filters.consumerDid) p.set("consumerDid", filters.consumerDid);
-    if (filters.providerDid) p.set("providerDid", filters.providerDid);
-    if (filters.crossBorder) p.set("crossBorder", filters.crossBorder);
+  // `isCurrent` turns false once the tab or a filter changed: the answer to
+  // an older request is dropped. Without it a slow overview (type=all) that
+  // answered after a click on Access Logs replaced that tab's rows with its
+  // own, and the tab said "No access logs recorded" (2026-11-08, J911).
+  const loadData = useCallback(
+    (isCurrent: () => boolean) => {
+      setLoading(true);
+      const p = new URLSearchParams({ type: activeTab, limit: "50" });
+      if (filters.status) p.set("status", filters.status);
+      if (filters.dateFrom) p.set("dateFrom", filters.dateFrom);
+      if (filters.dateTo) p.set("dateTo", filters.dateTo);
+      if (filters.consumerDid) p.set("consumerDid", filters.consumerDid);
+      if (filters.providerDid) p.set("providerDid", filters.providerDid);
+      if (filters.crossBorder) p.set("crossBorder", filters.crossBorder);
 
-    fetchApi(`/api/admin/audit?${p.toString()}`)
-      .then(async (r) => {
-        // The route answers 502 with { error, detail } when Neo4j is out of
-        // reach. Storing that body as data left the page blank on Azure;
-        // treat it as the failure it is and show the reason.
-        const body = await r.json();
-        if (!r.ok || body?.error) {
-          throw new Error(body?.detail || body?.error || `HTTP ${r.status}`);
-        }
-        return body as AuditData;
-      })
-      .then((d) => {
-        setData(d);
-        setError(null);
-        setLoading(false);
-      })
-      .catch((e: unknown) => {
-        setData(null);
-        setError(e instanceof Error ? e.message : String(e));
-        setLoading(false);
-      });
-  }, [activeTab, filters]);
+      fetchApi(`/api/admin/audit?${p.toString()}`)
+        .then(async (r) => {
+          // The route answers 502 with { error, detail } when Neo4j is out of
+          // reach. Storing that body as data left the page blank on Azure;
+          // treat it as the failure it is and show the reason.
+          const body = await r.json();
+          if (!r.ok || body?.error) {
+            throw new Error(body?.detail || body?.error || `HTTP ${r.status}`);
+          }
+          return body as AuditData;
+        })
+        .then((d) => {
+          if (!isCurrent()) return;
+          setData(d);
+          setError(null);
+          setLoading(false);
+        })
+        .catch((e: unknown) => {
+          if (!isCurrent()) return;
+          setData(null);
+          setError(e instanceof Error ? e.message : String(e));
+          setLoading(false);
+        });
+    },
+    [activeTab, filters],
+  );
 
   useEffect(() => {
-    loadData();
+    let current = true;
+    loadData(() => current);
+    return () => {
+      current = false;
+    };
   }, [loadData]);
 
   const updateFilter = (patch: Partial<AuditFilters>) =>

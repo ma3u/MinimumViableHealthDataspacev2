@@ -9,13 +9,11 @@
  */
 import { test, expect } from "@playwright/test";
 import {
-  PARTICIPANT_NAMES,
   T,
-  expectHeading,
   expectSigninRedirect,
-  waitForDataLoad,
   apiGet,
   skipIfNeo4jDown,
+  apiGetTasksOrSkip,
 } from "./helpers";
 import { signInOrSkip } from "../helpers/forged-session";
 
@@ -24,6 +22,8 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
   test("J49 — Cross-border journey: multi-country participants, negotiations, graph", async ({
     page,
   }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page);
 
     // Step 1: Verify participants from multiple countries via API
@@ -41,19 +41,19 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
     expect(new Set(dids).size).toBeGreaterThanOrEqual(3);
 
     // Step 2: Verify cross-border negotiations exist
-    const tasksData = await apiGet(page, "/api/tasks");
+    const tasksData = await apiGetTasksOrSkip(page);
     const tasks = tasksData.tasks || tasksData;
     const negotiations = tasks.filter(
       (t: { type: string }) => t.type === "negotiation",
     );
     expect(negotiations.length).toBeGreaterThanOrEqual(1);
 
-    // Step 3: Discover page is protected
+    // Step 3: Discover page is protected, for a visitor who is signed out
+    await page.context().clearCookies();
     await page.goto("/data/discover");
     await expectSigninRedirect(page);
 
-    // Step 4: Graph is public — renders with canvas
-    // Every API route needs a session since #404 (ADR-044).
+    // Step 4: The graph renders with canvas for any signed-in participant
     await signInOrSkip(page, test.skip);
     await page.goto("/graph");
     const canvas = page.locator("canvas");
@@ -64,6 +64,7 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
   test("J50 — Compliance audit: credentials, policies, catalog, audit log", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page); // Step 1: All 5 participants registered
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
@@ -86,7 +87,10 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
     const policiesData = await apiGet(page, "/api/admin/policies");
     const participantPolicies =
       policiesData.participants || policiesData.policies || policiesData;
-    if (Array.isArray(participantPolicies)) {
+    // Without an EDC control plane the route answers from Neo4j (offline),
+    // which holds no participant's policy definitions; the other steps of
+    // the audit still apply there.
+    if (!policiesData.offline && Array.isArray(participantPolicies)) {
       expect(participantPolicies.length).toBeGreaterThanOrEqual(3);
     }
 
@@ -114,7 +118,8 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
       Array.isArray(audit.credentials) && audit.credentials.length > 0;
     expect(hasTransfers || hasNegotiations || hasCredentials).toBe(true);
 
-    // Step 6: Compliance page is protected
+    // Step 6: Compliance page is protected, for a visitor who is signed out
+    await page.context().clearCookies();
     await page.goto("/compliance");
     await expectSigninRedirect(page);
   });

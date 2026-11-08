@@ -45,10 +45,15 @@ describe("isTestIdentity()", () => {
 describe("the forged sessions", () => {
   const read = (f: string) => readFileSync(path.resolve(f), "utf8");
 
-  it("the Playwright helper signs every persona in at ci.test", () => {
+  // loginAs() stands in for a Keycloak login where there is none (ADR-079)
+  // and takes the realm user's mail; every other forged session is ci.test.
+  it("the Playwright helper signs a persona in at ci.test unless it stands in for Keycloak", () => {
     const src = read("__tests__/e2e/helpers/forged-session.ts");
     expect(src).toMatch(/const TEST_MAIL_DOMAIN = "ci\.test"/);
-    expect(src).toContain("email: `${persona}@${TEST_MAIL_DOMAIN}`");
+    expect(src).toContain(": `${persona}@${TEST_MAIL_DOMAIN}`");
+    expect(src).toContain("realmMail && profile.realmMail");
+    const login = read("__tests__/e2e/journeys/helpers.ts");
+    expect(login).toContain("signInPage(page, username, { realmMail: true })");
     for (const persona of ["participant", "edcadmin", "researcher"]) {
       expect(userToParticipantId(`${persona}@ci.test`, [])).toBe(
         `did:web:ci.test:${persona}`,

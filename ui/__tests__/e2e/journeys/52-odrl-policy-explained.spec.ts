@@ -36,9 +36,12 @@ test.describe("ODRL policies explained and checked", () => {
       page.getByRole("heading", { level: 1, name: "Policy Definitions" }),
     ).toBeVisible({ timeout: 15_000 });
 
-    // Open the first participant that has policies.
+    // Open the first participant that has policies. Its button is named by
+    // what it shows and says whether it is open (aria-expanded), no longer
+    // "Expand <name>" (WCAG 2.5.3, 2026-11-08).
     await page
-      .getByRole("button", { name: /^Expand / })
+      .getByRole("main")
+      .locator('button[aria-expanded="false"]')
       .first()
       .click();
     const description = page.getByTestId("policy-description").first();
@@ -61,7 +64,8 @@ test.describe("ODRL policies explained and checked", () => {
     // German: the same description through the picker's dictionary.
     await page.goto("/admin/policies?lang=de");
     await page
-      .getByRole("button", { name: / aufklappen$/ })
+      .getByRole("main")
+      .locator('button[aria-expanded="false"]')
       .first()
       .click();
     await expect(page.getByTestId("policy-description").first()).toContainText(

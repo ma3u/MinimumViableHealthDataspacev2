@@ -14,6 +14,10 @@ NEO4J_USER="${NEO4J_USER:-neo4j}"
 NEO4J_PASSWORD="${NEO4J_PASSWORD:-healthdataspace}"
 NEO4J_URI="bolt://${NEO4J_HOST}:${NEO4J_PORT}"
 
+# Where the cypher files are: /seed in the seed image, neo4j/ when CI or a
+# developer loads a local Neo4j with the same graph (SEED_DIR=neo4j).
+SEED_DIR="${SEED_DIR:-/seed}"
+
 # A run that loads nothing, or loads a file only in part, must fail (ADR-031).
 # Until 2026-10-28 it exited 0 either way: two runs on 2026-10-27 found Neo4j
 # stopped for the night, every file failed, and the job reported Succeeded.
@@ -81,7 +85,7 @@ finish() {
 if [ "${SEED_PHASE:-}" = "api-cleanup" ]; then
   echo ""
   echo "=== SEED_PHASE=api-cleanup — removing what the API collection's journeys added ==="
-  run_file /seed/remove-api-collection-runs.cypher "API collection runs (Demo Smoke)"
+  run_file "$SEED_DIR"/remove-api-collection-runs.cypher "API collection runs (Demo Smoke)"
   echo ""
   echo "=== Verifying ==="
   left=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -102,10 +106,10 @@ if [ "${SEED_PHASE:-}" = "phase26-only" ]; then
   echo "=== SEED_PHASE=phase26-only — running just the Phase 26 files ==="
   # Schema constraints must exist before MERGE-by-property-key creates new
   # ParticipantProfile/VPA nodes; init-schema is idempotent (IF NOT EXISTS).
-  run_file /seed/init-schema.cypher "schema (idempotent)"
-  run_file /seed/participant-source-init.cypher "participant source labels (Phase 26a)"
-  run_file /seed/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
-  run_file /seed/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
+  run_file "$SEED_DIR"/init-schema.cypher "schema (idempotent)"
+  run_file "$SEED_DIR"/participant-source-init.cypher "participant source labels (Phase 26a)"
+  run_file "$SEED_DIR"/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
+  run_file "$SEED_DIR"/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
   echo ""
   echo "=== Verifying ==="
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -127,18 +131,18 @@ fi
 if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   echo ""
   echo "=== SEED_PHASE=demo-only — running the governance and audit seeds ==="
-  run_file /seed/init-schema.cypher "schema (idempotent)"
-  run_file /seed/seed-audit-provenance.cypher "audit provenance"
-  run_file /seed/seed-transfer-events.cypher "transfer events"
-  run_file /seed/seed-trust-center.cypher "trust center"
-  run_file /seed/seed-es-hdab.cypher "MedReg ES, second HDAB (#27)"
-  run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
-  run_file /seed/seed-persona-overview.cypher "persona overview (discussion #265)"
-  run_file /seed/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
-  run_file /seed/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
-  run_file /seed/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
-  run_file /seed/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
-  run_file /seed/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
+  run_file "$SEED_DIR"/init-schema.cypher "schema (idempotent)"
+  run_file "$SEED_DIR"/seed-audit-provenance.cypher "audit provenance"
+  run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"
+  run_file "$SEED_DIR"/seed-trust-center.cypher "trust center"
+  run_file "$SEED_DIR"/seed-es-hdab.cypher "MedReg ES, second HDAB (#27)"
+  run_file "$SEED_DIR"/seed-compliance-matrix.cypher "compliance matrix"
+  run_file "$SEED_DIR"/seed-persona-overview.cypher "persona overview (discussion #265)"
+  run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
+  run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
+  run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
+  run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
+  run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
   echo ""
   echo "=== Verifying ==="
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -156,68 +160,68 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   finish
 fi
 
-run_file /seed/init-schema.cypher "schema"
-run_file /seed/insert-synthetic-schema-data.cypher "synthetic data"
-run_file /seed/register-dsp-marketplace.cypher "DSP marketplace"
-run_file /seed/register-fhir-dataset-hdcatap.cypher "FHIR DCAT-AP"
-run_file /seed/register-fhir-dataset-hdcatap-spe2.cypher "FHIR DCAT-AP SPE2"
-run_file /seed/register-eehrxf-profiles.cypher "EEHRxF profiles"
-run_file /seed/register-ehds-credentials.cypher "EHDS credentials"
-run_file /seed/fhir-to-omop-transform.cypher "FHIR→OMOP transform"
-run_file /seed/seed-transfer-events.cypher "transfer events"
-run_file /seed/seed-trust-center.cypher "trust center"
-run_file /seed/seed-es-hdab.cypher "MedReg ES, second HDAB (#27)"
-run_file /seed/seed-audit-provenance.cypher "audit provenance"
-run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
+run_file "$SEED_DIR"/init-schema.cypher "schema"
+run_file "$SEED_DIR"/insert-synthetic-schema-data.cypher "synthetic data"
+run_file "$SEED_DIR"/register-dsp-marketplace.cypher "DSP marketplace"
+run_file "$SEED_DIR"/register-fhir-dataset-hdcatap.cypher "FHIR DCAT-AP"
+run_file "$SEED_DIR"/register-fhir-dataset-hdcatap-spe2.cypher "FHIR DCAT-AP SPE2"
+run_file "$SEED_DIR"/register-eehrxf-profiles.cypher "EEHRxF profiles"
+run_file "$SEED_DIR"/register-ehds-credentials.cypher "EHDS credentials"
+run_file "$SEED_DIR"/fhir-to-omop-transform.cypher "FHIR→OMOP transform"
+run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"
+run_file "$SEED_DIR"/seed-trust-center.cypher "trust center"
+run_file "$SEED_DIR"/seed-es-hdab.cypher "MedReg ES, second HDAB (#27)"
+run_file "$SEED_DIR"/seed-audit-provenance.cypher "audit provenance"
+run_file "$SEED_DIR"/seed-compliance-matrix.cypher "compliance matrix"
 
 # Discussion #265: the data the four persona overviews need and the relations
 # between the personas: the demo patient's LOINC-coded measurements at
 # AlphaKlinik, her consents to studies, twelve months of access events per
 # consumer and dataset, quality label assessments per quarter. Generated by
 # scripts/generate-persona-overview-seed.py. Idempotent MERGE.
-run_file /seed/seed-persona-overview.cypher "persona overview (discussion #265)"
-run_file /seed/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
+run_file "$SEED_DIR"/seed-persona-overview.cypher "persona overview (discussion #265)"
+run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
 
 # Issue #694: the seeds above now write ehdsArticle as "Art. NN" with the
 # adopted numbers of Regulation (EU) 2025/327. Some of them only SET it ON
 # CREATE, so a graph seeded before keeps the proposal-era labels; this
 # migration corrects them. Idempotent: it matches only the old values.
-run_file /seed/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
-run_file /seed/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
-run_file /seed/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
+run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
+run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
+run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
 # catalog-crawler has targets and the enricher can link federated datasets
 # back to their publishers. Idempotent MERGE, safe to re-run.
-run_file /seed/participant-source-init.cypher "participant source labels (Phase 26a)"
+run_file "$SEED_DIR"/participant-source-init.cypher "participant source labels (Phase 26a)"
 
 # Phase 26e: CFM tenant profiles + VPAs. Drives /admin/tenants on Azure (where
 # there is no live CFM TenantManager) so the dashboard shows non-zero
 # Participant Profiles + Disposed VPAs counts. Idempotent MERGE.
-run_file /seed/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
+run_file "$SEED_DIR"/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
 
 # Issue #782: the national implementation of the EHDS in DE, AT, BE, FR, NL
 # and ES, and which participant is under which. After Phase 26a, which gives
 # every participant its country. Idempotent MERGE.
-run_file /seed/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
+run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
 
 # Phase 26d: NLQ glossary — NL->code mappings for federated templates.
 # Stored in Neo4j (not hardcoded) so operators can extend without a
 # redeploy. ~30 curated terms across kind=country|concept|credential.
-run_file /seed/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
+run_file "$SEED_DIR"/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
 
 # Issue #19: backfill :CODED_BY edges from Condition/MedicationRequest/
 # Observation to their ontology nodes, using the code strings that are
 # already present on the clinical nodes. Fills in the relationships the
 # Synthea bulk-import leaves empty so NLQ queries can join to the
 # ontology layer cleanly. Idempotent.
-run_file /seed/backfill-coded-by.cypher "CODED_BY edge backfill (issue #19)"
+run_file "$SEED_DIR"/backfill-coded-by.cypher "CODED_BY edge backfill (issue #19)"
 
 # Issue #19: pharmacovigilance demo cohort (ciprofloxacin + UTI + tendon
 # rupture) so the canonical NLQ teaching question returns a real cohort
 # against the Synthea-based synthetic dataset (which does not include
 # fluoroquinolones out of the box). 6 fictional patients. Idempotent.
-run_file /seed/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (issue #19)"
+run_file "$SEED_DIR"/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (issue #19)"
 
 # Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
 # Requires the graph-data-science plugin; silently no-ops on installs without
@@ -226,7 +230,7 @@ run_file /seed/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (issue #
 if cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
      --non-interactive --format plain \
      "CALL gds.version() YIELD gdsVersion RETURN gdsVersion;" > /dev/null 2>&1; then
-  run_file /seed/register-embeddings-fastrp.cypher "FastRP structural embeddings"
+  run_file "$SEED_DIR"/register-embeddings-fastrp.cypher "FastRP structural embeddings"
 else
   echo ""
   echo "=== SKIPPED: FastRP embeddings (graph-data-science plugin not loaded) ==="
@@ -237,7 +241,7 @@ fi
 # Only runs when AZURE_OPENAI_API_KEY is present in the seed environment; a
 # fresh local install with no API key simply skips this step.
 if [ -n "${AZURE_OPENAI_API_KEY:-}" ] && [ -n "${AZURE_OPENAI_EMBEDDINGS_URL:-}" ]; then
-  run_file /seed/register-embeddings-aoai.cypher "Azure OpenAI semantic embeddings"
+  run_file "$SEED_DIR"/register-embeddings-aoai.cypher "Azure OpenAI semantic embeddings"
 fi
 
 echo ""

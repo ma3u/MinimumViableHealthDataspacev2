@@ -292,11 +292,7 @@ function DataDiscoverContent() {
                       >
                         <button
                           className="w-full text-left p-4"
-                          aria-label={
-                            isOpen
-                              ? t("Collapse {name}", { name: c.title })
-                              : t("Expand {name}", { name: c.title })
-                          }
+                          aria-expanded={isOpen}
                           onClick={() => setExpanded(isOpen ? null : c.id)}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -455,15 +451,7 @@ function DataDiscoverContent() {
                       >
                         <button
                           className="w-full text-left p-4"
-                          aria-label={
-                            isOpen
-                              ? t("Collapse {name}", {
-                                  name: assetField(a, "name") || id,
-                                })
-                              : t("Expand {name}", {
-                                  name: assetField(a, "name") || id,
-                                })
-                          }
+                          aria-expanded={isOpen}
                           onClick={() => setExpanded(isOpen ? null : id)}
                         >
                           <div className="flex items-start justify-between gap-4">

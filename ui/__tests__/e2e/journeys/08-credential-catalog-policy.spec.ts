@@ -15,6 +15,7 @@ import {
   waitForDataLoad,
   apiGet,
   skipIfNeo4jDown,
+  apiGetPoliciesOrSkip,
 } from "./helpers";
 import { signInOrSkip } from "../helpers/forged-session";
 
@@ -48,6 +49,7 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
 
   /* ── J58: Catalog API returns non-empty array ────────────── */
   test("J58 — Catalog API returns a populated array", async ({ page }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const datasets = await apiGet(page, "/api/catalog");
     expect(Array.isArray(datasets)).toBe(true);
     expect(datasets.length).toBeGreaterThanOrEqual(1);
@@ -62,7 +64,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
   test("J59 — Policy API returns ODRL-structured policies", async ({
     page,
   }) => {
-    const data = await apiGet(page, "/api/admin/policies");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetPoliciesOrSkip(page);
     const groups = data.participants || data || [];
     expect(Array.isArray(groups)).toBe(true);
     expect(groups.length).toBeGreaterThanOrEqual(1);
@@ -89,6 +92,7 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
   test("J60 — Credentials API returns EHDS credentials for participants", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;

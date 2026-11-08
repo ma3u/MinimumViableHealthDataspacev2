@@ -20,11 +20,15 @@
  *     PLAYWRIGHT_KEYCLOAK_URL — block skips cleanly otherwise)
  */
 import { test, expect, type Page } from "@playwright/test";
+import { forgedSessions } from "./helpers";
 import { keycloakLogin } from "../helpers/keycloak-login";
+import { signInOrSkip } from "../helpers/forged-session";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const API = `${BASE}/api`;
-const KC_AVAILABLE = Boolean(process.env.PLAYWRIGHT_KEYCLOAK_URL);
+// A Keycloak to sign in at, or loginAs()'s forged session (journeys/helpers.ts).
+const KC_AVAILABLE =
+  Boolean(process.env.PLAYWRIGHT_KEYCLOAK_URL) || forgedSessions();
 
 /* ── A. Public health endpoints ─────────────────────────────────── */
 
@@ -33,7 +37,9 @@ test.describe("A · Public health endpoints", () => {
     const r = await fetch(`${API}/health`, { cache: "no-store" });
     expect(r.status).toBe(200);
     const body = await r.json();
-    expect(body).toHaveProperty("ok");
+    // The probe has answered { status: "ok", timestamp } since Phase 20;
+    // there never was an "ok" flag.
+    expect(body.status).toBe("ok");
   });
 
   test("J701 GET / returns 200 (home page renders)", async ({ page }) => {
@@ -42,7 +48,10 @@ test.describe("A · Public health endpoints", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
+  // /query sends a signed-out visitor to sign in since #404 (ADR-044), so
+  // the chips are only there for a session; any participant will do.
   test("J702 /query page renders example question chips", async ({ page }) => {
+    await signInOrSkip(page, test.skip);
     await page.goto(`${BASE}/query`);
     await expect(
       page.getByRole("button", { name: /How many patients are there/ }),
@@ -52,6 +61,7 @@ test.describe("A · Public health endpoints", () => {
   test("J703 NLQ example chips meet minimum touch target (≥32×32 CSS px)", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip);
     await page.goto(`${BASE}/query`);
     const chip = page.getByRole("button", {
       name: /How many patients are there/,
@@ -108,7 +118,10 @@ test.describe("B · Authenticated NLQ roundtrip", () => {
       .getByRole("button", { name: /How many patients are there/ })
       .click();
     await page.getByRole("button", { name: /^Ask$/ }).click();
-    await expect(page.getByText(/rows$/)).toBeVisible({ timeout: 15_000 });
+    // "1 row" for the count, "N rows" otherwise.
+    await expect(page.getByText(/\d+ rows?$/).first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText(/fetch failed/)).toHaveCount(0);
   });
 
@@ -124,7 +137,8 @@ test.describe("B · Authenticated NLQ roundtrip", () => {
     // When nothing matches, method must be 'none' or results must be empty —
     // never should the route silently 500 or hide the error.
     if (body.method === "none") {
-      expect(body.results.length).toBe(0);
+      // A refusal without results carries no results field at all.
+      expect(body.results ?? []).toHaveLength(0);
     }
   });
 
@@ -188,6 +202,13 @@ test.describe("C · Federated stats + ODRL scope", () => {
 /* ── D. Version badge + release link ────────────────────────────── */
 
 test.describe("D · Version badge", () => {
+  // openUserMenu() opens the signed-in menu, whose button is named "User
+  // menu"; signed out (every route needs a session since #404) the button
+  // is "Sign in".
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip);
+  });
+
   async function openUserMenu(page: Page) {
     await page.goto(BASE);
     const menuTrigger = page
@@ -231,9 +252,15 @@ test.describe("D · Version badge", () => {
     const text = (await info.innerText()).trim();
     // Must contain version tag.
     expect(text).toMatch(/v\d+\.\d+\.\d+/);
-    // Must NOT contain a 40-char hex commit SHA or a yyyy-mm-dd timestamp.
+    // Must NOT contain a 40-char hex commit SHA or a time of day. The badge
+    // reads "vX.Y.Z · YYYY-MM-DD" since 61c4f447, the build date only, so a
+    // reported issue can be matched to a release; this asserted no date at
+    // all, as 794663d3 had it the same morning.
     expect(text).not.toMatch(/[0-9a-f]{40}/);
-    expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+    expect(text).not.toMatch(/\d{1,2}:\d{2}/);
+    expect(text).toMatch(
+      /^v\d+\.\d+\.\d+(\s*\+local)?(\s*·\s*\d{4}-\d{2}-\d{2})?$/,
+    );
     expect(text).not.toMatch(/Released\s*·/);
     expect(text).not.toMatch(/Built locally/);
   });

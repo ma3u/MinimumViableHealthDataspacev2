@@ -5,8 +5,9 @@ name: Security Scan (SBOM + CVE)
 #   * `npm audit` only sees npm packages. It cannot see Keycloak, Postgres,
 #     Neo4j, NATS, Traefik, Vault, or the JAD/EDC images — which is most of the
 #     attack surface in this stack.
-#   * Dependabot reads Dockerfile FROM lines, not docker-compose*.yml, so the
-#     infrastructure images pinned in compose are invisible to it too.
+#   * Dependabot proposes newer versions of the images pinned in compose
+#     (its docker-compose entry, since 2026-11-08), but it does not scan an
+#     image for known CVEs.
 #
 # This workflow closes both gaps: it produces a CycloneDX SBOM for the source
 # trees and scans the container images from the compose files, publishing

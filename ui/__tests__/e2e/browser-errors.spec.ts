@@ -8,10 +8,13 @@
  * Authenticated pages are tested after a full Keycloak login.
  */
 import { test, expect, Page } from "@playwright/test";
+import { forgedSessions, loginAs } from "./journeys/helpers";
 
 /* ── Service-availability probes ─────────────────────────────── */
 
+/** Keycloak answers, or loginAs() forges the session (E2E_FORGED_SESSIONS). */
 async function isKeycloakUp(): Promise<boolean> {
+  if (forgedSessions()) return true;
   try {
     const kcUrl = process.env.KEYCLOAK_PUBLIC_URL || "http://localhost:8080";
     const res = await fetch(
@@ -129,6 +132,11 @@ function summarize(errors: PageErrors, route: string): string {
 /* ── Auth helper ──────────────────────────────────────────────── */
 
 async function loginAsEdcAdmin(page: Page) {
+  if (forgedSessions()) {
+    await loginAs(page, "edcadmin", "edcadmin");
+    await page.goto("/onboarding");
+    return;
+  }
   await page.goto("/onboarding");
   await expect(page).toHaveURL(/\/auth\/signin/, { timeout: 10_000 });
   await page.click('button:has-text("Sign in with Keycloak")');

@@ -14,10 +14,13 @@
  * specs in this repo).
  */
 import { test, expect } from "@playwright/test";
+import { forgedSessions } from "./helpers";
 import { keycloakLogin } from "../helpers/keycloak-login";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
-const KC_AVAILABLE = Boolean(process.env.PLAYWRIGHT_KEYCLOAK_URL);
+// A Keycloak to sign in at, or loginAs()'s forged session (journeys/helpers.ts).
+const KC_AVAILABLE =
+  Boolean(process.env.PLAYWRIGHT_KEYCLOAK_URL) || forgedSessions();
 const IS_AZURE_BASE = BASE.includes("ehds.mabu.red");
 const IS_LOCALHOST = BASE.includes("localhost");
 
@@ -51,12 +54,22 @@ test.describe("Issue #17 · /admin/components", () => {
   });
 
   test("J801 cluster header shows CPU % + memory", async ({ page }) => {
+    // The cluster banner belongs to the Participant View, and shows where the
+    // topology has metrics (the Docker socket or Azure Monitor).
+    const topology = await page.request.get(
+      `${BASE}/api/admin/components/topology`,
+    );
+    test.skip(
+      !(await topology.json()).clusterMetrics,
+      "No cluster metrics on this stack (no Docker socket, no Azure Monitor)",
+    );
+    await page.getByRole("button", { name: /Participant View/i }).click();
     const header = page.getByText(/Cluster/).first();
     await expect(header).toBeVisible();
     const body = await page.locator("body").innerText();
-    // "CPU 4.5% now" / "MEM 2.7 GB now"
-    expect(body).toMatch(/CPU\s+[\d.]+%\s+now/i);
-    expect(body).toMatch(/MEM\s+[\d.]+\s*(MB|GB)\s+now/i);
+    // "4.5% now" / "2.7 GB now": icons mark CPU and memory, not words.
+    expect(body).toMatch(/[\d.]+%\s+now/i);
+    expect(body).toMatch(/[\d.]+\s*(MB|GB)\s+now/i);
   });
 
   /* ── B. Environment-appropriate cost panel ──────────────────────── */
@@ -66,14 +79,17 @@ test.describe("Issue #17 · /admin/components", () => {
   }) => {
     test.skip(!IS_AZURE_BASE, "Only meaningful against ehds.mabu.red");
     await expect(page.getByText(/Azure Container Apps/i).first()).toBeVisible();
-    // StackIT panel must NOT show on Azure demo.
-    await expect(page.getByText(/STACKIT \(Frankfurt\)/i)).toHaveCount(0);
+    // Since #482 the static STACKIT estimate follows it, for comparison.
+    await expect(
+      page.getByText(/STACKIT \(static, EU01 Germany/i).first(),
+    ).toBeVisible();
   });
 
   test("J803 localhost renders the StackIT cost panel", async ({ page }) => {
     test.skip(!IS_LOCALHOST, "Only meaningful against a local dev server");
+    // "STACKIT (Frankfurt)" became the static EU01 estimate in #482.
     await expect(
-      page.getByText(/STACKIT \(Frankfurt\)/i).first(),
+      page.getByText(/STACKIT \(static, EU01 Germany/i).first(),
     ).toBeVisible();
     // Azure panel must NOT show on local dev.
     await expect(page.getByText(/Azure Container Apps/i)).toHaveCount(0);

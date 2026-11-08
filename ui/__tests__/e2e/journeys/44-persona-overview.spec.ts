@@ -17,7 +17,13 @@
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
  */
 import { test, expect, type Page } from "@playwright/test";
-import { apiGet, loginAs, loginAsAdmin, skipIfNeo4jDown } from "./helpers";
+import {
+  apiGet,
+  loginAs,
+  loginAsAdmin,
+  skipIfKeycloakDown,
+  skipIfNeo4jDown,
+} from "./helpers";
 
 const P1 = "P1";
 const PHARMACO = "did:web:pharmaco.de:research";
@@ -26,14 +32,17 @@ const IRS = "did:web:irs.fr:hdab";
 
 /**
  * Skip when the persona overview seed has not been applied to this graph.
- * Probes the public patient list, so it works before any login.
+ * Probes the patient list, which needs a session since ADR-044 (#404): call
+ * it after the login. Under a patient login the list holds only their own
+ * record, and its name is shown only to EDC_ADMIN and DATA_HOLDER (#475), so
+ * a patient spec checks for P1 alone.
  */
-async function skipIfSeedMissing(page: Page) {
+async function skipIfSeedMissing(page: Page, { byName = true } = {}) {
   await skipIfNeo4jDown(page, "/api/patient");
   const list = await page.request.get("/api/patient");
   const data = list.ok() ? await list.json() : { patients: [] };
   const p1 = (data.patients ?? []).find((p: { id: string }) => p.id === P1);
-  if (!p1 || p1.name !== "Maria Schmidt") {
+  if (!p1 || (byName && p1.name !== "Maria Schmidt")) {
     test.skip(true, "seed-persona-overview.cypher not applied (no P1)");
   }
 }
@@ -44,8 +53,8 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
   test("J960 P1 is Maria Schmidt with her eight diagnoses and four medications", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAsAdmin(page);
+    await skipIfSeedMissing(page);
     const data = await apiGet(page, `/api/patient/profile?patientId=${P1}`);
     expect(data.patient.name).toBe("Maria Schmidt");
     expect(data.conditions.length).toBeGreaterThanOrEqual(8);
@@ -58,8 +67,8 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
   test("J961 her laboratory values carry a LOINC code and a unit", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAsAdmin(page);
+    await skipIfSeedMissing(page);
     const data = await apiGet(page, `/api/patient/profile?patientId=${P1}`);
     const labs: { code: string; unit: string }[] = data.observations ?? [];
     expect(labs.length).toBeGreaterThan(0);
@@ -72,8 +81,8 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
   test("J962 twelve months of access events per consumer are in the audit log", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAsAdmin(page);
+    await skipIfSeedMissing(page);
     const data = await apiGet(
       page,
       "/api/admin/audit?type=accesslogs&limit=200",
@@ -95,8 +104,8 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
   test("J963 the refused applicant's attempts are logged as refused, with the article", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAsAdmin(page);
+    await skipIfSeedMissing(page);
     const data = await apiGet(
       page,
       `/api/admin/audit?type=accesslogs&limit=200&consumerDid=${encodeURIComponent(
@@ -130,12 +139,27 @@ test.describe("Issue #271 · M1 patient overview", () => {
     );
     expect(bundle.resourceType).toBe("Bundle");
     expect(bundle.type).toBe("searchset");
-    expect(bundle.total).toBe(48);
+    expect(bundle.total).toBe(bundle.entry.length);
     for (const { resource } of bundle.entry) {
       expect(resource.subject.reference).toBe(`Patient/${P1}`);
       expect(resource.code.coding[0].system).toBe("http://loinc.org");
+    }
+    // The 48 parameter values of seed-persona-overview.cypher, each with its
+    // printed range. The resting ECG of seed-study-results.cypher (ADR-059)
+    // adds six intervals to the same bundle; a Q-T interval has no range.
+    const params = bundle.entry.filter(
+      ({ resource }: { resource: { id: string } }) =>
+        resource.id.startsWith(`obs-${P1.toLowerCase()}-`),
+    );
+    expect(params).toHaveLength(48);
+    for (const { resource } of params) {
       expect(resource.referenceRange[0].low.value).toBeDefined();
     }
+    const ecg = bundle.entry.filter(
+      ({ resource }: { resource: { id: string } }) =>
+        resource.id.startsWith(`dr-ecg-${P1.toLowerCase()}-`),
+    );
+    expect(ecg).toHaveLength(6);
   });
 
   test("J965 /api/overview?persona=patient names HbA1c as the first, red signal", async ({
@@ -339,11 +363,11 @@ test.describe("Issue #271 · M5 static export", () => {
 // ── M6 The data behind the views ───────────────────────────────────────────
 
 test.describe("Issue #271 · M6 the data behind the views", () => {
-  test("J976 the patient's access log names who read her record (Art. 8)", async ({
+  test("J976 the patient's access log names who read her record (Art. 9)", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAsAdmin(page);
+    await skipIfSeedMissing(page);
     const view = await apiGet(
       page,
       `/api/overview?persona=patient&patientId=${P1}`,
@@ -352,7 +376,9 @@ test.describe("Issue #271 · M6 the data behind the views", () => {
       (s: { code: string }) => s.code === "access-log",
     );
     expect(log.text).toContain("read my record");
-    expect(log.article).toContain("Art. 8");
+    // Art. 9 of Regulation (EU) 2025/327 as adopted; the proposal's Art. 8
+    // until the article numbers were corrected (#699).
+    expect(log.article).toContain("Art. 9");
     const readers = view.nodes.filter((n: { id: string }) =>
       n.id.startsWith("access:"),
     );
@@ -365,8 +391,8 @@ test.describe("Issue #271 · M6 the data behind the views", () => {
   test("J977 an opted-out study shows the withdrawal date (Art. 71)", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAsAdmin(page);
+    await skipIfSeedMissing(page);
     const view = await apiGet(
       page,
       `/api/overview?persona=patient&patientId=${P1}`,
@@ -414,8 +440,8 @@ test.describe("Issue #271 · the roles open their own overview", () => {
   test("J979 the patient login opens its own overview, no Forbidden", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAs(page, "patient1", "patient1");
+    await skipIfSeedMissing(page, { byName: false });
     const res = await page.request.get("/api/overview");
     expect(res.status(), await res.text()).toBe(200);
     const view = await res.json();
@@ -431,8 +457,8 @@ test.describe("Issue #271 · the roles open their own overview", () => {
   test("J982 the patient page says when the record was last synced", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAs(page, "patient1", "patient1");
+    await skipIfSeedMissing(page, { byName: false });
     const res = await page.request.get("/api/patient");
     expect(res.status(), await res.text()).toBe(200);
     const list = await res.json();
@@ -454,8 +480,8 @@ test.describe("Issue #271 · the roles open their own overview", () => {
   test("J983 finishing the Request EHR data flow stamps a fresh sync", async ({
     page,
   }) => {
-    await skipIfSeedMissing(page);
     await loginAs(page, "patient1", "patient1");
+    await skipIfSeedMissing(page, { byName: false });
     const before = (await (await page.request.get("/api/patient")).json())
       .lastEhrSync?.at as string | undefined;
     await page.goto("/patient");
@@ -510,6 +536,8 @@ test.describe("Issue #271 · the persona buttons land on the overview", () => {
   test("J981 signing in as patient1 from the sign-in page lands on /overview", async ({
     page,
   }) => {
+    // The Keycloak login form itself, which a forged session never shows.
+    await skipIfKeycloakDown({ realKeycloak: true });
     await page.goto("/auth/signin", { waitUntil: "networkidle" });
     await page
       .getByRole("button", { name: /patient1/i })

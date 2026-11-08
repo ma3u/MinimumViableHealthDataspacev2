@@ -36,6 +36,7 @@ test.describe("D · Discovery & Federated Search", () => {
   test("J24 — Catalog API includes datasets with various types", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const datasets = await apiGet(page, "/api/catalog");
     expect(datasets.length).toBeGreaterThanOrEqual(10);
 
@@ -50,6 +51,7 @@ test.describe("D · Discovery & Federated Search", () => {
   test("J25 — Clinical trial dataset exists in catalog API", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const datasets = await apiGet(page, "/api/catalog");
     const trial = datasets.find(
       (d: { title?: string }) => d.title?.includes("Clinical Trial"),
@@ -65,12 +67,13 @@ test.describe("D · Discovery & Federated Search", () => {
 
   /* ── J27: Graph Explorer renders layer sidebar ───────────── */
   test("J27 — Graph Explorer shows all 5 graph layers", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     // Every API route needs a session since #404 (ADR-044).
     await signInOrSkip(page, test.skip);
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
 
-    await expect(page.getByText("Data layers").first()).toBeVisible({
+    // The sidebar's "Data layers" became the "Layers" list of the Legend.
+    await expect(page.getByText("Layers", { exact: true })).toBeVisible({
       timeout: T,
     });
 
@@ -90,26 +93,32 @@ test.describe("D · Discovery & Federated Search", () => {
   test("J28 — Graph canvas renders and includes FHIR R4 + OMOP CDM", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
-
     // Every API route needs a session since #404 (ADR-044).
     await signInOrSkip(page, test.skip);
+    await skipIfNeo4jDown(page);
     await page.goto("/graph");
-    await expect(page.getByText("Data layers").first()).toBeVisible({
+    // The sidebar's "Data layers" became the "Layers" list of the Legend.
+    await expect(page.getByText("Layers", { exact: true })).toBeVisible({
       timeout: T,
     });
 
     const canvas = page.locator("canvas");
     await expect(canvas.first()).toBeVisible({ timeout: T });
 
-    await expect(page.getByText("FHIR R4").first()).toBeVisible({ timeout: T });
-    await expect(page.getByText("OMOP CDM").first()).toBeVisible({
+    // The standards are named in the legend rows' tooltips now.
+    await expect(page.locator('[title*="FHIR R4"]').first()).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.locator('[title*="OMOP CDM"]').first()).toBeVisible({
       timeout: T,
     });
   });
 
   /* ── J29: Patient Journey page renders cohort data ───────── */
   test("J29 — Patient Journey page shows patient cohort", async ({ page }) => {
+    // /patient joined PROTECTED_PATHS in #357; a signed-in participant sees
+    // the demo cohort.
+    await signInOrSkip(page, test.skip);
     await page.goto("/patient");
     await expectHeading(page, "Patient Journey");
     await waitForDataLoad(page);

@@ -51,7 +51,7 @@ async function sessionRoles(page: Page): Promise<string[]> {
 
 test.describe("Journey S — Logout clears the Keycloak SSO session", () => {
   test.beforeEach(async () => {
-    await skipIfKeycloakDown();
+    await skipIfKeycloakDown({ realKeycloak: true });
   });
 
   test("J820 — sign out fully clears the NextAuth session", async ({

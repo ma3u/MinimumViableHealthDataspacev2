@@ -8,18 +8,17 @@
  * also renders a few of them in German.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import mermaid from "mermaid";
 import { MESSAGES, type Area } from "@/messages";
 import { translate } from "@/lib/i18n/translate";
 import {
+  EPICS,
   ITEMS,
   LANES,
   MILESTONES,
   STATUS_LABEL,
-  roadmapGantt,
   roadmapTargets,
 } from "@/lib/docs/roadmap";
 import facts from "@/app/docs/docs-facts.json";
@@ -39,13 +38,9 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/components/MermaidDiagram", () => ({
-  default: ({ chart, caption }: { chart: string; caption?: string }) => (
-    <figure>
-      <pre data-testid="mermaid-diagram">{chart}</pre>
-      <figcaption>{caption}</figcaption>
-    </figure>
-  ),
+// The timeline's own test draws it in German (RoadmapTimeline.test.tsx).
+vi.mock("@/components/docs/RoadmapTimeline", () => ({
+  default: () => <div data-testid="roadmap-timeline" />,
 }));
 
 // One document translated into German, as the generator writes the index.
@@ -187,9 +182,16 @@ describe("the docs pages' texts are in their dictionaries", () => {
         ...LANES.flatMap((l) => [l.label, l.driver]),
         ...ITEMS.flatMap((i) => [i.short, i.title, i.note]),
         ...MILESTONES.flatMap((m) => [m.label, m.detail]),
+        ...EPICS.flatMap((e) => [e.short, e.title, e.note]),
         ...Object.values(STATUS_LABEL),
+        "Epic",
+        "{done} of {total} done",
         "{start} to {end}",
-        "Click a bar for its issue, a diamond for its source. The red line is today.",
+        "Drag to pan, Ctrl or ⌘ and the wheel to zoom. Click a bar or a diamond for its details; a double click opens its issue or source. The red line is today.",
+        "Edit in the GitHub Project",
+        "Open issue #{n}",
+        "Open the source",
+        "Milestone",
       ]),
     ).toEqual([]);
   });
@@ -197,21 +199,15 @@ describe("the docs pages' texts are in their dictionaries", () => {
 
 describe("the roadmap's chart in every language", () => {
   for (const lang of LANGS) {
-    const tr = (text: string, vars?: Record<string, string | number>) =>
-      translate(lang, "docsCommon", text, vars);
-
-    it(`${lang}: keeps the labels free of Mermaid's Gantt syntax and parses`, async () => {
+    it(`${lang}: has every lane, bar and marker label`, () => {
       for (const t of [
         ...LANES.map((l) => l.label),
         ...ITEMS.map((i) => i.short),
         ...MILESTONES.map((m) => m.label),
+        ...EPICS.flatMap((e) => [e.short, e.title]),
       ]) {
-        expect(tr(t), `${lang}: ${t}`).not.toMatch(/[:;#]/);
+        expect(MESSAGES[lang].docsCommon, `${lang}: ${t}`).toHaveProperty([t]);
       }
-      const chart = roadmapGantt(tr);
-      expect(chart).toContain(`  section ${tr("Identity and wallets")}\n`);
-      mermaid.initialize({ startOnLoad: false });
-      await expect(mermaid.parse(chart)).resolves.toBeTruthy();
     });
   }
 
@@ -250,17 +246,26 @@ describe("the pages in German", () => {
     expect(screen.getByText(/Zuletzt aktualisiert am/)).toBeInTheDocument();
   });
 
-  it("draws the roadmap's table and chart in German", async () => {
+  it("draws the roadmap's table and the Project link in German", async () => {
     localStorage.setItem("catalog-metadata-language", "de");
     render(<RoadmapDocsPage />);
     const items = (
       await screen.findByRole("heading", { level: 2, name: "Jeder Eintrag" })
     ).parentElement!;
     expect(within(items).getAllByText("Geplant").length).toBeGreaterThan(0);
-    await waitFor(() =>
-      expect(screen.getByTestId("mermaid-diagram").textContent).toContain(
-        "section Identität und Wallets",
-      ),
+    expect(
+      screen.getByRole("link", { name: "GitHub-Projekt" }),
+    ).toHaveAttribute("href", "https://github.com/users/ma3u/projects/1");
+    const epics = screen.getByRole("heading", { level: 2, name: "Die Epics" })
+      .parentElement!;
+    expect(
+      within(epics).getByRole("heading", {
+        level: 3,
+        name: "Connector-Plattform: EDC 1.0 und die Data Planes",
+      }),
+    ).toBeInTheDocument();
+    expect(within(epics).getAllByText(/von \d+ erledigt/)).toHaveLength(
+      EPICS.length,
     );
   });
 

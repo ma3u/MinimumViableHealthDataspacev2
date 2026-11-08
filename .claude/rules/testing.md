@@ -94,7 +94,8 @@ npx vitest run __tests__/unit/components/Navigation.test.tsx  # single file
 
 - `ui/__tests__/e2e/journeys/` — journey test files named `NN-description.spec.ts`.
 - Current journey range: J001–J260 across 19 spec files.
-- Screenshot captures in `ui/__tests__/e2e/capture-screenshots.spec.ts`.
+- Screenshot captures in `ui/__tests__/e2e/capture-screenshots.spec.ts`, run on purpose with
+  `--project=live`; the `chromium` project ignores it.
 
 ### Commands
 
@@ -131,8 +132,19 @@ npx playwright test --project=live   # requires JAD stack
 
 ### CI behaviour
 
-- CI runs Playwright with `--project=chromium` only.
-- E2E tests run once a night in `nightly.yml` (ADR-074), with `continue-on-error: true`; their reports reach the GitHub Pages site.
+- CI runs Playwright with `--project=chromium` only, against a Neo4j seeded
+  by `neo4j/seed.sh` and the neo4j-proxy, with no EDC connector, no Postgres
+  task store and no Keycloak: `E2E_FORGED_SESSIONS=1` makes `loginAs()`
+  forge the realm user's session. A spec that tests the Keycloak pages
+  themselves calls `skipIfKeycloakDown({ realKeycloak: true })` (ADR-079).
+- A pull request that touches `ui/` runs the specs it can break (`e2e.yml`,
+  `scripts/select-e2e-specs.sh`); shared code runs every spec on three shards.
+- The nightly (`nightly.yml`) runs every spec and spec 19 against GitHub Pages.
+  No Playwright step has `continue-on-error`: a failure is red and opens the
+  "Nightly suites failed" issue. Its report is the site's `/e2e-report/`;
+  `pages.yml` redeploys when a nightly run finishes.
+- Before pushing a UI change: `scripts/run-e2e-local.sh --changed`, the same
+  run on your machine.
 
 ## Static GitHub Pages Tests
 

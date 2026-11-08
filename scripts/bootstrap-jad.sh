@@ -16,7 +16,10 @@
 # Prerequisites:
 #   - Docker Engine 24+ with Compose V2
 #   - At least 8 GB RAM allocated to Docker
-#   - Ports 80, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222 available
+#   - The host ports of the default stack available: 80, 3000, 3003, 4222,
+#     5432, 7474, 7687, 8080, 8090, 8200, 8222, 9000, 9090, 10013, 10023,
+#     11003, 11005 (the 0.18 ports 11002, 11006, 11007, 11012 belong to the
+#     edc018 profile, which this script does not start)
 # =============================================================================
 set -euo pipefail
 
@@ -250,17 +253,20 @@ preflight() {
     warn "Docker has ${mem_gb}GB RAM. Recommended: 8GB+ for the full JAD stack."
   fi
 
-  # Check port availability (skip ports owned by Docker/OrbStack — our own stack)
-  local ports=(80 4222 5432 8080 8090 8200 8222 9090 10013 11002 11003 11005 11006 11007 11012)
+  # The host ports of the services in no profile, the ones start_stack runs.
+  # Ports Docker or OrbStack already hold are our own stack and are skipped.
+  local ports=(80 3000 3003 4222 5432 7474 7687 8080 8090 8200 8222 9000 9090 10013 10023 11003 11005)
   local busy_ports=()
   for port in "${ports[@]}"; do
     local pid
     pid=$(lsof -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null || true)
     pid=$(echo "$pid" | head -1)
     if [ -n "$pid" ]; then
-      # Check if owned by Docker (our own stack) — skip if so
+      # Owned by Docker or OrbStack: our own stack, skipped. Lower case,
+      # because OrbStack's process is "OrbStack Helper", which the pattern
+      # never matched, so every port of a running stack was reported taken.
       local cmd
-      cmd=$(ps -p "$pid" -o comm= 2>/dev/null || echo "")
+      cmd=$(ps -p "$pid" -o comm= 2>/dev/null | tr '[:upper:]' '[:lower:]' || echo "")
       if [[ "$cmd" != *"com.docker"* && "$cmd" != *"orbstack"* && "$cmd" != *"vpnkit"* ]]; then
         busy_ports+=("$port")
       fi

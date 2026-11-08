@@ -43,6 +43,16 @@ import { T } from "./helpers";
 const BP = "/MinimumViableHealthDataspacev2";
 
 /**
+ * Every deep link carries the export's basePath and relies on ?persona=,
+ * which only the static build honours. A server build (`next start`, the
+ * nightly) serves neither, answers each link with its 404 page and so says
+ * nothing about the demo; those tests run where the export is served.
+ */
+const NOT_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true";
+const NOT_STATIC_REASON =
+  "Requires NEXT_PUBLIC_STATIC_EXPORT=true: run against the static build or GitHub Pages";
+
+/**
  * Deep link for one journey step.
  *
  * No trailing slash, deliberately. The export sets `trailingSlash: false`, so
@@ -193,6 +203,7 @@ const JOURNEY: Step[] = [
 ];
 
 test.describe("EHDS secondary-use journey (static, no login)", () => {
+  test.skip(NOT_STATIC, NOT_STATIC_REASON);
   for (const s of JOURNEY) {
     test(`${s.id} ${s.name}`, async ({ page }) => {
       await open(page, s.path, s.persona);
@@ -249,6 +260,7 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
   test("J881 without ?persona= the page still renders, just signed out", async ({
     page,
   }) => {
+    test.skip(NOT_STATIC, NOT_STATIC_REASON);
     // The fallback must degrade, not explode: a regulator who strips the query
     // string should still see the page.
     await page.goto(`${BP}/negotiate`);
@@ -259,6 +271,7 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
   });
 
   test("J882 persona survives navigation within the tab", async ({ page }) => {
+    test.skip(NOT_STATIC, NOT_STATIC_REASON);
     // Step 4 and step 4b are different pages. If the persona did not persist,
     // every link in the guide would need the query string, and forgetting one
     // would silently show the wrong role.
@@ -273,6 +286,7 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
   test("J883 a username works where a personaId is expected", async ({
     page,
   }) => {
+    test.skip(NOT_STATIC, NOT_STATIC_REASON);
     // The credentials table in the demo guide lists usernames (regulator),
     // the persona hub uses ids (hdab). Both appear in the docs, so both resolve.
     await open(page, "/compliance", "regulator");
@@ -304,6 +318,7 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
   test("J887 the Spanish access body is in the participant data", async ({
     request,
   }) => {
+    test.skip(NOT_STATIC, NOT_STATIC_REASON);
     // EHDS Art. 67(3) is coordination between access bodies in different member
     // states, which needs two of them to exist. With only MedReg DE on the
     // graph the cross-border story has nothing to point at.
@@ -328,6 +343,7 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
   test("J884 every mock fixture the journey reads is served", async ({
     request,
   }) => {
+    test.skip(NOT_STATIC, NOT_STATIC_REASON);
     // The pages fetch these client-side, so a missing one shows an empty table
     // rather than an error, which is the worst way to find out mid-demo.
     const fixtures = [

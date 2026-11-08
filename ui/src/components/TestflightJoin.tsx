@@ -36,7 +36,7 @@ export function TestflightJoin({ basePath = "" }: { basePath?: string }) {
           href={TESTFLIGHT_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded bg-(--accent) px-3 py-2 font-medium text-white hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded bg-(--accent) px-3 py-2 font-medium text-white dark:text-gray-900 hover:opacity-90"
         >
           {t("Join the beta on TestFlight")}
           <ExternalLink size={14} aria-hidden="true" />

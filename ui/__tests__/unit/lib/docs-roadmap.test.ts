@@ -1,15 +1,19 @@
 /**
  * The roadmap behind /docs/roadmap (ui/src/lib/docs/roadmap.ts): its data must
- * stay consistent with the plan (#725), and the Mermaid source generated from
- * it must parse, or the page shows a render error where the chart should be.
+ * stay consistent with the plan (#725) and with the GitHub Project the plan
+ * is edited in (scripts/sync-roadmap-project.mjs).
  */
 import { describe, it, expect } from "vitest";
-import mermaid from "mermaid";
 import {
+  EPICS,
   ITEMS,
   LANES,
   MILESTONES,
-  roadmapGantt,
+  ROADMAP_PLANNED_ON,
+  ROADMAP_PROJECT,
+  epicOf,
+  epicStatus,
+  epicWindow,
   roadmapTargets,
 } from "@/lib/docs/roadmap";
 
@@ -47,14 +51,27 @@ describe("the roadmap data", () => {
     expect(spike?.note).toContain("#716");
   });
 
-  it("keeps labels free of the characters Mermaid's Gantt syntax uses", () => {
-    for (const i of ITEMS) expect(i.short, `#${i.issue}`).not.toMatch(/[:;#]/);
-    for (const m of MILESTONES) expect(m.label, m.id).not.toMatch(/[:;#]/);
+  it("keeps the bar labels short", () => {
+    for (const i of ITEMS)
+      expect(i.short.length, `#${i.issue}`).toBeLessThan(40);
+    for (const m of MILESTONES) expect(m.label.length, m.id).toBeLessThan(30);
+  });
+
+  it("names the GitHub Project the plan is edited in", () => {
+    expect(ROADMAP_PROJECT).toBe("https://github.com/users/ma3u/projects/1");
+  });
+
+  it("gives every bar and marker an id of its own, usable as an anchor", () => {
+    const ids = roadmapTargets().map((t) => t.taskId);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^(i\d+|e\d+|m_\w+)$/);
   });
 
   it("links every bar to its issue and every milestone to an https source", () => {
     const targets = roadmapTargets();
-    expect(targets).toHaveLength(ITEMS.length + MILESTONES.length);
+    expect(targets).toHaveLength(
+      ITEMS.length + EPICS.length + MILESTONES.length,
+    );
     for (const i of ITEMS) {
       expect(targets).toContainEqual(
         expect.objectContaining({
@@ -73,6 +90,11 @@ describe("the roadmap data", () => {
         id: `#${i.issue}`,
         texts: [i.title, i.note],
         links: i.links,
+      })),
+      ...EPICS.map((e) => ({
+        id: `epic #${e.issue}`,
+        texts: [e.title, e.note],
+        links: e.links,
       })),
     ];
     for (const { id, texts: parts, links } of texts) {
@@ -128,43 +150,48 @@ describe("the roadmap data", () => {
       "Applications: Art. 53 purposes, Art. 81 complaints",
     );
   });
-});
 
-describe("the generated Gantt chart", () => {
-  const chart = roadmapGantt();
-
-  it("parses", async () => {
-    mermaid.initialize({ startOnLoad: false });
-    await expect(mermaid.parse(chart)).resolves.toBeTruthy();
-  });
-
-  it("has a section per lane, a bar per item and a marker per milestone", () => {
-    for (const l of LANES) expect(chart).toContain(`  section ${l.label}\n`);
-    for (const i of ITEMS)
-      expect(chart).toContain(`i${i.issue}, ${i.start}, ${i.end}`);
-    expect(chart.match(/:milestone, /g)).toHaveLength(MILESTONES.length);
-  });
-
-  it("marks status the way the legend says: active, crit, done", () => {
-    expect(chart).toMatch(/708 EUDI Wallet sign-in :active, i708,/);
-    expect(chart).toMatch(/710 Simpl issuer trust :done, i710,/);
-    expect(chart).toMatch(/711 DSP kit vs Simpl :i711,/);
-    // Nothing is blocked since Simpl's code went public (#711); a blocked
-    // item would be drawn crit.
-    const tag = {
-      done: "done, ",
-      "in-progress": "active, ",
-      blocked: "crit, ",
-      planned: "",
-    };
-    for (const i of ITEMS) {
-      expect(chart, `#${i.issue}`).toContain(`:${tag[i.status]}i${i.issue},`);
+  it("puts every issue in one epic at most, in a lane of its own", () => {
+    const lanes = LANES.map((l) => l.id);
+    const seen = new Map<number, number>();
+    for (const e of EPICS) {
+      expect(lanes, `epic #${e.issue}`).toContain(e.lane);
+      expect(e.short.length, `epic #${e.issue}`).toBeLessThan(30);
+      for (const n of [...e.open.P1, ...e.open.P2, ...e.open.P3, ...e.done]) {
+        expect(seen.get(n), `#${n} in #${e.issue}`).toBeUndefined();
+        seen.set(n, e.issue);
+      }
     }
-    expect(chart).toMatch(/700 HealthDCAT-AP R8 :done, i700,/);
+    // Each of the four lanes outside the six drivers is one epic's.
+    for (const id of ["klarbefund", "operations", "quality", "demos"])
+      expect(EPICS.filter((e) => e.lane === id)).toHaveLength(1);
+    // A dated item's epic holds it at the item's priority, unless it is done.
+    for (const i of ITEMS) {
+      const e = epicOf(i.issue);
+      if (e && i.status !== "done")
+        expect(e.open[i.priority], `#${i.issue}`).toContain(i.issue);
+    }
   });
 
-  it("draws at a fixed width, since Mermaid measures 0 for its render element", () => {
-    expect(chart).toMatch(/useWidth: \d{4}/);
-    expect(chart).toContain("todayMarker");
+  it("draws an epic from its first issue to the deadline its issues set", () => {
+    const e = (n: number) => EPICS.find((x) => x.issue === n)!;
+    // #960 has only dated issues: #723 starts first, #720 and #721 end last.
+    expect(epicWindow(e(960))).toEqual({
+      start: "2026-10-28",
+      end: "2028-06-30",
+    });
+    // #964 has none: from the planning date to the P2 deadline.
+    expect(epicWindow(e(964))).toEqual({
+      start: ROADMAP_PLANNED_ON,
+      end: "2029-03-26",
+    });
+    for (const x of EPICS) {
+      const w = epicWindow(x);
+      expect(w.start <= w.end, `epic #${x.issue}`).toBe(true);
+    }
+    // #708 is under way and #951 is done; nothing in #967 has moved yet.
+    expect(epicStatus(e(959))).toBe("in-progress");
+    expect(epicStatus(e(966))).toBe("in-progress");
+    expect(epicStatus(e(967))).toBe("planned");
   });
 });

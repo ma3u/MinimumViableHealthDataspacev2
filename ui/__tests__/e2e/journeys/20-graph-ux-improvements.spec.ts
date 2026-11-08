@@ -75,11 +75,15 @@ test.describe("Graph Explorer UX Improvements", () => {
 
   // ── UI-level tests ────────────────────────────────────────────────────────
 
-  test("J264 — graph page shows 'Structural layers' in sidebar legend", async ({
+  test("J264 — graph page shows 'Layers' in the sidebar legend", async ({
     page,
   }) => {
     await page.goto("/graph");
-    await expect(page.getByText("Structural layers")).toBeVisible({
+    // "Structural layers" became "Layers" inside a "Legend" disclosure (fa5165b3).
+    await expect(page.getByText("Legend", { exact: true })).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("Layers", { exact: true })).toBeVisible({
       timeout: T,
     });
   });

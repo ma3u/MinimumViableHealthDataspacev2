@@ -297,11 +297,13 @@ test.describe("C - researcher (DATA_USER)", () => {
     ]);
   });
 
-  test("J502 My Researches menu has Research Overview, Browse Catalogs, Discover, Request Access, My Applications, Retrieve Data, Run Analytics, Query & Export, Patient Journeys, EEHRxF", async ({
+  test("J502 My Researches menu has My Research in One View, Browse Catalogs, Discover, Request Access, My Applications, Retrieve Data, Run Analytics, Query & Export, Patient Journeys, EEHRxF", async ({
     page,
   }) => {
     await expectMenuItems(page, "My Researches", [
-      "Research Overview",
+      // Renamed from "Research Overview" with the researcher overview
+      // (#271 M4, #281).
+      "My Research in One View",
       "Browse Catalogs",
       "Discover",
       "Request Access",
@@ -733,8 +735,11 @@ test.describe("H - Cross-Role Protected Page Access", () => {
     await page.goto(`${BASE}/admin/policies`, {
       waitUntil: "domcontentloaded",
     });
-    // HDAB_AUTHORITY gets unauthorized for /admin/* (requires EDC_ADMIN)
-    await expect(page).toHaveURL(/unauthorized/, { timeout: T });
+    // /admin/policies and /admin/audit are part of the regulator's
+    // supervision toolkit (Art. 46 policies), so the middleware admits
+    // HDAB_AUTHORITY there; every other /admin/* page stays EDC_ADMIN only.
+    await expect(page).toHaveURL(/\/admin\/policies/, { timeout: T });
+    await expect(page).not.toHaveURL(/signin|unauthorized/);
   });
 
   test("J553 researcher can access /data/discover", async ({ page }) => {

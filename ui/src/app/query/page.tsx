@@ -319,24 +319,26 @@ export default function NlqPage() {
                   "Ask questions about the Health Dataspace knowledge graph in plain language. The query engine translates your question into Cypher and returns structured results from all five graph layers.",
                 )}
               </p>
-              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
+              {/* The theme token, not gray-500: on the light header gray-500
+                  was 4.49:1, just under WCAG 1.4.3. */}
+              <div className="flex items-center gap-4 text-xs text-(--text-secondary) mt-2">
                 <Link
                   href="/analytics"
-                  className="hover:text-(--text-secondary) transition-colors"
+                  className="hover:text-(--text-primary) transition-colors"
                 >
                   ← {tn("OMOP Analytics")}
                 </Link>
                 <span>|</span>
                 <Link
                   href="/eehrxf"
-                  className="hover:text-(--text-secondary) transition-colors"
+                  className="hover:text-(--text-primary) transition-colors"
                 >
                   {tn("EEHRxF Profiles")} →
                 </Link>
               </div>
             </div>
             {stats?.totals && (
-              <div className="flex gap-6 text-sm">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
                 <div className="text-center">
                   <div className="text-lg font-semibold text-(--accent-l1)">
                     {stats.speCount}
@@ -489,7 +491,7 @@ export default function NlqPage() {
                     odrlScope.prohibitions.map((p) => (
                       <span
                         key={p}
-                        className="px-1.5 py-0.5 rounded-sm bg-red-500/10 text-red-300"
+                        className="px-1.5 py-0.5 rounded-sm bg-red-500/10 text-red-700 dark:text-red-300"
                       >
                         {p}
                       </span>
