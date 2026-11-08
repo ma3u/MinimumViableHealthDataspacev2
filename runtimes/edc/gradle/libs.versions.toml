@@ -23,6 +23,11 @@ edc-ih-api-participants = { module = "org.eclipse.edc:participant-context-api", 
 edc-issuance-spi = { module = "org.eclipse.edc:issuerservice-issuance-spi", version.ref = "edc" }
 edc-spi-controlplane = { module = "org.eclipse.edc:control-plane-spi", version.ref = "edc" }
 
+# the official DSP TCK against the control plane (controlplane-tck): EDC's own
+# connector-under-test pieces, published with every release
+edc-iam-mock = { module = "org.eclipse.edc:iam-mock", version.ref = "edc" }
+edc-tck-tasks = { module = "org.eclipse.edc:tasks-tck-extension", version.ref = "edc" }
+
 # shared by every runtime
 edc-participantcontext-config = { module = "org.eclipse.edc:participant-context-config-core", version.ref = "edc" }
 edc-participantcontext-config-sql = { module = "org.eclipse.edc:participantcontext-config-store-sql", version.ref = "edc" }

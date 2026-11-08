@@ -7,5 +7,6 @@ dependencyResolutionManagement {
 }
 
 include(":controlplane")
+include(":controlplane-tck")
 include(":identity-hub")
 include(":issuerservice")
