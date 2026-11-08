@@ -140,7 +140,8 @@ npx playwright test --project=live   # requires JAD stack
   `scripts/select-e2e-specs.sh`); shared code runs every spec on three shards.
 - The nightly (`nightly.yml`) runs every spec and spec 19 against GitHub Pages.
   No Playwright step has `continue-on-error`: a failure is red and opens the
-  "Nightly suites failed" issue. Its report is the site's `/e2e-report/`.
+  "Nightly suites failed" issue. Its report is the site's `/e2e-report/`;
+  `pages.yml` redeploys when a nightly run finishes.
 - Before pushing a UI change: `scripts/run-e2e-local.sh --changed`, the same
   run on your machine.
 

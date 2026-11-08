@@ -3,6 +3,12 @@ name: Deploy Next.js to GitHub Pages
 on:
   push:
     branches: ["main"]
+  # A finished night publishes its reports straight away, not with the next
+  # push to main, which can be a day or more later.
+  workflow_run:
+    workflows: ["Nightly"]
+    types: [completed]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -18,14 +24,19 @@ permissions:
 # they ran before the site was built, so a change waited 24 minutes for a
 # 6-second publish; until 2026-11-03 they ran beside it on every push.
 #
-# The reports on the site (/test-reports, /ci-e2e-report) are therefore the
-# ones from the last nightly run, at most a day behind the site.
+# The reports on the site (/test-reports, /e2e-report, /ci-e2e-report) are
+# therefore the ones from the last nightly run. A finished nightly run deploys
+# the site again (workflow_run), so they appear when the night ends. Until
+# 2026-11-08 they waited for the next push, and /e2e-report/ answered 404 the
+# day #969 removed the committed copy.
 #
 # Concurrency is per job. Site builds are cancelled by a newer push; deploys
 # run one at a time.
 
 jobs:
   site:
+    # A cancelled night leaves no new reports to publish.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
