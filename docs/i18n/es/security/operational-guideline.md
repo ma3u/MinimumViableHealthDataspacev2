@@ -1,6 +1,6 @@
 ---
 source: docs/security/operational-guideline.md
-sourceHash: 2e2292a441f4fee979f6778b256eb6258aeb74ff7d23dc85d151632f90d1bd91
+sourceHash: cda73eed51ddcd75a00e2878048e1b4858e79919d648f2093499e68858cbdf28
 language: es
 summary: "Cómo alojar de verdad el hub y Klarbefund: qué rol del EEDS (Reglamento (UE) 2025/327) opera cada parte, qué exigen BSI C5, IT-Grundschutz, TR-02102 y TR-03161 a cada parte, los plazos ante incidentes, la conservación y la lista de comprobación de puesta en producción por rol."
 ---
@@ -272,7 +272,7 @@ renderizado con [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh)
 art. [33](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_33) y [34](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_34) del RGPD,
 del [art. 23 de la NIS2](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng#art_23) tal como se ha transpuesto
 en la [BSIG](https://www.gesetze-im-internet.de/bsig_2025/__32.html), y del [Reglamento (UE) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng),
-art. [63, apartado 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63, apartado 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) y [73, apartado 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003); la tabla anterior nombra cada uno.
+art. [63, apartado 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63, apartado 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) y [73, apartado 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003), que la tabla anterior nombra cada uno; y [64, apartado 2, letra h)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#064.002), que muestra el diagrama: si un usuario de datos de salud notificó su propia infracción se tiene en cuenta cuando el organismo de acceso fija una multa.
 
 Los plazos no los negocia el operador: el responsable del tratamiento es
 titular de los del RGPD, el operador de los de la NIS2 y el organismo de

@@ -248,7 +248,7 @@ rendered with [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh). 
 [GDPR Art. 33](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_33) and [34](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_34),
 [NIS2 Art. 23](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng#art_23) as transposed
 in the [BSIG](https://www.gesetze-im-internet.de/bsig_2025/__32.html), and [Regulation (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng)
-Art. [63(2)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63(3)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) and [73(3)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003); the table above names each.
+Art. [63(2)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63(3)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) and [73(3)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003), the table above names each; and [64(2)(h)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#064.002), which the diagram shows: whether a data user reported its own infringement is weighed when the access body sets a fine.
 
 The clocks are not the operator's to negotiate: the controller owns the
 GDPR ones, the operator the NIS2 ones, the access body the EHDS ones. The

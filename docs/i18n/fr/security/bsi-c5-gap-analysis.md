@@ -1,6 +1,6 @@
 ---
 source: docs/security/bsi-c5-gap-analysis.md
-sourceHash: f2f072ff9dc53e3376024ef3168e8ec01ee91442ca87a26607fa79cb28b74d1d
+sourceHash: b212e547bb02a27db757cd94e3fa4f4671618032e3c29e5b39c7350f19c35aa3
 language: fr
 summary: Le hub face au catalogue de critères BSI C5:2020, mesuré aux mesures de sécurité et aux audits de l’environnement de traitement sécurisé de l’article 73 de l’EEDS.
 ---
@@ -79,9 +79,9 @@ Chaque numéro de critère renvoie à sa page dans le PDF du C5:2020, et son tit
 
 ### COS : Sécurité des communications
 
-| Critère                                                                                                                                                      | Titre dans le catalogue (version anglaise)                       | Statut démo | Où en est le hub                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [COS-06](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf?__blob=publicationFile&v=5#page=86) | Segregation of data traffic in jointly used network environments | ⚠️          | Seuls le hub et Keycloak ont un ingress public ; le reste est sur ingress interne dans un seul environnement Container Apps ([modèle de menaces, I-02 et I-05](threat-model.md#information-disclosure-divulgation-dinformations)) ; pas de points de terminaison privés |
+| Critère                                                                                                                                                      | Titre dans le catalogue (version anglaise)                       | Statut démo | Où en est le hub                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [COS-06](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf?__blob=publicationFile&v=5#page=86) | Segregation of data traffic in jointly used network environments | ⚠️          | Seuls le hub et Keycloak ont un ingress public ; le reste est sur ingress interne dans un seul environnement Container Apps, sauf le PostgreSQL Flexible Server, situé en dehors sur un point de terminaison public dont le pare-feu admet tout service Azure, un risque accepté ([modèle de menaces, I-02 et I-05](threat-model.md#information-disclosure-divulgation-dinformations)) ; pas de points de terminaison privés |
 
 ### DEV : Acquisition, développement et modification des systèmes d’information
 

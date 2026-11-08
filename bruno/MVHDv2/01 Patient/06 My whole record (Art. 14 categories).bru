@@ -25,9 +25,11 @@ assert {
 tests {
   // Art. 14(1) of Regulation (EU) 2025/327 lists six priority categories,
   // (a) to (f): https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#014.001
-  // The seeded record P1 carries the four resource types below (ADR-059):
-  // test results (e), imaging reports (d), a vaccination record and a
-  // medication plan. A hub whose seed has not run answers Observations only,
+  // The seeded record P1 carries the four resource types below, which cover
+  // (a), (d) and (e) in part (ADR-081): laboratory values and the resting
+  // ECG with its report (e), an imaging report (d), and the vaccination
+  // record and medication plan, two items of the patient summary (a).
+  // A hub whose seed has not run answers Observations only,
   // which is a finding for the operator, not a pass.
   const types = new Set(res.body.entry.map((e) => e.resource.resourceType));
   test("laboratory results (Observation)", () => expect(types.has("Observation")).to.equal(true));

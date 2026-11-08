@@ -1,6 +1,6 @@
 ---
 source: docs/security/operational-guideline.md
-sourceHash: 2e2292a441f4fee979f6778b256eb6258aeb74ff7d23dc85d151632f90d1bd91
+sourceHash: cda73eed51ddcd75a00e2878048e1b4858e79919d648f2093499e68858cbdf28
 language: nl
 summary: "Hoe u de hub en Klarbefund echt host: welke EHDS-rol (Verordening (EU) 2025/327) welk deel beheert, wat BSI C5, IT-Grundschutz, TR-02102 en TR-03161 van elk deel vragen, de termijnen bij incidenten, de bewaring en de go-livechecklist per rol."
 ---
@@ -265,7 +265,7 @@ gerenderd met [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh). 
 [AVG art. 33](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_33) en [34](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_34),
 [NIS2 art. 23](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng#art_23) zoals omgezet
 in de [BSIG](https://www.gesetze-im-internet.de/bsig_2025/__32.html), en [Verordening (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng)
-art. [63, lid 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63, lid 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) en [73, lid 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003); de tabel hierboven noemt ze elk.
+art. [63, lid 2](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.002), [63, lid 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003) en [73, lid 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.003), die de tabel hierboven elk noemt; en [64, lid 2, punt h)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#064.002), dat het diagram toont: of een gezondheidsgegevensgebruiker een eigen inbreuk heeft gemeld, weegt mee wanneer de instantie voor toegang een boete vaststelt.
 
 Over de termijnen valt voor de operator niet te onderhandelen: de
 verwerkingsverantwoordelijke is eigenaar van die van de AVG, de operator van

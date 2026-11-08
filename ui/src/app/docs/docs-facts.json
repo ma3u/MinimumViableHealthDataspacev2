@@ -1284,6 +1284,12 @@
       "file": "ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md",
       "title": "A bonus programme receives a yes or no, never the data",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-081",
+      "file": "ADR-081-the-record-covers-three-of-the-six-art-14-categories.md",
+      "title": "The demo record covers three of the six Art. 14 categories, and says which",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
