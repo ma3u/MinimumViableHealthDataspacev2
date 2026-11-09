@@ -1,5 +1,5 @@
 ---
-title: "CFM 0.0.7 spike (#973, ADR-085 step 1): the proxy works, the control plane does not take CFM's participant config"
+title: "CFM 0.0.7 spike (#973, ADR-085 step 1): onboarding through CFM works, with a proxy and two activities of our own; dispose does not"
 status: current
 owner: ma3u
 updated: 2026-11-09
@@ -7,18 +7,100 @@ issue: https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973
 ---
 
 [ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md) step 1, in
-two rounds on 2026-11-09:
+three rounds on 2026-11-09:
 
 1. **Keycloak alone** cannot serve the agents' token exchange (below, "Round
    1"). Matthias chose ADR-085 step 2, a proxy.
-2. **With the proxy** (below, "Round 2") every token exchange succeeds, and
-   CFM provisions the IdentityHub half of a participant on our stack: DID
-   document, issuer holder, MembershipCredential. It stops at the control
-   plane: CFM 0.0.7 no longer provisions STS credentials and writes a
-   participant config our control plane refuses. Dispose fails as well.
-   The spike stopped there; how to go on is Matthias's decision.
+2. **With the proxy** every token exchange succeeds and CFM provisions the
+   IdentityHub half of a participant; our control plane refuses the EDC-V
+   agent's config (below, "Round 2"). Matthias chose an activity of our own.
+3. **With two activities of our own** in place of the EDC-V and IdentityHub
+   agents, a participant registered at `/onboarding` is provisioned through
+   CFM end to end: all six steps complete, siglet included, and the new
+   participant fetches AlphaKlinik Berlin's catalogue over DSP. Dispose still
+   fails, on the upstream `participantContextId` bug alone (below, "Round 3").
 
-## Round 2, the proxy: what CFM 0.0.7 does on our stack
+## Round 3, two activities of our own
+
+### What is ours, why, and when it can go
+
+[`services/cfm-connector-agent`](../../../services/cfm-connector-agent/) is a
+small Go module on eclipse-cfm v0.0.7's own agent runtime and control-plane
+client. One image, two containers (`MVHD_AGENT` picks the activity):
+
+| Activity                                    | In place of                     | Why                                                                                                                                                                                                                                                                                                                                                                                                       | It can go when                                                                                          |
+| ------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `mvhd-connector-activity` (`activity.go`)   | eclipse-cfm's EDC-V agent       | Its config has no STS entries and a per-participant Vault partition ([`controlplane.go` L52-L66](https://github.com/eclipse-cfm/cfm/blob/v0.0.7/agent/common/controlplane/controlplane.go#L52-L66)); our control plane answers `400 'edc.iam.sts.oauth.client.id' is required`. Ours writes the context, the STS entries `provision.ts` writes, the DSP profile and the registration's details.           | Our control plane takes CFM's model (STS signing in a Vault partition), or CFM writes STS entries again |
+| `mvhd-identityhub-activity` (`identity.go`) | eclipse-cfm's IdentityHub agent | It creates the participant with `provisionStsAccount: false` and a Vault partition ([`identityhub.go` L208-L255](https://github.com/eclipse-cfm/cfm/blob/v0.0.7/agent/common/identityhub/identityhub.go#L208-L255)); IdentityHub then makes no STS client, and DSP fails at "Failed to fetch client secret from the vault with alias: `<ctx>-sts-client-secret`". Ours creates it as `provision.ts` does. | The same: it belongs with the connector activity                                                        |
+
+Ordering an activity _before_ the EDC-V agent, as first proposed, cannot
+work: that agent creates the context and accepts only a `200`, so a context
+created first fails it, and its config would still point the control plane
+at a Vault partition our launchers do not use. Replacing it in the
+orchestration is the smallest change that works.
+
+The four upstream agents stay: jwtlet (behind the proxy), registration,
+onboarding and siglet.
+
+### Onboarding through `/onboarding`
+
+The page posts to `/api/participants`; with `CFM_TENANT_URL` set the route
+calls [`cfm-provision.ts`](../../../ui/src/lib/edc/cfm-provision.ts) instead of
+`provision.ts`: a tenant, a participant profile (with the data plane mapping
+siglet's agent needs and the registration's details), a wait until every
+agent is active or one failed, then the context by its DID. Unset, nothing
+changes. Measured on a dev server against the OrbStack stack, signed in with
+a forged `edcadmin` session (Keycloak redirects only to the stack's own UI
+ports):
+
+| Step                                         | Result                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `/onboarding` "Register Participant"         | "Registration Submitted"; the participant is listed with its name and role                           |
+| jwtlet, connector (ours), IdentityHub (ours) | complete: context with STS config and profile, IdentityHub participant with an STS client            |
+| registration, onboarding                     | complete: issuer holder, MembershipCredential `ISSUED`                                               |
+| siglet                                       | complete: transfer type mapping and data plane registered                                            |
+| DSP catalogue request to AlphaKlinik Berlin  | `200`, 2 datasets                                                                                    |
+| Dispose through the Tenant Manager           | **fails**: all five agents, ours included, get no `participantContextId`; the profile stays in error |
+
+The hub itself has no route that removes a participant (`provision.ts` only
+undoes a failed registration), so there is no hub path to hand dispose to
+yet. The test participants were removed by hand (below).
+
+### Suites, and the cleanup
+
+On the stack rebuilt from `main` at `e1492052` (#1009's verification), with
+the three CFM test participants present, then after removing them:
+
+| Suite                                              | With the CFM participants | After the cleanup | Floor  |
+| -------------------------------------------------- | ------------------------- | ----------------- | ------ |
+| Identity (`scripts/run-ehds-identity-checks.sh`)   | 31 / 0 / 0                | (not rerun)       | 31/0/0 |
+| Dataspace (`scripts/run-ehds-dataspace-checks.sh`) | 28 / 0 / 5                | 32 / 0 / 1        | 32/0/1 |
+| Health domain (`scripts/run-ehds-tests.sh`)        | 27 / 0 / 3                | (not rerun)       | 27/0/3 |
+
+The four extra skips were the test data, not CFM: the dataspace suite finds
+its consumer by the slug `pharmaco`, and took the test participant
+`pharmaco-research-ag-cfm-check-…`, which has no negotiations. A test
+participant must not carry a seeded participant's slug in its name.
+
+Cleanup: the three contexts, IdentityHub participants (which took their keys
+and STS secrets from Vault), siglet mappings and issuer holders (three rows
+in `issuerservice_v1`, keyed by DID, which the API cannot delete); then the
+`cfm7-*` containers, volumes and image, `cfm_v007`, the `cfm-agents` client
+and its twelve scopes. Nothing of the spike is left on the stack.
+
+### What is left
+
+- **Dispose.** Needs eclipse-cfm to carry `participantContextId` into the
+  dispose orchestration, and the hub a removal path of its own until then.
+  Not reported upstream: an outward message needs Matthias's go.
+- **ADR-085 step 3.** The `/onboarding` switch exists (`CFM_TENANT_URL`); the
+  participant list, Bruno requests and the docs do not follow it yet.
+- **Azure (step 4).** The agent image would need building and pushing to ACR,
+  and CFM's NATS streams need their own answer to a NATS restart (they live
+  on `mvhd-nats`'s container storage and come back only when the managers
+  start; `docs/gotchas.md` 2026-11-09, PR #1028).
+
+## Round 2, the proxy: what CFM 0.0.7 does on our stack (superseded by round 3)
 
 ### What was built
 
@@ -121,7 +203,7 @@ the API, round 2's issuer holder in `issuerservice_v1` (one row,
 client and the twelve client scopes `seed-cfm.sh` had added were removed, so
 the stack is as it was. `--profile cfm up -d` and `seed-cfm.sh` recreate them.
 
-### What Matthias decides
+### What Matthias decided after round 2: option 2, an activity of our own
 
 1. **Make our control plane take CFM's config:** the upstream model, STS
    signing in a per-participant Vault partition reached by token exchange. A
@@ -181,7 +263,7 @@ IdentityHub and IssuerService accept the exchanged token, whose `aud` is
 `cfm-agents`, and whether the CFM
 managers, NATS and the orchestration run against our stack.
 
-## What Matthias decides
+## What Matthias decided after round 1: option 1, the proxy
 
 Each of these unblocks step 1; none is started.
 
@@ -200,6 +282,22 @@ Options 1 and 2 can go together: the proxy now, dropped once a release
 carries the setting.
 
 ## Reproduce
+
+Round 3, on the compose stack:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.jad.yml --profile cfm up -d --build
+./scripts/seed-cfm.sh
+./scripts/check-cfm-onboarding.sh   # deploy, DSP catalogue, then dispose (fails upstream)
+```
+
+For `/onboarding`, run the UI with `CFM_TENANT_URL=http://localhost:18181/api`
+and `CFM_CLIENT_SECRET=cfm-agents-local-dev`. `go test ./...` in
+`services/cfm-connector-agent` and
+`npx vitest run __tests__/unit/lib/edc-cfm-provision.test.ts` in `ui` cover
+the code without a stack.
+
+Round 1, Keycloak alone:
 
 ```bash
 DOCKER_CONTEXT=desktop-linux scripts/check-cfm-token-exchange.sh
