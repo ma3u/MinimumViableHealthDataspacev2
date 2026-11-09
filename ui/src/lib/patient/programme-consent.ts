@@ -112,7 +112,7 @@ export const PROGRAMME_CONSENT_SOURCES = [
 ] as const;
 
 /** The legal basis the routes name in their answers. */
-export const PROGRAMME_CONSENT_BASIS =
+const PROGRAMME_CONSENT_BASIS =
   "Explicit consent to one program, GDPR Art. 9(2)(a), withdrawable at any time, Art. 7(3); EHDS Art. 7(3) (ADR-080)";
 
 /** The open consent of a person to a program, or null. */
@@ -129,7 +129,7 @@ export function openConsent(
  * The gate: the consent id a transfer may go out under, or null when the
  * person has not joined the program or has withdrawn.
  */
-export async function programmeTransferAllowed(
+async function programmeTransferAllowed(
   patientId: string,
   programmeId: string,
 ): Promise<string | null> {
