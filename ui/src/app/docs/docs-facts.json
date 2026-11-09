@@ -836,12 +836,12 @@
         "ports": []
       },
       {
-        "name": "cfm7-edcvagent",
+        "name": "cfm7-mvhdconnectoragent",
         "profiles": ["cfm"],
         "ports": []
       },
       {
-        "name": "cfm7-ihagent",
+        "name": "cfm7-mvhdidentityagent",
         "profiles": ["cfm"],
         "ports": []
       },
