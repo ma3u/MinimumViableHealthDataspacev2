@@ -44,8 +44,11 @@ describe("the roadmap data", () => {
 
   it("carries the plan's P1 items and the Iceberg spike under #716", () => {
     const p1 = ITEMS.filter((i) => i.priority === "P1" && i.status !== "done");
-    // #710 is done (2026-10-28); #934 carries the Simpl use case to March 2027.
-    expect(p1.map((i) => i.issue).sort()).toEqual([708, 709, 711, 934]);
+    // #710 is done (2026-10-28); #934 carries the Simpl use case to March 2027;
+    // #991 to #994 are the TEHDAS2 work before its final conference (#990).
+    expect(p1.map((i) => i.issue).sort()).toEqual([
+      708, 709, 711, 934, 991, 992, 993, 994,
+    ]);
     const spike = ITEMS.find((i) => i.issue === 649);
     expect(spike?.lane).toBe("processing");
     expect(spike?.note).toContain("#716");
@@ -185,6 +188,15 @@ describe("the roadmap data", () => {
       start: ROADMAP_PLANNED_ON,
       end: "2029-03-26",
     });
+    // #990 has undated P3 issues (from the planning date) and ends with
+    // #996 at the P1 deadline; its demo ends on the conference day.
+    expect(epicWindow(e(990))).toEqual({
+      start: ROADMAP_PLANNED_ON,
+      end: "2027-03-26",
+    });
+    expect(ITEMS.find((i) => i.issue === 994)?.end).toBe(
+      MILESTONES.find((m) => m.id === "tehdas2-final")?.date,
+    );
     for (const x of EPICS) {
       const w = epicWindow(x);
       expect(w.start <= w.end, `epic #${x.issue}`).toBe(true);
