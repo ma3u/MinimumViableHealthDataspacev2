@@ -351,5 +351,21 @@
   "bpm": "bpm",
   "per day": "pro Tag",
   "kg": "kg",
-  "ePA transfer, GesundheitsID-authenticated": "ePA-Übertragung, mit GesundheitsID authentifiziert"
+  "ePA transfer, GesundheitsID-authenticated": "ePA-Übertragung, mit GesundheitsID authentifiziert",
+  "Offers from other data spaces that reward what you do for your health. A program receives a yes or no once a year, never the data behind it. Whether you join is your decision alone (GDPR Art. 9(2)(a)).": "Angebote aus anderen Datenräumen, die belohnen, was Sie für Ihre Gesundheit tun. Ein Programm erhält einmal im Jahr ein Ja oder Nein, nie die Daten dahinter. Ob Sie teilnehmen, entscheiden allein Sie (DSGVO Art. 9 Abs. 2 Buchst. a).",
+  "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.": "Ein Bonusprogramm ist keine Forschung und nicht der Widerspruch. Wer teilnimmt, wird nie in eine Studie aufgenommen, und Ihr Widerspruch gegen die Sekundärnutzung (EHDS Art. 71) stoppt kein Teilen, das Sie selbst beginnen.",
+  "Loading bonus programs…": "Bonusprogramme werden geladen…",
+  "You may not see the bonus programs: they are shown to patients. If your session has ended, sign in again.": "Sie dürfen die Bonusprogramme nicht sehen: Sie werden Patientinnen und Patienten gezeigt. Wenn Ihre Sitzung abgelaufen ist, melden Sie sich erneut an.",
+  "The bonus programs could not be loaded (HTTP {status}). Please try again later.": "Die Bonusprogramme konnten nicht geladen werden (HTTP {status}). Bitte versuchen Sie es später erneut.",
+  "The bonus programs could not be loaded. Please try again later.": "Die Bonusprogramme konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+  "Bonus programs on offer ({n})": "Angebotene Bonusprogramme ({n})",
+  "No bonus program is on offer. The catalogue crawler has not found one in another data space yet.": "Es wird kein Bonusprogramm angeboten. Der Katalog-Crawler hat noch keines in einem anderen Datenraum gefunden.",
+  "Insurance and wellbeing data space": "Datenraum Versicherung und Wohlbefinden",
+  "Another data space": "Ein anderer Datenraum",
+  "The rule, version {version}": "Die Regel, Version {version}",
+  "What {publisher} receives": "Was {publisher} erhält",
+  "The year, and goal met: yes or no.": "Das Jahr und Ziel erreicht: ja oder nein.",
+  "What never leaves your record": "Was Ihre Akte nie verlässt",
+  "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Schritte, Herzfrequenz, Diagnosen, Besuchsdetails und jedes Datum genauer als das Jahr.",
+  "You cannot join yet: joining and withdrawing come in the next step.": "Sie können noch nicht teilnehmen: Teilnehmen und Widerrufen folgen im nächsten Schritt."
 }

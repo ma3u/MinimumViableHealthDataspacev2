@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthError } from "@/lib/auth-guard";
 import { requireSessionOrToken } from "@/lib/service-auth";
+import alphakasseCatalogue from "@/content/catalogues/alphakasse-dcat-ap.json";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +134,24 @@ const MOCK_CATALOGS: Record<string, MockPublisher> = {
   },
 };
 
+/**
+ * Catalogues served as they are, in DCAT-AP 3.0.1 rather than built from a
+ * MockPublisher: a participant of another data space whose offers are not
+ * health datasets (#934, step 3). AlphaKasse DE, the fictional insurer of the
+ * "insurance and wellbeing" data space, publishes its bonus programme as a
+ * dcat:DataService. The same file is what the PR Gate validates against the
+ * DCAT-AP SHACL and what the enricher's test maps, so the three cannot drift.
+ */
+const DCAT_AP_CATALOGUES: Record<string, object> = {
+  alphakasse: alphakasseCatalogue,
+};
+
+function catalogFor(participant: string): object | null {
+  if (DCAT_AP_CATALOGUES[participant]) return DCAT_AP_CATALOGUES[participant];
+  const pub = MOCK_CATALOGS[participant];
+  return pub ? buildCatalog(pub) : null;
+}
+
 function buildCatalog(pub: MockPublisher) {
   return {
     "@context": {
@@ -191,14 +210,14 @@ export async function POST(
   const auth = await requireSessionOrToken(request, "DSP_CATALOG_TOKEN");
   if (isAuthError(auth)) return auth;
   const { participant } = await params;
-  const pub = MOCK_CATALOGS[participant];
-  if (!pub) {
+  const catalog = catalogFor(participant);
+  if (!catalog) {
     return NextResponse.json(
       { error: `No mock catalog for '${participant}'` },
       { status: 404 },
     );
   }
-  return NextResponse.json(buildCatalog(pub));
+  return NextResponse.json(catalog);
 }
 
 // GET mirror for manual browser inspection. Real DSP 2025-1 uses POST, but
@@ -210,15 +229,18 @@ export async function GET(
   const auth = await requireSessionOrToken(request, "DSP_CATALOG_TOKEN");
   if (isAuthError(auth)) return auth;
   const { participant } = await params;
-  const pub = MOCK_CATALOGS[participant];
-  if (!pub) {
+  const catalog = catalogFor(participant);
+  if (!catalog) {
     return NextResponse.json(
       {
         error: `No mock catalog for '${participant}'`,
-        available: Object.keys(MOCK_CATALOGS),
+        available: [
+          ...Object.keys(MOCK_CATALOGS),
+          ...Object.keys(DCAT_AP_CATALOGUES),
+        ],
       },
       { status: 404 },
     );
   }
-  return NextResponse.json(buildCatalog(pub));
+  return NextResponse.json(catalog);
 }

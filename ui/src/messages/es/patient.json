@@ -351,5 +351,21 @@
   "bpm": "lpm",
   "per day": "al día",
   "kg": "kg",
-  "ePA transfer, GesundheitsID-authenticated": "Transferencia de la ePA, autenticada con GesundheitsID"
+  "ePA transfer, GesundheitsID-authenticated": "Transferencia de la ePA, autenticada con GesundheitsID",
+  "Offers from other data spaces that reward what you do for your health. A program receives a yes or no once a year, never the data behind it. Whether you join is your decision alone (GDPR Art. 9(2)(a)).": "Ofertas de otros espacios de datos que premian lo que hace por su salud. Un programa recibe un sí o un no una vez al año, nunca los datos que hay detrás. Solo usted decide si participa (RGPD, art. 9, apdo. 2, letra a)).",
+  "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.": "Un programa de bonificación no es investigación ni la exclusión voluntaria. Participar nunca le inscribe en un estudio, y su exclusión del uso secundario (EEDS, art. 71) no detiene lo que usted mismo decide compartir.",
+  "Loading bonus programs…": "Cargando programas de bonificación…",
+  "You may not see the bonus programs: they are shown to patients. If your session has ended, sign in again.": "No puede ver los programas de bonificación: se muestran a los pacientes. Si su sesión ha caducado, vuelva a iniciar sesión.",
+  "The bonus programs could not be loaded (HTTP {status}). Please try again later.": "No se pudieron cargar los programas de bonificación (HTTP {status}). Inténtelo de nuevo más tarde.",
+  "The bonus programs could not be loaded. Please try again later.": "No se pudieron cargar los programas de bonificación. Inténtelo de nuevo más tarde.",
+  "Bonus programs on offer ({n})": "Programas de bonificación disponibles ({n})",
+  "No bonus program is on offer. The catalogue crawler has not found one in another data space yet.": "No se ofrece ningún programa de bonificación. El rastreador del catálogo aún no ha encontrado ninguno en otro espacio de datos.",
+  "Insurance and wellbeing data space": "Espacio de datos de seguros y bienestar",
+  "Another data space": "Otro espacio de datos",
+  "The rule, version {version}": "La regla, versión {version}",
+  "What {publisher} receives": "Lo que recibe {publisher}",
+  "The year, and goal met: yes or no.": "El año, y objetivo cumplido: sí o no.",
+  "What never leaves your record": "Lo que nunca sale de su historia",
+  "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Pasos, frecuencia cardiaca, diagnósticos, detalles de las visitas y cualquier fecha más precisa que el año.",
+  "You cannot join yet: joining and withdrawing come in the next step.": "Aún no puede participar: la adhesión y la retirada llegan en el siguiente paso."
 }

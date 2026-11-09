@@ -351,5 +351,21 @@
   "bpm": "bpm",
   "per day": "per dag",
   "kg": "kg",
-  "ePA transfer, GesundheitsID-authenticated": "ePA-overdracht, geauthenticeerd met GesundheitsID"
+  "ePA transfer, GesundheitsID-authenticated": "ePA-overdracht, geauthenticeerd met GesundheitsID",
+  "Offers from other data spaces that reward what you do for your health. A program receives a yes or no once a year, never the data behind it. Whether you join is your decision alone (GDPR Art. 9(2)(a)).": "Aanbiedingen uit andere dataruimten die belonen wat u voor uw gezondheid doet. Een programma ontvangt eenmaal per jaar een ja of nee, nooit de gegevens erachter. Of u meedoet, beslist u alleen (AVG art. 9, lid 2, onder a)).",
+  "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.": "Een bonusprogramma is geen onderzoek en niet de opt-out. Meedoen schrijft u nooit in voor een studie, en uw opt-out van secundair gebruik (EHDS art. 71) stopt geen delen dat u zelf start.",
+  "Loading bonus programs…": "Bonusprogramma’s laden…",
+  "You may not see the bonus programs: they are shown to patients. If your session has ended, sign in again.": "U mag de bonusprogramma’s niet zien: ze worden aan patiënten getoond. Als uw sessie is verlopen, meld u dan opnieuw aan.",
+  "The bonus programs could not be loaded (HTTP {status}). Please try again later.": "De bonusprogramma’s konden niet worden geladen (HTTP {status}). Probeer het later opnieuw.",
+  "The bonus programs could not be loaded. Please try again later.": "De bonusprogramma’s konden niet worden geladen. Probeer het later opnieuw.",
+  "Bonus programs on offer ({n})": "Aangeboden bonusprogramma’s ({n})",
+  "No bonus program is on offer. The catalogue crawler has not found one in another data space yet.": "Er wordt geen bonusprogramma aangeboden. De catalogus-crawler heeft er nog geen gevonden in een andere dataruimte.",
+  "Insurance and wellbeing data space": "Dataruimte verzekering en welzijn",
+  "Another data space": "Een andere dataruimte",
+  "The rule, version {version}": "De regel, versie {version}",
+  "What {publisher} receives": "Wat {publisher} ontvangt",
+  "The year, and goal met: yes or no.": "Het jaar, en doel gehaald: ja of nee.",
+  "What never leaves your record": "Wat uw dossier nooit verlaat",
+  "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Stappen, hartslag, diagnoses, details van bezoeken en elke datum preciezer dan het jaar.",
+  "You cannot join yet: joining and withdrawing come in the next step.": "U kunt nog niet meedoen: meedoen en intrekken volgen in de volgende stap."
 }

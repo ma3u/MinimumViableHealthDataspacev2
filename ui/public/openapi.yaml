@@ -870,6 +870,42 @@ paths:
       responses:
         "200": { description: Insight summary }
 
+  /api/patient/programmes:
+    get:
+      tags: [Patient]
+      summary: List bonus programmes found in other data spaces (#934)
+      description: >-
+        DCAT-AP dcat:DataService offers typed ehds:BonusProgramme, indexed by
+        the catalogue crawler and enricher. A programme receives a yes or no per
+        year, never the data behind it (ADR-080). PATIENT or EDC_ADMIN.
+      responses:
+        "200":
+          description: Programme list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [programmes, legalBasis]
+                properties:
+                  legalBasis: { type: string }
+                  programmes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        programmeId: { type: string }
+                        title: { type: string }
+                        description: { type: string, nullable: true }
+                        publisherName: { type: string }
+                        publisherDid: { type: string }
+                        dataSpace: { type: string, nullable: true }
+                        endpointUrl: { type: string, nullable: true }
+                        ruleTitle: { type: string, nullable: true }
+                        ruleDescription: { type: string, nullable: true }
+                        ruleVersion: { type: string, nullable: true }
+                        lastSeenAt: { type: string, nullable: true }
+        "401": { description: No session }
+        "403": { description: Not a patient or operator }
   /api/patient/research:
     get:
       tags: [Patient]

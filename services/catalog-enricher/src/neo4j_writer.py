@@ -14,7 +14,7 @@ from typing import Iterator
 from neo4j import Driver, GraphDatabase
 
 from .mapping import known_theme_system, split_theme
-from .models import DatasetUpsert
+from .models import DatasetUpsert, ServiceUpsert
 
 log = logging.getLogger(__name__)
 
@@ -85,14 +85,49 @@ MERGE (policy:OdrlPolicy {policyId: $policyId})
 MERGE (d)-[:GOVERNED_BY]->(policy)
 """
 
+# A dcat:DataService of another data space (#934), e.g. a bonus programme.
+UPSERT_SERVICE = """
+MERGE (s:DataService {serviceId: $serviceId})
+SET s.title                 = $title,
+    s.description           = $description,
+    s.source                = 'federated',
+    s.publisherDid          = $publisherDid,
+    s.publisherName         = $publisherName,
+    s.endpointUrl           = $endpointUrl,
+    s.themes                = $themes,
+    s.keywords              = $keywords,
+    s.accessRights          = $accessRights,
+    s.applicableLegislation = $applicableLegislation,
+    s.conformsTo            = $conformsTo,
+    s.ruleId                = $ruleId,
+    s.ruleTitle             = $ruleTitle,
+    s.ruleDescription       = $ruleDescription,
+    s.ruleVersion           = $ruleVersion,
+    s.lastSeenAt            = datetime($lastSeenAt)
+MERGE (p:Participant {participantId: $publisherDid})
+  ON CREATE SET p.source = 'dcp',
+                p.walletType = 'business',
+                p.name = coalesce($publisherName, $publisherDid)
+MERGE (s)-[:PUBLISHED_BY]->(p)
+"""
+
+# Labels come from mapping.KNOWN_SERVICE_KINDS only, never from the catalogue.
+LABEL_SERVICE = """
+MATCH (s:DataService {serviceId: $serviceId})
+SET s:{label}
+"""
+
 AUDIT_EVENT = """
 CREATE (e:CatalogEnrichmentEvent {
   ts: datetime($ts),
   participantDid: $participantDid,
   datasetsUpserted: $datasetsUpserted,
+  servicesUpserted: $servicesUpserted,
   themesUnknown: $themesUnknown
 })
 """
+
+KNOWN_LABELS = {"BonusProgramme"}
 
 
 @contextmanager
@@ -104,15 +139,46 @@ def bolt_driver(uri: str, user: str, password: str) -> Iterator[Driver]:
         driver.close()
 
 
+def write_services(driver: Driver, services: list[ServiceUpsert]) -> int:
+    """Upsert dcat:DataService nodes and their kind labels (#934). Returns the count."""
+    with driver.session() as session:
+        for sv in services:
+            session.run(
+                UPSERT_SERVICE,
+                serviceId=sv.service_id,
+                title=sv.title,
+                description=sv.description,
+                publisherDid=sv.publisher_did,
+                publisherName=sv.publisher_name,
+                endpointUrl=sv.endpoint_url,
+                themes=sv.themes,
+                keywords=sv.keywords,
+                accessRights=sv.access_rights,
+                applicableLegislation=sv.applicable_legislation,
+                conformsTo=sv.conforms_to,
+                ruleId=sv.rule_id,
+                ruleTitle=sv.rule_title,
+                ruleDescription=sv.rule_description,
+                ruleVersion=sv.rule_version,
+                lastSeenAt=sv.last_seen_at.isoformat(),
+            )
+            for label in sv.kinds:
+                if label in KNOWN_LABELS:
+                    session.run(LABEL_SERVICE.replace("{label}", label), serviceId=sv.service_id)
+    return len(services)
+
+
 def write_datasets(
     driver: Driver,
     envelope_ts: str,
     publisher_did: str,
     datasets: list[DatasetUpsert],
+    services_upserted: int = 0,
 ) -> tuple[int, int]:
     """Upsert datasets + distributions + themes + policies.
 
-    Returns (datasets_upserted, themes_unknown_count).
+    Returns (datasets_upserted, themes_unknown_count). The audit event also
+    records the services write_services() wrote for the same envelope.
     """
     themes_unknown = 0
     with driver.session() as session:
@@ -177,6 +243,7 @@ def write_datasets(
             ts=envelope_ts,
             participantDid=publisher_did,
             datasetsUpserted=len(datasets),
+            servicesUpserted=services_upserted,
             themesUnknown=themes_unknown,
         )
     return len(datasets), themes_unknown

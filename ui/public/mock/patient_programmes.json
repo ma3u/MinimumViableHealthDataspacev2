@@ -1,0 +1,18 @@
+{
+  "programmes": [
+    {
+      "programmeId": "urn:mvhd:programme:alphakasse:active-year-2027",
+      "title": "Active year bonus 2027",
+      "description": "A bonus for members who stay active through 2027 and go to their yearly check-up. The member joins in the patient portal. The hub works out inside the member's record whether the year's goal was met; AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record. A no changes nothing in the member's contract.",
+      "publisherName": "AlphaKasse DE",
+      "publisherDid": "did:web:alphakasse.de:insurer",
+      "dataSpace": "insurance-wellbeing",
+      "endpointUrl": "https://ehds.mabu.red/api/mock-dsp/alphakasse",
+      "ruleTitle": "Active year rule, version 2027.1",
+      "ruleDescription": "Goal met when, in the calendar year, the member was active for at least 150 minutes a week on average and went to one check-up. Read from the activity the member's tracker shares into the record and from the check-up in the member's own EHR. Evaluated by the hub inside the record; the member sees the result before anything is sent.",
+      "ruleVersion": "2027.1",
+      "lastSeenAt": "2026-11-09T08:00:00Z"
+    }
+  ],
+  "legalBasis": "Primary use the person directs, EHDS Art. 2(2)(d) and 7(3); explicit consent, GDPR Art. 9(2)(a) (ADR-080)"
+}

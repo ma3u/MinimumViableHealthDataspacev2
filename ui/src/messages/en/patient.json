@@ -351,5 +351,21 @@
   "bpm": "bpm",
   "per day": "per day",
   "kg": "kg",
-  "ePA transfer, GesundheitsID-authenticated": "ePA transfer, GesundheitsID-authenticated"
+  "ePA transfer, GesundheitsID-authenticated": "ePA transfer, GesundheitsID-authenticated",
+  "Offers from other data spaces that reward what you do for your health. A program receives a yes or no once a year, never the data behind it. Whether you join is your decision alone (GDPR Art. 9(2)(a)).": "Offers from other data spaces that reward what you do for your health. A program receives a yes or no once a year, never the data behind it. Whether you join is your decision alone (GDPR Art. 9(2)(a)).",
+  "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.": "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.",
+  "Loading bonus programs…": "Loading bonus programs…",
+  "You may not see the bonus programs: they are shown to patients. If your session has ended, sign in again.": "You may not see the bonus programs: they are shown to patients. If your session has ended, sign in again.",
+  "The bonus programs could not be loaded (HTTP {status}). Please try again later.": "The bonus programs could not be loaded (HTTP {status}). Please try again later.",
+  "The bonus programs could not be loaded. Please try again later.": "The bonus programs could not be loaded. Please try again later.",
+  "Bonus programs on offer ({n})": "Bonus programs on offer ({n})",
+  "No bonus program is on offer. The catalogue crawler has not found one in another data space yet.": "No bonus program is on offer. The catalogue crawler has not found one in another data space yet.",
+  "Insurance and wellbeing data space": "Insurance and wellbeing data space",
+  "Another data space": "Another data space",
+  "The rule, version {version}": "The rule, version {version}",
+  "What {publisher} receives": "What {publisher} receives",
+  "The year, and goal met: yes or no.": "The year, and goal met: yes or no.",
+  "What never leaves your record": "What never leaves your record",
+  "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Steps, heart rate, diagnoses, visit details and any date finer than the year.",
+  "You cannot join yet: joining and withdrawing come in the next step.": "You cannot join yet: joining and withdrawing come in the next step."
 }

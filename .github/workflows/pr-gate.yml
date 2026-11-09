@@ -106,6 +106,8 @@ jobs:
           python3 scripts/healthdcat-ap/validate.py services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
           python3 scripts/healthdcat-ap/validate.py ui/__tests__/unit/lib/fixtures/healthdcat-ap-r8.ttl \
             --same-as services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
+          # AlphaKasse's bonus programme is not health data: DCAT-AP alone (#934)
+          python3 scripts/healthdcat-ap/validate.py ui/src/content/catalogues/alphakasse-dcat-ap.json --dcat-ap
 
       # #404 removed the dead files, exports and dependencies knip found;
       # this keeps it that way. ui/knip.json lists the entry points knip

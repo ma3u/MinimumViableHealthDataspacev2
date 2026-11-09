@@ -98,6 +98,32 @@ describe("/api/mock-dsp/[participant]/catalog/request", () => {
     expect((await res.json())["@type"]).toBe("dcat:Catalog");
   });
 
+  it("serves AlphaKasse's DCAT-AP catalogue as published, its bonus programme a dcat:DataService (#934)", async () => {
+    const res = await POST(req(`Bearer ${TOKEN}`), {
+      params: Promise.resolve({ participant: "alphakasse" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body["@type"]).toBe("dcat:Catalog");
+    expect(body["dcat:dataset"]).toBeUndefined();
+    const [programme] = body["dcat:service"];
+    expect(programme["@type"]).toEqual([
+      "dcat:DataService",
+      "ehds:BonusProgramme",
+    ]);
+    expect(programme["dcat:endpointURL"]["@id"]).toBe(
+      "https://ehds.mabu.red/api/mock-dsp/alphakasse",
+    );
+  });
+
+  it("answers 404 for a participant with no catalogue", async () => {
+    const res = await POST(req(`Bearer ${TOKEN}`), {
+      params: Promise.resolve({ participant: "nobody" }),
+    });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toContain("nobody");
+  });
+
   it("answers 401 { error } to an anonymous caller (ADR-044)", async () => {
     const res = await GET(
       new Request("http://localhost/api/mock-dsp/alpha-klinik/catalog/request"),

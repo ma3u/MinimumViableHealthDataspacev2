@@ -31,6 +31,7 @@ import {
   Edit3,
   Lightbulb,
   FlaskConical,
+  Gift,
   Sparkles,
   Menu,
   X,
@@ -376,6 +377,12 @@ const myHealthGroup: NavGroup = {
       href: "/patient/research",
       label: "Research Programs",
       icon: FlaskConical,
+      roles: ["PATIENT"],
+    },
+    {
+      href: "/patient/programmes",
+      label: "Bonus Programs",
+      icon: Gift,
       roles: ["PATIENT"],
     },
     {

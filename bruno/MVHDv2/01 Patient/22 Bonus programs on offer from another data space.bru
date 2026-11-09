@@ -1,0 +1,40 @@
+meta {
+  name: 22 Bonus programs on offer from another data space
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{baseUrl}}/api/patient/programmes
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.programmes: isArray
+  res.body.legalBasis: contains 7(3)
+}
+
+tests {
+  const programmes = res.getBody().programmes || [];
+  if (programmes.length === 0) {
+    // The catalogue crawler fills this from AlphaKasse's DCAT-AP catalogue.
+    test("SKIPPED: the crawler has not indexed a bonus program on this stack yet (#934)", function () {});
+  } else {
+    test("a program carries its versioned rule and never a health value (ADR-080)", function () {
+      const p = programmes[0];
+      expect(p.programmeId, "programme id").to.be.a("string");
+      expect(p.ruleVersion, "a program publishes a versioned rule").to.be.a("string");
+      expect(JSON.stringify(p)).to.not.match(/"value(Quantity|AsNumber)"/);
+    });
+  }
+}
+
+docs {
+  #934, step 3. Bonus programs the catalogue crawler found in another data space, today AlphaKasse DE's "Active year bonus" in the insurance and wellbeing data space, published as a DCAT-AP dcat:DataService. A program receives a yes or no per year, never the data behind it (ADR-080). Listing only: joining comes with step 4.
+}
