@@ -128,7 +128,7 @@ describe("RoadmapTimeline", () => {
     act(() => t.handlers.select({ items: ["e963"] }));
     const detail = await screen.findByTestId("roadmap-detail");
     expect(detail).toHaveTextContent("Connector platform: EDC 1.0");
-    expect(detail).toHaveTextContent(/2 of 12 done/);
+    expect(detail).toHaveTextContent(/3 of 12 done/);
     expect(screen.getByRole("link", { name: "#542" })).toHaveAttribute(
       "href",
       "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/542",

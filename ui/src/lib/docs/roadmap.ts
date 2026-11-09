@@ -705,10 +705,10 @@ export const EPICS: readonly RoadmapEpic[] = [
     links: { edc: SRC.edc },
     open: {
       P1: [542],
-      P2: [881, 888, 890, 930, 971, 972, 973],
+      P2: [888, 890, 930, 971, 972, 973],
       P3: [891, 927],
     },
-    done: [97, 755],
+    done: [97, 755, 881],
   },
   {
     issue: 964,
