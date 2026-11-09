@@ -34,18 +34,22 @@ async def handle_message(driver: Driver, msg: Msg) -> None:
         return
 
     datasets = mapping.extract_datasets(envelope)
+    services = mapping.extract_services(envelope)
     try:
         with metrics.merge_seconds.time():
+            services_upserted = neo4j_writer.write_services(driver, services)
             upserted, unknown = neo4j_writer.write_datasets(
                 driver,
                 envelope_ts=envelope.fetched_at.isoformat(),
                 publisher_did=envelope.participant_did,
                 datasets=datasets,
+                services_upserted=services_upserted,
             )
         log.info(
-            "envelope processed — publisher=%s datasets=%d unknown_themes=%d",
+            "envelope processed — publisher=%s datasets=%d services=%d unknown_themes=%d",
             envelope.participant_did,
             upserted,
+            services_upserted,
             unknown,
         )
         for _ in range(unknown):

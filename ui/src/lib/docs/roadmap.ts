@@ -506,6 +506,99 @@ export const ITEMS: readonly RoadmapItem[] = [
     note: "Templates after their implementing act.",
     links: { a53: ehdsArt(53), a81: ehdsArt(81), a70: ehdsArt(70) },
   },
+  // TEHDAS2 results (#990): the Joint Action's guidelines against the hub,
+  // and the demo at its final conference.
+  {
+    issue: 991,
+    lane: "regulation",
+    short: "TEHDAS2 requirement check",
+    title:
+      "TEHDAS2: the high-relevance results checked requirement by requirement",
+    priority: "P1",
+    status: "planned",
+    start: "2026-11-09",
+    end: "2026-11-13",
+    note: "Nine results the demo shows, each against its own text; every gap goes to its issue.",
+  },
+  {
+    issue: 992,
+    lane: "processing",
+    short: "DAAMS against D6.4",
+    title:
+      "<d64>D6.4 DAAMS</d64>: the application and permit model against the specification",
+    priority: "P1",
+    status: "planned",
+    start: "2026-11-09",
+    end: "2026-11-13",
+    note: "The core the demo shows; deviations become issues, a change to the model an ADR.",
+    links: {
+      d64: "https://tehdas.eu/wp-content/uploads/2026/06/d6.4-data-access-application-management-system-daams-technical-specification-for-health-data-access-bodies.pdf",
+    },
+  },
+  {
+    issue: 993,
+    lane: "regulation",
+    short: "TEHDAS2 mapping page",
+    title: "The TEHDAS2 mapping as a page under /docs",
+    priority: "P1",
+    status: "planned",
+    start: "2026-11-11",
+    end: "2026-11-15",
+    note: "The 21 results with status, component and open issue; the one link the demo hands out.",
+  },
+  {
+    issue: 994,
+    lane: "demos",
+    short: "TEHDAS2 conference demo",
+    title: "<c>TEHDAS2 final conference</c>: the demo along its four sessions",
+    priority: "P1",
+    status: "planned",
+    start: "2026-11-10",
+    end: "2026-11-16",
+    note: "Brussels and online on 16 November 2026; a rehearsal on 13 November, the static site as fallback.",
+    links: { c: "https://tehdas.eu/event/tehdas2-final-conference/" },
+  },
+  {
+    issue: 995,
+    lane: "regulation",
+    short: "Information page public",
+    title: "Citizen Information Point without sign-in",
+    priority: "P2",
+    status: "planned",
+    start: "2026-11-10",
+    end: "2026-12-18",
+    note: "Needs an ADR that supersedes <adr>ADR-044</adr> for the information page.",
+    links: {
+      adr: `${REPO}/blob/main/docs/ADRs/ADR-044-every-api-route-needs-a-session.md`,
+    },
+  },
+  {
+    issue: 996,
+    lane: "processing",
+    short: "Significant findings",
+    title:
+      "<d82>D8.2</d82> significant findings: assessed by the access body, told to the person",
+    priority: "P2",
+    status: "planned",
+    start: "2026-12-01",
+    end: "2027-03-26",
+    note: "Not covered yet: only the policy duty to report an incident exists.",
+    links: {
+      d82: "https://tehdas.eu/wp-content/uploads/2026/06/d8.2-guideline-for-health-data-access-bodies-on-implementing-the-obligation-of-notifying-the-natural-person-on-a-significant-finding-from-the-secondary-use-of-health-data.pdf",
+    },
+  },
+  {
+    issue: 997,
+    lane: "regulation",
+    short: "TEHDAS2 wave 3 re-rated",
+    title:
+      "TEHDAS2 wave 3: the seven guidelines re-rated on their final versions",
+    priority: "P2",
+    status: "planned",
+    start: "2026-11-17",
+    end: "2026-12-18",
+    note: "None of the seven was final on 9 November 2026.",
+  },
 ];
 
 export interface Milestone {
@@ -527,6 +620,15 @@ export const MILESTONES: readonly Milestone[] = [
     detail:
       "The Regulation applies generally; access bodies and national contact points are designated. For an online request through MyHealth@EU, persons identify with electronic identification means under eIDAS at assurance level substantial (2026/2099, Art. 4(2)).",
     href: ehdsArt(105),
+  },
+  {
+    id: "tehdas2-final",
+    lane: "regulation",
+    date: "2026-11-16",
+    label: "TEHDAS2 final conference",
+    detail:
+      "The Joint Action that prepares the EHDS presents its 21 guidelines and technical specifications, in Brussels and online.",
+    href: "https://tehdas.eu/event/tehdas2-final-conference/",
   },
   {
     id: "healthdata-eu-act",
@@ -638,7 +740,8 @@ export interface RoadmapEpic {
 
 /** The epics: every open issue is a sub-issue of one, edited in the GitHub
  *  Project (view "Epics"). An epic is not dated by hand; epicWindow() derives
- *  its bar from its issues. #725 is the plan above the first four. */
+ *  its bar from its issues. #725 is the plan above the first four; #990 collects the
+ *  TEHDAS2 results. */
 export const EPICS: readonly RoadmapEpic[] = [
   {
     issue: 959,
@@ -705,10 +808,10 @@ export const EPICS: readonly RoadmapEpic[] = [
     links: { edc: SRC.edc },
     open: {
       P1: [542],
-      P2: [881, 888, 890, 930, 971, 972, 973],
+      P2: [888, 890, 930, 971, 972, 973],
       P3: [891, 927],
     },
-    done: [97, 755],
+    done: [97, 755, 881],
   },
   {
     issue: 964,
@@ -752,6 +855,18 @@ export const EPICS: readonly RoadmapEpic[] = [
     priority: "P2",
     note: "Showing the hub to access bodies and national programmes, and what a multilingual demonstrator with national implementation profiles would take.",
     open: { P1: [], P2: [27], P3: [782] },
+    done: [],
+  },
+  {
+    issue: 990,
+    lane: "regulation",
+    short: "TEHDAS2 results",
+    title:
+      "TEHDAS2 results: what the hub implements, and the final conference demo",
+    priority: "P1",
+    note: "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.",
+    links: { c: "https://tehdas.eu/event/tehdas2-final-conference/" },
+    open: { P1: [991, 992, 993, 994], P2: [995, 996, 997], P3: [998, 999] },
     done: [],
   },
 ];

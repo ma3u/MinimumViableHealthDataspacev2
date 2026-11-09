@@ -18,6 +18,7 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/patient/profile": "/mock/patient_profile_list.json",
   "/api/patient/insights": "/mock/patient_insights.json",
   "/api/patient/research": "/mock/patient_research.json",
+  "/api/patient/programmes": "/mock/patient_programmes.json",
   "/api/patient/opt-out": "/mock/patient_opt_out.json",
   "/api/patient/observations": "/mock/patient_observations.json",
   "/api/patient/app-devices": "/mock/patient_app_devices.json",

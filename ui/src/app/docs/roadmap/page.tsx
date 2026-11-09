@@ -217,7 +217,7 @@ export default function RoadmapDocsPage() {
             tags={{ e: inlineLink(`${ROADMAP_PROJECT}/views/6`) }}
           >
             {
-              "Every open issue belongs to one of nine <e>epics</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set."
+              "Every open issue belongs to an <e>epic</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set."
             }
           </T>
         </p>

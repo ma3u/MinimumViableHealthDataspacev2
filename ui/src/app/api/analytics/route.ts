@@ -3,7 +3,7 @@ import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { gateSecondaryUse } from "@/lib/permit-gate";
-import { forRoles } from "@/lib/opt-out";
+import { forRoles, secondaryUseView } from "@/lib/opt-out";
 
 export const dynamic = "force-dynamic";
 
@@ -39,8 +39,16 @@ export async function GET() {
 
   // Art. 71 (ADR-062): for a data user, an access body or a trust centre
   // the statistics leave out the persons who opted out of secondary use.
+  // A patient may read them too (decided in #951, J313): aggregate counts of
+  // the demo cohort, no person in them, and without the persons who opted
+  // out, since for a patient these are other people's records, not their own.
+  const patientOnly =
+    session.roles.includes("PATIENT") &&
+    !session.roles.some((r) => r === "EDC_ADMIN" || r === "DATA_HOLDER");
   const query = <T>(cypher: string) =>
-    runQuery<T>(forRoles(cypher, session.roles));
+    runQuery<T>(
+      patientOnly ? secondaryUseView(cypher) : forRoles(cypher, session.roles),
+    );
 
   try {
     const [

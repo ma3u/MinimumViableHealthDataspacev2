@@ -151,7 +151,9 @@ nodes carry the `OptedOut` label, and every secondary-use query excludes it:
   OMOP rows) for `DATA_USER`, `HDAB_AUTHORITY` or `TRUST_CENTER_OPERATOR`
   passes its Cypher through `forRoles(cypher, roles)` or `secondaryUseView()`
   from `@/lib/opt-out`. `EDC_ADMIN`, `DATA_HOLDER` and `PATIENT` read for care
-  or for themselves and are not narrowed.
+  or for themselves and are not narrowed. The exception is `PATIENT` on
+  `/api/analytics`: the cohort statistics are other people's records, so a
+  patient reads them through `secondaryUseView()` (#951, J313).
 - In the proxy, a route that serves secondary use runs through
   `secondaryUseSession()` or `runSecondaryUse()` from `src/opt-out.ts`, and a
   FHIR response drops any node `releasable()` refuses.
@@ -277,6 +279,7 @@ Each mock file maps 1:1 to an API endpoint:
 | `patient_profile_patient2.json` | `/api/patient/profile?patientId=P2` |
 | `patient_insights.json`         | `/api/patient/insights`             |
 | `patient_research.json`         | `/api/patient/research`             |
+| `patient_programmes.json`       | `/api/patient/programmes`           |
 | `compliance.json`               | `/api/compliance`                   |
 | `analytics.json`                | `/api/analytics`                    |
 | `credentials.json`              | `/api/credentials`                  |
@@ -302,6 +305,7 @@ did:web:pharmaco.de:research          — PharmaCo Research AG (DATA_USER)
 did:web:medreg.de:hdab                — MedReg DE (HDAB_AUTHORITY)
 did:web:lmc.nl:clinic                 — Limburg Medical Centre (DATA_HOLDER)
 did:web:irs.fr:hdab                   — Institut de Recherche Santé (HDAB)
+did:web:alphakasse.de:insurer         — AlphaKasse DE (insurer, second data space, #934)
 ```
 
 **EDC layer** (control plane participant contexts, IdentityHub, IssuerService

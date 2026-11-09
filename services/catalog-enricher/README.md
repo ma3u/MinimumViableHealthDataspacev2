@@ -11,6 +11,21 @@ Role and boundaries are defined in
 this service is **not** a crawler, **not** a query path, **not** a policy
 engine.
 
+## Data services of another data space (#934)
+
+A catalogue entry under `dcat:service` (DCAT-AP 3.0.1 `dcat:DataService`)
+becomes a `(:DataService {serviceId})` published by the crawled participant.
+That is how a participant of another data space offers something that is not
+a health dataset: AlphaKasse DE's bonus programme in the insurance and
+wellbeing data space
+([`alphakasse-dcat-ap.json`](../../ui/src/content/catalogues/alphakasse-dcat-ap.json),
+validated by the PR Gate with `scripts/healthdcat-ap/validate.py --dcat-ap`).
+A service typed `ehds:BonusProgramme` also gets the label `BonusProgramme`,
+and the versioned `dct:Standard` it conforms to is stored as its rule
+(`ruleVersion`, ADR-080 decision 3). Labels come from a fixed list in
+`mapping.KNOWN_SERVICE_KINDS`, never from the catalogue. The patient portal
+lists the programmes at `/patient/programmes`.
+
 ## Quick start — local
 
 ```bash
