@@ -1,18 +1,145 @@
 ---
-title: "CFM 0.0.7 spike (#973, ADR-085 step 1): Keycloak cannot serve the agents' token exchange"
+title: "CFM 0.0.7 spike (#973, ADR-085 step 1): the proxy works, the control plane does not take CFM's participant config"
 status: current
 owner: ma3u
 updated: 2026-11-09
 issue: https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973
 ---
 
-[ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md) step 1 starts
-with its riskiest assumption, decision 2.1: Keycloak's token exchange in place
-of jwtlet. It does not hold, so the spike stopped there, before the `cfm`
-compose profile, the onboarding and the suites. Step 2 (a token exchange of
-our own) waits for Matthias's decision.
+[ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md) step 1, in
+two rounds on 2026-11-09:
 
-## Result, 2026-11-09
+1. **Keycloak alone** cannot serve the agents' token exchange (below, "Round
+   1"). Matthias chose ADR-085 step 2, a proxy.
+2. **With the proxy** (below, "Round 2") every token exchange succeeds, and
+   CFM provisions the IdentityHub half of a participant on our stack: DID
+   document, issuer holder, MembershipCredential. It stops at the control
+   plane: CFM 0.0.7 no longer provisions STS credentials and writes a
+   participant config our control plane refuses. Dispose fails as well.
+   The spike stopped there; how to go on is Matthias's decision.
+
+## Round 2, the proxy: what CFM 0.0.7 does on our stack
+
+### What was built
+
+- [`jad/cfm/token-exchange.mjs`](../../../jad/cfm/token-exchange.mjs): the
+  proxy. It exists **only because of
+  [`tokenprovider.go` L123](https://github.com/eclipse-cfm/cfm/blob/v0.0.7/common/tokenexchange/tokenprovider.go#L123)**,
+  the fixed `subject_token_type` `jwt` Keycloak refuses, and can go once
+  eclipse-cfm makes the type configurable (the clean long-term fix; not asked
+  upstream). It rewrites that one parameter, adds the `cfm-agents` client's
+  credentials as HTTP Basic (the agents send none), and passes the rest of
+  the form and Keycloak's answer through unchanged. Two more things the agents
+  need from a jwtlet: the subject token file, which it writes and renews, and
+  jwtlet's mapping API, which it accepts without storing anything (a Keycloak
+  token is not scoped per participant, so there is nothing to map; the jwtlet
+  agent's step needs the 2xx).
+- The compose profile `cfm` in `docker-compose.jad.yml`: the 0.0.7 Tenant
+  Manager, Provision Manager and six agents, pinned by digest, configured in
+  `jad/cfm/*.dotenv` after core-platform-distribution v0.0.39, with their own
+  NATS (token auth) and database `cfm_v007`.
+- [`scripts/seed-cfm.sh`](../../../scripts/seed-cfm.sh): the database, the
+  `cfm-agents` client and the scopes CFM asks for, upstream's activity and
+  orchestration definitions, a cell and an EHDS dataspace profile with our
+  issuer's MembershipCredential.
+- [`scripts/check-cfm-onboarding.sh`](../../../scripts/check-cfm-onboarding.sh):
+  onboards one participant through the Tenant Manager, checks the control
+  plane, IdentityHub, DID document, issuer holder and credential, disposes it
+  and checks that it is gone.
+
+Run beside the running OrbStack stack (`--no-deps`, own container names, own
+NATS and database); nothing of the stack was restarted or reconfigured.
+Onboarding went through the Tenant Manager's API, not the `/onboarding` page:
+pointing the page at CFM is ADR-085 step 3.
+
+### Results
+
+| Part                                                    | Result                                                                                                                              |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Token exchange through the proxy                        | Works: 12 of 12 exchanges `200`, every scope the agents ask for                                                                     |
+| Tenant Manager and Provision Manager with Keycloak auth | Work: definitions, cell, dataspace profile, tenant, participant profile                                                             |
+| jwtlet agent (mapping no-op, derives the context id)    | Works                                                                                                                               |
+| IdentityHub agent                                       | Works: participant, keys, DID document with CredentialService, DSP and DataService endpoints                                        |
+| Registration agent (issuer holder)                      | Works (round 2; in round 1 the IssuerService timed out reading Keycloak's JWKS once)                                                |
+| Onboarding agent (MembershipCredential over DCP)        | Works: the credential is issued and stored in the IdentityHub                                                                       |
+| EDC-V agent (control plane context and config)          | **Fails**: `400 'edc.iam.sts.oauth.client.id' is required`                                                                          |
+| Siglet agent                                            | Not reached: it depends on the EDC-V agent                                                                                          |
+| Dispose                                                 | **Fails**: the registration and onboarding agents get no `participantContextId`; the orchestration stays open and the profile stays |
+| Compensation after the failed deploy                    | **Fails**: the EDC-V agent's rollback calls our control plane's `204` on delete an error                                            |
+
+With an orchestration that leaves out the two control-plane steps, a deploy
+is `active` in 15 seconds.
+
+### Why the control plane refuses
+
+Since v0.0.3, CFM no longer provisions STS credentials
+([eclipse-cfm/cfm#148](https://github.com/eclipse-cfm/cfm/pull/148): "We
+switched to sts signing service with token exchange and vault"). Its
+participant config is the two ids and a per-participant Vault partition the
+control plane reaches by jwtlet token exchange
+([`controlplane.go` L52-L66](https://github.com/eclipse-cfm/cfm/blob/v0.0.7/agent/common/controlplane/controlplane.go#L52-L66)).
+Our launchers' control plane signs through the IdentityHub's STS with a
+client id and a secret alias per participant, as
+[`provision.ts`](../../../ui/src/lib/edc/provision.ts) sets them, and requires
+`edc.iam.sts.oauth.client.id`. This is not a token problem: the token was
+accepted, the config was refused.
+
+### Three upstream behaviours found on the way
+
+Not reported upstream (an outward message needs Matthias's go):
+
+- Dispose does not carry `participantContextId` to the registration and
+  onboarding agents, which require it; the dispose orchestration then blocks
+  deleting its definition ("has ongoing orchestrations").
+- The EDC-V agent's rollback accepts only `200` from a context delete;
+  EDC 1.0 answers `204`
+  ([`controlplane.go` L127-L150](https://github.com/eclipse-cfm/cfm/blob/v0.0.7/agent/common/controlplane/controlplane.go#L127-L150)).
+- The registration agent keys the issuer holder by its DID. A DID with `%3A`
+  in it makes the holder undeletable through our IssuerService's API (`400`,
+  the ambiguous path encoding `provision.ts` already works around).
+
+### Suites after the spike
+
+Run on the same stack after both rounds and the cleanup, 2026-11-09 17:52 to
+17:54, all at the 1.0 floors measured locally the same day (#927):
+
+| Suite                                              | Passed / failed / skipped | Floor  |
+| -------------------------------------------------- | ------------------------- | ------ |
+| Identity (`scripts/run-ehds-identity-checks.sh`)   | 31 / 0 / 0                | 31/0/0 |
+| Dataspace (`scripts/run-ehds-dataspace-checks.sh`) | 32 / 0 / 1                | 32/0/1 |
+| Health domain (`scripts/run-ehds-tests.sh`)        | 27 / 0 / 3                | 27/0/3 |
+
+They show the spike left the stack as it was; they say nothing about CFM,
+which provisioned no participant they use.
+
+### Cleanup
+
+Both test participants were removed: their IdentityHub participants through
+the API, round 2's issuer holder in `issuerservice_v1` (one row,
+`cfm-check-31827f`, the API cannot delete it). Then the
+`cfm7-*` containers and volumes, the `cfm_v007` database, the `cfm-agents`
+client and the twelve client scopes `seed-cfm.sh` had added were removed, so
+the stack is as it was. `--profile cfm up -d` and `seed-cfm.sh` recreate them.
+
+### What Matthias decides
+
+1. **Make our control plane take CFM's config:** the upstream model, STS
+   signing in a per-participant Vault partition reached by token exchange. A
+   change to the launchers and to Vault (JWT auth trusting the proxy's
+   tokens), locally and on Azure, and the partition would be guarded by a
+   dataspace-wide token. The largest option, and the one that converges with
+   upstream.
+2. **A CFM activity of our own** that writes the STS entries and the
+   IdentityHub STS secret, ordered before the EDC-V agent. CFM is built for
+   extra agents (orchestration definitions are data), but it is Go code we
+   own, and dispose still needs upstream's fix.
+3. **ADR-078 decision 2 stays:** the hub provisions participants itself,
+   which passes the suites today. ADR-085 decision 2.3 foresaw this.
+
+Whichever it is, the three upstream behaviours above are worth reporting,
+with his go.
+
+## Round 1: Keycloak alone, 2026-11-09
 
 Keycloak 26.8.2 (the compose stack's image), the `edcv` realm plus a
 `cfm-agents` client with standard token exchange enabled. The request was

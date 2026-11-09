@@ -1296,12 +1296,258 @@ services:
       - edcv
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # CFM 0.0.7 (eclipse-cfm release images), ADR-085, #973. Profile `cfm`.
+  # ---------------------------------------------------------------------------
+  # Tenant Manager, Provision Manager and the six orchestration agents that
+  # core-platform-distribution v0.0.39 runs, configured in jad/cfm/. They
+  # provision a participant on the 1.0 control plane, IdentityHub, issuer and
+  # siglet, as ui/src/lib/edc/provision.ts does today.
+  #
+  # Own NATS (JetStream, CFM's orchestration only) and its own database
+  # `cfm_v007` (owner `cfm`, jad/init-postgres-edc1.sql); nothing of the rest
+  # of the stack changes. Keycloak stands in for jwtlet behind
+  # cfm7-token-exchange (jad/cfm/token-exchange.mjs), which exists only because
+  # the agents send subject_token_type jwt (cfm tokenprovider.go L123) and
+  # Keycloak takes access tokens only. scripts/seed-cfm.sh creates the
+  # `cfm-agents` client and the CFM definitions; scripts/check-cfm-onboarding.sh
+  # onboards and disposes a participant through the Tenant Manager.
+  #
+  #   docker compose -f docker-compose.yml -f docker-compose.jad.yml --profile cfm up -d
+  #   ./scripts/seed-cfm.sh && ./scripts/check-cfm-onboarding.sh
+  #
+  # Measured 2026-11-09: the IdentityHub half works; the EDC-V agent's participant
+  # config is refused (no STS entries since eclipse-cfm/cfm#148) and dispose
+  # fails. docs/planning/current/issue-973-cfm-0-0-7-spike.md has the detail.
+  cfm7-nats:
+    profiles: ["cfm"]
+    image: nats:2.15.1-alpine
+    container_name: health-dataspace-cfm7-nats
+    command:
+      ["-js", "-sd", "/data", "-m", "8222", "--auth", "cfm-nats-local-dev"]
+    volumes:
+      - cfm7_nats_data:/data
+    networks:
+      - edcv
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8222/healthz || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  cfm7-token-exchange:
+    profiles: ["cfm"]
+    image: node:22.23.4-alpine@sha256:0e1754758c2df4cfa3e68d59e2e1b7374bb7fd9ea6328eaaacf15cc934af8202
+    container_name: health-dataspace-cfm7-token-exchange
+    command: ["node", "/app/token-exchange.mjs"]
+    environment:
+      KEYCLOAK_TOKEN_URL: "http://keycloak:8080/realms/edcv/protocol/openid-connect/token"
+      CFM_CLIENT_ID: "cfm-agents"
+      # Local dev only, as edc-v-admin-secret; scripts/seed-cfm.sh sets the same.
+      CFM_CLIENT_SECRET: "${CFM_AGENTS_CLIENT_SECRET:-cfm-agents-local-dev}"
+    volumes:
+      - ./jad/cfm/token-exchange.mjs:/app/token-exchange.mjs:ro
+      - cfm7_subject_token:/var/run/secrets/cfm
+    networks:
+      - edcv
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "test -s /var/run/secrets/cfm/token && wget -q -O /dev/null http://127.0.0.1:8080/health",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  cfm7-tmanager:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/tmanager:0.0.7@sha256:a8ad035229a58c3e103514a0381d95bfd300c6190905ea9054b825f74382817a
+    container_name: health-dataspace-cfm7-tmanager
+    command: ["/tmanager", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/tm.dotenv:/etc/appname/tm.env:ro
+    ports:
+      - "18181:8080"
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-pmanager:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/pmanager:0.0.7@sha256:5ec089cfa9a6f47a1101e4f436f5423eabccee0da81622a4154f660819472ad0
+    container_name: health-dataspace-cfm7-pmanager
+    command: ["/pmanager", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/pm.dotenv:/etc/appname/pm.env:ro
+    ports:
+      - "18182:8080"
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-jwtletagent:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/jwtletagent:0.0.7@sha256:fc794521c99acf7cf7df8a0d93c6e58edd75dab46178be2456f07a334a6ef351
+    container_name: health-dataspace-cfm7-jwtletagent
+    command: ["/jwtletagent", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/jwtletagent.dotenv:/etc/appname/jwtletagent.env:ro
+      - cfm7_subject_token:/var/run/secrets/cfm:ro
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+      cfm7-token-exchange:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-edcvagent:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/edcvagent:0.0.7@sha256:2ed7f4f7f578e222acb90c18bc26c48f530034d5f45d14cfaed3f3dbbe1b8893
+    container_name: health-dataspace-cfm7-edcvagent
+    command: ["/edcvagent", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/edcvagent.dotenv:/etc/appname/edcvagent.env:ro
+      - cfm7_subject_token:/var/run/secrets/cfm:ro
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+      cfm7-token-exchange:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-ihagent:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/ihagent:0.0.7@sha256:fe2f9c9ff2dce495c873140fac6b347ff10023d5a3133d852187a7002e2f8ce2
+    container_name: health-dataspace-cfm7-ihagent
+    command: ["/ihagent", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/ihagent.dotenv:/etc/appname/ihagent.env:ro
+      - cfm7_subject_token:/var/run/secrets/cfm:ro
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+      cfm7-token-exchange:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-regagent:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/regagent:0.0.7@sha256:8d33c824ef0ca6b868a00276043752c3634cb60c12af90c03a522418855eb58e
+    container_name: health-dataspace-cfm7-regagent
+    command: ["/regagent", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/regagent.dotenv:/etc/appname/regagent.env:ro
+      - cfm7_subject_token:/var/run/secrets/cfm:ro
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+      cfm7-token-exchange:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-obagent:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/obagent:0.0.7@sha256:43244c6110fc3b3f882151d915c627b574f10a9f8a352d3b9e3e9e7d404e0bf1
+    container_name: health-dataspace-cfm7-obagent
+    command: ["/obagent", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/obagent.dotenv:/etc/appname/obagent.env:ro
+      - cfm7_subject_token:/var/run/secrets/cfm:ro
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+      cfm7-token-exchange:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  cfm7-sigletagent:
+    profiles: ["cfm"]
+    image: ghcr.io/eclipse-cfm/cfm/sigletagent:0.0.7@sha256:c598b6b3fd3cce5dd183f407595afd4ab2dfb68a7b1415246b84f0532ad22d59
+    container_name: health-dataspace-cfm7-sigletagent
+    command: ["/sigletagent", "--mode=debug"]
+    environment:
+      # No collector on compose; the autoexport default would retry localhost:4318.
+      OTEL_TRACES_EXPORTER: "none"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+    volumes:
+      - ./jad/cfm/sigletagent.dotenv:/etc/appname/sigletagent.env:ro
+      - cfm7_subject_token:/var/run/secrets/cfm:ro
+    depends_on:
+      cfm7-nats:
+        condition: service_healthy
+      cfm7-token-exchange:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
 networks:
   edcv:
     name: health-dataspace-edcv
     driver: bridge
 
 volumes:
+  cfm7_nats_data:
+  cfm7_subject_token:
   postgres_data:
   nats_data:
   vault_data:

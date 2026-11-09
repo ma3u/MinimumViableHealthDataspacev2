@@ -1,0 +1,15 @@
+# CFM 0.0.7 Tenant Manager (ADR-085, #973). Keys as in eclipse-cfm/core-platform-distribution v0.0.39
+# templates/cfm/tenant-manager-config.yaml, with our hosts, and Keycloak behind jad/cfm/token-exchange.mjs for jwtlet.
+uri: nats://cfm7-nats:4222
+# NATS token, local dev only (cfm7-nats --auth in docker-compose.jad.yml)
+nats.auth.method: token
+nats.auth.token: cfm-nats-local-dev
+bucket: cfm-bucket
+stream: cfm-stream
+httpport: 8080
+postgres: true
+dsn: postgres://cfm:cfm@postgres:5432/cfm_v007?sslmode=disable
+auth.enabled: true
+auth.audience: cfm-agents
+auth.jwksUrl: http://keycloak:8080/realms/edcv/protocol/openid-connect/certs
+auth.expectedIssuer: http://localhost:8080/realms/edcv

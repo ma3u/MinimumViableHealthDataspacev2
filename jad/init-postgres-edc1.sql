@@ -6,3 +6,5 @@ CREATE DATABASE identityhub_v1 OWNER ih;
 CREATE DATABASE issuerservice_v1 OWNER issuer;
 CREATE DATABASE simplga_v1 OWNER simplga;
 CREATE DATABASE rogueissuer_v1 OWNER rogueissuer;
+-- CFM 0.0.7 (ADR-085, profile `cfm`); its own database, apart from the 2026-03 CFM's `cfm`.
+CREATE DATABASE cfm_v007 OWNER cfm;

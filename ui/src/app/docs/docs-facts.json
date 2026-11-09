@@ -809,11 +809,62 @@
         "name": "siglet",
         "profiles": [],
         "ports": []
+      },
+      {
+        "name": "cfm7-nats",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-token-exchange",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-tmanager",
+        "profiles": ["cfm"],
+        "ports": ["18181:8080"]
+      },
+      {
+        "name": "cfm7-pmanager",
+        "profiles": ["cfm"],
+        "ports": ["18182:8080"]
+      },
+      {
+        "name": "cfm7-jwtletagent",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-edcvagent",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-ihagent",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-regagent",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-obagent",
+        "profiles": ["cfm"],
+        "ports": []
+      },
+      {
+        "name": "cfm7-sigletagent",
+        "profiles": ["cfm"],
+        "ports": []
       }
     ]
   },
   "postgresDbs": [
     "cfm",
+    "cfm_v007",
     "controlplane",
     "controlplane_v1",
     "dataplane",
