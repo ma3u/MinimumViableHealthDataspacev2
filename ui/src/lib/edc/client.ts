@@ -1,9 +1,9 @@
 /**
- * EDC API Client
+ * EDC-V / CFM API Client
  *
- * Type-safe client for the control plane's Management API, the IdentityHub's
- * Identity API and the IssuerService's Admin API. Uses openapi-typescript
- * generated types with a lightweight fetch wrapper.
+ * Type-safe client for all JAD Management, Identity, Issuer, Tenant, and
+ * Provision Manager APIs. Uses openapi-typescript generated types with
+ * a lightweight fetch wrapper.
  *
  * Usage:
  *   import { edcClient } from '@/lib/edc/client';
@@ -13,6 +13,9 @@
  *     '/v5/participants/{ctxId}/assets/request', 'POST',
  *     { '@context': [EDC_CONTEXT], '@type': 'QuerySpec' }
  *   );
+ *
+ *   // List tenants
+ *   const tenants = await edcClient.tenant('/v1alpha1/tenants');
  *
  * Types are generated from JAD OpenAPI specs via:
  *   npm run generate:api
@@ -44,6 +47,16 @@ const API_ENDPOINTS = {
     process.env.EDC_ISSUER_URL ||
     process.env.NEXT_PUBLIC_EDC_ISSUER_URL ||
     "http://health-dataspace-issuerservice:10013/api/admin",
+  /** CFM Tenant Manager API */
+  tenant:
+    process.env.EDC_TENANT_URL ||
+    process.env.NEXT_PUBLIC_CFM_TENANT_URL ||
+    "http://health-dataspace-tenant-manager:8080/api",
+  /** CFM Provision Manager API */
+  provision:
+    process.env.EDC_PROVISION_URL ||
+    process.env.NEXT_PUBLIC_CFM_PROVISION_URL ||
+    "http://health-dataspace-provision-manager:8080/api",
 } as const;
 
 /** JSON-LD context required by EDC Management API v5alpha */
@@ -126,7 +139,7 @@ interface RequestOptions {
   /** AbortSignal for cancellation */
   signal?: AbortSignal;
   /** Request timeout in ms (default 8_000). Prevents hung fetches when the
-   *  upstream ACA replica is unavailable (e.g. scaled to 0 off hours). */
+   *  upstream ACA replica is unavailable (e.g. mvhd-tenant-mgr scaled to 0). */
   timeoutMs?: number;
 }
 
@@ -137,7 +150,7 @@ const DEFAULT_TIMEOUT_MS = 8_000;
 /**
  * Make a typed API request to a JAD service.
  *
- * @param api - Which API to call (management, identity, issuer)
+ * @param api - Which API to call (management, identity, issuer, tenant, provision)
  * @param path - API path (e.g., '/v3/assets/request')
  * @param method - HTTP method
  * @param body - Request body (will be JSON-serialized)
@@ -227,7 +240,7 @@ function withMgmtVersion(path: string): string {
   return path.replace(/^\/v5(alpha|beta)?\//, `/${MGMT_API_VERSION}/`);
 }
 
-/** Type-safe EDC API client */
+/** Type-safe EDC-V / CFM API client */
 export const edcClient = {
   /** EDC-V Management API — assets, policies, contracts, catalogs, transfers */
   management: <T = unknown>(
@@ -253,6 +266,22 @@ export const edcClient = {
     body?: unknown,
     options?: RequestOptions,
   ) => apiRequest<T>("issuer", path, method, body, options),
+
+  /** CFM Tenant Manager API — tenants, participant profiles, dataspaces */
+  tenant: <T = unknown>(
+    path: string,
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" = "GET",
+    body?: unknown,
+    options?: RequestOptions,
+  ) => apiRequest<T>("tenant", path, method, body, options),
+
+  /** CFM Provision Manager API — provision requests, workflows */
+  provision: <T = unknown>(
+    path: string,
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" = "GET",
+    body?: unknown,
+    options?: RequestOptions,
+  ) => apiRequest<T>("provision", path, method, body, options),
 } as const;
 
 export type { ApiName, RequestOptions };

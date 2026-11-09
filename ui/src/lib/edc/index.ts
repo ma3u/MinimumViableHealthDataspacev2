@@ -1,5 +1,5 @@
 /**
- * EDC API client barrel export
+ * EDC-V / CFM API client barrel export
  *
  * @example
  *   import { edcClient, EDC_CONTEXT } from '@/lib/edc';
