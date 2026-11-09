@@ -210,9 +210,9 @@ ESLint, `tsc` and gitleaks over the pull request's commits run in PR Gate; E2E, 
 
 Runs on push to main and when a nightly run finishes: disable API routes → static export from the mock fixtures committed in `ui/public/mock/` → add the latest nightly test reports → deploy. `scripts/refresh-mocks.sh` refreshes the fixtures by hand from a stack you are signed in to.
 
-### e2e.yml: pull requests that touch ui/
+### e2e.yml: the specs a pull request can break
 
-The Playwright specs the change can break, picked by `scripts/select-e2e-specs.sh`: the changed specs and those that visit a changed route, or every spec on three runners when shared code changed. A seeded Neo4j (`neo4j/seed.sh`) and the neo4j-proxy, no EDC connector and no Keycloak, forged sessions for the realm users. A failure is a red check ([ADR-079](ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)). Locally, the same run: `scripts/run-e2e-local.sh --changed`.
+The Playwright specs the change can break, picked by `scripts/select-e2e-specs.sh`: the changed specs and those that visit a changed route, or every spec on three runners when shared code changed. A seeded Neo4j (`neo4j/seed.sh`) and the neo4j-proxy, no EDC connector and no Keycloak, forged sessions for the realm users. A failure is a red check ([ADR-079](ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)), and the job `E2E`, which reports on every pull request, is required on `main`. Locally, the same run: `scripts/run-e2e-local.sh --changed`.
 
 ### nightly.yml: once a night when main changed
 
