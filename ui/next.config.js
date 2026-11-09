@@ -22,6 +22,9 @@ const buildSha =
 const buildTime = process.env.BUILD_TIME || new Date().toISOString();
 const buildChannel = process.env.BUILD_CHANNEL || "local";
 
+// The public static site, where the nightly test reports are published.
+const PAGES_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
+
 const nextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: pkg.version,
@@ -70,6 +73,25 @@ const nextConfig = {
           destination: "/docs/operations/operational-guideline",
           permanent: true,
         },
+        // The test reports are the nightly's, published on GitHub Pages
+        // (#951, ADR-079). This server has no copy: public/e2e-report/ is
+        // gone and public/test-reports/ never had its index.html. A copy it
+        // served rendered blank anyway, since the report's inline scripts
+        // carry no CSP nonce and middleware.ts's policy blocks them.
+        ...["/e2e-report", "/ci-e2e-report", "/test-reports"].flatMap(
+          (path) => [
+            {
+              source: path,
+              destination: `${PAGES_URL}${path}/`,
+              permanent: false,
+            },
+            {
+              source: `${path}/:file*`,
+              destination: `${PAGES_URL}${path}/:file*`,
+              permanent: false,
+            },
+          ],
+        ),
       ];
     },
   }),
@@ -122,15 +144,6 @@ const nextConfig = {
             },
           ],
         },
-      ];
-    },
-  }),
-  // Serve static HTML reports that live in public/ subdirectories
-  // (rewrites are not supported with output: "export")
-  ...(!isStaticExport && {
-    async rewrites() {
-      return [
-        { source: "/test-reports", destination: "/test-reports/index.html" },
       ];
     },
   }),
