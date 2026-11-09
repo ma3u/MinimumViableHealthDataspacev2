@@ -202,6 +202,10 @@ export default function BonusProgrammesPage() {
           infoText={t(
             "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.",
           )}
+          docLink={{
+            href: "/docs/ehds/bonus-programme-data-flow",
+            label: t("Which data goes where"),
+          }}
         />
 
         {loading ? (

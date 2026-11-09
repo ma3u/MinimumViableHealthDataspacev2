@@ -376,5 +376,6 @@
   "Withdraw (GDPR Art. 7(3))": "Widerrufen (DSGVO Art. 7 Abs. 3)",
   "You withdrew on {date}. Nothing is sent any more.": "Sie haben am {date} widerrufen. Es wird nichts mehr gesendet.",
   "Joining…": "Beitritt läuft…",
-  "Join this program": "Diesem Programm beitreten"
+  "Join this program": "Diesem Programm beitreten",
+  "Which data goes where": "Welche Daten wohin gehen"
 }
