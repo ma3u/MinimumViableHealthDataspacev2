@@ -836,7 +836,7 @@ export const EPICS: readonly RoadmapEpic[] = [
     note: "Running the hub safely and affordably: secrets and the database firewall, the NLQ's read-only session, Keycloak load, logs, traces and alerts, and the load tests.",
     open: {
       P1: [359, 442, 779],
-      P2: [435, 577, 585, 586],
+      P2: [435, 577, 585, 586, 1029],
       P3: [519, 571],
     },
     done: [],
@@ -870,7 +870,11 @@ export const EPICS: readonly RoadmapEpic[] = [
     priority: "P1",
     note: "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.",
     links: { c: "https://tehdas.eu/event/tehdas2-final-conference/" },
-    open: { P1: [991, 992, 993, 994], P2: [995, 996, 997], P3: [998, 999] },
+    open: {
+      P1: [991, 992, 993, 994],
+      P2: [995, 996, 997, 1030, 1031, 1032, 1033],
+      P3: [998, 999],
+    },
     done: [],
   },
 ];
