@@ -188,11 +188,12 @@ describe("the roadmap data", () => {
       start: ROADMAP_PLANNED_ON,
       end: "2029-03-26",
     });
-    // #990 has undated P3 issues (from the planning date) and ends with
-    // #996 at the P1 deadline; its demo ends on the conference day.
+    // #990 has undated issues (from the planning date); its undated P2 gaps
+    // (#1030 to #1033) end at the P2 deadline; its demo ends on the
+    // conference day.
     expect(epicWindow(e(990))).toEqual({
       start: ROADMAP_PLANNED_ON,
-      end: "2027-03-26",
+      end: "2029-03-26",
     });
     expect(ITEMS.find((i) => i.issue === 994)?.end).toBe(
       MILESTONES.find((m) => m.id === "tehdas2-final")?.date,

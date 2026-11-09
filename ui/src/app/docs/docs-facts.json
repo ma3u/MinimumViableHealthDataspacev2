@@ -1334,6 +1334,12 @@
       "file": "ADR-085-cfm-stays-as-eclipse-cfm-releases.md",
       "title": "CFM stays, as eclipse-cfm's releases, behind a token exchange the hub provides",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-086",
+      "file": "ADR-086-tehdas2-ratings-after-the-requirement-check.md",
+      "title": "The TEHDAS2 ratings after the requirement check",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

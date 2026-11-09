@@ -62,6 +62,9 @@ DOCS = [
     ("ehds", "bonus-programme-data-flow", "docs/ehds/bonus-programme-data-flow.md",
      "AlphaKasse's bonus programme from the catalogue to the yes or no: who takes part, every step, what "
      "the hub stores, what crosses to the insurer and what never does, the legal basis, and how to check it."),
+    ("ehds", "tehdas2-mapping", "docs/ehds/tehdas2-mapping.md",
+     "The 21 TEHDAS2 guidelines and specifications against the hub, after a requirement-by-requirement "
+     "check: what it implements, where it stops on purpose, and the issue that closes each gap."),
     ("klarbefund", "klarbefund-user-guide", "docs/klarbefund/user-guide.md",
      "The app as a person uses it, screen by screen with screenshots: getting a report in, checking a "
      "value against the paper, trends, consents, connecting to the EHDS, exports and your data rights."),
