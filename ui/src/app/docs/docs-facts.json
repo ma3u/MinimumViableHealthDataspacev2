@@ -1322,6 +1322,12 @@
       "file": "ADR-083-what-the-hub-takes-over-from-tehdas2.md",
       "title": "What the hub takes over from TEHDAS2",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-085",
+      "file": "ADR-085-cfm-stays-as-eclipse-cfm-releases.md",
+      "title": "CFM stays, as eclipse-cfm's releases, behind a token exchange the hub provides",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
