@@ -60,7 +60,7 @@ Every step names its gate. A failed gate stops the run; the next step does not s
 - The workflow **EDC 1.0 databases** (`edc-v1-databases.yml`, PR #906 merged first), run as the CI identity.
 - Gate: `push-edc1-images.sh check` lists the tag, and the workflow summary lists four databases present.
 
-**4. EDC apps, one at a time.** `EDC1_TAG=<tag> scripts/azure/migrate-edc-to-v1.sh app controlplane`, then `identityhub`, then `issuerservice`. Each one runs the launcher image on its `_v1` database, with `prefix.mapping` and policy validation on. Gate per app: the revision is Healthy and its log has no `SEVERE` at boot.
+**4. EDC apps, one at a time.** `EDC1_TAG=<tag> scripts/azure/migrate-edc-to-v1.sh app controlplane`, then `identityhub`, then `issuerservice`. Each one runs the launcher image on its `_v1` database, with `prefix.mapping` and policy validation on. Gate per app: the revision is Healthy and its log has no `SEVERE` at boot. Then `scripts/azure/set-edc-log-level.sh`: the launcher's own command logs with ANSI colour codes, and the script appends `--log-level=info --no-color`. Every `app` run writes the plain command back, so run the script again after one.
 
 **5. siglet.** `migrate-edc-to-v1.sh siglet` (0.1.6, `siglet_v1`, pull endpoint `https://<proxy>/dataspace/data`). Gate: `scripts/azure/17-siglet.sh --check` passes, and ports 8081 to 8083 are exposed.
 
