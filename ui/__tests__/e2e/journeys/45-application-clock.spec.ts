@@ -98,7 +98,9 @@ test.describe("Issue #206 · the application and the Art. 68(4) clock", () => {
     expect(mine?.clockState).toBe("running");
 
     await regulator.goto("/compliance");
-    await expect(regulator.getByText("Decision due")).toBeVisible({
+    await expect(
+      regulator.getByRole("columnheader", { name: "Decision due" }),
+    ).toBeVisible({
       timeout: 15_000,
     });
     const row = regulator.locator(`tr[data-application-id="${applicationId}"]`);
