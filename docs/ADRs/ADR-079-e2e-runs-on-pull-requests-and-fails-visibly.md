@@ -2,14 +2,15 @@
 
 Date: 2026-11-07
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-08, Matthias Buchhorn, by merging #969)
 **Supersedes:** decision 1 of [ADR-074](ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md) for the Playwright suite, and its rejected alternatives "Shard Playwright across runners" and "Run E2E on every PR"
 **Relates to:** [ADR-044](ADR-044-every-api-route-needs-a-session.md), [ADR-053](ADR-053-everything-stops-off-hours.md)
 **Tracks:** [#951](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/951), [#847](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/847)
 
 ## Status
 
-Proposed with the pull request that adds `.github/workflows/e2e.yml`.
+Proposed with the pull request that adds `.github/workflows/e2e.yml`, and
+accepted when that pull request (#969) was merged on 2026-11-08.
 
 ## Context
 
