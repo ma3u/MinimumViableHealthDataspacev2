@@ -151,7 +151,9 @@ nodes carry the `OptedOut` label, and every secondary-use query excludes it:
   OMOP rows) for `DATA_USER`, `HDAB_AUTHORITY` or `TRUST_CENTER_OPERATOR`
   passes its Cypher through `forRoles(cypher, roles)` or `secondaryUseView()`
   from `@/lib/opt-out`. `EDC_ADMIN`, `DATA_HOLDER` and `PATIENT` read for care
-  or for themselves and are not narrowed.
+  or for themselves and are not narrowed. The exception is `PATIENT` on
+  `/api/analytics`: the cohort statistics are other people's records, so a
+  patient reads them through `secondaryUseView()` (#951, J313).
 - In the proxy, a route that serves secondary use runs through
   `secondaryUseSession()` or `runSecondaryUse()` from `src/opt-out.ts`, and a
   FHIR response drops any node `releasable()` refuses.

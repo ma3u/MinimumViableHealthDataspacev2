@@ -50,6 +50,16 @@ describe("the OMOP analytics", () => {
     for (const q of personQueries()) expect(q).toContain("&!OptedOut");
   });
 
+  it("leave out the persons who opted out for a patient (#951, J313)", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(
+      as(["EDC_USER_PARTICIPANT", "PATIENT"], "patient1"),
+    );
+    const res = await analytics();
+    expect(res.status).toBe(200);
+    expect(personQueries().length).toBeGreaterThan(3);
+    for (const q of personQueries()) expect(q).toContain("&!OptedOut");
+  });
+
   it("are the holder's own figures for the data holder", async () => {
     vi.mocked(getServerSession).mockResolvedValue(
       as(["EDC_USER_PARTICIPANT", "DATA_HOLDER"], "clinic"),
