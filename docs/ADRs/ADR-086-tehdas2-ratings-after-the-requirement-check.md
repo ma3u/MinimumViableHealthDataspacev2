@@ -2,13 +2,13 @@
 
 Date: 2026-11-09
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-09, Matthias Buchhorn)
 **Amends:** [ADR-083](ADR-083-what-the-hub-takes-over-from-tehdas2.md), decision 2 and its table
 **Tracks:** [#990](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/990), [#991](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/991), [#992](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/992)
 
 ## Status
 
-Proposed on 2026-11-09, the day the checks ran.
+Proposed and accepted on 2026-11-09, the day the checks ran.
 
 ## Context
 
