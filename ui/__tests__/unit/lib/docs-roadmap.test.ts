@@ -45,10 +45,8 @@ describe("the roadmap data", () => {
   it("carries the plan's P1 items and the Iceberg spike under #716", () => {
     const p1 = ITEMS.filter((i) => i.priority === "P1" && i.status !== "done");
     // #710 is done (2026-10-28); #934 carries the Simpl use case to March 2027;
-    // #991 to #994 are the TEHDAS2 work before its final conference (#990).
-    expect(p1.map((i) => i.issue).sort()).toEqual([
-      708, 709, 711, 934, 991, 992, 993, 994,
-    ]);
+    // #994 is the TEHDAS2 demo at its final conference (#990); #991 to #993 are done.
+    expect(p1.map((i) => i.issue).sort()).toEqual([708, 709, 711, 934, 994]);
     const spike = ITEMS.find((i) => i.issue === 649);
     expect(spike?.lane).toBe("processing");
     expect(spike?.note).toContain("#716");

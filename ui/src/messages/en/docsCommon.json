@@ -307,13 +307,10 @@
   "Every open issue belongs to an <e>epic</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set.": "Every open issue belongs to an <e>epic</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set.",
   "TEHDAS2 requirement check": "TEHDAS2 requirement check",
   "TEHDAS2: the high-relevance results checked requirement by requirement": "TEHDAS2: the high-relevance results checked requirement by requirement",
-  "Nine results the demo shows, each against its own text; every gap goes to its issue.": "Nine results the demo shows, each against its own text; every gap goes to its issue.",
   "DAAMS against D6.4": "DAAMS against D6.4",
   "<d64>D6.4 DAAMS</d64>: the application and permit model against the specification": "<d64>D6.4 DAAMS</d64>: the application and permit model against the specification",
-  "The core the demo shows; deviations become issues, a change to the model an ADR.": "The core the demo shows; deviations become issues, a change to the model an ADR.",
   "TEHDAS2 mapping page": "TEHDAS2 mapping page",
   "The TEHDAS2 mapping as a page under /docs": "The TEHDAS2 mapping as a page under /docs",
-  "The 21 results with status, component and open issue; the one link the demo hands out.": "The 21 results with status, component and open issue; the one link the demo hands out.",
   "TEHDAS2 conference demo": "TEHDAS2 conference demo",
   "<c>TEHDAS2 final conference</c>: the demo along its four sessions": "<c>TEHDAS2 final conference</c>: the demo along its four sessions",
   "Brussels and online on 16 November 2026; a rehearsal on 13 November, the static site as fallback.": "Brussels and online on 16 November 2026; a rehearsal on 13 November, the static site as fallback.",
@@ -334,5 +331,8 @@
   "Closed before the epics": "Closed before the epics",
   "Done before every open issue was given an epic on 2026-11-08.": "Done before every open issue was given an epic on 2026-11-08.",
   "Epics and items": "Epics and items",
-  "Its dated items": "Its dated items"
+  "Its dated items": "Its dated items",
+  "Done 2026-11-09: three of six ratings corrected (ADR-086), the gaps filed as #1029 to #1033.": "Done 2026-11-09: three of six ratings corrected (ADR-086), the gaps filed as #1029 to #1033.",
+  "Done 2026-11-09: 31 of 94 elements the same, 33 different, 30 missing; the permit lifecycle is #1031.": "Done 2026-11-09: 31 of 94 elements the same, 33 different, 30 missing; the permit lifecycle is #1031.",
+  "Done 2026-11-09: /docs/ehds/tehdas2-mapping, the one link the demo hands out.": "Done 2026-11-09: /docs/ehds/tehdas2-mapping, the one link the demo hands out."
 }
