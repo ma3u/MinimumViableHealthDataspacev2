@@ -9,6 +9,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 - [issue-847-ci-minutes](current/issue-847-ci-minutes.md): CI job-minutes cut by about three quarters; nightly suites per [ADR-074](../ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)
 - [issue-951-e2e-visible](current/issue-951-e2e-visible.md): E2E fails visibly and runs on the pull requests that can break it, per [ADR-079](../ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)
+- [issue-973-cfm-0-0-7-spike](current/issue-973-cfm-0-0-7-spike.md): ADR-085 step 1 stopped at its first assumption: Keycloak refuses the CFM agents' token exchange (`subject_token_type` jwt); step 2 or an upstream change waits for Matthias
 - [Roadmap to 2035: EHDS, wallets and Simpl](../planning-health-dataspace-v2.md#roadmap-to-2035-ehds-wallets-and-simpl): the dates, P1 to P3, plan #725 over issues #708 to #724, from the [gap analysis](../simpl-ehds-gap-analysis.md)
 - [issue-182-german-national-wallet-integration](current/issue-182-german-national-wallet-integration.md) — German EUDI Wallet (RP contract, self-hosted verifier, wallet-provider backend) **+ the #72 citizen consent demo** it enables (W7–W9)
 - [persona-journeys/registration-identification-exchange](../persona-journeys/registration-identification-exchange.md) — the seven-actor map: registration · identification · data exchange, primary and secondary use
