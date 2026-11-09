@@ -27,7 +27,7 @@ vi.mock("@/components/docs/RoadmapTimeline", () => ({
 }));
 
 import RoadmapDocsPage from "@/app/docs/roadmap/page";
-import { EPICS, ITEMS, itemEpic } from "@/lib/docs/roadmap";
+import { EPICS, ITEMS } from "@/lib/docs/roadmap";
 
 describe("/docs/roadmap", () => {
   it("renders the timeline and links the GitHub Project the plan is edited in", () => {
@@ -74,7 +74,7 @@ describe("/docs/roadmap", () => {
     render(<RoadmapDocsPage />);
     const items = screen.getByRole("heading", {
       level: 2,
-      name: "Every item",
+      name: "Epics and items",
     }).parentElement!;
     for (const i of ITEMS) {
       // A note can name an issue too ("After #708"); every such link goes
@@ -90,39 +90,36 @@ describe("/docs/roadmap", () => {
     }
   });
 
-  it("groups every item under its epic, the closed ones last", () => {
+  it("puts every epic with its items in one chapter, the closed ones last", () => {
     render(<RoadmapDocsPage />);
-    const items = screen.getByRole("heading", {
+    // The epics have no chapter of their own any more.
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "The epics" }),
+    ).toBeNull();
+    const chapter = screen.getByRole("heading", {
       level: 2,
-      name: "Every item",
+      name: "Epics and items",
     }).parentElement!;
-    const groups = within(items)
+    const groups = within(chapter)
       .getAllByRole("heading", { level: 3 })
       .map((h) => h.textContent);
-    // In the epic cards' order; only epics with dated items.
+    // Every epic, in the order of EPICS, then the items closed before them.
     expect(groups).toEqual([
-      ...EPICS.filter((e) => ITEMS.some((i) => itemEpic(i) === e)).map(
-        (e) => e.title,
-      ),
+      ...EPICS.map((e) => e.title),
       "Closed before the epics",
     ]);
-    // #649 is a sub-issue of #716, so it sits with #716 under #961.
-    const secondary = within(items).getByRole("heading", {
-      level: 3,
-      name: /^Secondary use/,
-    }).parentElement!;
+    // #649 is a sub-issue of #716, so it sits with #716 in #961's card.
+    const secondary = within(chapter)
+      .getAllByTestId("roadmap-epic")
+      .find((a) => a.id === "e961")!;
     expect(
-      within(secondary).getByRole("link", { name: "#649" }),
-    ).toBeInTheDocument();
-    expect(
-      within(secondary).getByRole("link", { name: "Epic #961" }),
-    ).toHaveAttribute("href", "#e961");
-    // Within an epic: P1 before P2.
-    const tehdas = within(items).getByRole("heading", {
-      level: 3,
-      name: /^TEHDAS2 results/,
-    }).parentElement!;
-    const order = within(tehdas)
+      within(secondary).getAllByRole("link", { name: "#649" }).length,
+    ).toBeGreaterThan(0);
+    // In an epic's table: P1 before P2.
+    const tehdas = within(chapter)
+      .getAllByTestId("roadmap-epic")
+      .find((a) => a.id === "e990")!;
+    const order = within(within(tehdas).getByRole("table"))
       .getAllByRole("link", { name: /^#\d+$/ })
       .map((a) => a.textContent);
     expect(order.slice(0, 4)).toEqual(["#991", "#992", "#994", "#993"]);

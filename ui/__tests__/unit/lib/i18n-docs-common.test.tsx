@@ -250,14 +250,16 @@ describe("the pages in German", () => {
     localStorage.setItem("catalog-metadata-language", "de");
     render(<RoadmapDocsPage />);
     const items = (
-      await screen.findByRole("heading", { level: 2, name: "Jeder Eintrag" })
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Epics und Einträge",
+      })
     ).parentElement!;
     expect(within(items).getAllByText("Geplant").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: "GitHub-Projekt" }),
     ).toHaveAttribute("href", "https://github.com/users/ma3u/projects/1");
-    const epics = screen.getByRole("heading", { level: 2, name: "Die Epics" })
-      .parentElement!;
+    const epics = items;
     expect(
       within(epics).getByRole("heading", {
         level: 3,

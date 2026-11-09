@@ -53,7 +53,6 @@
   "Diamond: a fixed date": "Ruit: een vaste datum",
   "Red line: today": "Rode lijn: vandaag",
   "What drives it": "Wat haar drijft",
-  "Every item": "Alle onderdelen",
   "Issue": "Issue",
   "What": "Wat",
   "Priority": "Prioriteit",
@@ -305,7 +304,6 @@
   "Open epic #{n}": "Epic #{n} openen",
   "{done} of {total} done": "{done} van {total} afgerond",
   "Hatched bar: an epic": "Gearceerde balk: een epic",
-  "The epics": "De epics",
   "Every open issue belongs to an <e>epic</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set.": "Elk open issue hoort bij een <e>epic</e>, een bovenliggend issue op GitHub met het werk als sub-issues. De gearceerde balk van een epic loopt van het eerste issue tot de deadline die de prioriteiten van zijn issues bepalen.",
   "TEHDAS2 requirement check": "TEHDAS2-eisencontrole",
   "TEHDAS2: the high-relevance results checked requirement by requirement": "TEHDAS2: de zeer relevante resultaten eis voor eis gecontroleerd",
@@ -334,5 +332,7 @@
   "TEHDAS2 results: what the hub implements, and the final conference demo": "TEHDAS2-resultaten: wat de hub implementeert, en de demo op de slotconferentie",
   "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.": "De richtsnoeren van de gezamenlijke actie eis voor eis tegen de hub gecontroleerd, gepubliceerd onder /docs en getoond op haar <c>slotconferentie</c> op 16 november 2026.",
   "Closed before the epics": "Afgerond vóór de epics",
-  "Done before every open issue was given an epic on 2026-11-08.": "Afgerond voordat elk open issue op 2026-11-08 een epic kreeg."
+  "Done before every open issue was given an epic on 2026-11-08.": "Afgerond voordat elk open issue op 2026-11-08 een epic kreeg.",
+  "Epics and items": "Epics en onderdelen",
+  "Its dated items": "Zijn gedateerde onderdelen"
 }
