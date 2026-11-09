@@ -23,6 +23,7 @@ export const GUIDE_SCREENS: { href: string; persona: string | null }[] = [
   { href: "/patient/query", persona: "patient1" },
   { href: "/patient/profile", persona: "patient1" },
   { href: "/patient/research", persona: "patient1" },
+  { href: "/patient/programmes", persona: "patient1" },
   { href: "/patient/insights", persona: "patient1" },
   { href: "/docs/klarbefund", persona: "patient1" },
   { href: "/compliance", persona: "regulator" },

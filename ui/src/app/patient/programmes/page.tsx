@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Gift, ShieldCheck, Lock } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { useT } from "@/lib/i18n/translate";
-import type { BonusProgramme } from "@/app/api/patient/programmes/route";
+import type { BonusProgramme } from "@/lib/patient/bonus-programme";
 
 /** Why the programmes did not load: refused (401, 403) or failed (anything else). */
 type LoadError =

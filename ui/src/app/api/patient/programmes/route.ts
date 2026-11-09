@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import type { BonusProgramme } from "@/lib/patient/bonus-programme";
 
 export const dynamic = "force-dynamic";
-
-export interface BonusProgramme {
-  programmeId: string;
-  title: string;
-  description: string | null;
-  publisherName: string;
-  publisherDid: string;
-  dataSpace: string | null;
-  endpointUrl: string | null;
-  ruleTitle: string | null;
-  ruleDescription: string | null;
-  ruleVersion: string | null;
-  lastSeenAt: string | null;
-}
 
 /**
  * GET /api/patient/programmes
