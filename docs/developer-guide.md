@@ -208,7 +208,7 @@ ESLint, `tsc` and gitleaks over the pull request's commits run in PR Gate; E2E, 
 
 ### pages.yml — Deploy to GitHub Pages
 
-Runs on push to main: seed Neo4j and refresh the mock fixtures → disable API routes → static export with the latest nightly test reports → deploy.
+Runs on push to main and when a nightly run finishes: disable API routes → static export from the mock fixtures committed in `ui/public/mock/` → add the latest nightly test reports → deploy. `scripts/refresh-mocks.sh` refreshes the fixtures by hand from a stack you are signed in to.
 
 ### e2e.yml: pull requests that touch ui/
 

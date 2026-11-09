@@ -1279,7 +1279,7 @@
       "id": "ADR-079",
       "file": "ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md",
       "title": "E2E runs on the pull requests that can break it, and a failure is red",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-080",
@@ -1381,21 +1381,21 @@
   "lastUpdated": {
     "/docs": "2026-11-08",
     "/docs/user-guide": "2026-11-08",
-    "/docs/developer": "2026-11-08",
+    "/docs/developer": "2026-11-09",
     "/docs/developer/quality-gates": "2026-11-08",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",
-    "/docs/developer/[slug]": "2026-11-08",
-    "/docs/architecture": "2026-11-08",
-    "/docs/security": "2026-11-08",
-    "/docs/security/[slug]": "2026-11-08",
-    "/docs/klarbefund": "2026-11-08",
-    "/docs/ehds": "2026-11-08",
+    "/docs/developer/[slug]": "2026-11-09",
+    "/docs/architecture": "2026-11-09",
+    "/docs/security": "2026-11-09",
+    "/docs/security/[slug]": "2026-11-09",
+    "/docs/klarbefund": "2026-11-09",
+    "/docs/ehds": "2026-11-09",
     "/docs/ehds/glossary": "2026-11-08",
-    "/docs/ehds/[slug]": "2026-11-08",
+    "/docs/ehds/[slug]": "2026-11-09",
     "/docs/roadmap": "2026-11-09",
-    "/docs/operations": "2026-11-08",
-    "/docs/operations/[slug]": "2026-11-08",
-    "/docs/klarbefund/[slug]": "2026-11-08"
+    "/docs/operations": "2026-11-09",
+    "/docs/operations/[slug]": "2026-11-09",
+    "/docs/klarbefund/[slug]": "2026-11-09"
   }
 }
