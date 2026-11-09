@@ -111,6 +111,10 @@ A new `mvhd-nats` revision or replica deletes `cn-stream` and `tp-stream`, and e
 
    The answer has a component `NATS task streams` with `"isHealthy":true`. `exec` needs a terminal, hence `script`.
 
+5. Drill, optional, about two minutes of 500s: `az containerapp revision restart -n mvhd-nats -g rg-mvhd-dev --revision <its active revision>`. Gate: the control plane's system log shows `ProbeFailed` three times, then `ContainerTerminated` with reason `ProbeFailure` and a new `ContainerStarted`; both streams are back; Bruno `Azure-Dev` `03 Data User` passes.
+
+Done on 2026-11-09: images `1.0.0-RC5-9be6b44cd517`, revision `mvhd-controlplane--0000198`, backup `~/.mvhd/edc-v1-rollback/20261109T155944Z` (revision 196). The drill passed: two minutes from the NATS restart to both streams back, then `03 Data User` 26 of 26 (timeline in `docs/gotchas.md`, 2026-11-09).
+
 A script that changes `mvhd-nats` (`04-edc-services.sh`, the min-replica fix in `05-cfm-configure.sh` and `05-cfm-agents.sh`) restarts the control plane after it (`restart_controlplane_after_nats_change` in `env.sh`). Anything else that touches NATS, an image change by hand included, leaves it to the probe: about two minutes of 500s. `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` on the control plane turns the check off.
 
 ## Rollback

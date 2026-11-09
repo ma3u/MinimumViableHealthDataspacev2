@@ -99,6 +99,31 @@ plane after it. To see what the check sees:
 
 The component `NATS task streams` names a missing stream.
 
+Drilled on Azure on 2026-11-09, on the control plane revision with the probes
+(`mvhd-controlplane--0000198`): `az containerapp revision restart` of
+`mvhd-nats--0000179` at 16:27:36 UTC; the new NATS container started at
+16:27:55 without either stream; liveness answered 503 at 16:28:13, 16:28:42
+and 16:29:13; Container Apps logged "failed liveness probe, will be
+restarted" and `ProbeFailure`; the control plane started again at 16:29:33,
+in the same replica, and both streams with their consumers were back at
+16:29:38. About two minutes end to end. The API collection's `03 Data User`
+on Azure-Dev passed afterwards, 26 of 26 requests (FINALIZED, STARTED, the
+data, the SPE import). IdentityHub, IssuerService and the catalog enricher
+logged one disconnect each and reconnected by themselves.
+
+Two more things the drill showed:
+
+- **NATS's other streams go too.** `cfm-stream` and `KV_cfm-bucket` are file
+  streams, but on Azure they sit on the NATS container's own storage, and CFM
+  creates them only when its managers start. Since #1024 nothing on EDC 1.0
+  calls CFM and the morning start leaves its apps stopped, so nothing broke.
+  CFM back as eclipse-cfm releases (ADR-085) meets this again: on Azure its
+  streams need the same answer as the control plane's.
+- **`az containerapp exec` right after a NATS restart** can answer "Cannot
+  attach to a container that is not running", because it picked the replica
+  being removed. Name the new one with `--replica` (from
+  `az containerapp replica list`).
+
 The last command, from the worktree the stack runs under, runs `nats-streams`
 and then starts the control plane.
 
