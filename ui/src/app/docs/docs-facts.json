@@ -1303,6 +1303,12 @@
       "file": "ADR-082-the-site-search-is-pagefind-built-from-the-sources.md",
       "title": "The site search is Pagefind, indexed from the sources, searched in the browser",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-083",
+      "file": "ADR-083-what-the-hub-takes-over-from-tehdas2.md",
+      "title": "What the hub takes over from TEHDAS2",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
