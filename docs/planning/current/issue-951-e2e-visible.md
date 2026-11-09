@@ -36,6 +36,8 @@ This file keeps the order of the work.
 7. The in-app developer page has an `e2e.yml` card in five languages.
 8. J313 decided: a PATIENT may read `/api/analytics`, without the persons who
    opted out of secondary use. The journey asserts the 200.
+9. `jad/seed-contract-negotiation.sh` ends one negotiation TERMINATED (a
+   request AlphaKlinik refuses), for J38. Not yet run against a connector.
 
 ## Next, in this order
 
@@ -44,5 +46,3 @@ This file keeps the order of the work.
 2. Build or drop the scope features J325, J327, J328, J330 to J332 and J347
    describe (`aggregateOnly`, `maxRowLimit`, expiry and revocation in the
    scope); they are `test.fixme` with the reason.
-3. A seed that terminates one negotiation, or J38's premise changed: no seed
-   holds a TERMINATED negotiation.

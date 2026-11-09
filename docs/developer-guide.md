@@ -102,15 +102,15 @@ open http://traefik.localhost        # Traefik Dashboard
 
 ## Data Seeding Pipeline
 
-| Phase | Script                            | Target Service           | What It Does                                                                        |
-| ----- | --------------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
-| 1     | ../scripts/seed-identity-layer.sh | Identity Hub, Issuer, CP | The 5 participants: contexts, DIDs, keys, a DCP MembershipCredential each (ADR-078) |
-| 2     | seed-ehds-credentials.sh          | Issuer Service           | Register EHDS credential types                                                      |
-| 3     | seed-ehds-policies.sh             | Control Plane            | Create ODRL policies for all participants                                           |
-| 4     | seed-data-assets.sh               | Control Plane            | Register data assets + contracts                                                    |
-| 5     | seed-contract-negotiation.sh      | Control Plane            | PharmaCo ↔ AlphaKlinik negotiations, transfers to STARTED                          |
-| 6     | seed-federated-catalog.sh         | Control Plane            | MedReg ↔ LMC federated catalog negotiation                                         |
-| 7     | seed-data-transfer.sh             | siglet, Neo4j Proxy      | Pull patients and the catalogue with siglet's tokens; record the TransferEvents     |
+| Phase | Script                            | Target Service           | What It Does                                                                                     |
+| ----- | --------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| 1     | ../scripts/seed-identity-layer.sh | Identity Hub, Issuer, CP | The 5 participants: contexts, DIDs, keys, a DCP MembershipCredential each (ADR-078)              |
+| 2     | seed-ehds-credentials.sh          | Issuer Service           | Register EHDS credential types                                                                   |
+| 3     | seed-ehds-policies.sh             | Control Plane            | Create ODRL policies for all participants                                                        |
+| 4     | seed-data-assets.sh               | Control Plane            | Register data assets + contracts                                                                 |
+| 5     | seed-contract-negotiation.sh      | Control Plane            | PharmaCo ↔ AlphaKlinik negotiations, transfers to STARTED, one refused negotiation (TERMINATED) |
+| 6     | seed-federated-catalog.sh         | Control Plane            | MedReg ↔ LMC federated catalog negotiation                                                      |
+| 7     | seed-data-transfer.sh             | siglet, Neo4j Proxy      | Pull patients and the catalogue with siglet's tokens; record the TransferEvents                  |
 
 `bootstrap-jad.sh` loads the graph (`init-schema.cypher` and the files CI loads) only when Neo4j holds no patients, so a graph you filled yourself stays as it is. Phase 7 rewrites three tracked fixtures, `ui/public/mock/{fhir_bundles,negotiations,transfers}.json`; restore them with `git checkout --` when you did not mean to refresh them. Phase 1 reports `HTTP 400` for the attestation types `ehds-participant` and `ehds-quality`, which no issuer launcher registers, and for the credential types defined on them (finding 7 in #881); phase 2 registers the EHDS credential types anyway.
 
