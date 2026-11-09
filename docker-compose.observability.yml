@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
 
   lgtm:
-    image: grafana/otel-lgtm:0.39.0
+    image: grafana/otel-lgtm:0.40.0
     container_name: mvhd-lgtm
     ports:
       - "3300:3000" # Grafana; 3000 is the UI

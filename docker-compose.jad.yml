@@ -216,7 +216,7 @@ services:
   # NATS — JetStream messaging bus
   # ---------------------------------------------------------------------------
   nats:
-    image: nats:2.15.1-alpine
+    image: nats:2.15.2-alpine
     container_name: health-dataspace-nats
     command: ["-c", "/etc/nats/nats.conf"]
     volumes:
@@ -934,7 +934,7 @@ services:
   # identity, which scripts/run-simpl-issuer-interop.sh fetches into
   # jad/simpl-issuer/data. That script starts both services (profile simpl).
   simpl-vault:
-    image: python:3.13-alpine@sha256:1e1f6334529d1fb26a2ef619d7cffb30a7c7d7cc1cc7338ebee283a58d1aeaca
+    image: python:3.15-alpine@sha256:a0f2e268f2ce8f3709611a90054ec6a8ae31f6251f5896b8648b9bb99835e30a
     container_name: health-dataspace-simpl-vault
     profiles: ["simpl"]
     command: ["python", "-I", "/app/mini-vault.py"]
@@ -1080,7 +1080,7 @@ services:
     # participants itself (ADR-078). Behind the edc018 profile, so the default
     # stack does not start it; removed with #927.
     profiles: ["edc018"]
-    image: nginx:1.29-alpine
+    image: nginx:1.31-alpine
     container_name: health-dataspace-cfm-cp-shim
     volumes:
       - ./jad/cfm-cp-shim.conf:/etc/nginx/conf.d/default.conf:ro
@@ -1324,7 +1324,7 @@ services:
   # participantContextId. docs/planning/current/issue-973-cfm-0-0-7-spike.md.
   cfm7-nats:
     profiles: ["cfm"]
-    image: nats:2.15.1-alpine
+    image: nats:2.15.2-alpine
     container_name: health-dataspace-cfm7-nats
     command:
       ["-js", "-sd", "/data", "-m", "8222", "--auth", "cfm-nats-local-dev"]
