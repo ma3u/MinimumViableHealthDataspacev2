@@ -836,10 +836,10 @@ export const EPICS: readonly RoadmapEpic[] = [
     note: "Running the hub safely and affordably: secrets and the database firewall, the NLQ's read-only session, Keycloak load, logs, traces and alerts, and the load tests.",
     open: {
       P1: [359, 442, 779],
-      P2: [435, 577, 585, 586, 1029],
+      P2: [435, 585, 586, 1029],
       P3: [519, 571],
     },
-    done: [],
+    done: [577],
   },
   {
     issue: 966,
