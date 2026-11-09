@@ -2,7 +2,7 @@
 
 Date: 2026-11-09
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-09, Matthias Buchhorn)
 **Supersedes:** [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md) decision 2 (CFM leaves the 1.0 stack), once decision 3 below is met
 **Relates to:** [ADR-012](ADR-012-azure-container-apps.md), [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-055](ADR-055-azure-runs-the-compose-jad-build.md), [ADR-076](ADR-076-edc-1-runtimes-are-built-here.md)
 **Tracks:** [#973](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973), [#927](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/927)
