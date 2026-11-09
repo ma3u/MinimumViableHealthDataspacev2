@@ -12,5 +12,7 @@
   "Hide details": "Masquer les détails",
   "Sign in required": "Connexion requise",
   "Skip to main content": "Aller au contenu principal",
-  "Diagram render error: {error}": "Erreur de rendu du diagramme : {error}"
+  "Diagram render error: {error}": "Erreur de rendu du diagramme : {error}",
+  "Legal notice": "Mentions légales",
+  "Privacy policy": "Politique de confidentialité"
 }

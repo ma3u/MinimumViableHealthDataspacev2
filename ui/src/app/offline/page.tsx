@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import OfflineNotice from "@/components/OfflineNotice";
 
 export const metadata: Metadata = {
-  title: "Live demo offline | European Health Data Space",
+  title: { absolute: "Live demo offline | European Health Data Space" },
   robots: { index: false },
 };
 

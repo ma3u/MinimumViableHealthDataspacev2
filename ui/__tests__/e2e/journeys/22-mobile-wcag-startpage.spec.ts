@@ -136,7 +136,8 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
   });
 
   test("J267 — footer shows regulation references", async ({ page }) => {
-    const footer = page.locator("footer");
+    // The start page's own footer, not the site footer with the legal links.
+    const footer = page.locator("main footer");
     // The footer names the EHDS chapters the demo covers (#782), not one article.
     await expect(footer).toContainText(/EHDS Chapters II and IV/i);
     await expect(footer).toContainText(/GDPR Art/i);
