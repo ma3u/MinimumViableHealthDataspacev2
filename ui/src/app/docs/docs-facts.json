@@ -1292,6 +1292,12 @@
       "file": "ADR-081-the-record-covers-three-of-the-six-art-14-categories.md",
       "title": "The demo record covers three of the six Art. 14 categories, and says which",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-082",
+      "file": "ADR-082-the-site-search-is-pagefind-built-from-the-sources.md",
+      "title": "The site search is Pagefind, indexed from the sources, searched in the browser",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1380,13 +1386,13 @@
   },
   "lastUpdated": {
     "/docs": "2026-11-08",
-    "/docs/user-guide": "2026-11-08",
+    "/docs/user-guide": "2026-11-09",
     "/docs/developer": "2026-11-08",
     "/docs/developer/quality-gates": "2026-11-08",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",
     "/docs/developer/[slug]": "2026-11-08",
-    "/docs/architecture": "2026-11-08",
+    "/docs/architecture": "2026-11-09",
     "/docs/security": "2026-11-08",
     "/docs/security/[slug]": "2026-11-08",
     "/docs/klarbefund": "2026-11-08",

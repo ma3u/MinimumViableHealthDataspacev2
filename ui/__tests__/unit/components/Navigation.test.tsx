@@ -104,15 +104,19 @@ function visibleGroupLabels(): string[] {
   const nav = screen.getByRole("navigation");
   // Get all buttons, excluding hamburger and UserMenu
   const buttons = nav.querySelectorAll("button");
-  return Array.from(buttons)
-    .map((b) => b.textContent?.trim() ?? "")
-    .filter(
-      (t) =>
-        t &&
-        t !== "UserMenu" &&
-        !/open menu/i.test(t) &&
-        !/close menu/i.test(t),
-    );
+  return (
+    Array.from(buttons)
+      // The site search button shows its shortcut, not a group (ADR-082).
+      .filter((b) => b.dataset.testid !== "site-search-button")
+      .map((b) => b.textContent?.trim() ?? "")
+      .filter(
+        (t) =>
+          t &&
+          t !== "UserMenu" &&
+          !/open menu/i.test(t) &&
+          !/close menu/i.test(t),
+      )
+  );
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

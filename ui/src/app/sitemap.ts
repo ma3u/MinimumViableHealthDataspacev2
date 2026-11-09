@@ -2,48 +2,13 @@ import type { MetadataRoute } from "next";
 import { STATIC_SITE_URL } from "@/lib/offline-mode";
 import { publishedDocs } from "@/lib/docs/published-docs";
 import facts from "@/app/docs/docs-facts.json";
+import sitePages from "@/content/site-pages.json";
 
 export const dynamic = "force-static";
 
 // The pages a visitor can read without signing in on the static site, which
-// is the indexed copy (see robots.ts). Sign-in, settings and the onboarding
-// forms are left out: they say nothing about the project.
-const PAGES = [
-  "/",
-  "/demo",
-  "/overview",
-  "/journey",
-  "/graph",
-  "/catalog",
-  "/eehrxf",
-  "/jurisdictions",
-  "/information",
-  "/permits",
-  "/activity-report",
-  "/compliance",
-  "/analytics",
-  "/query",
-  "/patient",
-  "/data/discover",
-  "/negotiate",
-  "/supervision",
-  "/credentials",
-  "/docs",
-  "/docs/user-guide",
-  "/docs/architecture",
-  "/docs/developer",
-  "/docs/developer/api",
-  "/docs/developer/quality-gates",
-  "/docs/developer/reference",
-  "/docs/ehds",
-  "/docs/ehds/glossary",
-  "/docs/security",
-  "/docs/operations",
-  "/docs/roadmap",
-  "/docs/klarbefund",
-  "/impressum",
-  "/datenschutz",
-];
+// is the indexed copy (see robots.ts). The site search reads the same list.
+const PAGES = sitePages.pages.map((p) => p.path);
 
 // The date each docs page last changed, kept by scripts/gen-docs-facts.py.
 const LAST_UPDATED = facts.lastUpdated as Record<string, string>;

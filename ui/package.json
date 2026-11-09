@@ -8,8 +8,8 @@
     "clean": "rm -rf .next",
     "dev": "next dev",
     "dev:clean": "npm run clean && next dev",
-    "predev": "rm -rf .next/cache/webpack && sh scripts/copy-swagger-ui.sh",
-    "prebuild": "sh scripts/copy-swagger-ui.sh",
+    "predev": "rm -rf .next/cache/webpack && sh scripts/copy-swagger-ui.sh && node scripts/build-search-index.mjs",
+    "prebuild": "sh scripts/copy-swagger-ui.sh && node scripts/build-search-index.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test --config playwright.config.ts",
-    "test:e2e:ui": "playwright test --config playwright.config.ts --ui"
+    "test:e2e:ui": "playwright test --config playwright.config.ts --ui",
+    "search:index": "node scripts/build-search-index.mjs"
   },
   "overrides": {
     "neverpanic": "^0.0.7",
@@ -70,6 +71,7 @@
     "jsdom": "^31.0.0",
     "knip": "6.44.1",
     "lightningcss": "1.33.0",
+    "pagefind": "1.6.0",
     "postcss": "^8.5.32",
     "prettier": "3.1.1",
     "tailwindcss": "^4.3.3",

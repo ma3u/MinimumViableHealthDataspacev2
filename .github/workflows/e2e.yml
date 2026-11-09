@@ -166,8 +166,10 @@ jobs:
             sleep 1
           done
 
+      # npm run build, not npx next build: its prebuild writes the site
+      # search index (ADR-082) the search journeys read.
       - name: Build
-        run: npx next build
+        run: npm run build
 
       - name: Install Playwright browsers
         if: steps.pw-cache.outputs.cache-hit != 'true'

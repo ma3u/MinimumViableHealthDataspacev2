@@ -7,3 +7,6 @@ out/
 
 # Swagger UI assets copied from node_modules by scripts/copy-swagger-ui.sh
 public/swagger-ui/
+
+# The site search index, built by scripts/build-search-index.mjs (ADR-082)
+public/pagefind/
