@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import http from "node:http";
-import { edcClient } from "@/lib/edc";
+import { contextNames, listContexts } from "@/lib/edc/participants";
 import { runQuery } from "@/lib/neo4j";
 import {
   azureResourceGroup,
@@ -16,7 +16,8 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
-// Topology aggregates ARM list + per-app metrics + Neo4j + CFM lookups.
+// Topology aggregates ARM list + per-app metrics + control plane or Neo4j
+// participant lookups.
 // 30s SWR keeps the page snappy without losing live monitoring fidelity.
 const TOPOLOGY_CACHE_TTL_MS = 30_000;
 
@@ -198,16 +199,12 @@ const PARTICIPANT_SERVICES: ServiceDef[] = [
     aca: "mvhd-controlplane",
     core: true,
   },
+  // siglet is the data plane on EDC 1.0 (runtimes/edc/README.md) and takes
+  // the place of the two JAD data planes that left with EDC 0.18 (#927).
   {
-    name: "Data Plane FHIR",
-    docker: "health-dataspace-dataplane-fhir",
-    aca: "mvhd-dp-fhir",
-    core: true,
-  },
-  {
-    name: "Data Plane OMOP",
-    docker: "health-dataspace-dataplane-omop",
-    aca: "mvhd-dp-omop",
+    name: "Data Plane (siglet)",
+    docker: "health-dataspace-siglet",
+    aca: "mvhd-siglet",
     core: true,
   },
   {
@@ -268,42 +265,6 @@ const INFRA_SERVICES: ServiceDef[] = [
     docker: "health-dataspace-traefik",
     aca: "", // ACA has its own ingress, no equivalent app
     layer: "infrastructure",
-  },
-  {
-    name: "Tenant Manager",
-    docker: "health-dataspace-tenant-manager",
-    aca: "mvhd-tenant-mgr",
-    layer: "cfm",
-  },
-  {
-    name: "Provision Manager",
-    docker: "health-dataspace-provision-manager",
-    aca: "mvhd-provision-mgr",
-    layer: "cfm",
-  },
-  {
-    name: "EDC-V Agent",
-    docker: "health-dataspace-cfm-edcv-agent",
-    aca: "",
-    layer: "cfm",
-  },
-  {
-    name: "Keycloak Agent",
-    docker: "health-dataspace-cfm-keycloak-agent",
-    aca: "",
-    layer: "cfm",
-  },
-  {
-    name: "Registration Agent",
-    docker: "health-dataspace-cfm-registration-agent",
-    aca: "",
-    layer: "cfm",
-  },
-  {
-    name: "Onboarding Agent",
-    docker: "health-dataspace-cfm-onboarding-agent",
-    aca: "",
-    layer: "cfm",
   },
   {
     name: "UI",
@@ -470,7 +431,7 @@ async function loadAcaMetrics(): Promise<Map<string, ResolvedMetrics> | null> {
 }
 
 // ---------------------------------------------------------------------------
-// Neo4j participant fallback (used when CFM tenant-manager is unreachable)
+// Neo4j participant fallback (used when the control plane is unreachable)
 // ---------------------------------------------------------------------------
 
 async function loadParticipantsFromNeo4j(): Promise<
@@ -565,7 +526,8 @@ async function buildTopologyResponse() {
     }),
   );
 
-  // ── 3. Resolve participants — CFM first, Neo4j fallback ──
+  // ── 3. Resolve participants: control plane contexts first (ADR-078),
+  //       Neo4j fallback ──
   type RawParticipant = {
     id: string;
     displayName: string;
@@ -576,56 +538,20 @@ async function buildTopologyResponse() {
   };
   const participantsRaw: RawParticipant[] = [];
   try {
-    const tenants =
-      await edcClient.tenant<
-        { id: string; version: number; properties: Record<string, string> }[]
-      >("/v1alpha1/tenants");
-
-    let edcParticipants: { "@id": string; identity: string; state: string }[] =
-      [];
-    try {
-      edcParticipants =
-        await edcClient.management<
-          { "@id": string; identity: string; state: string }[]
-        >("/v5/participants");
-    } catch {
-      /* auth may be unavailable */
-    }
-
-    for (const t of tenants) {
-      let profiles: {
-        identifier?: string;
-        properties?: {
-          "cfm.vpa.state"?: { participantContextId?: string };
-          [k: string]: unknown;
-        };
-      }[] = [];
-      try {
-        profiles = await edcClient.tenant<typeof profiles>(
-          `/v1alpha1/tenants/${t.id}/participant-profiles`,
-        );
-      } catch {
-        /* no profiles */
-      }
-      const ctxId =
-        profiles?.[0]?.properties?.["cfm.vpa.state"]?.participantContextId;
-      const ctx = edcParticipants.find((p) => p["@id"] === ctxId);
-
+    const contexts = await listContexts();
+    for (const ctx of contexts) {
+      const n = contextNames(ctx);
       participantsRaw.push({
-        id: t.id,
-        displayName: t.properties?.displayName || t.id,
-        organization: t.properties?.organization || "—",
-        role: t.properties?.ehdsParticipantType || t.properties?.role || "—",
-        did:
-          ctx?.identity ||
-          profiles?.[0]?.identifier ||
-          t.properties?.did ||
-          "—",
-        state: ctx?.state || "—",
+        id: ctx["@id"],
+        displayName: n.displayName,
+        organization: n.organization,
+        role: n.ehdsParticipantType || n.role || "—",
+        did: n.did || "—",
+        state: ctx.state || "—",
       });
     }
   } catch (err) {
-    console.warn("CFM tenant-manager unreachable (topology):", err);
+    console.warn("Control plane unreachable (topology):", err);
   }
 
   if (participantsRaw.length === 0) {
@@ -644,23 +570,20 @@ async function buildTopologyResponse() {
 
   // ── 4. Build per-participant topology rows ──
   //
-  // On Azure (ACA) there is exactly one container per service across ALL
-  // participants — `mvhd-controlplane`, `mvhd-dataplane-fhir`, etc. are
-  // single-instance. Participants are logical DIDs, not deployments, so
-  // per-participant CPU/MEM is meaningless: we'd either copy the same
-  // shared-pool number onto every row (misleading) or divide it by N
-  // (mathematically cute but implies a per-participant allocation that
-  // does not exist).
+  // There is exactly one container per service across ALL participants:
+  // `mvhd-controlplane`, `mvhd-siglet`, `mvhd-identityhub` on Azure, and the
+  // matching `health-dataspace-*` containers locally. The control plane holds
+  // every participant's context and siglet serves every participant's data
+  // flows. Participants are logical DIDs, not deployments, so a
+  // per-participant CPU/MEM split does not exist: we'd either copy the same
+  // shared-pool number onto every row or divide it by N, which implies an
+  // allocation nobody made.
   //
-  // Instead, on Azure we surface the same underlying ACA-app metric on
-  // every participant row and set `metricsShared=true` so the UI can
-  // annotate the value with a "shared" hint. That way the per-row CPU/MEM
-  // is *correct* (it reflects the actual container the participant uses)
-  // while the user knows the same number applies across all participants.
-  //
-  // On local JAD (docker), every participant has its own containers
-  // (ihub-alpha, dataplane-pharmaco-fhir, …) and the per-row values are
-  // independent; metricsShared stays false.
+  // So every participant row shows the metric of the container it actually
+  // uses. On Azure `metricsShared=true` tells the UI to annotate the value
+  // with a "shared" hint, so the user knows the same number applies across
+  // all participants. The hint names ACA, so the flag stays false locally,
+  // although the local rows share their containers in the same way.
   const metricsShared = isAzure && participantsRaw.length > 0;
   const participantTopologies: ParticipantTopology[] = participantsRaw.map(
     (p) => {

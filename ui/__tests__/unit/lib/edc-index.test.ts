@@ -8,8 +8,10 @@ describe("lib/edc barrel export", () => {
     const mod = await import("@/lib/edc");
     expect(mod.edcClient).toBeDefined();
     expect(typeof mod.edcClient.management).toBe("function");
-    expect(typeof mod.edcClient.tenant).toBe("function");
+    expect(typeof mod.edcClient.identity).toBe("function");
     expect(typeof mod.edcClient.issuer).toBe("function");
+    expect("tenant" in mod.edcClient).toBe(false);
+    expect("provision" in mod.edcClient).toBe(false);
   });
 
   it("should re-export EDC_CONTEXT constant", async () => {

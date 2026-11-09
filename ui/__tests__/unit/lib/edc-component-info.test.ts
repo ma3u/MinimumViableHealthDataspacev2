@@ -9,15 +9,14 @@ import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 describe("COMPONENT_INFO", () => {
   const components = Object.entries(COMPONENT_INFO);
 
-  it("should define all 20 EDC components", () => {
-    expect(components.length).toBeGreaterThanOrEqual(20);
+  it("should define the 13 components the dashboard lists", () => {
+    expect(components.length).toBe(13);
   });
 
   it("should include all core infrastructure components", () => {
     const names = Object.keys(COMPONENT_INFO);
     expect(names).toContain("Control Plane");
-    expect(names).toContain("Data Plane FHIR");
-    expect(names).toContain("Data Plane OMOP");
+    expect(names).toContain("Data Plane (siglet)");
     expect(names).toContain("Identity Hub");
     expect(names).toContain("Issuer Service");
     expect(names).toContain("Keycloak");
@@ -29,14 +28,23 @@ describe("COMPONENT_INFO", () => {
     expect(names).toContain("UI");
   });
 
-  it("should include CFM components", () => {
+  it("should include no CFM component and no JAD data plane (#927)", () => {
     const names = Object.keys(COMPONENT_INFO);
-    expect(names).toContain("Tenant Manager");
-    expect(names).toContain("Provision Manager");
-    expect(names).toContain("EDC-V Agent");
-    expect(names).toContain("Keycloak Agent");
-    expect(names).toContain("Registration Agent");
-    expect(names).toContain("Onboarding Agent");
+    for (const retired of [
+      "Data Plane FHIR",
+      "Data Plane OMOP",
+      "Tenant Manager",
+      "Provision Manager",
+      "EDC-V Agent",
+      "Keycloak Agent",
+      "Registration Agent",
+      "Onboarding Agent",
+    ]) {
+      expect(names).not.toContain(retired);
+    }
+    for (const [name, meta] of components) {
+      expect(meta.description, `${name} names CFM`).not.toMatch(/\bCFM\b/);
+    }
   });
 
   it("each component should have all required fields", () => {
@@ -78,11 +86,8 @@ describe("COMPONENT_INFO", () => {
     expect(cp.dependsOn).toContain("NATS");
   });
 
-  it("Data Planes should depend on Control Plane", () => {
-    expect(COMPONENT_INFO["Data Plane FHIR"].dependsOn).toContain(
-      "Control Plane",
-    );
-    expect(COMPONENT_INFO["Data Plane OMOP"].dependsOn).toContain(
+  it("the data plane, siglet, should depend on Control Plane", () => {
+    expect(COMPONENT_INFO["Data Plane (siglet)"].dependsOn).toContain(
       "Control Plane",
     );
   });

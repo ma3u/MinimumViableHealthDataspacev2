@@ -18,29 +18,16 @@
       }
     },
     {
-      "container": "health-dataspace-dataplane-fhir",
-      "component": "Data Plane FHIR",
+      "container": "health-dataspace-siglet",
+      "component": "Data Plane (siglet)",
       "layer": "edc-core",
-      "status": "healthy",
-      "uptime": "3h 26m",
-      "cpu": 0.41,
+      "status": "running",
+      "uptime": "12h 49m",
+      "cpu": 0.12,
       "mem": {
-        "usedMB": 162.3,
+        "usedMB": 14.2,
         "limitMB": 16030.8,
-        "percent": 1
-      }
-    },
-    {
-      "container": "health-dataspace-dataplane-omop",
-      "component": "Data Plane OMOP",
-      "layer": "edc-core",
-      "status": "healthy",
-      "uptime": "3h 26m",
-      "cpu": 0.36,
-      "mem": {
-        "usedMB": 160.5,
-        "limitMB": 16030.8,
-        "percent": 1
+        "percent": 0.1
       }
     },
     {
@@ -106,84 +93,6 @@
         "usedMB": 0,
         "limitMB": 16030.8,
         "percent": 0
-      }
-    },
-    {
-      "container": "health-dataspace-cfm-edcv-agent",
-      "component": "EDC-V Agent",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "3h 26m",
-      "cpu": 0.02,
-      "mem": {
-        "usedMB": 7.3,
-        "limitMB": 16030.8,
-        "percent": 0
-      }
-    },
-    {
-      "container": "health-dataspace-cfm-keycloak-agent",
-      "component": "Keycloak Agent",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "3h 26m",
-      "cpu": 0.03,
-      "mem": {
-        "usedMB": 11.1,
-        "limitMB": 16030.8,
-        "percent": 0.1
-      }
-    },
-    {
-      "container": "health-dataspace-cfm-onboarding-agent",
-      "component": "Onboarding Agent",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "3h 26m",
-      "cpu": 0.03,
-      "mem": {
-        "usedMB": 17.2,
-        "limitMB": 16030.8,
-        "percent": 0.1
-      }
-    },
-    {
-      "container": "health-dataspace-provision-manager",
-      "component": "Provision Manager",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "3h 26m",
-      "cpu": 0.02,
-      "mem": {
-        "usedMB": 20.1,
-        "limitMB": 16030.8,
-        "percent": 0.1
-      }
-    },
-    {
-      "container": "health-dataspace-cfm-registration-agent",
-      "component": "Registration Agent",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "3h 26m",
-      "cpu": 0.03,
-      "mem": {
-        "usedMB": 17.2,
-        "limitMB": 16030.8,
-        "percent": 0.1
-      }
-    },
-    {
-      "container": "health-dataspace-tenant-manager",
-      "component": "Tenant Manager",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "3h 26m",
-      "cpu": 0.04,
-      "mem": {
-        "usedMB": 24.9,
-        "limitMB": 16030.8,
-        "percent": 0.2
       }
     },
     {
@@ -269,45 +178,45 @@
     {
       "id": "b12c0cbe-3823-4e01-b367-de1855eff252",
       "displayName": "AlphaKlinik Berlin",
-      "organization": "AlphaKlinik Berlin — Universitätsklinikum",
-      "role": "data-holder",
-      "did": "did:web:alpha-klinik.de:participant",
+      "organization": "AlphaKlinik Berlin",
+      "role": "DATA_HOLDER",
+      "did": "did:web:identityhub%3A7083:alpha-klinik",
       "state": "ACTIVATED",
       "profileCount": 1
     },
     {
       "id": "d790c1f8-a0f1-4138-868a-0877a7e635a2",
       "displayName": "PharmaCo Research AG",
-      "organization": "PharmaCo Research AG — Clinical Trials Division",
-      "role": "data-user",
-      "did": "did:web:pharmaco.de:research",
+      "organization": "PharmaCo Research AG",
+      "role": "DATA_USER",
+      "did": "did:web:identityhub%3A7083:pharmaco",
       "state": "ACTIVATED",
       "profileCount": 1
     },
     {
       "id": "015085e9-6689-416f-8ae3-399fde0b3231",
       "displayName": "MedReg DE",
-      "organization": "MedReg DE — Health Data Access Body",
-      "role": "health-data-access-body",
-      "did": "did:web:medreg.de:hdab",
+      "organization": "MedReg DE",
+      "role": "HDAB",
+      "did": "did:web:identityhub%3A7083:medreg",
       "state": "ACTIVATED",
       "profileCount": 1
     },
     {
       "id": "1ff4740a-e208-4023-a71f-2bfbc045c278",
       "displayName": "Limburg Medical Centre",
-      "organization": "Limburg Medical Centre — Academic Hospital",
-      "role": "data-holder",
-      "did": "did:web:lmc.nl:clinic",
+      "organization": "Limburg Medical Centre",
+      "role": "DATA_HOLDER",
+      "did": "did:web:identityhub%3A7083:lmc",
       "state": "ACTIVATED",
       "profileCount": 1
     },
     {
       "id": "b7f3fa0e-badd-479c-be33-7dd539a18986",
       "displayName": "Institut de Recherche Santé",
-      "organization": "Institut de Recherche Santé — Research HDAB",
-      "role": "health-data-access-body",
-      "did": "did:web:irs.fr:hdab",
+      "organization": "Institut de Recherche Santé",
+      "role": "HDAB",
+      "did": "did:web:identityhub%3A7083:irs",
       "state": "ACTIVATED",
       "profileCount": 1
     }

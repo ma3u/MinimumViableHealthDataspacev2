@@ -27,7 +27,9 @@ export interface StackitServer {
 
 // The Azure apps, grouped onto three general-purpose servers (g2i, Intel,
 // CPU overprovisioned). The groups add up to more RAM than the Container
-// Apps reserve today (20.5 GiB without Postgres), with room for the OS.
+// Apps reserve today (14 GiB without Postgres since the EDC 0.18 apps left,
+// #927), with room for the OS. The sizes are those chosen with the 0.18 apps
+// and have not been revisited.
 export const STACKIT_SERVERS: StackitServer[] = [
   {
     id: "graph",
@@ -41,18 +43,17 @@ export const STACKIT_SERVERS: StackitServer[] = [
   },
   {
     id: "edc",
-    label: "EDC + CFM",
+    label: "EDC",
     flavor: "g2i.4",
     vcpu: 4,
     ramGb: 16,
     eurPerHour: 0.20458503352,
     components: [
-      "Control + data planes (FHIR, OMOP)",
+      "Control plane + data plane (siglet)",
       "Identity Hub + Issuer",
-      "CFM managers, 4 agents, shim",
       "NATS",
     ],
-    note: "12.5 GiB reserved on Azure across 13 apps; the JVMs idle most of the day",
+    note: "5 GiB reserved on Azure across 5 apps; the JVMs idle most of the day",
   },
   {
     id: "edge",

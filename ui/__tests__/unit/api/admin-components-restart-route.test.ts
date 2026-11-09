@@ -79,6 +79,41 @@ describe("POST /api/admin/components/[name]/restart", () => {
     expect(body.error).toMatch(/Unknown component/i);
   });
 
+  // The nine EDC 0.18 apps are deleted (#927): none is restartable.
+  it.each([
+    "mvhd-dp-fhir",
+    "mvhd-dp-omop",
+    "mvhd-tenant-mgr",
+    "mvhd-provision-mgr",
+    "mvhd-cfm-kcagent",
+    "mvhd-cfm-edcvagent",
+    "mvhd-cfm-regagent",
+    "mvhd-cfm-obagent",
+    "mvhd-cfm-cp-shim",
+  ])("refuses the retired %s", async (name) => {
+    const { status, body } = await callPost(name);
+    expect(status).toBe(400);
+    expect(body.error).toMatch(/Unknown component/i);
+    expect(mockRestart).not.toHaveBeenCalled();
+  });
+
+  it("restarts siglet, the data plane", async () => {
+    mockListContainerApps.mockResolvedValue([
+      {
+        name: "mvhd-siglet",
+        properties: { template: { scale: { minReplicas: 1 } } },
+      },
+    ]);
+    const { status, body } = await callPost("mvhd-siglet");
+    expect(status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(mockRestart).toHaveBeenCalledWith(
+      "sub-123",
+      "rg-mvhd-dev",
+      "mvhd-siglet",
+    );
+  });
+
   it("returns 400 when not on Azure", async () => {
     mockIsAzure.mockReturnValue(false);
     const { status, body } = await callPost("mvhd-controlplane");

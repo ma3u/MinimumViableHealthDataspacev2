@@ -1,5 +1,5 @@
 /**
- * Unit tests for EDC-V / CFM API Client (ui/src/lib/edc/client.ts)
+ * Unit tests for the EDC API Client (ui/src/lib/edc/client.ts)
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -87,14 +87,21 @@ describe("EDC Client", () => {
   });
 
   describe("edcClient (other APIs)", () => {
-    it("should expose identity, issuer, tenant, and provision facades", async () => {
+    it("should expose identity and issuer facades", async () => {
       mockTokenAndApi({ ok: true });
 
       const { edcClient } = await import("@/lib/edc/client");
       expect(typeof edcClient.identity).toBe("function");
       expect(typeof edcClient.issuer).toBe("function");
-      expect(typeof edcClient.tenant).toBe("function");
-      expect(typeof edcClient.provision).toBe("function");
+    });
+
+    it("has no CFM facade: tenant and provision left with EDC 0.18 (#927)", async () => {
+      const { edcClient } = await import("@/lib/edc/client");
+      expect(Object.keys(edcClient).sort()).toEqual([
+        "identity",
+        "issuer",
+        "management",
+      ]);
     });
   });
 

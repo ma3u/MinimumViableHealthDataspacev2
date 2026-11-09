@@ -54,23 +54,42 @@ describe("GET /api/admin/components/[name]/diagnosis", () => {
     expect(body).toEqual({ error: "Forbidden" });
   });
 
+  it.each(["mvhd-controlplane", "mvhd-identityhub", "mvhd-issuerservice"])(
+    "returns critical/warning diagnosis for %s",
+    async (name) => {
+      const { status, body } = await callGet(name);
+      expect(status).toBe(200);
+      expect(body.name).toBe(name);
+      expect(["critical", "warning"]).toContain(body.severity);
+      expect(body.summary).toBeTruthy();
+      expect(body.cause).toBeTruthy();
+      expect(body.remediation).toBeTruthy();
+      expect(body.trackingIssue).toMatch(/^https:\/\//);
+    },
+  );
+
+  // The nine EDC 0.18 apps are deleted (#927): no diagnosis names them.
   it.each([
-    "mvhd-controlplane",
-    "mvhd-identityhub",
-    "mvhd-issuerservice",
     "mvhd-dp-fhir",
     "mvhd-dp-omop",
     "mvhd-tenant-mgr",
     "mvhd-provision-mgr",
-  ])("returns critical/warning diagnosis for %s", async (name) => {
+    "mvhd-cfm-kcagent",
+    "mvhd-cfm-edcvagent",
+    "mvhd-cfm-regagent",
+    "mvhd-cfm-obagent",
+    "mvhd-cfm-cp-shim",
+  ])("has no diagnosis for the retired %s", async (name) => {
     const { status, body } = await callGet(name);
     expect(status).toBe(200);
-    expect(body.name).toBe(name);
-    expect(["critical", "warning"]).toContain(body.severity);
-    expect(body.summary).toBeTruthy();
-    expect(body.cause).toBeTruthy();
-    expect(body.remediation).toBeTruthy();
-    expect(body.trackingIssue).toMatch(/^https:\/\//);
+    expect(body.severity).toBe("healthy");
+    expect(body.summary).toMatch(/no known boot issue/i);
+  });
+
+  it("knows no boot issue of siglet, the data plane", async () => {
+    const { body } = await callGet("mvhd-siglet");
+    expect(body.name).toBe("mvhd-siglet");
+    expect(body.severity).toBe("healthy");
   });
 
   it("includes a bootError block for the controlplane port-collision case", async () => {

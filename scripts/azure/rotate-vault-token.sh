@@ -35,7 +35,8 @@ source "${SCRIPT_DIR}/env.sh"
 
 MODE="${1:-check}"
 JOB="mvhd-vault-rotate"
-EDC_APPS=("$CONTROLPLANE_APP" mvhd-identityhub mvhd-issuerservice mvhd-dp-fhir mvhd-dp-omop)
+# EDC 1.0 (ADR-078); the 0.18 data planes are gone (#927), and siglet follows below.
+EDC_APPS=("$CONTROLPLANE_APP" mvhd-identityhub mvhd-issuerservice)
 SIGLET="mvhd-siglet"
 TOKEN_ENV="EDC_VAULT_HASHICORP_TOKEN"
 

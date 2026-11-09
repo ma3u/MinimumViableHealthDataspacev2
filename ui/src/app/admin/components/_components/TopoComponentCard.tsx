@@ -27,8 +27,8 @@ export function TopoComponentCard({
       )
     : undefined;
   // The live status decides. The list of apps known to be broken on Azure
-  // only marks one whose status is not healthy: the CFM managers were on it
-  // while scaled to zero and kept showing "Broken" once they ran (#774).
+  // only marks one whose status is not healthy: apps on it while scaled to
+  // zero kept showing "Broken" once they ran (#774).
   const isBroken =
     comp.severity === "critical" ||
     comp.severity === "warning" ||

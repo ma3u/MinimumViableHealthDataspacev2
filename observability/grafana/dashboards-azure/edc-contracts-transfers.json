@@ -1470,7 +1470,7 @@
           },
           "queryType": "Azure Log Analytics",
           "azureLogAnalytics": {
-            "query": "let apps = dynamic(['mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice']); range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval | extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) | extend n = 0 | union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in (apps) | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | extend n = 1) | summarize errors = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
+            "query": "let apps = dynamic(['mvhd-controlplane', 'mvhd-siglet', 'mvhd-identityhub', 'mvhd-issuerservice']); range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval | extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) | extend n = 0 | union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in (apps) | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | extend n = 1) | summarize errors = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
             "resources": [
               "/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs"
             ],
@@ -1532,7 +1532,7 @@
           },
           "queryType": "Azure Log Analytics",
           "azureLogAnalytics": {
-            "query": "let apps = dynamic(['mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice']); range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval | extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) | extend n = 0 | union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in (apps)  | extend n = 1) | summarize lines = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
+            "query": "let apps = dynamic(['mvhd-controlplane', 'mvhd-siglet', 'mvhd-identityhub', 'mvhd-issuerservice']); range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval | extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) | extend n = 0 | union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in (apps)  | extend n = 1) | summarize lines = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
             "resources": [
               "/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs"
             ],
@@ -1594,7 +1594,7 @@
           },
           "queryType": "Azure Log Analytics",
           "azureLogAnalytics": {
-            "query": "let errs = ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ('mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice') | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | project TimeGenerated, app = ContainerAppName_s, line = Log_s | order by TimeGenerated desc | take 100; errs | union (print TimeGenerated = now(), app = '-', line = 'No connector errors in this time range.' | where toscalar(errs | count) == 0)",
+            "query": "let errs = ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ('mvhd-controlplane', 'mvhd-siglet', 'mvhd-identityhub', 'mvhd-issuerservice') | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | project TimeGenerated, app = ContainerAppName_s, line = Log_s | order by TimeGenerated desc | take 100; errs | union (print TimeGenerated = now(), app = '-', line = 'No connector errors in this time range.' | where toscalar(errs | count) == 0)",
             "resources": [
               "/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs"
             ],

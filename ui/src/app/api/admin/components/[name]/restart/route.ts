@@ -13,14 +13,11 @@ export const dynamic = "force-dynamic";
 
 const ALLOWED_APPS = new Set([
   "mvhd-controlplane",
-  "mvhd-dp-fhir",
-  "mvhd-dp-omop",
+  "mvhd-siglet",
   "mvhd-identityhub",
   "mvhd-issuerservice",
   "mvhd-keycloak",
   "mvhd-vault",
-  "mvhd-tenant-mgr",
-  "mvhd-provision-mgr",
   "mvhd-nats",
   "mvhd-neo4j",
   "mvhd-neo4j-proxy",

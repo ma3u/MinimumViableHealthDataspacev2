@@ -107,8 +107,7 @@ export NEO4J_PROXY_URL="http://localhost:$PROXY_PORT"
 # so they point at a closed port, as in CI.
 NOWHERE=http://127.0.0.1:9
 export EDC_MANAGEMENT_URL="$NOWHERE" EDC_IDENTITY_URL="$NOWHERE" \
-  EDC_ISSUER_URL="$NOWHERE" EDC_TENANT_URL="$NOWHERE" \
-  EDC_PROVISION_URL="$NOWHERE" KEYCLOAK_PUBLIC_URL="$NOWHERE"
+  EDC_ISSUER_URL="$NOWHERE" KEYCLOAK_PUBLIC_URL="$NOWHERE"
 
 if [ "${E2E_SKIP_BUILD:-0}" != "1" ]; then
   echo "[e2e] building the UI"

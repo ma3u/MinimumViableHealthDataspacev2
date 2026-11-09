@@ -61,54 +61,6 @@ const KNOWN_DIAGNOSES: Record<string, Diagnosis> = {
     trackingIssue:
       "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25",
   },
-  "mvhd-dp-fhir": {
-    name: "mvhd-dp-fhir",
-    severity: "critical",
-    summary: "Same multi-port mismatch as the controlplane (likely).",
-    cause:
-      "EDC dataplane uses public + control + signaling web ports (11002 + 11003 + 11004 in JAD config). " +
-      "ACA single target-port collapses all to 11002, almost certainly hitting the same Jetty PortMappingRegistry collision. " +
-      "Not individually verified — scaled to min-replicas=0 alongside the controlplane.",
-    remediation:
-      "Same multi-port resolution path as controlplane. Currently scaled to min-replicas=0.",
-    trackingIssue:
-      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25",
-  },
-  "mvhd-dp-omop": {
-    name: "mvhd-dp-omop",
-    severity: "critical",
-    summary: "Same multi-port mismatch as dp-fhir.",
-    cause:
-      "Same JAD source, same multi-port web layout, same single-port ACA mismatch. Not individually verified.",
-    remediation:
-      "Same multi-port resolution path. Currently scaled to min-replicas=0.",
-    trackingIssue:
-      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25",
-  },
-  "mvhd-tenant-mgr": {
-    name: "mvhd-tenant-mgr",
-    severity: "warning",
-    summary: "CFM service — likely affected by the same architecture mismatch.",
-    cause:
-      "CFM Tenant Manager has not been individually verified on Azure. Scaled to min-replicas=0 alongside the other " +
-      "broken EDC services to avoid cost burn.",
-    remediation:
-      "Investigate as part of the ADR-012 follow-up. Currently scaled to min-replicas=0.",
-    trackingIssue:
-      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25",
-  },
-  "mvhd-provision-mgr": {
-    name: "mvhd-provision-mgr",
-    severity: "warning",
-    summary: "CFM service — likely affected by the same architecture mismatch.",
-    cause:
-      "CFM Provision Manager has not been individually verified on Azure. Scaled to min-replicas=0 alongside the other " +
-      "broken EDC services to avoid cost burn.",
-    remediation:
-      "Investigate as part of the ADR-012 follow-up. Currently scaled to min-replicas=0.",
-    trackingIssue:
-      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25",
-  },
 };
 
 export async function GET(

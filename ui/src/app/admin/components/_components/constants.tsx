@@ -1,6 +1,6 @@
 "use client";
 
-import { HardDrive, Server, Shield, Workflow } from "lucide-react";
+import { HardDrive, Server, Shield } from "lucide-react";
 import type { AcaAppSpec, AciGroupSpec, PgFlexSpec } from "@/lib/azure-pricing";
 import type { Severity } from "./types";
 
@@ -21,11 +21,6 @@ export const LAYER_META: Record<
     label: "Identity & Trust",
     icon: Shield,
     color: "text-(--accent)",
-  },
-  cfm: {
-    label: "Connector Fabric Manager",
-    icon: Workflow,
-    color: "text-(--success-text)",
   },
   infrastructure: {
     label: "Infrastructure",
@@ -82,16 +77,15 @@ export const ROLE_COLORS: Record<string, string> = {
 // /api/admin/components/[name]/diagnosis.
 export const KNOWN_BROKEN_ACA_APPS = new Set<string>([
   "mvhd-controlplane",
-  "mvhd-dp-fhir",
-  "mvhd-dp-omop",
   "mvhd-identityhub",
   "mvhd-issuerservice",
-  "mvhd-tenant-mgr",
-  "mvhd-provision-mgr",
 ]);
 
 // Mirrors the live Container Apps in rg-mvhd-dev (read 2026-10-03), with
-// sidecars added to their app (Vault's unseal sidecar). Since ADR-053 every
+// sidecars added to their app (Vault's unseal sidecar). Since #927 without the
+// nine EDC 0.18 apps (the CFM managers, its four agents and shim, the two JAD
+// data planes); siglet, the data plane on EDC 1.0, sized as
+// scripts/azure/17-siglet.sh creates it. Since ADR-053 every
 // app stops outside Mon-Fri 07-20, Keycloak, Vault and the federation gateway
 // included; the UI stays reachable at min=0 with the offline notice, which
 // costs next to nothing. The live panel replaces memGiB with the reservation
@@ -99,21 +93,13 @@ export const KNOWN_BROKEN_ACA_APPS = new Set<string>([
 export const ACA_APP_SPECS: AcaAppSpec[] = [
   { name: "mvhd-neo4j", cpu: 1.0, memGiB: 2.0, schedule: "office" },
   { name: "mvhd-controlplane", cpu: 1.0, memGiB: 2.0, schedule: "office" },
-  { name: "mvhd-dp-fhir", cpu: 0.5, memGiB: 1.0, schedule: "office" },
-  { name: "mvhd-dp-omop", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  { name: "mvhd-siglet", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-identityhub", cpu: 0.5, memGiB: 1.0, schedule: "office" },
   { name: "mvhd-issuerservice", cpu: 0.5, memGiB: 1.0, schedule: "office" },
   { name: "mvhd-ui", cpu: 0.5, memGiB: 1.0, schedule: "office" },
-  { name: "mvhd-tenant-mgr", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-provision-mgr", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-nats", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-neo4j-proxy", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-catalog-enricher", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-cfm-cp-shim", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-cfm-kcagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-cfm-edcvagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-cfm-regagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-cfm-obagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, schedule: "office" },
   { name: "mvhd-vault", cpu: 0.75, memGiB: 1.5, schedule: "office" },
   { name: "mvhd-claude-federation", cpu: 0.5, memGiB: 1.0, schedule: "office" },

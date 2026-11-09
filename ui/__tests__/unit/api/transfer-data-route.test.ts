@@ -137,6 +137,22 @@ describe("GET /api/transfers/[id]/data", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("refuses the host of a JAD data plane, which left with EDC 0.18 (#927)", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock.mockResolvedValueOnce(
+      siglet("tok-5", "http://dataplane-fhir:11002/api/public"),
+    );
+
+    const res = await get();
+    const body = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(body.detail).toMatch(
+      /dataplane-fhir, which is not in EDR_DATA_HOSTS/,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("tries the correlation id when siglet does not know the transfer id", async () => {
     mockManagement.mockResolvedValue({
       state: "STARTED",

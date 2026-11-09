@@ -67,18 +67,24 @@ KEEP_UP_DATES="${KEEP_UP_DATES:-2026-10-14}"
 # last, then the database.
 BACKEND_APPS=(
   mvhd-catalog-enricher mvhd-neo4j-proxy mvhd-neo4j
-  mvhd-cfm-obagent mvhd-cfm-regagent mvhd-cfm-edcvagent mvhd-cfm-kcagent
-  mvhd-cfm-cp-shim
-  mvhd-provision-mgr mvhd-tenant-mgr mvhd-issuerservice mvhd-identityhub
-  mvhd-dp-omop mvhd-dp-fhir mvhd-siglet mvhd-controlplane
+  mvhd-issuerservice mvhd-identityhub mvhd-siglet mvhd-controlplane
   mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault
   mvhd-observability
 )
 CORE_APPS=(mvhd-vault mvhd-keycloak mvhd-claude-federation mvhd-neo4j mvhd-nats
            mvhd-neo4j-proxy mvhd-catalog-enricher mvhd-observability)
-EDC_APPS=(mvhd-controlplane mvhd-siglet mvhd-dp-fhir mvhd-dp-omop
-          mvhd-identityhub mvhd-issuerservice mvhd-tenant-mgr mvhd-provision-mgr)
-CFM_APPS=(mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent mvhd-cfm-regagent mvhd-cfm-obagent)
+# EDC 1.0 (ADR-078): the control plane, siglet as its data plane, the
+# IdentityHub and the IssuerService.
+EDC_APPS=(mvhd-controlplane mvhd-siglet mvhd-identityhub mvhd-issuerservice)
+# The 0.18 apps #927 retires: CFM's managers, agents and shim, and JAD's two
+# data planes. Nothing on 1.0 calls them. Until step 5 deletes them, the stop
+# still stops those that exist, so none runs through the night against a
+# stopped Postgres, and the start leaves them stopped. Step 7 removes this.
+RETIRED_APPS=(
+  mvhd-cfm-obagent mvhd-cfm-regagent mvhd-cfm-edcvagent mvhd-cfm-kcagent
+  mvhd-cfm-cp-shim mvhd-provision-mgr mvhd-tenant-mgr
+  mvhd-dp-omop mvhd-dp-fhir
+)
 # The two SPE workspaces, ACI confidential container groups, and the access
 # body's Trustee on ACA (ADR-069), from the moment 21-aci-confidential-spe.sh
 # has created them; each is left out while it does not exist. A stopped ACI
@@ -107,6 +113,13 @@ pg_state()    { az postgres flexible-server show --name "$PG_FLEX_NAME" --resour
                   --query state -o tsv 2>/dev/null || echo unknown; }
 trustee_present() { az containerapp show --name "$TRUSTEE_APP" --resource-group "$RESOURCE_GROUP" \
                       --query name -o tsv >/dev/null 2>&1; }
+retired_present() {  # the RETIRED_APPS that still exist, one per line
+  local a
+  for a in "${RETIRED_APPS[@]}"; do
+    az containerapp show --name "$a" --resource-group "$RESOURCE_GROUP" --query name -o tsv >/dev/null 2>&1 && echo "$a"
+  done
+  return 0
+}
 spe_groups() {  # the SPE container groups that exist, one per line
   local g
   for g in "${SPE_GROUPS[@]}"; do
@@ -270,7 +283,14 @@ do_stop() {
   # A stop, not min=0: scale-to-zero only reaches zero for an app nobody calls
   # (PR #482). A stopped app keeps its revision and scale. Trustee goes with
   # the backend once the workspaces that ask it are down.
-  local -a apps=("${BACKEND_APPS[@]}")
+  local -a apps=() retired=()
+  local a
+  while IFS= read -r a; do [ -n "$a" ] && retired+=("$a"); done < <(retired_present)
+  if [ "${#retired[@]}" -gt 0 ]; then
+    log "${#retired[@]} retired 0.18 apps still exist (#927); stopping them too"
+    apps+=("${retired[@]}")
+  fi
+  apps+=("${BACKEND_APPS[@]}")
   if trustee_present; then apps+=("$TRUSTEE_APP"); fi
   log "stopping ${#apps[@]} apps"
   "${SCRIPT_DIR}/set-app-power.sh" stop "${apps[@]}"
@@ -337,11 +357,6 @@ do_start() {
   "${SCRIPT_DIR}/set-app-power.sh" start "${EDC_APPS[@]}" || warn "Not every EDC app reported running, see above"
   scale 1 1 "${EDC_APPS[@]}"
 
-  # NATS consumers with no ingress: nothing wakes them from zero (#318).
-  log "CFM shim and agents"
-  "${SCRIPT_DIR}/set-app-power.sh" start "${CFM_APPS[@]}" || warn "Not every CFM app reported running, see above"
-  scale 1 1 "${CFM_APPS[@]}"
-
   log "Vault bootstrap job"
   az containerapp job start --name mvhd-vault-bootstrap --resource-group "$RESOURCE_GROUP" -o none ||
     warn "Vault bootstrap job start failed"
@@ -366,7 +381,7 @@ do_start() {
   # The one check allowed to fail the start: a stack that cannot serve a
   # login is not started, whatever the steps above said (2026-09-30).
   "${SCRIPT_DIR}/check-keycloak-health.sh" "https://${KEYCLOAK_PUBLIC_HOSTNAME}" edcv
-  log "started: Postgres, $(( ${#core[@]} + ${#EDC_APPS[@]} + ${#CFM_APPS[@]} )) apps, UI online"
+  log "started: Postgres, $(( ${#core[@]} + ${#EDC_APPS[@]} )) apps, UI online"
 }
 
 case "${1:-}" in

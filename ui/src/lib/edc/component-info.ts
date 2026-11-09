@@ -20,21 +20,16 @@ export const COMPONENT_INFO: Record<string, ComponentMeta> = {
     dependsOn: ["PostgreSQL", "Vault", "NATS"],
     healthSource: "Docker healthcheck (/api/check/health)",
   },
-  "Data Plane FHIR": {
+  // siglet is the data plane on EDC 1.0 (runtimes/edc/README.md,
+  // jad/siglet-edc1.toml); the JAD data planes left with EDC 0.18 (#927).
+  "Data Plane (siglet)": {
     description:
-      "DCore-based data plane for FHIR R4 clinical data. Implements HttpData-PUSH transfer type. Selected by DataPlaneSelectorService when allowedTransferTypes matches HttpData-PUSH.",
-    protocol: "DPS (Data Plane Signaling)",
-    ports: "11002 (HTTP)",
+      "The data plane on EDC 1.0. It answers the control plane's Data Plane Signaling and issues the access token. The consumer reads the endpoint and token from it; the Neo4j Proxy checks the token against siglet's JWKS and serves the dataset the token names.",
+    protocol: "DPS 1.0 (Data Plane Signaling)",
+    ports:
+      "8080 (JWKS, tokens), 8081 (signaling), 8082 (token refresh), 8083 (management)",
     dependsOn: ["Control Plane", "Vault"],
-    healthSource: "Docker healthcheck (/api/check/health)",
-  },
-  "Data Plane OMOP": {
-    description:
-      "DCore-based data plane for OMOP CDM research analytics. Implements HttpData-PULL transfer type. Proxies Cypher queries through Neo4j Proxy.",
-    protocol: "DPS (Data Plane Signaling)",
-    ports: "11012 (HTTP)",
-    dependsOn: ["Control Plane", "Vault", "Neo4j Proxy"],
-    healthSource: "Docker healthcheck (/api/check/health)",
+    healthSource: "Docker container state",
   },
   // DCP v1.0 is what the stack speaks: the JAD images are built on EDC
   // 0.18.0-SNAPSHOT, whose IdentityHub uses the
@@ -76,63 +71,15 @@ export const COMPONENT_INFO: Record<string, ComponentMeta> = {
   },
   "Vault Bootstrap": {
     description:
-      "Idempotent initialisation sidecar that unseals Vault, enables the transit engine, and writes initial secrets required by EDC-V and CFM services.",
+      "Idempotent initialisation sidecar that unseals Vault, enables the transit engine, and writes initial secrets required by the EDC services.",
     protocol: "Vault HTTP API v1",
     ports: "— (init job)",
     dependsOn: ["Vault"],
     healthSource: "Exit code (one-shot job)",
   },
-  "Tenant Manager": {
-    description:
-      "CFM multi-tenant lifecycle manager. Creates tenants, deploys dataspace profiles, provisions VPAs (Virtual Participant Addresses).",
-    protocol: "CFM REST API",
-    ports: "11006 (HTTP)",
-    dependsOn: ["PostgreSQL", "NATS"],
-    healthSource: "Docker healthcheck",
-  },
-  "Provision Manager": {
-    description:
-      "CFM automated provisioning engine. Orchestrates the sequence of agents (Keycloak → EDC-V → Registration → Onboarding) to bring a participant to ACTIVE state.",
-    protocol: "CFM REST API / NATS",
-    ports: "11007 (HTTP)",
-    dependsOn: ["PostgreSQL", "NATS", "Tenant Manager"],
-    healthSource: "Docker healthcheck",
-  },
-  "EDC-V Agent": {
-    description:
-      "CFM agent that creates participant contexts in the EDC-V Control Plane.",
-    protocol: "CFM Agent / EDC Management API",
-    ports: "— (agent)",
-    dependsOn: ["Control Plane", "NATS"],
-    healthSource: "Docker container state",
-  },
-  "Keycloak Agent": {
-    description:
-      "CFM agent that provisions Keycloak realms, clients, and service accounts for new participants.",
-    protocol: "CFM Agent / Keycloak Admin API",
-    ports: "— (agent)",
-    dependsOn: ["Keycloak", "NATS"],
-    healthSource: "Docker container state",
-  },
-  "Registration Agent": {
-    description:
-      "CFM agent that registers Verifiable Credentials with the IssuerService for new participants.",
-    protocol: "CFM Agent / VC Issuance API",
-    ports: "— (agent)",
-    dependsOn: ["Issuer Service", "NATS"],
-    healthSource: "Docker container state",
-  },
-  "Onboarding Agent": {
-    description:
-      "CFM orchestration agent that chains the full onboarding sequence: DID creation → credential issuance → participant context → catalog registration.",
-    protocol: "CFM Agent / Orchestration",
-    ports: "— (agent)",
-    dependsOn: ["Keycloak Agent", "EDC-V Agent", "Registration Agent", "NATS"],
-    healthSource: "Docker container state",
-  },
   PostgreSQL: {
     description:
-      "Shared relational database with isolated schemas: controlplane, dataplane, identityhub, issuerservice, keycloak, cfm, redlinedb. Each service auto-migrates its own schema.",
+      "Shared relational database with a database per service: the control plane, IdentityHub, IssuerService and Keycloak. Each service migrates its own schema.",
     protocol: "PostgreSQL wire protocol",
     ports: "5432 (TCP)",
     dependsOn: [],
@@ -140,7 +87,7 @@ export const COMPONENT_INFO: Record<string, ComponentMeta> = {
   },
   NATS: {
     description:
-      "JetStream messaging broker. Carries EDC-V internal events (contract state changes, transfer signals) and CFM provisioning workflow messages.",
+      "JetStream messaging broker. Carries the control plane's internal events (contract state changes, transfer signals).",
     protocol: "NATS / JetStream",
     ports: "4222 (client), 8222 (monitoring)",
     dependsOn: [],
@@ -156,7 +103,7 @@ export const COMPONENT_INFO: Record<string, ComponentMeta> = {
   },
   "Neo4j Proxy": {
     description:
-      "HTTP-to-Cypher bridge. Translates REST API calls from the OMOP Data Plane into Cypher queries against Neo4j. Enables pull-based OMOP data transfer.",
+      "HTTP-to-Cypher bridge. Serves the FHIR and OMOP datasets a transfer reads, translating REST calls into Cypher queries against Neo4j.",
     protocol: "HTTP REST → Bolt",
     ports: "9090 (HTTP)",
     dependsOn: ["Neo4j"],
@@ -175,7 +122,7 @@ export const COMPONENT_INFO: Record<string, ComponentMeta> = {
       "Next.js 14 admin portal — the Graph Explorer UI you are currently using. Provides participant onboarding, data sharing, operator dashboard, and compliance views.",
     protocol: "HTTP (Next.js SSR)",
     ports: "3000 (HTTP)",
-    dependsOn: ["Keycloak", "Control Plane", "Tenant Manager"],
+    dependsOn: ["Keycloak", "Control Plane"],
     healthSource: "Docker healthcheck (curl /api/health)",
   },
 };
