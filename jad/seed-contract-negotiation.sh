@@ -474,17 +474,20 @@ done < <(echo "$OFFERS")
 
 echo ""
 
-# --- 3f: One negotiation the provider refuses ---
+# --- 3f: One negotiation that ends without an agreement ---
 # A data space also holds negotiations that end without an agreement, and the
 # UI and J38 show them. PharmaCo asks for the first offer with a policy that
-# adds a prohibition AlphaKlinik never offered; the provider compares the
-# request with its offer, refuses it and the negotiation ends TERMINATED (the
-# same check that #881 finding 17 tripped over by accident). A run that ends
-# anywhere else only warns: the agreements above are what the seed is for.
+# adds a prohibition AlphaKlinik never offered. AlphaKlinik accepts the request
+# and builds the agreement from the policy it offered; PharmaCo's connector
+# rejects that agreement because it differs from the request ("Policy in the
+# contract agreement is not equal to the one in the contract offer", the check
+# 3a describes, #881 finding 17), and both sides end TERMINATED. Run on EDC 1.0
+# on 2026-11-09 (#951). A run that ends anywhere else only warns: the
+# agreements above are what the seed is for.
 REFUSED=$(echo "$OFFERS" | head -1)
 if [ -n "$REFUSED" ]; then
   IFS='|' read -r asset_id offer_id policy_file <<<"$REFUSED"
-  echo "  [$asset_id] a request AlphaKlinik refuses (altered policy)"
+  echo "  [$asset_id] a request with a policy AlphaKlinik never offered"
   REFUSED_POLICY=$(python3 -c '
 import json, sys
 policy = json.load(open(sys.argv[1]))
@@ -507,7 +510,7 @@ import json, sys
 print(json.load(sys.stdin).get('@id', ''))
 " 2>/dev/null || echo "")
   if [ -z "$REFUSED_ID" ]; then
-    warn "$asset_id: the refused request did not start"
+    warn "$asset_id: the altered request did not start"
   else
     echo -n "    Waiting for TERMINATED..."
     REFUSED_STATE=$(poll_state \
@@ -515,9 +518,9 @@ print(json.load(sys.stdin).get('@id', ''))
       "TERMINATED" "$asset_id")
     echo " $REFUSED_STATE"
     if [ "$REFUSED_STATE" = "TERMINATED" ]; then
-      ok "$asset_id: refused by the provider: TERMINATED"
+      ok "$asset_id: agreement rejected by PharmaCo: TERMINATED"
     else
-      warn "$asset_id: the refused request ended in $REFUSED_STATE, not TERMINATED"
+      warn "$asset_id: the altered request ended in $REFUSED_STATE, not TERMINATED"
     fi
   fi
 fi

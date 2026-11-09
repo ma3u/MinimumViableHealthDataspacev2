@@ -39,8 +39,9 @@ This file keeps the order of the work.
 9. `E2E` is a required check on `main` (ADR-079 decision 2), after at least 15
    green runs on pull requests in a row. `e2e.yml` runs on every pull request
    and its job `E2E` always reports.
-10. `jad/seed-contract-negotiation.sh` ends one negotiation TERMINATED (a
-    request AlphaKlinik refuses), for J38. Not yet run against a connector.
+10. `jad/seed-contract-negotiation.sh` ends one negotiation TERMINATED (an
+    agreement PharmaCo rejects), for J38. Run on a local JAD stack on EDC 1.0
+    on 2026-11-09: TERMINATED in both seed runs, J38 passed.
 
 ## Next, in this order
 
