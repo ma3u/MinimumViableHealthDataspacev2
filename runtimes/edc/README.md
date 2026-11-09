@@ -82,3 +82,36 @@ Two pieces of code, both exceptions to ADR-076 decision 1 awaiting their own ADR
   actions and left operands of the standard policies (ADR-077), so 1.0's
   policy validation accepts them. Declared, not enforced: they are bound to a
   scope EDC never evaluates, as on 0.18, where they were not enforced either.
+
+### Back to 0.18 on the compose stack
+
+Rehearsed on 2026-11-09 (#927): the 0.18 images came back on the databases and
+Vault keys that 1.0 had left alone, with no new seed, and the three suites
+reached the 0.18 floors (identity 27/0/0, dataspace 32/0/1, health domain
+27/0/3).
+
+- **The 0.18 point is `80fea9ad^` (`ddb660c4`), not `ba42e85^`.** #920 moved
+  the compose files to 1.0 before #932 switched the images: the control
+  plane's POLICY scopes to `prefix.mapping`, the CFM shim and the live UI to
+  Management API `v5`, the seeds and the suites to the 1.0 paths. On
+  `ba42e85^` the 0.18 control plane stops at boot, because 0.18 reads
+  `prefix-mapping`:
+  `Error booting runtime: DcpScope prefixMapping cannot be null for POLICY type`.
+- **Copy the volumes first**, with the containers that write to them stopped:
+  `postgres_data`, `vault_data`, `vault_keys` and `nats_data`.
+- **Start 0.18 from a worktree at `80fea9ad^`**, in the order of its
+  `scripts/bootstrap-jad.sh`, each step with
+  `docker compose -p minimumviablehealthdataspacev2 ... up -d --no-deps <services>`,
+  so the containers use the existing volumes and nothing else is recreated.
+  Not with the script itself: its `down --remove-orphans` also removes the EUDI
+  wallet containers. The 0.18 readiness URL answers 401, so a wait must accept
+  that. Then run that worktree's three suites.
+- **Forward** with `scripts/bootstrap-jad.sh` on `main`. From a worktree, set
+  `COMPOSE_PROJECT_NAME=minimumviablehealthdataspacev2`, or compose names the
+  project after the folder and starts on empty volumes. Bind mounts point into
+  the folder a container was created from, so create the stack from a checkout
+  that stays.
+
+Azure does not use this commit: `migrate-edc-to-v1.sh rollback` restores the
+definitions saved on 2026-11-06, whose control plane still carries
+`prefix-mapping`.
