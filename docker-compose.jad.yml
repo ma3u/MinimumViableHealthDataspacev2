@@ -16,6 +16,7 @@
 #     - vault          (HashiCorp Vault — secret management)
 #     - keycloak       (Keycloak — OAuth2/OIDC identity provider)
 #     - nats           (NATS JetStream — async messaging)
+#     - nats-streams   (one-shot: the control plane's task streams, on file)
 #   Application (k8s/apps equivalent):
 #     - controlplane     (EDC-V virtualized control plane)
 #     - dataplane-fhir   (DCore HTTP data plane — FHIR PUSH, port 11002)
@@ -243,6 +244,26 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # The control plane's task streams, as file streams (docs/gotchas.md 2026-11-09)
+  # ---------------------------------------------------------------------------
+  # The control plane would create cn-stream and tp-stream in memory, and a
+  # NATS restart would take them. Created here first, on nats_data, they
+  # survive one: the control plane leaves an existing stream alone and attaches
+  # its consumer. One-shot and idempotent; `up` runs it again, harmlessly.
+  nats-streams:
+    image: natsio/nats-box:0.20.2
+    container_name: health-dataspace-nats-streams
+    entrypoint: ["sh", "/create-nats-streams.sh"]
+    volumes:
+      - ./jad/create-nats-streams.sh:/create-nats-streams.sh:ro
+    networks:
+      - edcv
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
   # Vault Bootstrap Sidecar — Initializes JWT auth, secrets engine, policies
   # Stays alive so Docker restarts it after an OrbStack/daemon crash.
   # Vault keeps its secrets on the vault_data volume across restarts; this
@@ -321,7 +342,10 @@ services:
       web.http.management.path: "/api/mgmt"
       web.http.control.port: "8083"
       web.http.control.path: "/api/control"
-      # NATS
+      # NATS. autocreate makes the control plane attach its consumers; the
+      # streams themselves nats-streams has created as file streams first,
+      # because the control plane would create them in memory (gotchas.md,
+      # 2026-11-09).
       edc.nats.cn.subscriber.url: "nats://nats:4222"
       edc.nats.cn.subscriber.autocreate: "true"
       edc.nats.cn.publisher.url: "nats://nats:4222"
@@ -413,6 +437,8 @@ services:
         condition: service_healthy
       nats:
         condition: service_healthy
+      nats-streams:
+        condition: service_completed_successfully
       keycloak:
         condition: service_healthy
     labels:
