@@ -53,7 +53,6 @@
   "Diamond: a fixed date": "Losange : une date fixe",
   "Red line: today": "Ligne rouge : aujourd’hui",
   "What drives it": "Ce qui la détermine",
-  "Every item": "Tous les éléments",
   "Issue": "Issue",
   "What": "Quoi",
   "Priority": "Priorité",
@@ -305,7 +304,6 @@
   "Open epic #{n}": "Ouvrir l'epic #{n}",
   "{done} of {total} done": "{done} sur {total} terminés",
   "Hatched bar: an epic": "Barre hachurée : un epic",
-  "The epics": "Les epics",
   "Every open issue belongs to an <e>epic</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set.": "Chaque ticket ouvert appartient à un <e>epic</e>, un ticket parent sur GitHub dont le travail forme les sous-tickets. La barre hachurée d'un epic va de son premier ticket jusqu'à l'échéance que fixent les priorités de ses tickets.",
   "TEHDAS2 requirement check": "Vérification TEHDAS2",
   "TEHDAS2: the high-relevance results checked requirement by requirement": "TEHDAS2 : les résultats très pertinents vérifiés exigence par exigence",
@@ -334,5 +332,7 @@
   "TEHDAS2 results: what the hub implements, and the final conference demo": "Résultats TEHDAS2 : ce que le hub met en œuvre, et la démo de la conférence finale",
   "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.": "Les lignes directrices de l'action conjointe vérifiées exigence par exigence face au hub, publiées sous /docs et présentées à sa <c>conférence finale</c> le 16 novembre 2026.",
   "Closed before the epics": "Clos avant les epics",
-  "Done before every open issue was given an epic on 2026-11-08.": "Terminés avant que chaque ticket ouvert reçoive un epic le 2026-11-08."
+  "Done before every open issue was given an epic on 2026-11-08.": "Terminés avant que chaque ticket ouvert reçoive un epic le 2026-11-08.",
+  "Epics and items": "Epics et éléments",
+  "Its dated items": "Ses éléments datés"
 }
