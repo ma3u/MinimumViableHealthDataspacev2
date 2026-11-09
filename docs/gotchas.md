@@ -38,8 +38,11 @@ Two things make the stack look fine while it is broken:
 - `cfm-stream` and `KV_cfm-bucket` are file streams and survive, and the
   JetStream round trip in `bootstrap-jad.sh` (2026-09-26) brings its own
   stream, so it passes as well.
-- The control plane's own healthcheck stays `healthy` with both streams
-  gone (measured on a throwaway stack).
+- The control plane's own healthcheck stayed `healthy` with both streams
+  gone (measured on a throwaway stack): it read `/api/check/health`, which is
+  only the startup status, and EDC's subscriber check in liveness sees only
+  the connection, which the client reopens. Since ADR-084 the healthcheck
+  reads `/api/check/liveness`, and liveness asks NATS for both streams.
 
 ### Since the same day: file streams, created before the control plane
 
@@ -77,6 +80,24 @@ plane; any task not yet handled is lost:
       nats --server nats://nats:4222 stream rm tp-stream -f
     docker compose -f docker-compose.yml -f docker-compose.jad.yml \
       -f docker-compose.live.yml up -d controlplane
+
+### On Azure: liveness restarts the control plane (ADR-084)
+
+`mvhd-nats` has no volume, so file streams would not survive there either,
+and Azure Files is no fit for a NATS store (ADR-084). Instead the launcher's
+`NatsTaskStreamsLivenessExtension` fails liveness when NATS has lost
+`cn-stream` or `tp-stream`, and the control plane's liveness probe restarts
+it, whose startup creates both again: about two minutes of 500s after a NATS
+restart, not until someone notices. In the 30 days to 2026-11-09 NATS never
+restarted under a running control plane on Azure: the morning start brings it
+up 3 to 4 minutes earlier. What would do it is a change to `mvhd-nats` alone,
+such as a new NATS image; the scripts that make one restart the control
+plane after it. To see what the check sees:
+
+    script -q /dev/null az containerapp exec -n mvhd-controlplane -g rg-mvhd-dev \
+      --command "wget -qO- http://127.0.0.1:8080/api/check/liveness"
+
+The component `NATS task streams` names a missing stream.
 
 The last command, from the worktree the stack runs under, runs `nats-streams`
 and then starts the control plane.

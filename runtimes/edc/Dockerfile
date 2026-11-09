@@ -3,13 +3,14 @@
 # RUNTIME is controlplane, identity-hub or issuerservice.
 # The jar is the same on every platform, so it builds on the builder's own
 # (a linux/amd64 image for Azure builds on an arm64 laptop without emulating
-# Gradle); only the runtime stage is the target platform.
+# Gradle); only the runtime stage is the target platform. The unit tests of
+# the hub's own extensions run here, so no image is built when they fail.
 FROM --platform=$BUILDPLATFORM gradle:9.8.2-jdk21-alpine AS build
 ARG RUNTIME
 WORKDIR /src
 COPY . .
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    gradle --no-daemon -q ":${RUNTIME}:shadowJar"
+    gradle --no-daemon -q ":${RUNTIME}:test" ":${RUNTIME}:shadowJar"
 
 FROM eclipse-temurin:21.0.13_9-jre-alpine
 ARG RUNTIME

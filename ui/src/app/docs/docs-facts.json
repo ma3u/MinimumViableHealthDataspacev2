@@ -1324,6 +1324,12 @@
       "status": "Accepted"
     },
     {
+      "id": "ADR-084",
+      "file": "ADR-084-the-control-plane-restarts-when-its-nats-task-streams-are-gone.md",
+      "title": "The control plane's liveness covers its NATS task streams, and Container Apps restarts it when they are gone",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-085",
       "file": "ADR-085-cfm-stays-as-eclipse-cfm-releases.md",
       "title": "CFM stays, as eclipse-cfm's releases, behind a token exchange the hub provides",

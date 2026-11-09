@@ -445,11 +445,14 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.controlplane.rule=Host(`cp.localhost`)"
       - "traefik.http.services.controlplane.loadbalancer.server.port=8081"
+    # Liveness, not /api/check/health: health is only the startup status, and
+    # liveness includes the check that cn-stream and tp-stream exist on NATS
+    # (ADR-084). Compose restarts nothing on unhealthy; it shows it.
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:8080/api/check/health || exit 1",
+          "wget -q --spider http://127.0.0.1:8080/api/check/liveness || exit 1",
         ]
       interval: 10s
       timeout: 5s
