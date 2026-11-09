@@ -55,12 +55,16 @@ describe("/docs/roadmap", () => {
         screen.getByRole("heading", { level: 3, name }),
       ).toBeInTheDocument();
     }
-    expect(
-      screen.getByRole("link", { name: /Regulation \(EU\) 2025\/327/ }),
-    ).toHaveAttribute(
-      "href",
-      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng",
-    );
+    // The driver and the regulation lane's items (#990) both link it.
+    const regulation = screen.getAllByRole("link", {
+      name: /Regulation \(EU\) 2025\/327/,
+    });
+    expect(regulation.length).toBeGreaterThan(0);
+    for (const a of regulation)
+      expect(a).toHaveAttribute(
+        "href",
+        "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng",
+      );
     expect(
       screen.getByRole("link", { name: "What the hub implements" }),
     ).toHaveAttribute("href", "/docs/ehds");
