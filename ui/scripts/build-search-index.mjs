@@ -50,10 +50,14 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
-/** A message string as a reader sees it: no <a>…</a> tags, no {placeholders}. */
-function plain(s) {
-  return String(s)
-    .replace(/<\/?[a-z][a-z0-9]*>/gi, "")
+/**
+ * A message string as a reader sees it, as HTML text: no <a>…</a> tags, no
+ * {placeholders}. Escaped first, then the escaped tags removed, so no
+ * removal can leave markup behind (CodeQL, incomplete sanitization).
+ */
+function plainHtml(s) {
+  return escapeHtml(s)
+    .replace(/&lt;\/?[a-z][a-z0-9]*&gt;/gi, "")
     .replace(/\{[a-zA-Z_][a-zA-Z0-9_]*\}/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -145,9 +149,9 @@ export function searchDocuments() {
       const parts = [`<p>${escapeHtml(t(p.description))}</p>`];
       for (const area of p.areas ?? []) {
         const strings = Object.entries(areas[area] ?? {}).map(([en, tr]) =>
-          plain(lang === "en" ? en : tr || en),
+          plainHtml(lang === "en" ? en : tr || en),
         );
-        parts.push(`<p>${escapeHtml(strings.filter(Boolean).join(" · "))}</p>`);
+        parts.push(`<p>${strings.filter(Boolean).join(" · ")}</p>`);
       }
       if (p.path === "/docs/ehds/glossary") parts.push(glossaryHtml(lang));
       out.push(
