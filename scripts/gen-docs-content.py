@@ -56,12 +56,12 @@ DOCS = [
     ("ehds", "regulation-implementation", "docs/ehds/regulation-implementation.md",
      "What the integration hub implements of Regulation (EU) 2025/327, article by article: the status, "
      "the page, route or file that does it, the test that shows it, and the gap with its issue."),
-    ("ehds", "bonus-programme-data-flow", "docs/ehds/bonus-programme-data-flow.md",
-     "AlphaKasse's bonus programme from the catalogue to the yes or no: who takes part, every step, what "
-     "the hub stores, what crosses to the insurer and what never does, the legal basis, and how to check it."),
     ("ehds", "article-numbering", "docs/ehds-article-numbering.md",
      "The 2022 proposal's article numbers against the adopted ones, and the dates of Art. 105; read "
      "older material and the Regulation side by side."),
+    ("ehds", "bonus-programme-data-flow", "docs/ehds/bonus-programme-data-flow.md",
+     "AlphaKasse's bonus programme from the catalogue to the yes or no: who takes part, every step, what "
+     "the hub stores, what crosses to the insurer and what never does, the legal basis, and how to check it."),
     ("klarbefund", "klarbefund-user-guide", "docs/klarbefund/user-guide.md",
      "The app as a person uses it, screen by screen with screenshots: getting a report in, checking a "
      "value against the paper, trends, consents, connecting to the EHDS, exports and your data rights."),
