@@ -1,0 +1,25 @@
+meta {
+  name: 42 No app token, withdraw from a bonus program in the app (401)
+  type: http
+  seq: 42
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/app/programmes/consent?programmeId=urn:mvhd:programme:alphakasse:active-year-2027
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer not-a-token
+}
+
+tests {
+  // GDPR Art. 7(3): withdrawing is the person's own act, from their phone.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

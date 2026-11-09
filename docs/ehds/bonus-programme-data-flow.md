@@ -12,8 +12,8 @@ the plan is [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues
 
 - **Today (steps 3 and 4 of #934), no data about the member reaches
   AlphaKasse.** The hub reads AlphaKasse's catalogue, the member joins in the
-  patient portal, and "Send my answer" records the member's instruction inside
-  the hub. The answer itself is computed in step 6 and delivered in step 8, or
+  patient portal or in the Klarbefund app, and "Send my answer" records the
+  member's instruction inside the hub. The answer itself is computed in step 6 and delivered in step 8, or
   through the member's wallet.
 - **When it is delivered, AlphaKasse receives three things:** the programme, the
   year, and "goal met: yes" or "no".
@@ -24,7 +24,7 @@ the plan is [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues
 
 | Party                                           | Role                                                            | Where it runs                                                                            |
 | ----------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| The member (patient1 in the demo)               | Decides: joins, sends, withdraws                                | Patient portal, `/patient/programmes`                                                    |
+| The member (patient1 in the demo)               | Decides: joins, sends, withdraws                                | Patient portal, `/patient/programmes`, or the Klarbefund app (Connect to EHDS)           |
 | The hub (MVHD)                                  | Reads the catalogue, keeps the consent, will compute the answer | `ehds.mabu.red`                                                                          |
 | AlphaKasse DE (`did:web:alphakasse.de:insurer`) | Publishes the programme, will receive the yes or no             | A catalogue served for it by the hub's mock DSP route, standing in for its own connector |
 | The catalogue crawler and enricher              | Fetch the catalogue every 5 minutes and index the programme     | Azure Container Apps jobs `mvhd-catalog-crawler`, `mvhd-catalog-enricher`                |
@@ -76,7 +76,14 @@ sequenceDiagram
    Node labels come from a fixed list in the hub, never from the catalogue.
 4. **The member sees it** on `/patient/programmes`, apart from research and from
    the opt-out. The card shows the rule, what AlphaKasse receives and what never
-   leaves the record.
+   leaves the record. In the Klarbefund app the same list is under Connect to
+   EHDS, then Bonus programs, in the portal's words. The app calls
+   `/api/patient/app/programmes` and its `consent` and `transfer` routes, the
+   app-token twins of the portal's routes (ADR-049): the same queries and
+   answers, the login's own record only, and a join from the phone is recorded
+   with `source: "klarbefund"`. The app keeps the programme apart from its
+   Consents screen, which notes a study consent, an ePA objection and a
+   registry consent held by others (ADR-080, decision 6).
 5. **The member joins.** The hub writes an open `(:ProgrammeConsent)` on the
    member's own record
    ([`JOIN_PROGRAMME_CYPHER`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/a1c78c3e/ui/src/lib/patient/programme-consent.ts#L32)).
@@ -107,11 +114,11 @@ from the EUDI Wallet.
 
 ## What is stored, and where
 
-| Record                          | Fields                                                                                                                  | Written when                                 | Read by                                            |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------- |
-| `(:DataService:BonusProgramme)` | programme id, title, description, publisher, endpoint, themes, keywords, rule title, rule text, rule version, last seen | Each crawl                                   | Patients and operators (`/api/patient/programmes`) |
-| `(:ProgrammeConsent)`           | consent id, patient id, programme id, joined at, withdrawn at, source                                                   | Join, withdraw                               | The member, and an operator who names the record   |
-| `(:ProgrammeTransfer)`          | transfer id, patient id, programme id, year, goal met (empty until step 6), status, requested at                        | "Send my answer", only under an open consent | The member, and an operator who names the record   |
+| Record                          | Fields                                                                                                                  | Written when                                 | Read by                                                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `(:DataService:BonusProgramme)` | programme id, title, description, publisher, endpoint, themes, keywords, rule title, rule text, rule version, last seen | Each crawl                                   | Patients and operators (`/api/patient/programmes`), the app (`/api/patient/app/programmes`) |
+| `(:ProgrammeConsent)`           | consent id, patient id, programme id, joined at, withdrawn at, source                                                   | Join, withdraw                               | The member, and an operator who names the record                                            |
+| `(:ProgrammeTransfer)`          | transfer id, patient id, programme id, year, goal met (empty until step 6), status, requested at                        | "Send my answer", only under an open consent | The member, and an operator who names the record                                            |
 
 A patient reads and changes only their own record; naming another record is
 refused with 403 (`refuseForeignRecord`). `source` is `patient-portal`,
@@ -158,8 +165,15 @@ rules apply to it (in Germany § 65a SGB V), and the design needs a legal review
 
 - **In the portal:** sign in as patient1, open My Health, then Bonus Programs.
   Join, send ("Recorded for 2027"), withdraw ("Nothing is sent any more").
+- **In Klarbefund:** connect the app (Connect to EHDS), open Bonus programs,
+  join, send, withdraw. Without a phone,
+  `cd clients/ios && Scripts/run-ui-tests.sh BonusProgrammesUITests` runs the
+  same steps against the demo hub (`-MBDemoSeed`, `-MBShot programmes`), and
+  `swift test --filter BonusProgrammes` pins how the app reads the answers,
+  the 403 after a withdrawal among them.
 - **API collection:** `bruno/MVHDv2/01 Patient/22` to `26` list the programme,
-  join, send (202), withdraw, and send again (403).
+  join, send (202), withdraw, and send again (403). `09 Access control/40` to
+  `43` refuse the app routes without the app's token (401).
 - **Browser journeys:** J1092 and J1094 in
   [`54-bonus-programmes.spec.ts`](../../ui/__tests__/e2e/journeys/54-bonus-programmes.spec.ts).
   They skip with a reason on a stack where the crawler has not run.
@@ -173,6 +187,12 @@ OPTIONAL MATCH (t:ProgrammeTransfer)-[:UNDER_CONSENT]->(c)
 RETURN b.title, c.joinedAt, c.withdrawnAt, c.source, collect(t {.year, .goalMet, .status})
 ```
 
+## Done
+
+- Step 3: the crawled DCAT-AP programme on `/patient/programmes` (#1005).
+- Step 4: join, send and withdraw in the portal, and the transfer gate (#1014).
+- Klarbefund: the app's join, send and withdraw screen (`source: "klarbefund"`).
+
 ## Open
 
 - Step 5: the bonus standard policy, enforced at the hub's connector.
@@ -180,4 +200,3 @@ RETURN b.title, c.joinedAt, c.withdrawnAt, c.source, collect(t {.year, .goalMet,
   attestation for the EUDI Wallet (after #708).
 - Step 8: delivery to AlphaKasse's connector, which needs a `simpl-edc` with
   DCP. The member reference AlphaKasse ties the answer to is designed there.
-- Klarbefund: the app's join and withdraw screen (`source: "klarbefund"`).

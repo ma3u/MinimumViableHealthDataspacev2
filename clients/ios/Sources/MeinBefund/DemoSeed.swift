@@ -71,6 +71,8 @@
       case consents
       /// Connect to EHDS, with the hub and Keycloak played by the demo.
       case connect
+      /// Bonus programs (#934), connected to the demo hub as `patient1`.
+      case programmes
     }
 
     static var screen: Screen? {

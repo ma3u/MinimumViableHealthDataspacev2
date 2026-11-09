@@ -12,9 +12,13 @@
  * gate every transfer of a program's answer passes, and it asks for an open
  * consent (GDPR Art. 7(3), Art. 9(2)(a)).
  */
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
-import type { ProgrammeConsent } from "@/lib/patient/bonus-programme";
+import type {
+  BonusProgramme,
+  ProgrammeConsent,
+} from "@/lib/patient/bonus-programme";
 import { ownRecordId, refuseForeignRecord } from "@/lib/patient/own-record";
 
 const PATIENT_BY_KEY = `MATCH (p:Patient)
@@ -157,4 +161,141 @@ export async function resolveProgrammePatient(
   }
   const refused = await refuseForeignRecord(roles, patientId);
   return refused ?? { patientId };
+}
+
+/**
+ * Every bonus program the crawler indexed, as the enricher wrote it
+ * (DCAT-AP dcat:DataService typed ehds:BonusProgramme, #934 step 3).
+ */
+export const BONUS_PROGRAMMES_CYPHER = `MATCH (s:DataService:BonusProgramme)
+   OPTIONAL MATCH (s)-[:PUBLISHED_BY]->(p:Participant)
+   RETURN s.serviceId AS programmeId,
+          s.title AS title,
+          s.description AS description,
+          coalesce(p.name, s.publisherName, s.publisherDid) AS publisherName,
+          s.publisherDid AS publisherDid,
+          p.dataSpace AS dataSpace,
+          s.endpointUrl AS endpointUrl,
+          s.ruleTitle AS ruleTitle,
+          s.ruleDescription AS ruleDescription,
+          s.ruleVersion AS ruleVersion,
+          toString(s.lastSeenAt) AS lastSeenAt
+   ORDER BY s.title`;
+
+/**
+ * What happens once a route has decided whose record it acts on. The portal
+ * routes (a session, requireAuth) and the Klarbefund routes (an app token,
+ * requireAppToken, ADR-049) each keep their own gate and call these, so the
+ * phone and the browser get the same answers from the same queries.
+ */
+
+/** The offer and the person's own consents; none for a record left unnamed. */
+export async function listProgrammes(patientId: string | null) {
+  const programmes = await runQuery<BonusProgramme>(BONUS_PROGRAMMES_CYPHER);
+  const consents = patientId
+    ? await runQuery<ProgrammeConsentRow>(PROGRAMME_CONSENTS_CYPHER, {
+        patientId,
+      })
+    : [];
+  return {
+    programmes,
+    consents,
+    legalBasis:
+      "Primary use the person directs, EHDS Art. 2(2)(d) and 7(3); explicit consent, GDPR Art. 9(2)(a) (ADR-080)",
+  };
+}
+
+/** Join: 201 with the open consent, or 404 for an unknown program or record. */
+export async function joinProgramme(
+  patientId: string,
+  programmeId: string,
+  source: (typeof PROGRAMME_CONSENT_SOURCES)[number],
+): Promise<NextResponse> {
+  const [consent] = await runQuery<ProgrammeConsentRow>(JOIN_PROGRAMME_CYPHER, {
+    patientId,
+    programmeId,
+    consentId: randomUUID(),
+    source,
+  });
+  if (!consent) {
+    return NextResponse.json(
+      {
+        error: `No bonus program '${programmeId}', or no record '${patientId}'`,
+      },
+      { status: 404 },
+    );
+  }
+  return NextResponse.json(
+    { consent, legalBasis: PROGRAMME_CONSENT_BASIS },
+    { status: 201 },
+  );
+}
+
+/** Withdraw: 200 with the closed consent, or 404 when none is open. */
+export async function withdrawProgramme(
+  patientId: string,
+  programmeId: string,
+): Promise<NextResponse> {
+  const [consent] = await runQuery<ProgrammeConsentRow>(
+    WITHDRAW_PROGRAMME_CYPHER,
+    { patientId, programmeId },
+  );
+  if (!consent) {
+    return NextResponse.json(
+      { error: "There is no open consent to this program to withdraw" },
+      { status: 404 },
+    );
+  }
+  return NextResponse.json({ consent, legalBasis: PROGRAMME_CONSENT_BASIS });
+}
+
+/** A transfer body's program and calendar year, or a 400. */
+export function parseTransferRequest(body: {
+  programmeId?: unknown;
+  year?: unknown;
+}): { programmeId: string; year: number } | NextResponse {
+  const year = Number(body.year);
+  if (
+    typeof body.programmeId !== "string" ||
+    !body.programmeId ||
+    !Number.isInteger(year) ||
+    year < 2000 ||
+    year > 2100
+  ) {
+    return NextResponse.json(
+      { error: "programmeId and a calendar year are required" },
+      { status: 400 },
+    );
+  }
+  return { programmeId: body.programmeId, year };
+}
+
+/**
+ * The person's instruction to send a year's answer: 202 under an open
+ * consent, 403 without one (never joined, or withdrawn), and then nothing is
+ * recorded (GDPR Art. 7(3)).
+ */
+export async function requestProgrammeTransfer(
+  patientId: string,
+  programmeId: string,
+  year: number,
+): Promise<NextResponse> {
+  const consentId = await programmeTransferAllowed(patientId, programmeId);
+  if (!consentId) {
+    return NextResponse.json(
+      {
+        error:
+          "No open consent to this program: join it first. After a withdrawal nothing is sent.",
+      },
+      { status: 403 },
+    );
+  }
+  const [transfer] = await runQuery<ProgrammeTransferRow>(
+    RECORD_TRANSFER_CYPHER,
+    { consentId, transferId: randomUUID(), patientId, programmeId, year },
+  );
+  return NextResponse.json(
+    { transfer, legalBasis: PROGRAMME_CONSENT_BASIS },
+    { status: 202 },
+  );
 }

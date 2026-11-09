@@ -1,0 +1,31 @@
+meta {
+  name: 43 No app token, send a bonus program answer from the app (401)
+  type: http
+  seq: 43
+}
+
+post {
+  url: {{baseUrl}}/api/patient/app/programmes/transfer
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer not-a-token
+}
+
+body:json {
+  {"programmeId": "urn:mvhd:programme:alphakasse:active-year-2027", "year": 2027}
+}
+
+tests {
+  // ADR-080, decision 4: a year's answer goes out only on the person's own
+  // instruction, from their connected phone.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

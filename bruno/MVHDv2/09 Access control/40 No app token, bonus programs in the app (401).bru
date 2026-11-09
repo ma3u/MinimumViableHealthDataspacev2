@@ -1,0 +1,26 @@
+meta {
+  name: 40 No app token, bonus programs in the app (401)
+  type: http
+  seq: 40
+}
+
+get {
+  url: {{baseUrl}}/api/patient/app/programmes
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer not-a-token
+}
+
+tests {
+  // #934 step 4: only the Klarbefund app's own token, from a connected
+  // phone, lists the bonus programs and the person's consents to them.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

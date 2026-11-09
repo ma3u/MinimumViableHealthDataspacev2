@@ -1345,7 +1345,7 @@ struct ContentView: View {
         model.showingProfile = true
       case .consents:
         model.showingConsents = true
-      case .connect:
+      case .connect, .programmes:
         model.showingConnect = true
       case .list, nil:
         break

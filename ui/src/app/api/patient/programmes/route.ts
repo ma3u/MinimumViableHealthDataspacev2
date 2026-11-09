@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
-import type { BonusProgramme } from "@/lib/patient/bonus-programme";
 import {
-  PROGRAMME_CONSENTS_CYPHER,
+  listProgrammes,
   resolveProgrammePatient,
-  type ProgrammeConsentRow,
 } from "@/lib/patient/programme-consent";
 
 export const dynamic = "force-dynamic";
@@ -38,32 +35,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   );
   if (who instanceof NextResponse) return who;
 
-  const programmes = await runQuery<BonusProgramme>(
-    `MATCH (s:DataService:BonusProgramme)
-     OPTIONAL MATCH (s)-[:PUBLISHED_BY]->(p:Participant)
-     RETURN s.serviceId AS programmeId,
-            s.title AS title,
-            s.description AS description,
-            coalesce(p.name, s.publisherName, s.publisherDid) AS publisherName,
-            s.publisherDid AS publisherDid,
-            p.dataSpace AS dataSpace,
-            s.endpointUrl AS endpointUrl,
-            s.ruleTitle AS ruleTitle,
-            s.ruleDescription AS ruleDescription,
-            s.ruleVersion AS ruleVersion,
-            toString(s.lastSeenAt) AS lastSeenAt
-     ORDER BY s.title`,
-  );
-  const consents = who.patientId
-    ? await runQuery<ProgrammeConsentRow>(PROGRAMME_CONSENTS_CYPHER, {
-        patientId: who.patientId,
-      })
-    : [];
-
-  return NextResponse.json({
-    programmes,
-    consents,
-    legalBasis:
-      "Primary use the person directs, EHDS Art. 2(2)(d) and 7(3); explicit consent, GDPR Art. 9(2)(a) (ADR-080)",
-  });
+  return NextResponse.json(await listProgrammes(who.patientId));
 }
