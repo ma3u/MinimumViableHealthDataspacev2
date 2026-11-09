@@ -367,5 +367,14 @@
   "The year, and goal met: yes or no.": "The year, and goal met: yes or no.",
   "What never leaves your record": "What never leaves your record",
   "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Steps, heart rate, diagnoses, visit details and any date finer than the year.",
-  "You cannot join yet: joining and withdrawing come in the next step.": "You cannot join yet: joining and withdrawing come in the next step."
+  "That did not work (HTTP {status}). Please try again.": "That did not work (HTTP {status}). Please try again.",
+  "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.": "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.",
+  "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.": "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.",
+  "You joined on {date}.": "You joined on {date}.",
+  "Sending…": "Sending…",
+  "Send my answer for {year}": "Send my answer for {year}",
+  "Withdraw (GDPR Art. 7(3))": "Withdraw (GDPR Art. 7(3))",
+  "You withdrew on {date}. Nothing is sent any more.": "You withdrew on {date}. Nothing is sent any more.",
+  "Joining…": "Joining…",
+  "Join this program": "Join this program"
 }

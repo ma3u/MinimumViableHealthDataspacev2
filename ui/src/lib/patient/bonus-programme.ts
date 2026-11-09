@@ -16,3 +16,11 @@ export interface BonusProgramme {
   ruleVersion: string | null;
   lastSeenAt: string | null;
 }
+
+/** One consent of the person to one program (#934, step 4). */
+export interface ProgrammeConsent {
+  consentId: string;
+  programmeId: string;
+  joinedAt: string;
+  withdrawnAt: string | null;
+}

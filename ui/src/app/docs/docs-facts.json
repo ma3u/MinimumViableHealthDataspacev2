@@ -310,8 +310,16 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/patient/programmes/consent",
+      "methods": ["POST", "DELETE"]
+    },
+    {
       "path": "/api/patient/programmes",
       "methods": ["GET"]
+    },
+    {
+      "path": "/api/patient/programmes/transfer",
+      "methods": ["POST"]
     },
     {
       "path": "/api/patient/research",
@@ -1347,8 +1355,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 61,
-    "operations": 78
+    "paths": 63,
+    "operations": 81
   },
   "workflowJobs": {
     "test.yml": [

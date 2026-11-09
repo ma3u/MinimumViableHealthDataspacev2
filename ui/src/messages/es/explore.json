@@ -484,5 +484,7 @@
   "the provider": "el proveedor",
   "the contract": "el contrato",
   "patients": "pacientes",
-  "observations": "observaciones"
+  "observations": "observaciones",
+  "My Program Consent": "Mi consentimiento al programa",
+  "Program Answer Sent": "Respuesta enviada al programa"
 }

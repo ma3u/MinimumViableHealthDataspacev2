@@ -126,6 +126,11 @@ CREATE CONSTRAINT patient_consent_id IF NOT EXISTS FOR (pc:PatientConsent) REQUI
 CREATE INDEX patient_consent_patient IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.patientId);
 CREATE INDEX patient_consent_study IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.studyId);
 CREATE INDEX patient_consent_revoked IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.revoked);
+// Consent to one bonus program and the transfers it allows (#934 step 4,
+// ADR-080 decision 6): its own record, not study consent and not the opt-out.
+CREATE CONSTRAINT programme_consent_id IF NOT EXISTS FOR (c:ProgrammeConsent) REQUIRE c.consentId IS UNIQUE;
+CREATE INDEX programme_consent_patient IF NOT EXISTS FOR (c:ProgrammeConsent) ON (c.patientId, c.programmeId);
+CREATE CONSTRAINT programme_transfer_id IF NOT EXISTS FOR (t:ProgrammeTransfer) REQUIRE t.transferId IS UNIQUE;
 
 // Opt-out from secondary use, EHDS Art. 71 (ADR-062). One OptOutRecord per
 // opt-out, (:Patient)-[:OPTED_OUT]->(:OptOutRecord {optOutId, patientId,
