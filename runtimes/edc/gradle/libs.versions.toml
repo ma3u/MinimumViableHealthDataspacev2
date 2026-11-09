@@ -5,6 +5,11 @@ edc = "1.0.0-RC5"
 bouncyCastle = "1.86"
 opentelemetry = "1.67.0"
 shadow = "9.6.1"
+# what EDC's NATS subscribers bring at runtime (negotiation-tasks-subscriber-nats
+# 1.0.0-RC5); the liveness check compiles against it, so keep them equal
+jnats = "2.26.4"
+# the JUnit EDC 1.0.0-RC5 is built with
+junit = "6.0.3"
 
 [libraries]
 # control plane: the virtual (multi-participant) control plane, merged from EDC-V
@@ -37,6 +42,12 @@ edc-monitor-otel = { module = "org.eclipse.edc:otel-monitor", version.ref = "edc
 edc-events-nats = { module = "org.eclipse.edc:events-nats", version.ref = "edc" }
 bouncyCastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncyCastle" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
+jnats = { module = "io.nats:jnats", version.ref = "jnats" }
+
+# tests of the hub's own extensions
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

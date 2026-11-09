@@ -83,6 +83,20 @@ Two pieces of code, both exceptions to ADR-076 decision 1 awaiting their own ADR
   policy validation accepts them. Declared, not enforced: they are bound to a
   scope EDC never evaluates, as on 0.18, where they were not enforced either.
 
+And one with its ADR:
+
+- `controlplane/.../nats/NatsTaskStreamsLivenessExtension.java`
+  ([ADR-084](../../docs/ADRs/ADR-084-the-control-plane-restarts-when-its-nats-task-streams-are-gone.md)):
+  liveness fails when NATS has lost `cn-stream` or `tp-stream`, which 1.0
+  creates in memory and at startup only. EDC's own subscriber check sees only
+  the connection, which the client reopens after a NATS restart. Read
+  `/api/check/liveness`: `/api/check/health` is the startup status.
+  `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` turns it off.
+
+The image build runs the unit tests of these extensions
+(`gradle :<runtime>:test :<runtime>:shadowJar` in the Dockerfile), so no image
+is built when one fails.
+
 ### Back to 0.18 on the compose stack
 
 Rehearsed on 2026-11-09 (#927): the 0.18 images came back on the databases and

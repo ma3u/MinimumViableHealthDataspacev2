@@ -26,9 +26,13 @@
 #   - the database <db>_v1; the 0.18 database stays untouched for a rollback;
 #   - what 1.0 reads differently: `prefix.mapping` where 0.18 read
 #     `prefix-mapping`, and policy validation on (the launcher's
-#     EhdsPolicyVocabularyExtension declares the EHDS terms, ADR-078).
-# The 0.18 NATS settings stay; the launchers carry no NATS extension and
-# ignore them.
+#     EhdsPolicyVocabularyExtension declares the EHDS terms, ADR-078);
+#   - for the control plane, probes: liveness on /api/check/liveness, which
+#     fails when NATS has lost cn-stream or tp-stream, so Container Apps
+#     restarts it and its startup creates them again (ADR-084).
+# The NATS settings stay: the 1.0 control plane runs negotiations and
+# transfers as tasks on NATS (controlplane-virtual-feature-nats), and the
+# other launchers publish their events there.
 #
 # Needs: az (logged in, Container Apps Contributor), python3 with PyYAML,
 # EDC1_TAG (push-edc1-images.sh prints it).
@@ -67,7 +71,8 @@ need_tag() {
 }
 
 # The settings per service, as KEY=VALUE lines. A line starting with -D goes
-# into JAVA_TOOL_OPTIONS; UNSET=<name> removes that variable. Values from
+# into JAVA_TOOL_OPTIONS; UNSET=<name> removes that variable; PROBES=edc sets
+# the probes of an EDC launcher (patch_yaml). Values from
 # docker-compose.jad.yml, the stack the suites
 # passed on locally (#881).
 settings() {
@@ -76,6 +81,7 @@ settings() {
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}
 DB=controlplane_v1
 EDC_POLICY_VALIDATION_ENABLED=true
+PROBES=edc
 -Dedc.iam.dcp.scopes.manufacturer.prefix.mapping=ManufacturerCredential
 -Dedc.iam.dcp.scopes.ehds-participant.prefix.mapping=EHDSParticipantCredential
 -Dedc.iam.dcp.scopes.data-processing-purpose.prefix.mapping=DataProcessingPurposeCredential
@@ -133,6 +139,20 @@ for line in spec:
         env['EDC_DATASOURCE_MEMBERSHIP_USER'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_USER', 'value': pg_admin}
         env['EDC_DATASOURCE_MEMBERSHIP_PASSWORD'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_PASSWORD', 'secretRef': 'pg-flex-password'}
     elif k == 'UNSET': env.pop(v, None)
+    elif k == 'PROBES':
+        # ADR-084. The runtime is ready 3 to 4 s after it boots (Azure,
+        # 2026-11-09), so startup has 10 + 10 x 10 s. Liveness fails when NATS
+        # has lost a task stream: after 3 x 30 s Container Apps restarts the
+        # control plane, and its startup creates the streams again. Readiness
+        # stays the TCP check Container Apps used by default.
+        c['probes'] = [
+            {'type': 'Startup', 'httpGet': {'path': '/api/check/startup', 'port': 8080},
+             'initialDelaySeconds': 10, 'periodSeconds': 10, 'timeoutSeconds': 5, 'failureThreshold': 10},
+            {'type': 'Liveness', 'httpGet': {'path': '/api/check/liveness', 'port': 8080},
+             'initialDelaySeconds': 10, 'periodSeconds': 30, 'timeoutSeconds': 10, 'failureThreshold': 3},
+            {'type': 'Readiness', 'tcpSocket': {'port': 8080},
+             'periodSeconds': 10, 'timeoutSeconds': 5, 'failureThreshold': 3},
+        ]
     else: env[k] = {'name': k, 'value': v}
 # JAVA_TOOL_OPTIONS: keep what is there (the pool cap, the scopes, the trusted
 # issuer), drop the 0.18 spelling `prefix-mapping`, replace our -D keys.

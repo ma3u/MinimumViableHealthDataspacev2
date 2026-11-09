@@ -30,6 +30,11 @@ subprojects {
         exclude(group = "org.glassfish", module = "jakarta.json")
     }
 
+    // the hub's own extensions have unit tests; the image build runs them
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+
     tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
         mergeServiceFiles()
         archiveFileName.set("${project.name}.jar")

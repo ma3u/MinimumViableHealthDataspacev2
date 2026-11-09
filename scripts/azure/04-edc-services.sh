@@ -132,6 +132,8 @@ PY
 az containerapp update --name "$NATS_APP" --resource-group "$RG" --yaml "$NATS_YAML" -o none
 rm -f "$NATS_YAML"
 ok "NATS (JetStream enabled)"
+# The update made a new NATS revision under the control plane created above.
+restart_controlplane_after_nats_change
 
 # ── Data Plane FHIR ─────────────────────────────────────────────────────────
 # Web ports, ingress ports and the selector settings come from

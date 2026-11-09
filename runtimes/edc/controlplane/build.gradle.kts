@@ -1,6 +1,8 @@
 dependencies {
     // for the EHDS policy vocabulary (see the extension's comment)
     implementation(libs.edc.spi.controlplane)
+    // for the task streams liveness check (ADR-084)
+    implementation(libs.jnats)
 
     runtimeOnly(libs.edc.bom.controlplane.virtual)
     runtimeOnly(libs.edc.bom.controlplane.virtual.sql)
@@ -12,4 +14,8 @@ dependencies {
     runtimeOnly(libs.edc.vault.hashicorp)
     runtimeOnly(libs.bouncyCastle.bcprov)
     runtimeOnly(libs.opentelemetry.exporter.otlp)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }

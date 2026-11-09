@@ -95,6 +95,24 @@ What the first cutover (2026-11-06) found after the seeds, both fixed in the scr
 - **Every DSP request between participants answered 401.** Azure's control plane still carried `edc.iam.trusted-issuer.*`: #754 moved the scripts to `edc.iam.trustedissuer` but never redeployed the app, and 0.18 kept reading the deprecated key. 1.0 reads only `trustedissuer`, so it trusted no issuer. `migrate-edc-to-v1.sh` now renames the key. Seen as Bruno 03/16 and the DSP suite's CAT-1.1 to 1.3; 1.0 logs nothing about why.
 - **Every transfer ended TERMINATED** with "Refresh endpoint rejected by policy: scheme must be https". siglet's running revision had mounted the 0.18 `siglet.toml`, without `[token.refresh_endpoint_policy] allow_http`: `17-siglet.sh` wrote the new file after starting the revision, and the update that followed started none. The script now restarts the revision after it writes the file.
 
+## The control plane restarts when NATS loses its task streams (ADR-084)
+
+A new `mvhd-nats` revision or replica deletes `cn-stream` and `tp-stream`, and every negotiation answers 500 until the control plane restarts ([ADR-084](../../ADRs/ADR-084-the-control-plane-restarts-when-its-nats-task-streams-are-gone.md), `docs/gotchas.md` 2026-11-09). The launcher's liveness check reports the missing streams, and the control plane's liveness probe restarts it. To roll it out, in the window of step 0:
+
+1. `migrate-edc-to-v1.sh backup`, so `rollback controlplane` returns to the running 1.0 definition.
+2. `DOCKER_CONTEXT=orbstack scripts/azure/push-edc1-images.sh build`, then `push`. It prints the new `EDC1_TAG`.
+3. `EDC1_TAG=<tag> scripts/azure/migrate-edc-to-v1.sh app controlplane`, then `set-edc-log-level.sh`. The revision gets the image and three probes: startup on `/api/check/startup`, liveness on `/api/check/liveness` (every 30 s, failing after 3), readiness on TCP 8080.
+4. Gate: the revision is Healthy, and its liveness lists the streams:
+
+   ```bash
+   script -q /dev/null az containerapp exec -n mvhd-controlplane -g rg-mvhd-dev \
+     --command "wget -qO- http://127.0.0.1:8080/api/check/liveness"
+   ```
+
+   The answer has a component `NATS task streams` with `"isHealthy":true`. `exec` needs a terminal, hence `script`.
+
+A script that changes `mvhd-nats` (`04-edc-services.sh`, the min-replica fix in `05-cfm-configure.sh` and `05-cfm-agents.sh`) restarts the control plane after it (`restart_controlplane_after_nats_change` in `env.sh`). Anything else that touches NATS, an image change by hand included, leaves it to the probe: about two minutes of 500s. `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` on the control plane turns the check off.
+
 ## Rollback
 
 - **EDC apps and siglet:** `migrate-edc-to-v1.sh rollback <name>` for each app, newest first. The saved definitions name the 0.18 images and the `_v018` databases, which 1.0 never wrote, and the 0.18 keys are still in Vault.

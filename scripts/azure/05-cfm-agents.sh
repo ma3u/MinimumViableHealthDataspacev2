@@ -76,6 +76,7 @@ if [ "$NATS_MIN" != "1" ]; then
   log "scaling ${NATS_APP} to min=1 (was ${NATS_MIN})"
   az containerapp update --name "$NATS_APP" --resource-group "$RG" \
     --min-replicas 1 --max-replicas 1 -o none
+  restart_controlplane_after_nats_change
 fi
 
 # ── Secrets: Postgres password, and the provisioner client secret ───────────

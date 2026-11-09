@@ -405,3 +405,37 @@ wait_for_app() {
   err "${name} did not reach Running state within $((max * 5))s"
   return 1
 }
+
+# ADR-084: a new mvhd-nats revision or replica takes the control plane's task
+# streams with it (cn-stream and tp-stream live in memory, and the control
+# plane creates them at startup only), and every negotiation answers 500 until
+# it restarts. A script that changes NATS calls this once it has; the control
+# plane's liveness probe catches every other case within about two minutes.
+restart_controlplane_after_nats_change() {
+  local cp_status nats_rev state="" cp_rev
+  cp_status=$(az containerapp show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+    --query "properties.runningStatus" -o tsv 2>/dev/null || echo "")
+  if [[ "$cp_status" != "Running" ]]; then
+    log "${CONTROLPLANE_APP} is ${cp_status:-absent}: its next start creates the NATS task streams"
+    return 0
+  fi
+  nats_rev=$(az containerapp show --name "$NATS_APP" --resource-group "$RG" \
+    --query "properties.latestRevisionName" -o tsv)
+  for _ in $(seq 1 24); do
+    state=$(az containerapp revision show --name "$NATS_APP" --resource-group "$RG" \
+      --revision "$nats_rev" --query "properties.runningState" -o tsv 2>/dev/null || echo "")
+    [[ "$state" == Running || "$state" == RunningAtMaxScale ]] && break
+    sleep 5
+  done
+  if [[ "$state" != Running && "$state" != RunningAtMaxScale ]]; then
+    warn "${nats_rev} is ${state:-unknown}; restart ${CONTROLPLANE_APP} once NATS runs (ADR-084)"
+    return 0
+  fi
+  sleep 10 # JetStream answers a few seconds after the replica runs
+  cp_rev=$(az containerapp show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+    --query "properties.latestRevisionName" -o tsv)
+  log "Restarting ${cp_rev}: NATS changed, and the task streams went with it (ADR-084)"
+  az containerapp revision restart --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+    --revision "$cp_rev" -o none
+  ok "${CONTROLPLANE_APP} restarted; its startup creates cn-stream and tp-stream"
+}
