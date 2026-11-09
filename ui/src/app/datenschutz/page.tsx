@@ -86,9 +86,12 @@ export default function DatenschutzPage() {
         <p>
           Im lokalen Speicher Ihres Browsers merkt sich die Website das
           Farbschema (<code>theme</code>), die Sprache (
-          <code>catalog-metadata-language</code>) und die gewählte Demo-Rolle (
-          <code>demo-persona</code>). Diese Werte verlassen Ihr Gerät nicht und
-          lassen sich in den Browser-Einstellungen löschen.
+          <code>catalog-metadata-language</code>), die gewählte Demo-Rolle (
+          <code>demo-persona</code>) und Ihre letzten fünf Suchbegriffe der
+          Seitensuche (<code>site-search-recent</code>). Die Suche selbst läuft
+          in Ihrem Browser; Suchbegriffe werden nicht übertragen. Diese Werte
+          verlassen Ihr Gerät nicht und lassen sich in den Browser-Einstellungen
+          löschen, die Suchbegriffe auch über „Löschen“ in der Suche.
         </p>
 
         <h2 className="text-xl font-semibold">6. Kontakt</h2>
@@ -166,9 +169,12 @@ export default function DatenschutzPage() {
         <p>
           Your browser&apos;s local storage keeps the colour scheme (
           <code>theme</code>), the language (
-          <code>catalog-metadata-language</code>) and the demo role you chose (
-          <code>demo-persona</code>). These values never leave your device and
-          can be cleared in the browser settings.
+          <code>catalog-metadata-language</code>), the demo role you chose (
+          <code>demo-persona</code>) and your last five site searches (
+          <code>site-search-recent</code>). The search itself runs in your
+          browser; what you search for is never sent. These values never leave
+          your device and can be cleared in the browser settings, the searches
+          also with &ldquo;Clear&rdquo; in the search.
         </p>
 
         <h3 className="text-lg font-semibold">6. Contact</h3>

@@ -44,6 +44,7 @@ import {
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "./LanguagePicker";
+import SiteSearch from "./SiteSearch";
 import { useT } from "@/lib/i18n/translate";
 import { useState, useRef, useEffect } from "react";
 import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
@@ -679,6 +680,7 @@ export default function Navigation() {
           {/* In the bar with the desktop nav; on a narrower screen the full
               language name made the bar too wide, so there it sits in the
               menu panel. */}
+          <SiteSearch />
           <LanguagePicker className="hidden xl:flex" />
           <ThemeToggle />
           <UserMenu />

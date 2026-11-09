@@ -218,6 +218,9 @@ export interface RoadmapItem {
   note: string;
   /** Where a part of the title or the note in <tag>...</tag> links to. */
   links?: Readonly<Record<string, string>>;
+  /** The item this one is a sub-issue of on GitHub, when it is not an
+   *  epic's own sub-issue: it sits with that item's epic. */
+  parent?: number;
 }
 
 export const ITEMS: readonly RoadmapItem[] = [
@@ -471,6 +474,7 @@ export const ITEMS: readonly RoadmapItem[] = [
   {
     issue: 649,
     lane: "processing",
+    parent: 716,
     short: "Iceberg spike",
     title: "Spike: Apache Iceberg tables with a REST catalog inside the SPE",
     priority: "P2",
@@ -909,6 +913,10 @@ export const epicOf = (n: number) =>
   EPICS.find(
     (e) => e.done.includes(n) || PRIORITIES.some((p) => e.open[p].includes(n)),
   );
+
+/** The epic an item sits under on the page: its own, or its parent's. */
+export const itemEpic = (i: RoadmapItem) =>
+  epicOf(i.issue) ?? (i.parent ? epicOf(i.parent) : undefined);
 
 export const issueUrl = issue;
 

@@ -114,6 +114,8 @@ function buildCsp(nonce: string, isDev: boolean): string {
     `font-src 'self' data:`,
     // connect-src: same-origin for /api/*, plus websocket for Next.js HMR in dev
     `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+    // The site search runs Pagefind in a worker from /pagefind/ (ADR-082).
+    `worker-src 'self'`,
     `frame-src 'none'`,
     `frame-ancestors 'none'`,
     `object-src 'none'`,
@@ -266,8 +268,10 @@ export const config = {
   matcher: [
     // presentations/ holds self-contained reveal.js decks and poc/ the
     // static prototypes, both served as files; like swagger-ui they carry
-    // their own scripts, which the nonce CSP would block.
-    "/((?!api|_next/static|_next/image|favicon.ico|swagger-ui|presentations|poc|mock|static).*)",
+    // their own scripts, which the nonce CSP would block. pagefind/ is the
+    // site search index (ADR-082): its worker compiles WebAssembly, which the
+    // page's CSP would forbid it, and it answers off hours like any file.
+    "/((?!api|_next/static|_next/image|favicon.ico|swagger-ui|presentations|poc|mock|static|pagefind).*)",
     // Off-hours mode answers data routes with a 503 (ADR-053); the handler
     // passes them straight through otherwise.
     "/api/:path*",

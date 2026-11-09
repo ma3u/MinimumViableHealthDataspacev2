@@ -88,6 +88,69 @@ wait_for_healthy() {
 }
 
 # ---------------------------------------------------------------------------
+# Wait for Neo4j, following its plugin installation
+# ---------------------------------------------------------------------------
+# Before Neo4j starts, the image's entrypoint installs NEO4J_PLUGINS, and APOC
+# Extended, GDS and n10s come from the internet. On the first start of a new
+# image (5.26.32, 2026-11-09) that took about three minutes, and the flat
+# 120 s wait stopped the bootstrap before the proxy and the seed. So the wait
+# reads the container's log: while the entrypoint is still installing it
+# allows NEO4J_PLUGIN_WAIT seconds (600) and prints each plugin as it comes;
+# once Neo4j logs "Starting..." it allows NEO4J_START_WAIT seconds (120) for
+# the HTTP port to answer. A container that stops or restarts fails at once,
+# with its log.
+wait_for_neo4j() {
+  local container="${1:-health-dataspace-neo4j}" url="${2:-http://localhost:7474}"
+  local plugin_wait="${NEO4J_PLUGIN_WAIT:-600}" start_wait="${NEO4J_START_WAIT:-120}"
+  local since state restarts0 code logs line="" last="" started=0 deadline phase="installing plugins"
+  since=$(docker inspect -f '{{.State.StartedAt}}' "$container" 2>/dev/null) || {
+    error "no container $container"
+    return 1
+  }
+  restarts0=$(docker inspect -f '{{.RestartCount}}' "$container" 2>/dev/null) || restarts0=0
+  deadline=$(( $(date +%s) + plugin_wait ))
+  log "Waiting for Neo4j at $url (plugins up to ${plugin_wait}s, then ${start_wait}s to answer) ..."
+  while :; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null) || code=000
+    if [ "$code" != "000" ]; then
+      ok "Neo4j is healthy (HTTP $code)"
+      return 0
+    fi
+    state=$(docker inspect -f '{{.State.Running}} {{.RestartCount}}' "$container" 2>/dev/null) || state="false ?"
+    if [ "$state" != "true $restarts0" ]; then
+      error "$container stopped or restarted while $phase (running ${state% *}, restarts ${state#* }); its log:"
+      docker logs --tail 20 "$container" 2>&1 | sed 's/^/    /' >&2
+      return 1
+    fi
+    if [ "$started" -eq 0 ]; then
+      logs=$(docker logs --since "$since" "$container" 2>&1) || logs=""
+      if [[ "$logs" == *" Starting..."* ]]; then
+        started=1
+        phase="starting"
+        deadline=$(( $(date +%s) + start_wait ))
+        log "  plugins installed; Neo4j is starting"
+      else
+        line=$(printf '%s\n' "$logs" | grep -E "^(Installing|Fetching) " | tail -1) || line=""
+        if [ -n "$line" ] && [ "$line" != "$last" ]; then
+          log "  $line"
+          last="$line"
+        fi
+      fi
+    fi
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+      if [ "$started" -eq 0 ]; then
+        error "Neo4j was still installing plugins after ${plugin_wait}s (NEO4J_PLUGIN_WAIT); last: ${last:-no plugin line yet}"
+      else
+        error "Neo4j did not answer ${start_wait}s after it started (NEO4J_START_WAIT); its log:"
+        docker logs --tail 20 "$container" 2>&1 | sed 's/^/    /' >&2
+      fi
+      return 1
+    fi
+    sleep 3
+  done
+}
+
+# ---------------------------------------------------------------------------
 # Load the graph into an empty Neo4j
 # ---------------------------------------------------------------------------
 # A fresh neo4j_data volume holds no graph, and the seeds' last step reads
@@ -144,6 +207,16 @@ wait_for_api() {
 }
 
 # ---------------------------------------------------------------------------
+# nats-box, the NATS CLI the two JetStream checks below run in
+# ---------------------------------------------------------------------------
+# Pulled on first use; returns non-zero when it is not there and cannot be.
+have_nats_box() {
+  docker image inspect natsio/nats-box:latest >/dev/null 2>&1 && return 0
+  log "  pulling natsio/nats-box (first run only)"
+  docker pull -q natsio/nats-box:latest >/dev/null 2>&1
+}
+
+# ---------------------------------------------------------------------------
 # JetStream round trip
 # ---------------------------------------------------------------------------
 # Issue #191. A `nats_data` volume written by an older server can leave
@@ -171,15 +244,12 @@ assert_jetstream_roundtrip() {
   local subject="bootstrap.probe.$$"
 
   log "Checking a JetStream publish round trip ..."
-  if ! docker image inspect natsio/nats-box:latest >/dev/null 2>&1; then
-    log "  pulling natsio/nats-box (first run only)"
-    docker pull -q natsio/nats-box:latest >/dev/null 2>&1 || {
-      log "  WARNING: could not pull natsio/nats-box; skipping the round trip."
-      log "  If CFM orchestrations later fail with 'invalid jetstream publish"
-      log "  response', the nats_data volume is the first thing to suspect (#191)."
-      return 0
-    }
-  fi
+  have_nats_box || {
+    log "  WARNING: could not pull natsio/nats-box; skipping the round trip."
+    log "  If CFM orchestrations later fail with 'invalid jetstream publish"
+    log "  response', the nats_data volume is the first thing to suspect (#191)."
+    return 0
+  }
 
   local out rc
   set +e
@@ -218,6 +288,70 @@ assert_jetstream_roundtrip() {
   error ""
   error "nats-box said:"
   printf '%s\n' "$out" | sed 's/^/    /' >&2
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# The control plane's task streams
+# ---------------------------------------------------------------------------
+# docs/gotchas.md, 2026-11-09. EDC 1.0 runs negotiations and transfers as
+# tasks on NATS: the control plane publishes each one to `cn-stream` or
+# `tp-stream` and consumes it from there. It creates both streams once, at
+# startup (edc.nats.cn/tp.subscriber.autocreate in docker-compose.jad.yml),
+# and in memory, so the nats_data volume does not keep them. A NATS restart
+# under a running control plane leaves no stream for the subjects: every
+# publish fails with "503 No Responders Available For Request", every
+# negotiation start answers 500, and seed step 5 stops at "Negotiation failed
+# to start". The full bring-up starts NATS before the control plane, so this
+# is for --seed on a stack whose NATS was restarted on its own.
+#
+# It fails with the restart command rather than restarting the control plane
+# itself: --seed re-runs the seed and starts or restarts no service; the local
+# stack is shared by several sessions, and a restart cuts off whatever another
+# one is running against the control plane at that moment; and whatever was
+# queued in the lost streams is gone either way, which whoever restarts it
+# should know rather than have repaired quietly.
+assert_controlplane_streams() {
+  local network="${1:-health-dataspace-edcv}"
+  local container="health-dataspace-controlplane"
+  local names="" rc=0 s
+  local missing=()
+
+  log "Checking the control plane's JetStream task streams ..."
+  # A control plane that is still starting has not created them yet; it does
+  # so about a second before the runtime reports ready.
+  wait_for_healthy "$container" 30 3 || return 1
+  have_nats_box || {
+    warn "  could not pull natsio/nats-box; skipping the stream check. If seed"
+    warn "  step 5 fails with 'Negotiation failed to start', see docs/gotchas.md"
+    warn "  (2026-11-09)."
+    return 0
+  }
+
+  names=$(docker run --rm --network "$network" natsio/nats-box:latest \
+    nats --server nats://nats:4222 stream ls --names 2>&1) || rc=$?
+  if [ "$rc" -ne 0 ]; then
+    error "Cannot list the JetStream streams on nats:4222. nats-box said:"
+    printf '%s\n' "$names" | sed 's/^/    /' >&2
+    return 1
+  fi
+  for s in cn-stream tp-stream; do
+    grep -qx "$s" <<<"$names" || missing+=("$s")
+  done
+  if [ "${#missing[@]}" -eq 0 ]; then
+    ok "cn-stream and tp-stream exist"
+    return 0
+  fi
+
+  local list="${missing[*]}"
+  error "JetStream has no ${list// / and }. The control plane creates cn-stream and"
+  error "tp-stream in memory and only at startup, so NATS has most likely restarted"
+  error "after it. Every negotiation start would answer 500, the control plane"
+  error "logging '503 No Responders Available For Request', and the seed would stop"
+  error "at step 5. Restart the control plane, which recreates both, then seed again:"
+  error "  docker restart $container"
+  error "  $0 --seed"
+  error "See docs/gotchas.md (2026-11-09)."
   return 1
 }
 
@@ -365,7 +499,7 @@ start_stack() {
   log "=== Phase 4b: Starting Neo4j (from base compose) ==="
   # Before the proxy, which exits while it cannot reach Neo4j.
   docker compose $COMPOSE_FILES up -d neo4j
-  wait_for_service "Neo4j" "http://localhost:7474" 40 3
+  wait_for_neo4j || exit 1
   ok "Neo4j started"
   load_graph_if_empty || exit 1
 
@@ -419,6 +553,10 @@ seed_dataspace() {
     error "jad/seed-all.sh not found, cannot seed the dataspace"
     exit 1
   fi
+
+  # Step 5 needs the control plane's task streams, which a NATS restart on its
+  # own takes away (docs/gotchas.md, 2026-11-09).
+  assert_controlplane_streams || exit 1
 
   # seed-all.sh exits non-zero when a phase fails, and phases are strictly
   # ordered, so a failure here means the stack is not usable. Reporting it as

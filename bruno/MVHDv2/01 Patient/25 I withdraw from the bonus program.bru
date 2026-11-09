@@ -1,0 +1,30 @@
+meta {
+  name: 25 I withdraw from the bonus program
+  type: http
+  seq: 25
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/programmes/consent?programmeId={{programmeId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  if (!bru.getVar("programmeId")) {
+    test("SKIPPED: no bonus program on this stack to withdraw from (#934)", function () {});
+  } else {
+    test("withdrawn: 200 and a withdrawal date", function () {
+      expect(res.getStatus()).to.equal(200);
+      expect(res.getBody().consent.withdrawnAt).to.be.a("string");
+    });
+  }
+}
+
+docs {
+  GDPR Art. 7(3): withdrawn at any time, as easily as given. The record stays with both dates.
+}

@@ -1,0 +1,40 @@
+meta {
+  name: 23 I join a bonus program
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{baseUrl}}/api/patient/programmes/consent
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "programmeId": "{{programmeId}}",
+    "source": "api-collection"
+  }
+}
+
+tests {
+  if (!bru.getVar("programmeId")) {
+    test("SKIPPED: no bonus program on this stack to join (#934)", function () {});
+  } else {
+    test("joined: 201, an open consent and its legal basis", function () {
+      expect(res.getStatus()).to.equal(201);
+      const c = res.getBody().consent;
+      expect(c.programmeId).to.equal(bru.getVar("programmeId"));
+      expect(c.withdrawnAt).to.equal(null);
+      expect(res.getBody().legalBasis).to.contain("9(2)(a)");
+    });
+  }
+}
+
+docs {
+  Step 4 of #934. Joining is consent to this one program (GDPR Art. 9(2)(a)), its own record: not study consent, not the Art. 71 opt-out. Joining twice keeps the one open consent. Marked source "api-collection", so the live clean-up removes it (neo4j/remove-api-collection-runs.cypher).
+}

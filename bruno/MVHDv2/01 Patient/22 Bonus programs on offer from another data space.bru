@@ -28,6 +28,7 @@ tests {
   } else {
     test("a program carries its versioned rule and never a health value (ADR-080)", function () {
       const p = programmes[0];
+      bru.setVar("programmeId", p.programmeId);
       expect(p.programmeId, "programme id").to.be.a("string");
       expect(p.ruleVersion, "a program publishes a versioned rule").to.be.a("string");
       expect(JSON.stringify(p)).to.not.match(/"value(Quantity|AsNumber)"/);

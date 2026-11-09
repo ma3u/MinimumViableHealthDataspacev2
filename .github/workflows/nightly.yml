@@ -160,8 +160,9 @@ jobs:
             sleep 1
           done
 
+      # npm run build: its prebuild writes the site search index (ADR-082).
       - name: Build for E2E tests
-        run: npx next build
+        run: npm run build
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "false"
 

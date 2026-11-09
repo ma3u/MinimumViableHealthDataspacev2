@@ -14,5 +14,15 @@
   "Skip to main content": "Naar de hoofdinhoud",
   "Diagram render error: {error}": "Fout bij het tekenen van het diagram: {error}",
   "Legal notice": "Colofon",
-  "Privacy policy": "Privacybeleid"
+  "Privacy policy": "Privacybeleid",
+  "Search": "Zoeken",
+  "Search pages and documentation": "Pagina's en documentatie doorzoeken",
+  "Search results": "Zoekresultaten",
+  "No results for “{query}”": "Geen resultaten voor ‘{query}’",
+  "Documentation": "Documentatie",
+  "Page": "Pagina",
+  "Search is not available right now.": "Zoeken is nu niet beschikbaar.",
+  "The search runs in your browser; nothing you type leaves it. Your last searches are kept in this browser only.": "Het zoeken gebeurt in uw browser; wat u typt, verlaat die niet. Uw laatste zoekopdrachten worden alleen in deze browser bewaard.",
+  "Recent searches": "Recente zoekopdrachten",
+  "Clear": "Wissen"
 }

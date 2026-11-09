@@ -42,7 +42,7 @@ EDC ships no migration from 0.18 to 1.0, and the schemas differ, so nothing is m
 - [x] The hub's flows: Bruno `03 Data User` with `BRUNO_DSP_LIVE=1`, Playwright J1090 and J1091.
 - [x] A new participant onboarded through the hub on 1.0: 201 with 7 steps, MembershipCredential within 6 s, DID resolves (`21aae2a1`).
 - [x] The Keycloak delta on a 0.18 realm, applied twice, tokens unchanged for 0.18.
-- [ ] A rollback rehearsal: the 0.18 images on the old databases and keys, the suites at their floors again.
+- [x] A rollback rehearsal: the 0.18 images on the old databases and keys, the suites at their floors again. On 2026-11-09 (#927), from the compose files of `80fea9ad^` and with no new seed: identity 27/0/0, dataspace 32/0/1, health domain 27/0/3. Forward again on `main`: identity 31/0/0 (the suite has grown since), dataspace 32/0/1, health domain 27/0/3. How, and why not `ba42e85^`: [the EDC runtimes README](../../../runtimes/edc/README.md#back-to-018-on-the-compose-stack).
 
 ## Azure, in order
 

@@ -3,6 +3,49 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-09: a NATS restart takes the control plane's task streams, and every negotiation answers 500
+
+On the EDC 1.0 compose stack every negotiation start answered HTTP 500, and
+`jad/seed-contract-negotiation.sh` (seed step 5) stopped at "Negotiation
+failed to start". The control plane logged, from `NatsTaskPublisher.created`:
+
+    java.io.IOException: Error Publishing: 503 No Responders Available For Request
+
+NATS had restarted at 10:36 during the #927 rollback rehearsal, under a
+control plane running since 10:25. EDC 1.0 runs negotiations and transfers as
+tasks on JetStream: the control plane publishes each one to `cn-stream` or
+`tp-stream` and consumes it from there. It creates both only at startup
+(`edc.nats.cn.subscriber.autocreate` and `edc.nats.tp.subscriber.autocreate`
+in `docker-compose.jad.yml`), and with `"storage": "memory"`, so the
+`nats_data` volume does not keep them. After the restart no stream takes the
+subjects, and a JetStream publish that no stream takes is answered with 503
+No Responders. NATS itself stays healthy.
+
+Restart the control plane, which recreates both streams and their consumers
+(they were back two seconds after the restart):
+
+    docker restart health-dataspace-controlplane
+
+`docker compose restart controlplane` does the same, but only from the
+worktree the stack runs under or with its `COMPOSE_PROJECT_NAME`; the
+container name works from anywhere.
+
+Two things make the stack look fine while it is broken:
+
+- `edc-events` is a memory stream too, and it was back by 10:36:41 without a
+  restart, so a `nats stream ls` that shows a control plane stream says
+  nothing about the other two. Look for them by name.
+- `cfm-stream` and `KV_cfm-bucket` are file streams and survive, and the
+  JetStream round trip in `bootstrap-jad.sh` (2026-09-26) brings its own
+  stream, so it passes as well.
+
+The full bring-up starts NATS before the control plane, so only a NATS
+restart on its own meets this. `bootstrap-jad.sh --seed` now checks, before
+`seed-all.sh`, that both streams exist, and fails with the restart command
+when one is missing. It does not restart the control plane itself: `--seed`
+starts and restarts no service, and the local stack is shared by several
+sessions.
+
 ## 2026-11-06: `$(curl -w '%{http_code}' ... || echo 000)` is never 000
 
 curl prints `000` for its `-w` code when nothing answers, and exits non-zero,

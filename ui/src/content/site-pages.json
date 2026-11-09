@@ -1,0 +1,181 @@
+{
+  "_comment": "The pages a visitor can read on the static site. The sitemap lists them (src/app/sitemap.ts) and the site search indexes them (scripts/build-search-index.mjs). A title or description that is a key in src/messages/en/*.json is searched in every language; `areas` adds every string of those message areas as the page's text.",
+  "pages": [
+    {
+      "path": "/",
+      "title": "European Health Data Space",
+      "description": "An open-source reference implementation of the European Health Data Space (Regulation (EU) 2025/327): seven roles, 127 synthetic patients, one knowledge graph.",
+      "areas": ["home"]
+    },
+    {
+      "path": "/demo",
+      "title": "Demo",
+      "description": "Explore the Health Dataspace as any of the 7 demo participants, no login required."
+    },
+    {
+      "path": "/overview",
+      "title": "Persona Overview",
+      "description": "Everything the current role does, in one view: datasets, requests, permits and results."
+    },
+    {
+      "path": "/journey",
+      "title": "Patient journey",
+      "description": "How a patient takes control of their health data: access, sharing, consent and opting out of secondary use."
+    },
+    {
+      "path": "/graph",
+      "title": "Knowledge Graph",
+      "description": "The five-layer Neo4j knowledge graph: DSP marketplace, HealthDCAT-AP, FHIR R4, OMOP CDM and biomedical ontologies."
+    },
+    {
+      "path": "/catalog",
+      "title": "Dataset Catalog",
+      "description": "Explore curated FHIR R4 and OMOP datasets for cross-border health research."
+    },
+    {
+      "path": "/eehrxf",
+      "title": "EEHRxF Profiles",
+      "description": "The European Electronic Health Record exchange Format: priority categories and their FHIR profiles."
+    },
+    {
+      "path": "/jurisdictions",
+      "title": "National implementation of the EHDS",
+      "description": "How each member state implements the Regulation: health data access bodies, national rules and opt-out.",
+      "areas": ["jurisdictions"]
+    },
+    {
+      "path": "/information",
+      "title": "Secondary use of health data: what you should know",
+      "description": "Regulation (EU) 2025/327, Art. 58(1) · published by the health data access body"
+    },
+    {
+      "path": "/permits",
+      "title": "Data permits register",
+      "description": "Regulation (EU) 2025/327, Art. 57(1)(j) and Art. 58(1)(f) · public register"
+    },
+    {
+      "path": "/activity-report",
+      "title": "Activity report of the health data access body",
+      "description": "The yearly activity report of the health data access body under Art. 59: applications, permits, fees and penalties."
+    },
+    {
+      "path": "/compliance",
+      "title": "EHDS Approval",
+      "description": "HDAB approval chain · Regulation (EU) 2025/327, Art. 67 to 73",
+      "areas": ["compliance"]
+    },
+    {
+      "path": "/analytics",
+      "title": "OMOP Analytics",
+      "description": "Cohort statistics over the OMOP Common Data Model: conditions, measurements and drug exposures."
+    },
+    {
+      "path": "/query",
+      "title": "Natural Language Query",
+      "description": "Ask questions about the Health Dataspace knowledge graph in plain language. The query engine translates your question into Cypher and returns structured results from all five graph layers."
+    },
+    {
+      "path": "/patient",
+      "title": "Patient Journey",
+      "description": "A synthetic patient's FHIR record: conditions, observations, medications and the EHDS rights over them."
+    },
+    {
+      "path": "/data/discover",
+      "title": "Discover Datasets",
+      "description": "Search the federated catalogues of every data holder in the dataspace."
+    },
+    {
+      "path": "/negotiate",
+      "title": "Negotiate",
+      "description": "Choose a data provider below; the catalog will be fetched automatically."
+    },
+    {
+      "path": "/supervision",
+      "title": "Supervision",
+      "description": "How the health data access body supervises permits, secure processing environments and penalties."
+    },
+    {
+      "path": "/credentials",
+      "title": "Credentials",
+      "description": "Request a Verifiable Credential (VC) from the IssuerService for a participant. VCs prove identity, compliance, and data-access authorization in the EHDS dataspace."
+    },
+    {
+      "path": "/docs",
+      "title": "Documentation",
+      "description": "Health Dataspace v2: comprehensive guides for business users and developers."
+    },
+    {
+      "path": "/docs/user-guide",
+      "title": "User Guide",
+      "description": "A practical guide for business users, researchers, and data stewards working with the Health Dataspace platform.",
+      "areas": ["docsGuide"]
+    },
+    {
+      "path": "/docs/architecture",
+      "title": "Architecture",
+      "description": "The five-layer knowledge graph, the services around it and how a dataset travels from holder to user.",
+      "areas": ["docsArchitecture"]
+    },
+    {
+      "path": "/docs/developer",
+      "title": "Developer",
+      "description": "Technical documentation for developing, testing, and deploying the Health Dataspace v2 platform.",
+      "areas": ["docsDeveloper"]
+    },
+    {
+      "path": "/docs/developer/api",
+      "title": "API",
+      "description": "The OpenAPI description of the EHDS Integration Hub, grouped by role."
+    },
+    {
+      "path": "/docs/developer/quality-gates",
+      "title": "Quality Gates",
+      "description": "Every check enforced from developer workstation to production."
+    },
+    {
+      "path": "/docs/developer/reference",
+      "title": "API Reference",
+      "description": "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel."
+    },
+    {
+      "path": "/docs/ehds",
+      "title": "EHDS Regulation",
+      "description": "How the hub implements Regulation (EU) 2025/327, article by article."
+    },
+    {
+      "path": "/docs/ehds/glossary",
+      "title": "EHDS glossary",
+      "description": "The Regulation's terms in English, German, French, Dutch and Spanish, as the Official Journal writes them."
+    },
+    {
+      "path": "/docs/security",
+      "title": "Security and Data Protection",
+      "description": "Threat model, data protection impact assessment, penetration tests and the security controls of the hub."
+    },
+    {
+      "path": "/docs/operations",
+      "title": "Operations",
+      "description": "Running the hub: deployment, monitoring, off-hours schedule, incidents and runbooks."
+    },
+    {
+      "path": "/docs/roadmap",
+      "title": "Roadmap",
+      "description": "What is built and what comes next, to 2031."
+    },
+    {
+      "path": "/docs/klarbefund",
+      "title": "Klarbefund",
+      "description": "Klarbefund, the iPhone app that reads lab reports into FHIR and shares them with the hub."
+    },
+    {
+      "path": "/impressum",
+      "title": "Legal notice",
+      "description": "Impressum: provider of this website under § 5 DDG."
+    },
+    {
+      "path": "/datenschutz",
+      "title": "Privacy policy",
+      "description": "Datenschutzerklärung: what personal data this website processes, and your rights."
+    }
+  ]
+}

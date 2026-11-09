@@ -9,6 +9,9 @@
 //                              the results communicated under it, a finding
 //                              with an information request, and the revocation
 //   08 Journey - Data request  a data request (its question "Bruno: ...")
+//   01 Patient, 23 to 26       a consent to a bonus program, joined and
+//                              withdrawn, and the transfer sent under it
+//                              (#934 step 4), marked source "api-collection"
 //
 // Nothing removed them, so /compliance filled with identical PharmaCo rows,
 // one revoked permit per run (2026-10-28: 165 applications, 152 requests).
@@ -40,3 +43,12 @@ MATCH (r:HealthDataRequest)
 WHERE r.question STARTS WITH 'Bruno:'
    OR r.question = 'How many patients with type 2 diabetes had an HbA1c above 9 percent in 2024?'
 DETACH DELETE r;
+
+// 3. The bonus program requests: the consent the collection joined and
+// withdrew, and the transfer recorded under it. Only what it marked; a
+// consent given in the portal stays.
+MATCH (c:ProgrammeConsent {source: 'api-collection'})
+OPTIONAL MATCH (t:ProgrammeTransfer)-[:UNDER_CONSENT]->(c)
+WITH collect(DISTINCT c) + collect(DISTINCT t) AS nodes
+UNWIND nodes AS n
+DETACH DELETE n;

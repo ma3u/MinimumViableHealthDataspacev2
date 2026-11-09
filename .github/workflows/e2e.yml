@@ -8,9 +8,9 @@
 # scripts/select-e2e-specs.sh picks the specs from the diff: the specs that
 # changed and those that visit a changed route, or every spec when shared
 # code changed (lib, components, messages, config). Every spec is split over
-# three runners so the wall time stays under ten minutes; a change outside
-# ui/ that no spec exercises starts nothing. A draft runs nothing until it
-# is ready for review.
+# three runners so the wall time stays under ten minutes; a change no spec
+# exercises starts no runner. A draft runs nothing until it is ready for
+# review. The job named E2E sums it up and is the check main requires.
 #
 # Same environment as the nightly: a seeded Neo4j and the neo4j-proxy, no
 # EDC connector and no Keycloak, forged sessions for the realm users
@@ -23,13 +23,9 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "ui/**"
-      - "neo4j/*.cypher"
-      - "neo4j/seed.sh"
-      - "services/neo4j-proxy/**"
-      - "scripts/select-e2e-specs.sh"
-      - ".github/workflows/e2e.yml"
+    # No paths filter: the E2E job below is a required check (ADR-079
+    # decision 2), and a check that never reports blocks the merge. The
+    # selection answers "none" within seconds for a change no spec exercises.
   workflow_dispatch:
 
 permissions:
@@ -166,8 +162,10 @@ jobs:
             sleep 1
           done
 
+      # npm run build, not npx next build: its prebuild writes the site
+      # search index (ADR-082) the search journeys read.
       - name: Build
-        run: npx next build
+        run: npm run build
 
       - name: Install Playwright browsers
         if: steps.pw-cache.outputs.cache-hit != 'true'
@@ -206,3 +204,49 @@ jobs:
           name: e2e-report-${{ matrix.shard }}
           path: ui/playwright-report/
           retention-days: 7
+
+  # The one check main requires (ADR-079 decision 2, after ten green runs on
+  # pull requests in a row, 2026-11-09). It reports on every pull request:
+  # green when the selected specs passed or no spec was needed, red when the
+  # selection or any shard failed or was cancelled.
+  gate:
+    name: E2E
+    needs: [select, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: The selection and every shard
+        env:
+          SELECT: ${{ needs.select.result }}
+          PLAYWRIGHT: ${{ needs.e2e.result }}
+          SPECS: ${{ needs.select.outputs.specs }}
+        run: |
+          set -euo pipefail
+          echo "selection: $SELECT, playwright: $PLAYWRIGHT, specs: ${SPECS:-}"
+          case "$SELECT" in
+            success) ;;
+            skipped)
+              echo "A draft: nothing runs until it is ready for review."
+              exit 0
+              ;;
+            *)
+              echo "::error::Selecting the specs ended $SELECT"
+              exit 1
+              ;;
+          esac
+          case "$PLAYWRIGHT" in
+            success) ;;
+            skipped)
+              if [ "$SPECS" = "none" ]; then
+                echo "No spec exercises this change."
+                exit 0
+              fi
+              echo "::error::Playwright was skipped although specs were selected"
+              exit 1
+              ;;
+            *)
+              echo "::error::Playwright ended $PLAYWRIGHT"
+              exit 1
+              ;;
+          esac

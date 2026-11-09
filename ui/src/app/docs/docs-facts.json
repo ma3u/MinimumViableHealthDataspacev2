@@ -310,8 +310,16 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/patient/programmes/consent",
+      "methods": ["POST", "DELETE"]
+    },
+    {
       "path": "/api/patient/programmes",
       "methods": ["GET"]
+    },
+    {
+      "path": "/api/patient/programmes/transfer",
+      "methods": ["POST"]
     },
     {
       "path": "/api/patient/research",
@@ -1297,6 +1305,18 @@
       "file": "ADR-081-the-record-covers-three-of-the-six-art-14-categories.md",
       "title": "The demo record covers three of the six Art. 14 categories, and says which",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-082",
+      "file": "ADR-082-the-site-search-is-pagefind-built-from-the-sources.md",
+      "title": "The site search is Pagefind, indexed from the sources, searched in the browser",
+      "status": "Proposed"
+    },
+    {
+      "id": "ADR-083",
+      "file": "ADR-083-what-the-hub-takes-over-from-tehdas2.md",
+      "title": "What the hub takes over from TEHDAS2",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1335,8 +1355,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 61,
-    "operations": 78
+    "paths": 63,
+    "operations": 81
   },
   "workflowJobs": {
     "test.yml": [

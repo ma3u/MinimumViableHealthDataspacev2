@@ -14,12 +14,21 @@
 #   4. the issuer accepts tokens                       scripts/lib/wait-for-issuer-auth.sh
 #   5. participants registered as holders              scripts/seed-issuer-holders.sh
 #   6. attestation and credential definitions          jad/seed-issuer-defs.sh
-#   7. a MembershipCredential for each, over DCP       scripts/request-participant-credentials.sh
+#   7. the hub's MembershipCredential, over DCP        scripts/request-participant-credentials.sh
 #
 # Step 7 is the one that proves the layer works: it needs every participant's
 # signing key to be in Vault. On a stack whose Vault lost them (gotchas,
 # 2026-09-26) it fails there and says so; the six steps before it still leave
 # the stores consistent. SKIP_CREDENTIALS=1 stops after step 6.
+#
+# Step 7 asks the hub's issuer for the four hub members only (HUB_MEMBERS),
+# as compliance.yml's DCP job does. irs takes its membership from the Simpl
+# test Governance Authority alone (TRUST-6.2, scripts/seed-simpl-ga.sh) and
+# alphakasse from the wellbeing authority alone (TRUST-6.6,
+# scripts/seed-second-data-space.sh). Asking for every context on the control
+# plane gave both a second one from the hub, which neither seed removes, and
+# the identity suite was 29/2 after every local bootstrap. A context the hub's
+# onboarding created already requested its own (ui/src/lib/edc/provision.ts).
 #
 # Defaults are the local compose stack. Override the URLs for anything else.
 # ---------------------------------------------------------------------------
@@ -32,6 +41,7 @@ export EDC_MANAGEMENT_URL="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt
 export EDC_IDENTITY_URL="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 export EDC_ISSUER_URL="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
 SKIP_CREDENTIALS="${SKIP_CREDENTIALS:-0}"
+HUB_MEMBERS="${HUB_MEMBERS:-alpha-klinik pharmaco medreg lmc}"
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
 step() { echo; echo -e "${CYAN}══ $*${NC}"; }
@@ -79,6 +89,7 @@ KC_HOST="$KEYCLOAK_URL" ISSUER_API="${EDC_ISSUER_URL%/api/admin}" bash "${REPO_D
 if [ "$SKIP_CREDENTIALS" = "1" ]; then
   echo -e "${GREEN}identity layer seeded${NC} (credentials skipped on request)"; exit 0
 fi
-step "7/7 a MembershipCredential for each participant, over DCP"
-"${SCRIPT_DIR}/request-participant-credentials.sh" || fail "step 7: the stores are consistent, but no credential could be issued; see the reason above"
-echo; echo -e "${GREEN}identity layer recovered${NC}: every participant holds a DCP-issued credential"
+step "7/7 the hub's MembershipCredential for ${HUB_MEMBERS}, over DCP"
+ONLY="$HUB_MEMBERS" "${SCRIPT_DIR}/request-participant-credentials.sh" || fail "step 7: the stores are consistent, but no credential could be issued; see the reason above"
+echo; echo -e "${GREEN}identity layer recovered${NC}: ${HUB_MEMBERS} hold a DCP-issued MembershipCredential from the hub"
+echo "irs takes its own from scripts/seed-simpl-ga.sh, alphakasse from scripts/seed-second-data-space.sh"

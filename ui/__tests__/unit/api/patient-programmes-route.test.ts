@@ -4,6 +4,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
+import { NextRequest } from "next/server";
 import { join } from "node:path";
 
 // Run the real requireAuth() against the mocked session, so the 401/403
@@ -16,7 +17,10 @@ vi.mock("@/lib/neo4j", () => ({
   runQuery: (...args: unknown[]) => mockRunQuery(...args),
 }));
 
-import { GET } from "@/app/api/patient/programmes/route";
+import { GET as GET_ROUTE } from "@/app/api/patient/programmes/route";
+
+const GET = (qs = "") =>
+  GET_ROUTE(new NextRequest(`http://localhost/api/patient/programmes${qs}`));
 
 function session(roles: string[]) {
   return {
@@ -42,7 +46,7 @@ const ROW = {
 describe("/api/patient/programmes", () => {
   beforeEach(() => {
     mockRunQuery.mockReset();
-    vi.mocked(getServerSession).mockResolvedValue(session(["PATIENT"]));
+    vi.mocked(getServerSession).mockResolvedValue(session(["EDC_ADMIN"]));
   });
 
   it("answers 401 { error } without a session", async () => {
@@ -66,9 +70,25 @@ describe("/api/patient/programmes", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.programmes).toEqual([ROW]);
+    // an operator who names no record gets no consents, and none is read
+    expect(body.consents).toEqual([]);
+    expect(mockRunQuery).toHaveBeenCalledTimes(1);
     expect(body.legalBasis).toContain("7(3)");
     const [cypher] = mockRunQuery.mock.calls[0];
     expect(cypher).toContain("MATCH (s:DataService:BonusProgramme)");
+  });
+
+  it("lists the named record's consents to programmes (step 4)", async () => {
+    const consent = {
+      consentId: "c-1",
+      programmeId: ROW.programmeId,
+      joinedAt: "2026-11-09T10:00:00Z",
+      withdrawnAt: null,
+    };
+    mockRunQuery.mockResolvedValueOnce([ROW]).mockResolvedValueOnce([consent]);
+    const res = await GET("?patientId=P1");
+    expect((await res.json()).consents).toEqual([consent]);
+    expect(mockRunQuery.mock.calls[1][1]).toEqual({ patientId: "P1" });
   });
 
   it("the static mock has the live response's shape", () => {
@@ -78,7 +98,11 @@ describe("/api/patient/programmes", () => {
         "utf-8",
       ),
     );
-    expect(Object.keys(mock).sort()).toEqual(["legalBasis", "programmes"]);
+    expect(Object.keys(mock).sort()).toEqual([
+      "consents",
+      "legalBasis",
+      "programmes",
+    ]);
     expect(Object.keys(mock.programmes[0]).sort()).toEqual(
       Object.keys(ROW).sort(),
     );

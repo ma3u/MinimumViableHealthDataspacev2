@@ -332,5 +332,7 @@
   "The Joint Action that prepares the EHDS presents its 21 guidelines and technical specifications, in Brussels and online.": "La acción conjunta que prepara el EEDS presenta sus 21 directrices y especificaciones técnicas, en Bruselas y en línea.",
   "TEHDAS2 results": "Resultados TEHDAS2",
   "TEHDAS2 results: what the hub implements, and the final conference demo": "Resultados TEHDAS2: lo que implementa el hub, y la demo de la conferencia final",
-  "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.": "Las directrices de la acción conjunta revisadas requisito por requisito frente al hub, publicadas en /docs y mostradas en su <c>conferencia final</c> el 16 de noviembre de 2026."
+  "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.": "Las directrices de la acción conjunta revisadas requisito por requisito frente al hub, publicadas en /docs y mostradas en su <c>conferencia final</c> el 16 de noviembre de 2026.",
+  "Closed before the epics": "Cerradas antes de las épicas",
+  "Done before every open issue was given an epic on 2026-11-08.": "Terminadas antes de que cada incidencia abierta recibiera una épica el 2026-11-08."
 }
