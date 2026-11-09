@@ -88,6 +88,69 @@ wait_for_healthy() {
 }
 
 # ---------------------------------------------------------------------------
+# Wait for Neo4j, following its plugin installation
+# ---------------------------------------------------------------------------
+# Before Neo4j starts, the image's entrypoint installs NEO4J_PLUGINS, and APOC
+# Extended, GDS and n10s come from the internet. On the first start of a new
+# image (5.26.32, 2026-11-09) that took about three minutes, and the flat
+# 120 s wait stopped the bootstrap before the proxy and the seed. So the wait
+# reads the container's log: while the entrypoint is still installing it
+# allows NEO4J_PLUGIN_WAIT seconds (600) and prints each plugin as it comes;
+# once Neo4j logs "Starting..." it allows NEO4J_START_WAIT seconds (120) for
+# the HTTP port to answer. A container that stops or restarts fails at once,
+# with its log.
+wait_for_neo4j() {
+  local container="${1:-health-dataspace-neo4j}" url="${2:-http://localhost:7474}"
+  local plugin_wait="${NEO4J_PLUGIN_WAIT:-600}" start_wait="${NEO4J_START_WAIT:-120}"
+  local since state restarts0 code logs line="" last="" started=0 deadline phase="installing plugins"
+  since=$(docker inspect -f '{{.State.StartedAt}}' "$container" 2>/dev/null) || {
+    error "no container $container"
+    return 1
+  }
+  restarts0=$(docker inspect -f '{{.RestartCount}}' "$container" 2>/dev/null) || restarts0=0
+  deadline=$(( $(date +%s) + plugin_wait ))
+  log "Waiting for Neo4j at $url (plugins up to ${plugin_wait}s, then ${start_wait}s to answer) ..."
+  while :; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null) || code=000
+    if [ "$code" != "000" ]; then
+      ok "Neo4j is healthy (HTTP $code)"
+      return 0
+    fi
+    state=$(docker inspect -f '{{.State.Running}} {{.RestartCount}}' "$container" 2>/dev/null) || state="false ?"
+    if [ "$state" != "true $restarts0" ]; then
+      error "$container stopped or restarted while $phase (running ${state% *}, restarts ${state#* }); its log:"
+      docker logs --tail 20 "$container" 2>&1 | sed 's/^/    /' >&2
+      return 1
+    fi
+    if [ "$started" -eq 0 ]; then
+      logs=$(docker logs --since "$since" "$container" 2>&1) || logs=""
+      if [[ "$logs" == *" Starting..."* ]]; then
+        started=1
+        phase="starting"
+        deadline=$(( $(date +%s) + start_wait ))
+        log "  plugins installed; Neo4j is starting"
+      else
+        line=$(printf '%s\n' "$logs" | grep -E "^(Installing|Fetching) " | tail -1) || line=""
+        if [ -n "$line" ] && [ "$line" != "$last" ]; then
+          log "  $line"
+          last="$line"
+        fi
+      fi
+    fi
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+      if [ "$started" -eq 0 ]; then
+        error "Neo4j was still installing plugins after ${plugin_wait}s (NEO4J_PLUGIN_WAIT); last: ${last:-no plugin line yet}"
+      else
+        error "Neo4j did not answer ${start_wait}s after it started (NEO4J_START_WAIT); its log:"
+        docker logs --tail 20 "$container" 2>&1 | sed 's/^/    /' >&2
+      fi
+      return 1
+    fi
+    sleep 3
+  done
+}
+
+# ---------------------------------------------------------------------------
 # Load the graph into an empty Neo4j
 # ---------------------------------------------------------------------------
 # A fresh neo4j_data volume holds no graph, and the seeds' last step reads
@@ -365,7 +428,7 @@ start_stack() {
   log "=== Phase 4b: Starting Neo4j (from base compose) ==="
   # Before the proxy, which exits while it cannot reach Neo4j.
   docker compose $COMPOSE_FILES up -d neo4j
-  wait_for_service "Neo4j" "http://localhost:7474" 40 3
+  wait_for_neo4j || exit 1
   ok "Neo4j started"
   load_graph_if_empty || exit 1
 
