@@ -39,11 +39,11 @@ This file keeps the order of the work.
 9. `E2E` is a required check on `main` (ADR-079 decision 2), after at least 15
    green runs on pull requests in a row. `e2e.yml` runs on every pull request
    and its job `E2E` always reports.
+10. `jad/seed-contract-negotiation.sh` ends one negotiation TERMINATED (a
+    request AlphaKlinik refuses), for J38. Not yet run against a connector.
 
 ## Next, in this order
 
 1. Build or drop the scope features J325, J327, J328, J330 to J332 and J347
    describe (`aggregateOnly`, `maxRowLimit`, expiry and revocation in the
    scope); they are `test.fixme` with the reason.
-2. A seed that terminates one negotiation, or J38's premise changed: no seed
-   holds a TERMINATED negotiation.

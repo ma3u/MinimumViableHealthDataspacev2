@@ -474,6 +474,56 @@ done < <(echo "$OFFERS")
 
 echo ""
 
+# --- 3f: One negotiation the provider refuses ---
+# A data space also holds negotiations that end without an agreement, and the
+# UI and J38 show them. PharmaCo asks for the first offer with a policy that
+# adds a prohibition AlphaKlinik never offered; the provider compares the
+# request with its offer, refuses it and the negotiation ends TERMINATED (the
+# same check that #881 finding 17 tripped over by accident). A run that ends
+# anywhere else only warns: the agreements above are what the seed is for.
+REFUSED=$(echo "$OFFERS" | head -1)
+if [ -n "$REFUSED" ]; then
+  IFS='|' read -r asset_id offer_id policy_file <<<"$REFUSED"
+  echo "  [$asset_id] a request AlphaKlinik refuses (altered policy)"
+  REFUSED_POLICY=$(python3 -c '
+import json, sys
+policy = json.load(open(sys.argv[1]))
+policy = {k: v for k, v in policy.items() if k != "@context" and v != []}
+policy.setdefault("permission", [{"action": "use"}])
+policy["prohibition"] = policy.get("prohibition", []) + [{"action": "distribute"}]
+policy.update({"@context": "http://www.w3.org/ns/odrl.jsonld", "@id": sys.argv[2],
+               "@type": "Offer", "assigner": sys.argv[3], "target": sys.argv[4]})
+print(json.dumps(policy))
+' "$policy_file" "$offer_id" "$ALPHAKLINIK_DID" "$asset_id")
+  REFUSED_ID=$(mgmt_call POST "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations" "{
+    \"@context\": [\"$EDC_CTX\"],
+    \"@type\": \"ContractRequest\",
+    \"counterPartyAddress\": \"$ALPHAKLINIK_DSP\",
+    \"protocol\": \"$DSP_PROTOCOL\",
+    \"callbackAddresses\": $(callback_addresses contract.negotiation),
+    \"policy\": $REFUSED_POLICY
+  }" | python3 -c "
+import json, sys
+print(json.load(sys.stdin).get('@id', ''))
+" 2>/dev/null || echo "")
+  if [ -z "$REFUSED_ID" ]; then
+    warn "$asset_id: the refused request did not start"
+  else
+    echo -n "    Waiting for TERMINATED..."
+    REFUSED_STATE=$(poll_state \
+      "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations/$REFUSED_ID" \
+      "TERMINATED" "$asset_id")
+    echo " $REFUSED_STATE"
+    if [ "$REFUSED_STATE" = "TERMINATED" ]; then
+      ok "$asset_id: refused by the provider: TERMINATED"
+    else
+      warn "$asset_id: the refused request ended in $REFUSED_STATE, not TERMINATED"
+    fi
+  fi
+fi
+
+echo ""
+
 # =============================================================================
 # Step 4: MedReg discovers AlphaKlinik's catalog (operator oversight)
 # =============================================================================

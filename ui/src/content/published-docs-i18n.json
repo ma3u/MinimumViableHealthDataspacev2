@@ -229,22 +229,22 @@
     },
     "developer/stack-and-environment": {
       "de": {
-        "status": "current",
+        "status": "stale",
         "title": "Der Stack und die Entwicklungsumgebung",
         "summary": "Ein Glossar des Stacks (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, der Proxy, die Katalogdienste) und wie er zusammenwirkt; Voraussetzungen, die beiden lokalen Stacks, Seed-Phasen, Ports, Umgebungsvariablen, die iPhone-App und die Stolpersteine des ersten Tages."
       },
       "fr": {
-        "status": "current",
+        "status": "stale",
         "title": "La pile et l’environnement de développement",
         "summary": "Un glossaire de la pile (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, le proxy, les services de catalogue) et la manière dont ses éléments s’assemblent ; les prérequis, les deux piles locales, les phases d’amorçage, les ports, les variables d’environnement, l’app iPhone et les pièges du premier jour."
       },
       "nl": {
-        "status": "current",
+        "status": "stale",
         "title": "De stack en de ontwikkelomgeving",
         "summary": "Een woordenlijst van de stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, de proxy, de catalogusdiensten) en hoe die in elkaar past; vereisten, de twee lokale stacks, seedfasen, poorten, omgevingsvariabelen, de iPhone-app en de valkuilen van de eerste dag."
       },
       "es": {
-        "status": "current",
+        "status": "stale",
         "title": "La pila y el entorno de desarrollo",
         "summary": "Un glosario de la pila (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, el proxy, los servicios de catálogo) y cómo encaja; requisitos previos, las dos pilas locales, las fases de carga, los puertos, las variables de entorno, la app de iPhone y los gotchas del primer día."
       }
