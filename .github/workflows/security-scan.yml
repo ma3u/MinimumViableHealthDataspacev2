@@ -106,6 +106,7 @@ jobs:
           - postgres:17.7-alpine
           - neo4j:5.26.32-community
           - nats:2.15.1-alpine
+          - natsio/nats-box:0.20.2
           - traefik:v3.7
           - nginx:1.29-alpine
           - hashicorp/vault:2.2

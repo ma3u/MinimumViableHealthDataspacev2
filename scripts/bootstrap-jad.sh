@@ -26,6 +26,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 COMPOSE_FILES="-f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.live.yml"
+# The NATS CLI the JetStream checks run in; the tag of the nats-streams service
+# in docker-compose.jad.yml, so one image serves both.
+NATS_BOX_IMAGE="natsio/nats-box:0.20.2"
 
 # Colors for output
 RED='\033[0;31m'
@@ -211,9 +214,9 @@ wait_for_api() {
 # ---------------------------------------------------------------------------
 # Pulled on first use; returns non-zero when it is not there and cannot be.
 have_nats_box() {
-  docker image inspect natsio/nats-box:latest >/dev/null 2>&1 && return 0
-  log "  pulling natsio/nats-box (first run only)"
-  docker pull -q natsio/nats-box:latest >/dev/null 2>&1
+  docker image inspect "$NATS_BOX_IMAGE" >/dev/null 2>&1 && return 0
+  log "  pulling $NATS_BOX_IMAGE (first run only)"
+  docker pull -q "$NATS_BOX_IMAGE" >/dev/null 2>&1
 }
 
 # ---------------------------------------------------------------------------
@@ -245,7 +248,7 @@ assert_jetstream_roundtrip() {
 
   log "Checking a JetStream publish round trip ..."
   have_nats_box || {
-    log "  WARNING: could not pull natsio/nats-box; skipping the round trip."
+    log "  WARNING: could not pull $NATS_BOX_IMAGE; skipping the round trip."
     log "  If CFM orchestrations later fail with 'invalid jetstream publish"
     log "  response', the nats_data volume is the first thing to suspect (#191)."
     return 0
@@ -253,7 +256,7 @@ assert_jetstream_roundtrip() {
 
   local out rc
   set +e
-  out=$(docker run --rm --network "$network" natsio/nats-box:latest sh -c "
+  out=$(docker run --rm --network "$network" "$NATS_BOX_IMAGE" sh -c "
     set -e
     # --defaults, because the CLI prompts for every unset option and there
     # is no terminal here: without it the probe dies with 'cannot ask for
@@ -265,7 +268,7 @@ assert_jetstream_roundtrip() {
       | grep -q '\"messages\": *1'
   " 2>&1)
   rc=$?
-  docker run --rm --network "$network" natsio/nats-box:latest \
+  docker run --rm --network "$network" "$NATS_BOX_IMAGE" \
     nats --server nats://nats:4222 stream rm "$stream" -f >/dev/null 2>&1 || true
   set -e
 
@@ -296,62 +299,96 @@ assert_jetstream_roundtrip() {
 # ---------------------------------------------------------------------------
 # docs/gotchas.md, 2026-11-09. EDC 1.0 runs negotiations and transfers as
 # tasks on NATS: the control plane publishes each one to `cn-stream` or
-# `tp-stream` and consumes it from there. It creates both streams once, at
-# startup (edc.nats.cn/tp.subscriber.autocreate in docker-compose.jad.yml),
-# and in memory, so the nats_data volume does not keep them. A NATS restart
-# under a running control plane leaves no stream for the subjects: every
-# publish fails with "503 No Responders Available For Request", every
-# negotiation start answers 500, and seed step 5 stops at "Negotiation failed
-# to start". The full bring-up starts NATS before the control plane, so this
-# is for --seed on a stack whose NATS was restarted on its own.
+# `tp-stream` and consumes it there through its durable consumers
+# `cn-subscriber` and `tp-subscriber`. It creates a missing stream, in memory,
+# and attaches its consumers only at startup. The compose service nats-streams
+# creates both streams as file streams first, so a NATS restart keeps them.
 #
-# It fails with the restart command rather than restarting the control plane
-# itself: --seed re-runs the seed and starts or restarts no service; the local
-# stack is shared by several sessions, and a restart cuts off whatever another
-# one is running against the control plane at that moment; and whatever was
-# queued in the lost streams is gone either way, which whoever restarts it
-# should know rather than have repaired quietly.
+# What is left to go wrong, and what this checks:
+# - a stream is missing (the nats_data volume was removed, or NATS restarted
+#   on a stack whose streams are still in memory): every publish fails with
+#   "503 No Responders Available For Request", every negotiation start
+#   answers 500, and seed step 5 stops at "Negotiation failed to start";
+# - a consumer is missing (a stream was recreated under a running control
+#   plane): tasks are published and never handled;
+# - a stream is still in memory, from before nats-streams: it works until
+#   the next NATS restart, so that is a warning, not a failure.
+#
+# It fails with the commands rather than restarting the control plane itself:
+# --seed re-runs the seed and starts or restarts no service; the local stack
+# is shared by several sessions, and a restart cuts off whatever another one
+# is running against the control plane at that moment; and whatever was
+# queued in lost streams is gone either way, which whoever restarts it should
+# know rather than have repaired quietly.
 assert_controlplane_streams() {
   local network="${1:-health-dataspace-edcv}"
   local container="health-dataspace-controlplane"
-  local names="" rc=0 s
-  local missing=()
+  local out="" rc=0 line list
+  local missing=() memory=()
 
   log "Checking the control plane's JetStream task streams ..."
-  # A control plane that is still starting has not created them yet; it does
-  # so about a second before the runtime reports ready.
+  # A control plane that is still starting has not attached its consumers
+  # yet; it does so about a second before the runtime reports ready.
   wait_for_healthy "$container" 30 3 || return 1
   have_nats_box || {
-    warn "  could not pull natsio/nats-box; skipping the stream check. If seed"
+    warn "  could not pull $NATS_BOX_IMAGE; skipping the stream check. If seed"
     warn "  step 5 fails with 'Negotiation failed to start', see docs/gotchas.md"
     warn "  (2026-11-09)."
     return 0
   }
 
-  names=$(docker run --rm --network "$network" natsio/nats-box:latest \
-    nats --server nats://nats:4222 stream ls --names 2>&1) || rc=$?
+  # One line per finding: "missing <stream>", "missing <stream>/<consumer>",
+  # "memory <stream>". The listing comes first, so an unreachable NATS fails
+  # the whole run instead of reading as missing streams.
+  out=$(docker run --rm --network "$network" "$NATS_BOX_IMAGE" sh -c '
+    set -e
+    n="nats --server nats://nats:4222"
+    names=$($n stream ls --names)
+    for pair in cn-stream:cn-subscriber tp-stream:tp-subscriber; do
+      stream=${pair%%:*} consumer=${pair#*:}
+      if ! printf "%s\n" "$names" | grep -qx "$stream"; then
+        echo "missing $stream"
+        continue
+      fi
+      $n consumer info "$stream" "$consumer" --json >/dev/null 2>&1 \
+        || echo "missing $stream/$consumer"
+      $n stream info "$stream" --json | grep -q "\"storage\": *\"file\"" \
+        || echo "memory $stream"
+    done' 2>&1) || rc=$?
   if [ "$rc" -ne 0 ]; then
-    error "Cannot list the JetStream streams on nats:4222. nats-box said:"
-    printf '%s\n' "$names" | sed 's/^/    /' >&2
+    error "Cannot read the JetStream streams on nats:4222. nats-box said:"
+    printf '%s\n' "$out" | sed 's/^/    /' >&2
     return 1
   fi
-  for s in cn-stream tp-stream; do
-    grep -qx "$s" <<<"$names" || missing+=("$s")
-  done
+  while IFS= read -r line; do
+    case "$line" in
+      "missing "*) missing+=("${line#missing }") ;;
+      "memory "*) memory+=("${line#memory }") ;;
+    esac
+  done <<<"$out"
+
+  if [ "${#memory[@]}" -gt 0 ]; then
+    list="${memory[*]}"
+    warn "In memory, from before the nats-streams service: ${list// / and }. That"
+    warn "works until NATS restarts, which takes them. Convert them once, while"
+    warn "nobody else needs the control plane: docs/gotchas.md (2026-11-09)."
+  fi
   if [ "${#missing[@]}" -eq 0 ]; then
-    ok "cn-stream and tp-stream exist"
+    ok "cn-stream and tp-stream exist, each with its consumer"
     return 0
   fi
 
-  local list="${missing[*]}"
-  error "JetStream has no ${list// / and }. The control plane creates cn-stream and"
-  error "tp-stream in memory and only at startup, so NATS has most likely restarted"
-  error "after it. Every negotiation start would answer 500, the control plane"
-  error "logging '503 No Responders Available For Request', and the seed would stop"
-  error "at step 5. Restart the control plane, which recreates both, then seed again:"
+  list="${missing[*]}"
+  error "JetStream has no ${list// / and } (stream, or stream/consumer). The control"
+  error "plane creates a missing stream and attaches its consumers only at startup,"
+  error "so NATS or its volume changed under it. Every negotiation start would"
+  error "answer 500 ('503 No Responders Available For Request') or never be handled,"
+  error "and the seed would stop at step 5. Recreate them, then seed again:"
+  error "  docker start -a health-dataspace-nats-streams"
   error "  docker restart $container"
   error "  $0 --seed"
-  error "See docs/gotchas.md (2026-11-09)."
+  error "A stack started before nats-streams existed has no such container; there"
+  error "the restart alone recreates them, in memory. See docs/gotchas.md (2026-11-09)."
   return 1
 }
 

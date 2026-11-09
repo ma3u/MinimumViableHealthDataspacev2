@@ -38,13 +38,67 @@ Two things make the stack look fine while it is broken:
 - `cfm-stream` and `KV_cfm-bucket` are file streams and survive, and the
   JetStream round trip in `bootstrap-jad.sh` (2026-09-26) brings its own
   stream, so it passes as well.
+- The control plane's own healthcheck stays `healthy` with both streams
+  gone (measured on a throwaway stack).
 
-The full bring-up starts NATS before the control plane, so only a NATS
-restart on its own meets this. `bootstrap-jad.sh --seed` now checks, before
-`seed-all.sh`, that both streams exist, and fails with the restart command
-when one is missing. It does not restart the control plane itself: `--seed`
+### Since the same day: file streams, created before the control plane
+
+No setting makes the control plane create the streams on disk:
+`NatsSubscriber.prepare` (1.0.0-RC5) passes `StorageType.Memory`. But it
+leaves a stream that exists alone (`NatsFunctions.createStream` asks
+`streamExists` first) and attaches its durable consumer with
+`addOrUpdateConsumer`. So the one-shot compose service `nats-streams`
+(`jad/create-nats-streams.sh`, nats-box 0.20.2) creates both as file streams
+on `nats_data` before the control plane starts: the control plane's own
+configuration, file storage, and a seven-day maximum age, because on disk a
+stream is no longer emptied by every restart. Measured on a throwaway stack
+with the real control plane image: NATS restarted under the running control
+plane, both streams and both consumers were still there, and the next message
+on each subject was delivered and acknowledged, with no control plane
+restart.
+
+`bootstrap-jad.sh --seed` checks, before `seed-all.sh`, that both streams
+exist with their consumers (`cn-subscriber`, `tp-subscriber`), fails with the
+commands that recreate them when one is missing, and warns about a stream
+still in memory. It does not restart the control plane itself: `--seed`
 starts and restarts no service, and the local stack is shared by several
 sessions.
+
+A stack whose control plane created the streams before this keeps them in
+memory. `nats-streams` leaves an existing stream alone, because deleting one
+under a running control plane takes its consumer, which the control plane
+attaches only at startup. Convert it once, while nobody needs the control
+plane; any task not yet handled is lost:
+
+    docker stop health-dataspace-controlplane
+    docker run --rm --network health-dataspace-edcv natsio/nats-box:0.20.2 \
+      nats --server nats://nats:4222 stream rm cn-stream -f
+    docker run --rm --network health-dataspace-edcv natsio/nats-box:0.20.2 \
+      nats --server nats://nats:4222 stream rm tp-stream -f
+    docker compose -f docker-compose.yml -f docker-compose.jad.yml \
+      -f docker-compose.live.yml up -d controlplane
+
+The last command, from the worktree the stack runs under, runs `nats-streams`
+and then starts the control plane.
+
+Not covered: the Azure NATS (`mvhd-nats`, `scripts/azure/04-edc-services.sh`)
+has no volume, so there even a file stream lives only as long as its replica,
+and the Azure control plane creates memory streams the same way.
+
+`edc-events` stays in memory, and it cannot be created first:
+`NatsPublishingExtension` calls `addStream` (memory, interest retention,
+`events.>`) and refuses to boot when a stream of that name exists with
+another configuration; `edc.events.nats.stream.create.force` would only
+delete it and create it in memory again. Nothing consumes it, so with
+interest retention it holds nothing. After a NATS restart, which no longer
+needs a control plane restart, the control plane logs `[NATS events] Error
+publishing event` with the same `503 No Responders Available For Request`
+for every event until its next restart. That one is harmless: tell them
+apart by the class in the stack trace, `NatsEventPublisher.on` for the
+events, `NatsTaskPublisher.created` for a task stream. Measured on the shared
+stack after the conversion: NATS restarted, then seed step 5 finalized two
+negotiations and started two transfers in 14 s, with 28 of the first and
+none of the second in the log.
 
 ## 2026-11-06: `$(curl -w '%{http_code}' ... || echo 000)` is never 000
 
