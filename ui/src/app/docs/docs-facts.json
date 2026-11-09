@@ -310,6 +310,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/patient/programmes",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/patient/research",
       "methods": ["GET", "POST", "DELETE"]
     },
@@ -416,6 +420,7 @@
     "/patient",
     "/patient/insights",
     "/patient/profile",
+    "/patient/programmes",
     "/patient/query",
     "/patient/research",
     "/patient/wallet",
@@ -1330,8 +1335,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 60,
-    "operations": 77
+    "paths": 61,
+    "operations": 78
   },
   "workflowJobs": {
     "test.yml": [
@@ -1380,11 +1385,11 @@
   },
   "lastUpdated": {
     "/docs": "2026-11-08",
-    "/docs/user-guide": "2026-11-08",
+    "/docs/user-guide": "2026-11-09",
     "/docs/developer": "2026-11-09",
-    "/docs/developer/quality-gates": "2026-11-08",
-    "/docs/developer/api": "2026-11-07",
-    "/docs/developer/reference": "2026-11-07",
+    "/docs/developer/quality-gates": "2026-11-09",
+    "/docs/developer/api": "2026-11-09",
+    "/docs/developer/reference": "2026-11-09",
     "/docs/developer/[slug]": "2026-11-09",
     "/docs/architecture": "2026-11-09",
     "/docs/security": "2026-11-09",

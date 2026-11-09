@@ -57,6 +57,9 @@ export const LABEL_LAYER: Record<string, number> = {
   // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   ImportedDataset: 2,
+  // #934: an offer of another data space (DCAT-AP dcat:DataService)
+  DataService: 2,
+  BonusProgramme: 2,
   Distribution: 2,
   ContactPoint: 2,
   EhdsPurpose: 2,
@@ -231,6 +234,8 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   // L2 Catalog
   HealthDataset: "Dataset Description",
   ImportedDataset: "Imported Transfer",
+  DataService: "Data Service",
+  BonusProgramme: "Bonus Program",
   Distribution: "Data Format",
   ContactPoint: "Contact",
   EhdsPurpose: "Research Purpose",
@@ -390,6 +395,8 @@ export const LABEL_GROUP: Record<string, string> = {
   ProviderPseudonym: "trust-center",
   HealthDataset: "dataset",
   ImportedDataset: "dataset",
+  DataService: "dataset",
+  BonusProgramme: "dataset",
   SpeWorkspace: "governance",
   Distribution: "dataset",
   EhdsPurpose: "dataset",

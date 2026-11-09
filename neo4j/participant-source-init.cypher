@@ -61,6 +61,21 @@ MERGE (irs:Participant {participantId: 'did:web:irs.fr:hdab'})
       irs.crawlerEnabled = true,
       irs.onboardedAt   = coalesce(irs.onboardedAt, datetime('2026-02-14T09:00:00Z'));
 
+// AlphaKasse DE — fictional statutory insurer of a second data space,
+// "insurance and wellbeing" (#934). Its catalogue is DCAT-AP, not
+// HealthDCAT-AP: it offers a bonus programme (a dcat:DataService), no health
+// dataset (ui/src/content/catalogues/alphakasse-dcat-ap.json).
+MERGE (ak:Participant {participantId: 'did:web:alphakasse.de:insurer'})
+  ON CREATE SET ak.name            = 'AlphaKasse DE',
+                ak.participantType = 'INSURER'
+  SET ak.source        = coalesce(ak.source, 'seed'),
+      ak.walletType    = 'business',
+      ak.country       = 'DE',
+      ak.dataSpace     = 'insurance-wellbeing',
+      ak.dspCatalogUrl = 'https://ehds.mabu.red/api/mock-dsp/alphakasse',
+      ak.crawlerEnabled = true,
+      ak.onboardedAt   = coalesce(ak.onboardedAt, datetime('2026-11-09T09:00:00Z'));
+
 // Indexes that speed up the crawler's MATCH
 CREATE INDEX participant_source_idx IF NOT EXISTS FOR (p:Participant) ON (p.source);
 CREATE INDEX participant_wallet_idx IF NOT EXISTS FOR (p:Participant) ON (p.walletType);

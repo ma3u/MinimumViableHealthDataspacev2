@@ -1,0 +1,146 @@
+{
+  "@context": {
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "dcatap": "http://data.europa.eu/r5r/",
+    "eli": "http://data.europa.eu/eli/ontology#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "vcard": "http://www.w3.org/2006/vcard/ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "ehds": "https://w3id.org/ehds/"
+  },
+  "@id": "https://ehds.mabu.red/api/mock-dsp/alphakasse/catalog",
+  "@type": "dcat:Catalog",
+  "dct:title": [
+    {
+      "@value": "AlphaKasse DE, insurance and wellbeing data space",
+      "@language": "en"
+    },
+    {
+      "@value": "AlphaKasse DE, Datenraum Versicherung und Wohlbefinden",
+      "@language": "de"
+    }
+  ],
+  "dct:description": [
+    {
+      "@value": "What AlphaKasse DE, a fictional statutory health insurer, offers its members in the insurance and wellbeing data space. Each programme is joined by the member's own decision and receives a yes or no, never the data behind it.",
+      "@language": "en"
+    },
+    {
+      "@value": "Was AlphaKasse DE, eine fiktive gesetzliche Krankenkasse, ihren Mitgliedern im Datenraum Versicherung und Wohlbefinden anbietet. Jedes Programm beginnt mit der eigenen Entscheidung des Mitglieds und erhält ein Ja oder Nein, nie die Daten dahinter.",
+      "@language": "de"
+    }
+  ],
+  "dct:publisher": {
+    "@id": "did:web:alphakasse.de:insurer",
+    "@type": "foaf:Agent",
+    "foaf:name": "AlphaKasse DE"
+  },
+  "dct:modified": {
+    "@value": "2026-11-09",
+    "@type": "xsd:date"
+  },
+  "dcat:service": [
+    {
+      "@id": "urn:mvhd:programme:alphakasse:active-year-2027",
+      "@type": ["dcat:DataService", "ehds:BonusProgramme"],
+      "dct:title": [
+        {
+          "@value": "Active year bonus 2027",
+          "@language": "en"
+        },
+        {
+          "@value": "Bonus für ein aktives Jahr 2027",
+          "@language": "de"
+        }
+      ],
+      "dct:description": [
+        {
+          "@value": "A bonus for members who stay active through 2027 and go to their yearly check-up. The member joins in the patient portal. The hub works out inside the member's record whether the year's goal was met; AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record. A no changes nothing in the member's contract.",
+          "@language": "en"
+        },
+        {
+          "@value": "Ein Bonus für Mitglieder, die 2027 aktiv bleiben und zur jährlichen Vorsorgeuntersuchung gehen. Das Mitglied tritt im Patientenportal bei. Der Hub prüft in der Akte des Mitglieds, ob das Jahresziel erreicht ist; AlphaKasse erhält das Programm, das Jahr und Ziel erreicht ja oder nein. Schritte, Herzfrequenz, Diagnosen und Besuchsdetails verlassen die Akte nie. Ein Nein ändert nichts am Vertrag des Mitglieds.",
+          "@language": "de"
+        }
+      ],
+      "dct:publisher": {
+        "@id": "did:web:alphakasse.de:insurer",
+        "@type": "foaf:Agent",
+        "foaf:name": "AlphaKasse DE"
+      },
+      "dcat:endpointURL": {
+        "@id": "https://ehds.mabu.red/api/mock-dsp/alphakasse"
+      },
+      "dct:conformsTo": [
+        {
+          "@id": "urn:mvhd:programme:alphakasse:active-year-2027:rule:2027.1",
+          "@type": "dct:Standard",
+          "dct:title": {
+            "@value": "Active year rule, version 2027.1",
+            "@language": "en"
+          },
+          "dct:description": {
+            "@value": "Goal met when, in the calendar year, the member was active for at least 150 minutes a week on average and went to one check-up. Read from the activity the member's tracker shares into the record and from the check-up in the member's own EHR. Evaluated by the hub inside the record; the member sees the result before anything is sent.",
+            "@language": "en"
+          },
+          "owl:versionInfo": "2027.1",
+          "dct:issued": {
+            "@value": "2026-11-09",
+            "@type": "xsd:date"
+          }
+        },
+        {
+          "@id": "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+          "@type": "dct:Standard",
+          "dct:title": {
+            "@value": "Dataspace Protocol 2025-1",
+            "@language": "en"
+          }
+        }
+      ],
+      "dcat:theme": {
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Health",
+          "@language": "en"
+        }
+      },
+      "dcat:keyword": [
+        {
+          "@value": "bonus programme",
+          "@language": "en"
+        },
+        {
+          "@value": "physical activity",
+          "@language": "en"
+        },
+        {
+          "@value": "check-up",
+          "@language": "en"
+        },
+        {
+          "@value": "Bonusprogramm",
+          "@language": "de"
+        }
+      ],
+      "dct:accessRights": {
+        "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
+        "@type": "dct:RightsStatement"
+      },
+      "dcatap:applicableLegislation": [
+        {
+          "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+          "@type": "eli:LegalResource"
+        },
+        {
+          "@id": "http://data.europa.eu/eli/reg/2016/679/oj",
+          "@type": "eli:LegalResource"
+        }
+      ]
+    }
+  ]
+}

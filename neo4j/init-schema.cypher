@@ -35,6 +35,9 @@ CREATE INDEX transfer_event_retain_until IF NOT EXISTS FOR (te:TransferEvent) ON
 // ============================================================
 CREATE CONSTRAINT catalog_id IF NOT EXISTS FOR (cat:Catalog) REQUIRE cat.catalogId IS UNIQUE;
 CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
+// DCAT-AP dcat:DataService of another data space, from the crawl (#934): a
+// bonus programme carries the second label :BonusProgramme.
+CREATE CONSTRAINT data_service_id IF NOT EXISTS FOR (ds:DataService) REQUIRE ds.serviceId IS UNIQUE;
 CREATE CONSTRAINT distribution_id IF NOT EXISTS FOR (d:Distribution) REQUIRE d.distributionId IS UNIQUE;
 CREATE CONSTRAINT contact_point_id IF NOT EXISTS FOR (cp:ContactPoint) REQUIRE cp.contactId IS UNIQUE;
 // HealthDCAT-AP Release 8 variables (#700): healthdcatap:hasVariables -> csvw:TableGroup

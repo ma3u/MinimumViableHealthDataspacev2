@@ -11,11 +11,20 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from .models import CrawlEnvelope, DatasetUpsert
+from .models import CrawlEnvelope, DatasetUpsert, ServiceUpsert
 
 SNOMED_SYSTEM = "http://snomed.info/sct"
 LOINC_SYSTEM = "http://loinc.org"
 ICD10_SYSTEM = "http://hl7.org/fhir/sid/icd-10"
+
+# The hub's own classes a dcat:DataService may carry, and the node label each
+# becomes (#934). Anything else a remote catalogue types its service with is
+# ignored: a label cannot be a query parameter, so it never comes from outside.
+EHDS_NS = "https://w3id.org/ehds/"
+KNOWN_SERVICE_KINDS = {
+    "ehds:BonusProgramme": "BonusProgramme",
+    EHDS_NS + "BonusProgramme": "BonusProgramme",
+}
 
 
 def _coerce_theme_code(theme: Any) -> str | None:
@@ -157,6 +166,59 @@ def extract_datasets(env: CrawlEnvelope) -> list[DatasetUpsert]:
                 keywords=[
                     k for k, lang in _tagged(raw.get("dcat:keyword")) if lang in ("en", None)
                 ],
+            )
+        )
+    return out
+
+
+def _types(node: dict[str, Any]) -> list[str]:
+    return [str(t) for t in _values(node.get("@type"))]
+
+
+def _node(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def extract_services(env: CrawlEnvelope) -> list[ServiceUpsert]:
+    """Return one ServiceUpsert per dcat:DataService entry in the envelope catalog (#934).
+
+    The catalogue is DCAT-AP 3.0.1 with its nodes inline (see
+    ui/src/content/catalogues/alphakasse-dcat-ap.json). Of the standards a
+    service conforms to, the one that carries owl:versionInfo is its rule.
+    """
+    catalog = env.catalog or {}
+    catalog_publisher = _node(catalog.get("dct:publisher"))
+    out: list[ServiceUpsert] = []
+    for raw in _values(catalog.get("dcat:service")):
+        if not isinstance(raw, dict) or not raw.get("@id"):
+            continue
+        publisher = _node(raw.get("dct:publisher")) or catalog_publisher
+        standards = [_node(c) for c in _values(raw.get("dct:conformsTo"))]
+        rule = next((c for c in standards if c.get("owl:versionInfo") is not None), {})
+        out.append(
+            ServiceUpsert(
+                service_id=str(raw["@id"]),
+                title=_text(raw.get("dct:title")) or str(raw["@id"]),
+                description=_text(raw.get("dct:description")),
+                # The crawled participant publishes what its catalogue holds;
+                # a service naming another publisher is still recorded under
+                # the DID it was fetched from, as datasets are.
+                publisher_did=env.participant_did,
+                publisher_name=_text(publisher.get("foaf:name")),
+                endpoint_url=next(iter(i for i in map(_iri, _values(raw.get("dcat:endpointURL"))) if i), None),
+                kinds=sorted({KNOWN_SERVICE_KINDS[t] for t in _types(raw) if t in KNOWN_SERVICE_KINDS}),
+                themes=_codes(raw.get("dcat:theme")),
+                keywords=[k for k, lang in _tagged(raw.get("dcat:keyword")) if lang in ("en", None)],
+                access_rights=next(iter(_codes(raw.get("dct:accessRights"))), None),
+                applicable_legislation=[
+                    i for i in map(_iri, _values(raw.get("dcatap:applicableLegislation"))) if i
+                ],
+                conforms_to=[i for i in map(_iri, standards) if i],
+                rule_id=_iri(rule) if rule else None,
+                rule_title=_text(rule.get("dct:title")),
+                rule_description=_text(rule.get("dct:description")),
+                rule_version=_text(rule.get("owl:versionInfo")),
+                last_seen_at=env.fetched_at,
             )
         )
     return out

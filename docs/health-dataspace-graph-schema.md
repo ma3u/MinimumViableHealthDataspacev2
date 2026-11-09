@@ -495,6 +495,33 @@ CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE o
 
 ---
 
+#### `DataService` (`BonusProgramme`)
+
+An offer of another data space that is not a health dataset, a DCAT-AP 3.0.1
+`dcat:DataService` from the crawl (#934). The catalog enricher writes it; a
+service typed `ehds:BonusProgramme` also carries the label `BonusProgramme`
+(AlphaKasse DE's programme, ADR-080). Its rule is the versioned
+`dct:Standard` it conforms to.
+
+**Properties:**
+
+- `serviceId: String!` — IRI of the service (`@id`)
+- `title: String!`, `description: String` — English text (`dct:title`, `dct:description`)
+- `publisherDid: String!`, `publisherName: String` — the crawled participant and its `foaf:name`
+- `endpointUrl: String` — `dcat:endpointURL`
+- `themes: [String]`, `keywords: [String]`, `accessRights: String` — vocabulary codes and English keywords
+- `applicableLegislation: [String]`, `conformsTo: [String]` — ELI and standard IRIs
+- `ruleId`, `ruleTitle`, `ruleDescription`, `ruleVersion: String` — the rule (`owl:versionInfo`)
+- `source: 'federated'`, `lastSeenAt: DateTime`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT data_service_id IF NOT EXISTS FOR (ds:DataService) REQUIRE ds.serviceId IS UNIQUE;
+```
+
+---
+
 ### 3.2 Relationships
 
 ```cypher
@@ -507,6 +534,7 @@ CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE o
 (:DataProduct)-[:DESCRIBED_BY]->(:HealthDataset)
 (:HealthDataset)-[:HAS_DISTRIBUTION]->(:Distribution)
 (:HealthDataset)-[:PUBLISHED_BY]->(:Participant)
+(:DataService)-[:PUBLISHED_BY]->(:Participant)
 (:HealthDataset)-[:HAS_CONTACT_POINT]->(:ContactPoint)
 (:HealthDataset)-[:HAS_THEME]->(:EEHRxFCategory)
 (:HealthDataset)-[:SUBJECT_TO_PURPOSE]->(:EhdsPurpose)

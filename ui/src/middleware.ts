@@ -27,6 +27,7 @@ import {
  *   /patient/profile           → requires PATIENT or EDC_ADMIN
  *   /patient/research          → requires PATIENT or EDC_ADMIN
  *   /patient/insights          → requires PATIENT or EDC_ADMIN
+ *   /patient/programmes        → requires PATIENT or EDC_ADMIN
  *   /onboarding/*              → any authenticated
  *   /credentials               → any authenticated
  *   /settings                  → any authenticated
@@ -59,6 +60,7 @@ const PROTECTED_PATHS = [
   "/patient/profile",
   "/patient/research",
   "/patient/insights",
+  "/patient/programmes",
   "/requests",
   "/applications",
   "/supervision",
@@ -138,7 +140,8 @@ function requiresRole(pathname: string): string[] | null {
   if (
     pathname.startsWith("/patient/profile") ||
     pathname.startsWith("/patient/research") ||
-    pathname.startsWith("/patient/insights")
+    pathname.startsWith("/patient/insights") ||
+    pathname.startsWith("/patient/programmes")
   ) {
     return ["PATIENT", "EDC_ADMIN"];
   }

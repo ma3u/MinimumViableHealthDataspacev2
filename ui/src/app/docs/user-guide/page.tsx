@@ -17,6 +17,7 @@ import {
   FileCheck,
   TestTube,
   Award,
+  Gift,
   Share2,
   Compass,
   Handshake,
@@ -1772,6 +1773,22 @@ export default function UserGuidePage() {
             <p className="text-(--text-secondary) text-xs italic">
               {t(
                 "Example: A patient opts out of secondary use; from then on every new research query leaves them out, and the opt-out is kept with its date until they opt back in.",
+              )}
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/patient/programmes"
+            title={tn("Bonus Programs")}
+            icon={Gift}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              {t(
+                "Bonus programs that another data space offers, found by the catalogue crawler: each with its rule and with what the program receives, a yes or no per year and never the data behind it. Kept apart from research and from the opt-out.",
+              )}
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              {t(
+                "Example: A patient reads AlphaKasse's active year bonus: at least 150 minutes of activity a week and a yearly check-up, and the insurer learns only whether the goal was met.",
               )}
             </p>
           </FeatureCard>

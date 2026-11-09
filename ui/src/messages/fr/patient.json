@@ -351,5 +351,21 @@
   "bpm": "bpm",
   "per day": "par jour",
   "kg": "kg",
-  "ePA transfer, GesundheitsID-authenticated": "Transfert de l’ePA, authentifié par GesundheitsID"
+  "ePA transfer, GesundheitsID-authenticated": "Transfert de l’ePA, authentifié par GesundheitsID",
+  "Offers from other data spaces that reward what you do for your health. A program receives a yes or no once a year, never the data behind it. Whether you join is your decision alone (GDPR Art. 9(2)(a)).": "Des offres d’autres espaces de données qui récompensent ce que vous faites pour votre santé. Un programme reçoit un oui ou un non une fois par an, jamais les données qui le fondent. Vous seul décidez d’y participer (RGPD, art. 9, par. 2, point a)).",
+  "A bonus program is not research and not the opt-out. Joining one never enrolls you in a study, and your opt-out from secondary use (EHDS Art. 71) does not stop sharing you start yourself.": "Un programme de bonus n’est ni de la recherche ni l’opposition. Y participer ne vous inscrit jamais à une étude, et votre opposition à l’utilisation secondaire (EEDS, art. 71) n’arrête pas un partage que vous lancez vous-même.",
+  "Loading bonus programs…": "Chargement des programmes de bonus…",
+  "You may not see the bonus programs: they are shown to patients. If your session has ended, sign in again.": "Vous ne pouvez pas voir les programmes de bonus : ils sont présentés aux patients. Si votre session a expiré, reconnectez-vous.",
+  "The bonus programs could not be loaded (HTTP {status}). Please try again later.": "Les programmes de bonus n’ont pas pu être chargés (HTTP {status}). Veuillez réessayer plus tard.",
+  "The bonus programs could not be loaded. Please try again later.": "Les programmes de bonus n’ont pas pu être chargés. Veuillez réessayer plus tard.",
+  "Bonus programs on offer ({n})": "Programmes de bonus proposés ({n})",
+  "No bonus program is on offer. The catalogue crawler has not found one in another data space yet.": "Aucun programme de bonus n’est proposé. Le robot du catalogue n’en a encore trouvé aucun dans un autre espace de données.",
+  "Insurance and wellbeing data space": "Espace de données assurance et bien-être",
+  "Another data space": "Un autre espace de données",
+  "The rule, version {version}": "La règle, version {version}",
+  "What {publisher} receives": "Ce que {publisher} reçoit",
+  "The year, and goal met: yes or no.": "L’année, et objectif atteint : oui ou non.",
+  "What never leaves your record": "Ce qui ne quitte jamais votre dossier",
+  "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Les pas, la fréquence cardiaque, les diagnostics, les détails des visites et toute date plus précise que l’année.",
+  "You cannot join yet: joining and withdrawing come in the next step.": "Vous ne pouvez pas encore participer : l’adhésion et le retrait arrivent à l’étape suivante."
 }

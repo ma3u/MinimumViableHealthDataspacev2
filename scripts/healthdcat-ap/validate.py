@@ -36,6 +36,17 @@ published validator reports today.
     python3 scripts/healthdcat-ap/validate.py <file> --as-published  # without the workaround
     python3 scripts/healthdcat-ap/validate.py a.ttl --same-as a.jsonld  # also: the same graph?
 
+A catalogue that is not health data (#934: AlphaKasse's bonus programme, a
+dcat:DataService in the insurance and wellbeing data space) is checked against
+DCAT-AP 3.0.1 alone; HealthDCAT-AP stays for health datasets (#719):
+
+    python3 scripts/healthdcat-ap/validate.py ui/src/content/catalogues/alphakasse-dcat-ap.json --dcat-ap
+
+DCAT-AP 3.0.1's own shapes need one repair too, made in memory and reported:
+the DataService shape names two sh:property shapes the file never defines, so
+any data with a dcat:DataService stops the processor (SEMICeu/DCAT-AP#448,
+open, fixed in the drafts). The two references are dropped.
+
 A source ending in .ttl is read as Turtle, anything else as JSON-LD.
 
 Exit 0 when the data conforms (warnings allowed), 1 on any violation, 2 when
@@ -91,6 +102,16 @@ def repair(shapes):
     return fixed
 
 
+def drop_undefined(shapes):
+    """Drop sh:property references to shapes the file never defines (SEMICeu/DCAT-AP#448)."""
+    dropped = 0
+    for node, prop in list(shapes.subject_objects(SH.property)):
+        if (prop, None, None) not in shapes:
+            shapes.remove((node, SH.property, prop))
+            dropped += 1
+    return dropped
+
+
 def load(source):
     if source.startswith("http://") or source.startswith("https://"):
         with urllib.request.urlopen(source, timeout=60) as r:  # noqa: S310 (a URL the caller names)
@@ -134,6 +155,7 @@ def main():
     ap.add_argument("source", help="a JSON-LD file or URL")
     ap.add_argument("--recommended", action="store_true", help="also list the recommended-property warnings")
     ap.add_argument("--as-published", action="store_true", help="keep dcat:Catalog rdfs:subClassOf dcat:Dataset (no workaround)")
+    ap.add_argument("--dcat-ap", action="store_true", help="DCAT-AP 3.0.1 only, for a catalogue that is not health data (#934)")
     ap.add_argument("--same-as", metavar="OTHER", help="also fail unless OTHER holds the same graph (e.g. the Turtle of a JSON-LD)")
     args = ap.parse_args()
 
@@ -154,10 +176,13 @@ def main():
                 dropped += 1
 
     base = Graph().parse(checked(DCAT_AP), format="turtle")
+    undefined = drop_undefined(base)
     _, base_results, _ = validate(data, shacl_graph=base, inference="none", allow_warnings=True)
     base_ok, text = verdict(base_results)
-    print(f"1. DCAT-AP 3.0.1: {triples} triples, {text}; hierarchy workarounds: {dropped}")
+    print(f"1. DCAT-AP 3.0.1: {triples} triples, {text}; hierarchy workarounds: {dropped}; undefined shapes dropped: {undefined}")
     report(base_results, "dcat-ap ")
+    if args.dcat_ap:
+        return 0 if base_ok else 1
 
     shapes = Graph()
     for name in SHAPES:
