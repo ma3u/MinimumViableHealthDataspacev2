@@ -1,0 +1,31 @@
+meta {
+  name: 41 No app token, join a bonus program from the app (401)
+  type: http
+  seq: 41
+}
+
+post {
+  url: {{baseUrl}}/api/patient/app/programmes/consent
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer not-a-token
+}
+
+body:json {
+  {"programmeId": "urn:mvhd:programme:alphakasse:active-year-2027"}
+}
+
+tests {
+  // ADR-080, decision 6: a consent to a program is given by the person,
+  // here from their connected phone, never by a token the hub cannot verify.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

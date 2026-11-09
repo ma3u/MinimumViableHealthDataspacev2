@@ -1595,6 +1595,165 @@ paths:
         "413": { description: More than 1000 weekly values }
         "429": { description: Too many syncs in a minute }
         "502": { description: Neo4j failed }
+  /api/patient/app/programmes:
+    get:
+      tags: [Patient]
+      summary: The Klarbefund app lists bonus programmes and the person's own consents (#934)
+      description: >-
+        The app-token twin of /api/patient/programmes, from the same queries and
+        with the same answer (ADR-080, decision 6). The record is the one the
+        login owns; there is no patientId parameter (ADR-049).
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: The offer and the person's consents, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [programmes, consents, legalBasis]
+                properties:
+                  legalBasis: { type: string }
+                  consents: { type: array, items: { type: object } }
+                  programmes: { type: array, items: { type: object } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: No record is assigned to this login }
+  /api/patient/app/programmes/consent:
+    post:
+      tags: [Patient]
+      summary: The Klarbefund app joins a bonus programme (GDPR Art. 9(2)(a)) (#934)
+      description: >-
+        The app-token twin of POST /api/patient/programmes/consent, recorded with
+        source klarbefund. Its own record, separate from study consent and the
+        Art. 71 opt-out (ADR-080, decision 6).
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [programmeId]
+              properties:
+                programmeId: { type: string }
+      responses:
+        "201":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legalBasis: { type: string }
+                  consent:
+                    type: object
+                    properties:
+                      consentId: { type: string }
+                      programmeId: { type: string }
+                      joinedAt: { type: string }
+                      withdrawnAt: { type: string, nullable: true }
+        "400": { description: programmeId missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: No such programme, or no record for this login }
+    delete:
+      tags: [Patient]
+      summary: The Klarbefund app withdraws from a bonus programme (GDPR Art. 7(3))
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - name: programmeId
+          in: query
+          required: true
+          schema: { type: string }
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: Withdrawn; transfers stop at once
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legalBasis: { type: string }
+                  consent:
+                    type: object
+                    properties:
+                      consentId: { type: string }
+                      programmeId: { type: string }
+                      joinedAt: { type: string }
+                      withdrawnAt: { type: string, nullable: true }
+        "400": { description: programmeId missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: No open consent to withdraw }
+  /api/patient/app/programmes/transfer:
+    post:
+      tags: [Patient]
+      summary: The Klarbefund app asks the hub to send a programme the year's answer
+      description: >-
+        The app-token twin of POST /api/patient/programmes/transfer (ADR-080,
+        decision 4, second path). Only under an open consent; after a
+        withdrawal the answer is 403 and nothing is recorded.
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [programmeId, year]
+              properties:
+                programmeId: { type: string }
+                year: { type: integer, minimum: 2000, maximum: 2100 }
+      responses:
+        "202":
+          description: Recorded, awaiting the hub's evaluation of the year
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legalBasis: { type: string }
+                  transfer:
+                    type: object
+                    properties:
+                      transferId: { type: string }
+                      programmeId: { type: string }
+                      year: { type: integer }
+                      goalMet: { type: boolean, nullable: true }
+                      status: { type: string }
+                      requestedAt: { type: string }
+        "400": { description: programmeId and a calendar year are required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: No open consent to this programme }
   /api/patient/app/record:
     post:
       tags: [Patient]

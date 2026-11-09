@@ -20,6 +20,7 @@ struct ConnectView: View {
   @State private var scanning = false
   @State private var pasted = ""
   @State private var showingRecord = false
+  @State private var showingProgrammes = false
   @State private var username = ""
   @State private var password = ""
   @State private var confirmingDelete = false
@@ -73,6 +74,17 @@ struct ConnectView: View {
       .navigationDestination(isPresented: $showingRecord) {
         DataspaceRecordView(connection: connection)
       }
+      .navigationDestination(isPresented: $showingProgrammes) {
+        BonusProgrammesView(connection: connection)
+      }
+      #if DEBUG
+        .onAppear {
+          // `-MBShot programmes`: the demo hub, connected, and the screen open.
+          guard DemoSeed.screen == .programmes, !showingProgrammes else { return }
+          connection.connectForDemo()
+          showingProgrammes = true
+        }
+      #endif
     }
   }
 
@@ -254,6 +266,12 @@ struct ConnectView: View {
           Label("Show my EHDS record", systemImage: "list.bullet.clipboard")
         }
         .accessibilityIdentifier("connect-show-record")
+        Button {
+          showingProgrammes = true
+        } label: {
+          Label("Bonus programs", systemImage: "gift")
+        }
+        .accessibilityIdentifier("connect-show-programmes")
       } header: {
         Text("Connected")
       } footer: {

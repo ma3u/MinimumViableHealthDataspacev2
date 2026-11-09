@@ -58,6 +58,12 @@ final class EHDSConnection: ObservableObject {
   @Published private(set) var lastWearableSend: String?
   /// True while device trends are being sent.
   @Published private(set) var syncingWearables = false
+  /// The bonus programs on offer and the person's consents to them (#934,
+  /// step 4), fetched when the screen opens and kept nowhere.
+  @Published private(set) var programmes: ProgrammeOffer?
+  @Published private(set) var loadingProgrammes = false
+  /// Why the programs could not be loaded, for the screen to say.
+  @Published private(set) var programmesError: String?
 
   /// Hubs a link may name: the live one, and in a debug build the local stack.
   static var trusted: [TrustedHub] {
@@ -88,6 +94,22 @@ final class EHDSConnection: ObservableObject {
     self.attestor = attestor ?? DeviceAppAttestor()
     restore()
   }
+
+  #if DEBUG
+    /// Connected to the demo hub as `patient1` at once, for `-MBShot
+    /// programmes`: a screen that needs a connection opens without a test
+    /// tapping through the device grant. Demo transport only, nothing kept.
+    func connectForDemo() {
+      guard DemoSeed.isRequested else { return }
+      let hub = Self.trusted[0]
+      self.hub = hub
+      tokens = TokenSet.from(json: [
+        "access_token": DemoEHDSTransport.token, "refresh_token": "demo",
+        "expires_in": 3600, "refresh_expires_in": 3600,
+      ])
+      state = .connected(hub: hub, username: "patient1")
+    }
+  #endif
 
   // MARK: - Connecting
 
@@ -463,6 +485,100 @@ final class EHDSConnection: ObservableObject {
     }
   }
 
+  // MARK: - Bonus programs (#934, step 4)
+
+  /// The offer and the person's own consents, from the app-token twin of the
+  /// portal's `/api/patient/programmes`: the same queries, the same answer.
+  ///
+  /// A program consent is held by the hub and given from here, so it is kept
+  /// apart from `ConsentLedger`, the person's note of decisions held
+  /// elsewhere, and from the opt-out (ADR-080, decision 6).
+  func loadProgrammes() async {
+    loadingProgrammes = true
+    defer { loadingProgrammes = false }
+    do {
+      let (status, body) = try await programmeCall("GET", "/api/patient/app/programmes")
+      guard status == 200, let offer = ProgrammeOffer.parse(body) else {
+        programmesError = String(
+          localized: "The bonus programs could not be loaded (HTTP \(status)). Please try again later.")
+        return
+      }
+      programmes = offer
+      programmesError = nil
+    } catch {
+      programmesError = Self.explain(error)
+    }
+  }
+
+  /// Joins one program: the person's consent to it alone, GDPR Art. 9(2)(a).
+  func joinProgramme(_ programme: BonusProgramme) async -> ProgrammeAnswer {
+    let answer = await programmeAction(
+      "POST", "/api/patient/app/programmes/consent",
+      json: ["programmeId": programme.programmeId, "source": "klarbefund"],
+      read: ProgrammeAnswer.join)
+    if case let .consent(consent) = answer { programmes?.apply(consent) }
+    return answer
+  }
+
+  /// Withdraws it, GDPR Art. 7(3). From then on the hub sends nothing.
+  func withdrawProgramme(_ programme: BonusProgramme) async -> ProgrammeAnswer {
+    var query = URLComponents()
+    query.queryItems = [URLQueryItem(name: "programmeId", value: programme.programmeId)]
+    let answer = await programmeAction(
+      "DELETE", "/api/patient/app/programmes/consent?\(query.percentEncodedQuery ?? "")",
+      json: nil, read: ProgrammeAnswer.withdraw)
+    if case let .consent(consent) = answer { programmes?.apply(consent) }
+    return answer
+  }
+
+  /// "Send my answer for <year>". Only under an open consent: the hub
+  /// answers 403 otherwise, and the screen then shows what the hub holds.
+  func sendProgrammeAnswer(_ programme: BonusProgramme, year: Int) async -> ProgrammeAnswer {
+    let answer = await programmeAction(
+      "POST", "/api/patient/app/programmes/transfer",
+      json: ["programmeId": programme.programmeId, "year": String(year)],
+      read: ProgrammeAnswer.transfer)
+    if answer == .noOpenConsent {
+      // Withdrawn on the portal while this screen still showed "joined".
+      await loadProgrammes()
+    }
+    return answer
+  }
+
+  private func programmeAction(
+    _ method: String, _ path: String, json: [String: String]?,
+    read: (Int, Data) -> ProgrammeAnswer
+  ) async -> ProgrammeAnswer {
+    do {
+      let (status, body) = try await programmeCall(method, path, json: json)
+      return read(status, body)
+    } catch {
+      return .failed(status: (error as? HubError)?.status ?? 0, reason: Self.explain(error))
+    }
+  }
+
+  /// One request to a program route, signed in again once on a 401 when the
+  /// phone holds the password, as `loadRecord` does.
+  private func programmeCall(
+    _ method: String, _ path: String, json: [String: String]? = nil, attemptsLeft: Int = 1
+  ) async throws -> (status: Int, body: Data) {
+    guard let hub else { throw HubError(status: 401, body: Data()) }
+    let token = try await freshToken()
+    let (status, body) = try await transport.send(
+      method: method, url: URL(string: "\(hub.ehds)\(path)")!,
+      bearer: token, device: Self.deviceId(), json: json)
+    if status == 401, let account, attemptsLeft > 0 {
+      try await signIn(account)
+      return try await programmeCall(method, path, json: json, attemptsLeft: attemptsLeft - 1)
+    }
+    if status == 401 {
+      forget()
+      state = .failed(String(localized: "This phone is no longer connected. Scan a new code to connect again."))
+      throw HubError(status: status, body: body)
+    }
+    return (status, body)
+  }
+
   /// A token valid for the next request, refreshing it when needed.
   private func freshToken() async throws -> String {
     if tokens == nil, let account {
@@ -519,6 +635,7 @@ final class EHDSConnection: ObservableObject {
     tokens = nil
     hub = nil
     record = nil
+    programmes = nil
     Keychain.delete(Self.tokensTag)
   }
 
@@ -831,6 +948,10 @@ enum Keychain {
       switch (method, url.path) {
       case ("POST", "/api/patient/app-devices"): return (201, Data("{}".utf8))
       case ("DELETE", "/api/patient/app/account"): return (200, Data(#"{"deleted":"kb-demo2345"}"#.utf8))
+      case ("GET", "/api/patient/app/programmes"), ("POST", "/api/patient/app/programmes/consent"),
+        ("DELETE", "/api/patient/app/programmes/consent"),
+        ("POST", "/api/patient/app/programmes/transfer"):
+        return await DemoProgrammes.answer(method: method, url: url, json: json)
       case ("GET", "/api/patient/app/record"):
         let bundle = #"""
           {"resourceType":"Bundle","type":"searchset","meta":{"tag":[{"code":"fictional"}]},"entry":[
@@ -839,6 +960,63 @@ enum Keychain {
           """#
         return (200, Data(bundle.utf8))
       default: return (200, Data("{}".utf8))
+      }
+    }
+  }
+
+  /// AlphaKasse DE's active year bonus, as the hub's mock fixture lists it
+  /// (`ui/public/mock/patient_programmes.json`), with the join, the
+  /// withdrawal and the 403 after it played in memory. Fictional throughout.
+  @MainActor
+  enum DemoProgrammes {
+    static let programmeId = "urn:mvhd:programme:alphakasse:active-year-2027"
+
+    static let programme = BonusProgramme(
+      programmeId: programmeId, title: "Active year bonus 2027",
+      description:
+        "A bonus for members who stay active through 2027 and go to their yearly check-up. AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record.",
+      publisherName: "AlphaKasse DE", publisherDid: "did:web:alphakasse.de:insurer",
+      dataSpace: "insurance-wellbeing", ruleTitle: "Active year rule, version 2027.1",
+      ruleDescription:
+        "Goal met when, in the calendar year, the member was active for at least 150 minutes a week on average and went to one check-up.",
+      ruleVersion: "2027.1")
+
+    /// Empty at launch, so a test sees "Join this program" first.
+    static var consents: [ProgrammeConsent] = []
+
+    static func answer(method: String, url: URL, json: [String: String]?) -> (
+      status: Int, body: Data
+    ) {
+      let now = ISO8601DateFormatter().string(from: Date())
+      let open = consents.firstIndex { $0.isOpen }
+      func encode<T: Encodable>(_ status: Int, _ value: T) -> (status: Int, body: Data) {
+        (status, (try? JSONEncoder().encode(value)) ?? Data("{}".utf8))
+      }
+      switch (method, url.path) {
+      case ("GET", _):
+        return encode(200, ProgrammeOffer(programmes: [programme], consents: consents))
+      case ("POST", "/api/patient/app/programmes/consent"):
+        if let open { return encode(201, ["consent": consents[open]]) }
+        let consent = ProgrammeConsent(
+          consentId: UUID().uuidString, programmeId: programmeId, joinedAt: now, withdrawnAt: nil)
+        consents.insert(consent, at: 0)
+        return encode(201, ["consent": consent])
+      case ("DELETE", _):
+        guard let open else {
+          return (404, Data(#"{"error":"There is no open consent to this program to withdraw"}"#.utf8))
+        }
+        let closed = ProgrammeConsent(
+          consentId: consents[open].consentId, programmeId: programmeId,
+          joinedAt: consents[open].joinedAt, withdrawnAt: now)
+        consents[open] = closed
+        return encode(200, ["consent": closed])
+      default:
+        guard open != nil else {
+          return (403, Data(#"{"error":"No open consent to this program: join it first. After a withdrawal nothing is sent."}"#.utf8))
+        }
+        let year = json?["year"] ?? "2027"
+        let transfer = #"{"transfer":{"transferId":"\#(UUID().uuidString)","programmeId":"\#(programmeId)","year":\#(year),"goalMet":null,"status":"awaiting-evaluation","requestedAt":"\#(now)"}}"#
+        return (202, Data(transfer.utf8))
       }
     }
   }
