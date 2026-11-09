@@ -519,10 +519,10 @@ export const ITEMS: readonly RoadmapItem[] = [
     title:
       "TEHDAS2: the high-relevance results checked requirement by requirement",
     priority: "P1",
-    status: "planned",
+    status: "done",
     start: "2026-11-09",
     end: "2026-11-13",
-    note: "Nine results the demo shows, each against its own text; every gap goes to its issue.",
+    note: "Done 2026-11-09: three of six ratings corrected (ADR-086), the gaps filed as #1029 to #1033.",
   },
   {
     issue: 992,
@@ -531,10 +531,10 @@ export const ITEMS: readonly RoadmapItem[] = [
     title:
       "<d64>D6.4 DAAMS</d64>: the application and permit model against the specification",
     priority: "P1",
-    status: "planned",
+    status: "done",
     start: "2026-11-09",
     end: "2026-11-13",
-    note: "The core the demo shows; deviations become issues, a change to the model an ADR.",
+    note: "Done 2026-11-09: 31 of 94 elements the same, 33 different, 30 missing; the permit lifecycle is #1031.",
     links: {
       d64: "https://tehdas.eu/wp-content/uploads/2026/06/d6.4-data-access-application-management-system-daams-technical-specification-for-health-data-access-bodies.pdf",
     },
@@ -545,10 +545,10 @@ export const ITEMS: readonly RoadmapItem[] = [
     short: "TEHDAS2 mapping page",
     title: "The TEHDAS2 mapping as a page under /docs",
     priority: "P1",
-    status: "planned",
+    status: "done",
     start: "2026-11-11",
     end: "2026-11-15",
-    note: "The 21 results with status, component and open issue; the one link the demo hands out.",
+    note: "Done 2026-11-09: /docs/ehds/tehdas2-mapping, the one link the demo hands out.",
   },
   {
     issue: 994,
@@ -836,10 +836,10 @@ export const EPICS: readonly RoadmapEpic[] = [
     note: "Running the hub safely and affordably: secrets and the database firewall, the NLQ's read-only session, Keycloak load, logs, traces and alerts, and the load tests.",
     open: {
       P1: [359, 442, 779],
-      P2: [435, 577, 585, 586, 1029],
+      P2: [435, 585, 586, 1029],
       P3: [519, 571],
     },
-    done: [],
+    done: [577],
   },
   {
     issue: 966,
@@ -871,11 +871,11 @@ export const EPICS: readonly RoadmapEpic[] = [
     note: "The Joint Action's guidelines checked against the hub requirement by requirement, published under /docs, and shown at its <c>final conference</c> on 16 November 2026.",
     links: { c: "https://tehdas.eu/event/tehdas2-final-conference/" },
     open: {
-      P1: [991, 992, 993, 994],
+      P1: [994],
       P2: [995, 996, 997, 1030, 1031, 1032, 1033],
       P3: [998, 999],
     },
-    done: [],
+    done: [991, 992, 993],
   },
 ];
 
