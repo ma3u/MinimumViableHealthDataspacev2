@@ -1299,8 +1299,10 @@ services:
   # ---------------------------------------------------------------------------
   # CFM 0.0.7 (eclipse-cfm release images), ADR-085, #973. Profile `cfm`.
   # ---------------------------------------------------------------------------
-  # Tenant Manager, Provision Manager and the six orchestration agents that
-  # core-platform-distribution v0.0.39 runs, configured in jad/cfm/. They
+  # Tenant Manager, Provision Manager and the orchestration agents that
+  # core-platform-distribution v0.0.39 runs, configured in jad/cfm/, with the
+  # hub's own connector and IdentityHub activities (services/cfm-connector-agent)
+  # in place of the EDC-V and IdentityHub agents. They
   # provision a participant on the 1.0 control plane, IdentityHub, issuer and
   # siglet, as ui/src/lib/edc/provision.ts does today.
   #
@@ -1316,9 +1318,10 @@ services:
   #   docker compose -f docker-compose.yml -f docker-compose.jad.yml --profile cfm up -d
   #   ./scripts/seed-cfm.sh && ./scripts/check-cfm-onboarding.sh
   #
-  # Measured 2026-11-09: the IdentityHub half works; the EDC-V agent's participant
-  # config is refused (no STS entries since eclipse-cfm/cfm#148) and dispose
-  # fails. docs/planning/current/issue-973-cfm-0-0-7-spike.md has the detail.
+  # Measured 2026-11-09: a participant registered at /onboarding (with
+  # CFM_TENANT_URL set) is provisioned through CFM end to end and fetches a
+  # catalogue over DSP; dispose fails on eclipse-cfm's missing
+  # participantContextId. docs/planning/current/issue-973-cfm-0-0-7-spike.md.
   cfm7-nats:
     profiles: ["cfm"]
     image: nats:2.15.1-alpine
@@ -1430,18 +1433,21 @@ services:
       - edcv
     restart: unless-stopped
 
-  cfm7-edcvagent:
+  cfm7-mvhdconnectoragent:
     profiles: ["cfm"]
-    image: ghcr.io/eclipse-cfm/cfm/edcvagent:0.0.7@sha256:2ed7f4f7f578e222acb90c18bc26c48f530034d5f45d14cfaed3f3dbbe1b8893
-    container_name: health-dataspace-cfm7-edcvagent
-    command: ["/edcvagent", "--mode=debug"]
+    # The hub's own activity in place of eclipse-cfm's EDC-V agent, whose participant
+    # config our control plane refuses (no STS entries since eclipse-cfm/cfm#148).
+    build: ./services/cfm-connector-agent
+    image: mvhd/cfm-connector-agent:local
+    container_name: health-dataspace-cfm7-mvhdconnectoragent
+    command: ["/mvhdconnectoragent", "--mode=debug"]
     environment:
       # No collector on compose; the autoexport default would retry localhost:4318.
       OTEL_TRACES_EXPORTER: "none"
       OTEL_METRICS_EXPORTER: "none"
       OTEL_LOGS_EXPORTER: "none"
     volumes:
-      - ./jad/cfm/edcvagent.dotenv:/etc/appname/edcvagent.env:ro
+      - ./jad/cfm/mvhdconnectoragent.dotenv:/etc/appname/mvhdconnectoragent.env:ro
       - cfm7_subject_token:/var/run/secrets/cfm:ro
     depends_on:
       cfm7-nats:
@@ -1452,20 +1458,26 @@ services:
       - edcv
     restart: unless-stopped
 
-  cfm7-ihagent:
+  cfm7-mvhdidentityagent:
     profiles: ["cfm"]
-    image: ghcr.io/eclipse-cfm/cfm/ihagent:0.0.7@sha256:fe2f9c9ff2dce495c873140fac6b347ff10023d5a3133d852187a7002e2f8ce2
-    container_name: health-dataspace-cfm7-ihagent
-    command: ["/ihagent", "--mode=debug"]
+    # The hub's own IdentityHub activity in place of eclipse-cfm's IdentityHub agent,
+    # which creates the participant without an STS account; same image as
+    # cfm7-mvhdconnectoragent, MVHD_AGENT picks the activity.
+    image: mvhd/cfm-connector-agent:local
+    container_name: health-dataspace-cfm7-mvhdidentityagent
+    command: ["/mvhdconnectoragent", "--mode=debug"]
     environment:
+      MVHD_AGENT: "identityhub"
       # No collector on compose; the autoexport default would retry localhost:4318.
       OTEL_TRACES_EXPORTER: "none"
       OTEL_METRICS_EXPORTER: "none"
       OTEL_LOGS_EXPORTER: "none"
     volumes:
-      - ./jad/cfm/ihagent.dotenv:/etc/appname/ihagent.env:ro
+      - ./jad/cfm/mvhdidentityagent.dotenv:/etc/appname/mvhdidentityagent.env:ro
       - cfm7_subject_token:/var/run/secrets/cfm:ro
     depends_on:
+      cfm7-mvhdconnectoragent:
+        condition: service_started
       cfm7-nats:
         condition: service_healthy
       cfm7-token-exchange:

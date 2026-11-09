@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { PROVISIONING_HOURS } from "@/lib/provisioning";
 import { provisionParticipant, ProvisioningError } from "@/lib/edc/provision";
+import { cfmProvisioning, provisionThroughCfm } from "@/lib/edc/cfm-provision";
 import {
   listContexts,
   contextNames,
@@ -145,7 +146,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { contextId, did, steps } = await provisionParticipant({
+    // CFM_TENANT_URL set: through CFM's Tenant Manager (ADR-085); else the
+    // hub provisions the participant itself (ADR-078).
+    const provision = cfmProvisioning()
+      ? provisionThroughCfm
+      : provisionParticipant;
+    const { contextId, did, steps } = await provision({
       displayName,
       organization: str(body.organization),
       role,

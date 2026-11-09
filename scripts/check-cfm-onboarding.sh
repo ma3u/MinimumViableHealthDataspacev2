@@ -65,7 +65,11 @@ r="$(tm -X POST "$TM_URL/api/v1alpha1/tenants/$TENANT/participant-profiles" -d "
   \"identifier\": \"$DID\",
   \"dataspaceProfileIds\": [\"$DS_ID\"],
   \"participantRoles\": {\"$DS_ID\": [\"participant\"]},
-  \"vpaProperties\": {\"cfm.issuer\": {\"id\": \"$DID\"}},
+  \"vpaProperties\": {
+    \"cfm.issuer\": {\"id\": \"$DID\"},
+    \"cfm.dataplane\": {\"transferTypeMappings\": {\"HttpData-PULL\": {\"transferType\": \"HttpData-PULL\",
+      \"endpointType\": \"HTTP\", \"tokenSource\": \"provider\", \"endpoint\": \"http://neo4j-proxy:9090/dataspace/data\"}}}
+  },
   \"properties\": {}
 }")"
 [[ "$(status_of "$r")" -lt 300 ]] || {
@@ -113,6 +117,19 @@ print(" ".join(sorted(t for c in d if isinstance(c, dict) for t in c.get("verifi
     sleep 3
   done
   check "MembershipCredential in the IdentityHub" "MembershipCredential" "$(grep -o MembershipCredential <<<"$creds" | head -1 || true)"
+  # The test that needs all of it: STS client, keys, credential, DSP profile.
+  read -r PCTX PDID <<<"$(edc_body "http://controlplane:8081/api/mgmt/v5/participants" | python3 -I -c '
+import json, sys
+for p in json.load(sys.stdin):
+    if p.get("identity", "").endswith(":alpha-klinik"):
+        print(p["@id"], p["identity"]); break')"
+  if [[ -n "${PCTX:-}" ]]; then
+    catalog="$(docker run --rm --network "$NETWORK" "$CURL_IMAGE" -s -m 60 -o /dev/null -w '%{http_code}' \
+      -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -X POST \
+      -d "{\"@context\":[\"https://w3id.org/edc/connector/management/v2\"],\"@type\":\"CatalogRequest\",\"counterPartyAddress\":\"http://controlplane:8082/api/dsp/$PCTX/http-dsp-profile-2025-1\",\"counterPartyId\":\"$PDID\",\"protocol\":\"http-dsp-profile-2025-1\"}" \
+      "http://controlplane:8081/api/mgmt/v5/participants/$CTX/catalog/request")"
+    check "DSP catalogue from AlphaKlinik Berlin" "200" "$catalog"
+  fi
 fi
 
 echo "Disposing"
