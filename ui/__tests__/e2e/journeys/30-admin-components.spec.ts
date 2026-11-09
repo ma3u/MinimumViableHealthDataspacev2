@@ -46,7 +46,7 @@ test.describe("Admin → Components (J600–J609)", () => {
     expect(["docker", "azure-monitor", "none"]).toContain(body.metricsSource);
   });
 
-  test("J602 participant list is non-empty (CFM or Neo4j fallback)", async ({
+  test("J602 participant list is non-empty (control plane or Neo4j fallback)", async ({
     page,
   }) => {
     // Wait for the API snapshot call to complete

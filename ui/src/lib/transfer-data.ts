@@ -20,9 +20,9 @@ import { birthYear, patientPseudonym } from "@/lib/patient-identity";
 const SIGLET_TOKEN_URL = process.env.SIGLET_TOKEN_URL || "http://siglet:8080";
 const EDR_DATA_URL =
   process.env.EDR_DATA_URL || "http://neo4j-proxy:9090/dataspace/data";
-const EDR_DATA_HOSTS = (
-  process.env.EDR_DATA_HOSTS || "neo4j-proxy,dataplane-fhir"
-)
+// The neo4j-proxy serves the data on EDC 1.0 (runtimes/edc/README.md); the
+// JAD data planes that once did left with EDC 0.18 (#927).
+const EDR_DATA_HOSTS = (process.env.EDR_DATA_HOSTS || "neo4j-proxy")
   .split(",")
   .map((h) => h.trim().toLowerCase())
   .filter(Boolean);

@@ -4,8 +4,8 @@
  * Regression spec for the four bugs that surfaced once the stack moved from
  * Docker Compose to ACA:
  *
- *   1. /admin/tenants showed 0 participants (CFM tenant-manager unreachable
- *      at Docker hostname `health-dataspace-tenant-manager`).
+ *   1. /admin/tenants showed 0 participants (the participant source of the
+ *      time, CFM on EDC 0.18, was unreachable at its Docker hostname).
  *   2. /admin/components showed the STACKIT cost card on an Azure deployment.
  *   3. /admin/components showed empty CPU/memory rows because the topology
  *      route only knew how to talk to the Docker socket.
@@ -34,7 +34,7 @@ test.describe("Admin → Azure regression (J610–J619)", () => {
   test.beforeEach(async ({ page }) => {
     // Keycloak OIDC login on ACA consumes ~25s (networkidle + OIDC redirect
     // chain). The admin/components route itself can take 10-15s because it
-    // sequentially fetches Azure Monitor metrics and CFM tenant data. The 30s
+    // sequentially fetches Azure Monitor metrics and the participants. The 30s
     // default per-test timeout leaves no margin for the API response waits,
     // so raise it for every test in this describe block.
     test.setTimeout(60_000);

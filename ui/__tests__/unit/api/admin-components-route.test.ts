@@ -2,8 +2,9 @@
  * Unit tests for GET /api/admin/components route.
  *
  * Covers: Docker available/unavailable, container status mapping,
- * CPU/memory calculation, uptime calculation, participant data
- * from edcClient, sorting by layer, error handling, response structure.
+ * CPU/memory calculation, uptime calculation, participants from the control
+ * plane's contexts (ADR-078) with the Neo4j fallback, sorting by layer, the
+ * components left after EDC 0.18 (#927), error handling, response structure.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -15,11 +16,12 @@ vi.mock("node:http", () => ({
   request: (...args: unknown[]) => mockHttpRequest(...args),
 }));
 
-const mockTenant = vi.fn();
+// The control plane's Management API is the only EDC API the route reads;
+// the CFM facades are gone (#927), so the mock has none.
 const mockManagement = vi.fn();
 vi.mock("@/lib/edc", () => ({
+  EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
   edcClient: {
-    tenant: (...args: unknown[]) => mockTenant(...args),
     management: (...args: unknown[]) => mockManagement(...args),
   },
 }));
@@ -167,39 +169,43 @@ const KEYCLOAK: MockContainer = {
   State: "running",
 };
 
-/* ── Tenants/participants mock data ── */
+/* ── Control plane contexts ── */
 
-const MOCK_TENANTS = [
-  {
-    id: "t1",
-    version: 1,
-    properties: {
-      displayName: "AlphaKlinik Berlin",
-      organization: "AlphaKlinik Berlin",
-      ehdsParticipantType: "DATA_HOLDER",
-      did: "did:web:alpha-klinik.de:participant",
-    },
-  },
-  {
-    id: "t2",
-    version: 1,
-    properties: {
-      displayName: "PharmaCo Research AG",
-      organization: "PharmaCo Research AG",
-      role: "DATA_USER",
-    },
-  },
-];
-
-const MOCK_EDC_PARTICIPANTS = [
+// Two of the seeded five, named by their DID slug (lib/edc/participants.ts),
+// and one onboarded through the hub, which carries its own properties.
+const MOCK_CONTEXTS = [
   {
     "@id": "ctx-alpha",
-    identity: "did:web:alpha-klinik.de:participant",
+    identity: "did:web:identityhub%3A7083:alpha-klinik",
     state: "CREATED",
+  },
+  {
+    "@id": "ctx-pharmaco",
+    identity: "did:web:identityhub%3A7083:pharmaco",
+    state: "ACTIVATED",
+  },
+  {
+    "@id": "ctx-nord",
+    identity: "did:web:identityhub%3A7083:testklinik-nord",
+    state: "CREATED",
+    properties: {
+      displayName: "Testklinik Nord",
+      organization: "Testklinik Nord GmbH",
+      ehdsParticipantType: "DATA_HOLDER",
+    },
   },
 ];
 
-const MOCK_PROFILES = [{ participantContextId: "ctx-alpha" }];
+const RETIRED_CONTAINERS = [
+  "health-dataspace-dataplane-fhir",
+  "health-dataspace-dataplane-omop",
+  "health-dataspace-tenant-manager",
+  "health-dataspace-provision-manager",
+  "health-dataspace-cfm-edcv-agent",
+  "health-dataspace-cfm-keycloak-agent",
+  "health-dataspace-cfm-onboarding-agent",
+  "health-dataspace-cfm-registration-agent",
+];
 
 /* ── Setup ── */
 
@@ -210,7 +216,6 @@ beforeEach(() => {
   vi.spyOn(console, "warn").mockImplementation(() => {});
 
   // Default: no participants
-  mockTenant.mockRejectedValue(new Error("unavailable"));
   mockManagement.mockRejectedValue(new Error("unavailable"));
   // Default: Neo4j fallback returns no participants so existing empty-case
   // assertions remain valid. Tests that need seeded fallback override this.
@@ -219,6 +224,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 // =====================================================================
@@ -340,7 +346,7 @@ describe("GET /api/admin/components — Docker available", () => {
     const res = await GET();
     const data = await res.json();
     const layers = data.components.map((c: { layer: string }) => c.layer);
-    // edc-core < identity < cfm < infrastructure
+    // edc-core < identity < infrastructure
     const edcIdx = layers.indexOf("edc-core");
     const identityIdx = layers.indexOf("identity");
     const infraIdx = layers.indexOf("infrastructure");
@@ -384,115 +390,185 @@ describe("GET /api/admin/components — Docker unavailable", () => {
     setupDockerUnavailable();
     const res = await GET();
     const data = await res.json();
-    // SERVICE_MAP has 20 entries
-    expect(data.components.length).toBe(20);
+    // SERVICE_MAP has 13 entries since the EDC 0.18 apps left (#927)
+    expect(data.components.length).toBe(13);
   });
 });
 
 // =====================================================================
-// Participant data from edcClient
+// The components left after EDC 0.18 (#927)
 // =====================================================================
-describe("GET /api/admin/components — participant data", () => {
+describe("GET /api/admin/components, EDC 1.0 components", () => {
+  it("lists siglet as the data plane in the EDC core layer", async () => {
+    setupDockerUnavailable();
+    const data = await (await GET()).json();
+    const siglet = data.components.find(
+      (c: { container: string }) => c.container === "health-dataspace-siglet",
+    );
+    expect(siglet).toMatchObject({
+      component: "Data Plane (siglet)",
+      layer: "edc-core",
+    });
+  });
+
+  it("lists no JAD data plane, CFM manager or agent, and no cfm layer", async () => {
+    setupDockerUnavailable();
+    const data = await (await GET()).json();
+    const containers = data.components.map(
+      (c: { container: string }) => c.container,
+    );
+    for (const retired of RETIRED_CONTAINERS) {
+      expect(containers).not.toContain(retired);
+    }
+    const layers = new Set(
+      data.components.map((c: { layer: string }) => c.layer),
+    );
+    expect([...layers].sort()).toEqual([
+      "edc-core",
+      "identity",
+      "infrastructure",
+    ]);
+  });
+
+  it("reads siglet's container status from Docker", async () => {
+    setupDockerAvailable(
+      [{ Id: "sig1", Names: ["/health-dataspace-siglet"], State: "running" }],
+      { sig1: makeDockerInspect(undefined) },
+    );
+    const data = await (await GET()).json();
+    const siglet = data.components.find(
+      (c: { component: string }) => c.component === "Data Plane (siglet)",
+    );
+    expect(siglet.status).toBe("running");
+  });
+
+  it("maps the Container Apps on Azure: mvhd-siglet in, the nine 0.18 apps out", async () => {
+    // Azure without a subscription id: no ARM call, so the route falls back
+    // to the ACA map with every app unknown.
+    vi.stubEnv("DEPLOYMENT_TARGET", "azure");
+    vi.stubEnv("AZURE_SUBSCRIPTION_ID", "");
+    setupDockerUnavailable();
+    const data = await (await GET()).json();
+    const containers = data.components.map(
+      (c: { container: string }) => c.container,
+    );
+    expect(containers).toContain("mvhd-siglet");
+    for (const retired of [
+      "mvhd-dp-fhir",
+      "mvhd-dp-omop",
+      "mvhd-tenant-mgr",
+      "mvhd-provision-mgr",
+    ]) {
+      expect(containers).not.toContain(retired);
+    }
+    expect(
+      data.components.some((c: { layer: string }) => c.layer === "cfm"),
+    ).toBe(false);
+  });
+});
+
+// =====================================================================
+// Participants from the control plane (ADR-078)
+// =====================================================================
+describe("GET /api/admin/components, participant data", () => {
   beforeEach(() => {
-    setupDockerUnavailable(); // simplify — Docker not needed for participant tests
+    setupDockerUnavailable(); // Docker is not needed for participant tests
   });
 
-  it("fetches participants from tenant API", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
+  it("reads the participants from the control plane's contexts", async () => {
+    mockManagement.mockResolvedValue(MOCK_CONTEXTS);
 
     const res = await GET();
     const data = await res.json();
-    expect(data.participants).toHaveLength(2);
-    expect(data.participants[0].displayName).toBe("AlphaKlinik Berlin");
+    expect(data.participants).toHaveLength(3);
+    // One read of the contexts, and no other EDC call.
+    expect(mockManagement.mock.calls.map((c) => c[0])).toEqual([
+      "/v5/participants",
+    ]);
   });
 
-  it("maps participant properties correctly", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      return Promise.resolve(MOCK_PROFILES);
+  it("names a seeded participant by its DID slug", async () => {
+    mockManagement.mockResolvedValue(MOCK_CONTEXTS);
+
+    const data = await (await GET()).json();
+    const alpha = data.participants.find(
+      (p: { id: string }) => p.id === "ctx-alpha",
+    );
+    expect(alpha).toEqual({
+      id: "ctx-alpha",
+      displayName: "AlphaKlinik Berlin",
+      organization: "AlphaKlinik Berlin",
+      role: "DATA_HOLDER",
+      did: "did:web:identityhub%3A7083:alpha-klinik",
+      state: "CREATED",
+      profileCount: 1,
     });
-    mockManagement.mockResolvedValue(MOCK_EDC_PARTICIPANTS);
-
-    const res = await GET();
-    const data = await res.json();
-    const alpha = data.participants.find((p: { id: string }) => p.id === "t1");
-    expect(alpha.organization).toBe("AlphaKlinik Berlin");
-    expect(alpha.role).toBe("DATA_HOLDER");
-    expect(alpha.did).toBe("did:web:alpha-klinik.de:participant");
-    expect(alpha.state).toBe("CREATED");
-  });
-
-  it("uses profileCount from profiles endpoint", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      if (path.includes("t1/participant-profiles"))
-        return Promise.resolve([{ id: "p1" }, { id: "p2" }]);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
-
-    const res = await GET();
-    const data = await res.json();
-    const alpha = data.participants.find((p: { id: string }) => p.id === "t1");
-    expect(alpha.profileCount).toBe(2);
-  });
-
-  it("falls back to role property when ehdsParticipantType missing", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
-
-    const res = await GET();
-    const data = await res.json();
     const pharmaco = data.participants.find(
-      (p: { id: string }) => p.id === "t2",
+      (p: { id: string }) => p.id === "ctx-pharmaco",
     );
     expect(pharmaco.role).toBe("DATA_USER");
+    expect(pharmaco.state).toBe("ACTIVATED");
   });
 
-  it("handles tenant API failure gracefully", async () => {
-    mockTenant.mockRejectedValue(new Error("connection refused"));
+  it("takes an onboarded participant's names and role from its context", async () => {
+    mockManagement.mockResolvedValue(MOCK_CONTEXTS);
+
+    const data = await (await GET()).json();
+    const nord = data.participants.find(
+      (p: { id: string }) => p.id === "ctx-nord",
+    );
+    expect(nord.displayName).toBe("Testklinik Nord");
+    expect(nord.organization).toBe("Testklinik Nord GmbH");
+    expect(nord.role).toBe("DATA_HOLDER");
+  });
+
+  it("falls back to the seeded graph when the control plane is unreachable", async () => {
+    mockManagement.mockRejectedValue(new Error("connection refused"));
+    mockRunQuery.mockResolvedValue([
+      {
+        id: "did:web:lmc.nl:clinic",
+        name: "Limburg Medical Centre",
+        type: "DATA_HOLDER",
+        did: "did:web:lmc.nl:clinic",
+      },
+    ]);
+
+    const data = await (await GET()).json();
+    expect(data.participants).toEqual([
+      {
+        id: "did:web:lmc.nl:clinic",
+        displayName: "Limburg Medical Centre",
+        organization: "Limburg Medical Centre",
+        role: "DATA_HOLDER",
+        did: "did:web:lmc.nl:clinic",
+        state: "SEEDED",
+        profileCount: 0,
+      },
+    ]);
+  });
+
+  it("falls back to the seeded graph when the control plane has no context", async () => {
+    mockManagement.mockResolvedValue([]);
+    mockRunQuery.mockResolvedValue([
+      {
+        id: "did:web:irs.fr:hdab",
+        name: "Institut de Recherche Santé",
+        type: "HDAB",
+        did: "did:web:irs.fr:hdab",
+      },
+    ]);
+
+    const data = await (await GET()).json();
+    expect(data.participants).toHaveLength(1);
+    expect(data.participants[0].state).toBe("SEEDED");
+  });
+
+  it("returns no participants when the control plane and Neo4j both fail", async () => {
+    mockManagement.mockRejectedValue(new Error("connection refused"));
+    mockRunQuery.mockRejectedValue(new Error("bolt down"));
     const res = await GET();
     const data = await res.json();
     expect(data.participants).toEqual([]);
-  });
-
-  it("handles management API failure gracefully", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockRejectedValue(new Error("auth error"));
-
-    const res = await GET();
-    const data = await res.json();
-    // Participants still returned, but DID/state come from tenant properties
-    expect(data.participants).toHaveLength(2);
-    expect(data.participants[0].did).toBe(
-      "did:web:alpha-klinik.de:participant",
-    );
-    expect(data.participants[0].state).toBe("—");
-  });
-
-  it("handles per-tenant profile fetch failure", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      if (path.includes("t1/participant-profiles"))
-        return Promise.reject(new Error("timeout"));
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
-
-    const res = await GET();
-    const data = await res.json();
-    const alpha = data.participants.find((p: { id: string }) => p.id === "t1");
-    expect(alpha.profileCount).toBe(0);
   });
 });
 

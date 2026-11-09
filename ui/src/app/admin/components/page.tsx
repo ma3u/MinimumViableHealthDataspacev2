@@ -334,7 +334,7 @@ export default function AdminComponentsPage() {
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                     <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
                       <HardDrive size={16} className="text-(--warning-text)" />
-                      {t("Shared Infrastructure & CFM")}
+                      {t("Shared Infrastructure")}
                       <span className="text-xs font-normal text-(--text-secondary)">
                         ({topology.infrastructure.length})
                       </span>
@@ -453,7 +453,7 @@ export default function AdminComponentsPage() {
             )}
 
             {/* Component tables per layer */}
-            {["edc-core", "identity", "cfm", "infrastructure"].map((layer) => {
+            {["edc-core", "identity", "infrastructure"].map((layer) => {
               const items = grouped[layer];
               if (!items || items.length === 0) return null;
               const meta = LAYER_META[layer];

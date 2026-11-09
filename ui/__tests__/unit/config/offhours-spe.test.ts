@@ -49,6 +49,11 @@ case "$*" in
   *"containerapp show --name mvhd-trustee"*)
     if [ "$TRUSTEE_EXISTS" = 1 ]; then echo mvhd-trustee; exit 0; fi
     echo "ResourceNotFound" >&2; exit 3 ;;
+  *"containerapp show --name mvhd-cfm-"*|*"containerapp show --name mvhd-dp-"*|*"containerapp show --name mvhd-tenant-mgr"*|*"containerapp show --name mvhd-provision-mgr"*)
+    for a in $RETIRED_EXIST; do
+      case "$*" in *"--name $a "*) echo "$a"; exit 0 ;; esac
+    done
+    echo "ResourceNotFound" >&2; exit 3 ;;
   *"containerapp update --name mvhd-ui"*"LIVE_DEMO_OFFLINE=true"*) echo true > "$STATE/ui_flag" ;;
   *"containerapp update --name mvhd-ui"*"LIVE_DEMO_OFFLINE=false"*) echo false > "$STATE/ui_flag" ;;
   *LIVE_DEMO_OFFLINE*) cat "$STATE/ui_flag" ;;
@@ -69,7 +74,12 @@ let dir: string;
 
 function run(
   action: "stop" | "start" | "idle-stop",
-  opts: { groups: string[]; trustee: boolean; env?: Record<string, string> },
+  opts: {
+    groups: string[];
+    trustee: boolean;
+    retired?: string[];
+    env?: Record<string, string>;
+  },
 ) {
   writeFileSync(join(dir, "pg"), action === "stop" ? "Ready\n" : "Stopped\n");
   writeFileSync(join(dir, "ui_flag"), action === "stop" ? "false\n" : "true\n");
@@ -80,6 +90,7 @@ function run(
       STATE: dir,
       SPE_GROUPS_EXIST: opts.groups.join(" "),
       TRUSTEE_EXISTS: opts.trustee ? "1" : "0",
+      RETIRED_EXIST: (opts.retired ?? []).join(" "),
       ...(opts.env ?? {}),
     },
     encoding: "utf8",
@@ -204,6 +215,73 @@ describe("offhours.sh and the SPE workspaces on ACI (ADR-069)", SLOW, () => {
     expect(log.filter((l) => / container (stop|start) /.test(l))).toEqual([]);
     expect(appsOf(log, "set-app-power.sh start")).not.toContain("mvhd-trustee");
     expect(appsOf(log, "set-app-power.sh start")).toContain("mvhd-neo4j-proxy");
+  });
+});
+
+/** The nine 0.18 apps #927 retires: CFM's managers, agents and shim, JAD's data planes. */
+const RETIRED = [
+  "mvhd-cfm-obagent",
+  "mvhd-cfm-regagent",
+  "mvhd-cfm-edcvagent",
+  "mvhd-cfm-kcagent",
+  "mvhd-cfm-cp-shim",
+  "mvhd-provision-mgr",
+  "mvhd-tenant-mgr",
+  "mvhd-dp-omop",
+  "mvhd-dp-fhir",
+];
+
+/** Every app any `set-app-power.sh start` call was given, in order. */
+const allStarted = (log: string[]) =>
+  log
+    .filter((l) => l.startsWith("set-app-power.sh start"))
+    .flatMap((l) =>
+      l.slice("set-app-power.sh start".length).trim().split(/\s+/),
+    );
+
+describe("offhours.sh and the retired 0.18 apps (#927)", SLOW, () => {
+  it("stops the retired apps that still exist, first, and only those", () => {
+    const { status, stderr, log } = run("stop", {
+      ...NONE,
+      retired: ["mvhd-tenant-mgr", "mvhd-dp-fhir"],
+    });
+    expect(status, stderr).toBe(0);
+    const stopped = appsOf(log, "set-app-power.sh stop");
+    expect(stopped.slice(0, 2)).toEqual(["mvhd-tenant-mgr", "mvhd-dp-fhir"]);
+    for (const app of RETIRED.filter(
+      (a) => a !== "mvhd-tenant-mgr" && a !== "mvhd-dp-fhir",
+    )) {
+      expect(stopped).not.toContain(app);
+    }
+    expect(stopped).toContain("mvhd-siglet");
+    expect(stopped.indexOf("mvhd-siglet")).toBeLessThan(
+      stopped.indexOf("mvhd-controlplane"),
+    );
+    expect(stderr).toContain("2 retired 0.18 apps still exist (#927)");
+  });
+
+  it("stops none of them once step 5 has deleted them", () => {
+    const { status, stderr, log } = run("stop", NONE);
+    expect(status, stderr).toBe(0);
+    const stopped = appsOf(log, "set-app-power.sh stop");
+    for (const app of RETIRED) expect(stopped).not.toContain(app);
+    expect(stderr).not.toContain("retired 0.18 apps");
+  });
+
+  it("never starts them, even while they exist", () => {
+    const { status, stderr, log } = run("start", { ...NONE, retired: RETIRED });
+    expect(status, stderr).toBe(0);
+    const started = allStarted(log);
+    for (const app of RETIRED) expect(started).not.toContain(app);
+    expect(started).toEqual(
+      expect.arrayContaining([
+        "mvhd-controlplane",
+        "mvhd-siglet",
+        "mvhd-identityhub",
+        "mvhd-issuerservice",
+      ]),
+    );
+    expect(stderr).not.toContain("CFM");
   });
 });
 

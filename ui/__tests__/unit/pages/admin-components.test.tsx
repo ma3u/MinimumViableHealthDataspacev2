@@ -58,8 +58,8 @@ const HEALTHY_COMPONENT = {
 };
 
 const CRITICAL_COMPONENT = {
-  name: "Data Plane FHIR",
-  container: "health-dataspace-dataplane-fhir",
+  name: "Data Plane (siglet)",
+  container: "health-dataspace-siglet",
   status: "unhealthy",
   severity: "critical" as const,
   cpu: 95.5,
@@ -150,8 +150,8 @@ const MOCK_SNAPSHOT = {
       mem: { usedMB: 256, limitMB: 1024, percent: 25.0 },
     },
     {
-      container: "health-dataspace-dataplane-fhir",
-      component: "Data Plane FHIR",
+      container: "health-dataspace-siglet",
+      component: "Data Plane (siglet)",
       layer: "edc-core",
       status: "healthy",
       uptime: "5h 30m",
@@ -294,6 +294,8 @@ describe("participant view (default)", () => {
     await waitFor(() => {
       expect(screen.getByText(/Shared Infrastructure/)).toBeInTheDocument();
     });
+    // CFM left with EDC 0.18 (#927); the heading no longer names it.
+    expect(screen.queryByText(/CFM/)).not.toBeInTheDocument();
     expect(screen.getAllByText("PostgreSQL")[0]).toBeInTheDocument();
     expect(screen.getAllByText("NATS")[0]).toBeInTheDocument();
   });
@@ -359,7 +361,7 @@ describe("participant sections", () => {
     render(<AdminComponentsPage />);
     await waitFor(() => {
       // PharmaCo is critical → auto-expanded → components visible
-      expect(screen.getByText("Data Plane FHIR")).toBeInTheDocument();
+      expect(screen.getByText("Data Plane (siglet)")).toBeInTheDocument();
     });
   });
 
@@ -540,6 +542,9 @@ describe("layer view", () => {
     expect(screen.getByText("EDC-V Core")).toBeInTheDocument();
     expect(screen.getByText("Identity & Trust")).toBeInTheDocument();
     expect(screen.getByText("Infrastructure")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Connector Fabric Manager"),
+    ).not.toBeInTheDocument();
   });
 
   it("shows component status badges", async () => {

@@ -5,8 +5,8 @@
     {
       "id": "b12c0cbe-3823-4e01-b367-de1855eff252",
       "displayName": "AlphaKlinik Berlin",
-      "organization": "AlphaKlinik Berlin \u2014 Universit\u00e4tsklinikum",
-      "role": "data-holder",
+      "organization": "AlphaKlinik Berlin",
+      "role": "DATA_HOLDER",
       "did": "did:web:identityhub%3A7083:alpha-klinik",
       "state": "ACTIVATED",
       "health": "healthy",
@@ -21,21 +21,12 @@
           "uptime": "12h 49m"
         },
         {
-          "name": "Data Plane FHIR",
-          "container": "health-dataspace-dataplane-fhir",
-          "status": "healthy",
+          "name": "Data Plane (siglet)",
+          "container": "health-dataspace-siglet",
+          "status": "running",
           "severity": "healthy",
-          "cpu": 0.53,
-          "memMB": 166.6,
-          "uptime": "12h 49m"
-        },
-        {
-          "name": "Data Plane OMOP",
-          "container": "health-dataspace-dataplane-omop",
-          "status": "healthy",
-          "severity": "healthy",
-          "cpu": 0.23,
-          "memMB": 160.7,
+          "cpu": 0.12,
+          "memMB": 14.2,
           "uptime": "12h 49m"
         },
         {
@@ -79,8 +70,8 @@
     {
       "id": "b7f3fa0e-badd-479c-be33-7dd539a18986",
       "displayName": "Institut de Recherche Sant\u00e9",
-      "organization": "Institut de Recherche Sant\u00e9 \u2014 Research HDAB",
-      "role": "health-data-access-body",
+      "organization": "Institut de Recherche Sant\u00e9",
+      "role": "HDAB",
       "did": "did:web:identityhub%3A7083:irs",
       "state": "ACTIVATED",
       "health": "healthy",
@@ -95,21 +86,12 @@
           "uptime": "12h 49m"
         },
         {
-          "name": "Data Plane FHIR",
-          "container": "health-dataspace-dataplane-fhir",
-          "status": "healthy",
+          "name": "Data Plane (siglet)",
+          "container": "health-dataspace-siglet",
+          "status": "running",
           "severity": "healthy",
-          "cpu": 0.53,
-          "memMB": 166.6,
-          "uptime": "12h 49m"
-        },
-        {
-          "name": "Data Plane OMOP",
-          "container": "health-dataspace-dataplane-omop",
-          "status": "healthy",
-          "severity": "healthy",
-          "cpu": 0.23,
-          "memMB": 160.7,
+          "cpu": 0.12,
+          "memMB": 14.2,
           "uptime": "12h 49m"
         },
         {
@@ -153,8 +135,8 @@
     {
       "id": "1ff4740a-e208-4023-a71f-2bfbc045c278",
       "displayName": "Limburg Medical Centre",
-      "organization": "Limburg Medical Centre \u2014 Academic Hospital",
-      "role": "data-holder",
+      "organization": "Limburg Medical Centre",
+      "role": "DATA_HOLDER",
       "did": "did:web:identityhub%3A7083:lmc",
       "state": "ACTIVATED",
       "health": "healthy",
@@ -169,21 +151,12 @@
           "uptime": "12h 49m"
         },
         {
-          "name": "Data Plane FHIR",
-          "container": "health-dataspace-dataplane-fhir",
-          "status": "healthy",
+          "name": "Data Plane (siglet)",
+          "container": "health-dataspace-siglet",
+          "status": "running",
           "severity": "healthy",
-          "cpu": 0.53,
-          "memMB": 166.6,
-          "uptime": "12h 49m"
-        },
-        {
-          "name": "Data Plane OMOP",
-          "container": "health-dataspace-dataplane-omop",
-          "status": "healthy",
-          "severity": "healthy",
-          "cpu": 0.23,
-          "memMB": 160.7,
+          "cpu": 0.12,
+          "memMB": 14.2,
           "uptime": "12h 49m"
         },
         {
@@ -227,8 +200,8 @@
     {
       "id": "015085e9-6689-416f-8ae3-399fde0b3231",
       "displayName": "MedReg DE",
-      "organization": "MedReg DE \u2014 Health Data Access Body",
-      "role": "health-data-access-body",
+      "organization": "MedReg DE",
+      "role": "HDAB",
       "did": "did:web:identityhub%3A7083:medreg",
       "state": "ACTIVATED",
       "health": "healthy",
@@ -243,21 +216,12 @@
           "uptime": "12h 49m"
         },
         {
-          "name": "Data Plane FHIR",
-          "container": "health-dataspace-dataplane-fhir",
-          "status": "healthy",
+          "name": "Data Plane (siglet)",
+          "container": "health-dataspace-siglet",
+          "status": "running",
           "severity": "healthy",
-          "cpu": 0.53,
-          "memMB": 166.6,
-          "uptime": "12h 49m"
-        },
-        {
-          "name": "Data Plane OMOP",
-          "container": "health-dataspace-dataplane-omop",
-          "status": "healthy",
-          "severity": "healthy",
-          "cpu": 0.23,
-          "memMB": 160.7,
+          "cpu": 0.12,
+          "memMB": 14.2,
           "uptime": "12h 49m"
         },
         {
@@ -301,8 +265,8 @@
     {
       "id": "d790c1f8-a0f1-4138-868a-0877a7e635a2",
       "displayName": "PharmaCo Research AG",
-      "organization": "PharmaCo Research AG \u2014 Clinical Trials Division",
-      "role": "data-user",
+      "organization": "PharmaCo Research AG",
+      "role": "DATA_USER",
       "did": "did:web:identityhub%3A7083:pharmaco",
       "state": "ACTIVATED",
       "health": "healthy",
@@ -317,21 +281,12 @@
           "uptime": "12h 49m"
         },
         {
-          "name": "Data Plane FHIR",
-          "container": "health-dataspace-dataplane-fhir",
-          "status": "healthy",
+          "name": "Data Plane (siglet)",
+          "container": "health-dataspace-siglet",
+          "status": "running",
           "severity": "healthy",
-          "cpu": 0.53,
-          "memMB": 166.6,
-          "uptime": "12h 49m"
-        },
-        {
-          "name": "Data Plane OMOP",
-          "container": "health-dataspace-dataplane-omop",
-          "status": "healthy",
-          "severity": "healthy",
-          "cpu": 0.23,
-          "memMB": 160.7,
+          "cpu": 0.12,
+          "memMB": 14.2,
           "uptime": "12h 49m"
         },
         {
@@ -374,66 +329,6 @@
     }
   ],
   "infrastructure": [
-    {
-      "name": "EDC-V Agent",
-      "container": "health-dataspace-cfm-edcv-agent",
-      "layer": "cfm",
-      "status": "running",
-      "severity": "healthy",
-      "cpu": 0.05,
-      "memMB": 20.1,
-      "uptime": "12h 49m"
-    },
-    {
-      "name": "Keycloak Agent",
-      "container": "health-dataspace-cfm-keycloak-agent",
-      "layer": "cfm",
-      "status": "running",
-      "severity": "healthy",
-      "cpu": 0.11,
-      "memMB": 20.9,
-      "uptime": "12h 49m"
-    },
-    {
-      "name": "Onboarding Agent",
-      "container": "health-dataspace-cfm-onboarding-agent",
-      "layer": "cfm",
-      "status": "running",
-      "severity": "healthy",
-      "cpu": 0.1,
-      "memMB": 17.4,
-      "uptime": "12h 49m"
-    },
-    {
-      "name": "Provision Manager",
-      "container": "health-dataspace-provision-manager",
-      "layer": "cfm",
-      "status": "running",
-      "severity": "healthy",
-      "cpu": 0.03,
-      "memMB": 19,
-      "uptime": "12h 49m"
-    },
-    {
-      "name": "Registration Agent",
-      "container": "health-dataspace-cfm-registration-agent",
-      "layer": "cfm",
-      "status": "running",
-      "severity": "healthy",
-      "cpu": 0.04,
-      "memMB": 7,
-      "uptime": "12h 49m"
-    },
-    {
-      "name": "Tenant Manager",
-      "container": "health-dataspace-tenant-manager",
-      "layer": "cfm",
-      "status": "running",
-      "severity": "healthy",
-      "cpu": 0.04,
-      "memMB": 25.1,
-      "uptime": "12h 49m"
-    },
     {
       "name": "NATS",
       "container": "health-dataspace-nats",
@@ -498,11 +393,11 @@
   "summary": {
     "totalParticipants": 5,
     "degradedParticipants": 0,
-    "totalInfra": 12
+    "totalInfra": 6
   },
   "clusterMetrics": {
-    "currentCpu": 11.88,
-    "currentMemMB": 3473.6,
+    "currentCpu": 10.87,
+    "currentMemMB": 3051.0,
     "last24h": {
       "peakCpu": 17.03,
       "peakMemMB": 3468.3,

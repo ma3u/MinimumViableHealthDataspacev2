@@ -27,7 +27,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboards")
 LOKI = {"type": "loki", "uid": "loki"}
 AUDIT = {"type": "yesoreyeram-infinity-datasource", "uid": "mvhd-audit"}
 PROXY = '{service_name=~".*neo4j-proxy.*"}'
-EDC = 'health-dataspace-(controlplane|dataplane-fhir|dataplane-omop|identityhub|issuerservice)|mvhd-(controlplane|dp-fhir|dp-omop|identityhub|issuerservice)'
+EDC = 'health-dataspace-(controlplane|siglet|identityhub|issuerservice)|mvhd-(controlplane|siglet|identityhub|issuerservice)'
 
 OUTCOME_MAP = [
     {"type": "value", "options": {
@@ -302,7 +302,8 @@ LAW_ID = ("/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg
           "/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs")
 ACA_APPS = ["mvhd-ui", "mvhd-neo4j-proxy", "mvhd-neo4j", "mvhd-keycloak",
             "mvhd-controlplane", "mvhd-identityhub", "mvhd-observability"]
-EDC_APPS = ["mvhd-controlplane", "mvhd-dp-fhir", "mvhd-dp-omop", "mvhd-identityhub", "mvhd-issuerservice"]
+# EDC 1.0 (ADR-078): siglet is the data plane; JAD's two are gone (#927).
+EDC_APPS = ["mvhd-controlplane", "mvhd-siglet", "mvhd-identityhub", "mvhd-issuerservice"]
 ACA_NS = "microsoft.app/containerapps"
 PG_NS = "microsoft.dbforpostgresql/flexibleservers"
 PG_SERVER = "mvhd-pg-b53a0449"

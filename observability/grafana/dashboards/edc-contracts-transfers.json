@@ -1467,7 +1467,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (service_name) (count_over_time({service_name=~\"health-dataspace-(controlplane|dataplane-fhir|dataplane-omop|identityhub|issuerservice)|mvhd-(controlplane|dp-fhir|dp-omop|identityhub|issuerservice)\"} | detected_level=~\"(?i)error|severe\" != \"otel.javaagent\" [$__auto]))",
+          "expr": "sum by (service_name) (count_over_time({service_name=~\"health-dataspace-(controlplane|siglet|identityhub|issuerservice)|mvhd-(controlplane|siglet|identityhub|issuerservice)\"} | detected_level=~\"(?i)error|severe\" != \"otel.javaagent\" [$__auto]))",
           "legendFormat": "{{service_name}}",
           "queryType": "range",
           "refId": "A"
@@ -1520,7 +1520,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (service_name) (count_over_time({service_name=~\"health-dataspace-(controlplane|dataplane-fhir|dataplane-omop|identityhub|issuerservice)|mvhd-(controlplane|dp-fhir|dp-omop|identityhub|issuerservice)\"} [$__auto]))",
+          "expr": "sum by (service_name) (count_over_time({service_name=~\"health-dataspace-(controlplane|siglet|identityhub|issuerservice)|mvhd-(controlplane|siglet|identityhub|issuerservice)\"} [$__auto]))",
           "legendFormat": "{{service_name}}",
           "queryType": "range",
           "refId": "A"
@@ -1573,7 +1573,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{service_name=~\"health-dataspace-(controlplane|dataplane-fhir|dataplane-omop|identityhub|issuerservice)|mvhd-(controlplane|dp-fhir|dp-omop|identityhub|issuerservice)\"} | detected_level=~\"(?i)error|severe\" != \"otel.javaagent\"",
+          "expr": "{service_name=~\"health-dataspace-(controlplane|siglet|identityhub|issuerservice)|mvhd-(controlplane|siglet|identityhub|issuerservice)\"} | detected_level=~\"(?i)error|severe\" != \"otel.javaagent\"",
           "legendFormat": "",
           "queryType": "range",
           "refId": "A"

@@ -88,14 +88,20 @@ describe("costForEnvironment", () => {
   });
 
   it("keeps the live stack in the range the schedule predicts", () => {
-    // 21 apps with the SPE Trustee (#774), all stopped off hours (ADR-053):
-    // about €302 compute and €370 in all
-    expect(cost.apps).toHaveLength(21);
+    // 13 apps since the nine EDC 0.18 apps left and siglet came in (#927),
+    // all stopped off hours (ADR-053): about €221 compute and €289 in all
+    expect(cost.apps).toHaveLength(13);
+    expect(cost.apps.map((a) => a.name)).toContain("mvhd-siglet");
+    expect(
+      cost.apps.filter((a) =>
+        /^mvhd-(cfm-|dp-|tenant-mgr|provision-mgr)/.test(a.name),
+      ),
+    ).toEqual([]);
     expect(cost.apps.every((a) => a.idleEur === 0)).toBe(true);
-    expect(cost.computeEur).toBeGreaterThan(260);
-    expect(cost.computeEur).toBeLessThan(330);
-    expect(cost.totalEur).toBeGreaterThan(330);
-    expect(cost.totalEur).toBeLessThan(400);
+    expect(cost.computeEur).toBeGreaterThan(190);
+    expect(cost.computeEur).toBeLessThan(250);
+    expect(cost.totalEur).toBeGreaterThan(260);
+    expect(cost.totalEur).toBeLessThan(320);
   });
 
   it("adds nothing for SPE workspaces when there are none", () => {

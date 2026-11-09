@@ -3,7 +3,9 @@
  *
  * Covers: Docker available/unavailable, severity derivation, worst severity
  * aggregation, participant health, infrastructure components, sorting,
- * summary counts, edcClient integration, error handling.
+ * summary counts, participants from the control plane's contexts (ADR-078)
+ * with the Neo4j fallback, siglet as the data plane after EDC 0.18 (#927),
+ * the Azure path, error handling.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -15,13 +17,24 @@ vi.mock("node:http", () => ({
   request: (...args: unknown[]) => mockHttpRequest(...args),
 }));
 
-const mockTenant = vi.fn();
+// The control plane's Management API is the only EDC API the route reads;
+// the CFM facades are gone (#927), so the mock has none.
 const mockManagement = vi.fn();
 vi.mock("@/lib/edc", () => ({
+  EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
   edcClient: {
-    tenant: (...args: unknown[]) => mockTenant(...args),
     management: (...args: unknown[]) => mockManagement(...args),
   },
+}));
+
+// ARM is stubbed; isAzureDeployment() and the env readers stay real, so a
+// test turns the Azure path on with vi.stubEnv.
+const mockListContainerApps = vi.fn();
+const mockAppMetrics = vi.fn();
+vi.mock("@/lib/azure-arm", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/azure-arm")>()),
+  listContainerApps: (...args: unknown[]) => mockListContainerApps(...args),
+  getContainerAppMetrics: (...args: unknown[]) => mockAppMetrics(...args),
 }));
 
 const mockRunQuery = vi.fn();
@@ -148,18 +161,11 @@ function setupDockerUnavailable() {
 
 const NOW = new Date("2026-03-21T10:00:00Z").getTime();
 
+// The first six are PARTICIPANT_SERVICES, in order: Control Plane, siglet,
+// Identity Hub (the core three), Issuer Service, Keycloak, Vault.
 const CONTAINERS: MockContainer[] = [
   { Id: "cp1", Names: ["/health-dataspace-controlplane"], State: "running" },
-  {
-    Id: "dp-fhir1",
-    Names: ["/health-dataspace-dataplane-fhir"],
-    State: "running",
-  },
-  {
-    Id: "dp-omop1",
-    Names: ["/health-dataspace-dataplane-omop"],
-    State: "running",
-  },
+  { Id: "sig1", Names: ["/health-dataspace-siglet"], State: "running" },
   {
     Id: "ih1",
     Names: ["/health-dataspace-identityhub"],
@@ -181,68 +187,35 @@ const CONTAINERS: MockContainer[] = [
     State: "running",
   },
   { Id: "traefik1", Names: ["/health-dataspace-traefik"], State: "running" },
-  {
-    Id: "tm1",
-    Names: ["/health-dataspace-tenant-manager"],
-    State: "running",
-  },
-  {
-    Id: "pm1",
-    Names: ["/health-dataspace-provision-manager"],
-    State: "running",
-  },
-  {
-    Id: "ea1",
-    Names: ["/health-dataspace-cfm-edcv-agent"],
-    State: "running",
-  },
-  {
-    Id: "ka1",
-    Names: ["/health-dataspace-cfm-keycloak-agent"],
-    State: "running",
-  },
-  {
-    Id: "ra1",
-    Names: ["/health-dataspace-cfm-registration-agent"],
-    State: "running",
-  },
-  {
-    Id: "oa1",
-    Names: ["/health-dataspace-cfm-onboarding-agent"],
-    State: "running",
-  },
   { Id: "ui1", Names: ["/health-dataspace-ui"], State: "running" },
 ];
 
-/* ── Tenants mock data ── */
+const PARTICIPANT_CONTAINERS = CONTAINERS.slice(0, 6);
 
-const MOCK_TENANTS = [
-  {
-    id: "t1",
-    version: 1,
-    properties: {
-      displayName: "AlphaKlinik Berlin",
-      organization: "AlphaKlinik Berlin",
-      ehdsParticipantType: "DATA_HOLDER",
-      did: "did:web:alpha-klinik.de:participant",
-    },
-  },
-  {
-    id: "t2",
-    version: 1,
-    properties: {
-      displayName: "PharmaCo Research AG",
-      organization: "PharmaCo Research AG",
-      role: "DATA_USER",
-    },
-  },
+const RETIRED_CONTAINERS = [
+  "health-dataspace-dataplane-fhir",
+  "health-dataspace-dataplane-omop",
+  "health-dataspace-tenant-manager",
+  "health-dataspace-provision-manager",
+  "health-dataspace-cfm-edcv-agent",
+  "health-dataspace-cfm-keycloak-agent",
+  "health-dataspace-cfm-registration-agent",
+  "health-dataspace-cfm-onboarding-agent",
 ];
 
-const MOCK_EDC_PARTICIPANTS = [
+/* ── Control plane contexts ── */
+
+// Two of the seeded five, named by their DID slug (lib/edc/participants.ts).
+const MOCK_CONTEXTS = [
   {
     "@id": "ctx-alpha",
-    identity: "did:web:alpha-klinik.de:participant",
+    identity: "did:web:identityhub%3A7083:alpha-klinik",
     state: "CREATED",
+  },
+  {
+    "@id": "ctx-pharmaco",
+    identity: "did:web:identityhub%3A7083:pharmaco",
+    state: "ACTIVATED",
   },
 ];
 
@@ -258,24 +231,12 @@ beforeEach(() => {
   mockRunQuery.mockResolvedValue([]);
 
   // Default: participants available
-  mockTenant.mockImplementation((path: string) => {
-    if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-    if (path.includes("/participant-profiles"))
-      return Promise.resolve([
-        {
-          identifier: "did:web:alpha-klinik.de:participant",
-          properties: {
-            "cfm.vpa.state": { participantContextId: "ctx-alpha" },
-          },
-        },
-      ]);
-    return Promise.resolve([]);
-  });
-  mockManagement.mockResolvedValue(MOCK_EDC_PARTICIPANTS);
+  mockManagement.mockResolvedValue(MOCK_CONTEXTS);
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 // =====================================================================
@@ -294,18 +255,42 @@ describe("GET /api/admin/components/topology — Docker available", () => {
     const res = await GET();
     const data = await res.json();
     expect(data.participants.length).toBeGreaterThanOrEqual(1);
-    expect(data.participants[0].components.length).toBe(7); // PARTICIPANT_SERVICES count
+    expect(data.participants[0].components.length).toBe(6); // PARTICIPANT_SERVICES count
   });
 
-  it("maps participant properties from tenant data", async () => {
+  it("gives every participant siglet as its data plane, and no JAD data plane", async () => {
+    setupDockerAvailable(CONTAINERS);
+    const data = await (await GET()).json();
+    for (const p of data.participants) {
+      expect(p.components.map((c: { name: string }) => c.name)).toEqual([
+        "Control Plane",
+        "Data Plane (siglet)",
+        "Identity Hub",
+        "Issuer Service",
+        "Keycloak",
+        "Vault",
+      ]);
+      const containers = p.components.map(
+        (c: { container: string }) => c.container,
+      );
+      expect(containers).toContain("health-dataspace-siglet");
+      for (const retired of RETIRED_CONTAINERS) {
+        expect(containers).not.toContain(retired);
+      }
+    }
+  });
+
+  it("maps participant properties from the control plane context", async () => {
     setupDockerAvailable(CONTAINERS);
     const res = await GET();
     const data = await res.json();
-    const alpha = data.participants.find((p: { id: string }) => p.id === "t1");
+    const alpha = data.participants.find(
+      (p: { id: string }) => p.id === "ctx-alpha",
+    );
     expect(alpha.displayName).toBe("AlphaKlinik Berlin");
     expect(alpha.organization).toBe("AlphaKlinik Berlin");
     expect(alpha.role).toBe("DATA_HOLDER");
-    expect(alpha.did).toBe("did:web:alpha-klinik.de:participant");
+    expect(alpha.did).toBe("did:web:identityhub%3A7083:alpha-klinik");
     expect(alpha.state).toBe("CREATED");
   });
 
@@ -366,12 +351,7 @@ describe("GET /api/admin/components/topology — Docker available", () => {
 describe("severity derivation", () => {
   beforeEach(() => {
     // Single participant for focused testing
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants")
-        return Promise.resolve([MOCK_TENANTS[0]]);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
+    mockManagement.mockResolvedValue([MOCK_CONTEXTS[0]]);
   });
 
   it("assigns healthy severity to healthy container", async () => {
@@ -460,20 +440,42 @@ describe("severity derivation", () => {
 // =====================================================================
 describe("participant health aggregation", () => {
   beforeEach(() => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants")
-        return Promise.resolve([MOCK_TENANTS[0]]);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
+    mockManagement.mockResolvedValue([MOCK_CONTEXTS[0]]);
   });
 
   it("healthy when all core components are healthy", async () => {
     // All participant service containers present and healthy
-    const participantContainers = CONTAINERS.slice(0, 7); // first 7 = participant services
-    setupDockerAvailable(participantContainers);
+    setupDockerAvailable(PARTICIPANT_CONTAINERS);
     const res = await GET();
     const data = await res.json();
+    expect(data.participants[0].health).toBe("healthy");
+  });
+
+  it("healthy with no JAD data plane and no CFM container at all", async () => {
+    // The EDC 0.18 containers are gone (#927); a participant does not miss them.
+    setupDockerAvailable(PARTICIPANT_CONTAINERS);
+    const data = await (await GET()).json();
+    expect(data.participants[0].health).toBe("healthy");
+    expect(data.summary.degradedParticipants).toBe(0);
+  });
+
+  it("critical when siglet, the data plane, is down", async () => {
+    setupDockerAvailable(
+      PARTICIPANT_CONTAINERS.filter((c) => c.Id !== "sig1"), // siglet stopped
+    );
+    const data = await (await GET()).json();
+    const siglet = data.participants[0].components.find(
+      (c: { name: string }) => c.name === "Data Plane (siglet)",
+    );
+    expect(siglet.severity).toBe("critical");
+    expect(data.participants[0].health).toBe("critical");
+  });
+
+  it("a non-core service down does not change a participant's health", async () => {
+    setupDockerAvailable(
+      PARTICIPANT_CONTAINERS.filter((c) => c.Id !== "kc1"), // Keycloak stopped
+    );
+    const data = await (await GET()).json();
     expect(data.participants[0].health).toBe("healthy");
   });
 
@@ -491,14 +493,14 @@ describe("participant health aggregation", () => {
     // All containers present, but controlplane has high CPU
     const allInspects: Record<string, unknown> = {};
     const allStats: Record<string, unknown> = {};
-    CONTAINERS.slice(0, 7).forEach((c) => {
+    PARTICIPANT_CONTAINERS.forEach((c) => {
       allInspects[c.Id] = makeDockerInspect("healthy");
       allStats[c.Id] = makeDockerStats(5, 200, 1024);
     });
     // Override controlplane with high CPU
     allStats["cp1"] = makeDockerStats(85, 200, 1024);
 
-    setupDockerAvailable(CONTAINERS.slice(0, 7), allInspects, allStats);
+    setupDockerAvailable(PARTICIPANT_CONTAINERS, allInspects, allStats);
     const res = await GET();
     const data = await res.json();
     expect(data.participants[0].health).toBe("warning");
@@ -532,8 +534,8 @@ describe("GET /api/admin/components/topology — Docker unavailable", () => {
     setupDockerUnavailable();
     const res = await GET();
     const data = await res.json();
-    // INFRA_SERVICES has 12 entries
-    expect(data.infrastructure.length).toBe(12);
+    // INFRA_SERVICES has 6 entries since the CFM managers and agents left (#927)
+    expect(data.infrastructure.length).toBe(6);
   });
 
   it("returns participants with unknown component status without Docker", async () => {
@@ -560,15 +562,13 @@ describe("sorting", () => {
     const layerNames = data.infrastructure.map(
       (c: { layer: string; name: string }) => `${c.layer}:${c.name}`,
     );
-    // Should be sorted: cfm before infrastructure, alphabetically within
+    // Should be sorted by layer, alphabetically within
     const sorted = [...layerNames].sort();
     expect(layerNames).toEqual(sorted);
   });
 
   it("sorts participants by severity then name", async () => {
-    // Make two participants: one critical, one healthy
-    // PharmaCo = DATA_USER (no matching ctx → state "—")
-    // AlphaKlinik = DATA_HOLDER (matches ctx → state "CREATED")
+    // Two participants, AlphaKlinik and PharmaCo
     setupDockerAvailable([]); // all stopped → all critical
     const res = await GET();
     const data = await res.json();
@@ -600,58 +600,148 @@ describe("degraded participant count", () => {
 });
 
 // =====================================================================
-// Participant data from edcClient
+// Participants from the control plane (ADR-078)
 // =====================================================================
-describe("participant data from edcClient", () => {
-  it("gracefully handles tenant API failure", async () => {
+describe("participants from the control plane", () => {
+  it("reads the contexts once and calls no other EDC API", async () => {
     setupDockerAvailable(CONTAINERS);
-    mockTenant.mockRejectedValue(new Error("connection refused"));
-    const res = await GET();
-    const data = await res.json();
-    expect(data.participants).toEqual([]);
+    await GET();
+    expect(mockManagement.mock.calls.map((c) => c[0])).toEqual([
+      "/v5/participants",
+    ]);
   });
 
-  it("gracefully handles management API failure", async () => {
-    setupDockerAvailable(CONTAINERS);
-    mockManagement.mockRejectedValue(new Error("auth error"));
-    const res = await GET();
-    const data = await res.json();
-    // Participants still returned but with DID from tenant properties
-    expect(data.participants.length).toBeGreaterThanOrEqual(1);
-    const alpha = data.participants.find((p: { id: string }) => p.id === "t1");
-    expect(alpha.did).toBe("did:web:alpha-klinik.de:participant");
-  });
-
-  it("handles per-tenant profile fetch failure", async () => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
-      if (path.includes("t1/participant-profiles"))
-        return Promise.reject(new Error("timeout"));
-      if (path.includes("/participant-profiles"))
-        return Promise.resolve([
-          {
-            identifier: "did:web:alpha-klinik.de:participant",
-            properties: {
-              "cfm.vpa.state": { participantContextId: "ctx-alpha" },
-            },
-          },
-        ]);
-      return Promise.resolve([]);
-    });
-    setupDockerAvailable(CONTAINERS);
-    const res = await GET();
-    const data = await res.json();
-    expect(data.participants).toHaveLength(2);
-  });
-
-  it("falls back to role property when ehdsParticipantType missing", async () => {
+  it("takes the role from the seeded slug", async () => {
     setupDockerAvailable(CONTAINERS);
     const res = await GET();
     const data = await res.json();
     const pharmaco = data.participants.find(
-      (p: { id: string }) => p.id === "t2",
+      (p: { id: string }) => p.id === "ctx-pharmaco",
     );
     expect(pharmaco.role).toBe("DATA_USER");
+    expect(pharmaco.state).toBe("ACTIVATED");
+  });
+
+  it("takes an onboarded participant's names and role from its context", async () => {
+    setupDockerAvailable(CONTAINERS);
+    mockManagement.mockResolvedValue([
+      {
+        "@id": "ctx-nord",
+        identity: "did:web:identityhub%3A7083:testklinik-nord",
+        state: "CREATED",
+        properties: {
+          displayName: "Testklinik Nord",
+          organization: "Testklinik Nord GmbH",
+          role: "DATA_USER",
+        },
+      },
+    ]);
+    const data = await (await GET()).json();
+    expect(data.participants[0]).toMatchObject({
+      id: "ctx-nord",
+      displayName: "Testklinik Nord",
+      organization: "Testklinik Nord GmbH",
+      role: "DATA_USER",
+    });
+  });
+
+  it("falls back to the seeded graph when the control plane is unreachable", async () => {
+    setupDockerAvailable(CONTAINERS);
+    mockManagement.mockRejectedValue(new Error("connection refused"));
+    mockRunQuery.mockResolvedValue([
+      {
+        id: "did:web:lmc.nl:clinic",
+        name: "Limburg Medical Centre",
+        type: "DATA_HOLDER",
+        did: "did:web:lmc.nl:clinic",
+      },
+    ]);
+    const data = await (await GET()).json();
+    expect(data.participants).toHaveLength(1);
+    expect(data.participants[0]).toMatchObject({
+      id: "did:web:lmc.nl:clinic",
+      displayName: "Limburg Medical Centre",
+      role: "DATA_HOLDER",
+      state: "SEEDED",
+      health: "healthy",
+    });
+  });
+
+  it("returns no participants when the control plane and Neo4j have none", async () => {
+    setupDockerAvailable(CONTAINERS);
+    mockManagement.mockRejectedValue(new Error("connection refused"));
+    const res = await GET();
+    const data = await res.json();
+    expect(data.participants).toEqual([]);
+  });
+});
+
+// =====================================================================
+// Azure Container Apps
+// =====================================================================
+describe("on Azure Container Apps", () => {
+  const app = (name: string, runningStatus = "Running") => ({
+    id: `/apps/${name}`,
+    name,
+    location: "westeurope",
+    properties: {
+      runningStatus,
+      template: { containers: [{ resources: { cpu: 0.5, memory: "1Gi" } }] },
+    },
+  });
+
+  beforeEach(() => {
+    vi.stubEnv("DEPLOYMENT_TARGET", "azure");
+    vi.stubEnv("AZURE_SUBSCRIPTION_ID", "sub-123");
+    vi.stubEnv("AZURE_RESOURCE_GROUP", "rg-mvhd-dev");
+    mockAppMetrics.mockResolvedValue({ cpuPercent: 0.1, memPercent: 1e8 });
+    mockManagement.mockResolvedValue([MOCK_CONTEXTS[0]]);
+  });
+
+  it("is healthy with the core apps running and none of the nine 0.18 apps deployed", async () => {
+    mockListContainerApps.mockResolvedValue([
+      app("mvhd-controlplane"),
+      app("mvhd-siglet"),
+      app("mvhd-identityhub"),
+      app("mvhd-issuerservice"),
+      app("mvhd-keycloak"),
+      app("mvhd-vault"),
+      app("mvhd-nats"),
+      app("mvhd-neo4j"),
+      app("mvhd-neo4j-proxy"),
+      app("mvhd-ui"),
+    ]);
+    const data = await (await GET()).json();
+    expect(data.metricsSource).toBe("azure-monitor");
+    expect(data.metricsShared).toBe(true);
+    const p = data.participants[0];
+    expect(p.health).toBe("healthy");
+    expect(p.components.map((c: { container: string }) => c.container)).toEqual(
+      [
+        "mvhd-controlplane",
+        "mvhd-siglet",
+        "mvhd-identityhub",
+        "mvhd-issuerservice",
+        "mvhd-keycloak",
+        "mvhd-vault",
+      ],
+    );
+    const infra = data.infrastructure.map(
+      (c: { container: string }) => c.container,
+    );
+    for (const retired of ["mvhd-tenant-mgr", "mvhd-provision-mgr"]) {
+      expect(infra).not.toContain(retired);
+    }
+  });
+
+  it("marks a participant critical when mvhd-siglet is stopped", async () => {
+    mockListContainerApps.mockResolvedValue([
+      app("mvhd-controlplane"),
+      app("mvhd-siglet", "Stopped"),
+      app("mvhd-identityhub"),
+    ]);
+    const data = await (await GET()).json();
+    expect(data.participants[0].health).toBe("critical");
   });
 });
 
@@ -660,12 +750,7 @@ describe("participant data from edcClient", () => {
 // =====================================================================
 describe("component metrics", () => {
   beforeEach(() => {
-    mockTenant.mockImplementation((path: string) => {
-      if (path === "/v1alpha1/tenants")
-        return Promise.resolve([MOCK_TENANTS[0]]);
-      return Promise.resolve([]);
-    });
-    mockManagement.mockResolvedValue([]);
+    mockManagement.mockResolvedValue([MOCK_CONTEXTS[0]]);
   });
 
   it("resolves CPU percentage for containers", async () => {
@@ -746,8 +831,7 @@ describe("response structure", () => {
     const res = await GET();
     const data = await res.json();
     for (const infra of data.infrastructure) {
-      expect(infra).toHaveProperty("layer");
-      expect(["infrastructure", "cfm"]).toContain(infra.layer);
+      expect(infra.layer).toBe("infrastructure");
     }
   });
 });

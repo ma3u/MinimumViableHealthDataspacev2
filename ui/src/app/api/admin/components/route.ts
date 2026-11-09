@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import http from "node:http";
-import { edcClient } from "@/lib/edc";
+import { contextNames, listContexts } from "@/lib/edc/participants";
 import { runQuery } from "@/lib/neo4j";
 import {
   azureResourceGroup,
@@ -17,7 +17,7 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 export const dynamic = "force-dynamic";
 
 // First load on Azure spends 3-6s in ARM (list + per-app metrics) + ~1s in
-// CFM/Neo4j; serving stale data for up to 30s makes navigation feel instant
+// the control plane or Neo4j; serving stale data for up to 30s makes navigation feel instant
 // while keeping the dashboard fresh enough for live monitoring.
 const CACHE_TTL_MS = 30_000;
 
@@ -57,7 +57,7 @@ function dockerGet<T>(path: string): Promise<T> {
 interface ServiceMapping {
   container: string;
   component: string;
-  layer: "edc-core" | "identity" | "cfm" | "infrastructure";
+  layer: "edc-core" | "identity" | "infrastructure";
   participant?: string; // undefined = shared
 }
 
@@ -67,14 +67,11 @@ const SERVICE_MAP: ServiceMapping[] = [
     component: "Control Plane",
     layer: "edc-core",
   },
+  // siglet is the data plane on EDC 1.0 (runtimes/edc/README.md); the two
+  // JAD data planes left with EDC 0.18 (#927).
   {
-    container: "health-dataspace-dataplane-fhir",
-    component: "Data Plane FHIR",
-    layer: "edc-core",
-  },
-  {
-    container: "health-dataspace-dataplane-omop",
-    component: "Data Plane OMOP",
+    container: "health-dataspace-siglet",
+    component: "Data Plane (siglet)",
     layer: "edc-core",
   },
   {
@@ -101,36 +98,6 @@ const SERVICE_MAP: ServiceMapping[] = [
     container: "health-dataspace-vault-bootstrap",
     component: "Vault Bootstrap",
     layer: "identity",
-  },
-  {
-    container: "health-dataspace-tenant-manager",
-    component: "Tenant Manager",
-    layer: "cfm",
-  },
-  {
-    container: "health-dataspace-provision-manager",
-    component: "Provision Manager",
-    layer: "cfm",
-  },
-  {
-    container: "health-dataspace-cfm-edcv-agent",
-    component: "EDC-V Agent",
-    layer: "cfm",
-  },
-  {
-    container: "health-dataspace-cfm-keycloak-agent",
-    component: "Keycloak Agent",
-    layer: "cfm",
-  },
-  {
-    container: "health-dataspace-cfm-onboarding-agent",
-    component: "Onboarding Agent",
-    layer: "cfm",
-  },
-  {
-    container: "health-dataspace-cfm-registration-agent",
-    component: "Registration Agent",
-    layer: "cfm",
   },
   {
     container: "health-dataspace-postgres",
@@ -262,19 +229,16 @@ interface ParticipantInfo {
 
 interface AcaMapping {
   component: string;
-  layer: "edc-core" | "identity" | "cfm" | "infrastructure";
+  layer: "edc-core" | "identity" | "infrastructure";
 }
 
 const ACA_SERVICE_MAP: Record<string, AcaMapping> = {
   "mvhd-controlplane": { component: "Control Plane", layer: "edc-core" },
-  "mvhd-dp-fhir": { component: "Data Plane FHIR", layer: "edc-core" },
-  "mvhd-dp-omop": { component: "Data Plane OMOP", layer: "edc-core" },
+  "mvhd-siglet": { component: "Data Plane (siglet)", layer: "edc-core" },
   "mvhd-identityhub": { component: "Identity Hub", layer: "identity" },
   "mvhd-issuerservice": { component: "Issuer Service", layer: "identity" },
   "mvhd-keycloak": { component: "Keycloak", layer: "identity" },
   "mvhd-vault": { component: "Vault", layer: "identity" },
-  "mvhd-tenant-mgr": { component: "Tenant Manager", layer: "cfm" },
-  "mvhd-provision-mgr": { component: "Provision Manager", layer: "cfm" },
   "mvhd-nats": { component: "NATS", layer: "infrastructure" },
   "mvhd-neo4j": { component: "Neo4j", layer: "infrastructure" },
   "mvhd-neo4j-proxy": { component: "Neo4j Proxy", layer: "infrastructure" },
@@ -475,63 +439,30 @@ async function buildComponentsResponse() {
     }
   }
 
-  // 2) Fetch participant data from CFM
+  // 2) Participants are the control plane's contexts (ADR-078); CFM's
+  //    tenants and participant profiles are gone with EDC 0.18 (#927). A
+  //    context is one participant with one profile.
   try {
-    const tenants =
-      await edcClient.tenant<
-        { id: string; version: number; properties: Record<string, string> }[]
-      >("/v1alpha1/tenants");
-
-    let edcParticipants: { "@id": string; identity: string; state: string }[] =
-      [];
-    try {
-      edcParticipants =
-        await edcClient.management<
-          { "@id": string; identity: string; state: string }[]
-        >("/v5/participants");
-    } catch {
-      /* auth may be unavailable */
-    }
-
-    for (const t of tenants) {
-      let profiles: unknown[] = [];
-      try {
-        profiles = await edcClient.tenant<unknown[]>(
-          `/v1alpha1/tenants/${t.id}/participant-profiles`,
-        );
-      } catch {
-        /* no profiles */
-      }
-
-      // Find matching EDC participant context
-      const ctxId = (profiles as { participantContextId?: string }[])?.[0]
-        ?.participantContextId;
-      const ctx = edcParticipants.find((p) => p["@id"] === ctxId);
-
-      // Extract DID from profile identifier (URL-encoded), EDC identity, or tenant property
-      const profileDid = (profiles as { identifier?: string }[])?.[0]
-        ?.identifier;
-      const decodedDid = profileDid
-        ? decodeURIComponent(profileDid)
-        : undefined;
-
+    const contexts = await listContexts();
+    for (const ctx of contexts) {
+      const n = contextNames(ctx);
       participants.push({
-        id: t.id,
-        displayName: t.properties?.displayName || t.id,
-        organization: t.properties?.organization || "—",
-        role: t.properties?.ehdsParticipantType || t.properties?.role || "—",
-        did: ctx?.identity || decodedDid || t.properties?.did || "—",
-        state: ctx?.state || "—",
-        profileCount: profiles.length,
+        id: ctx["@id"],
+        displayName: n.displayName,
+        organization: n.organization,
+        role: n.ehdsParticipantType || n.role || "—",
+        did: n.did || "—",
+        state: ctx.state || "—",
+        profileCount: 1,
       });
     }
   } catch (err) {
-    console.warn("Could not fetch participant data from CFM:", err);
+    console.warn("Could not read participants from the control plane:", err);
   }
 
-  // Neo4j fallback — when CFM is unreachable (e.g. Azure deployment without
-  // tenant-manager) the participants array is empty. Backfill from Neo4j so
-  // the /admin/components page still shows the seeded dataspace members.
+  // Neo4j fallback: when the control plane is unreachable or has no context
+  // yet, the participants array is empty. Backfill from Neo4j so the
+  // /admin/components page still shows the seeded dataspace members.
   if (participants.length === 0) {
     try {
       const neoRows = await runQuery<{
@@ -566,7 +497,7 @@ async function buildComponentsResponse() {
   }
 
   // Sort components by layer order then name
-  const layerOrder = { "edc-core": 0, identity: 1, cfm: 2, infrastructure: 3 };
+  const layerOrder = { "edc-core": 0, identity: 1, infrastructure: 2 };
   components.sort(
     (a, b) =>
       (layerOrder[a.layer as keyof typeof layerOrder] ?? 9) -

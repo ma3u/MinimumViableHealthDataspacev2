@@ -230,7 +230,7 @@ export function AzureCostEstimatorPanel({
               {AZURE_PG_FLEX.sku} ·{" "}
               {AZURE_PG_FLEX.schedule === "always" ? "24×7" : t("office hours")}{" "}
               {formatEur(cost.pgFlexComputeEur)} · {AZURE_PG_FLEX.storageGb} GB{" "}
-              {formatEur(cost.pgFlexStorageEur)} · Keycloak, EDC, CFM, Vault
+              {formatEur(cost.pgFlexStorageEur)} · Keycloak, EDC, Vault
               (ADR-041, ADR-046)
             </div>
           </div>
