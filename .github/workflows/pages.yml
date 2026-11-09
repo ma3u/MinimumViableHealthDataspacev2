@@ -81,8 +81,10 @@ jobs:
       - name: Disable API routes for static export
         run: mv src/app/api /tmp/api_disabled || true
 
+      # npm run build: its prebuild writes the site search index into
+      # public/pagefind/ (ADR-082), which the export copies to the site.
       - name: Build with Next.js
-        run: npx next build
+        run: npm run build
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "true"
 

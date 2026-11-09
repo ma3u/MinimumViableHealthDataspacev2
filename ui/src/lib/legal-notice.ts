@@ -27,7 +27,7 @@ export const PROVIDER: {
 };
 
 /** The date the two pages were last changed, shown on both. */
-export const LEGAL_LAST_UPDATED = "2026-11-08";
+export const LEGAL_LAST_UPDATED = "2026-11-09";
 
 const PLACEHOLDER = /^\[.*\]$/;
 

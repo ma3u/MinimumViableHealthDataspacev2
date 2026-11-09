@@ -14,5 +14,15 @@
   "Skip to main content": "Zum Hauptinhalt springen",
   "Diagram render error: {error}": "Fehler beim Zeichnen des Diagramms: {error}",
   "Legal notice": "Impressum",
-  "Privacy policy": "Datenschutzerklärung"
+  "Privacy policy": "Datenschutzerklärung",
+  "Search": "Suchen",
+  "Search pages and documentation": "Seiten und Dokumentation durchsuchen",
+  "Search results": "Suchergebnisse",
+  "No results for “{query}”": "Keine Treffer für „{query}“",
+  "Documentation": "Dokumentation",
+  "Page": "Seite",
+  "Search is not available right now.": "Die Suche ist gerade nicht verfügbar.",
+  "The search runs in your browser; nothing you type leaves it. Your last searches are kept in this browser only.": "Die Suche läuft in Ihrem Browser; was Sie eingeben, verlässt ihn nicht. Ihre letzten Suchen bleiben nur in diesem Browser gespeichert.",
+  "Recent searches": "Letzte Suchen",
+  "Clear": "Löschen"
 }
