@@ -150,19 +150,20 @@ test.describe("A · API Route Authentication", () => {
     expect([401, 403]).toContain(r.status);
   });
 
-  test("J313 GET /api/analytics with PATIENT role returns 403", async ({
+  test("J313 GET /api/analytics with PATIENT role returns the cohort statistics", async ({
     page,
   }) => {
-    // The route admits any session (requireAuth() without roles) and the
-    // permit gate covers DATA_USER only, so a patient gets the cohort
-    // statistics. Whether it should is open in #951; until it is decided
-    // this journey is expected to fail and turns red when it passes.
-    test.fail();
+    // A patient may read the aggregate cohort statistics (decided in #951);
+    // the route leaves out the persons who opted out of secondary use.
     await setPersona(page, "patient1");
     const r = await page.evaluate(() =>
-      fetch("/api/analytics").then((r) => r.status),
+      fetch("/api/analytics").then(async (r) => ({
+        status: r.status,
+        body: (await r.json()) as { summary?: { persons?: unknown } },
+      })),
     );
-    expect([403]).toContain(r);
+    expect(r.status).toBe(200);
+    expect(typeof r.body.summary?.persons).toBe("number");
   });
 
   test("J314 POST /api/catalog with DATA_USER role returns 403", async ({

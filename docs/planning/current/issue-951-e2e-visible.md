@@ -34,15 +34,15 @@ This file keeps the order of the work.
    every request answered 401 since ADR-044 and nothing was written, about
    220 s of every deploy. The site serves the committed fixtures.
 7. The in-app developer page has an `e2e.yml` card in five languages.
+8. J313 decided: a PATIENT may read `/api/analytics`, without the persons who
+   opted out of secondary use. The journey asserts the 200.
 
 ## Next, in this order
 
 1. After ten green `E2E` runs on pull requests in a row: make `E2E` a required
    check (ADR-079 decision 2).
-2. Decide J313: may a PATIENT read `/api/analytics` (cohort statistics)? The
-   journey is marked `test.fail()` until then.
-3. Build or drop the scope features J325, J327, J328, J330 to J332 and J347
+2. Build or drop the scope features J325, J327, J328, J330 to J332 and J347
    describe (`aggregateOnly`, `maxRowLimit`, expiry and revocation in the
    scope); they are `test.fixme` with the reason.
-4. A seed that terminates one negotiation, or J38's premise changed: no seed
+3. A seed that terminates one negotiation, or J38's premise changed: no seed
    holds a TERMINATED negotiation.
