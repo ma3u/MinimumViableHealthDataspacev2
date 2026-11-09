@@ -83,9 +83,22 @@ and then starts the control plane.
 
 Not covered: the Azure NATS (`mvhd-nats`, `scripts/azure/04-edc-services.sh`)
 has no volume, so there even a file stream lives only as long as its replica,
-and the Azure control plane creates memory streams the same way. `edc-events`
-stays in memory; nothing consumes it, and the control plane only logs a
-publish that fails ("Error publishing event").
+and the Azure control plane creates memory streams the same way.
+
+`edc-events` stays in memory, and it cannot be created first:
+`NatsPublishingExtension` calls `addStream` (memory, interest retention,
+`events.>`) and refuses to boot when a stream of that name exists with
+another configuration; `edc.events.nats.stream.create.force` would only
+delete it and create it in memory again. Nothing consumes it, so with
+interest retention it holds nothing. After a NATS restart, which no longer
+needs a control plane restart, the control plane logs `[NATS events] Error
+publishing event` with the same `503 No Responders Available For Request`
+for every event until its next restart. That one is harmless: tell them
+apart by the class in the stack trace, `NatsEventPublisher.on` for the
+events, `NatsTaskPublisher.created` for a task stream. Measured on the shared
+stack after the conversion: NATS restarted, then seed step 5 finalized two
+negotiations and started two transfers in 14 s, with 28 of the first and
+none of the second in the log.
 
 ## 2026-11-06: `$(curl -w '%{http_code}' ... || echo 000)` is never 000
 
