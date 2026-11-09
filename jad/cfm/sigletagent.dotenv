@@ -1,0 +1,20 @@
+# CFM 0.0.7 siglet agent (ADR-085, #973). Keys as in eclipse-cfm/core-platform-distribution v0.0.39
+# templates/cfm/cfm-agents-configs.yaml, with our hosts, and Keycloak behind jad/cfm/token-exchange.mjs for jwtlet.
+uri: nats://cfm7-nats:4222
+# NATS token, local dev only (cfm7-nats --auth in docker-compose.jad.yml)
+nats.auth.method: token
+nats.auth.token: cfm-nats-local-dev
+bucket: cfm-bucket
+stream: cfm-stream
+httpport: 8080
+postgres: true
+dsn: postgres://cfm:cfm@postgres:5432/cfm_v007?sslmode=disable
+siglet.management.url: http://siglet:8083
+siglet.signaling.url: http://siglet:8081
+controlplane.url: http://controlplane:8081/api/mgmt
+tokenexchange.url: http://cfm7-token-exchange:8080
+tokenexchange.audience: cfm-agents
+tokenexchange.tokenFilePath: /var/run/secrets/cfm/token
+tokenexchange.issuer: http://localhost:8080/realms/edcv
+tokenexchange.jwksUri: http://keycloak:8080/realms/edcv/protocol/openid-connect/certs
+tokenexchange.scope: signaling
