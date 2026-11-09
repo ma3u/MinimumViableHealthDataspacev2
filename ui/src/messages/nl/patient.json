@@ -376,5 +376,6 @@
   "Withdraw (GDPR Art. 7(3))": "Intrekken (AVG art. 7, lid 3)",
   "You withdrew on {date}. Nothing is sent any more.": "U trok uw toestemming in op {date}. Er wordt niets meer verstuurd.",
   "Joining…": "Aanmelden…",
-  "Join this program": "Meedoen met dit programma"
+  "Join this program": "Meedoen met dit programma",
+  "Which data goes where": "Welke gegevens waarheen gaan"
 }

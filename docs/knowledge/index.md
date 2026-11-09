@@ -27,7 +27,8 @@ frontmatter. Spec:
 [dsp-contract-chain](datamodels/dsp-contract-chain.md) ·
 [healthdcat-ap](datamodels/healthdcat-ap.md) ·
 [participant-directory](datamodels/participant-directory.md) ·
-[secondary-use-opt-out](datamodels/secondary-use-opt-out.md)
+[secondary-use-opt-out](datamodels/secondary-use-opt-out.md) ·
+[bonus-programme-consent](datamodels/bonus-programme-consent.md)
 
 ## apis/ — surfaces & contracts
 

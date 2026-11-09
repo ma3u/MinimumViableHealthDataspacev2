@@ -376,5 +376,6 @@
   "Withdraw (GDPR Art. 7(3))": "Retirar (RGPD, art. 7, apdo. 3)",
   "You withdrew on {date}. Nothing is sent any more.": "Retiró su consentimiento el {date}. Ya no se envía nada.",
   "Joining…": "Uniéndose…",
-  "Join this program": "Unirse a este programa"
+  "Join this program": "Unirse a este programa",
+  "Which data goes where": "Qué datos van adónde"
 }

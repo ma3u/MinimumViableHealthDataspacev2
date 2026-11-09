@@ -31,3 +31,8 @@
   #774 / ADR-069, the two SPE workspaces on ACI confidential containers attested to
   the access body's Trustee; pinning reference values, checks, stop and start, and
   the failures of 2026-11-01/02 by symptom.
+- 2026-11-09 · Added `datamodels/bonus-programme-consent.md` (status draft): #934
+  steps 3 and 4 / ADR-080, AlphaKasse's bonus programme as a crawled DCAT-AP
+  `dcat:DataService`, the person's consent to it, and the transfer gate that
+  answers 403 after a withdrawal. The process is published at
+  `docs/ehds/bonus-programme-data-flow.md`.
