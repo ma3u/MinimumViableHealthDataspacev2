@@ -3,15 +3,27 @@
  * on GitHub Pages (#951). The server has no copy of them, and a copy it served
  * rendered blank under the app's nonce-based CSP.
  */
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
+const CONFIG = require.resolve("../../../next.config.js");
 
 type Redirect = { source: string; destination: string; permanent: boolean };
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+/**
+ * The server build's redirects. next.config.js decides at load time whether it
+ * is the static export, which has none, and on GitHub Actions it is unless the
+ * variable says "false"; so the module is loaded afresh with it set.
+ */
 async function redirects(): Promise<Redirect[]> {
-  const config = require("../../../next.config.js") as {
+  vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "false");
+  delete require.cache[CONFIG];
+  const config = require(CONFIG) as {
     redirects?: () => Promise<Redirect[]>;
   };
   expect(config.redirects).toBeTypeOf("function");
