@@ -367,5 +367,14 @@
   "The year, and goal met: yes or no.": "Het jaar, en doel gehaald: ja of nee.",
   "What never leaves your record": "Wat uw dossier nooit verlaat",
   "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Stappen, hartslag, diagnoses, details van bezoeken en elke datum preciezer dan het jaar.",
-  "You cannot join yet: joining and withdrawing come in the next step.": "U kunt nog niet meedoen: meedoen en intrekken volgen in de volgende stap."
+  "That did not work (HTTP {status}). Please try again.": "Dat is niet gelukt (HTTP {status}). Probeer het opnieuw.",
+  "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.": "Vastgelegd voor {year}: {publisher} ontvangt ja of nee zodra de hub het jaar heeft beoordeeld.",
+  "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.": "Meedoen is uw toestemming voor alleen dit programma (AVG art. 9, lid 2, onder a)). Het schrijft u voor geen enkele studie in en staat los van uw opt-out.",
+  "You joined on {date}.": "U deed mee vanaf {date}.",
+  "Sending…": "Verzenden…",
+  "Send my answer for {year}": "Mijn antwoord voor {year} versturen",
+  "Withdraw (GDPR Art. 7(3))": "Intrekken (AVG art. 7, lid 3)",
+  "You withdrew on {date}. Nothing is sent any more.": "U trok uw toestemming in op {date}. Er wordt niets meer verstuurd.",
+  "Joining…": "Aanmelden…",
+  "Join this program": "Meedoen met dit programma"
 }

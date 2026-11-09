@@ -874,6 +874,12 @@ paths:
     get:
       tags: [Patient]
       summary: List bonus programmes found in other data spaces (#934)
+      parameters:
+        - name: patientId
+          in: query
+          required: false
+          description: The record an operator names; a patient acts on their own.
+          schema: { type: string }
       description: >-
         DCAT-AP dcat:DataService offers typed ehds:BonusProgramme, indexed by
         the catalogue crawler and enricher. A programme receives a yes or no per
@@ -885,9 +891,18 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [programmes, legalBasis]
+                required: [programmes, consents, legalBasis]
                 properties:
                   legalBasis: { type: string }
+                  consents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        consentId: { type: string }
+                        programmeId: { type: string }
+                        joinedAt: { type: string }
+                        withdrawnAt: { type: string, nullable: true }
                   programmes:
                     type: array
                     items:
@@ -906,6 +921,117 @@ paths:
                         lastSeenAt: { type: string, nullable: true }
         "401": { description: No session }
         "403": { description: Not a patient or operator }
+  /api/patient/programmes/consent:
+    post:
+      tags: [Patient]
+      summary: Join a bonus programme (consent, GDPR Art. 9(2)(a)) (#934)
+      description: >-
+        Consent to one programme, its own record (ADR-080, decision 6); idempotent
+        while a consent is open. A PATIENT joins on their own record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [programmeId]
+              properties:
+                programmeId: { type: string }
+                patientId: { type: string }
+                source:
+                  type: string
+                  enum: [patient-portal, klarbefund, api-collection]
+                  default: patient-portal
+      responses:
+        "201":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legalBasis: { type: string }
+                  consent:
+                    type: object
+                    properties:
+                      consentId: { type: string }
+                      programmeId: { type: string }
+                      joinedAt: { type: string }
+                      withdrawnAt: { type: string, nullable: true }
+        "400": { description: programmeId missing or an unknown source }
+        "401": { description: No session }
+        "403":
+          { description: Not a patient or operator, or another person's record }
+        "404": { description: No such programme or record }
+    delete:
+      tags: [Patient]
+      summary: Withdraw from a bonus programme (GDPR Art. 7(3))
+      parameters:
+        - name: programmeId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: patientId
+          in: query
+          required: false
+          description: The record an operator names; a patient acts on their own.
+          schema: { type: string }
+      responses:
+        "200":
+          description: Withdrawn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legalBasis: { type: string }
+                  consent:
+                    type: object
+                    properties:
+                      consentId: { type: string }
+                      programmeId: { type: string }
+                      joinedAt: { type: string }
+                      withdrawnAt: { type: string, nullable: true }
+        "404": { description: No open consent to withdraw }
+  /api/patient/programmes/transfer:
+    post:
+      tags: [Patient]
+      summary: Send a programme the year's answer, on the person's instruction
+      description: >-
+        ADR-080, decision 4, second path. Only under an open consent; after a
+        withdrawal the answer is 403. The answer (goal met) is computed in
+        #934 step 6, so the transfer is recorded as awaiting evaluation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [programmeId, year]
+              properties:
+                programmeId: { type: string }
+                year: { type: integer, minimum: 2000, maximum: 2100 }
+                patientId: { type: string }
+      responses:
+        "202":
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legalBasis: { type: string }
+                  transfer:
+                    type: object
+                    properties:
+                      transferId: { type: string }
+                      programmeId: { type: string }
+                      year: { type: integer }
+                      goalMet: { type: boolean, nullable: true }
+                      status: { type: string }
+                      requestedAt: { type: string }
+        "400": { description: programmeId and a calendar year are required }
+        "403": { description: No open consent to this programme }
   /api/patient/research:
     get:
       tags: [Patient]

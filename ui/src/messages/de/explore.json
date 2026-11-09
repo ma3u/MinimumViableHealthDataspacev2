@@ -484,5 +484,7 @@
   "the provider": "der Anbieter",
   "the contract": "der Vertrag",
   "patients": "Patientinnen und Patienten",
-  "observations": "Beobachtungen"
+  "observations": "Beobachtungen",
+  "My Program Consent": "Meine Programmeinwilligung",
+  "Program Answer Sent": "Gesendete Programmantwort"
 }

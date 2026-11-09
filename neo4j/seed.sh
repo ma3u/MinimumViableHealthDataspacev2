@@ -90,7 +90,7 @@ if [ "${SEED_PHASE:-}" = "api-cleanup" ]; then
   echo "=== Verifying ==="
   left=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
     --non-interactive --format plain \
-    "RETURN COUNT { MATCH (a:AccessApplication) WHERE a.name STARTS WITH 'Bruno:' } + COUNT { MATCH (r:HealthDataRequest) WHERE r.question STARTS WITH 'Bruno:' OR r.question = 'How many patients with type 2 diabetes had an HbA1c above 9 percent in 2024?' } AS left;" \
+    "RETURN COUNT { MATCH (a:AccessApplication) WHERE a.name STARTS WITH 'Bruno:' } + COUNT { MATCH (r:HealthDataRequest) WHERE r.question STARTS WITH 'Bruno:' OR r.question = 'How many patients with type 2 diabetes had an HbA1c above 9 percent in 2024?' } + COUNT { MATCH (c:ProgrammeConsent {source: 'api-collection'}) } AS left;" \
     2>/dev/null | tail -1)
   echo "left from API collection runs: ${left:-unknown}"
   [ "$left" = "0" ] || failed+=("API collection runs left: ${left:-unknown}")

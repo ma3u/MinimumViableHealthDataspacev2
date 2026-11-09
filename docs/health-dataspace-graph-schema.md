@@ -522,6 +522,30 @@ CREATE CONSTRAINT data_service_id IF NOT EXISTS FOR (ds:DataService) REQUIRE ds.
 
 ---
 
+#### `ProgrammeConsent`, `ProgrammeTransfer`
+
+A person's consent to one bonus program (#934 step 4, ADR-080 decision 6):
+joined, seen and withdrawn in the patient portal, separate from study consent
+(`PatientConsent`) and from the Art. 71 opt-out (`OptOutRecord`). A
+`ProgrammeTransfer` is the person's instruction to send a year's answer; it is
+recorded only under an open consent (`withdrawnAt` null), otherwise the route
+answers 403.
+
+**Properties:**
+
+- `ProgrammeConsent`: `consentId: String!`, `patientId`, `programmeId`, `joinedAt: DateTime`, `withdrawnAt: DateTime` (null while open)
+- `ProgrammeTransfer`: `transferId: String!`, `patientId`, `programmeId`, `year: Integer`, `goalMet: Boolean` (null until step 6 evaluates the year), `status` (`awaiting-evaluation`), `requestedAt: DateTime`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT programme_consent_id IF NOT EXISTS FOR (c:ProgrammeConsent) REQUIRE c.consentId IS UNIQUE;
+CREATE INDEX programme_consent_patient IF NOT EXISTS FOR (c:ProgrammeConsent) ON (c.patientId, c.programmeId);
+CREATE CONSTRAINT programme_transfer_id IF NOT EXISTS FOR (t:ProgrammeTransfer) REQUIRE t.transferId IS UNIQUE;
+```
+
+---
+
 ### 3.2 Relationships
 
 ```cypher
@@ -535,6 +559,8 @@ CREATE CONSTRAINT data_service_id IF NOT EXISTS FOR (ds:DataService) REQUIRE ds.
 (:HealthDataset)-[:HAS_DISTRIBUTION]->(:Distribution)
 (:HealthDataset)-[:PUBLISHED_BY]->(:Participant)
 (:DataService)-[:PUBLISHED_BY]->(:Participant)
+(:Patient)-[:GAVE_PROGRAMME_CONSENT]->(:ProgrammeConsent)-[:FOR_PROGRAMME]->(:BonusProgramme)
+(:ProgrammeTransfer)-[:UNDER_CONSENT]->(:ProgrammeConsent)
 (:HealthDataset)-[:HAS_CONTACT_POINT]->(:ContactPoint)
 (:HealthDataset)-[:HAS_THEME]->(:EEHRxFCategory)
 (:HealthDataset)-[:SUBJECT_TO_PURPOSE]->(:EhdsPurpose)

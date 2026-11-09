@@ -367,5 +367,14 @@
   "The year, and goal met: yes or no.": "Das Jahr und Ziel erreicht: ja oder nein.",
   "What never leaves your record": "Was Ihre Akte nie verlässt",
   "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Schritte, Herzfrequenz, Diagnosen, Besuchsdetails und jedes Datum genauer als das Jahr.",
-  "You cannot join yet: joining and withdrawing come in the next step.": "Sie können noch nicht teilnehmen: Teilnehmen und Widerrufen folgen im nächsten Schritt."
+  "That did not work (HTTP {status}). Please try again.": "Das hat nicht geklappt (HTTP {status}). Bitte versuchen Sie es erneut.",
+  "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.": "Für {year} vermerkt: {publisher} erhält ja oder nein, sobald der Hub das Jahr ausgewertet hat.",
+  "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.": "Die Teilnahme ist Ihre Einwilligung nur in dieses Programm (DSGVO Art. 9 Abs. 2 Buchst. a). Sie nimmt Sie in keine Studie auf und ist von Ihrem Widerspruch getrennt.",
+  "You joined on {date}.": "Sie sind am {date} beigetreten.",
+  "Sending…": "Wird gesendet…",
+  "Send my answer for {year}": "Meine Antwort für {year} senden",
+  "Withdraw (GDPR Art. 7(3))": "Widerrufen (DSGVO Art. 7 Abs. 3)",
+  "You withdrew on {date}. Nothing is sent any more.": "Sie haben am {date} widerrufen. Es wird nichts mehr gesendet.",
+  "Joining…": "Beitritt läuft…",
+  "Join this program": "Diesem Programm beitreten"
 }

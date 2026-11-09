@@ -1,0 +1,37 @@
+meta {
+  name: 26 After withdrawing nothing is sent (403)
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{baseUrl}}/api/patient/programmes/transfer
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "programmeId": "{{programmeId}}",
+    "year": 2027
+  }
+}
+
+tests {
+  if (!bru.getVar("programmeId")) {
+    test("SKIPPED: no bonus program on this stack to refuse (#934)", function () {});
+  } else {
+    test("refused: 403 with { error }, and nothing recorded", function () {
+      expect(res.getStatus()).to.equal(403);
+      expect(res.getBody().error).to.contain("No open consent");
+    });
+  }
+}
+
+docs {
+  The check of #934 step 4: the same instruction as request 24, after the withdrawal in request 25, is refused.
+}

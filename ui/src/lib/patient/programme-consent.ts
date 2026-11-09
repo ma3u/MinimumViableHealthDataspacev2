@@ -1,0 +1,160 @@
+/**
+ * Consent to a bonus program (#934, step 4; ADR-080, decision 6).
+ *
+ * A person joins one program, sees that they joined, and withdraws, each on
+ * their own record. It is its own record, (:ProgrammeConsent), next to two
+ * that sound close and are not this one: study consent (PatientConsent) and
+ * the Art. 71 opt-out (OptOutRecord). The opt-out governs secondary use and
+ * does not stop sharing the person directs themselves, so nothing here reads
+ * it; joining a program never enrolls anyone in research.
+ *
+ * Withdrawal ends transfers at once: programmeTransferAllowed() is the one
+ * gate every transfer of a program's answer passes, and it asks for an open
+ * consent (GDPR Art. 7(3), Art. 9(2)(a)).
+ */
+import { NextResponse } from "next/server";
+import { runQuery } from "@/lib/neo4j";
+import type { ProgrammeConsent } from "@/lib/patient/bonus-programme";
+import { ownRecordId, refuseForeignRecord } from "@/lib/patient/own-record";
+
+const PATIENT_BY_KEY = `MATCH (p:Patient)
+   WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId`;
+
+/** One consent of one person to one program; open while withdrawnAt is null. */
+export type ProgrammeConsentRow = ProgrammeConsent;
+
+/**
+ * Join: an open consent for the program, or the one already open. A program
+ * the crawler has not indexed, or a record that does not exist, returns no
+ * row. MERGE on a consent id made by the caller, so a retried request with
+ * the same id writes nothing twice.
+ */
+export const JOIN_PROGRAMME_CYPHER = `${PATIENT_BY_KEY}
+   MATCH (s:BonusProgramme {serviceId: $programmeId})
+   OPTIONAL MATCH (p)-[:GAVE_PROGRAMME_CONSENT]->(open:ProgrammeConsent {programmeId: $programmeId})
+     WHERE open.withdrawnAt IS NULL
+   WITH p, s, open
+   CALL (p, s, open) {
+     WITH p, s, open WHERE open IS NULL
+     MERGE (c:ProgrammeConsent {consentId: $consentId})
+       ON CREATE SET c.patientId = $patientId,
+                     c.programmeId = $programmeId,
+                     c.joinedAt = datetime(),
+                     c.source = $source
+     MERGE (p)-[:GAVE_PROGRAMME_CONSENT]->(c)
+     MERGE (c)-[:FOR_PROGRAMME]->(s)
+     RETURN c
+     UNION
+     WITH open WHERE open IS NOT NULL
+     RETURN open AS c
+   }
+   RETURN c.consentId AS consentId, c.programmeId AS programmeId,
+          toString(c.joinedAt) AS joinedAt, toString(c.withdrawnAt) AS withdrawnAt`;
+
+/** Withdraw: close the open consent. No row when none is open. */
+export const WITHDRAW_PROGRAMME_CYPHER = `MATCH (c:ProgrammeConsent {patientId: $patientId, programmeId: $programmeId})
+   WHERE c.withdrawnAt IS NULL
+   SET c.withdrawnAt = datetime()
+   RETURN c.consentId AS consentId, c.programmeId AS programmeId,
+          toString(c.joinedAt) AS joinedAt, toString(c.withdrawnAt) AS withdrawnAt`;
+
+/** Every consent of the person to any program, newest first. */
+export const PROGRAMME_CONSENTS_CYPHER = `MATCH (c:ProgrammeConsent {patientId: $patientId})
+   RETURN c.consentId AS consentId, c.programmeId AS programmeId,
+          toString(c.joinedAt) AS joinedAt, toString(c.withdrawnAt) AS withdrawnAt
+   ORDER BY c.joinedAt DESC`;
+
+/** The open consent, if any: what the transfer gate reads. */
+export const OPEN_PROGRAMME_CONSENT_CYPHER = `MATCH (c:ProgrammeConsent {patientId: $patientId, programmeId: $programmeId})
+   WHERE c.withdrawnAt IS NULL
+   RETURN c.consentId AS consentId
+   LIMIT 1`;
+
+/**
+ * A transfer the person asked for (ADR-080, decision 4, second path). What it
+ * carries is the program, the year and goal met; the answer is computed in
+ * step 6, so until then goalMet stays null and the status says so.
+ */
+export const RECORD_TRANSFER_CYPHER = `MATCH (c:ProgrammeConsent {consentId: $consentId})
+   MERGE (t:ProgrammeTransfer {transferId: $transferId})
+     ON CREATE SET t.patientId = $patientId,
+                   t.programmeId = $programmeId,
+                   t.year = toInteger($year),
+                   t.goalMet = null,
+                   t.status = 'awaiting-evaluation',
+                   t.requestedAt = datetime()
+   MERGE (t)-[:UNDER_CONSENT]->(c)
+   RETURN t.transferId AS transferId, t.programmeId AS programmeId, t.year AS year,
+          t.goalMet AS goalMet, t.status AS status, toString(t.requestedAt) AS requestedAt`;
+
+export interface ProgrammeTransferRow {
+  transferId: string;
+  programmeId: string;
+  year: number;
+  goalMet: boolean | null;
+  status: string;
+  requestedAt: string;
+}
+
+/**
+ * Where a join came from. The API collection marks its own with
+ * "api-collection", so the live clean-up removes them and nothing else
+ * (neo4j/remove-api-collection-runs.cypher).
+ */
+export const PROGRAMME_CONSENT_SOURCES = [
+  "patient-portal",
+  "klarbefund",
+  "api-collection",
+] as const;
+
+/** The legal basis the routes name in their answers. */
+export const PROGRAMME_CONSENT_BASIS =
+  "Explicit consent to one program, GDPR Art. 9(2)(a), withdrawable at any time, Art. 7(3); EHDS Art. 7(3) (ADR-080)";
+
+/** The open consent of a person to a program, or null. */
+export function openConsent(
+  rows: ProgrammeConsentRow[],
+  programmeId: string,
+): ProgrammeConsentRow | null {
+  return (
+    rows.find((r) => r.programmeId === programmeId && !r.withdrawnAt) ?? null
+  );
+}
+
+/**
+ * The gate: the consent id a transfer may go out under, or null when the
+ * person has not joined the program or has withdrawn.
+ */
+export async function programmeTransferAllowed(
+  patientId: string,
+  programmeId: string,
+): Promise<string | null> {
+  const [row] = await runQuery<{ consentId: string }>(
+    OPEN_PROGRAMME_CONSENT_CYPHER,
+    { patientId, programmeId },
+  );
+  return row?.consentId ?? null;
+}
+
+/**
+ * Whose record a program route acts on, after the route's own requireAuth()
+ * (ADR-044: the gate stays visible in each handler). A PATIENT acts on their
+ * own record only (a foreign patientId is refused with 403, #475); EDC_ADMIN
+ * names one. With required=false a session without a record (an operator who
+ * names none) gets { patientId: null }, which the list route answers without
+ * consents.
+ */
+export async function resolveProgrammePatient(
+  roles: readonly string[],
+  named: string | null,
+  required = true,
+): Promise<{ patientId: string | null } | NextResponse> {
+  const patientId = named ?? (await ownRecordId());
+  if (!patientId) {
+    return required
+      ? NextResponse.json({ error: "patientId is required" }, { status: 400 })
+      : { patientId: null };
+  }
+  const refused = await refuseForeignRecord(roles, patientId);
+  return refused ?? { patientId };
+}

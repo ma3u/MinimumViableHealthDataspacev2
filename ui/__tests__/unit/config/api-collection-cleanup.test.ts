@@ -43,6 +43,8 @@ describe("the API collection cleans up after itself on the live hub", () => {
     expect(firstMatches).toEqual([
       "MATCH (app:AccessApplication)",
       "MATCH (r:HealthDataRequest)",
+      // #934 step 4: only consents the collection marked, never a person's
+      "MATCH (c:ProgrammeConsent {source: 'api-collection'})",
     ]);
   });
 

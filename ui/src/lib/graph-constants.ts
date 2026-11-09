@@ -46,6 +46,8 @@ export const LABEL_LAYER: Record<string, number> = {
   ProviderPseudonym: 1,
   // L1 Phase 20: Patient Portal (EHDS Chapter II / GDPR Art. 15-22)
   PatientConsent: 1,
+  ProgrammeConsent: 1,
+  ProgrammeTransfer: 1,
   ResearchInsight: 1,
   // L1 discussion #265: persona overview
   ResearchStudy: 1,
@@ -224,6 +226,8 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   ResearchPseudonym: "Research Pseudonym",
   ProviderPseudonym: "Provider Pseudonym",
   PatientConsent: "My Consent",
+  ProgrammeConsent: "My Program Consent",
+  ProgrammeTransfer: "Program Answer Sent",
   ResearchInsight: "Research Finding",
   ResearchStudy: "Study",
   StudyEnrolment: "Enrolment",
