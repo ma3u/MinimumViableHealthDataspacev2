@@ -13,11 +13,13 @@ import {
   SRC,
   STATUS_LABEL,
   ehdsArt,
-  epicOf,
   epicStatus,
   epicTaskId,
   epicWindow,
   issueUrl,
+  itemEpic,
+  type LaneId,
+  type RoadmapItem,
 } from "@/lib/docs/roadmap";
 import { T } from "@/lib/i18n/translate";
 
@@ -173,6 +175,89 @@ const DRIVERS: {
     ],
   },
 ];
+
+/** A lane's label by its id. */
+const laneLabel = (id: LaneId) => LANES.find((l) => l.id === id)!.label;
+
+/** Items by priority, then by start, then by number. */
+const byPriority = (items: readonly RoadmapItem[]) =>
+  [...items].sort(
+    (a, b) =>
+      a.priority.localeCompare(b.priority) ||
+      a.start.localeCompare(b.start) ||
+      a.issue - b.issue,
+  );
+
+/** One epic's items: issue, what, priority, status, window; the lane under
+ *  the note. */
+function ItemTable({ items }: { items: readonly RoadmapItem[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[40rem] table-fixed text-sm">
+        <colgroup>
+          <col className="w-16" />
+          <col />
+          <col className="w-20" />
+          <col className="w-28" />
+          <col className="w-56" />
+        </colgroup>
+        <thead>
+          <tr className="text-left text-(--text-secondary) border-b border-(--border)">
+            <th className="py-1 pr-3 font-medium">
+              <T area="docsCommon">{"Issue"}</T>
+            </th>
+            <th className="py-1 pr-3 font-medium">
+              <T area="docsCommon">{"What"}</T>
+            </th>
+            <th className="py-1 pr-3 font-medium">
+              <T area="docsCommon">{"Priority"}</T>
+            </th>
+            <th className="py-1 pr-3 font-medium">
+              <T area="docsCommon">{"Status"}</T>
+            </th>
+            <th className="py-1 pr-3 font-medium">
+              <T area="docsCommon">{"Window"}</T>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((i) => (
+            <tr key={i.issue} className="border-b border-(--border) align-top">
+              <td className="py-1.5 pr-3">
+                <a
+                  href={issueUrl(i.issue)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-(--accent) underline"
+                >
+                  #{i.issue}
+                </a>
+              </td>
+              <td className="py-1.5 pr-3">
+                <LinkedText area="docsCommon" text={i.title} links={i.links} />
+                <span className="block text-xs text-(--text-secondary)">
+                  <LinkedText area="docsCommon" text={i.note} links={i.links} />
+                </span>
+                <span className="block text-xs text-(--text-secondary)">
+                  <T area="docsCommon">{laneLabel(i.lane)}</T>
+                </span>
+              </td>
+              <td className="py-1.5 pr-3">{i.priority}</td>
+              <td className="py-1.5 pr-3">
+                <T area="docsCommon">{STATUS_LABEL[i.status]}</T>
+              </td>
+              <td className="py-1.5 pr-3 whitespace-nowrap">
+                <T area="docsCommon" vars={{ start: i.start, end: i.end }}>
+                  {"{start} to {end}"}
+                </T>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function RoadmapDocsPage() {
   return (
@@ -405,112 +490,53 @@ export default function RoadmapDocsPage() {
         <h2 id="items" className="text-xl font-semibold mb-4">
           <T area="docsCommon">{"Every item"}</T>
         </h2>
-        {LANES.map((lane) => {
-          const items = ITEMS.filter((i) => i.lane === lane.id);
+        {EPICS.map((e) => {
+          const items = byPriority(
+            ITEMS.filter((i) => itemEpic(i)?.issue === e.issue),
+          );
           if (items.length === 0) return null;
           return (
-            <div key={lane.id} className="mb-6">
+            <div key={e.issue} className="mb-6">
               <h3 className="font-semibold">
-                <T area="docsCommon">{lane.label}</T>
+                <T area="docsCommon">{e.title}</T>
               </h3>
               <p className="text-xs text-(--text-secondary) mb-2">
-                <LinkedText
-                  area="docsCommon"
-                  text={lane.driver}
-                  links={lane.links}
-                />
+                <a
+                  href={`#${epicTaskId(e.issue)}`}
+                  className="text-(--accent) underline"
+                >
+                  <T area="docsCommon" vars={{ n: e.issue }}>
+                    {"Epic #{n}"}
+                  </T>
+                </a>{" "}
+                · <T area="docsCommon">{laneLabel(e.lane)}</T> · {e.priority} ·{" "}
+                <T area="docsCommon" vars={epicWindow(e)}>
+                  {"{start} to {end}"}
+                </T>
               </p>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[40rem] table-fixed text-sm">
-                  <colgroup>
-                    <col className="w-16" />
-                    <col />
-                    <col className="w-20" />
-                    <col className="w-28" />
-                    <col className="w-56" />
-                  </colgroup>
-                  <thead>
-                    <tr className="text-left text-(--text-secondary) border-b border-(--border)">
-                      <th className="py-1 pr-3 font-medium">
-                        <T area="docsCommon">{"Issue"}</T>
-                      </th>
-                      <th className="py-1 pr-3 font-medium">
-                        <T area="docsCommon">{"What"}</T>
-                      </th>
-                      <th className="py-1 pr-3 font-medium">
-                        <T area="docsCommon">{"Priority"}</T>
-                      </th>
-                      <th className="py-1 pr-3 font-medium">
-                        <T area="docsCommon">{"Status"}</T>
-                      </th>
-                      <th className="py-1 pr-3 font-medium">
-                        <T area="docsCommon">{"Window"}</T>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((i) => (
-                      <tr
-                        key={i.issue}
-                        className="border-b border-(--border) align-top"
-                      >
-                        <td className="py-1.5 pr-3">
-                          <a
-                            href={issueUrl(i.issue)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-(--accent) underline"
-                          >
-                            #{i.issue}
-                          </a>
-                        </td>
-                        <td className="py-1.5 pr-3">
-                          <LinkedText
-                            area="docsCommon"
-                            text={i.title}
-                            links={i.links}
-                          />
-                          <span className="block text-xs text-(--text-secondary)">
-                            <LinkedText
-                              area="docsCommon"
-                              text={i.note}
-                              links={i.links}
-                            />
-                          </span>
-                          {epicOf(i.issue) && (
-                            <a
-                              href={`#${epicTaskId(epicOf(i.issue)!.issue)}`}
-                              className="text-xs text-(--accent) underline"
-                            >
-                              <T
-                                area="docsCommon"
-                                vars={{ n: epicOf(i.issue)!.issue }}
-                              >
-                                {"Epic #{n}"}
-                              </T>
-                            </a>
-                          )}
-                        </td>
-                        <td className="py-1.5 pr-3">{i.priority}</td>
-                        <td className="py-1.5 pr-3">
-                          <T area="docsCommon">{STATUS_LABEL[i.status]}</T>
-                        </td>
-                        <td className="py-1.5 pr-3 whitespace-nowrap">
-                          <T
-                            area="docsCommon"
-                            vars={{ start: i.start, end: i.end }}
-                          >
-                            {"{start} to {end}"}
-                          </T>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <ItemTable items={items} />
             </div>
           );
         })}
+        {(() => {
+          const items = byPriority(ITEMS.filter((i) => !itemEpic(i)));
+          if (items.length === 0) return null;
+          return (
+            <div className="mb-6">
+              <h3 className="font-semibold">
+                <T area="docsCommon">{"Closed before the epics"}</T>
+              </h3>
+              <p className="text-xs text-(--text-secondary) mb-2">
+                <T area="docsCommon">
+                  {
+                    "Done before every open issue was given an epic on 2026-11-08."
+                  }
+                </T>
+              </p>
+              <ItemTable items={items} />
+            </div>
+          );
+        })()}
       </section>
     </div>
   );

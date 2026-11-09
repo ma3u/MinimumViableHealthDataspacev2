@@ -27,7 +27,7 @@ vi.mock("@/components/docs/RoadmapTimeline", () => ({
 }));
 
 import RoadmapDocsPage from "@/app/docs/roadmap/page";
-import { ITEMS } from "@/lib/docs/roadmap";
+import { EPICS, ITEMS, itemEpic } from "@/lib/docs/roadmap";
 
 describe("/docs/roadmap", () => {
   it("renders the timeline and links the GitHub Project the plan is edited in", () => {
@@ -88,6 +88,44 @@ describe("/docs/roadmap", () => {
           `https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/${i.issue}`,
         );
     }
+  });
+
+  it("groups every item under its epic, the closed ones last", () => {
+    render(<RoadmapDocsPage />);
+    const items = screen.getByRole("heading", {
+      level: 2,
+      name: "Every item",
+    }).parentElement!;
+    const groups = within(items)
+      .getAllByRole("heading", { level: 3 })
+      .map((h) => h.textContent);
+    // In the epic cards' order; only epics with dated items.
+    expect(groups).toEqual([
+      ...EPICS.filter((e) => ITEMS.some((i) => itemEpic(i) === e)).map(
+        (e) => e.title,
+      ),
+      "Closed before the epics",
+    ]);
+    // #649 is a sub-issue of #716, so it sits with #716 under #961.
+    const secondary = within(items).getByRole("heading", {
+      level: 3,
+      name: /^Secondary use/,
+    }).parentElement!;
+    expect(
+      within(secondary).getByRole("link", { name: "#649" }),
+    ).toBeInTheDocument();
+    expect(
+      within(secondary).getByRole("link", { name: "Epic #961" }),
+    ).toHaveAttribute("href", "#e961");
+    // Within an epic: P1 before P2.
+    const tehdas = within(items).getByRole("heading", {
+      level: 3,
+      name: /^TEHDAS2 results/,
+    }).parentElement!;
+    const order = within(tehdas)
+      .getAllByRole("link", { name: /^#\d+$/ })
+      .map((a) => a.textContent);
+    expect(order.slice(0, 4)).toEqual(["#991", "#992", "#994", "#993"]);
   });
 
   it("links what the texts cite to the article, the act or the file", () => {
