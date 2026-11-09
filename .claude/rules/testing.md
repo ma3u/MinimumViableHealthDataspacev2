@@ -137,8 +137,10 @@ npx playwright test --project=live   # requires JAD stack
   task store and no Keycloak: `E2E_FORGED_SESSIONS=1` makes `loginAs()`
   forge the realm user's session. A spec that tests the Keycloak pages
   themselves calls `skipIfKeycloakDown({ realKeycloak: true })` (ADR-079).
-- A pull request that touches `ui/` runs the specs it can break (`e2e.yml`,
-  `scripts/select-e2e-specs.sh`); shared code runs every spec on three shards.
+- Every pull request runs the specs it can break (`e2e.yml`,
+  `scripts/select-e2e-specs.sh`); shared code runs every spec on three shards,
+  a change no spec exercises runs none. The job `E2E` sums it up and is a
+  required check on `main`, beside `PR Gate`.
 - The nightly (`nightly.yml`) runs every spec and spec 19 against GitHub Pages.
   No Playwright step has `continue-on-error`: a failure is red and opens the
   "Nightly suites failed" issue. Its report is the site's `/e2e-report/`;
