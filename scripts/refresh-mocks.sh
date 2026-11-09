@@ -7,10 +7,15 @@ set -euo pipefail
 #   ./scripts/refresh-mocks.sh [BASE_URL]
 #
 # Defaults to http://localhost:3000. Requires the Next.js dev/server
-# and Neo4j to be running.
+# and Neo4j to be running, and a session: every API route answers 401
+# without one (ADR-044). Pass the session cookie of a signed-in browser:
 #
-# This script is called by the pages.yml CI workflow to ensure the static
-# GitHub Pages build always has fresh data matching the live API.
+#   MOCK_COOKIE='next-auth.session-token=...' ./scripts/refresh-mocks.sh
+#
+# Run it by hand against the full stack and review the diff before
+# committing. CI no longer runs it (pages.yml serves the committed fixtures):
+# without a session it wrote nothing, and its stack had no EDC connector for
+# the negotiation, transfer and task fixtures.
 # ─────────────────────────────────────────────────────────────────────────────
 
 BASE="${1:-http://localhost:3000}"
@@ -27,7 +32,7 @@ fetch_mock() {
   local url="${BASE}${endpoint}"
 
   local response
-  response=$(curl -sf --max-time "$TIMEOUT" "$url" 2>/dev/null) || {
+  response=$(curl -sf --max-time "$TIMEOUT" ${MOCK_COOKIE:+-H "Cookie: ${MOCK_COOKIE}"} "$url" 2>/dev/null) || {
     echo "   ⚠️  SKIP ${endpoint} (unreachable or error)"
     return 0
   }

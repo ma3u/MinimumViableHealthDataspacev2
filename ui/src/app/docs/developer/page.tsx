@@ -2406,9 +2406,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               </h4>
               <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
                 <li>
-                  {t(
-                    "Seed Neo4j and refresh the mock fixtures from the live API",
-                  )}
+                  {t("Use the mock fixtures committed in ui/public/mock")}
                 </li>
                 <li>
                   <T area="docsDeveloper" tags={{ c }}>
@@ -2461,6 +2459,35 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
                 >
                   {
                     "Playwright E2E with the <w>WCAG 2.2 AA</w> and <o>OWASP</o>/BSI checks against a seeded Neo4j, the <l>Lighthouse</l> budget, and on the full JAD stack: {jobs}. Each compliance suite is held to the floor in <f>scripts/compliance-baseline.json</f>. Skipped when main has no commit since the last green run; a red night opens an issue (<a>ADR-074</a>)."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/e2e.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("e2e.yml: the specs a pull request can break")}
+                </a>
+              </h4>
+              <p className="text-(--text-secondary) text-xs">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    s: srcCode("scripts/select-e2e-specs.sh"),
+                    r: srcCode("scripts/run-e2e-local.sh"),
+                    a: adr(
+                      "ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md",
+                    ),
+                  }}
+                >
+                  {
+                    "On a pull request that touches <c>ui/</c>, the neo4j-proxy or the seeds, <s>scripts/select-e2e-specs.sh</s> picks the Playwright specs the diff can break; shared code runs every spec on three shards, and drafts wait. The stack is the demo graph, the neo4j-proxy and forged sessions, with no EDC connector and no Keycloak, and <r>scripts/run-e2e-local.sh</r> runs the same on a laptop. A failure is red (<a>ADR-079</a>)."
                   }
                 </T>
               </p>
