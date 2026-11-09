@@ -2,13 +2,14 @@
 
 Date: 2026-11-09
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-09, Matthias Buchhorn)
 **Relates to:** [ADR-044](ADR-044-every-api-route-needs-a-session.md), [ADR-062](ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md), [ADR-063](ADR-063-healthdcat-ap-release-8-and-its-namespace.md), [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-077](ADR-077-a-minimal-set-of-standard-data-sharing-policies.md)
 **Tracks:** [#990](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/990) (epic) with [#991](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/991) to [#999](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/999)
 
 ## Status
 
-Proposed on 2026-11-09, before the TEHDAS2 final conference on 16 November 2026.
+Proposed and accepted on 2026-11-09, before the TEHDAS2 final conference on
+16 November 2026.
 
 ## Context
 
