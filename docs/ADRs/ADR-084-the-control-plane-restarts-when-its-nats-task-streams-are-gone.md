@@ -1,6 +1,6 @@
 # ADR-084: The control plane's liveness covers its NATS task streams, and Container Apps restarts it when they are gone
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-09, Matthias Buchhorn)
 **Date:** 2026-11-09
 **Relates to:** [ADR-012](ADR-012-azure-container-apps.md), [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-058](ADR-058-azure-triggers-the-off-hours-schedule.md), [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md)
 **Tracks:** [PR #1013](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1013), [PR #1018](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1018), [`docs/gotchas.md`](../gotchas.md) (2026-11-09)
@@ -16,8 +16,8 @@ JetStream. It creates `cn-stream` (`negotiations.>`) and `tp-stream`
 plane deletes both. From then on every negotiation start answers 500, the
 control plane logs `503 No Responders Available For Request` from
 `NatsTaskPublisher.created`, and this lasts until the control plane restarts.
-Locally, PR #1018 creates both as file streams on the `nats_data` volume before
-the control plane starts, so they survive a NATS restart.
+Locally, PR #1018 (merged) creates both as file streams on the `nats_data`
+volume before the control plane starts, so they survive a NATS restart.
 
 ### Azure is exposed the same way (read on 2026-11-09)
 
@@ -119,13 +119,18 @@ green.
    It reads the settings the subscribers read (`edc.nats.cn.subscriber.url`,
    `edc.nats.cn.subscriber.stream` with the default `cn-stream`, and the same
    for `tp`) and asks NATS whether both streams exist. A missing stream is
-   unhealthy, and the failure names it. NATS unreachable stays healthy with a
-   note: a restart cannot bring NATS back, and the upstream check already fails
-   on a closed connection. The answer is cached for 10 s.
+   unhealthy, and the failure names it. NATS unreachable, or not answering
+   within 2 s, stays healthy after one attempt: a restart cannot bring NATS
+   back, and the upstream check already fails on a closed connection. The
+   answer is cached for 10 s. `mvhd.nats.taskstreams.liveness.enabled=false`
+   (`MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED`, no hyphen, so an environment
+   name can spell it) turns it off.
 2. **Container Apps restarts the control plane on it.** `mvhd-controlplane`
-   gets a startup probe and a liveness probe, HTTP GET
-   `:8080/api/check/liveness`, every 30 s, failing after 3, set through
-   `--yaml` (gotcha of 2026-11-05). A missing stream restarts the control plane
+   gets three probes, set by `migrate-edc-to-v1.sh app controlplane` through
+   `--yaml` (gotcha of 2026-11-05): startup on `/api/check/startup` (10 s,
+   then 10 tries 10 s apart; the runtime is ready 3 to 4 s after it boots on
+   Azure), liveness on `/api/check/liveness` every 30 s, failing after 3, and
+   readiness on TCP 8080, the check Container Apps used by default. A missing stream restarts the control plane
    within about two minutes, and its startup creates both streams and both
    consumers again (measured locally: back two seconds after a restart).
 3. **Compose checks liveness too.** The control plane's compose healthcheck
@@ -143,6 +148,23 @@ green.
    goes once the launcher's EDC version covers it.
 
 The same change corrects the comment in `migrate-edc-to-v1.sh`.
+
+### Measured before rollout (2026-11-09)
+
+On the TCK compose stack (Postgres, NATS 2.14.3 as on Azure, the control plane
+built from this launcher), reading `/api/check/liveness`:
+
+| Step                                           | Liveness                                                             |
+| ---------------------------------------------- | -------------------------------------------------------------------- |
+| started                                        | 200, `NATS task streams` healthy                                     |
+| `cn-stream` removed with nats-box              | 503 within 10 s, naming `cn-stream`; EDC's subscriber checks healthy |
+| control plane restarted                        | 200 after 8 to 10 s, both streams back                               |
+| NATS restarted under it                        | 503 naming both; a JetStream publish gets "no responders"            |
+| NATS stopped                                   | 200, answered in 8 to 20 ms                                          |
+| NATS started again                             | 503 after 12 s (its memory streams are gone)                         |
+| `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` | the component is not listed                                          |
+
+The seven unit tests of the check run in the image build.
 
 ## Consequences
 
