@@ -50,11 +50,13 @@ jobs:
       - name: Install UI dependencies
         run: npm ci --prefix ui --no-audit --fund=false
 
+      # Retries: a release download can fail for a moment on GitHub's side
+      # (#1001).
       - name: Install gitleaks and actionlint
         run: |
           set -euo pipefail
           gl=8.29.0
-          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${gl}/gitleaks_${gl}_linux_x64.tar.gz" \
+          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors --connect-timeout 20 "https://github.com/gitleaks/gitleaks/releases/download/v${gl}/gitleaks_${gl}_linux_x64.tar.gz" \
             | sudo tar -xz -C /usr/local/bin gitleaks
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) >/dev/null
           sudo mv ./actionlint /usr/local/bin/
