@@ -2293,6 +2293,44 @@ paths:
                 organization: { type: string }
       responses:
         "200": { description: Updated }
+    delete:
+      tags: [Participants]
+      summary: Remove a participant registered through /onboarding (EDC_ADMIN)
+      description: >-
+        Removes the issuer holder, the siglet transfer type mapping, the
+        IdentityHub participant and the control plane context, the context
+        last; with CFM_TENANT_URL set, the participant's CFM tenant and profile
+        first (ADR-085). A participant without registeredAt, one of the seeded
+        five, is refused with 409 and nothing is touched.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Removed; complete is false when a step failed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [removed, did, complete, steps]
+                properties:
+                  removed: { type: string }
+                  did: { type: string }
+                  complete: { type: boolean }
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      required: [step, ok]
+                      properties:
+                        step: { type: string }
+                        ok: { type: boolean }
+                        detail: { type: string }
+        "403": { description: Not an EDC_ADMIN }
+        "404": { description: No context with this id }
+        "409": { description: A seeded participant; nothing was removed }
 
   /api/participants/me:
     get:

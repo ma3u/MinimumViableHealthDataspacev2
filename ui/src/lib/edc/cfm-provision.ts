@@ -56,9 +56,45 @@ function settings() {
 
 interface ParticipantProfile {
   id: string;
+  identifier?: string;
   error?: boolean;
   errorDetail?: string;
   vpas?: { type: string; state: string }[];
+}
+
+type Settings = ReturnType<typeof settings>;
+type TenantManager = <T>(path: string, init?: RequestInit) => Promise<T>;
+
+/** A client-credentials token of the cfm-agents client for the Tenant Manager. */
+async function cfmToken(s: Settings): Promise<string> {
+  const res = await fetch(s.tokenUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: s.clientId,
+      client_secret: s.clientSecret,
+    }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Keycloak answered ${res.status}`);
+  return (await res.json()).access_token;
+}
+
+function tenantManager(s: Settings, token: string): TenantManager {
+  return async <T>(path: string, init?: RequestInit): Promise<T> => {
+    const res = await fetch(`${s.tenantUrl}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`Tenant Manager ${res.status}: ${text}`);
+    return (text ? JSON.parse(text) : {}) as T;
+  };
 }
 
 /** Provisions one participant through the Tenant Manager. */
@@ -78,37 +114,12 @@ export async function provisionThroughCfm(
     );
   };
 
-  let token: string;
+  let tm: TenantManager;
   try {
-    const res = await fetch(s.tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: s.clientId,
-        client_secret: s.clientSecret,
-      }),
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error(`Keycloak answered ${res.status}`);
-    token = (await res.json()).access_token;
+    tm = tenantManager(s, await cfmToken(s));
   } catch (err) {
     throw fail("CFM token", err instanceof Error ? err.message : String(err));
   }
-
-  const tm = async <T>(path: string, init?: RequestInit): Promise<T> => {
-    const res = await fetch(`${s.tenantUrl}${path}`, {
-      ...init,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-    const text = await res.text();
-    if (!res.ok) throw new Error(`Tenant Manager ${res.status}: ${text}`);
-    return (text ? JSON.parse(text) : {}) as T;
-  };
 
   let dataspaceProfileId = process.env.CFM_DATASPACE_PROFILE_ID || "";
   try {
@@ -214,4 +225,69 @@ export async function provisionThroughCfm(
   }
   steps.push({ step: "control plane context", ok: true });
   return { contextId, did, steps };
+}
+
+/**
+ * Removes the participant's tenant and profile from CFM, best effort. CFM
+ * 0.0.7's dispose reaches no agent with the context id
+ * (docs/planning/current/issue-973-cfm-0-0-7-spike.md), so it removes nothing
+ * on the stack; the hub removes that itself (remove-participant.ts). This only
+ * keeps the Tenant Manager from listing a participant that is gone. A step
+ * that fails is reported, never thrown.
+ */
+export async function removeFromCfm(did: string): Promise<ProvisionStep[]> {
+  const s = settings();
+  const steps: ProvisionStep[] = [];
+  const detail = (err: unknown) =>
+    err instanceof Error ? err.message : String(err);
+  let tm: TenantManager;
+  try {
+    tm = tenantManager(s, await cfmToken(s));
+  } catch (err) {
+    return [{ step: "CFM token", ok: false, detail: detail(err) }];
+  }
+  let found = false;
+  try {
+    for (const tenant of await tm<{ id: string }[]>("/v1alpha1/tenants")) {
+      const profiles = await tm<ParticipantProfile[]>(
+        `/v1alpha1/tenants/${tenant.id}/participant-profiles`,
+      );
+      const mine = profiles.filter((p) => p.identifier === did);
+      if (mine.length === 0) continue;
+      found = true;
+      for (const p of mine) {
+        try {
+          await tm(
+            `/v1alpha1/tenants/${tenant.id}/participant-profiles/${p.id}`,
+            { method: "DELETE" },
+          );
+          steps.push({ step: "CFM participant profile", ok: true });
+        } catch (err) {
+          steps.push({
+            step: "CFM participant profile",
+            ok: false,
+            detail: detail(err),
+          });
+        }
+      }
+      if (mine.length === profiles.length) {
+        try {
+          await tm(`/v1alpha1/tenants/${tenant.id}`, { method: "DELETE" });
+          steps.push({ step: "CFM tenant", ok: true });
+        } catch (err) {
+          steps.push({ step: "CFM tenant", ok: false, detail: detail(err) });
+        }
+      }
+    }
+  } catch (err) {
+    steps.push({ step: "CFM tenants", ok: false, detail: detail(err) });
+  }
+  if (!found && steps.length === 0) {
+    steps.push({
+      step: "CFM participant profile",
+      ok: true,
+      detail: "none for this DID",
+    });
+  }
+  return steps;
 }

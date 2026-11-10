@@ -167,6 +167,7 @@ The UI reads its configuration from the environment; [`ui/.env.example`](../../u
 | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`                                                                                 | [NextAuth](https://next-auth.js.org/); the secret also signs the sessions the API tests forge                                                  |
 | `KEYCLOAK_PUBLIC_URL`, `KEYCLOAK_INTERNAL_URL`, `KEYCLOAK_ISSUER`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET` | sign-in; never `wellKnown` (gotcha 5 in [`CLAUDE.md`](../../CLAUDE.md#L71))                                                                    |
 | `EDC_MANAGEMENT_URL`, `EDC_IDENTITY_URL`, `EDC_ISSUER_URL`, `EDC_TENANT_URL`, `EDC_PROVISION_URL`                 | the EDC services ([`docker-compose.yml`](../../docker-compose.yml#L78-L82)); the last two point at CFM, which only the `edc018` profile starts |
+| `CFM_TENANT_URL`, `CFM_CLIENT_SECRET`                                                                             | set, `/onboarding` provisions through CFM ([ADR-085](../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)); unset, the hub itself             |
 | `NEXT_PUBLIC_STATIC_EXPORT=true`                                                                                  | the GitHub Pages build: no API routes, fixtures from [`ui/public/mock/`](../../ui/public/mock)                                                 |
 
 ### The iPhone app

@@ -91,14 +91,43 @@ and its twelve scopes. Nothing of the spike is left on the stack.
 ### What is left
 
 - **Dispose.** Needs eclipse-cfm to carry `participantContextId` into the
-  dispose orchestration, and the hub a removal path of its own until then.
-  Not reported upstream: an outward message needs Matthias's go.
-- **ADR-085 step 3.** The `/onboarding` switch exists (`CFM_TENANT_URL`); the
-  participant list, Bruno requests and the docs do not follow it yet.
+  dispose orchestration. Until then the hub removes participants itself (step
+  3, below). Not reported upstream: an outward message needs Matthias's go.
 - **Azure (step 4).** The agent image would need building and pushing to ACR,
   and CFM's NATS streams need their own answer to a NATS restart (they live
   on `mvhd-nats`'s container storage and come back only when the managers
   start; `docs/gotchas.md` 2026-11-09, PR #1028).
+
+## Step 3, 2026-11-10: the hub removes a participant, with CFM or without
+
+The participant list and `/onboarding`'s cards already follow CFM: both read
+the control plane's contexts, and the connector activity writes the
+registration's details onto them. What step 3 added is
+[`DELETE /api/participants/{id}`](../../../ui/src/app/api/participants/[id]/route.ts)
+([`remove-participant.ts`](../../../ui/src/lib/edc/remove-participant.ts)),
+`EDC_ADMIN` only:
+
+- Only a context with `registeredAt` (registered through `/onboarding`) is
+  removed; a seeded one answers `409` and nothing is touched, so the suites
+  keep their providers and consumers.
+- Issuer holder, siglet mapping (only with CFM), IdentityHub participant
+  (its keys, STS client and credentials go with it), control plane context
+  last, so a removal that stopped halfway can run again. Every step is in
+  the answer; `complete` is false when one failed.
+- With `CFM_TENANT_URL` set, the CFM profile and tenant first, best effort.
+
+Measured on the OrbStack stack with a dev server:
+
+| Case                        | Answer                                                                                                                                                                                                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seeded AlphaKlinik Berlin   | `409`, nothing touched                                                                                                                                                                                                                                                 |
+| Unknown id / no session     | `404` / `401`                                                                                                                                                                                                                                                          |
+| Onboarded by the hub itself | `200`, `complete: true`; control plane, IdentityHub, holder, STS client and Vault entries gone; again: `404`                                                                                                                                                           |
+| Onboarded through CFM       | `200`, `complete: false`: context and IdentityHub participant gone; the CFM tenant stays ("cannot delete tenant with participants", dispose never finishes upstream); the holder CFM's registration agent keyed by DID cannot be deleted through the IssuerService API |
+
+What remains for a CFM participant after removal, the DID-keyed holder and
+the CFM tenant, disappears only with upstream's dispose fixed, or with a
+registration activity of our own that keys the holder by context id.
 
 ## Round 2, the proxy: what CFM 0.0.7 does on our stack (superseded by round 3)
 
