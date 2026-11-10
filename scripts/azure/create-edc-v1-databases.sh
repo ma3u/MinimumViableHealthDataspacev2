@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 # =============================================================================
-# The four databases for EDC 1.0, beside the 0.18 ones (#881, ADR-078)
+# The four databases for EDC 1.0 (#881, ADR-078)
 # =============================================================================
 #   create-edc-v1-databases.sh          create what is missing, then list
 #   create-edc-v1-databases.sh check    list only
 #
 # EDC ships no migration from 0.18 to 1.0, and the schemas differ, so the 1.0
-# launchers start on fresh databases and create their own tables. The 0.18
-# databases (create-edc-v018-databases.sh) stay untouched: a rollback is the
-# saved app definition, which names them (migrate-edc-to-v1.sh rollback).
-# siglet_v1 is for siglet 0.1.6, which refuses a database a newer build
-# migrated, so the 0.18 siglet keeps its own.
+# launchers start on fresh databases and create their own tables. siglet_v1
+# is for siglet 0.1.6, which refuses a database a newer build migrated. The
+# 0.18 databases they replaced were dropped by edc-retire-v018-azure.yml
+# (#927 step 6), after the 0.18 apps were deleted.
 #
 # Creating a database needs write access to the Flexible Server, which the
 # maintainer account does not have (Container Apps Contributor only), so the

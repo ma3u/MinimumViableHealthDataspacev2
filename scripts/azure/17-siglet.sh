@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # =============================================================================
-# mvhd-siglet: the token signer the 0.18 data planes need (#574, #542)
+# mvhd-siglet: the data plane of EDC 1.0 (#574, #542, #881, ADR-078)
 # =============================================================================
 #   17-siglet.sh            create or update the app (idempotent)
 #   17-siglet.sh --check    report, change nothing
 #
-# The 0.18 data plane launcher refuses to start without `edc.iam.siglet.*`:
-# siglet signs the data plane's access tokens and publishes their keys at
-# /keys (port 8080), the URL migrate-edc-to-v018.sh gives the data planes.
-# Compose has run it since #584; Azure has not had one.
+# siglet answers the control plane's Data Plane Signaling and issues the
+# access token; the neo4j-proxy serves the data after checking it. It came to
+# Azure for the EDC 0.18 data planes (#574), whose access tokens it signed;
+# those were deleted on 2026-11-09 (#927). migrate-edc-to-v1.sh siglet runs
+# this script for 1.0.
 #
 # Decided on #574 (2026-10-06):
-#   - storage `postgres-vault`: renewable tokens and locks in the database
-#     `siglet` on the Flexible Server (created here; siglet makes its own
-#     tables), the other tokens in Vault;
+#   - storage `postgres-vault`: renewable tokens and locks in a database on
+#     the Flexible Server (created here; siglet makes its own tables), the
+#     other tokens in Vault;
 #   - the Postgres password is a Key Vault reference to postgres-admin-password
 #     through the identity the UI and the proxy use (ADR-036). sqlx reads
 #     PGPASSWORD when the URL carries none, so no URL with a password exists;
@@ -39,8 +40,10 @@ MODE="${1:-apply}"
 # The database. SIGLET_DB moves the siglet to a fresh one: a siglet build
 # refuses a database whose migrations a newer build wrote ("DataPlane SDK
 # error" at start), which is what pinning sha-54382c8 over the July build
-# met on 2026-10-07 (#542). The old database stays as it was.
-DB="${SIGLET_DB:-siglet}"
+# met on 2026-10-07 (#542). 0.1.6 has siglet_v1 (#881); the July build's
+# `siglet` and 0.18's `siglet_v2` are dropped by edc-retire-v018-azure.yml
+# (#927), so the default must not create either again.
+DB="${SIGLET_DB:-siglet_v1}"
 SECRET_NAME="pg-password"
 IDENTITY_NAME="${SIGLET_IDENTITY:-id-mvhd-claude-federation}"
 
@@ -162,11 +165,16 @@ unset VAULT_TOKEN
 # ── 3b. Transfer types (#542) ───────────────────────────────────────────────
 # The siglet answers every start message for a transfer type it has no entry
 # for with "Data flow handler cannot handle this flow", and the transfer ends
-# TERMINATED. Compose mounts jad/siglet.toml; here the same file, with this
-# environment's data plane, is the secret siglet-toml mounted at /config, as
+# TERMINATED. Compose mounts jad/siglet-edc1.toml; here the same file, with
+# this environment's address, is the secret siglet-toml mounted at /config, as
 # upstream jad mounts its siglet-config ConfigMap. The endpoint goes into the
-# consumer's EDR: the FHIR data plane's data API.
-SIGLET_PULL_ENDPOINT="${SIGLET_PULL_ENDPOINT:-http://${DP_FHIR_APP}:8186/api/data}"
+# consumer's EDR: the neo4j-proxy's data API (ADR-078). The 0.18 default, the
+# FHIR data plane's, named an app deleted on 2026-11-09 (#927).
+if [ -z "${SIGLET_PULL_ENDPOINT:-}" ]; then
+  eval "$(get_aca_fqdns)"
+  [ -n "${NEO4J_PROXY_URL:-}" ] || { err "no ACA domain, so no proxy address for the pull endpoint"; exit 1; }
+  SIGLET_PULL_ENDPOINT="${NEO4J_PROXY_URL}/dataspace/data"
+fi
 SIGLET_TOML_TEXT=$(sed "s#^endpoint = .*#endpoint = \"${SIGLET_PULL_ENDPOINT}\"#" "${REPO_ROOT}/${SIGLET_TOML}")
 az containerapp secret set --name "$SIGLET_APP" --resource-group "$RG" \
   --secrets "siglet-toml=${SIGLET_TOML_TEXT}" -o none
@@ -266,4 +274,3 @@ done
 }
 ok "${rev} Healthy"
 report
-log "The data planes reach its key set at http://${SIGLET_APP}/keys (migrate-edc-to-v018.sh app dp-fhir)."
