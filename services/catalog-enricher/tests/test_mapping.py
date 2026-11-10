@@ -145,9 +145,9 @@ def test_bonus_programme_is_indexed_as_a_data_service():
     assert extract_datasets(env) == []
     [programme] = extract_services(env)
 
-    assert programme.service_id == "urn:mvhd:programme:alphakasse:active-year-2027"
+    assert programme.service_id == "urn:mvhd:programme:alphakasse:active-year-2025"
     assert programme.kinds == ["BonusProgramme"]
-    assert programme.title == "Active year bonus 2027"
+    assert programme.title == "Active year bonus 2025"
     assert "yes or no" in programme.description
     assert programme.publisher_did == "did:web:alphakasse.de:insurer"
     assert programme.publisher_name == "AlphaKasse DE"
@@ -156,8 +156,8 @@ def test_bonus_programme_is_indexed_as_a_data_service():
     assert programme.access_rights == "PUBLIC"
     assert "http://data.europa.eu/eli/reg/2025/327/oj" in programme.applicable_legislation
     # ADR-080, decision 3: the rule travels with the entry, versioned
-    assert programme.rule_version == "2027.1"
-    assert programme.rule_id.endswith(":rule:2027.1")
+    assert programme.rule_version == "2025.1"
+    assert programme.rule_id.endswith(":rule:2025.1")
     assert "150 minutes a week" in programme.rule_description
     assert len(programme.conforms_to) == 2
     # English and untagged keywords only, as for datasets

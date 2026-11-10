@@ -20,6 +20,11 @@ import type {
   ProgrammeConsent,
 } from "@/lib/patient/bonus-programme";
 import { ownRecordId, refuseForeignRecord } from "@/lib/patient/own-record";
+import {
+  evaluateYear,
+  ruleYear,
+  type YearEvaluation,
+} from "@/lib/patient/programme-rule";
 
 const PATIENT_BY_KEY = `MATCH (p:Patient)
    WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId`;
@@ -76,16 +81,18 @@ export const OPEN_PROGRAMME_CONSENT_CYPHER = `MATCH (c:ProgrammeConsent {patient
 
 /**
  * A transfer the person asked for (ADR-080, decision 4, second path). What it
- * carries is the program, the year and goal met; the answer is computed in
- * step 6, so until then goalMet stays null and the status says so.
+ * carries is the program, the year and goal met, nothing else: the hub has
+ * evaluated the ended year inside the record (step 6, ADR-087), and the
+ * breakdown behind the answer is not stored with it. Delivery to the
+ * program's connector is step 8; until then the status says it is ready.
  */
 export const RECORD_TRANSFER_CYPHER = `MATCH (c:ProgrammeConsent {consentId: $consentId})
    MERGE (t:ProgrammeTransfer {transferId: $transferId})
      ON CREATE SET t.patientId = $patientId,
                    t.programmeId = $programmeId,
                    t.year = toInteger($year),
-                   t.goalMet = null,
-                   t.status = 'awaiting-evaluation',
+                   t.goalMet = $goalMet,
+                   t.status = 'evaluated',
                    t.requestedAt = datetime()
    MERGE (t)-[:UNDER_CONSENT]->(c)
    RETURN t.transferId AS transferId, t.programmeId AS programmeId, t.year AS year,
@@ -114,6 +121,11 @@ export const PROGRAMME_CONSENT_SOURCES = [
 /** The legal basis the routes name in their answers. */
 const PROGRAMME_CONSENT_BASIS =
   "Explicit consent to one program, GDPR Art. 9(2)(a), withdrawable at any time, Art. 7(3); EHDS Art. 7(3) (ADR-080)";
+
+/** A program's rule version, or no row when the crawler never indexed it. */
+export const PROGRAMME_RULE_CYPHER = `MATCH (s:BonusProgramme {serviceId: $programmeId})
+   RETURN s.ruleVersion AS ruleVersion
+   LIMIT 1`;
 
 /** The open consent of a person to a program, or null. */
 export function openConsent(
@@ -164,11 +176,21 @@ export async function resolveProgrammePatient(
 }
 
 /**
- * Every bonus program the crawler indexed, as the enricher wrote it
- * (DCAT-AP dcat:DataService typed ehds:BonusProgramme, #934 step 3).
+ * The bonus programs the crawler indexed, as the enricher wrote it (DCAT-AP
+ * dcat:DataService typed ehds:BonusProgramme, #934 step 3). Only those the
+ * publisher's latest catalogue still lists: the enricher stamps lastSeenAt
+ * on each crawl and never deletes, so a programme a catalogue dropped
+ * (2027 became 2025, ADR-087) is left out here, while the consents given to
+ * it stay on record.
  */
 export const BONUS_PROGRAMMES_CYPHER = `MATCH (s:DataService:BonusProgramme)
    OPTIONAL MATCH (s)-[:PUBLISHED_BY]->(p:Participant)
+   WITH s, p, coalesce(p.participantId, s.publisherDid, s.serviceId) AS publisher
+   WITH publisher, collect({s: s, p: p}) AS offers, max(s.lastSeenAt) AS latest
+   UNWIND offers AS offer
+   WITH offer.s AS s, offer.p AS p, latest
+   WHERE s.lastSeenAt IS NULL OR latest IS NULL
+      OR s.lastSeenAt >= latest - duration('PT1H')
    RETURN s.serviceId AS programmeId,
           s.title AS title,
           s.description AS description,
@@ -271,14 +293,100 @@ export function parseTransferRequest(body: {
 }
 
 /**
- * The person's instruction to send a year's answer: 202 under an open
- * consent, 403 without one (never joined, or withdrawn), and then nothing is
- * recorded (GDPR Art. 7(3)).
+ * Checks that the program exists and that its rule covers the year: 404 for
+ * a program the crawler never indexed, 400 for a year its rule does not
+ * cover. A rule version that names no year covers any.
+ */
+async function checkProgrammeYear(
+  programmeId: string,
+  year: number,
+): Promise<NextResponse | null> {
+  const [programme] = await runQuery<{ ruleVersion: string | null }>(
+    PROGRAMME_RULE_CYPHER,
+    { programmeId },
+  );
+  if (!programme) {
+    return NextResponse.json(
+      { error: `No bonus program '${programmeId}'` },
+      { status: 404 },
+    );
+  }
+  const covered = ruleYear(programme.ruleVersion);
+  if (covered !== null && covered !== year) {
+    return NextResponse.json(
+      { error: `This program's rule covers ${covered}, not ${year}` },
+      { status: 400 },
+    );
+  }
+  return null;
+}
+
+/** The year the request names, or the program's rule year, or a 400. */
+export function parseEvaluationRequest(
+  params: URLSearchParams,
+): { programmeId: string; year: number | null } | NextResponse {
+  const programmeId = params.get("programmeId");
+  const raw = params.get("year");
+  const year = raw === null ? null : Number(raw);
+  if (
+    !programmeId ||
+    (year !== null && (!Number.isInteger(year) || year < 2000 || year > 2100))
+  ) {
+    return NextResponse.json(
+      { error: "programmeId is required, and year must be a calendar year" },
+      { status: 400 },
+    );
+  }
+  return { programmeId, year };
+}
+
+/**
+ * The member's own result for a program year, before anything is sent
+ * (ADR-080, decision 3). The breakdown is in the answer because the member
+ * is the one reading it; it is never stored with a transfer.
+ */
+export async function evaluateProgrammeYear(
+  patientId: string,
+  programmeId: string,
+  year: number | null,
+  now: Date = new Date(),
+): Promise<NextResponse> {
+  let target = year;
+  if (target === null) {
+    const [programme] = await runQuery<{ ruleVersion: string | null }>(
+      PROGRAMME_RULE_CYPHER,
+      { programmeId },
+    );
+    if (!programme) {
+      return NextResponse.json(
+        { error: `No bonus program '${programmeId}'` },
+        { status: 404 },
+      );
+    }
+    target = ruleYear(programme.ruleVersion) ?? now.getUTCFullYear() - 1;
+  } else {
+    const refused = await checkProgrammeYear(programmeId, target);
+    if (refused) return refused;
+  }
+  const evaluation = await evaluateYear(patientId, target, now);
+  if (!evaluation) {
+    return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+  }
+  return NextResponse.json({ programmeId, evaluation });
+}
+
+/**
+ * The person's instruction to send a year's answer. Only under an open
+ * consent (403 otherwise, and nothing is recorded, GDPR Art. 7(3)); only for
+ * a year the program's rule covers (400) and that has ended (409, with the
+ * date it can be evaluated). Then the hub evaluates the year inside the
+ * record and records the program, the year and goal met: 202.
  */
 export async function requestProgrammeTransfer(
   patientId: string,
   programmeId: string,
   year: number,
+  now: Date = new Date(),
 ): Promise<NextResponse> {
   const consentId = await programmeTransferAllowed(patientId, programmeId);
   if (!consentId) {
@@ -290,9 +398,35 @@ export async function requestProgrammeTransfer(
       { status: 403 },
     );
   }
+  const refused = await checkProgrammeYear(programmeId, year);
+  if (refused) return refused;
+  const evaluation: YearEvaluation | null = await evaluateYear(
+    patientId,
+    year,
+    now,
+  );
+  if (!evaluation) {
+    return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+  }
+  if (evaluation.status === "year-not-over") {
+    return NextResponse.json(
+      {
+        error: `${year} is not over: the hub evaluates it from ${evaluation.evaluableFrom}, and nothing is sent before.`,
+        evaluation,
+      },
+      { status: 409 },
+    );
+  }
   const [transfer] = await runQuery<ProgrammeTransferRow>(
     RECORD_TRANSFER_CYPHER,
-    { consentId, transferId: randomUUID(), patientId, programmeId, year },
+    {
+      consentId,
+      transferId: randomUUID(),
+      patientId,
+      programmeId,
+      year,
+      goalMet: evaluation.goalMet,
+    },
   );
   return NextResponse.json(
     { transfer, legalBasis: PROGRAMME_CONSENT_BASIS },

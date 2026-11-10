@@ -40,6 +40,7 @@ struct HealthKitWearables: WearableSource {
     case .heartRateVariability: return HKQuantityType(.heartRateVariabilitySDNN)
     case .steps: return HKQuantityType(.stepCount)
     case .bodyMass: return HKQuantityType(.bodyMass)
+    case .exercise: return HKQuantityType(.appleExerciseTime)
     }
   }
 
@@ -49,6 +50,7 @@ struct HealthKitWearables: WearableSource {
     case .heartRateVariability: return .secondUnit(with: .milli)
     case .steps: return .count()
     case .bodyMass: return .gramUnit(with: .kilo)
+    case .exercise: return .minute()
     }
   }
 
@@ -108,10 +110,12 @@ struct HealthKitWearables: WearableSource {
           WearableDay(day: day, value: 42 + index / 90 + 3 * sin(index / 5)))
         days[.steps, default: []].append(
           WearableDay(day: day, value: 7_400 + 1_800 * sin(index / 7) + index * 2))
+        days[.exercise, default: []].append(
+          WearableDay(day: day, value: 26 + 8 * sin(index / 4)))
         day = calendar.date(byAdding: .day, value: 1, to: day)!
         index += 1
       }
-      return [WearableMetric.restingHeartRate, .heartRateVariability, .steps].map {
+      return [WearableMetric.restingHeartRate, .heartRateVariability, .steps, .exercise].map {
         WearableSeries.weekly(days[$0] ?? [], metric: $0, sources: ["Demo Watch"])
       }
     }

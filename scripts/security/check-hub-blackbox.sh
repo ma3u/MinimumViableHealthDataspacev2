@@ -44,6 +44,8 @@ expect 401 "POST /api/patient/app/wearables (bad bearer)" -X POST -H 'Authorizat
 expect 401 "DELETE /api/patient/app/account (no token)" -X DELETE "$H/api/patient/app/account"
 expect 401 "GET /api/patient/app/programmes (bad bearer)" -H 'Authorization: Bearer not-a-token' "$H/api/patient/app/programmes"
 expect 401 "POST /api/patient/app/programmes/transfer (no token)" -X POST -H 'Content-Type: application/json' -d '{"programmeId":"x","year":2027}' "$H/api/patient/app/programmes/transfer"
+expect 401 "GET /api/patient/app/programmes/evaluation (no token)" "$H/api/patient/app/programmes/evaluation?programmeId=x"
+expect 401 "GET /api/patient/programmes/evaluation (no session)" "$H/api/patient/programmes/evaluation?programmeId=x"
 expect "400,401,403" "POST /api/app-accounts (no attestation)" -X POST -H 'Content-Type: application/json' -d '{}' "$H/api/app-accounts"
 expect "200,405" "POST /api/app-accounts/challenge" -X POST "$H/api/app-accounts/challenge"
 

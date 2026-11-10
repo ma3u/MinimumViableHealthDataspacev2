@@ -27,11 +27,14 @@ public enum WearableMetric: String, CaseIterable, Sendable, Codable {
   case heartRateVariability = "heart-rate-variability"
   case steps
   case bodyMass = "body-mass"
+  /// Apple Health's exercise minutes, a day's total. What a bonus program's
+  /// active year rule reads (#934 step 6, ADR-087); never inferred from steps.
+  case exercise
 
   /// How a week of daily values becomes one point.
   public enum Aggregation: Sendable { case mean, sum }
 
-  public var aggregation: Aggregation { self == .steps ? .sum : .mean }
+  public var aggregation: Aggregation { self == .steps || self == .exercise ? .sum : .mean }
 
   /// The unit the series is expressed in, as a person reads it.
   public var unit: String {
@@ -40,6 +43,7 @@ public enum WearableMetric: String, CaseIterable, Sendable, Codable {
     case .heartRateVariability: return "ms"
     case .steps: return String(localized: "steps per day")
     case .bodyMass: return "kg"
+    case .exercise: return String(localized: "minutes per day")
     }
   }
 
@@ -49,6 +53,7 @@ public enum WearableMetric: String, CaseIterable, Sendable, Codable {
     case .heartRateVariability: return String(localized: "Heart rate variability (SDNN)")
     case .steps: return String(localized: "Steps")
     case .bodyMass: return String(localized: "Body weight")
+    case .exercise: return String(localized: "Exercise minutes")
     }
   }
 }

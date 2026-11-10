@@ -282,6 +282,10 @@
       "methods": ["POST", "DELETE"]
     },
     {
+      "path": "/api/patient/app/programmes/evaluation",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/patient/app/programmes",
       "methods": ["GET"]
     },
@@ -324,6 +328,10 @@
     {
       "path": "/api/patient/programmes/consent",
       "methods": ["POST", "DELETE"]
+    },
+    {
+      "path": "/api/patient/programmes/evaluation",
+      "methods": ["GET"]
     },
     {
       "path": "/api/patient/programmes",
@@ -1403,6 +1411,12 @@
       "file": "ADR-086-tehdas2-ratings-after-the-requirement-check.md",
       "title": "The TEHDAS2 ratings after the requirement check",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-087",
+      "file": "ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md",
+      "title": "The hub evaluates a bonus year once it has ended",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1441,8 +1455,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 66,
-    "operations": 85
+    "paths": 68,
+    "operations": 87
   },
   "workflowJobs": {
     "test.yml": [
@@ -1492,21 +1506,21 @@
   "lastUpdated": {
     "/docs": "2026-11-08",
     "/docs/user-guide": "2026-11-09",
-    "/docs/developer": "2026-11-09",
-    "/docs/developer/quality-gates": "2026-11-09",
-    "/docs/developer/api": "2026-11-09",
-    "/docs/developer/reference": "2026-11-09",
-    "/docs/developer/[slug]": "2026-11-09",
-    "/docs/architecture": "2026-11-09",
-    "/docs/security": "2026-11-09",
-    "/docs/security/[slug]": "2026-11-09",
-    "/docs/klarbefund": "2026-11-09",
-    "/docs/ehds": "2026-11-09",
+    "/docs/developer": "2026-11-10",
+    "/docs/developer/quality-gates": "2026-11-10",
+    "/docs/developer/api": "2026-11-10",
+    "/docs/developer/reference": "2026-11-10",
+    "/docs/developer/[slug]": "2026-11-10",
+    "/docs/architecture": "2026-11-10",
+    "/docs/security": "2026-11-10",
+    "/docs/security/[slug]": "2026-11-10",
+    "/docs/klarbefund": "2026-11-10",
+    "/docs/ehds": "2026-11-10",
     "/docs/ehds/glossary": "2026-11-08",
-    "/docs/ehds/[slug]": "2026-11-09",
+    "/docs/ehds/[slug]": "2026-11-10",
     "/docs/roadmap": "2026-11-09",
-    "/docs/operations": "2026-11-09",
-    "/docs/operations/[slug]": "2026-11-09",
-    "/docs/klarbefund/[slug]": "2026-11-09"
+    "/docs/operations": "2026-11-10",
+    "/docs/operations/[slug]": "2026-11-10",
+    "/docs/klarbefund/[slug]": "2026-11-10"
   }
 }

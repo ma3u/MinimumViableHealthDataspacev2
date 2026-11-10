@@ -368,7 +368,6 @@
   "What never leaves your record": "Lo que nunca sale de su historia",
   "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Pasos, frecuencia cardiaca, diagnósticos, detalles de las visitas y cualquier fecha más precisa que el año.",
   "That did not work (HTTP {status}). Please try again.": "No ha funcionado (HTTP {status}). Inténtelo de nuevo.",
-  "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.": "Registrado para {year}: {publisher} recibe sí o no en cuanto el hub haya evaluado el año.",
   "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.": "Participar es su consentimiento solo a este programa (RGPD, art. 9, apdo. 2, letra a)). No le inscribe en ningún estudio y es independiente de su exclusión voluntaria.",
   "You joined on {date}.": "Se unió el {date}.",
   "Sending…": "Enviando…",
@@ -377,5 +376,18 @@
   "You withdrew on {date}. Nothing is sent any more.": "Retiró su consentimiento el {date}. Ya no se envía nada.",
   "Joining…": "Uniéndose…",
   "Join this program": "Unirse a este programa",
-  "Which data goes where": "Qué datos van adónde"
+  "Which data goes where": "Qué datos van adónde",
+  "{year} is not over yet. Nothing was sent; the hub works out the result once the year has ended.": "{year} todavía no ha terminado. No se ha enviado nada; el hub calcula el resultado cuando el año haya terminado.",
+  "Recorded for {year}: goal met, yes. Only this answer goes to {publisher}, once the hub's delivery is connected.": "Registrado para {year}: objetivo cumplido, sí. Solo esta respuesta va a {publisher}, en cuanto el envío del hub esté conectado.",
+  "Recorded for {year}: goal met, no. Only this answer goes to {publisher}, once the hub's delivery is connected.": "Registrado para {year}: objetivo cumplido, no. Solo esta respuesta va a {publisher}, en cuanto el envío del hub esté conectado.",
+  "Working out your result…": "Calculando su resultado…",
+  "Your result could not be worked out (HTTP {status}).": "No se ha podido calcular su resultado (HTTP {status}).",
+  "Your result could not be worked out.": "No se ha podido calcular su resultado.",
+  "{year} is not over. The hub works out your result from {date}; nothing can be sent before.": "{year} no ha terminado. El hub calcula su resultado a partir del {date}; antes no se puede enviar nada.",
+  "Your result for {year}": "Su resultado de {year}",
+  "Goal met: yes": "Objetivo cumplido: sí",
+  "Goal met: no": "Objetivo cumplido: no",
+  "Exercise: {minutes} minutes a week on average, from {weeks} weeks your tracker shared. The rule asks for {required}.": "Actividad: {minutes} minutos a la semana de media, de {weeks} semanas que compartió su pulsera. La regla pide {required}.",
+  "Check-ups in {year}: {count}. The rule asks for one.": "Revisiones en {year}: {count}. La regla pide una.",
+  "Only the year and goal met, yes or no, would go to {publisher}. This breakdown stays in your record.": "Solo el año y objetivo cumplido, sí o no, irían a {publisher}. Este desglose se queda en su historia."
 }

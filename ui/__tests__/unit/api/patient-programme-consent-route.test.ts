@@ -24,13 +24,15 @@ import {
   OPEN_PROGRAMME_CONSENT_CYPHER,
   RECORD_TRANSFER_CYPHER,
   WITHDRAW_PROGRAMME_CYPHER,
+  PROGRAMME_RULE_CYPHER,
   openConsent,
 } from "@/lib/patient/programme-consent";
+import { YEAR_RECORD_CYPHER } from "@/lib/patient/programme-rule";
 
 type Session = Awaited<ReturnType<typeof getServerSession>>;
 const asSession = (s: unknown) => s as Session;
 const ADMIN = asSession({ user: { name: "Admin" }, roles: ["EDC_ADMIN"] });
-const PROGRAMME = "urn:mvhd:programme:alphakasse:active-year-2027";
+const PROGRAMME = "urn:mvhd:programme:alphakasse:active-year-2025";
 
 function req(path: string, init?: RequestInit): NextRequest {
   return new NextRequest(
@@ -179,31 +181,34 @@ describe("a transfer the person asks for", () => {
     TRANSFER(
       post("/transfer", {
         programmeId: PROGRAMME,
-        year: 2027,
+        year: 2025,
         patientId: "P1",
       }),
     );
 
-  it("goes out under an open consent: 202, the year and no answer yet", async () => {
+  it("goes out under an open consent for an ended year: 202 with goal met, nothing else", async () => {
     mockRunQuery
       .mockResolvedValueOnce([{ consentId: "c-1" }])
+      .mockResolvedValueOnce([{ ruleVersion: "2025.1" }])
+      // 52 weeks at 25 minutes a day, and one check-up
+      .mockResolvedValueOnce([{ minutes: 52 * 25 * 7, weeks: 52, checkUps: 1 }])
       .mockResolvedValueOnce([
         {
           transferId: "t-1",
           programmeId: PROGRAMME,
-          year: 2027,
-          goalMet: null,
-          status: "awaiting-evaluation",
-          requestedAt: "2026-11-09T10:05:00Z",
+          year: 2025,
+          goalMet: true,
+          status: "evaluated",
+          requestedAt: "2026-11-10T10:05:00Z",
         },
       ]);
     const res = await send();
     expect(res.status).toBe(202);
     const { transfer } = await res.json();
     expect(transfer).toMatchObject({
-      year: 2027,
-      goalMet: null,
-      status: "awaiting-evaluation",
+      year: 2025,
+      goalMet: true,
+      status: "evaluated",
     });
     // ADR-080, decision 2: the program, the year and goal met, nothing else
     expect(Object.keys(transfer).sort()).toEqual([
@@ -215,11 +220,67 @@ describe("a transfer the person asks for", () => {
       "year",
     ]);
     expect(mockRunQuery.mock.calls[0][0]).toBe(OPEN_PROGRAMME_CONSENT_CYPHER);
-    expect(mockRunQuery.mock.calls[1][0]).toBe(RECORD_TRANSFER_CYPHER);
-    expect(mockRunQuery.mock.calls[1][1]).toMatchObject({
+    expect(mockRunQuery.mock.calls[1][0]).toBe(PROGRAMME_RULE_CYPHER);
+    expect(mockRunQuery.mock.calls[2][0]).toBe(YEAR_RECORD_CYPHER);
+    expect(mockRunQuery.mock.calls[3][0]).toBe(RECORD_TRANSFER_CYPHER);
+    // The breakdown stays in the hub: only goal met reaches the transfer.
+    expect(mockRunQuery.mock.calls[3][1]).toMatchObject({
       consentId: "c-1",
-      year: 2027,
+      year: 2025,
+      goalMet: true,
     });
+    expect(Object.keys(mockRunQuery.mock.calls[3][1]).sort()).toEqual([
+      "consentId",
+      "goalMet",
+      "patientId",
+      "programmeId",
+      "transferId",
+      "year",
+    ]);
+  });
+
+  it("records goal met: no when the year falls short", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ consentId: "c-1" }])
+      .mockResolvedValueOnce([{ ruleVersion: "2025.1" }])
+      .mockResolvedValueOnce([{ minutes: 52 * 15 * 7, weeks: 52, checkUps: 1 }])
+      .mockResolvedValueOnce([{ transferId: "t-2", goalMet: false }]);
+    const res = await send();
+    expect(res.status).toBe(202);
+    expect(mockRunQuery.mock.calls[3][1]).toMatchObject({ goalMet: false });
+  });
+
+  it("refuses a year the program's rule does not cover (400), and records nothing", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ consentId: "c-1" }])
+      .mockResolvedValueOnce([{ ruleVersion: "2027.1" }]);
+    const res = await send();
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("covers 2027, not 2025");
+    expect(mockRunQuery).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a year that is not over (409), and records nothing", async () => {
+    const thisYear = new Date().getUTCFullYear();
+    mockRunQuery
+      .mockResolvedValueOnce([{ consentId: "c-1" }])
+      .mockResolvedValueOnce([{ ruleVersion: `${thisYear}.1` }]);
+    const res = await TRANSFER(
+      post("/transfer", {
+        programmeId: PROGRAMME,
+        year: thisYear,
+        patientId: "P1",
+      }),
+    );
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error).toContain("is not over");
+    expect(body.evaluation).toEqual({
+      year: thisYear,
+      status: "year-not-over",
+      evaluableFrom: `${thisYear + 1}-01-01`,
+    });
+    expect(mockRunQuery).toHaveBeenCalledTimes(2);
   });
 
   it("after a withdrawal is refused with 403, and nothing is recorded", async () => {
@@ -258,7 +319,7 @@ describe("a transfer the person asks for", () => {
     const res = await TRANSFER(
       post("/transfer", {
         programmeId: PROGRAMME,
-        year: 2027,
+        year: 2025,
         patientId: "P9",
       }),
     );
