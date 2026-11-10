@@ -1,0 +1,32 @@
+# mvhd-cfm-tmanager: CFM's Tenant Manager from our fork (ADR-088, ADR-085 step 4).
+# Rendered by scripts/azure/20-cfm-fork.sh; the $${NAME} placeholders are filled there, secrets too.
+name: mvhd-cfm-tmanager
+type: Microsoft.App/containerApps
+location: ${LOCATION}
+properties:
+  managedEnvironmentId: ${ENV_ID}
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: false
+      targetPort: 8080
+      transport: http
+    registries:
+      - server: ${ACR_LOGIN_SERVER}
+        username: ${ACR_NAME}
+        passwordSecretRef: acr-password
+  template:
+    containers:
+      - name: tmanager
+        image: ${IMAGE_PREFIX}/tmanager:${CFM_VERSION}
+        command: ["/tmanager", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+    scale: { minReplicas: 1, maxReplicas: 1 }
+    volumes:
+      - { name: cfm-config, storageType: Secret }

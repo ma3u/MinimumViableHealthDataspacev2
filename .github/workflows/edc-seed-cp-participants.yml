@@ -15,8 +15,8 @@ name: EDC Seed Control-Plane Participants (issue #316)
 # ACA exposes only as an additionalPortMapping, so it is reachable as
 # http://mvhd-controlplane:8081 from inside the environment and not at all from
 # a runner. The seed therefore runs as a one-shot ACA Job, inlining
-# scripts/azure/05-cp-participants.sh (the canonical source) via base64 the way
-# cfm-seed.yml does. Keep the two in sync.
+# scripts/azure/05-cp-participants.sh (the canonical source) via base64. Keep
+# the two in sync.
 #
 # Idempotent: a context whose identity already matches is left alone, so
 # re-running is a no-op.

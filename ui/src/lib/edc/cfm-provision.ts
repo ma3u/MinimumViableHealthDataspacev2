@@ -1,20 +1,23 @@
 /**
- * Provisioning a participant through CFM 0.0.7 (ADR-085, #973), behind the
+ * Provisioning a participant through CFM (the fork's v0.0.7-mvhd.2, ADR-085,
+ * #973), behind the
  * setting CFM_TENANT_URL. Unset, /api/participants provisions with
  * provision.ts as before (ADR-078); set, it asks CFM's Tenant Manager.
  *
  * The Tenant Manager takes a tenant and a participant profile and runs the
- * orchestration scripts/seed-cfm.sh defines: jwtlet, IdentityHub, the hub's
- * own connector activity, siglet, issuer holder, MembershipCredential. This
+ * orchestration scripts/seed-cfm.sh defines: jwtlet, IdentityHub, EDC-V
+ * (control plane), siglet, issuer holder, MembershipCredential. This
  * waits until the profile's agents are active or one failed, then finds the
  * control plane context by its DID, so the answer has the shape
  * provisionParticipant() returns.
  *
- * Dispose stays with the hub: CFM 0.0.7 sends dispose without the context id
- * (docs/planning/current/issue-973-cfm-0-0-7-spike.md).
+ * The Tenant Manager disposes what this provisions (DELETE on the participant
+ * profile): the fork carries the context id into the dispose orchestration
+ * (docs/planning/current/issue-973-cfm-0-0-7-spike.md, round 4).
  */
 import { edcClient } from "@/lib/edc";
 import { newDidSlug } from "@/lib/cfm-participant";
+import { updateContextProperties } from "@/lib/edc/participants";
 import {
   ProvisioningError,
   type Provisioned,
@@ -27,6 +30,9 @@ import {
 const DATA_ENDPOINT =
   process.env.CFM_SIGLET_DATA_ENDPOINT ||
   "http://neo4j-proxy:9090/dataspace/data";
+
+// The DSP profile the EDC-V agent associates with the context, as provision.ts does.
+const DSP_PROFILE = process.env.DSP_PROFILE || "http-dsp-profile-2025-1";
 
 const DID_BASE =
   process.env.EDC_DID_BASE ||
@@ -167,7 +173,7 @@ export async function provisionThroughCfm(
             dataspaceProfileIds: [dataspaceProfileId],
             participantRoles: { [dataspaceProfileId]: ["participant"] },
             vpaProperties: {
-              "cfm.connector": { contextProperties: properties },
+              "cfm.connector": { dataspaceProfiles: [DSP_PROFILE] },
               "cfm.dataplane": {
                 transferTypeMappings: {
                   "HttpData-PULL": {
@@ -224,6 +230,21 @@ export async function provisionThroughCfm(
     throw fail("control plane context", `no context for ${did}`);
   }
   steps.push({ step: "control plane context", ok: true });
+
+  // CFM's EDC-V agent creates the context without properties. The hub's
+  // participant list shows these, and /api/participants/{id} removes only a
+  // context that carries registeredAt, so they are written here, as
+  // provision.ts writes them when it creates the context.
+  try {
+    await updateContextProperties(contextId, properties);
+    steps.push({ step: "context properties", ok: true });
+  } catch (err) {
+    steps.push({
+      step: "context properties",
+      ok: false,
+      detail: err instanceof Error ? err.message.split("\n")[0] : String(err),
+    });
+  }
   return { contextId, did, steps };
 }
 

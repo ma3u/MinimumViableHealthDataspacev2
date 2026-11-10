@@ -31,7 +31,7 @@
 #   bash scripts/azure/05-cp-participants.sh
 #
 # In CI: .github/workflows/edc-seed-cp-participants.yml inlines this file, which
-# stays the canonical source. Keep the two in sync, the way cfm-seed.yml does.
+# stays the canonical source. Keep the two in sync.
 #
 # A context made here has no config, and without one the control plane answers
 # 500 to every DSP call it would send for the participant. CFM writes the config
