@@ -101,7 +101,7 @@ describe("DocsPage (Hub)", () => {
     );
   });
 
-  it("calls the hub a demonstrator on EDC 1.0, with CFM only in the edc018 profile (ADR-078)", () => {
+  it("calls the hub a demonstrator on EDC 1.0 that provisions participants itself (ADR-078), CFM only in the cfm profile (ADR-085)", () => {
     render(<DocsPage />);
     expect(screen.queryByText(/EHDS-compliant/)).not.toBeInTheDocument();
     expect(
@@ -119,11 +119,16 @@ describe("DocsPage (Hub)", () => {
         "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
       ),
     );
-    expect(
-      screen.getByRole("link", { name: "edc018 profile" }),
-    ).toHaveAttribute(
+    expect(screen.queryByText(/edc018/)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "cfm profile" })).toHaveAttribute(
       "href",
-      expect.stringMatching(/docker-compose\.jad\.yml#L\d+-L\d+$/),
+      "/docs/developer#compose-profiles",
+    );
+    expect(screen.getByRole("link", { name: "ADR-085" })).toHaveAttribute(
+      "href",
+      expect.stringContaining(
+        "docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md",
+      ),
     );
   });
 });
@@ -136,6 +141,35 @@ describe("DeveloperPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Developer Guide" }),
     ).toBeInTheDocument();
+  });
+
+  it("lists the cfm profile as eclipse-cfm 0.0.7 (ADR-085) and no edc018 profile (#927)", () => {
+    render(<DeveloperPage />);
+    const profiles =
+      document.getElementById("compose-profiles")?.nextElementSibling
+        ?.nextElementSibling;
+    const names = [...(profiles?.querySelectorAll("li") ?? [])].map(
+      (li) => li.querySelector("code")?.textContent,
+    );
+    expect(names).toEqual([
+      "cfm",
+      "wellbeing",
+      "simpl",
+      "trust-check",
+      "federated",
+    ]);
+    expect(profiles?.textContent).not.toContain("edc018");
+    expect(
+      within(profiles as HTMLElement).getByRole("link", {
+        name: "scripts/seed-cfm.sh",
+      }),
+    ).toHaveAttribute("href", expect.stringContaining("scripts/seed-cfm.sh"));
+    expect(
+      within(profiles as HTMLElement).getByRole("link", { name: "ADR-085" }),
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining("ADR-085-cfm-stays-as-eclipse-cfm-releases.md"),
+    );
   });
 
   it("shows its four diagrams from the hub, each opening at full size", () => {
@@ -303,11 +337,16 @@ describe("UserGuidePage", () => {
     ).toHaveAttribute("href", `${EHDS}#art_67`);
   });
 
-  it("says the hub provisions participants, CFM only under edc018", () => {
+  it("says the hub provisions participants, CFM only under the cfm profile", () => {
     const { container } = render(<UserGuidePage />);
     expect(container.textContent).toContain(
       "On the default stack the hub provisions it itself",
     );
+    expect(container.textContent).not.toContain("edc018");
+    expect(container.textContent).toContain("Under the stack's cfm profile");
     expect(hrefsOf("ADR-078")[0]).toMatch(/ADR-078-.*#L62-L72$/);
+    expect(hrefsOf("ADR-085")[0]).toMatch(
+      /ADR-085-cfm-stays-as-eclipse-cfm-releases\.md$/,
+    );
   });
 });

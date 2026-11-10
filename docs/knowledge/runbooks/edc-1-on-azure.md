@@ -115,9 +115,11 @@ A new `mvhd-nats` revision or replica deletes `cn-stream` and `tp-stream`, and e
 
 Done on 2026-11-09: images `1.0.0-RC5-9be6b44cd517`, revision `mvhd-controlplane--0000198`, backup `~/.mvhd/edc-v1-rollback/20261109T155944Z` (revision 196). The drill passed: two minutes from the NATS restart to both streams back, then `03 Data User` 26 of 26 (timeline in `docs/gotchas.md`, 2026-11-09).
 
-A script that changes `mvhd-nats` (`04-edc-services.sh`, the min-replica fix in `05-cfm-configure.sh` and `05-cfm-agents.sh`) restarts the control plane after it (`restart_controlplane_after_nats_change` in `env.sh`). Anything else that touches NATS, an image change by hand included, leaves it to the probe: about two minutes of 500s. `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` on the control plane turns the check off.
+A script that changes `mvhd-nats` (`04-edc-services.sh`) restarts the control plane after it (`restart_controlplane_after_nats_change` in `env.sh`). Anything else that touches NATS, an image change by hand included, leaves it to the probe: about two minutes of 500s. `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` on the control plane turns the check off.
 
 ## Rollback
+
+The way back to 0.18 is closed since 2026-11-09 (#927): the CFM apps and the 0.18 data planes are deleted, and `edc-retire-v018-azure.yml` (#927 step 6, PR #1048) drops the `_v018` databases. What follows is the record of the cutover's rollback, not a step to take.
 
 - **EDC apps and siglet:** `migrate-edc-to-v1.sh rollback <name>` for each app, newest first. The saved definitions name the 0.18 images and the `_v018` databases, which 1.0 never wrote, and the 0.18 keys are still in Vault.
 - **UI and proxy:** revert the merge on `main`. Their saved definitions name `:latest`, which the merge moved; `rollback ui` and `rollback proxy` only restore the settings.
@@ -126,9 +128,11 @@ A script that changes `mvhd-nats` (`04-edc-services.sh`, the min-replica fix in 
 
 ## After a stable cutover
 
-- Retire the CFM apps (tenant manager, provision manager, the four agents, the shim) and the 0.18 data planes `mvhd-dp-fhir` and `mvhd-dp-omop` (ADR-078).
-- Remove the CFM views from `/api/admin/components` and `/topology`.
-- Drop the `_v018` databases once the final 1.0 runs (a guarded workflow, as `drop-edc-april-databases.sh`).
+- Done 2026-11-09 (#927): retire the CFM apps (tenant manager, provision manager, the four agents, the shim) and the 0.18 data planes `mvhd-dp-fhir` and `mvhd-dp-omop` (ADR-078).
+- Done: remove the CFM views from `/api/admin/components` and `/topology`.
+- Drop the `_v018` databases once the final 1.0 runs: the guarded workflow `edc-retire-v018-azure.yml` (#927 step 6, PR #1048).
+
+CFM itself stays, as eclipse-cfm releases ([ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)); until its step 3 the hub's own provisioning is the default.
 
 ## Known limits on 1.0, as on the local stack
 

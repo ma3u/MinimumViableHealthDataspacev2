@@ -4,6 +4,16 @@
 > **Target platform:** Azure Container Apps (Consumption plan)
 > **Region:** West Europe (PostgreSQL in North Europe)
 > **Services:** 13 container apps + 3 ACA jobs + PostgreSQL Flexible Server
+>
+> **Out of date for the EDC services.** This guide describes the April 2026
+> deployment on EDC 0.18 with the 2026-03 CFM build. Since 2026-11-06 Azure
+> runs EDC 1.0 and the hub provisions participants itself
+> ([ADR-078](ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)); #927
+> deleted the CFM apps, the data planes `mvhd-dp-fhir` and `mvhd-dp-omop`
+> and their scripts (`05-cfm-*.sh` among them) on 2026-11-09. For the EDC
+> services see [edc-1-on-azure](knowledge/runbooks/edc-1-on-azure.md); the
+> tables below that name a data plane, the tenant manager or the `cfm`
+> databases are a record of April.
 
 ---
 
@@ -197,8 +207,8 @@ az login
 # Phase 3: EDC-V core services — controlplane, dataplanes, identity hub, issuer
 ./scripts/azure/04-edc-services.sh
 
-# Phase 4: CFM + UI — tenant/provision managers, Next.js UI
-./scripts/azure/05-cfm-ui.sh
+# Phase 4: 05-cfm-ui.sh created the CFM managers and mvhd-ui; it is gone
+# with EDC 0.18 (#927). deploy-azure.yml updates mvhd-ui on every push to main.
 
 # Phase 5: Post-deployment — seed Neo4j, bootstrap Vault, import Keycloak realm
 ./scripts/azure/06-post-deploy.sh
@@ -222,7 +232,6 @@ All scripts live in `scripts/azure/` and share common variables from `scripts/az
 | `02-data-layer.sh`    | PostgreSQL Flex + Neo4j container app                    | ~5 min   |
 | `03-identity.sh`      | Keycloak + Vault container apps                          | ~3 min   |
 | `04-edc-services.sh`  | Control plane, data planes, identity hub, issuer service | ~3 min   |
-| `05-cfm-ui.sh`        | Tenant manager, provision manager, Next.js UI            | ~3 min   |
 | `06-post-deploy.sh`   | Seed Neo4j, bootstrap Vault, import Keycloak realm       | ~5 min   |
 | `07-observability.sh` | Diagnostic settings, alerts, dashboard                   | ~2 min   |
 | `teardown.sh`         | Delete entire resource group                             | ~5 min   |

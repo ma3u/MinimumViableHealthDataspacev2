@@ -69,9 +69,10 @@ and participants with no credentials scored as passes.
 **Fix:** the client is now declared in `jad/keycloak-realm.json`, field for
 field as the script created it, and pinned by
 `ui/__tests__/unit/config/keycloak-realm.test.ts`, which runs in the pre-commit
-Vitest hook and the PR Gate. Removing it fails the build. `seed-jad.sh` still
-runs its create; against an imported realm it now takes the "may already
-exist" branch, which is the correct one.
+Vitest hook and the PR Gate. Removing it fails the build. `seed-jad.sh` kept
+its create, which against an imported realm took the "may already exist"
+branch, until #927 removed the script and the `jad-seed` service with EDC
+0.18; the realm file is now the only place the client is defined.
 
 **The rule this adds:** a realm object lives in the realm file. A script may
 _reconcile_ what the file declares, idempotently; it may not be the only place

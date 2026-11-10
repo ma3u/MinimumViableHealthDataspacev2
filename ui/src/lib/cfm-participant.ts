@@ -1,13 +1,14 @@
 /**
  * What the CFM Tenant Manager needs to provision a participant registered at
- * /onboarding: the shape jad/seed-health-tenants.sh sends (#455).
+ * /onboarding: its participant profile, with the DID and the dataspace
+ * profile role of its EHDS type (#455).
  */
 
 /**
  * The base of the DIDs the EDC layer issues to participants. The same base as
- * jad/seed-health-tenants.sh and scripts/azure/05-cp-participants.sh, so a
- * participant registered here is addressed like the seeded ones (CLAUDE.md,
- * "DID Conventions").
+ * scripts/seed-identityhub-participants.sh and
+ * scripts/azure/05-cp-participants.sh, so a participant registered here is
+ * addressed like the seeded ones (CLAUDE.md, "DID Conventions").
  */
 // The host other containers reach IdentityHub's DID endpoint (7083) on: on
 // compose identityhub, on Azure mvhd-identityhub (CFM_DID_BASE in

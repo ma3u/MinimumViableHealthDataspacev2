@@ -175,9 +175,17 @@ export default function DocsPage() {
               ),
               fhir: source(SRC.fhir),
               omop: source(SRC.omop),
-              p: source(`${REPO}/blob/main/docker-compose.jad.yml#L853-L858`),
+              p: (
+                <Link
+                  href="/docs/developer#compose-profiles"
+                  className="relative z-10 text-(--accent) underline hover:opacity-80"
+                />
+              ),
               adr: source(
                 `${REPO}/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md`,
+              ),
+              cfm: source(
+                `${REPO}/blob/main/docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md`,
               ),
               dsp: source(SRC.dsp),
               a: (
@@ -189,7 +197,7 @@ export default function DocsPage() {
             }}
           >
             {
-              "A demonstrator aligned with the <e>European Health Data Space Regulation</e>, built on <edc>Eclipse EDC 1.0</edc>, <neo>Neo4j</neo>, <fhir>FHIR R4</fhir> and <omop>OMOP CDM</omop>. CFM and the DCore data planes run only in the stack's <p>edc018 profile</p> (<adr>ADR-078</adr>). A 5-layer knowledge graph carries the Regulation's data, from <dsp>DSP</dsp> marketplace discovery to ontology alignment, for sovereign health data exchange between data holders and approved research users. <a>Explore the architecture →</a>"
+              "A demonstrator aligned with the <e>European Health Data Space Regulation</e>, built on <edc>Eclipse EDC 1.0</edc>, <neo>Neo4j</neo>, <fhir>FHIR R4</fhir> and <omop>OMOP CDM</omop>. The hub provisions its participants itself (<adr>ADR-078</adr>); CFM 0.0.7 runs only in the stack's <p>cfm profile</p>, as a spike (<cfm>ADR-085</cfm>). A 5-layer knowledge graph carries the Regulation's data, from <dsp>DSP</dsp> marketplace discovery to ontology alignment, for sovereign health data exchange between data holders and approved research users. <a>Explore the architecture →</a>"
             }
           </T>
         </p>

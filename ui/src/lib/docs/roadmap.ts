@@ -808,7 +808,7 @@ export const EPICS: readonly RoadmapEpic[] = [
     short: "Connector platform",
     title: "Connector platform: EDC 1.0 and the data planes",
     priority: "P1",
-    note: "The connector the dataspace runs on: the move to <edc>EDC 1.0</edc>, the data planes, the TCKs and the protocol versions, and retiring CFM and EDC 0.18.",
+    note: "The connector the dataspace runs on: the move to <edc>EDC 1.0</edc>, the data planes, the TCKs and the protocol versions, retiring EDC 0.18, and CFM as eclipse-cfm releases.",
     links: { edc: SRC.edc },
     open: {
       P1: [542],
