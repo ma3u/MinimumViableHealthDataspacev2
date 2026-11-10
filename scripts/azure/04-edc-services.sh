@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 # Phase 4: EDC core services: NATS, control plane, identity hub, issuer, proxy.
 #
-# This creates the apps with base settings only. EDC 1.0 (ADR-078) runs them:
-# migrate-edc-to-v1.sh moves each to its launcher image and _v1 database
-# (runbook: docs/knowledge/runbooks/edc-1-on-azure.md). The images and the
-# database names below are still the ones this phase was written with; a
-# rebuild from nothing has not been rehearsed since 1.0 (#927 follow-up).
+# This creates the apps on the EDC 1.0 launchers (ADR-078, ADR-076) and their
+# _v1 databases, with base settings only; `migrate-edc-to-v1.sh app <name>`
+# then gives each its full settings (runbook:
+# docs/knowledge/runbooks/edc-1-on-azure.md). Needs EDC1_TAG, the tag
+# push-edc1-images.sh pushed, and the databases of edc-v1-databases.yml.
+# A rebuild from nothing has not been rehearsed since 1.0 (#927).
 # siglet is the data plane on 1.0 (17-siglet.sh); the two 0.18 data planes
 # this phase created were deleted on 2026-11-09 (#927).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
 eval "$(get_aca_fqdns)"
+[ -n "$EDC1_TAG" ] || { err "set EDC1_TAG to the tag push-edc1-images.sh pushed"; exit 2; }
 
 log "Phase 4: EDC-V core services"
 
@@ -75,7 +77,7 @@ az containerapp create \
   --ingress internal --target-port 8080 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
@@ -151,7 +153,7 @@ az containerapp create \
   --ingress internal --target-port 7081 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
@@ -192,7 +194,7 @@ az containerapp create \
   --ingress internal --target-port 10013 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \

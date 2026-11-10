@@ -144,15 +144,15 @@ export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
 # scripts/check-deployed-image-pins.sh fails if any deployed app resolves to
 # `:latest`, which is the check that was missing when #116 went unnoticed.
 #
-# ADR-055 (#503) replaced the April build with EDC 0.18 (the jad-* images at
-# ghcr.io/metaform/jad 4a7e5bd096c5, copied into ACR under the commit). Those
-# are the images 04-edc-services.sh still creates the apps from; EDC 1.0 runs
-# them as mvhd-edc-<x>:<tag> (push-edc1-images.sh, migrate-edc-to-v1.sh,
-# ADR-076). The 0.18 data planes and the 2026-03 CFM images went with #927.
-export JAD_VERSION="${JAD_VERSION:-4a7e5bd096c5}"
-export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}"
-export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/jad-identity-hub:${JAD_VERSION}"
-export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/jad-issuerservice:${JAD_VERSION}"
+# The EDC 1.0 launchers, built here (runtimes/edc, ADR-076) and pushed by
+# push-edc1-images.sh as mvhd-edc-<x>:<EDC1_TAG>. 04-edc-services.sh creates
+# the apps from them; migrate-edc-to-v1.sh gives each its full settings. The
+# jad-* images of EDC 0.18 and the April build, and the 2026-03 CFM's, were
+# deleted from ACR on 2026-11-10 (#927).
+export EDC1_TAG="${EDC1_TAG:-}"
+export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}"
+export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}"
+export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}"
 
 # ── Neo4j ────────────────────────────────────────────────────────────────────
 export NEO4J_USER="neo4j"
