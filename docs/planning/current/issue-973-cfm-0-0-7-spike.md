@@ -42,6 +42,12 @@ builds the eight images from the tag as `mvhd/cfm-*:0.0.7-mvhd.2`, each
 labelled with the commit (the default `CFM_REPO` is the fork's future URL).
 Nothing is reported to eclipse-cfm.
 
+Keeping it in step with upstream (sync, drop-check per patch, rebase,
+re-tag, rebuild, re-check) is the routine of
+[runbook cfm-fork](../../knowledge/runbooks/cfm-fork.md). The weekly
+upstream watch reads the fork from `.github/upstream.json` and, on a new
+eclipse-cfm release, opens an issue that lists that routine as tasks.
+
 ### The fixes, and when each can go
 
 | Branch                                   | Commit               | What it fixes                                                                                                                                                                                                                                                                                                    | Replaces here                                     | Can go when                                                                             |

@@ -17,7 +17,14 @@ releases and reports the ones published after `known`.
 
 With --open-issues it opens an issue "Upstream release: <repo> <tag>" for the
 newest release of each repository, unless one with that title exists (open or
-closed), and exits 0. Exit 2 when a repository could not be asked or its `known`
+closed), and exits 0.
+
+An entry with a `fork` block (eclipse-cfm/cfm, ADR-085) is a component the hub
+builds from its own fork with patches. For it the report also says how far the
+fork's main is behind upstream's main and whether the fork's base tag is still
+`known`, and the issue for a new release lists the fork routine: sync, a
+drop-check per patch, rebase, re-tag, rebuild, re-check (`fork.runbook`). A
+fork that does not exist yet is reported, not counted as an error. Exit 2 when a repository could not be asked or its `known`
 release is not among its releases: unknown is not the same as up to date.
 Needs `gh`, signed in locally or GH_TOKEN in a workflow.
 """
@@ -64,6 +71,56 @@ def newer(entry: dict, rows: list[dict]) -> list[dict]:
     ]
 
 
+def fork_status(entry: dict) -> str:
+    """How the fork stands against upstream: main behind, base tag against `known`."""
+    fork = entry["fork"]
+    owner = fork["repo"].split("/")[0]
+    notes = []
+    if fork["base"] != entry["known"]:
+        notes.append(f"base {fork['base']} is not known {entry['known']}: rebase pending")
+    try:
+        cmp = json.loads(gh("api", f"repos/{entry['repo']}/compare/main...{owner}:main"))
+        behind = cmp.get("behind_by", 0)
+        notes.append(
+            f"{fork['repo']} main {behind} behind upstream main" if behind
+            else f"{fork['repo']} main in sync"
+        )
+    except subprocess.CalledProcessError:
+        notes.append(f"{fork['repo']} not found: create it as a fork of {entry['repo']}")
+    notes.append(f"{len(fork['patches'])} patch(es) on {fork['tag']}")
+    return "; ".join(notes)
+
+
+def fork_tasks(entry: dict, tag: str) -> list[str]:
+    """The fork routine for a new upstream release, as tasks."""
+    fork = entry["fork"]
+    version = tag.lstrip("v")
+    lines = [
+        "",
+        f"## The fork ({fork['repo']}, [runbook](https://github.com/{THIS_REPO}/blob/main/{fork['runbook']}))",
+        "",
+        f"The hub runs {entry['repo']} {fork['base']} with {len(fork['patches'])} patch(es) "
+        f"from `{fork['integration']}`, tagged `{fork['tag']}`.",
+        "",
+        f"- [ ] Sync the fork's main: `gh repo sync {fork['repo']} --branch main`.",
+        f"- [ ] Drop-check: for each patch, does {tag} fix it upstream? Then drop the branch and say so in #{entry['issue']}.",
+    ]
+    lines += [
+        f"  - [ ] `{p['branch']}` ({p['fix']}): drop when {p['drop_when']}."
+        for p in fork["patches"]
+    ]
+    lines += [
+        f"- [ ] Rebase the remaining patches onto {tag}, merge them into a new `{fork['integration']}` from {tag}, "
+        f"tag `{tag}-mvhd.1`, push branches and tag to {fork['repo']}.",
+        f"- [ ] `CFM_REF={tag}-mvhd.1 scripts/build-cfm-fork-images.sh`, and move the image tags in "
+        f"`docker-compose.jad.yml` to `{version}-mvhd.1`.",
+        "- [ ] Re-check locally: `./scripts/seed-cfm.sh && ./scripts/check-cfm-onboarding.sh` (12 passed), "
+        "and the identity, dataspace and health domain suites at their floors.",
+        f"- [ ] Move `fork.base`, `fork.tag` and the patch list in `.github/upstream.json` with `known`.",
+    ]
+    return lines
+
+
 def title(repo: str, tag: str) -> str:
     return f"Upstream release: {repo} {tag}"
 
@@ -100,6 +157,10 @@ def body(entry: dict, new: list[dict]) -> str:
         f"- [ ] Take it in under #{entry['issue']}, or decide not to and say why there.",
         f"- [ ] Move `known` for {entry['repo']} in `.github/upstream.json` to "
         f"`{top['tag_name']}`, so the next run stops reporting it.",
+    ]
+    if "fork" in entry:
+        lines += fork_tasks(entry, top["tag_name"])
+    lines += [
         "",
         "Opened by the weekly upstream watch (`scripts/check-upstream-releases.py`, "
         "`.github/workflows/upstream-watch.yml`).",
@@ -137,6 +198,8 @@ def main() -> int:
             continue
         row["newer"] = [r["tag_name"] for r in new]
         row["status"] = "behind" if new else "current"
+        if "fork" in entry:
+            row["fork"] = fork_status(entry)
         if new:
             behind += 1
             if args.open_issues:
@@ -149,6 +212,8 @@ def main() -> int:
         for r in report:
             extra = ", ".join(r.get("newer", [])) or r.get("detail", "")
             print(f"{r['status']:8} {r['repo']:52} known {r['known']:12} {extra}")
+            if r.get("fork"):
+                print(f"{'':8} {'fork:':52} {r['fork']}")
         print(f"{behind} behind, {errors} unknown, of {len(report)}")
 
     if errors:
