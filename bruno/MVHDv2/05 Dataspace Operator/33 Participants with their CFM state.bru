@@ -1,0 +1,43 @@
+meta {
+  name: 33 Participants with their CFM state
+  type: http
+  seq: 33
+}
+
+get {
+  url: {{baseUrl}}/api/participants
+  body: none
+  auth: inherit
+}
+
+docs {
+  ADR-085 step 3: with CFM_TENANT_URL set, every participant says what CFM's
+  Tenant Manager holds for it (`cfm`), null for a context CFM did not
+  provision. Without CFM the field is absent and this request skips.
+}
+
+tests {
+  const rows = res.getBody();
+  const withCfm = Array.isArray(rows) ? rows.filter((r) => "cfm" in r) : [];
+  test("the participant list answers", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(rows, "an array of participants").to.be.an("array");
+  });
+  if (withCfm.length === 0) {
+    test("SKIPPED: this hub does not provision through CFM (no cfm field), or its Tenant Manager did not answer", function () {});
+  } else {
+    test("every participant carries a CFM state or null", function () {
+      expect(withCfm.length).to.equal(rows.length);
+      for (const r of withCfm) {
+        if (r.cfm !== null) {
+          expect(["active", "pending", "disposed", "error"]).to.include(r.cfm.state);
+          expect(r.cfm.profileId, "the CFM profile").to.be.a("string");
+        }
+      }
+    });
+    test("a seeded participant has no CFM profile", function () {
+      const seeded = rows.find((r) => /:alpha-klinik$/.test(r.identity || "") && !(r.properties && r.properties.registeredAt));
+      if (seeded) expect(seeded.cfm).to.equal(null);
+    });
+  }
+}

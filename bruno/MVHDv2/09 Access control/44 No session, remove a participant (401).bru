@@ -1,0 +1,20 @@
+meta {
+  name: 44 No session, remove a participant (401)
+  type: http
+  seq: 44
+}
+
+delete {
+  url: {{baseUrl}}/api/participants/{{uiParticipantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 401
+  res.body.error: isString
+}

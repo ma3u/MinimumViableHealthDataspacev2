@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { PROVISIONING_HOURS } from "@/lib/provisioning";
 import { provisionParticipant, ProvisioningError } from "@/lib/edc/provision";
-import { cfmProvisioning, provisionThroughCfm } from "@/lib/edc/cfm-provision";
+import {
+  cfmProvisioning,
+  cfmStatesByDid,
+  provisionThroughCfm,
+  type CfmState,
+} from "@/lib/edc/cfm-provision";
 import {
   listContexts,
   contextNames,
@@ -44,6 +49,21 @@ export async function GET() {
           `using ${usable.length} CREATED context(s) (#876).`,
       );
     }
+    // With CFM_TENANT_URL set, each context also says what CFM holds for it
+    // (ADR-085 step 3): `cfm` is its profile's state, or null for a context
+    // CFM did not provision, such as the seeded five. A Tenant Manager that
+    // does not answer leaves `cfm` out rather than failing the list.
+    let cfm: Map<string, CfmState> | undefined;
+    if (cfmProvisioning()) {
+      try {
+        cfm = await cfmStatesByDid();
+      } catch (err) {
+        console.warn(
+          "CFM Tenant Manager not reachable; listing without it:",
+          err,
+        );
+      }
+    }
     const enriched = usable.map((p) => {
       const { did, slug, displayName, role } = contextNames(p);
       return {
@@ -53,6 +73,7 @@ export async function GET() {
         role,
         slug,
         identity: did,
+        ...(cfm ? { cfm: (did && cfm.get(did)) || null } : {}),
       };
     });
 

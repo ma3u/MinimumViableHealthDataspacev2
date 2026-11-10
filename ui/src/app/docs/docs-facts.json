@@ -247,7 +247,7 @@
     },
     {
       "path": "/api/participants/[id]",
-      "methods": ["PATCH"]
+      "methods": ["PATCH", "DELETE"]
     },
     {
       "path": "/api/participants/me",
@@ -1457,7 +1457,7 @@
   "openapi": {
     "version": "3.1.0",
     "paths": 68,
-    "operations": 87
+    "operations": 88
   },
   "workflowJobs": {
     "test.yml": [
