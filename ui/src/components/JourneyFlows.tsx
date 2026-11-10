@@ -374,7 +374,7 @@ export function JourneyFlows() {
               onKeyDown={(e) => onTabKey(e, i)}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors touch-target-sm ${
                 f.id === active
-                  ? "bg-(--accent) text-white font-semibold"
+                  ? "bg-blue-700 text-white font-semibold"
                   : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
