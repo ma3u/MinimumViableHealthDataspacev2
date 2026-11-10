@@ -2,8 +2,7 @@
 
 Date: 2026-11-10
 
-**Status:** Proposed (2026-11-10). Decision 1 is Matthias Buchhorn's choice of
-2026-11-10; decisions 2 to 5 await his review.
+**Status:** Accepted (2026-11-10, Matthias Buchhorn)
 **Relates to:** [ADR-080](ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md) (decisions 2 and 3), [ADR-057](ADR-057-klarbefund-sends-weekly-device-means.md), [ADR-049](ADR-049-klarbefund-connects-by-device-grant.md)
 **Tracks:** [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934), step 6
 
