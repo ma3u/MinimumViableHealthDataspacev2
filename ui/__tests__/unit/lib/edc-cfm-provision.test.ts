@@ -89,15 +89,31 @@ describe("provisionThroughCfm", () => {
       ],
     });
     // the DID is generated; the control plane lists the one it was deployed for
-    mgmt.mockImplementation(async () => {
-      const deployed = requests.find((r) =>
-        r.key.endsWith("/participant-profiles"),
-      )?.body as { identifier: string };
-      return [
-        { "@id": "other", identity: "did:web:elsewhere" },
-        { "@id": "ctx-1", identity: deployed.identifier },
-      ];
-    });
+    const written: Record<string, unknown>[] = [];
+    mgmt.mockImplementation(
+      async (path: string, method?: string, body?: unknown) => {
+        const deployed = requests.find((r) =>
+          r.key.endsWith("/participant-profiles"),
+        )?.body as { identifier: string };
+        if (path === "/v5/participants") {
+          return [
+            { "@id": "other", identity: "did:web:elsewhere" },
+            { "@id": "ctx-1", identity: deployed.identifier },
+          ];
+        }
+        if (method === "PUT") {
+          written.push(body as Record<string, unknown>);
+          return undefined;
+        }
+        // getContext before the properties are written
+        return {
+          "@id": "ctx-1",
+          identity: deployed.identifier,
+          state: "CREATED",
+          properties: {},
+        };
+      },
+    );
 
     const result = await provisionThroughCfm({
       displayName: "Limburg Medical Centre",
@@ -111,17 +127,22 @@ describe("provisionThroughCfm", () => {
       "CFM participant profile",
       "CFM orchestration",
       "control plane context",
+      "context properties",
     ]);
+    expect(written[0]?.properties).toMatchObject({
+      displayName: "Limburg Medical Centre",
+      role: "DATA_HOLDER",
+    });
+    expect(
+      (written[0]?.properties as Record<string, unknown>).registeredAt,
+    ).toEqual(expect.any(String));
     const deploy = requests.find((r) => r.key.endsWith("/participant-profiles"))
       ?.body as Record<string, any>;
     expect(deploy.dataspaceProfileIds).toEqual(["ds-1"]);
     expect(deploy.participantRoles).toEqual({ "ds-1": ["participant"] });
-    expect(
-      deploy.vpaProperties["cfm.connector"].contextProperties,
-    ).toMatchObject({
-      displayName: "Limburg Medical Centre",
-      role: "DATA_HOLDER",
-    });
+    expect(deploy.vpaProperties["cfm.connector"].dataspaceProfiles).toEqual([
+      "http-dsp-profile-2025-1",
+    ]);
     expect(deploy.vpaProperties["cfm.issuer"].id).toBe(result.did);
     expect(
       deploy.vpaProperties["cfm.dataplane"].transferTypeMappings[

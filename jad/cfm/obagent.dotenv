@@ -1,5 +1,5 @@
-# CFM 0.0.7 onboarding agent (ADR-085, #973). Keys as in eclipse-cfm/core-platform-distribution v0.0.39
-# templates/cfm/cfm-agents-configs.yaml, with our hosts, and Keycloak behind jad/cfm/token-exchange.mjs for jwtlet.
+# CFM onboarding agent (the fork's v0.0.7-mvhd.2, ADR-085, #973). Keys as in eclipse-cfm/core-platform-distribution v0.0.39
+# templates/cfm/cfm-agents-configs.yaml, with our hosts.
 uri: nats://cfm7-nats:4222
 # NATS token, local dev only (cfm7-nats --auth in docker-compose.jad.yml)
 nats.auth.method: token
@@ -12,6 +12,11 @@ dsn: postgres://cfm:cfm@postgres:5432/cfm_v007?sslmode=disable
 identityhub.url: http://identityhub:7081/api/identity
 issuerservice.url: http://issuerservice:10013/api/admin
 issuer.id: issuer
-tokenexchange.url: http://cfm7-token-exchange:8080
+# Token exchange at Keycloak (fork fix a): client credentials instead of a token
+# file, access tokens as subject tokens. The secret is local dev only, as
+# edc-v-admin-secret; scripts/seed-cfm.sh creates the client with it.
+tokenexchange.url: http://keycloak:8080/realms/edcv/protocol/openid-connect
 tokenexchange.audience: cfm-agents
-tokenexchange.tokenFilePath: /var/run/secrets/cfm/token
+tokenexchange.subjectTokenType: urn:ietf:params:oauth:token-type:access_token
+tokenexchange.clientId: cfm-agents
+tokenexchange.clientSecret: cfm-agents-local-dev

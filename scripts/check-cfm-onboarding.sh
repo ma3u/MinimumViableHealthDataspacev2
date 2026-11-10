@@ -66,6 +66,7 @@ r="$(tm -X POST "$TM_URL/api/v1alpha1/tenants/$TENANT/participant-profiles" -d "
   \"dataspaceProfileIds\": [\"$DS_ID\"],
   \"participantRoles\": {\"$DS_ID\": [\"participant\"]},
   \"vpaProperties\": {
+    \"cfm.connector\": {\"dataspaceProfiles\": [\"http-dsp-profile-2025-1\"]},
     \"cfm.issuer\": {\"id\": \"$DID\"},
     \"cfm.dataplane\": {\"transferTypeMappings\": {\"HttpData-PULL\": {\"transferType\": \"HttpData-PULL\",
       \"endpointType\": \"HTTP\", \"tokenSource\": \"provider\", \"endpoint\": \"http://neo4j-proxy:9090/dataspace/data\"}}}
@@ -139,11 +140,16 @@ start=$(date +%s)
 while :; do
   code="$(status_of "$(tm "$PROFILE_URL")")"
   [[ "$code" == "404" ]] && break
+  # The Tenant Manager may keep the profile with every agent disposed.
+  if [[ "$(states)" == "disposed" ]]; then
+    code="disposed"
+    break
+  fi
   (($(date +%s) - start > TIMEOUT)) && break
   sleep 3
 done
 echo "  dispose took $(($(date +%s) - start))s, profile: HTTP $code (state $(states 2>/dev/null || echo -))"
-check "participant profile gone" "404" "$code"
+check "participant profile disposed" "yes" "$([[ "$code" == "404" || "$code" == "disposed" ]] && echo yes || echo "no ($code)")"
 if [[ -n "$CTX" ]]; then
   TOKEN="$(token)"
   check "control plane context removed" "404" "$(edc_status "http://controlplane:8081/api/mgmt/v5/participants/$CTX")"
