@@ -22,7 +22,7 @@ unnecessary is dropped.
 
 | Thing             | Where                                                                                                                           |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| The fork          | `ma3u/cfm`, a GitHub fork of eclipse-cfm/cfm (to be created; until then the clone below)                                        |
+| The fork          | [`ma3u/cfm`](https://github.com/ma3u/cfm), a GitHub fork of eclipse-cfm/cfm                                                     |
 | Local clone       | `../cfm` next to this repository, remote `upstream` = eclipse-cfm/cfm, `origin` = the fork                                      |
 | Patches           | one `fix/*` branch each on the base tag, with Go tests, listed in `.github/upstream.json` (`fork.patches`)                      |
 | Integration       | `mvhd/integration`: the base tag with every patch merged, tagged `<base>-mvhd.<n>` (`fork.tag`)                                 |

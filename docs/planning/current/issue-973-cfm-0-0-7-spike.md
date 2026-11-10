@@ -28,18 +28,20 @@ four rounds on 2026-11-09 and 2026-11-10:
 
 ### Where it is
 
-A clone of [eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm) at
+[`ma3u/cfm`](https://github.com/ma3u/cfm), Matthias's fork of
+[eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm), created on 2026-11-10
+with his go: on
 [`v0.0.7`](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7), one branch
-per fix, each with Go tests, merged into `mvhd/integration` and tagged
-`v0.0.7-mvhd.2` (`8894f669`). Commits are Matthias's, with his private address
-and no assistant attribution, so each branch can go upstream unchanged.
+per fix, each with Go tests, merged into
+[`mvhd/integration`](https://github.com/ma3u/cfm/tree/mvhd/integration) and
+tagged [`v0.0.7-mvhd.2`](https://github.com/ma3u/cfm/tree/v0.0.7-mvhd.2)
+(`8894f669`). Commits are Matthias's, with his private address and no
+assistant attribution, so each branch can go upstream unchanged. The fork's
+`main` is upstream's, untouched.
 
-Not yet on GitHub: creating the public repository `ma3u/cfm` and pushing to it
-is Matthias's step. Until then the clone lives at
-`/Users/mbuchhorn/projects/dataspaces/cfm`, and
 [`scripts/build-cfm-fork-images.sh`](../../../scripts/build-cfm-fork-images.sh)
 builds the eight images from the tag as `mvhd/cfm-*:0.0.7-mvhd.2`, each
-labelled with the commit (the default `CFM_REPO` is the fork's future URL).
+labelled with the commit; without a local checkout it clones the fork.
 Nothing is reported to eclipse-cfm.
 
 Keeping it in step with upstream (sync, drop-check per patch, rebase,
