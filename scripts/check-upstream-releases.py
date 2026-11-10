@@ -106,7 +106,7 @@ def fork_tasks(entry: dict, tag: str) -> list[str]:
         f"- [ ] Drop-check: for each patch, does {tag} fix it upstream? Then drop the branch and say so in #{entry['issue']}.",
     ]
     lines += [
-        f"  - [ ] `{p['branch']}` ({p['fix']}): drop when {p['drop_when']}."
+        f"  - [ ] `{p['branch']}` ({p['fix']}, #{p['issue']}): drop when {p['drop_when']}."
         for p in fork["patches"]
     ]
     lines += [

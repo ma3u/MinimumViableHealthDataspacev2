@@ -80,29 +80,35 @@
           {
             "branch": "fix/token-exchange-without-jwtlet",
             "fix": "a",
-            "drop_when": "upstream makes the token exchange's subject_token_type and client authentication configurable (common/tokenexchange/tokenprovider.go)"
+            "drop_when": "upstream makes the token exchange's subject_token_type and client authentication configurable (common/tokenexchange/tokenprovider.go)",
+            "issue": 1043
           },
           {
             "branch": "fix/sts-in-identityhub",
             "fix": "b, c",
-            "drop_when": "upstream can provision an STS account in IdentityHub and write edc.iam.sts.oauth.* (IdentityHub and EDC-V agents)"
+            "drop_when": "upstream can provision an STS account in IdentityHub and write edc.iam.sts.oauth.* (IdentityHub and EDC-V agents)",
+            "issue": 1044
           },
           {
             "branch": "fix/dispose-participant-context-id",
             "fix": "d",
-            "drop_when": "the dispose orchestration carries participantContextId (tmanager/core/service_participant.go)"
+            "drop_when": "the dispose orchestration carries participantContextId (tmanager/core/service_participant.go)",
+            "issue": 1045
           },
           {
             "branch": "fix/edcv-delete-accepts-204",
             "fix": "e",
-            "drop_when": "the control plane client accepts 204 on a participant context delete (agent/common/controlplane)"
+            "drop_when": "the control plane client accepts 204 on a participant context delete (agent/common/controlplane)",
+            "issue": 1046
           },
           {
             "branch": "fix/holder-id-for-did-with-port",
             "fix": "f",
-            "drop_when": "the registration agent no longer keys the issuer holder by the DID (agent/orchestration/registration)"
+            "drop_when": "the registration agent no longer keys the issuer holder by the DID (agent/orchestration/registration)",
+            "issue": 1047
           }
-        ]
+        ],
+        "adr": "docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md"
       }
     }
   ]
