@@ -692,6 +692,53 @@ describe("SettingsPage", () => {
     });
   });
 
+  describe("where changes go (#927)", () => {
+    it("says changes are saved on the control plane context, not the tenant manager", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/participants/me") return mockResponse([sampleTenant]);
+        return mockResponse([]);
+      });
+
+      const user = userEvent.setup();
+      render(<SettingsPage />);
+      await user.click(await screen.findByText("How does this work?"));
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            /Changes are saved on the participant's control plane context/,
+          ),
+        ).toBeTruthy();
+      });
+      expect(screen.queryByText(/tenant-manager/)).toBeNull();
+    });
+
+    it("tells to onboard again when every VPA is disposed, not to run a retired script", async () => {
+      const disposed = {
+        ...sampleTenant,
+        participantProfiles: [
+          {
+            ...sampleTenant.participantProfiles[0],
+            vpas: [{ id: "vpa-1", type: "cfm.dsp", state: "disposed" }],
+          },
+        ],
+      };
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/participants/me") return mockResponse([disposed]);
+        return mockResponse([]);
+      });
+
+      render(<SettingsPage />);
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            "VPAs disposed; onboard the participant again to re-provision",
+          ),
+        ).toBeTruthy();
+      });
+      expect(screen.queryByText(/seed-health-tenants/)).toBeNull();
+    });
+  });
+
   describe("refresh credentials", () => {
     it("has a Refresh button that reloads credentials", async () => {
       let callCount = 0;

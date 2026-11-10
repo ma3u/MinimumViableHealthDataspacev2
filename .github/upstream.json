@@ -1,5 +1,5 @@
 {
-  "_comment": "What scripts/check-upstream-releases.py watches: the specifications, TCKs and components no package manager covers (Dependabot reads npm, pip, Gradle, Dockerfiles and compose). `known` is the newest release this repo has taken into account; move it in the change that takes the next one in. `prerelease: true` also reports release candidates. `issue` is where the work for a new release goes.",
+  "_comment": "What scripts/check-upstream-releases.py watches: the specifications, TCKs and components no package manager covers (Dependabot reads npm, pip, Gradle, Dockerfiles and compose). `known` is the newest release this repo has taken into account; move it in the change that takes the next one in. `prerelease: true` also reports release candidates. `issue` is where the work for a new release goes. A `fork` block (eclipse-cfm/cfm) records the hub's fork: its base tag, the integration tag the images are built from, and each patch with what upstream would have to do for it to be dropped; on a new release the issue lists the routine of `fork.runbook`.",
   "repos": [
     {
       "repo": "eclipse-edc/Connector",
@@ -68,8 +68,48 @@
       "repo": "eclipse-cfm/cfm",
       "known": "v0.0.7",
       "prerelease": false,
-      "where": "docker-compose.jad.yml (CFM services)",
-      "issue": 973
+      "where": "docker-compose.jad.yml (profile cfm), built from the fork below",
+      "issue": 973,
+      "fork": {
+        "repo": "ma3u/cfm",
+        "base": "v0.0.7",
+        "integration": "mvhd/integration",
+        "tag": "v0.0.7-mvhd.2",
+        "runbook": "docs/knowledge/runbooks/cfm-fork.md",
+        "patches": [
+          {
+            "branch": "fix/token-exchange-without-jwtlet",
+            "fix": "a",
+            "drop_when": "upstream makes the token exchange's subject_token_type and client authentication configurable (common/tokenexchange/tokenprovider.go)",
+            "issue": 1043
+          },
+          {
+            "branch": "fix/sts-in-identityhub",
+            "fix": "b, c",
+            "drop_when": "upstream can provision an STS account in IdentityHub and write edc.iam.sts.oauth.* (IdentityHub and EDC-V agents)",
+            "issue": 1044
+          },
+          {
+            "branch": "fix/dispose-participant-context-id",
+            "fix": "d",
+            "drop_when": "the dispose orchestration carries participantContextId (tmanager/core/service_participant.go)",
+            "issue": 1045
+          },
+          {
+            "branch": "fix/edcv-delete-accepts-204",
+            "fix": "e",
+            "drop_when": "the control plane client accepts 204 on a participant context delete (agent/common/controlplane)",
+            "issue": 1046
+          },
+          {
+            "branch": "fix/holder-id-for-did-with-port",
+            "fix": "f",
+            "drop_when": "the registration agent no longer keys the issuer holder by the DID (agent/orchestration/registration)",
+            "issue": 1047
+          }
+        ],
+        "adr": "docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md"
+      }
     }
   ]
 }

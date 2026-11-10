@@ -1,13 +1,13 @@
 ---
-title: "CFM 0.0.7 spike (#973, ADR-085 step 1): onboarding through CFM works, with a proxy and two activities of our own; dispose does not"
+title: "CFM spike (#973, ADR-085 step 1): onboarding and dispose through CFM work on our stack, with six fixes in Matthias's fork of eclipse-cfm"
 status: current
 owner: ma3u
-updated: 2026-11-09
+updated: 2026-11-10
 issue: https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973
 ---
 
 [ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md) step 1, in
-three rounds on 2026-11-09:
+four rounds on 2026-11-09 and 2026-11-10:
 
 1. **Keycloak alone** cannot serve the agents' token exchange (below, "Round
    1"). Matthias chose ADR-085 step 2, a proxy.
@@ -19,12 +19,89 @@ three rounds on 2026-11-09:
    CFM end to end: all six steps complete, siglet included, and the new
    participant fetches AlphaKlinik Berlin's catalogue over DSP. Dispose still
    fails, on the upstream `participantContextId` bug alone (below, "Round 3").
+4. **With six fixes in a fork of eclipse-cfm** (Matthias: "Fix them in my own
+   fork"), CFM runs on our stack with no proxy and no agent of our own:
+   onboarding through `/onboarding`, the DSP catalogue, and dispose through
+   the Tenant Manager all work (below, "Round 4").
 
-## Round 3, two activities of our own
+## Round 4, 2026-11-10: the fork
+
+### Where it is
+
+[`ma3u/cfm`](https://github.com/ma3u/cfm), Matthias's fork of
+[eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm), created on 2026-11-10
+with his go: on
+[`v0.0.7`](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7), one branch
+per fix, each with Go tests, merged into
+[`mvhd/integration`](https://github.com/ma3u/cfm/tree/mvhd/integration) and
+tagged [`v0.0.7-mvhd.2`](https://github.com/ma3u/cfm/tree/v0.0.7-mvhd.2)
+(`8894f669`). Commits are Matthias's, with his private address and no
+assistant attribution, so each branch can go upstream unchanged. The fork's
+`main` is upstream's, untouched.
+
+[`scripts/build-cfm-fork-images.sh`](../../../scripts/build-cfm-fork-images.sh)
+builds the eight images from the tag as `mvhd/cfm-*:0.0.7-mvhd.2`, each
+labelled with the commit; without a local checkout it clones the fork.
+Nothing is reported to eclipse-cfm.
+
+Keeping it in step with upstream (sync, drop-check per patch, rebase,
+re-tag, rebuild, re-check) is the routine of
+[runbook cfm-fork](../../knowledge/runbooks/cfm-fork.md). The weekly
+upstream watch reads the fork from `.github/upstream.json` and, on a new
+eclipse-cfm release, opens an issue that lists that routine as tasks.
+
+### The fixes, and when each can go
+
+| Branch                                   | Commit               | What it fixes                                                                                                                                                                                                                                                                                                    | Replaces here                                     | Can go when                                                                             |
+| ---------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `fix/token-exchange-without-jwtlet` (a)  | `bd12c58`, `2189c08` | `tokenexchange.subjectTokenType` and `tokenexchange.clientId`/`clientSecret`: Keycloak's token exchange instead of jwtlet, a client-credentials subject token instead of a ServiceAccount file; the jwtlet agent skips resource mappings without `management.url`. Defaults unchanged (`tokenprovider.go` L123). | `jad/cfm/token-exchange.mjs`                      | upstream makes the token type and client authentication configurable                    |
+| `fix/sts-in-identityhub` (b, c)          | `0e33eb1`            | `identityhub.sts.enabled`: the IdentityHub agent provisions an STS account and no Vault partition; the EDC-V agent writes `edc.iam.sts.oauth.*`.                                                                                                                                                                 | both activities of `services/cfm-connector-agent` | upstream supports IdentityHub's STS again, or our control plane takes CFM's Vault model |
+| `fix/dispose-participant-context-id` (d) | `98ccd06`            | the Tenant Manager gives the dispose orchestration the deploy's outputs (`participantContextId`) at the top level                                                                                                                                                                                                | nothing (dispose did not work)                    | upstream fixes dispose                                                                  |
+| `fix/edcv-delete-accepts-204` (e)        | `bb21a46`            | the EDC-V agent accepts `204` on a context delete                                                                                                                                                                                                                                                                | nothing                                           | upstream accepts `204`                                                                  |
+| `fix/holder-id-for-did-with-port` (f)    | `7d36c57`            | the issuer holder is keyed by the participant context id, so a DID with `%3A` can be deleted, and the onboarding agent's revocation query (by that id) matches                                                                                                                                                   | nothing                                           | upstream keys holders so                                                                |
+
+`go test` passes for every package except the three `sqlstore` ones, which
+start Postgres through Testcontainers and were not run.
+
+### What changed here
+
+- The `cfm` profile runs `mvhd/cfm-*:0.0.7-mvhd.2`. `cfm7-token-exchange`,
+  `jad/cfm/token-exchange.mjs` and `services/cfm-connector-agent` are removed;
+  the agents' configs point the token exchange at Keycloak with client
+  credentials, and the IdentityHub and EDC-V agents set
+  `identityhub.sts.enabled`.
+- `scripts/seed-cfm.sh` seeds upstream's `edcv-activity` and
+  `identityhub-activity` again, and puts the IdentityHub participant in the
+  dispose orchestration too (upstream leaves it out).
+- `cfm-provision.ts` asks for the DSP profile through the connector VPA and
+  writes the registration's details onto the context after provisioning
+  (upstream's EDC-V agent creates it without properties).
+
+### Measured on the OrbStack stack
+
+| Check                                                  | Result                                                                                                                                                                                                                      |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/check-cfm-onboarding.sh` (Tenant Manager)     | 12 of 12: deploy `active` in 10 s; context, config, IdentityHub, DID document, holder, MembershipCredential; DSP catalogue from AlphaKlinik Berlin `200`; dispose in 4 s; context, holder and IdentityHub participant `404` |
+| `/onboarding` on a dev server with `CFM_TENANT_URL`    | all six agents complete, credential `ISSUED`; listed as "Fork Check Clinic · data-holder"; context carries `registeredAt`                                                                                                   |
+| Dispose of that participant through the Tenant Manager | `disposed` in 4 s; context, IdentityHub participant and holder `404`                                                                                                                                                        |
+
+With the fork's CFM running and its test participants disposed, the suites
+stay at their 1.0 floors: identity 31/0/0, dataspace 32/0/1, health domain
+27/0/3. Afterwards the `cfm7-*` containers, their volume and images,
+`cfm_v007`, the `cfm-agents` client and its scopes were removed again.
+
+### A seventh upstream behaviour
+
+A disposed participant profile stays in the Tenant Manager: a second DELETE
+answers `500`, and the tenant cannot be deleted ("cannot delete tenant with
+participants"). Only CFM's own database keeps the record; nothing is left on
+the stack. Not fixed in the fork, as it was not among the six.
+
+## Round 3, two activities of our own (superseded by round 4)
 
 ### What is ours, why, and when it can go
 
-[`services/cfm-connector-agent`](../../../services/cfm-connector-agent/) is a
+`services/cfm-connector-agent` (removed in round 4) is a
 small Go module on eclipse-cfm v0.0.7's own agent runtime and control-plane
 client. One image, two containers (`MVHD_AGENT` picks the activity):
 
@@ -104,7 +181,7 @@ and its twelve scopes. Nothing of the spike is left on the stack.
 
 ### What was built
 
-- [`jad/cfm/token-exchange.mjs`](../../../jad/cfm/token-exchange.mjs): the
+- `jad/cfm/token-exchange.mjs` (removed in round 4): the
   proxy. It exists **only because of
   [`tokenprovider.go` L123](https://github.com/eclipse-cfm/cfm/blob/v0.0.7/common/tokenexchange/tokenprovider.go#L123)**,
   the fixed `subject_token_type` `jwt` Keycloak refuses, and can go once

@@ -786,11 +786,6 @@
         "ports": []
       },
       {
-        "name": "cfm7-token-exchange",
-        "profiles": ["cfm"],
-        "ports": []
-      },
-      {
         "name": "cfm7-tmanager",
         "profiles": ["cfm"],
         "ports": ["18181:8080"]
@@ -806,12 +801,12 @@
         "ports": []
       },
       {
-        "name": "cfm7-mvhdconnectoragent",
+        "name": "cfm7-edcvagent",
         "profiles": ["cfm"],
         "ports": []
       },
       {
-        "name": "cfm7-mvhdidentityagent",
+        "name": "cfm7-ihagent",
         "profiles": ["cfm"],
         "ports": []
       },
@@ -1362,6 +1357,12 @@
       "file": "ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md",
       "title": "The hub evaluates a bonus year once it has ended",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-088",
+      "file": "ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md",
+      "title": "CFM runs from our fork of eclipse-cfm until upstream takes the patches",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1449,8 +1450,8 @@
     "trivy": "0.69.3"
   },
   "lastUpdated": {
-    "/docs": "2026-11-08",
-    "/docs/user-guide": "2026-11-09",
+    "/docs": "2026-11-10",
+    "/docs/user-guide": "2026-11-10",
     "/docs/developer": "2026-11-10",
     "/docs/developer/quality-gates": "2026-11-10",
     "/docs/developer/api": "2026-11-10",
@@ -1463,7 +1464,7 @@
     "/docs/ehds": "2026-11-10",
     "/docs/ehds/glossary": "2026-11-08",
     "/docs/ehds/[slug]": "2026-11-10",
-    "/docs/roadmap": "2026-11-09",
+    "/docs/roadmap": "2026-11-10",
     "/docs/operations": "2026-11-10",
     "/docs/operations/[slug]": "2026-11-10",
     "/docs/klarbefund/[slug]": "2026-11-10"

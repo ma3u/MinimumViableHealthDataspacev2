@@ -20,8 +20,8 @@ const implementedOperations = facts.apiRoutes.reduce(
   (n, r) => n + r.methods.length,
   0,
 );
-// What `docker compose up` starts: the services in no profile. The edc018,
-// trust-check and federated profiles hold the rest.
+// What `docker compose up` starts: the services in no profile. The cfm,
+// wellbeing, simpl, trust-check and federated profiles hold the rest.
 const inDefaultProfile = (s: { profiles: string[] }) => s.profiles.length === 0;
 const STACK_SERVICES = Object.values(facts.composeServices)
   .flat()
@@ -821,7 +821,7 @@ export default function DeveloperGuidePage() {
           </h3>
           <p className="text-(--text-secondary) text-sm mb-2">
             {t(
-              "Three compose profiles hold the {n} services the default stack leaves out:",
+              "Compose profiles hold the {n} services the default stack leaves out:",
               {
                 n:
                   Object.values(facts.composeServices).flat().length -
@@ -833,10 +833,31 @@ export default function DeveloperGuidePage() {
             <li>
               <T
                 area="docsDeveloper"
-                tags={{ c: chip, a: externalLink(`${GITHUB_REPO}/issues/927`) }}
+                tags={{
+                  c: chip,
+                  r: ext(
+                    "https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7",
+                  ),
+                  a: adr("ADR-085-cfm-stays-as-eclipse-cfm-releases.md"),
+                  s: srcCode("scripts/seed-cfm.sh"),
+                }}
               >
                 {
-                  "<c>edc018</c>: what only EDC 0.18 used, the two DCore data planes (FHIR :11002, OMOP :11012), CFM's Tenant Manager (:11006) and Provision Manager (:11007), its four agents and the shim, and the one-shot <c>jad-seed</c>. They stay until <a>#927</a> retires them; nothing in CI starts them."
+                  "<c>cfm</c>: the Connector Fabric Manager of the <r>eclipse-cfm 0.0.7</r> release, its Tenant Manager (:18181), Provision Manager (:18182), agents and own NATS, seeded by <s>scripts/seed-cfm.sh</s>. A spike (<a>ADR-085</a>): on the default stack the hub provisions participants itself."
+                }
+              </T>
+            </li>
+            <li>
+              <T area="docsDeveloper" tags={{ c: chip }}>
+                {
+                  "<c>wellbeing</c>: <c>wellbeing-ga-issuer</c> (:10053), the Governance Authority of the second data space."
+                }
+              </T>
+            </li>
+            <li>
+              <T area="docsDeveloper" tags={{ c: chip }}>
+                {
+                  "<c>simpl</c>: <c>simpl-issuer</c> (:10043) and <c>simpl-vault</c>, Simpl-Open's own issuer, for the interoperability check."
                 }
               </T>
             </li>
@@ -1749,7 +1770,7 @@ open http://traefik.localhost`}</pre>
               vars={{ n: facts.postgresDbs.length }}
             >
               {
-                "A fresh <c>postgres_data</c> volume holds {n} databases. The image creates <c>controlplane</c> (<c>POSTGRES_DB</c>); <c>jad/init-postgres.sql</c> creates the users, <c>keycloak</c>, <c>taskdb</c> and the other EDC 0.18 databases (<c>identityhub</c>, <c>issuerservice</c>, <c>dataplane</c>, <c>dataplane_omop</c>, <c>cfm</c>, <c>redlinedb</c>, ...), which the 1.0 services no longer use. <c>jad/init-postgres-edc1.sql</c> creates the <c>_v1</c> databases after it, on a fresh volume only; on an existing volume, run that file once with <c>psql</c> as <c>cp</c> (see <c>docs/gotchas.md</c>)."
+                "A fresh <c>postgres_data</c> volume holds {n} databases. The image creates <c>controlplane</c> (<c>POSTGRES_DB</c>); <c>jad/init-postgres.sql</c> creates the users, <c>keycloak</c> and <c>taskdb</c>. <c>jad/init-postgres-edc1.sql</c> creates the <c>_v1</c> databases and <c>cfm_v007</c> after it, on a fresh volume only; on an existing volume, run that file once with <c>psql</c> as <c>cp</c> (see <c>docs/gotchas.md</c>)."
               }
             </T>
           </p>

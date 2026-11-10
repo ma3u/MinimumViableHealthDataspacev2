@@ -1,0 +1,53 @@
+name: ACR retire the 0.18 and 2026-03 CFM images (#927)
+
+# Deletes the ACR repositories of EDC 0.18 (jad-*) and of the 2026-03 CFM
+# (cfm-tmanager, cfm-pmanager, the four agents, and nginx for its shim) once
+# no Container App or job names them. ADR-088's fork images are under cfm/<name>
+# and are not touched. scripts/azure/retire-v018-images.sh does the work;
+# `plan` lists each repository, its tags and who uses it, and changes nothing.
+# A deleted repository cannot be restored.
+#
+# Runs as the CI identity: deleting from ACR needs more than the maintainer's
+# Container Apps Contributor role. ACR does not stop off hours, so any time
+# works. Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or delete"
+        type: choice
+        options: [plan, delete]
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  retire:
+    name: 0.18 and CFM images (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Repositories
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+        run: |
+          set -o pipefail
+          ./scripts/azure/retire-v018-images.sh "$MODE" </dev/null | tee /tmp/out.txt
+          { echo "### 0.18 and 2026-03 CFM images (${MODE})"; echo '```'; sed 's/\x1b\[[0-9;]*m//g' /tmp/out.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

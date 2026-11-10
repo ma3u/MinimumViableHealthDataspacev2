@@ -627,8 +627,9 @@ describe("AdminTenantsPage", () => {
     await user.click(expandBtns[1]);
 
     await waitFor(() => {
-      expect(screen.getByText(/VPAs disposed/)).toBeInTheDocument();
-      expect(screen.getByText("seed-health-tenants.sh")).toBeInTheDocument();
+      expect(
+        screen.getByText("VPAs disposed; onboard the participant again"),
+      ).toBeInTheDocument();
     });
   });
 

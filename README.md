@@ -34,7 +34,7 @@
   - [Development](#development)
     - [Run pre-commit checks](#run-pre-commit-checks)
     - [Neo4j driver note](#neo4j-driver-note)
-    - [JAD Stack (EDC-V + CFM + DCore)](#jad-stack-edc-v--cfm--dcore)
+    - [JAD Stack (EDC 1.0)](#jad-stack-edc-10)
     - [All Docker Service Endpoints](#all-docker-service-endpoints)
   - [Documentation](#documentation)
   - [Implementation Status](#implementation-status)
@@ -42,8 +42,8 @@
       - [Tier 0 — Infrastructure Foundations (no dependencies, start first)](#tier-0--infrastructure-foundations-no-dependencies-start-first)
       - [Tier 1 — Core Identity \& UI (depend on Tier 0)](#tier-1--core-identity--ui-depend-on-tier-0)
       - [Tier 2 — EDC-V Core + Identity Services (depend on Tier 0 + 1)](#tier-2--edc-v-core--identity-services-depend-on-tier-0--1)
-      - [Tier 3 — Data Planes, Proxy, Provisioning \& CFM Agents (depend on Tier 2)](#tier-3--data-planes-proxy-provisioning--cfm-agents-depend-on-tier-2)
-      - [Tier 4 — Seed Job (runs once after all services are ready)](#tier-4--seed-job-runs-once-after-all-services-are-ready)
+      - [Tier 3: Neo4j Query Proxy (depends on Tier 2)](#tier-3-neo4j-query-proxy-depends-on-tier-2)
+      - [Profiles](#profiles)
       - [Dependency Graph](#dependency-graph)
   - [Contributing](#contributing)
   - [Background](#background)
@@ -238,7 +238,7 @@ be running. No build step is needed for the graph itself.
 MinimumViableHealthDataspacev2/
 ├── README.md
 ├── docker-compose.yml            # Neo4j 5 with APOC + n10s plugins
-├── docker-compose.jad.yml        # JAD stack: 19 EDC-V/CFM/DCore services
+├── docker-compose.jad.yml        # JAD stack: EDC 1.0, identity, infrastructure, profiles
 ├── docker-compose.live.yml       # Live-mode UI override (port 3003)
 ├── LICENSE
 ├── clients/ios/                  # Klarbefund, the iPhone lab-report scanner (issue #186)
@@ -258,7 +258,8 @@ MinimumViableHealthDataspacev2/
 │   ├── openapi/                  # OpenAPI specs for all JAD services
 │   ├── keycloak-realm.json       # Keycloak realm import
 │   ├── bootstrap-vault.sh        # Vault JWT auth + data plane keys
-│   ├── init-postgres.sql         # 8-database PostgreSQL init
+│   ├── init-postgres.sql         # PostgreSQL users, keycloak, taskdb
+│   ├── init-postgres-edc1.sql    # The EDC 1.0 databases (_v1) and cfm_v007
 │   └── *.yaml / *.env            # Per-service configuration files
 ├── neo4j/
 │   ├── init-schema.cypher                 # Neo4j constraints and indexes
@@ -421,16 +422,19 @@ To access the protected **Portal** views (which simulate dataspace participation
 
 ## Quick Start — Full Dataspace (JAD Stack)
 
-The full EHDS-compliant dataspace runs 19+ services locally using the
-[JAD (Joint Architecture Demo)](https://github.com/Metaform/jad) container images.
-This brings up EDC-V, DCore, CFM, IdentityHub, IssuerService, Keycloak, Vault, NATS,
-and all supporting infrastructure.
+The full EHDS-compliant dataspace runs locally as the stack that grew out of
+[JAD (Joint Architecture Demo)](https://github.com/Metaform/jad), on EDC 1.0.
+This brings up the control plane with siglet as its data plane, IdentityHub,
+IssuerService, Keycloak, Vault, NATS and all supporting infrastructure. The hub
+provisions participants itself ([ADR-078](docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md));
+CFM 0.0.7 runs only under the `cfm` profile, as a spike
+([ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)).
 
 ### Prerequisites
 
 - **OrbStack** (or Docker Desktop ≥ 24) with **≥ 8 GB RAM** allocated
 - **Ports available:** 80, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222, 9090,
-  10013, 11002, 11003, 11005, 11006, 11007, 11012
+  10013, 10023, 11003, 11005
 - **Node.js ≥ 20** (for the UI)
 - **Python 3** (for seed script parsing)
 
@@ -446,7 +450,7 @@ cd MinimumViableHealthDataspacev2
 ```
 
 This takes approximately 5–10 minutes on first run (image pulls). Subsequent runs are
-faster. When complete, all 20 services are healthy, the live UI is running on
+faster. When complete, the services of the default profile are healthy, the live UI is running on
 <http://localhost:3003>, and the dataspace is seeded with:
 
 - **5 participants** — AlphaKlinik Berlin, Limburg Medical Centre, PharmaCo Research AG,
@@ -454,7 +458,7 @@ faster. When complete, all 20 services are healthy, the live UI is running on
 - **10 Verifiable Credentials** (EHDSParticipantCredential, DataProcessingPurposeCredential)
 - **9 data assets** (FHIR R4, OMOP CDM, HealthDCAT-AP)
 - **Contract negotiations** — PharmaCo↔AlphaKlinik (FHIR data), MedReg↔LMC (catalog metadata)
-- **Active data transfers** via DCore data planes
+- **Active data transfers** via siglet, the EDC 1.0 data plane
 
 ### Verify Services
 
@@ -514,7 +518,7 @@ If the stack is already running, you can re-seed without restarting:
 # 1. Seed IssuerService credential definitions (idempotent, runs from host)
 ./jad/seed-issuer-defs.sh
 
-# 2. Full dataspace seed pipeline (tenants → credentials → policies → assets → …)
+# 2. Full dataspace seed pipeline (participants → credentials → policies → assets → …)
 ./jad/seed-all.sh
 
 # Resume from a specific step (e.g. step 5 = negotiations)
@@ -525,11 +529,12 @@ If the stack is already running, you can re-seed without restarting:
 ```
 
 **Seed dependency order:** IssuerService definitions must exist _before_
-running `seed-all.sh`, because the CFM onboarding agent needs credential
-definitions to issue Verifiable Credentials during tenant onboarding.
+running `seed-all.sh`, because its step 1 requests a MembershipCredential for
+each participant and fails when one does not arrive.
 The bootstrap script handles this automatically.
 
-Seed-all steps: (1) health tenants, (2) EHDS credentials, (3) ODRL policies,
+Seed-all steps: (1) participants and their identity on EDC 1.0
+(`scripts/seed-identity-layer.sh`), (2) EHDS credentials, (3) ODRL policies,
 (4) data assets, (5) contract negotiations, (6) federated catalog, (7) data transfers.
 
 ### Bootstrap Phases
@@ -537,20 +542,17 @@ Seed-all steps: (1) health tenants, (2) EHDS credentials, (3) ODRL policies,
 The bootstrap script (`./scripts/bootstrap-jad.sh`) orchestrates startup in the
 correct dependency order with health checks at each phase:
 
-| Phase | Services                                                                    | Health Check                           |
-| ----- | --------------------------------------------------------------------------- | -------------------------------------- |
-| 1     | PostgreSQL, Vault, Keycloak, NATS                                           | HTTP readiness / health endpoints      |
-| 2     | vault-bootstrap (sidecar)                                                   | Log polling for success message        |
-| 3     | Traefik reverse proxy                                                       | —                                      |
-| 4     | Control Plane, Data Plane FHIR, Data Plane OMOP, IdentityHub, IssuerService | Management API readiness (accepts 401) |
-| 4b    | Neo4j Query Proxy                                                           | `/health` endpoint                     |
-| 5     | Tenant Manager, Provision Manager, 4× CFM agents                            | —                                      |
-| 6     | Neo4j                                                                       | —                                      |
-| 6b    | Graph Explorer Live UI (port 3003)                                          | Docker build + start                   |
-| 7     | JAD seed (jad-seed container) — best-effort                                 | Exit code (non-fatal)                  |
-| 8     | IssuerService identity fixup (SQL → restart → DID verification)             | DID document check                     |
-| 8b    | IssuerService attestation + credential definitions (`seed-issuer-defs.sh`)  | HTTP 200/409 per definition            |
-| 9     | Dataspace seeding (`seed-all.sh`: 7 phases)                                 | Exit code                              |
+| Phase | Services                                                           | Health Check                                        |
+| ----- | ------------------------------------------------------------------ | --------------------------------------------------- |
+| 1     | PostgreSQL, Vault, vault-unseal, Keycloak, NATS                    | HTTP readiness / health endpoints                   |
+| 2     | vault-bootstrap (sidecar)                                          | Log polling for success message                     |
+| 3     | Traefik reverse proxy                                              | -                                                   |
+| 4     | Control Plane, IdentityHub, IssuerService, Simpl GA issuer, siglet | Management API readiness (accepts 401)              |
+| 4b    | Neo4j                                                              | Bolt readiness                                      |
+| 5     | Neo4j Query Proxy                                                  | `/health` endpoint                                  |
+| 5b    | Graph Explorer Live UI (port 3003)                                 | Docker build + start                                |
+| 7     | Dataspace seeding (`seed-all.sh`: 7 phases)                        | Exit code, then five participant contexts on the CP |
+| 7b    | Simpl test Governance Authority (`scripts/seed-simpl-ga.sh`)       | Warns on failure; the TRUST checks report it        |
 
 The script is **idempotent** — safe to re-run on an existing stack. It performs
 `docker compose down --remove-orphans` at the start to clean up stale containers.
@@ -702,9 +704,9 @@ pre-commit run --all-files
 
 The UI driver (`ui/src/lib/neo4j.ts`) is configured with `{ disableLosslessIntegers: true }`. By default the JavaScript Neo4j driver wraps 64-bit integers as `{ low, high }` objects; this flag converts them to native JavaScript numbers so stat card values render correctly instead of showing `[object Object]`.
 
-### JAD Stack (EDC-V + CFM + DCore)
+### JAD Stack (EDC 1.0)
 
-The full dataspace connector stack is defined in `docker-compose.jad.yml` using container images from the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad). This runs 19 services including EDC-V Control Plane, dual DCore Data Planes (FHIR PUSH + OMOP PULL), Neo4j Query Proxy, IdentityHub (DCP v1.0), IssuerService, Keycloak, Vault, NATS, and CFM agents.
+The full dataspace connector stack is defined in `docker-compose.jad.yml`; it grew out of the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad). It runs the EDC 1.0 control plane with siglet as its data plane, IdentityHub, IssuerService, Keycloak, Vault, NATS, PostgreSQL, Traefik and the Neo4j Query Proxy. The hub provisions participants itself ([ADR-078](docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)); the EDC 0.18 data planes and the 2026-03 CFM build are gone (#927). CFM 0.0.7 from the eclipse-cfm releases runs only under `--profile cfm`, seeded by `scripts/seed-cfm.sh` ([ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)).
 
 ```bash
 # Start full JAD stack (+ Neo4j from base compose)
@@ -728,13 +730,9 @@ Service endpoints after startup:
 | Keycloak Admin    | http://keycloak.localhost | admin / admin     |
 | Vault UI          | http://vault.localhost    | token: root       |
 | Control Plane     | http://cp.localhost       | OAuth2 (Keycloak) |
-| Data Plane FHIR   | http://dp-fhir.localhost  | OAuth2 (Keycloak) |
-| Data Plane OMOP   | http://dp-omop.localhost  | OAuth2 (Keycloak) |
 | Neo4j Query Proxy | http://proxy.localhost    | internal (DCore)  |
 | Identity Hub      | http://ih.localhost       | OAuth2 (Keycloak) |
 | Issuer Service    | http://issuer.localhost   | OAuth2 (Keycloak) |
-| Tenant Manager    | http://tm.localhost       | OAuth2 (Keycloak) |
-| Provision Manager | http://pm.localhost       | OAuth2 (Keycloak) |
 | NATS Monitor      | http://localhost:8222     | —                 |
 
 Configuration files are in the `jad/` directory. OpenAPI specs are in `jad/openapi/`. EDC-V asset registration payloads (Phase 4a) are in `jad/edcv-assets/`.
@@ -758,18 +756,12 @@ Complete list of all services and their direct `localhost` port mappings when th
 | **Keycloak**            | 8080, 9000                    | http://localhost:8080  | IAM / OAuth2 provider (`admin/admin`)                     |
 | **Vault**               | 8200                          | http://localhost:8200  | HashiCorp Vault (token: `root`)                           |
 | **Control Plane**       | 11003                         | http://localhost:11003 | EDC-V Management API (DSP + DCP)                          |
-| **Data Plane FHIR**     | 11002                         | http://localhost:11002 | DCore Data Plane — FHIR PUSH                              |
-| **Data Plane OMOP**     | 11012                         | http://localhost:11012 | DCore Data Plane — OMOP PULL                              |
 | **Identity Hub**        | 11005                         | http://localhost:11005 | DCP v1.0 Decentralized Claims                             |
 | **Issuer Service**      | 10013                         | http://localhost:10013 | Verifiable Credential issuer                              |
-| **Tenant Manager**      | 11006                         | http://localhost:11006 | Multi-tenant management API                               |
-| **Provision Manager**   | 11007                         | http://localhost:11007 | Resource provisioning API                                 |
 | **NATS**                | 4222 (client), 8222 (monitor) | http://localhost:8222  | Message bus — monitoring dashboard                        |
-| **PostgreSQL**          | 5432                          | localhost:5432         | Shared database (8 schemas)                               |
-| CFM EDC-V Agent         | —                             | internal               | Connector Framework Module agent                          |
-| CFM Keycloak Agent      | —                             | internal               | Keycloak integration agent                                |
-| CFM Onboarding Agent    | —                             | internal               | Participant onboarding agent                              |
-| CFM Registration Agent  | —                             | internal               | Service registration agent                                |
+| **PostgreSQL**          | 5432                          | localhost:5432         | Shared database (one per service)                         |
+| CFM Tenant Manager      | 18181                         | http://localhost:18181 | CFM 0.0.7, only with `--profile cfm` (ADR-085)            |
+| CFM Provision Manager   | 18182                         | http://localhost:18182 | CFM 0.0.7, only with `--profile cfm` (ADR-085)            |
 
 > **Note:** Inside Docker, services communicate using Docker DNS names (e.g. `bolt://neo4j:7687`).
 > The `localhost` ports above are the host-mapped ports for external access from your browser or
@@ -805,13 +797,13 @@ the cost model and scheduling rationale. ADR-015 documents the single-VM fallbac
 
 ### Topology
 
-| Resource       | Details                                                                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Environment    | `mvhd-env` (West Europe, consumption plan)                                                                                           |
-| Container Apps | 13 (UI, Neo4j, Keycloak, Vault, NATS, PostgreSQL, Neo4j Proxy, EDC-V, DCore, IdentityHub, IssuerService, CFM TManager, CFM PManager) |
-| ACA Jobs       | 3 (bootstrap, schema, seed)                                                                                                          |
-| CI/CD          | GitHub Actions with OIDC federation — no stored credentials                                                                          |
-| E2E Validation | Playwright runs against Azure after every deploy                                                                                     |
+| Resource       | Details                                                                                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Environment    | `mvhd-env` (West Europe, consumption plan)                                                                                                                             |
+| Container Apps | UI, Neo4j, Keycloak, Vault, NATS, Neo4j Proxy, EDC 1.0 control plane, siglet, IdentityHub, IssuerService; no CFM or DCore data planes since 2026-11-09 (ADR-078, #927) |
+| ACA Jobs       | 3 (bootstrap, schema, seed)                                                                                                                                            |
+| CI/CD          | GitHub Actions with OIDC federation — no stored credentials                                                                                                            |
+| E2E Validation | Playwright runs against Azure after every deploy                                                                                                                       |
 
 **Guides:**
 
@@ -882,15 +874,15 @@ For detailed phase descriptions, sub-tasks, and architecture decisions, see the 
 
 ### Container Inventory
 
-The full stack comprises **25 containers** across two Docker Compose files. Containers are
-grouped by startup tier — Docker Compose launches each tier in parallel once all dependencies
-in the previous tier report healthy. The `neo4j-spe2` and `jad-seed` containers only start
-when their respective profiles (`federated`, `seed`) are explicitly activated.
+The default stack comprises **16 containers** across two Docker Compose files, plus
+`neo4j-spe2` under `--profile federated`. Containers are grouped by startup tier: Docker
+Compose launches each tier in parallel once all dependencies in the previous tier report
+healthy. The other profiles are listed [below](#profiles).
 
 ![OrbStack Activity Monitor with the local stack's containers running](docs/images/container-activity-monitor.png)
 
 The stack running locally in OrbStack's Activity Monitor. The `wallet-*` containers and the separate
-`edcv-control-plane` project are not part of the 25 containers listed below.
+`edcv-control-plane` project are not part of the containers listed below.
 
 ```
 Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
@@ -901,7 +893,7 @@ Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
 | #   | Service        | Container Name                | Compose File             | Port(s)    | Description                                                                                                                                                                 |
 | --- | -------------- | ----------------------------- | ------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | `neo4j`        | `health-dataspace-neo4j`      | `docker-compose.yml`     | 7474, 7687 | Neo4j 5 Community — primary graph database with APOC + n10s plugins. Stores the 5-layer knowledge graph.                                                                    |
-| 2   | `postgres`     | `health-dataspace-postgres`   | `docker-compose.jad.yml` | 5432       | PostgreSQL 17 — multi-database server (8 schemas: controlplane, identityhub, issuerservice, dataplane, dataplane_omop, keycloak, cfm, redlinedb).                           |
+| 2   | `postgres`     | `health-dataspace-postgres`   | `docker-compose.jad.yml` | 5432       | PostgreSQL 17, one database per service: the EDC 1.0 `_v1` databases, keycloak, taskdb, and `cfm_v007` for the `cfm` profile.                                               |
 | 3   | `vault`        | `health-dataspace-vault`      | `docker-compose.jad.yml` | 8200       | HashiCorp Vault with file storage on the `vault_data` volume — secret management for signing keys, AES keys, and data plane token keys; keeps every secret across restarts. |
 | 4   | `nats`         | `health-dataspace-nats`       | `docker-compose.jad.yml` | 4222, 8222 | NATS JetStream — async messaging bus for contract negotiation and transfer process state machine events.                                                                    |
 | 5   | `traefik`      | `health-dataspace-traefik`    | `docker-compose.jad.yml` | 80, 8090   | Traefik v3 reverse proxy — routes `*.localhost` domains to internal services; replaces K8s Gateway API.                                                                     |
@@ -917,45 +909,41 @@ Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
 | 7   | `keycloak`       | `health-dataspace-keycloak`     | `docker-compose.jad.yml` | 8080, 9000   | `postgres`   | Keycloak — OAuth2/OIDC identity provider. Hosts `edcv` realm with 3 demo users, PKCE client, and role mappings.                                                    |
 | 8   | `graph-explorer` | `health-dataspace-ui`           | `docker-compose.yml`     | 3000, 3003 ³ | `neo4j`      | Next.js 14 UI — Graph Explorer, Catalogue, Analytics, Portal views. Connects to Neo4j (Bolt) and Keycloak (OIDC). Port 3003 via `docker-compose.live.yml` overlay. |
 | 9   | `vault-unseal`   | `health-dataspace-vault-unseal` | `docker-compose.jad.yml` | —            | `vault`      | Sidecar — initialises Vault once and unseals it on every start (`scripts/vault-init-or-unseal.sh`).                                                                |
-| 10  | `siglet`         | `health-dataspace-siglet`       | `docker-compose.jad.yml` | —            | `vault`      | Siglet (Eclipse Data Plane Core) — certificate exchange and token signing for the EDC 0.18 data planes.                                                            |
+| 10  | `siglet`         | `health-dataspace-siglet`       | `docker-compose.jad.yml` | -            | `vault`      | siglet (Eclipse Data Plane Core), the EDC 1.0 data plane: Data Plane Signaling and the access tokens of pull transfers.                                            |
+| 11  | `nats-streams`   | `health-dataspace-nats-streams` | `docker-compose.jad.yml` | -            | `nats`       | One-shot: creates the control plane's task streams `cn-stream` and `tp-stream` as file streams, so a NATS restart keeps them.                                      |
 
 #### Tier 2 — EDC-V Core + Identity Services (depend on Tier 0 + 1)
 
-| #   | Service           | Container Name                     | Compose File             | Port(s) | Dependencies                            | Description                                                                                                                              |
-| --- | ----------------- | ---------------------------------- | ------------------------ | ------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 11  | `vault-bootstrap` | `health-dataspace-vault-bootstrap` | `docker-compose.jad.yml` | —       | `vault`, `keycloak`                     | Init job (runs once, then exits) — configures JWT auth backend, secrets engine, policies, and signing keys in Vault.                     |
-| 12  | `controlplane`    | `health-dataspace-controlplane`    | `docker-compose.jad.yml` | 11003   | `postgres`, `vault`, `nats`, `keycloak` | EDC-V Control Plane — DSP protocol engine, management API, contract negotiation state machine, ODRL policy evaluation.                   |
-| 13  | `identityhub`     | `health-dataspace-identityhub`     | `docker-compose.jad.yml` | 11005   | `postgres`, `vault`, `keycloak`         | DCP v1.0 Identity Hub — stores Verifiable Credentials, handles DID resolution, and credential presentation requests.                     |
-| 14  | `issuerservice`   | `health-dataspace-issuerservice`   | `docker-compose.jad.yml` | 10013   | `postgres`, `vault`, `keycloak`         | Verifiable Credential Issuer — trust anchor that issues MembershipCredential, EHDSParticipantCredential, and DataQualityLabelCredential. |
-| 15  | `tenant-manager`  | `health-dataspace-tenant-manager`  | `docker-compose.jad.yml` | 11006   | `postgres`, `keycloak`                  | CFM Tenant Manager — multi-tenant participant lifecycle (create, activate, deactivate dataspace tenants).                                |
+| #   | Service           | Container Name                     | Compose File             | Port(s) | Dependencies                            | Description                                                                                                                             |
+| --- | ----------------- | ---------------------------------- | ------------------------ | ------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 12  | `vault-bootstrap` | `health-dataspace-vault-bootstrap` | `docker-compose.jad.yml` | -       | `vault`, `keycloak`                     | Init job (runs once, then exits): configures JWT auth backend, secrets engine, policies, and signing keys in Vault.                     |
+| 13  | `controlplane`    | `health-dataspace-controlplane`    | `docker-compose.jad.yml` | 11003   | `postgres`, `vault`, `nats`, `keycloak` | EDC-V Control Plane: DSP protocol engine, management API, contract negotiation state machine, ODRL policy evaluation.                   |
+| 14  | `identityhub`     | `health-dataspace-identityhub`     | `docker-compose.jad.yml` | 11005   | `postgres`, `vault`, `keycloak`         | DCP v1.0 Identity Hub: stores Verifiable Credentials, handles DID resolution, and credential presentation requests.                     |
+| 15  | `issuerservice`   | `health-dataspace-issuerservice`   | `docker-compose.jad.yml` | 10013   | `postgres`, `vault`, `keycloak`         | Verifiable Credential Issuer: trust anchor that issues MembershipCredential, EHDSParticipantCredential, and DataQualityLabelCredential. |
+| 16  | `simpl-ga-issuer` | `health-dataspace-simpl-ga-issuer` | `docker-compose.jad.yml` | 10023   | `postgres`, `vault`, `keycloak`         | The fictional Simpl Governance Authority's issuer (ADR-064).                                                                            |
 
-#### Tier 3 — Data Planes, Proxy, Provisioning & CFM Agents (depend on Tier 2)
+#### Tier 3: Neo4j Query Proxy (depends on Tier 2)
 
-| #   | Service                  | Container Name                            | Compose File             | Port(s) | Dependencies                                                     | Description                                                                                                                                            |
-| --- | ------------------------ | ----------------------------------------- | ------------------------ | ------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 16  | `dataplane-fhir`         | `health-dataspace-dataplane-fhir`         | `docker-compose.jad.yml` | 11002   | `postgres`, `vault`, `controlplane`, `siglet`                    | DCore Data Plane (FHIR PUSH) — transfers FHIR R4 Bundle JSON to consumer endpoints via HttpData-PUSH protocol.                                         |
-| 17  | `dataplane-omop`         | `health-dataspace-dataplane-omop`         | `docker-compose.jad.yml` | 11012   | `postgres`, `vault`, `controlplane`, `siglet`                    | DCore Data Plane (OMOP PULL) — serves OMOP CDM aggregate query results via HttpData-PULL protocol.                                                     |
-| 18  | `neo4j-proxy`            | `health-dataspace-neo4j-proxy`            | `docker-compose.jad.yml` | 9090    | `controlplane`                                                   | Node.js/Express bridge — translates DCore HTTP requests into Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
-| 19  | `cfm-cp-shim`            | `health-dataspace-cfm-cp-shim`            | `docker-compose.jad.yml` | —       | `controlplane`                                                   | nginx shim — rewrites the CFM agents' Management API `v5alpha` calls to the `v5beta` that EDC 0.18 serves (#181).                                      |
-| 20  | `provision-manager`      | `health-dataspace-provision-manager`      | `docker-compose.jad.yml` | 11007   | `postgres`, `keycloak`, `controlplane`                           | CFM Provision Manager — automated resource provisioning for new tenants (Vault keys, DB schemas, EDC-V registrations).                                 |
-| 21  | `cfm-agents`             | `health-dataspace-cfm-keycloak-agent`     | `docker-compose.jad.yml` | —       | `keycloak`, `tenant-manager`                                     | CFM Keycloak Agent — watches tenant events and provisions Keycloak client registrations and role mappings.                                             |
-| 22  | `cfm-edcv-agent`         | `health-dataspace-cfm-edcv-agent`         | `docker-compose.jad.yml` | —       | `controlplane`, `tenant-manager`                                 | CFM EDC-V Agent — provisions connector resources (data plane selectors, asset definitions) for new tenants.                                            |
-| 23  | `cfm-registration-agent` | `health-dataspace-cfm-registration-agent` | `docker-compose.jad.yml` | —       | `identityhub`, `issuerservice`, `tenant-manager`                 | CFM Registration Agent — registers DID documents and requests Verifiable Credentials from IssuerService for new tenants.                               |
-| 24  | `cfm-onboarding-agent`   | `health-dataspace-cfm-onboarding-agent`   | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager` | CFM Onboarding Agent — orchestrates the full onboarding sequence: DID creation → VC issuance → connector setup → catalog entry.                        |
+| #   | Service       | Container Name                 | Compose File             | Port(s) | Dependencies   | Description                                                                                                                                           |
+| --- | ------------- | ------------------------------ | ------------------------ | ------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 17  | `neo4j-proxy` | `health-dataspace-neo4j-proxy` | `docker-compose.jad.yml` | 9090    | `controlplane` | Node.js/Express bridge: translates DCore HTTP requests into Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
 
-#### Tier 4 — Seed Job (runs once after all services are ready)
+#### Profiles
 
-| #   | Service      | Container Name              | Compose File             | Port(s) | Dependencies                                                                          | Description                                                                                                                                    |
-| --- | ------------ | --------------------------- | ------------------------ | ------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| 25  | `jad-seed` ² | `health-dataspace-jad-seed` | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager`, `provision-manager` | One-shot seed job — initialises IssuerService credential definitions, creates demo tenants, and triggers provisioning. Exits after completion. |
+Services that start only with `--profile <name>`:
 
-> ² Only starts with `--profile seed`.
+- `cfm`: CFM 0.0.7 from the [eclipse-cfm releases](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7), its Tenant Manager (:18181), Provision Manager (:18182), agents and own NATS (`cfm7-*`), seeded by `scripts/seed-cfm.sh`. A spike ([ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)): on the default stack the hub provisions participants itself.
+- `wellbeing`: `wellbeing-ga-issuer` (:10053), the Governance Authority of the second data space (#934).
+- `simpl`: `simpl-issuer` (:10043) and `simpl-vault`, Simpl-Open's own issuer (#934 step 0a).
+- `trust-check`: `rogue-issuer` (:10033), the untrusted issuer the identity checks must refuse.
+- `federated`: `neo4j-spe2` (:7475 / :7688), the second SPE.
 
 #### Dependency Graph
 
-Generated from the `depends_on` entries of `docker-compose.yml` and `docker-compose.jad.yml`:
+Generated from the `depends_on` entries of `docker-compose.yml` and `docker-compose.jad.yml`
+before #927, so it still shows the EDC 0.18 services and the 2026-03 CFM build:
 
-![Container dependencies: 25 Docker Compose services in five startup tiers](docs/images/container-dependencies.svg)
+![Container dependencies: the Docker Compose services by startup tier, before #927 removed the EDC 0.18 services](docs/images/container-dependencies.svg)
 
 ---
 

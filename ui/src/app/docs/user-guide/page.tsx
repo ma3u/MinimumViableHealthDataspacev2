@@ -100,6 +100,7 @@ const EDC_URL =
 const IDENTITY_HUB_URL =
   "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5";
 const CFM_URL = "https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7";
+const ADR_085 = "docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md";
 const TRUSTEE_URL =
   "https://github.com/confidential-containers/trustee/releases/tag/v0.22.0";
 const ACI_CONFIDENTIAL_URL =
@@ -1245,10 +1246,11 @@ export default function UserGuidePage() {
                   i: ext(IDENTITY_HUB_URL),
                   d: ext(DCP_URL),
                   f: ext(CFM_URL),
+                  b: repo(ADR_085),
                 }}
               >
                 {
-                  "The onboarding wizard registers a new participant. On the default stack the hub provisions it itself (<a>ADR-078</a>): a control plane context, a DID with its keys in the <i>IdentityHub</i>, and a MembershipCredential requested over <d>DCP v1.0</d>. The <f>Connector Fabric Manager</f> did this before and still does under the edc018 profile only."
+                  "The onboarding wizard registers a new participant. On the default stack the hub provisions it itself (<a>ADR-078</a>): a control plane context, a DID with its keys in the <i>IdentityHub</i>, and a MembershipCredential requested over <d>DCP v1.0</d>. Under the stack's cfm profile, the <f>Connector Fabric Manager</f> 0.0.7 can do it instead, as a spike (<b>ADR-085</b>)."
                 }
               </T>
             </p>
@@ -2268,11 +2270,10 @@ export default function UserGuidePage() {
                 tags={{
                   e: ext(EDC_URL),
                   i: ext(IDENTITY_HUB_URL),
-                  f: ext(CFM_URL),
                 }}
               >
                 {
-                  "Inspect the runtime status of <e>Eclipse Dataspace Connector</e> components: Control Plane, Data Plane, <i>Identity Hub</i>, Issuer Service, and, under the edc018 profile only, the <f>Connector Fabric Manager</f>. View health checks, versions, and configuration details."
+                  "Inspect the runtime status of <e>Eclipse Dataspace Connector</e> components: Control Plane, Data Plane, <i>Identity Hub</i> and Issuer Service. View health checks, versions, and configuration details."
                 }
               </T>
             </p>
@@ -2421,10 +2422,11 @@ export default function UserGuidePage() {
                     "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md?plain=1#L62-L72",
                   ),
                   f: ext(CFM_URL),
+                  b: repo(ADR_085),
                 }}
               >
                 {
-                  "Each participant's control plane context and its provisioning state: whether its MembershipCredential has arrived. The hub provisions participants itself (<a>ADR-078</a>); the tenants and virtual participant agents of the <f>Connector Fabric Manager</f> exist only under the edc018 profile."
+                  "Each participant's control plane context and its provisioning state: whether its MembershipCredential has arrived. The hub provisions participants itself (<a>ADR-078</a>); the tenants and virtual participant agents of the <f>Connector Fabric Manager</f> exist only under the stack's cfm profile, a spike (<b>ADR-085</b>)."
                 }
               </T>
             </p>

@@ -6,7 +6,7 @@ Technical documentation for developing, testing, and deploying the Health Datasp
 
 ## JAD Stack Architecture
 
-The full JAD stack runs **15 Docker services** via `docker-compose.yml` + `docker-compose.jad.yml`, on EDC 1.0.0-RC5 with siglet as the data plane and no CFM, as Azure does ([ADR-078](ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)). The three EDC launchers are built from `runtimes/edc` (`mvhd/edc-<runtime>:1.0.0-RC5`).
+The full JAD stack runs **15 Docker services** via `docker-compose.yml` + `docker-compose.jad.yml`, on EDC 1.0.0-RC5 with siglet as the data plane and no CFM, as Azure does: the hub provisions participants itself ([ADR-078](ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)). CFM 0.0.7 runs only under the `cfm` profile below ([ADR-085](ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)). The three EDC launchers are built from `runtimes/edc` (`mvhd/edc-<runtime>:1.0.0-RC5`).
 
 | Service         | Port          | Traefik Route      | Purpose                                                         | Depends On          |
 | --------------- | ------------- | ------------------ | --------------------------------------------------------------- | ------------------- |
@@ -30,7 +30,7 @@ A pull transfer runs like this: the consumer's control plane negotiates, siglet 
 
 Five compose profiles hold what the default stack leaves out:
 
-- `edc018`: the EDC 0.18 services, the two DCore data planes (FHIR :11002, OMOP :11012), CFM's Tenant Manager (:11006) and Provision Manager (:11007), its four agents and shim, and the one-shot `jad-seed`. They are kept until #927 retires them; nothing in CI starts them.
+- `cfm`: the Connector Fabric Manager of the [eclipse-cfm 0.0.7](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7) release, its Tenant Manager (:18181), Provision Manager (:18182), agents and own NATS. `scripts/seed-cfm.sh` seeds it and `scripts/check-cfm-onboarding.sh` onboards and disposes a participant through it. A spike ([ADR-085](ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)): on the default stack the hub provisions participants itself (`ui/src/lib/edc/provision.ts`).
 - `trust-check`: `rogue-issuer` (:10033), the untrusted issuer the identity checks must refuse.
 - `wellbeing`: `wellbeing-ga-issuer` (:10053), the Governance Authority of a second data space that admits AlphaKasse DE (#934). `scripts/seed-second-data-space.sh` starts it and seeds AlphaKasse; CI runs it before the identity checks.
 - `simpl`: `simpl-issuer` (:10043) and its `simpl-vault`, Simpl-Open's own issuer service, which `scripts/run-simpl-issuer-interop.sh` starts to test whether the hub accepts its credentials (#934 step 0a; today it does not).
@@ -143,8 +143,9 @@ PostgreSQL serves as the runtime store for all JAD services. Neo4j holds the hea
 | rogueissuer_v1   | rogue-issuer    | The untrusted issuer of the identity checks             |
 | keycloak         | Keycloak        | Users, roles, realm config, sessions                    |
 | taskdb           | Neo4j Proxy     | The task store                                          |
+| cfm_v007         | CFM 0.0.7       | Tenants and orchestrations, profile `cfm` only          |
 
-The image creates `controlplane` (`POSTGRES_DB`); `jad/init-postgres.sql` creates the users, `keycloak`, `taskdb` and the other EDC 0.18 databases (`identityhub`, `issuerservice`, `dataplane`, `dataplane_omop`, `cfm`, `redlinedb`, ...), which the 1.0 services no longer use. `jad/init-postgres-edc1.sql` creates the `_v1` databases after it, on a fresh `postgres_data` volume only; on an existing volume, run that file once with `psql` as `cp` (see `docs/gotchas.md`).
+The image creates `controlplane` (`POSTGRES_DB`); `jad/init-postgres.sql` creates the users, `keycloak` and `taskdb`. `jad/init-postgres-edc1.sql` creates the `_v1` databases and `cfm_v007` after it, on a fresh `postgres_data` volume only; on an existing volume, run that file once with `psql` as `cp` (see `docs/gotchas.md`).
 
 ## Testing
 

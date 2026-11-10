@@ -1,0 +1,149 @@
+# ---------------------------------------------------------------------------
+# CFM fork: the patches still build and pass, at our tag and on upstream main
+# ---------------------------------------------------------------------------
+# The compose profile `cfm` runs eclipse-cfm/cfm from our fork ma3u/cfm with
+# five patches (ADR-088, #973, sub-issues #1043 to #1047). Two jobs:
+#
+# - "Fork at its tag": the integration tag `.github/upstream.json` pins
+#   (fork.tag) passes the fork's Go tests, the Testcontainers ones included,
+#   and builds the eight images scripts/build-cfm-fork-images.sh builds.
+# - "Patches on upstream main": eclipse-cfm's current main merged into that
+#   tag still merges and passes. A red run here means an upstream change,
+#   released or not, touches what a patch changes: do the routine of
+#   docs/knowledge/runbooks/cfm-fork.md before the next release forces it.
+#   (The tag, not the patch branches one by one: two patches add a line to
+#   the same copyright header, which the tag has already resolved.)
+#
+# Weekly, Monday after the upstream watch; on a change to the pin, the build
+# script or this file; by hand. Nothing is pushed anywhere.
+# ---------------------------------------------------------------------------
+name: CFM fork
+
+on:
+  schedule:
+    - cron: "47 2 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/upstream.json"
+      - "scripts/build-cfm-fork-images.sh"
+      - ".github/workflows/cfm-fork.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".github/upstream.json"
+      - "scripts/build-cfm-fork-images.sh"
+      - ".github/workflows/cfm-fork.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cfm-fork-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pinned:
+    name: Fork at its tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/upstream.json
+            scripts/build-cfm-fork-images.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Read the fork from .github/upstream.json
+        id: fork
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          fork = next(e["fork"] for e in json.load(open(".github/upstream.json"))["repos"] if "fork" in e)
+          print(f"repo={fork['repo']}")
+          print(f"tag={fork['tag']}")
+          PY
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.fork.outputs.repo }}
+          ref: ${{ steps.fork.outputs.tag }}
+          path: cfm
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: cfm/go.mod
+          cache-dependency-path: cfm/go.sum
+
+      - name: Go tests of the fork (Testcontainers included)
+        working-directory: cfm
+        run: |
+          mapfile -t pkgs < <(go list ./... | grep -v /e2e)
+          go test -timeout 25m "${pkgs[@]}"
+
+      - name: Build the eight images from the tag
+        env:
+          CFM_REF: ${{ steps.fork.outputs.tag }}
+        run: scripts/build-cfm-fork-images.sh "$GITHUB_WORKSPACE/cfm"
+
+  upstream-main:
+    name: Patches on upstream main
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/upstream.json
+          sparse-checkout-cone-mode: false
+
+      - name: Read the fork from .github/upstream.json
+        id: fork
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          entry = next(e for e in json.load(open(".github/upstream.json"))["repos"] if "fork" in e)
+          print(f"repo={entry['fork']['repo']}")
+          print(f"tag={entry['fork']['tag']}")
+          print(f"upstream={entry['repo']}")
+          PY
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.fork.outputs.repo }}
+          ref: ${{ steps.fork.outputs.tag }}
+          path: cfm
+          fetch-depth: 0
+
+      - name: Merge upstream main into the integration tag
+        working-directory: cfm
+        env:
+          UPSTREAM: ${{ steps.fork.outputs.upstream }}
+          TAG: ${{ steps.fork.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "cfm-fork check"
+          git config user.email "cfm-fork-check@users.noreply.github.com"
+          git remote add upstream "https://github.com/${UPSTREAM}.git"
+          git fetch --quiet upstream main
+          echo "upstream main: $(git log --oneline -1 upstream/main)"
+          echo "commits on upstream main since ${TAG}'s base: $(git rev-list --count HEAD..upstream/main)"
+          git switch --quiet -c check/upstream-main
+          if ! git merge --quiet --no-ff -m "check: ${UPSTREAM} main" upstream/main; then
+            git diff --name-only --diff-filter=U | sed 's/^/conflict: /'
+            git merge --abort
+            echo "::error::${UPSTREAM} main no longer merges into ${TAG}; see docs/knowledge/runbooks/cfm-fork.md"
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: cfm/go.mod
+          cache-dependency-path: cfm/go.sum
+
+      - name: Go tests with the patches on upstream main
+        working-directory: cfm
+        run: |
+          mapfile -t pkgs < <(go list ./... | grep -v /e2e)
+          go test -timeout 25m "${pkgs[@]}"

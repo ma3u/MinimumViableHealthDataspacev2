@@ -9,11 +9,8 @@ set -euo pipefail
 #   3. the Provision Manager: the activity definitions and the deploy and
 #      dispose orchestration of core-platform-distribution v0.0.39
 #      (templates/hooks/provision-manager-seed-job.yaml), jwtlet step included
-#      (it derives the participant context id the other agents need), with the
-#      hub's own mvhd-connector-activity and mvhd-identityhub-activity
-#      (services/cfm-connector-agent) in place of edcv-activity and
-#      identityhub-activity: our control plane refuses the first's config,
-#      and the second creates the participant without an STS account;
+#      (it derives the participant context id the other agents need), and the
+#      IdentityHub participant in the dispose too, which upstream leaves out;
 #   4. the Tenant Manager: one cell and the EHDS dataspace profile with our
 #      issuer's MembershipCredential, deployed to the cell.
 #
@@ -120,7 +117,7 @@ body_of() { sed '$d' <<<"$1"; }
 
 defs="$(api "$PM_URL/api/v1alpha1/activity-definitions")"
 [[ "$(status_of "$defs")" == "200" ]] || die "activity definitions: HTTP $(status_of "$defs") $(body_of "$defs")"
-for type in mvhd-connector-activity mvhd-identityhub-activity registration-activity onboarding-activity jwtlet-activity siglet-activity; do
+for type in edcv-activity identityhub-activity registration-activity onboarding-activity jwtlet-activity siglet-activity; do
   if ! grep -q "\"$type\"" <<<"$(body_of "$defs")"; then
     r="$(api -X POST "$PM_URL/api/v1alpha1/activity-definitions" -d "{\"type\":\"$type\",\"description\":\"$type (core-platform-distribution v0.0.39)\",\"inputSchema\":{},\"outputSchema\":{}}")"
     [[ "$(status_of "$r")" -lt 300 ]] || die "activity $type: HTTP $(status_of "$r") $(body_of "$r")"
@@ -138,17 +135,17 @@ if ! body_of "$orchs" | python3 -I -c 'import json,sys; sys.exit(0 if any(d.get(
       "cfm.orchestration.vpa.deploy": [
         {"id": "jwtlet-tokenexchange-agent", "type": "jwtlet-activity"},
         {"id": "registration-agent", "type": "registration-activity", "dependsOn": ["jwtlet-tokenexchange-agent"]},
-        {"id": "connector-provisioner", "type": "mvhd-connector-activity", "dependsOn": ["jwtlet-tokenexchange-agent"]},
+        {"id": "connector-provisioner", "type": "edcv-activity", "dependsOn": ["jwtlet-tokenexchange-agent"]},
         {"id": "siglet-provisioner", "type": "siglet-activity", "dependsOn": ["jwtlet-tokenexchange-agent", "connector-provisioner"]},
-        {"id": "identityhub-provisioner", "type": "mvhd-identityhub-activity", "dependsOn": ["jwtlet-tokenexchange-agent"]},
+        {"id": "identityhub-provisioner", "type": "identityhub-activity", "dependsOn": ["jwtlet-tokenexchange-agent"]},
         {"id": "onboarding-agent", "type": "onboarding-activity",
          "dependsOn": ["jwtlet-tokenexchange-agent", "connector-provisioner", "identityhub-provisioner", "registration-agent"]}
       ],
       "cfm.orchestration.vpa.dispose": [
         {"id": "offboarding-agent", "type": "onboarding-activity", "dependsOn": []},
         {"id": "registration-rollback", "type": "registration-activity", "dependsOn": []},
-        {"id": "connector-rollback", "type": "mvhd-connector-activity", "dependsOn": []},
-        {"id": "identityhub-rollback", "type": "mvhd-identityhub-activity", "dependsOn": []},
+        {"id": "connector-rollback", "type": "edcv-activity", "dependsOn": []},
+        {"id": "identityhub-rollback", "type": "identityhub-activity", "dependsOn": []},
         {"id": "siglet-rollback", "type": "siglet-activity", "dependsOn": []}
       ]
     }}')"
