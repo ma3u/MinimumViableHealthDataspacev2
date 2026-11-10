@@ -105,10 +105,10 @@ jobs:
           - quay.io/keycloak/keycloak:26.8.2
           - postgres:17.7-alpine
           - neo4j:5.26.32-community
-          - nats:2.15.1-alpine
+          - nats:2.15.2-alpine
           - natsio/nats-box:0.20.2
           - traefik:v3.7
-          - nginx:1.29-alpine
+          - nginx:1.31-alpine
           - hashicorp/vault:2.2
           - curlimages/curl:8.23.0
           # JAD's 0.18 data plane, still in docker-compose.jad.yml behind the
