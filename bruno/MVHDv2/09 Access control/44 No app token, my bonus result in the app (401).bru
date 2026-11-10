@@ -1,0 +1,26 @@
+meta {
+  name: 44 No app token, my bonus result in the app (401)
+  type: http
+  seq: 44
+}
+
+get {
+  url: {{baseUrl}}/api/patient/app/programmes/evaluation?programmeId=urn:mvhd:programme:alphakasse:active-year-2025
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer not-a-token
+}
+
+tests {
+  // ADR-087: a member's result is worked out from their own record, so only
+  // their connected phone reads it.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

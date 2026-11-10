@@ -8,7 +8,9 @@ import SwiftUI
 /// yes or no per year and never the data behind it. Joining is the person's
 /// consent to that one program, withdrawn here at any time, and "Send my
 /// answer" goes out only while that consent is open: after a withdrawal the
-/// hub answers 403 and records nothing.
+/// hub answers 403 and records nothing. Before it can be tapped, the member
+/// sees their own result for the ended year, worked out by the hub inside
+/// their record (#934 step 6, ADR-087).
 ///
 /// Reached from Connect to EHDS, not from Consents. The Consents screen is
 /// the person's own note of a study consent, an ePA objection and a registry
@@ -46,6 +48,8 @@ struct BonusProgrammesView: View {
         ForEach(offer.programmes) { programme in
           ProgrammeSection(
             programme: programme,
+            evaluation: connection.evaluations[programme.programmeId],
+            evaluationError: connection.evaluationErrors[programme.programmeId],
             open: offer.open(programme.programmeId),
             last: offer.last(programme.programmeId),
             busy: busy == programme.programmeId,
@@ -76,8 +80,19 @@ struct BonusProgrammesView: View {
     }
     .navigationTitle("Bonus programs")
     .task { await connection.loadProgrammes() }
+    // The result for each program joined, read again after a join.
+    .task(id: joinedKey) {
+      for programme in joinedProgrammes { await connection.loadEvaluation(programme) }
+    }
     .refreshable { await connection.loadProgrammes() }
   }
+
+  private var joinedProgrammes: [BonusProgramme] {
+    guard let offer = connection.programmes else { return [] }
+    return offer.programmes.filter { offer.open($0.programmeId) != nil }
+  }
+
+  private var joinedKey: String { joinedProgrammes.map(\.programmeId).joined(separator: " ") }
 
   /// Runs one join, withdrawal or send, and says what came of it.
   private func act(
@@ -107,9 +122,21 @@ private struct ProgrammeMessage: Equatable {
       return nil
     case let .transfer(transfer):
       ok = true
+      text =
+        transfer.goalMet == true
+        ? String(
+          localized:
+            "Recorded for \(String(transfer.year)): goal met, yes. Only this answer goes to \(programme.publisher), once the hub's delivery is connected."
+        )
+        : String(
+          localized:
+            "Recorded for \(String(transfer.year)): goal met, no. Only this answer goes to \(programme.publisher), once the hub's delivery is connected."
+        )
+    case .yearNotOver:
+      ok = false
       text = String(
         localized:
-          "Recorded for \(String(transfer.year)): \(programme.publisher) receives yes or no once the hub has evaluated the year."
+          "\(String(programme.ruleYear())) is not over yet. Nothing was sent; the hub works out the result once the year has ended."
       )
     case .noOpenConsent:
       ok = false
@@ -129,6 +156,8 @@ private struct ProgrammeMessage: Equatable {
 
 private struct ProgrammeSection: View {
   let programme: BonusProgramme
+  let evaluation: ProgrammeEvaluation?
+  let evaluationError: String?
   let open: ProgrammeConsent?
   let last: ProgrammeConsent?
   let busy: Bool
@@ -136,6 +165,12 @@ private struct ProgrammeSection: View {
   let onJoin: () -> Void
   let onWithdraw: () -> Void
   let onSend: () -> Void
+
+  /// Send is offered only for an ended year the hub has worked out.
+  private var evaluated: Bool {
+    if case .evaluated = evaluation { return true }
+    return false
+  }
 
   private var dataSpace: String {
     programme.dataSpace == "insurance-wellbeing"
@@ -208,6 +243,8 @@ private struct ProgrammeSection: View {
           .accessibilityElement(children: .ignore)
           .accessibilityLabel(Text("You joined on \(Self.day(open.joinedDay))."))
           .accessibilityIdentifier("programme-joined")
+        YearResultView(
+          programme: programme, evaluation: evaluation, error: evaluationError)
         Button {
           onSend()
         } label: {
@@ -215,7 +252,7 @@ private struct ProgrammeSection: View {
             busy ? String(localized: "Sending…") : String(localized: "Send my answer for \(String(programme.ruleYear()))"),
             systemImage: "paperplane")
         }
-        .disabled(busy)
+        .disabled(busy || !evaluated)
         .accessibilityIdentifier("programme-send")
         Button(role: .destructive) {
           onWithdraw()
@@ -246,6 +283,58 @@ private struct ProgrammeSection: View {
       }
     } header: {
       Text(programme.title)
+    }
+  }
+}
+
+/// The member's own result for the program year, before anything is sent
+/// (ADR-080, decision 3; ADR-087). The breakdown stays on this screen: what
+/// would go out is the year and goal met, yes or no.
+private struct YearResultView: View {
+  let programme: BonusProgramme
+  let evaluation: ProgrammeEvaluation?
+  let error: String?
+
+  var body: some View {
+    switch evaluation {
+    case let .evaluated(result):
+      VStack(alignment: .leading, spacing: 4) {
+        Label("Your result for \(String(result.year))", systemImage: "scalemass")
+          .font(.footnote.weight(.medium))
+        Text(result.goalMet ? "Goal met: yes" : "Goal met: no")
+          .font(.body.weight(.semibold))
+          .foregroundStyle(result.goalMet ? Color.teal : Color.orange)
+          .accessibilityIdentifier("programme-goal")
+        Text(
+          "Exercise: \(result.minutesPerWeek) minutes a week on average, from \(result.weeksWithData) weeks your tracker shared. The rule asks for \(result.requiredMinutesPerWeek)."
+        )
+        Text("Check-ups in \(String(result.year)): \(result.checkUps). The rule asks for one.")
+        Text(
+          "Only the year and goal met, yes or no, would go to \(programme.publisher). This breakdown stays in your record."
+        )
+        .foregroundStyle(.secondary)
+      }
+      .font(.footnote)
+      .accessibilityElement(children: .combine)
+      .accessibilityIdentifier("programme-result")
+    case let .yearNotOver(year, from):
+      Text(
+        "\(String(year)) is not over. The hub works out your result from \(from); nothing can be sent before."
+      )
+      .font(.footnote)
+      .accessibilityIdentifier("programme-year-not-over")
+    case nil:
+      if let error {
+        Label(error, systemImage: "exclamationmark.triangle")
+          .font(.footnote)
+          .accessibilityIdentifier("programme-result-error")
+      } else {
+        HStack(spacing: 8) {
+          ProgressView()
+          Text("Working out your result…")
+        }
+        .font(.footnote)
+      }
     }
   }
 }

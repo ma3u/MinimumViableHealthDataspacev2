@@ -39,30 +39,30 @@
     "foaf:name": "AlphaKasse DE"
   },
   "dct:modified": {
-    "@value": "2026-11-09",
+    "@value": "2026-11-10",
     "@type": "xsd:date"
   },
   "dcat:service": [
     {
-      "@id": "urn:mvhd:programme:alphakasse:active-year-2027",
+      "@id": "urn:mvhd:programme:alphakasse:active-year-2025",
       "@type": ["dcat:DataService", "ehds:BonusProgramme"],
       "dct:title": [
         {
-          "@value": "Active year bonus 2027",
+          "@value": "Active year bonus 2025",
           "@language": "en"
         },
         {
-          "@value": "Bonus für ein aktives Jahr 2027",
+          "@value": "Bonus für ein aktives Jahr 2025",
           "@language": "de"
         }
       ],
       "dct:description": [
         {
-          "@value": "A bonus for members who stay active through 2027 and go to their yearly check-up. The member joins in the patient portal. The hub works out inside the member's record whether the year's goal was met; AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record. A no changes nothing in the member's contract.",
+          "@value": "A bonus for members who stayed active through 2025 and went to their yearly check-up, claimed once the year is over. The member joins in the patient portal or in the Klarbefund app. The hub works out inside the member's record whether the year's goal was met; AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record. A no changes nothing in the member's contract.",
           "@language": "en"
         },
         {
-          "@value": "Ein Bonus für Mitglieder, die 2027 aktiv bleiben und zur jährlichen Vorsorgeuntersuchung gehen. Das Mitglied tritt im Patientenportal bei. Der Hub prüft in der Akte des Mitglieds, ob das Jahresziel erreicht ist; AlphaKasse erhält das Programm, das Jahr und Ziel erreicht ja oder nein. Schritte, Herzfrequenz, Diagnosen und Besuchsdetails verlassen die Akte nie. Ein Nein ändert nichts am Vertrag des Mitglieds.",
+          "@value": "Ein Bonus für Mitglieder, die 2025 aktiv geblieben und zur jährlichen Vorsorgeuntersuchung gegangen sind, beantragt nach Ende des Jahres. Das Mitglied tritt im Patientenportal oder in der Klarbefund-App bei. Der Hub prüft in der Akte des Mitglieds, ob das Jahresziel erreicht ist; AlphaKasse erhält das Programm, das Jahr und Ziel erreicht ja oder nein. Schritte, Herzfrequenz, Diagnosen und Besuchsdetails verlassen die Akte nie. Ein Nein ändert nichts am Vertrag des Mitglieds.",
           "@language": "de"
         }
       ],
@@ -76,19 +76,19 @@
       },
       "dct:conformsTo": [
         {
-          "@id": "urn:mvhd:programme:alphakasse:active-year-2027:rule:2027.1",
+          "@id": "urn:mvhd:programme:alphakasse:active-year-2025:rule:2025.1",
           "@type": "dct:Standard",
           "dct:title": {
-            "@value": "Active year rule, version 2027.1",
+            "@value": "Active year rule, version 2025.1",
             "@language": "en"
           },
           "dct:description": {
-            "@value": "Goal met when, in the calendar year, the member was active for at least 150 minutes a week on average and went to one check-up. Read from the activity the member's tracker shares into the record and from the check-up in the member's own EHR. Evaluated by the hub inside the record; the member sees the result before anything is sent.",
+            "@value": "Goal met when, in the calendar year, the member was active for at least 150 minutes a week on average and went to one check-up. Read from the exercise minutes the member's tracker shares into the record (LOINC 55411-3, a week without any counts as none) and from the check-up in the member's own EHR (SNOMED CT 185349003). Evaluated by the hub inside the record once the year has ended; the member sees the result before anything is sent.",
             "@language": "en"
           },
-          "owl:versionInfo": "2027.1",
+          "owl:versionInfo": "2025.1",
           "dct:issued": {
-            "@value": "2026-11-09",
+            "@value": "2024-11-15",
             "@type": "xsd:date"
           }
         },

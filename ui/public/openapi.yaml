@@ -993,14 +993,68 @@ paths:
                       joinedAt: { type: string }
                       withdrawnAt: { type: string, nullable: true }
         "404": { description: No open consent to withdraw }
+  /api/patient/programmes/evaluation:
+    get:
+      tags: [Patient]
+      summary: The member's own result for a bonus programme year, before anything is sent (#934)
+      description: >-
+        Worked out inside the record (ADR-080, decision 3; ADR-087): goal met
+        when the ended year averaged at least 150 minutes of exercise a week
+        (LOINC 55411-3) and held one check-up (SNOMED CT 185349003). Nothing
+        is sent or stored. Without year, the year the programme's rule names.
+        A PATIENT reads their own record; EDC_ADMIN names one.
+      parameters:
+        - {
+            name: programmeId,
+            in: query,
+            required: true,
+            schema: { type: string },
+          }
+        - { name: year, in: query, required: false, schema: { type: integer } }
+        - name: patientId
+          in: query
+          required: false
+          description: The record an operator names; a patient acts on their own.
+          schema: { type: string }
+      responses:
+        "200":
+          description: The evaluation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  programmeId: { type: string }
+                  evaluation:
+                    type: object
+                    description: >-
+                      status year-not-over carries evaluableFrom; status
+                      evaluated carries goalMet and, for the member only,
+                      activity (minutesPerWeek, required, weeksWithData, met)
+                      and checkUp (count, required, met).
+                    properties:
+                      year: { type: integer }
+                      status: { type: string, enum: [evaluated, year-not-over] }
+                      goalMet: { type: boolean }
+                      evaluableFrom: { type: string, format: date }
+                      activity: { type: object }
+                      checkUp: { type: object }
+        "400":
+          { description: No programmeId, or a year the rule does not cover }
+        "401": { description: No session }
+        "403":
+          { description: Not a patient or operator, or another person's record }
+        "404": { description: No such programme or record }
   /api/patient/programmes/transfer:
     post:
       tags: [Patient]
       summary: Send a programme the year's answer, on the person's instruction
       description: >-
         ADR-080, decision 4, second path. Only under an open consent; after a
-        withdrawal the answer is 403. The answer (goal met) is computed in
-        #934 step 6, so the transfer is recorded as awaiting evaluation.
+        withdrawal the answer is 403. Only for the year the programme's rule
+        covers (400) and once that year has ended (409). The hub evaluates the
+        year inside the record (#934 step 6, ADR-087) and records the
+        programme, the year and goal met, nothing else.
       requestBody:
         required: true
         content:
@@ -1030,8 +1084,15 @@ paths:
                       goalMet: { type: boolean, nullable: true }
                       status: { type: string }
                       requestedAt: { type: string }
-        "400": { description: programmeId and a calendar year are required }
+        "400":
+          {
+            description: programmeId and a calendar year are required,
+            or a year the rule does not cover,
+          }
         "403": { description: No open consent to this programme }
+        "404": { description: No such programme or record }
+        "409":
+          { description: The year is not over; nothing is sent before it ends }
   /api/patient/research:
     get:
       tags: [Patient]
@@ -1550,10 +1611,11 @@ paths:
       summary: The Klarbefund app adds the person's weekly device values to their own record
       description: >
         Body: a FHIR R4 Bundle of Observations, one per metric and week, read
-        from Apple Health on the phone (ADR-057). Only the four metrics of the
+        from Apple Health on the phone (ADR-057). Only the five metrics of the
         app's Trends screen are accepted, each with its LOINC code and UCUM
         unit: resting heart rate 40443-4 (/min), heart rate variability SDNN
-        80404-7 (ms), steps per day 41950-7 (/d), body weight 29463-7 (kg).
+        80404-7 (ms), steps per day 41950-7 (/d), body weight 29463-7 (kg),
+        exercise minutes per day 55411-3 (min/d, ADR-087).
         Status `final`, a plausible value and an `effectivePeriod` of at most a
         week; the rest is answered as skipped. Each sync replaces the previous
         one. Only an account the app created (ADR-054); a demo persona is
@@ -1706,6 +1768,56 @@ paths:
         "400": { description: programmeId missing }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { description: No open consent to withdraw }
+  /api/patient/app/programmes/evaluation:
+    get:
+      tags: [Patient]
+      summary: The Klarbefund app shows the member's own result for a programme year (#934)
+      description: >-
+        The app-token twin of /api/patient/programmes/evaluation (ADR-049,
+        ADR-087), for the login's own record only.
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+        - {
+            name: programmeId,
+            in: query,
+            required: true,
+            schema: { type: string },
+          }
+        - { name: year, in: query, required: false, schema: { type: integer } }
+      responses:
+        "200":
+          description: The evaluation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  programmeId: { type: string }
+                  evaluation:
+                    type: object
+                    description: >-
+                      status year-not-over carries evaluableFrom; status
+                      evaluated carries goalMet and, for the member only,
+                      activity (minutesPerWeek, required, weeksWithData, met)
+                      and checkUp (count, required, met).
+                    properties:
+                      year: { type: integer }
+                      status: { type: string, enum: [evaluated, year-not-over] }
+                      goalMet: { type: boolean }
+                      evaluableFrom: { type: string, format: date }
+                      activity: { type: object }
+                      checkUp: { type: object }
+        "400":
+          { description: No programmeId, or a year the rule does not cover }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: No such programme, or no record for this login }
   /api/patient/app/programmes/transfer:
     post:
       tags: [Patient]
@@ -1713,7 +1825,9 @@ paths:
       description: >-
         The app-token twin of POST /api/patient/programmes/transfer (ADR-080,
         decision 4, second path). Only under an open consent; after a
-        withdrawal the answer is 403 and nothing is recorded.
+        withdrawal the answer is 403 and nothing is recorded. Only for the
+        year the programme's rule covers (400) and once it has ended (409);
+        then evaluated inside the record (ADR-087).
       security:
         - klarbefundAppToken: []
       parameters:
@@ -1735,7 +1849,7 @@ paths:
                 year: { type: integer, minimum: 2000, maximum: 2100 }
       responses:
         "202":
-          description: Recorded, awaiting the hub's evaluation of the year
+          description: Evaluated and recorded; delivery to the programme is #934 step 8
           content:
             application/json:
               schema:
@@ -1751,9 +1865,16 @@ paths:
                       goalMet: { type: boolean, nullable: true }
                       status: { type: string }
                       requestedAt: { type: string }
-        "400": { description: programmeId and a calendar year are required }
+        "400":
+          {
+            description: programmeId and a calendar year are required,
+            or a year the rule does not cover,
+          }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: No open consent to this programme }
+        "404": { description: No such programme, or no record for this login }
+        "409":
+          { description: The year is not over; nothing is sent before it ends }
   /api/patient/app/record:
     post:
       tags: [Patient]

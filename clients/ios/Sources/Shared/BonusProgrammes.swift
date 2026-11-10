@@ -25,7 +25,7 @@ public struct BonusProgramme: Codable, Equatable, Sendable, Identifiable {
   public let dataSpace: String?
   public let ruleTitle: String?
   public let ruleDescription: String?
-  /// `2027.1` is the rule for 2027.
+  /// `2025.1` is the rule for 2025.
   public let ruleVersion: String?
 
   public var id: String { programmeId }
@@ -87,8 +87,9 @@ public struct ProgrammeConsent: Codable, Equatable, Sendable {
   }
 }
 
-/// A year's answer the person asked the hub to send. `goalMet` stays nil
-/// until the hub evaluates the year (#934, step 6).
+/// A year's answer the person asked the hub to send: the program, the year
+/// and goal met, worked out by the hub inside the record (#934 step 6,
+/// ADR-087). Nothing else is stored with it.
 public struct ProgrammeTransfer: Codable, Equatable, Sendable {
   public let transferId: String
   public let programmeId: String
@@ -140,11 +141,99 @@ public struct ProgrammeOffer: Codable, Equatable, Sendable {
 /// How the hub answered a join, a withdrawal or a transfer, read from the
 /// status and body. Kept here rather than in the app so the one answer that
 /// matters most, the 403 after a withdrawal, is pinned by a unit test.
+/// The member's own result for one program year, worked out inside their
+/// record before anything is sent (#934 step 6; ADR-080, decision 3;
+/// ADR-087). The breakdown is for the member's eyes; a transfer carries the
+/// year and goal met only.
+public enum ProgrammeEvaluation: Equatable, Sendable {
+  /// The year has not ended; the hub works it out from `evaluableFrom`
+  /// (`yyyy-MM-dd`), and nothing can be sent before.
+  case yearNotOver(year: Int, evaluableFrom: String)
+  case evaluated(ProgrammeResult)
+
+  public var year: Int {
+    switch self {
+    case let .yearNotOver(year, _): year
+    case let .evaluated(result): result.year
+    }
+  }
+
+  /// `GET /api/patient/app/programmes/evaluation`, or nil for another shape.
+  public static func parse(_ data: Data) -> ProgrammeEvaluation? {
+    struct Wire: Decodable { let evaluation: Body }
+    struct Body: Decodable {
+      let year: Int
+      let status: String
+      let evaluableFrom: String?
+      let goalMet: Bool?
+      let activity: Activity?
+      let checkUp: CheckUp?
+    }
+    struct Activity: Decodable {
+      let minutesPerWeek: Int
+      let required: Int
+      let weeksWithData: Int
+      let met: Bool
+    }
+    struct CheckUp: Decodable {
+      let count: Int
+      let required: Int
+      let met: Bool
+    }
+    guard let body = (try? JSONDecoder().decode(Wire.self, from: data))?.evaluation else {
+      return nil
+    }
+    switch body.status {
+    case "year-not-over":
+      guard let from = body.evaluableFrom else { return nil }
+      return .yearNotOver(year: body.year, evaluableFrom: from)
+    case "evaluated":
+      guard let goalMet = body.goalMet, let activity = body.activity, let checkUp = body.checkUp
+      else { return nil }
+      return .evaluated(
+        ProgrammeResult(
+          year: body.year, goalMet: goalMet, minutesPerWeek: activity.minutesPerWeek,
+          requiredMinutesPerWeek: activity.required, weeksWithData: activity.weeksWithData,
+          activityMet: activity.met, checkUps: checkUp.count, checkUpMet: checkUp.met))
+    default:
+      return nil
+    }
+  }
+}
+
+/// An ended year, worked out: goal met, and why, for the member to read.
+public struct ProgrammeResult: Equatable, Sendable {
+  public let year: Int
+  public let goalMet: Bool
+  public let minutesPerWeek: Int
+  public let requiredMinutesPerWeek: Int
+  public let weeksWithData: Int
+  public let activityMet: Bool
+  public let checkUps: Int
+  public let checkUpMet: Bool
+
+  public init(
+    year: Int, goalMet: Bool, minutesPerWeek: Int, requiredMinutesPerWeek: Int,
+    weeksWithData: Int, activityMet: Bool, checkUps: Int, checkUpMet: Bool
+  ) {
+    self.year = year
+    self.goalMet = goalMet
+    self.minutesPerWeek = minutesPerWeek
+    self.requiredMinutesPerWeek = requiredMinutesPerWeek
+    self.weeksWithData = weeksWithData
+    self.activityMet = activityMet
+    self.checkUps = checkUps
+    self.checkUpMet = checkUpMet
+  }
+}
+
 public enum ProgrammeAnswer: Equatable, Sendable {
   /// 201 to a join, 200 to a withdrawal: the consent as it now stands.
   case consent(ProgrammeConsent)
   /// 202: the hub recorded the instruction and evaluates the year.
   case transfer(ProgrammeTransfer)
+  /// 409 to a transfer: the year has not ended, so nothing was sent.
+  case yearNotOver(evaluableFrom: String)
   /// 403 to a transfer: no open consent, so nothing was sent or recorded.
   /// Withdrawn in the portal while this screen still showed "joined", or
   /// never joined at all.
@@ -163,6 +252,14 @@ public enum ProgrammeAnswer: Equatable, Sendable {
   public static func transfer(status: Int, body: Data) -> ProgrammeAnswer {
     struct Wire: Decodable { let transfer: ProgrammeTransfer }
     if status == 403 { return .noOpenConsent }
+    if status == 409 {
+      struct NotOver: Decodable {
+        struct Evaluation: Decodable { let evaluableFrom: String }
+        let evaluation: Evaluation
+      }
+      let from = (try? JSONDecoder().decode(NotOver.self, from: body))?.evaluation.evaluableFrom
+      return .yearNotOver(evaluableFrom: from ?? "")
+    }
     if status == 202, let wire = try? JSONDecoder().decode(Wire.self, from: body) {
       return .transfer(wire.transfer)
     }

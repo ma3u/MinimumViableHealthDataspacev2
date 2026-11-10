@@ -1,9 +1,9 @@
 import XCTest
 
 /// Bonus programs (#934, step 4; ADR-080), with the hub played by the demo
-/// under `-MBDemoSeed`: AlphaKasse DE's fictional active year bonus, joined,
-/// answered for 2027 and withdrawn, all in memory. No real record and no
-/// network are involved.
+/// under `-MBDemoSeed`: AlphaKasse DE's fictional active year bonus for 2025,
+/// joined, its result shown (step 6, ADR-087), answered and withdrawn, all
+/// in memory. No real record and no network are involved.
 final class BonusProgrammesUITests: XCTestCase {
 
   override func setUp() {
@@ -19,7 +19,7 @@ final class BonusProgrammesUITests: XCTestCase {
       .matching(identifier: "programme-publisher").firstMatch, "who offers the program")
     XCTAssertTrue(publisher.label.contains("AlphaKasse DE"), publisher.label)
     XCTAssertTrue(
-      AppDriver.text(containing: "Active year bonus 2027", in: app).exists, "the program's title")
+      AppDriver.text(containing: "Active year bonus 2025", in: app).exists, "the program's title")
 
     AppDriver.scrollTo(app.buttons["programme-join"], in: app).tap()
     let joined = AppDriver.require(
@@ -27,15 +27,25 @@ final class BonusProgrammesUITests: XCTestCase {
       "the consent, open")
     XCTAssertTrue(joined.label.contains("You joined on"), joined.label)
 
+    // The result, worked out by the hub, before anything can be sent.
+    let goal = app.staticTexts["programme-goal"]
+    _ = goal.waitForExistence(timeout: 4)
+    AppDriver.scrollTo(goal, in: app)
+    XCTAssertEqual(goal.label, "Goal met: yes")
+    let result = app.descendants(matching: .any).matching(identifier: "programme-result").firstMatch
+    XCTAssertTrue(result.label.contains("181 minutes a week"), result.label)
+    XCTAssertTrue(result.label.contains("This breakdown stays in your record"), result.label)
+
     let send = AppDriver.scrollTo(app.buttons["programme-send"], in: app)
-    XCTAssertTrue(send.label.contains("2027"), "the year the rule names: \(send.label)")
+    XCTAssertTrue(send.label.contains("2025"), "the year the rule names: \(send.label)")
+    XCTAssertTrue(send.isEnabled, "send is offered once the year is worked out")
     send.tap()
     // The line sits under the buttons, and a List builds no row nobody has
     // scrolled to: wait for the answer, then scroll to where it is.
     let sent = app.staticTexts["programme-message"]
     _ = sent.waitForExistence(timeout: 4)
     AppDriver.scrollTo(sent, in: app)
-    XCTAssertTrue(sent.label.contains("Recorded for 2027"), sent.label)
+    XCTAssertTrue(sent.label.contains("Recorded for 2025: goal met, yes"), sent.label)
     XCTAssertTrue(sent.label.contains("AlphaKasse DE"), sent.label)
 
     AppDriver.scrollTo(app.buttons["programme-withdraw"], in: app).tap()

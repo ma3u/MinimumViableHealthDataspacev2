@@ -8,6 +8,11 @@
  * Step 4 (J1094): the patient joins, asks the hub to send the year's answer,
  * withdraws, and the same request is then refused with 403.
  *
+ * Step 6 (J1099, ADR-087): the hub works out the ended year inside the
+ * record. patient1's seeded 2025 (52 weeks of exercise, about 181 minutes a
+ * week, and a check-up) meets the rule; the transfer carries the year and
+ * goal met and nothing else.
+ *
  * Both need the crawl to have run on the stack. Where it has not (the PR
  * E2E seeds Neo4j without the crawler), they skip and say so.
  *
@@ -52,11 +57,11 @@ test.describe("Bonus programs from another data space", () => {
     ).toBeVisible({ timeout: 15_000 });
     const card = page
       .getByTestId("bonus-programme-card")
-      .filter({ hasText: "Active year bonus 2027" });
+      .filter({ hasText: "Active year bonus 2025" });
     await expect(card).toBeVisible({ timeout: 15_000 });
     await expect(card).toContainText("AlphaKasse DE");
     await expect(card).toContainText("Insurance and wellbeing data space");
-    await expect(card).toContainText("The rule, version 2027.1");
+    await expect(card).toContainText("The rule, version 2025.1");
     await expect(card).toContainText("What AlphaKasse DE receives");
     await expect(card).toContainText("The year, and goal met: yes or no.");
     await expect(card.getByTestId("bonus-programme-join-state")).toContainText(
@@ -72,7 +77,7 @@ test.describe("Bonus programs from another data space", () => {
       programmes: { programmeId: string; title: string }[];
     };
     const programme = programmes.find(
-      (p) => p.title === "Active year bonus 2027",
+      (p) => p.title === "Active year bonus 2025",
     );
     test.skip(
       !programme,
@@ -82,7 +87,7 @@ test.describe("Bonus programs from another data space", () => {
     await page.goto("/patient/programmes?lang=en");
     const card = page
       .getByTestId("bonus-programme-card")
-      .filter({ hasText: "Active year bonus 2027" });
+      .filter({ hasText: "Active year bonus 2025" });
     await expect(card).toBeVisible({ timeout: 15_000 });
 
     // A run before may have left a consent open; start from a closed one.
@@ -95,8 +100,14 @@ test.describe("Bonus programs from another data space", () => {
     await expect(card.getByTestId("bonus-programme-joined")).toContainText(
       "You joined on",
     );
-    await card.getByRole("button", { name: "Send my answer for 2027" }).click();
-    await expect(card.getByRole("status")).toContainText("Recorded for 2027");
+    // Step 6: the result shows before anything is sent (ADR-087).
+    await expect(card.getByTestId("bonus-programme-goal")).toBeVisible({
+      timeout: 15_000,
+    });
+    await card.getByRole("button", { name: "Send my answer for 2025" }).click();
+    await expect(card.getByRole("status")).toContainText(
+      /Recorded for 2025: goal met, (yes|no)\./,
+    );
 
     await card.getByRole("button", { name: /Withdraw/ }).click();
     await expect(card.getByTestId("bonus-programme-withdrawn")).toContainText(
@@ -106,9 +117,88 @@ test.describe("Bonus programs from another data space", () => {
     // The step 4 check: the same instruction, after the withdrawal.
     const refused = await page.request.post(
       "/api/patient/programmes/transfer",
-      { data: { programmeId: programme!.programmeId, year: 2027 } },
+      { data: { programmeId: programme!.programmeId, year: 2025 } },
     );
     expect(refused.status()).toBe(403);
     expect((await refused.json()).error).toContain("No open consent");
+  });
+
+  test("J1099 the member sees goal met for 2025 before sending, and the transfer carries only the year and goal met", async ({
+    page,
+  }) => {
+    const api = await page.request.get("/api/patient/programmes");
+    const { programmes } = (await api.json()) as {
+      programmes: { programmeId: string; title: string }[];
+    };
+    const programme = programmes.find(
+      (p) => p.title === "Active year bonus 2025",
+    );
+    test.skip(
+      !programme,
+      "SKIPPED: the catalogue crawler has not indexed a bonus program on this stack (#934)",
+    );
+
+    // The result for patient1's seeded 2025, worked out inside the record.
+    const evaluated = await page.request.get(
+      `/api/patient/programmes/evaluation?programmeId=${encodeURIComponent(
+        programme!.programmeId,
+      )}`,
+    );
+    expect(evaluated.status()).toBe(200);
+    const { evaluation } = await evaluated.json();
+    expect(evaluation).toMatchObject({
+      year: 2025,
+      status: "evaluated",
+      goalMet: true,
+      checkUp: { count: 1, met: true },
+    });
+    expect(evaluation.activity.minutesPerWeek).toBeGreaterThanOrEqual(150);
+
+    // A year the rule does not cover is refused, and nothing is recorded.
+    const wrongYear = await page.request.post(
+      "/api/patient/programmes/transfer",
+      { data: { programmeId: programme!.programmeId, year: 2024 } },
+    );
+    expect([400, 403]).toContain(wrongYear.status());
+
+    await page.goto("/patient/programmes?lang=en");
+    const card = page
+      .getByTestId("bonus-programme-card")
+      .filter({ hasText: "Active year bonus 2025" });
+    await expect(card).toBeVisible({ timeout: 15_000 });
+    if (!(await card.getByTestId("bonus-programme-joined").isVisible())) {
+      await card.getByRole("button", { name: "Join this program" }).click();
+    }
+    const result = card.getByTestId("bonus-programme-result");
+    await expect(result).toContainText("Your result for 2025", {
+      timeout: 15_000,
+    });
+    await expect(card.getByTestId("bonus-programme-goal")).toHaveText(
+      "Goal met: yes",
+    );
+    await expect(result).toContainText("This breakdown stays in your record");
+
+    const sent = await page.request.post("/api/patient/programmes/transfer", {
+      data: { programmeId: programme!.programmeId, year: 2025 },
+    });
+    expect(sent.status()).toBe(202);
+    const { transfer } = await sent.json();
+    expect(transfer).toMatchObject({
+      year: 2025,
+      goalMet: true,
+      status: "evaluated",
+    });
+    // ADR-080, decision 2: no minutes, weeks or check-ups leave with it.
+    expect(Object.keys(transfer).sort()).toEqual([
+      "goalMet",
+      "programmeId",
+      "requestedAt",
+      "status",
+      "transferId",
+      "year",
+    ]);
+
+    await card.getByRole("button", { name: /Withdraw/ }).click();
+    await expect(card.getByTestId("bonus-programme-withdrawn")).toBeVisible();
   });
 });

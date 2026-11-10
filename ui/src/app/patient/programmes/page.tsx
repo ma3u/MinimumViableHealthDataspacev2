@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   XCircle,
   Send,
+  Scale,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { useT } from "@/lib/i18n/translate";
@@ -16,6 +17,7 @@ import { useOwnRecord } from "@/lib/patient/use-own-record";
 import type {
   BonusProgramme,
   ProgrammeConsent,
+  YearEvaluation,
 } from "@/lib/patient/bonus-programme";
 
 /** Why the programmes did not load: refused (401, 403) or failed (anything else). */
@@ -30,8 +32,15 @@ type LoadError =
  * is neither research nor the Art. 71 opt-out, so it has its own page.
  * Joining, seeing and withdrawing are step 4 (ADR-080, decision 6), and so
  * is the person's instruction to send a year's answer, which goes out only
- * under an open consent.
+ * under an open consent. Step 6 (ADR-087): before sending, the member sees
+ * their own result for the ended year, worked out inside their record.
  */
+
+/** The member's result for a program year, as far as it has loaded. */
+type EvaluationState =
+  | { kind: "loading" }
+  | { kind: "ready"; evaluation: YearEvaluation }
+  | { kind: "failed"; status: number | null };
 
 /**
  * The record an operator (EDC_ADMIN) acts on here, as on the research page:
@@ -41,7 +50,7 @@ const DEMO_PATIENT_ID = "P1";
 
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
 
-/** The year a rule version names (2027.1 is the rule for 2027). */
+/** The year a rule version names (2025.1 is the rule for 2025). */
 const ruleYear = (p: BonusProgramme) =>
   Number((p.ruleVersion ?? "").slice(0, 4)) || new Date().getFullYear();
 export default function BonusProgrammesPage() {
@@ -52,6 +61,9 @@ export default function BonusProgrammesPage() {
   const [loadError, setLoadError] = useState<LoadError | null>(null);
   const [consents, setConsents] = useState<ProgrammeConsent[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [evaluations, setEvaluations] = useState<
+    Record<string, EvaluationState>
+  >({});
   const [message, setMessage] = useState<{
     programmeId: string;
     text: string;
@@ -86,6 +98,38 @@ export default function BonusProgrammesPage() {
       .catch(() => setLoadError({ kind: "failed", status: null }))
       .finally(() => setLoading(false));
   }, [subject.kind, query]);
+
+  // The member's own result, for each program they joined (ADR-087). Read
+  // again after a join, so a new member sees it before sending anything.
+  const joined = programmes
+    .filter((p) =>
+      consents.some((c) => c.programmeId === p.programmeId && !c.withdrawnAt),
+    )
+    .map((p) => p.programmeId)
+    .join(" ");
+  useEffect(() => {
+    for (const programmeId of joined.split(" ").filter(Boolean)) {
+      const qs = new URLSearchParams({ programmeId });
+      if (patientId) qs.set("patientId", patientId);
+      setEvaluations((e) => ({ ...e, [programmeId]: { kind: "loading" } }));
+      fetchApi(`/api/patient/programmes/evaluation?${qs}`)
+        .then(async (r) => {
+          const d = r.ok ? await r.json() : null;
+          setEvaluations((e) => ({
+            ...e,
+            [programmeId]: d?.evaluation
+              ? { kind: "ready", evaluation: d.evaluation }
+              : { kind: "failed", status: r.status },
+          }));
+        })
+        .catch(() =>
+          setEvaluations((e) => ({
+            ...e,
+            [programmeId]: { kind: "failed", status: null },
+          })),
+        );
+    }
+  }, [joined, patientId]);
 
   const openFor = (programmeId: string) =>
     consents.find((c) => c.programmeId === programmeId && !c.withdrawnAt) ??
@@ -163,14 +207,38 @@ export default function BonusProgrammesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ programmeId: p.programmeId, year, patientId }),
       });
+      if (r.status === 409) {
+        return setMessage({
+          programmeId: p.programmeId,
+          ok: false,
+          text: t(
+            "{year} is not over yet. Nothing was sent; the hub works out the result once the year has ended.",
+            { year },
+          ),
+        });
+      }
       if (!r.ok) return failed(p.programmeId, r.status);
+      const d = await r.json();
+      // The static build answers { ok: true } without a transfer; the page
+      // then shows the result it had already shown the member.
+      const shown = evaluations[p.programmeId];
+      const goalMet: boolean | undefined =
+        d.transfer?.goalMet ??
+        (shown?.kind === "ready" && shown.evaluation.status === "evaluated"
+          ? shown.evaluation.goalMet
+          : undefined);
       setMessage({
         programmeId: p.programmeId,
         ok: true,
-        text: t(
-          "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.",
-          { year, publisher: p.publisherName },
-        ),
+        text: goalMet
+          ? t(
+              "Recorded for {year}: goal met, yes. Only this answer goes to {publisher}, once the hub's delivery is connected.",
+              { year, publisher: p.publisherName },
+            )
+          : t(
+              "Recorded for {year}: goal met, no. Only this answer goes to {publisher}, once the hub's delivery is connected.",
+              { year, publisher: p.publisherName },
+            ),
       });
     } finally {
       setBusy(null);
@@ -315,6 +383,7 @@ export default function BonusProgrammesPage() {
 
                 <ProgrammeConsentPanel
                   programme={p}
+                  evaluation={evaluations[p.programmeId] ?? null}
                   open={openFor(p.programmeId)}
                   last={lastFor(p.programmeId)}
                   busy={busy === p.programmeId}
@@ -336,6 +405,7 @@ export default function BonusProgrammesPage() {
 
 function ProgrammeConsentPanel({
   programme,
+  evaluation,
   open,
   last,
   busy,
@@ -345,6 +415,7 @@ function ProgrammeConsentPanel({
   onSend,
 }: {
   programme: BonusProgramme;
+  evaluation: EvaluationState | null;
   open: ProgrammeConsent | null;
   last: ProgrammeConsent | null;
   busy: boolean;
@@ -374,10 +445,19 @@ function ProgrammeConsentPanel({
             <CheckCircle2 size={12} />
             {t("You joined on {date}.", { date: day(open.joinedAt) })}
           </p>
+          <YearResult
+            evaluation={evaluation}
+            year={year}
+            publisher={programme.publisherName}
+          />
           <div className="flex flex-wrap gap-3">
             <button
               onClick={onSend}
-              disabled={busy}
+              disabled={
+                busy ||
+                evaluation?.kind !== "ready" ||
+                evaluation.evaluation.status !== "evaluated"
+              }
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-teal-700 hover:bg-teal-600 text-white font-medium transition-colors disabled:opacity-50"
             >
               <Send size={12} />
@@ -423,6 +503,93 @@ function ProgrammeConsentPanel({
           {message.text}
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * The member's own result for the program year, before anything is sent
+ * (ADR-080, decision 3; ADR-087). The breakdown stays on this screen: what
+ * would go out is the year and goal met, yes or no.
+ */
+function YearResult({
+  evaluation,
+  year,
+  publisher,
+}: {
+  evaluation: EvaluationState | null;
+  year: number;
+  publisher: string;
+}) {
+  const t = useT("patient");
+  if (!evaluation || evaluation.kind === "loading") {
+    return (
+      <p className="text-(--text-secondary)">{t("Working out your result…")}</p>
+    );
+  }
+  if (evaluation.kind === "failed") {
+    return (
+      <p role="alert" className="text-amber-900 dark:text-amber-200">
+        {evaluation.status
+          ? t("Your result could not be worked out (HTTP {status}).", {
+              status: evaluation.status,
+            })
+          : t("Your result could not be worked out.")}
+      </p>
+    );
+  }
+  const e = evaluation.evaluation;
+  if (e.status === "year-not-over") {
+    return (
+      <p data-testid="bonus-programme-year-not-over">
+        {t(
+          "{year} is not over. The hub works out your result from {date}; nothing can be sent before.",
+          { year: e.year, date: e.evaluableFrom },
+        )}
+      </p>
+    );
+  }
+  return (
+    <div
+      data-testid="bonus-programme-result"
+      className="rounded-lg border border-(--border) p-3 space-y-1"
+    >
+      <div className="flex items-center gap-1.5 font-medium">
+        <Scale size={14} />
+        {t("Your result for {year}", { year })}
+      </div>
+      <p
+        data-testid="bonus-programme-goal"
+        className={
+          e.goalMet
+            ? "font-semibold text-teal-800 dark:text-teal-300"
+            : "font-semibold text-amber-900 dark:text-amber-200"
+        }
+      >
+        {e.goalMet ? t("Goal met: yes") : t("Goal met: no")}
+      </p>
+      <p className="text-(--text-secondary)">
+        {t(
+          "Exercise: {minutes} minutes a week on average, from {weeks} weeks your tracker shared. The rule asks for {required}.",
+          {
+            minutes: e.activity.minutesPerWeek,
+            weeks: e.activity.weeksWithData,
+            required: e.activity.required,
+          },
+        )}
+      </p>
+      <p className="text-(--text-secondary)">
+        {t("Check-ups in {year}: {count}. The rule asks for one.", {
+          year: e.year,
+          count: e.checkUp.count,
+        })}
+      </p>
+      <p className="text-(--text-secondary)">
+        {t(
+          "Only the year and goal met, yes or no, would go to {publisher}. This breakdown stays in your record.",
+          { publisher },
+        )}
+      </p>
     </div>
   );
 }

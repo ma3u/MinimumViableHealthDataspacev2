@@ -15,8 +15,9 @@ export const dynamic = "force-dynamic";
  * (ADR-080, decision 4, second path; #934, step 4). Only under an open
  * consent: without one, never joined or withdrawn, the answer is 403 and
  * nothing is recorded (GDPR Art. 7(3)). What goes out is the program, the
- * year and goal met, nothing else (decision 2); the hub computes goal met in
- * step 6, so until then the transfer is recorded as awaiting evaluation.
+ * year and goal met, nothing else (decision 2). Step 6 (ADR-087): only for
+ * the year the program's rule covers (400) and once it has ended (409); the
+ * hub then works out goal met inside the record and records it.
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await requireAuth(["PATIENT", "EDC_ADMIN"]);

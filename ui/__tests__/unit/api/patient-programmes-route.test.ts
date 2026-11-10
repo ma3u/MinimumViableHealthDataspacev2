@@ -30,16 +30,16 @@ function session(roles: string[]) {
 }
 
 const ROW = {
-  programmeId: "urn:mvhd:programme:alphakasse:active-year-2027",
-  title: "Active year bonus 2027",
-  description: "A bonus for members who stay active through 2027.",
+  programmeId: "urn:mvhd:programme:alphakasse:active-year-2025",
+  title: "Active year bonus 2025",
+  description: "A bonus for members who stay active through 2025.",
   publisherName: "AlphaKasse DE",
   publisherDid: "did:web:alphakasse.de:insurer",
   dataSpace: "insurance-wellbeing",
   endpointUrl: "https://ehds.mabu.red/api/mock-dsp/alphakasse",
-  ruleTitle: "Active year rule, version 2027.1",
+  ruleTitle: "Active year rule, version 2025.1",
   ruleDescription: "Goal met when ...",
-  ruleVersion: "2027.1",
+  ruleVersion: "2025.1",
   lastSeenAt: "2026-11-09T08:00:00Z",
 };
 

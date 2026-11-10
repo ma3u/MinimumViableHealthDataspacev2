@@ -64,6 +64,11 @@ final class EHDSConnection: ObservableObject {
   @Published private(set) var loadingProgrammes = false
   /// Why the programs could not be loaded, for the screen to say.
   @Published private(set) var programmesError: String?
+  /// The member's own result per program year (#934 step 6, ADR-087), by
+  /// program id, fetched when a joined program is shown. Kept nowhere.
+  @Published private(set) var evaluations: [String: ProgrammeEvaluation] = [:]
+  /// Why a program's result could not be worked out, by program id.
+  @Published private(set) var evaluationErrors: [String: String] = [:]
 
   /// Hubs a link may name: the live one, and in a debug build the local stack.
   static var trusted: [TrustedHub] {
@@ -510,6 +515,30 @@ final class EHDSConnection: ObservableObject {
     }
   }
 
+  /// The member's own result for the program's year, worked out by the hub
+  /// inside their record. Only read, never sent: the screen shows it before
+  /// "Send my answer" can be tapped (ADR-080, decision 3).
+  func loadEvaluation(_ programme: BonusProgramme) async {
+    var query = URLComponents()
+    query.queryItems = [
+      URLQueryItem(name: "programmeId", value: programme.programmeId),
+      URLQueryItem(name: "year", value: String(programme.ruleYear())),
+    ]
+    do {
+      let (status, body) = try await programmeCall(
+        "GET", "/api/patient/app/programmes/evaluation?\(query.percentEncodedQuery ?? "")")
+      guard status == 200, let evaluation = ProgrammeEvaluation.parse(body) else {
+        evaluationErrors[programme.programmeId] = String(
+          localized: "Your result could not be worked out (HTTP \(status)).")
+        return
+      }
+      evaluations[programme.programmeId] = evaluation
+      evaluationErrors[programme.programmeId] = nil
+    } catch {
+      evaluationErrors[programme.programmeId] = Self.explain(error)
+    }
+  }
+
   /// Joins one program: the person's consent to it alone, GDPR Art. 9(2)(a).
   func joinProgramme(_ programme: BonusProgramme) async -> ProgrammeAnswer {
     let answer = await programmeAction(
@@ -636,6 +665,8 @@ final class EHDSConnection: ObservableObject {
     hub = nil
     record = nil
     programmes = nil
+    evaluations = [:]
+    evaluationErrors = [:]
     Keychain.delete(Self.tokensTag)
   }
 
@@ -948,7 +979,8 @@ enum Keychain {
       switch (method, url.path) {
       case ("POST", "/api/patient/app-devices"): return (201, Data("{}".utf8))
       case ("DELETE", "/api/patient/app/account"): return (200, Data(#"{"deleted":"kb-demo2345"}"#.utf8))
-      case ("GET", "/api/patient/app/programmes"), ("POST", "/api/patient/app/programmes/consent"),
+      case ("GET", "/api/patient/app/programmes"), ("GET", "/api/patient/app/programmes/evaluation"),
+        ("POST", "/api/patient/app/programmes/consent"),
         ("DELETE", "/api/patient/app/programmes/consent"),
         ("POST", "/api/patient/app/programmes/transfer"):
         return await DemoProgrammes.answer(method: method, url: url, json: json)
@@ -964,22 +996,24 @@ enum Keychain {
     }
   }
 
-  /// AlphaKasse DE's active year bonus, as the hub's mock fixture lists it
-  /// (`ui/public/mock/patient_programmes.json`), with the join, the
-  /// withdrawal and the 403 after it played in memory. Fictional throughout.
+  /// AlphaKasse DE's active year bonus for 2025, as the hub's mock fixture
+  /// lists it (`ui/public/mock/patient_programmes.json`), with the result,
+  /// the join, the withdrawal and the 403 after it played in memory. The
+  /// demo's 2025 meets the rule, as patient1's seeded year does. Fictional
+  /// throughout.
   @MainActor
   enum DemoProgrammes {
-    static let programmeId = "urn:mvhd:programme:alphakasse:active-year-2027"
+    static let programmeId = "urn:mvhd:programme:alphakasse:active-year-2025"
 
     static let programme = BonusProgramme(
-      programmeId: programmeId, title: "Active year bonus 2027",
+      programmeId: programmeId, title: "Active year bonus 2025",
       description:
-        "A bonus for members who stay active through 2027 and go to their yearly check-up. AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record.",
+        "A bonus for members who stayed active through 2025 and went to their yearly check-up, claimed once the year is over. AlphaKasse receives the programme, the year and goal met yes or no. Steps, heart rate, diagnoses and visit details never leave the record.",
       publisherName: "AlphaKasse DE", publisherDid: "did:web:alphakasse.de:insurer",
-      dataSpace: "insurance-wellbeing", ruleTitle: "Active year rule, version 2027.1",
+      dataSpace: "insurance-wellbeing", ruleTitle: "Active year rule, version 2025.1",
       ruleDescription:
         "Goal met when, in the calendar year, the member was active for at least 150 minutes a week on average and went to one check-up.",
-      ruleVersion: "2027.1")
+      ruleVersion: "2025.1")
 
     /// Empty at launch, so a test sees "Join this program" first.
     static var consents: [ProgrammeConsent] = []
@@ -993,6 +1027,10 @@ enum Keychain {
         (status, (try? JSONEncoder().encode(value)) ?? Data("{}".utf8))
       }
       switch (method, url.path) {
+      case ("GET", "/api/patient/app/programmes/evaluation"):
+        // 52 weeks at about 26 minutes a day and one check-up: goal met.
+        let evaluation = #"{"programmeId":"\#(programmeId)","evaluation":{"year":2025,"status":"evaluated","goalMet":true,"activity":{"minutesPerWeek":181,"required":150,"weeksWithData":52,"met":true},"checkUp":{"count":1,"required":1,"met":true}}}"#
+        return (200, Data(evaluation.utf8))
       case ("GET", _):
         return encode(200, ProgrammeOffer(programmes: [programme], consents: consents))
       case ("POST", "/api/patient/app/programmes/consent"):
@@ -1014,8 +1052,8 @@ enum Keychain {
         guard open != nil else {
           return (403, Data(#"{"error":"No open consent to this program: join it first. After a withdrawal nothing is sent."}"#.utf8))
         }
-        let year = json?["year"] ?? "2027"
-        let transfer = #"{"transfer":{"transferId":"\#(UUID().uuidString)","programmeId":"\#(programmeId)","year":\#(year),"goalMet":null,"status":"awaiting-evaluation","requestedAt":"\#(now)"}}"#
+        let year = json?["year"] ?? "2025"
+        let transfer = #"{"transfer":{"transferId":"\#(UUID().uuidString)","programmeId":"\#(programmeId)","year":\#(year),"goalMet":true,"status":"evaluated","requestedAt":"\#(now)"}}"#
         return (202, Data(transfer.utf8))
       }
     }

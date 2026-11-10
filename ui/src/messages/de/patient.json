@@ -368,7 +368,6 @@
   "What never leaves your record": "Was Ihre Akte nie verlässt",
   "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Schritte, Herzfrequenz, Diagnosen, Besuchsdetails und jedes Datum genauer als das Jahr.",
   "That did not work (HTTP {status}). Please try again.": "Das hat nicht geklappt (HTTP {status}). Bitte versuchen Sie es erneut.",
-  "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.": "Für {year} vermerkt: {publisher} erhält ja oder nein, sobald der Hub das Jahr ausgewertet hat.",
   "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.": "Die Teilnahme ist Ihre Einwilligung nur in dieses Programm (DSGVO Art. 9 Abs. 2 Buchst. a). Sie nimmt Sie in keine Studie auf und ist von Ihrem Widerspruch getrennt.",
   "You joined on {date}.": "Sie sind am {date} beigetreten.",
   "Sending…": "Wird gesendet…",
@@ -377,5 +376,18 @@
   "You withdrew on {date}. Nothing is sent any more.": "Sie haben am {date} widerrufen. Es wird nichts mehr gesendet.",
   "Joining…": "Beitritt läuft…",
   "Join this program": "Diesem Programm beitreten",
-  "Which data goes where": "Welche Daten wohin gehen"
+  "Which data goes where": "Welche Daten wohin gehen",
+  "{year} is not over yet. Nothing was sent; the hub works out the result once the year has ended.": "{year} ist noch nicht vorbei. Es wurde nichts gesendet; der Hub ermittelt das Ergebnis, sobald das Jahr zu Ende ist.",
+  "Recorded for {year}: goal met, yes. Only this answer goes to {publisher}, once the hub's delivery is connected.": "Für {year} vermerkt: Ziel erreicht, ja. Nur diese Antwort geht an {publisher}, sobald die Zustellung des Hubs angebunden ist.",
+  "Recorded for {year}: goal met, no. Only this answer goes to {publisher}, once the hub's delivery is connected.": "Für {year} vermerkt: Ziel erreicht, nein. Nur diese Antwort geht an {publisher}, sobald die Zustellung des Hubs angebunden ist.",
+  "Working out your result…": "Ihr Ergebnis wird ermittelt…",
+  "Your result could not be worked out (HTTP {status}).": "Ihr Ergebnis konnte nicht ermittelt werden (HTTP {status}).",
+  "Your result could not be worked out.": "Ihr Ergebnis konnte nicht ermittelt werden.",
+  "{year} is not over. The hub works out your result from {date}; nothing can be sent before.": "{year} ist nicht vorbei. Der Hub ermittelt Ihr Ergebnis ab dem {date}; vorher kann nichts gesendet werden.",
+  "Your result for {year}": "Ihr Ergebnis für {year}",
+  "Goal met: yes": "Ziel erreicht: ja",
+  "Goal met: no": "Ziel erreicht: nein",
+  "Exercise: {minutes} minutes a week on average, from {weeks} weeks your tracker shared. The rule asks for {required}.": "Bewegung: im Schnitt {minutes} Minuten pro Woche, aus {weeks} Wochen, die Ihr Tracker geteilt hat. Die Regel verlangt {required}.",
+  "Check-ups in {year}: {count}. The rule asks for one.": "Vorsorgeuntersuchungen {year}: {count}. Die Regel verlangt eine.",
+  "Only the year and goal met, yes or no, would go to {publisher}. This breakdown stays in your record.": "Nur das Jahr und Ziel erreicht, ja oder nein, gingen an {publisher}. Diese Aufschlüsselung bleibt in Ihrer Akte."
 }

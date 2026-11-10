@@ -87,6 +87,34 @@ describe("seed-persona-overview.cypher", () => {
     expect(seed).toContain("MERGE (obs)-[:PART_OF]->(enc)");
   });
 
+  it("gives P1 a year of exercise and a check-up that meet the bonus rule, and P2 one that does not (#934 step 6)", () => {
+    const week = (pid: string) =>
+      [
+        ...seed.matchAll(
+          new RegExp(
+            `\\{id: 'act-${pid}-(2025-\\d{2}-\\d{2})', start: '[^']+', end: '[^']+', v: (\\d+)\\}`,
+            "g",
+          ),
+        ),
+      ].map((m) => Number(m[2]));
+    const p1 = week("p1");
+    const p2 = week("p2");
+    expect(p1).toHaveLength(52);
+    expect(p2).toHaveLength(48);
+    // The rule: the weekly means times seven, summed, over 52 weeks.
+    const perWeek = (v: number[]) => (v.reduce((a, b) => a + b, 0) * 7) / 52;
+    expect(perWeek(p1)).toBeGreaterThanOrEqual(150);
+    expect(perWeek(p2)).toBeLessThan(150);
+    expect(seed).toContain("SET o.code = '55411-3',");
+    expect(seed).toContain("enc.typeCode = '185349003',");
+    expect(seed).toMatch(
+      /Encounter \{resourceId: 'checkup-p1-2025-\d{2}-\d{2}'\}/,
+    );
+    expect(seed).toMatch(
+      /Encounter \{resourceId: 'checkup-p2-2025-\d{2}-\d{2}'\}/,
+    );
+  });
+
   it("records when her ePA was last transferred into the portal", () => {
     expect(seed).toMatch(/p\.ehrSyncedAt = datetime\('2026-09-22T18:05:00Z'\)/);
     expect(seed).toMatch(/p\.ehrSyncSource = 'ePA transfer/);

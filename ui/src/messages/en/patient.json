@@ -368,7 +368,6 @@
   "What never leaves your record": "What never leaves your record",
   "Steps, heart rate, diagnoses, visit details and any date finer than the year.": "Steps, heart rate, diagnoses, visit details and any date finer than the year.",
   "That did not work (HTTP {status}). Please try again.": "That did not work (HTTP {status}). Please try again.",
-  "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.": "Recorded for {year}: {publisher} receives yes or no once the hub has evaluated the year.",
   "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.": "Joining is your consent to this program alone (GDPR Art. 9(2)(a)). It enrolls you in no study and is separate from your opt-out.",
   "You joined on {date}.": "You joined on {date}.",
   "Sending…": "Sending…",
@@ -377,5 +376,18 @@
   "You withdrew on {date}. Nothing is sent any more.": "You withdrew on {date}. Nothing is sent any more.",
   "Joining…": "Joining…",
   "Join this program": "Join this program",
-  "Which data goes where": "Which data goes where"
+  "Which data goes where": "Which data goes where",
+  "{year} is not over yet. Nothing was sent; the hub works out the result once the year has ended.": "{year} is not over yet. Nothing was sent; the hub works out the result once the year has ended.",
+  "Recorded for {year}: goal met, yes. Only this answer goes to {publisher}, once the hub's delivery is connected.": "Recorded for {year}: goal met, yes. Only this answer goes to {publisher}, once the hub's delivery is connected.",
+  "Recorded for {year}: goal met, no. Only this answer goes to {publisher}, once the hub's delivery is connected.": "Recorded for {year}: goal met, no. Only this answer goes to {publisher}, once the hub's delivery is connected.",
+  "Working out your result…": "Working out your result…",
+  "Your result could not be worked out (HTTP {status}).": "Your result could not be worked out (HTTP {status}).",
+  "Your result could not be worked out.": "Your result could not be worked out.",
+  "{year} is not over. The hub works out your result from {date}; nothing can be sent before.": "{year} is not over. The hub works out your result from {date}; nothing can be sent before.",
+  "Your result for {year}": "Your result for {year}",
+  "Goal met: yes": "Goal met: yes",
+  "Goal met: no": "Goal met: no",
+  "Exercise: {minutes} minutes a week on average, from {weeks} weeks your tracker shared. The rule asks for {required}.": "Exercise: {minutes} minutes a week on average, from {weeks} weeks your tracker shared. The rule asks for {required}.",
+  "Check-ups in {year}: {count}. The rule asks for one.": "Check-ups in {year}: {count}. The rule asks for one.",
+  "Only the year and goal met, yes or no, would go to {publisher}. This breakdown stays in your record.": "Only the year and goal met, yes or no, would go to {publisher}. This breakdown stays in your record."
 }
