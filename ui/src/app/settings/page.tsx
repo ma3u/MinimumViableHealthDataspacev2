@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { IS_STATIC } from "@/lib/static-export";
-import { T, useT } from "@/lib/i18n/translate";
+import { useT } from "@/lib/i18n/translate";
 
 /**
  * Maps a demo persona username to the tenant IDs they should see.
@@ -368,7 +368,7 @@ export default function SettingsPage() {
           }
           prevStep={{ href: "/admin/audit", label: t("Audit & Provenance") }}
           infoText={t(
-            "Changes are saved to the tenant-manager API and reflected across all dataspace interactions. Your DID:web identity and credentials remain unchanged.",
+            "Changes are saved on the participant's control plane context and reflected across all dataspace interactions. Your DID:web identity and credentials remain unchanged.",
           )}
           docLink={{ href: "/docs/user-guide", label: t("User Guide") }}
         />
@@ -587,18 +587,9 @@ export default function SettingsPage() {
                               <div className="flex items-center gap-1.5 text-yellow-800 dark:text-yellow-400 mb-1">
                                 <AlertCircle size={12} />
                                 <span>
-                                  <T
-                                    area="admin"
-                                    tags={{
-                                      c: (
-                                        <code className="font-mono bg-yellow-900/30 px-1 rounded-sm" />
-                                      ),
-                                    }}
-                                  >
-                                    {
-                                      "VPAs disposed; re-run <c>seed-health-tenants.sh</c> to re-provision"
-                                    }
-                                  </T>
+                                  {t(
+                                    "VPAs disposed; onboard the participant again to re-provision",
+                                  )}
                                 </span>
                               </div>
                             )}

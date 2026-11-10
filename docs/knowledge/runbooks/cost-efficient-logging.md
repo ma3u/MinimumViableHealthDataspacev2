@@ -181,9 +181,8 @@ on-call person sees is the loop, not the bill.
     `grafana/otel-lgtm:0.35.0` (Loki, Tempo, Prometheus, Grafana in one container, the
     shape ADR-045 plans for Azure) on <http://localhost:3300>. Data in a volume, not
     MinIO, for now. **Azure open.**
-11. Move the workflows that query `ContainerAppConsoleLogs_CL` (`edc-*`, `cfm-seed`,
-    `neo4j-seed`, `vault-bootstrap-participant-keys`) to LogQL **before** switching
-    console logs away from Log Analytics.
+11. Move the workflows that query `ContainerAppConsoleLogs_CL` (`compliance`, `edc-*`,
+    `neo4j-seed`) to LogQL **before** switching console logs away from Log Analytics.
 12. Switch ACA console logs to the collector; Log Analytics keeps system logs only.
 
 ### Phase C: keep it cheap

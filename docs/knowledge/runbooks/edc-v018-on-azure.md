@@ -1,5 +1,12 @@
 # Runbook: moving Azure to the EDC 0.18 build (ADR-055)
 
+> **Historical.** EDC 0.18 left Azure on 2026-11-06
+> ([ADR-078](../../ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)), its
+> apps were deleted on 2026-11-09, and `edc-retire-v018-azure.yml` drops its
+> databases (#927 step 6, PR #1048). This page is kept as a record; its
+> commands no longer apply. The current runbook is
+> [edc-1-on-azure](edc-1-on-azure.md).
+
 Moves the five EDC apps on `rg-mvhd-dev` from the April build
 (`jad-*:2026-04-14`) to the build compose and CI run (`jad-*:4a7e5bd096c5`),
 so CFM onboarding works on Azure (#503). Each phase is checked before the

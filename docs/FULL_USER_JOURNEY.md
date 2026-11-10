@@ -185,7 +185,7 @@ sequenceDiagram
 | J04  | Credentials exist for all holders   | ✅     |
 | J05  | EHDS & DataQuality credential types | ✅     |
 
-**Seed Phase:** `jad/seed-health-tenants.sh` (Phase 1),
+**Seed Phase:** `scripts/seed-identity-layer.sh` (Phase 1, the five participants on EDC 1.0),
 `jad/seed-ehds-credentials.sh` (Phase 2)
 
 ---

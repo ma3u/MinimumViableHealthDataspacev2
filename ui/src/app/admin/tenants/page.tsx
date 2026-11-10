@@ -485,18 +485,9 @@ export default function AdminTenantsPage() {
                                                           <AlertTriangle
                                                             size={12}
                                                           />
-                                                          <T
-                                                            area="admin"
-                                                            tags={{
-                                                              c: (
-                                                                <code className="bg-(--warning)/10 px-1 rounded-sm font-mono" />
-                                                              ),
-                                                            }}
-                                                          >
-                                                            {
-                                                              "VPAs disposed; re-run <c>seed-health-tenants.sh</c>"
-                                                            }
-                                                          </T>
+                                                          {t(
+                                                            "VPAs disposed; onboard the participant again",
+                                                          )}
                                                         </div>
                                                       )}
                                                       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
