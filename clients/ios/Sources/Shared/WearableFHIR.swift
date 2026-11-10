@@ -43,6 +43,12 @@ public enum WearableFHIR {
       return Coding(
         loinc: "29463-7", display: "Body weight", ucum: "kg", category: "vital-signs",
         decimals: 1)
+    case .exercise:
+      // A week's mean of the daily exercise minutes, as the hub reads it for
+      // a bonus program's active year rule (ADR-087).
+      return Coding(
+        loinc: "55411-3", display: "Exercise duration", ucum: "min/d", category: "activity",
+        decimals: 0)
     }
   }
 

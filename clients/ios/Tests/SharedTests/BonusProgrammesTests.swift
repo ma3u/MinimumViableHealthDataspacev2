@@ -9,22 +9,22 @@ import Testing
 /// bonus, from the hub's own mock fixture.
 @Suite("Bonus programs: the hub's answers, read by the app")
 struct BonusProgrammesTests {
-  private let programmeId = "urn:mvhd:programme:alphakasse:active-year-2027"
+  private let programmeId = "urn:mvhd:programme:alphakasse:active-year-2025"
 
   /// The live route's answer, as Neo4j prints it: nanosecond datetimes, nulls.
   private var listed: Data {
     Data(
       #"""
-      {"programmes":[{"programmeId":"urn:mvhd:programme:alphakasse:active-year-2027",
-        "title":"Active year bonus 2027","description":null,"publisherName":"AlphaKasse DE",
+      {"programmes":[{"programmeId":"urn:mvhd:programme:alphakasse:active-year-2025",
+        "title":"Active year bonus 2025","description":null,"publisherName":"AlphaKasse DE",
         "publisherDid":"did:web:alphakasse.de:insurer","dataSpace":"insurance-wellbeing",
-        "endpointUrl":null,"ruleTitle":"Active year rule, version 2027.1",
-        "ruleDescription":"Goal met when active 150 minutes a week.","ruleVersion":"2027.1",
+        "endpointUrl":null,"ruleTitle":"Active year rule, version 2025.1",
+        "ruleDescription":"Goal met when active 150 minutes a week.","ruleVersion":"2025.1",
         "lastSeenAt":"2026-11-09T08:00:00Z"}],
        "consents":[
-        {"consentId":"c-2","programmeId":"urn:mvhd:programme:alphakasse:active-year-2027",
+        {"consentId":"c-2","programmeId":"urn:mvhd:programme:alphakasse:active-year-2025",
          "joinedAt":"2026-11-09T10:15:00.123456789Z","withdrawnAt":null},
-        {"consentId":"c-1","programmeId":"urn:mvhd:programme:alphakasse:active-year-2027",
+        {"consentId":"c-1","programmeId":"urn:mvhd:programme:alphakasse:active-year-2025",
          "joinedAt":"2026-11-02T09:00:00Z","withdrawnAt":"2026-11-03T09:00:00Z"}],
        "legalBasis":"Primary use the person directs"}
       """#.utf8)
@@ -35,7 +35,7 @@ struct BonusProgrammesTests {
     let offer = try #require(ProgrammeOffer.parse(listed))
     #expect(offer.programmes.count == 1)
     let programme = offer.programmes[0]
-    #expect(programme.title == "Active year bonus 2027")
+    #expect(programme.title == "Active year bonus 2025")
     #expect(programme.publisher == "AlphaKasse DE")
     #expect(programme.description == nil)
     #expect(programme.dataSpace == "insurance-wellbeing")
@@ -50,7 +50,7 @@ struct BonusProgrammesTests {
       ).standardizedFileURL
     let offer = try #require(ProgrammeOffer.parse(try Data(contentsOf: url)))
     #expect(offer.programmes.first?.programmeId == programmeId)
-    #expect(offer.programmes.first?.ruleYear() == 2027)
+    #expect(offer.programmes.first?.ruleYear() == 2025)
     #expect(offer.consents.isEmpty)
   }
 
@@ -127,17 +127,53 @@ struct BonusProgrammesTests {
         == .failed(status: 404, reason: "There is no open consent to this program to withdraw"))
   }
 
-  @Test("a transfer under an open consent answers 202, the year and no answer yet")
+  @Test("a transfer under an open consent answers 202 with the year and goal met")
   func transfer() {
     let body = Data(
-      #"{"transfer":{"transferId":"t-1","programmeId":"p","year":2027,"goalMet":null,"status":"awaiting-evaluation","requestedAt":"2026-11-09T12:00:00Z"},"legalBasis":"x"}"#
+      #"{"transfer":{"transferId":"t-1","programmeId":"p","year":2025,"goalMet":true,"status":"evaluated","requestedAt":"2026-11-10T12:00:00Z"},"legalBasis":"x"}"#
         .utf8)
     #expect(
       ProgrammeAnswer.transfer(status: 202, body: body)
         == .transfer(
           ProgrammeTransfer(
-            transferId: "t-1", programmeId: "p", year: 2027, goalMet: nil,
-            status: "awaiting-evaluation")))
+            transferId: "t-1", programmeId: "p", year: 2025, goalMet: true,
+            status: "evaluated")))
+  }
+
+  @Test("a year that is not over answers 409, and the app reads: nothing was sent")
+  func yearNotOver() {
+    let body = Data(
+      #"{"error":"2026 is not over","evaluation":{"year":2026,"status":"year-not-over","evaluableFrom":"2027-01-01"}}"#
+        .utf8)
+    #expect(ProgrammeAnswer.transfer(status: 409, body: body) == .yearNotOver(evaluableFrom: "2027-01-01"))
+  }
+
+  @Test("decodes the member's result for an ended year, breakdown and all")
+  func evaluated() throws {
+    let body = Data(
+      #"{"programmeId":"p","evaluation":{"year":2025,"status":"evaluated","goalMet":false,"activity":{"minutesPerWeek":78,"required":150,"weeksWithData":48,"met":false},"checkUp":{"count":1,"required":1,"met":true}}}"#
+        .utf8)
+    let evaluation = try #require(ProgrammeEvaluation.parse(body))
+    #expect(evaluation.year == 2025)
+    #expect(
+      evaluation
+        == .evaluated(
+          ProgrammeResult(
+            year: 2025, goalMet: false, minutesPerWeek: 78, requiredMinutesPerWeek: 150,
+            weeksWithData: 48, activityMet: false, checkUps: 1, checkUpMet: true)))
+  }
+
+  @Test("decodes a year that is not over, and refuses another shape")
+  func evaluationShapes() {
+    let notOver = Data(
+      #"{"evaluation":{"year":2026,"status":"year-not-over","evaluableFrom":"2027-01-01"}}"#.utf8)
+    #expect(
+      ProgrammeEvaluation.parse(notOver) == .yearNotOver(year: 2026, evaluableFrom: "2027-01-01"))
+    #expect(ProgrammeEvaluation.parse(Data(#"{"error":"Patient not found"}"#.utf8)) == nil)
+    // Evaluated without its breakdown is not a result the screen can show.
+    #expect(
+      ProgrammeEvaluation.parse(
+        Data(#"{"evaluation":{"year":2025,"status":"evaluated","goalMet":true}}"#.utf8)) == nil)
   }
 
   @Test("after a withdrawal the hub answers 403, and the app reads: nothing was sent")

@@ -335,6 +335,8 @@
 "Heart rate variability (SDNN)" = "Herzfrequenzvariabilität (SDNN)";
 "Steps" = "Schritte";
 "Body weight" = "Körpergewicht";
+"minutes per day" = "Minuten pro Tag";
+"Exercise minutes" = "Trainingsminuten";
 "Apple Health is not available on this device." = "Apple Health ist auf diesem Gerät nicht verfügbar.";
 "Consents" = "Einwilligungen";
 "Three separate decisions, given to three different parties. Changing one never changes another. Klarbefund keeps your own record of them on this phone and tells nobody: to give or withdraw one, contact whoever holds it." = "Drei getrennte Entscheidungen, gegenüber drei verschiedenen Stellen. Eine zu ändern ändert nie eine andere. Klarbefund führt Ihre eigene Aufzeichnung davon auf diesem Telefon und teilt sie niemandem mit: Um eine zu erteilen oder zu widerrufen, wenden Sie sich an die Stelle, die sie hält.";
@@ -568,7 +570,6 @@
 "No bonus program is on offer. The catalogue crawler has not found one in another data space yet." = "Es wird kein Bonusprogramm angeboten. Der Katalog-Crawler hat noch keines in einem anderen Datenraum gefunden.";
 "Loading bonus programs…" = "Bonusprogramme werden geladen…";
 "Bonus programs" = "Bonusprogramme";
-"Recorded for %@: %@ receives yes or no once the hub has evaluated the year." = "Für %1$@ vermerkt: %2$@ erhält ja oder nein, sobald der Hub das Jahr ausgewertet hat.";
 "Nothing was sent: there is no open consent to this program. If you withdrew, nothing is sent any more; join again to send an answer." = "Nichts wurde gesendet: Es gibt keine offene Einwilligung in dieses Programm. Wenn Sie widerrufen haben, wird nichts mehr gesendet; treten Sie erneut bei, um eine Antwort zu senden.";
 "That did not work (HTTP %lld). Please try again." = "Das hat nicht geklappt (HTTP %lld). Bitte versuchen Sie es erneut.";
 "That did not work. Please try again." = "Das hat nicht geklappt. Bitte versuchen Sie es erneut.";
@@ -589,3 +590,17 @@
 "Joining…" = "Beitritt läuft…";
 "Join this program" = "Diesem Programm beitreten";
 "The bonus programs could not be loaded (HTTP %lld). Please try again later." = "Die Bonusprogramme konnten nicht geladen werden (HTTP %lld). Bitte versuchen Sie es später erneut.";
+
+/* The year's result (#934, step 6; ADR-087). The portal's words, ui/src/messages/de/patient.json. */
+"Recorded for %@: goal met, yes. Only this answer goes to %@, once the hub's delivery is connected." = "Für %1$@ vermerkt: Ziel erreicht, ja. Nur diese Antwort geht an %2$@, sobald die Zustellung des Hubs angebunden ist.";
+"Recorded for %@: goal met, no. Only this answer goes to %@, once the hub's delivery is connected." = "Für %1$@ vermerkt: Ziel erreicht, nein. Nur diese Antwort geht an %2$@, sobald die Zustellung des Hubs angebunden ist.";
+"%@ is not over yet. Nothing was sent; the hub works out the result once the year has ended." = "%@ ist noch nicht vorbei. Es wurde nichts gesendet; der Hub ermittelt das Ergebnis, sobald das Jahr zu Ende ist.";
+"Your result for %@" = "Ihr Ergebnis für %@";
+"Goal met: yes" = "Ziel erreicht: ja";
+"Goal met: no" = "Ziel erreicht: nein";
+"Exercise: %lld minutes a week on average, from %lld weeks your tracker shared. The rule asks for %lld." = "Bewegung: im Schnitt %1$lld Minuten pro Woche, aus %2$lld Wochen, die Ihr Tracker geteilt hat. Die Regel verlangt %3$lld.";
+"Check-ups in %@: %lld. The rule asks for one." = "Vorsorgeuntersuchungen %1$@: %2$lld. Die Regel verlangt eine.";
+"Only the year and goal met, yes or no, would go to %@. This breakdown stays in your record." = "Nur das Jahr und Ziel erreicht, ja oder nein, gingen an %@. Diese Aufschlüsselung bleibt in Ihrer Akte.";
+"%@ is not over. The hub works out your result from %@; nothing can be sent before." = "%1$@ ist nicht vorbei. Der Hub ermittelt Ihr Ergebnis ab dem %2$@; vorher kann nichts gesendet werden.";
+"Working out your result…" = "Ihr Ergebnis wird ermittelt…";
+"Your result could not be worked out (HTTP %lld)." = "Ihr Ergebnis konnte nicht ermittelt werden (HTTP %lld).";

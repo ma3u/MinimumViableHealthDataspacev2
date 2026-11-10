@@ -82,6 +82,7 @@ struct WearableFHIRTests {
       .heartRateVariability: ("80404-7", "ms"),
       .steps: ("41950-7", "/d"),
       .bodyMass: ("29463-7", "kg"),
+      .exercise: ("55411-3", "min/d"),
     ]
     for metric in WearableMetric.allCases {
       let coding = WearableFHIR.coding(metric)

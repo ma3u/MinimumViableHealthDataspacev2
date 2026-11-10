@@ -25,6 +25,7 @@ import {
   DELETE as WITHDRAW,
 } from "@/app/api/patient/app/programmes/consent/route";
 import { POST as TRANSFER } from "@/app/api/patient/app/programmes/transfer/route";
+import { GET as EVALUATE } from "@/app/api/patient/app/programmes/evaluation/route";
 import {
   BONUS_PROGRAMMES_CYPHER,
   JOIN_PROGRAMME_CYPHER,
@@ -34,7 +35,7 @@ import {
   WITHDRAW_PROGRAMME_CYPHER,
 } from "@/lib/patient/programme-consent";
 
-const PROGRAMME = "urn:mvhd:programme:alphakasse:active-year-2027";
+const PROGRAMME = "urn:mvhd:programme:alphakasse:active-year-2025";
 const BASE = "http://localhost/api/patient/app/programmes";
 
 const OPEN = {
@@ -75,7 +76,10 @@ describe("bonus programs for the Klarbefund app", () => {
           method: "DELETE",
         }),
       ),
-      await TRANSFER(post("/transfer", { programmeId: PROGRAMME, year: 2027 })),
+      await TRANSFER(post("/transfer", { programmeId: PROGRAMME, year: 2025 })),
+      await EVALUATE(
+        new Request(`${BASE}/evaluation?programmeId=${PROGRAMME}`),
+      ),
     ]) {
       expect(res.status).toBe(401);
       expect(await res.json()).toHaveProperty("error");
@@ -89,7 +93,7 @@ describe("bonus programs for the Klarbefund app", () => {
   it("lists the offer and the login's own consents, the portal's shape", async () => {
     mockRunQuery
       .mockResolvedValueOnce([
-        { programmeId: PROGRAMME, title: "Active year bonus 2027" },
+        { programmeId: PROGRAMME, title: "Active year bonus 2025" },
       ])
       .mockResolvedValueOnce([OPEN]);
     const res = await LIST(new Request(`${BASE}?patientId=P2`));
@@ -148,36 +152,69 @@ describe("bonus programs for the Klarbefund app", () => {
     ]);
   });
 
-  it("sends a year's answer under an open consent: 202", async () => {
+  it("sends a year's answer under an open consent: 202, evaluated", async () => {
     mockRunQuery
       .mockResolvedValueOnce([{ consentId: "c-1" }])
+      .mockResolvedValueOnce([{ ruleVersion: "2025.1" }])
+      .mockResolvedValueOnce([{ minutes: 52 * 25 * 7, weeks: 52, checkUps: 1 }])
       .mockResolvedValueOnce([
         {
           transferId: "t-1",
           programmeId: PROGRAMME,
-          year: 2027,
-          goalMet: null,
-          status: "awaiting-evaluation",
-          requestedAt: "2026-11-09T12:00:00Z",
+          year: 2025,
+          goalMet: true,
+          status: "evaluated",
+          requestedAt: "2026-11-10T12:00:00Z",
         },
       ]);
     const res = await TRANSFER(
-      post("/transfer", { programmeId: PROGRAMME, year: "2027" }),
+      post("/transfer", { programmeId: PROGRAMME, year: "2025" }),
     );
     expect(res.status).toBe(202);
-    expect((await res.json()).transfer.status).toBe("awaiting-evaluation");
+    expect((await res.json()).transfer).toMatchObject({
+      status: "evaluated",
+      goalMet: true,
+    });
     expect(mockRunQuery.mock.calls[0][0]).toBe(OPEN_PROGRAMME_CONSENT_CYPHER);
-    expect(mockRunQuery.mock.calls[1][0]).toBe(RECORD_TRANSFER_CYPHER);
+    expect(mockRunQuery.mock.calls[2][1]).toMatchObject({
+      patientId: "KB-AB3DK7MN",
+      year: "2025",
+    });
+    expect(mockRunQuery.mock.calls[3][0]).toBe(RECORD_TRANSFER_CYPHER);
+    expect(mockRunQuery.mock.calls[3][1]).toMatchObject({
+      patientId: "KB-AB3DK7MN",
+      year: 2025,
+      goalMet: true,
+    });
+  });
+
+  it("shows the login's own result before anything is sent", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ ruleVersion: "2025.1" }])
+      .mockResolvedValueOnce([
+        { minutes: 52 * 10 * 7, weeks: 40, checkUps: 0 },
+      ]);
+    const res = await EVALUATE(
+      new Request(`${BASE}/evaluation?programmeId=${PROGRAMME}&patientId=P2`),
+    );
+    expect(res.status).toBe(200);
+    const { evaluation } = await res.json();
+    expect(evaluation).toMatchObject({
+      year: 2025,
+      status: "evaluated",
+      goalMet: false,
+      activity: { minutesPerWeek: 70, weeksWithData: 40, met: false },
+      checkUp: { count: 0, met: false },
+    });
     expect(mockRunQuery.mock.calls[1][1]).toMatchObject({
       patientId: "KB-AB3DK7MN",
-      year: 2027,
     });
   });
 
   it("after a withdrawal is refused with 403, and nothing is recorded", async () => {
     mockRunQuery.mockResolvedValueOnce([]);
     const res = await TRANSFER(
-      post("/transfer", { programmeId: PROGRAMME, year: 2027 }),
+      post("/transfer", { programmeId: PROGRAMME, year: 2025 }),
     );
     expect(res.status).toBe(403);
     expect((await res.json()).error).toMatch(/No open consent/);

@@ -1,0 +1,19 @@
+{
+  "programmeId": "urn:mvhd:programme:alphakasse:active-year-2025",
+  "evaluation": {
+    "year": 2025,
+    "status": "evaluated",
+    "goalMet": true,
+    "activity": {
+      "minutesPerWeek": 181,
+      "required": 150,
+      "weeksWithData": 52,
+      "met": true
+    },
+    "checkUp": {
+      "count": 1,
+      "required": 1,
+      "met": true
+    }
+  }
+}
