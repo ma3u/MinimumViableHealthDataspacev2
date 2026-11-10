@@ -25,6 +25,7 @@ import { HomeRegisterCta } from "@/components/HomeRegisterCta";
 import { LivingBodyHero } from "@/components/LivingBodyHero";
 import { LatestUpdates } from "@/components/LatestUpdates";
 import { KlarbefundShowcase } from "@/components/KlarbefundShowcase";
+import { JourneyFlows } from "@/components/JourneyFlows";
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
@@ -130,6 +131,9 @@ export default function Home() {
             sign-up stay at the top; moved left of it on wide screens. */}
         <LivingBodyHero className="aspect-9/16 w-[min(72vw,300px)] justify-self-center lg:order-first lg:w-auto lg:h-[min(72vh,620px)]" />
       </section>
+
+      {/* ── The two journeys of the HL7 showcase deck, drawn and clickable ── */}
+      <JourneyFlows />
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}
       <section

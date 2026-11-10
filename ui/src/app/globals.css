@@ -870,3 +870,77 @@
     max-height: 40%;
   }
 }
+
+/* ── The start page's two journeys (JourneyFlows.tsx) ─────────────────────────
+   Boxes, labels and arrowheads pop in, edges draw, each after its own delay,
+   once the drawing is on screen. Without motion, everything is just there. */
+.journey-flow {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.journey-flow .jf-n {
+  opacity: 0;
+}
+.journey-flow .jf-e {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.journey-flow .jf-e.jf-dashed {
+  stroke-dasharray: 8 6;
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+.journey-flow.is-playing .jf-n {
+  animation: jf-popin 0.5s ease-out forwards;
+}
+.journey-flow.is-playing .jf-e {
+  animation: jf-draw 1.1s ease-out forwards;
+}
+.journey-flow.is-playing .jf-e.jf-dashed {
+  animation: jf-fade 0.8s ease-out forwards;
+}
+.journey-flow .jf-link {
+  cursor: pointer;
+  outline: none;
+}
+.journey-flow .jf-link:hover rect,
+.journey-flow .jf-link:focus-visible rect {
+  filter: brightness(1.35);
+}
+.journey-flow .jf-link:focus-visible rect {
+  stroke: #fbfbf8;
+  stroke-width: 4;
+}
+@keyframes jf-popin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes jf-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes jf-fade {
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-flow .jf-n,
+  .journey-flow .jf-e,
+  .journey-flow .jf-e.jf-dashed,
+  .journey-flow.is-playing .jf-n,
+  .journey-flow.is-playing .jf-e,
+  .journey-flow.is-playing .jf-e.jf-dashed {
+    animation: none !important;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
