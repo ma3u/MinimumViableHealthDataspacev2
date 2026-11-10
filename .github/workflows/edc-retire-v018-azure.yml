@@ -1,0 +1,194 @@
+name: EDC 0.18 leftovers on Azure (#927 step 6)
+
+# What EDC 0.18 and the 2026-03 CFM left on Azure after their apps were
+# deleted on 2026-11-09 (#927 step 5):
+#   databases   controlplane_v018, identityhub_v018, issuerservice_v018,
+#               dataplane_v018, dataplane_omop_v018, siglet_v2 (the 0.18
+#               siglet) and siglet (the July one) are dropped; cfm is emptied
+#               and kept for eclipse-cfm 0.0.7 (ADR-085).
+#   vault-keys  the five demo participants' 0.18 keys in secret/: the aliases
+#               did:web:mvhd-identityhub%3A7083:<slug>#key1 and
+#               <slug>-private-key-alias. EDC 1.0's own keys (<alias>@<context>),
+#               the issuer's #key-1 and transit signing-siglet stay.
+#
+# `plan` changes nothing: it shows the guards, the databases, what cfm holds
+# and which Vault entries would go. `apply` needs Matthias's go on a plan run.
+# The guards (scripts/azure/drop-edc-v018-databases.sh,
+# scripts/azure/retire-v018-in-env.sh) refuse while a 1.0 app reads one of the
+# databases, a CFM app exists, or an IdentityHub key pair names a key in the
+# delete set.
+#
+# Runs as the CI identity: dropping a database needs write access to the
+# Flexible Server, which the maintainer account does not have, and the server,
+# Vault and IdentityHub answer only inside Azure, so the second half runs as a
+# one-shot ACA job, deleted afterwards. Run it during office hours: the
+# server and the apps stop at night (ADR-053). Secrets never reach a log: the
+# Postgres password, the Vault token and the admin client secret are read
+# from ACA secrets and Keycloak, masked, and handed to the job as ACA secrets.
+#
+# Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or apply"
+        type: choice
+        options: [plan, apply]
+        default: plan
+      scope:
+        description: "databases (drop and empty cfm), vault-keys, or all"
+        type: choice
+        options: [all, databases, vault-keys]
+        default: all
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  JOB: mvhd-retire-v018
+  KC_PUBLIC: https://auth.ehds.mabu.red
+  PG_HOST: mvhd-pg-b53a0449.postgres.database.azure.com
+  PG_USER: mvhdadmin
+
+jobs:
+  retire:
+    name: 0.18 leftovers (${{ github.event.inputs.mode }}, ${{ github.event.inputs.scope }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # The guards run in every mode and scope: a blocked guard means the
+      # environment is not what this retirement assumes. `drop` only when the
+      # scope includes the databases.
+      - name: Guards and databases
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          SCOPE: ${{ github.event.inputs.scope }}
+        run: |
+          set -o pipefail
+          ARG=plan
+          if [ "$MODE" = apply ] && [ "$SCOPE" != vault-keys ]; then ARG=drop; fi
+          ./scripts/azure/drop-edc-v018-databases.sh "$ARG" </dev/null | tee /tmp/out.txt
+          { echo "### Databases (${ARG})"; echo '```'; sed 's/\x1b\[[0-9;]*m//g' /tmp/out.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$MODE" = apply ] && grep -q "BLOCKED" /tmp/out.txt; then
+            echo "::error::a guard blocks the retirement; nothing past this step runs"
+            exit 1
+          fi
+
+      - name: Read the credentials (masked)
+        run: |
+          set -euo pipefail
+          KC_ADMIN_PASS=$(az containerapp secret show --name mvhd-keycloak --resource-group "$RESOURCE_GROUP" \
+            --secret-name keycloak-admin-password --query value -o tsv)
+          echo "::add-mask::$KC_ADMIN_PASS"
+          MASTER=$(curl -sS --max-time 30 -X POST "${KC_PUBLIC}/realms/master/protocol/openid-connect/token" \
+            --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
+            --data-urlencode username=admin --data-urlencode "password=${KC_ADMIN_PASS}" | jq -r '.access_token // empty')
+          [ -n "$MASTER" ] || { echo "::error::no Keycloak admin token"; exit 1; }
+          echo "::add-mask::$MASTER"
+          uuid=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients?clientId=admin" | jq -r '.[0].id // empty')
+          ADMIN_SECRET=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty')
+          [ -n "$ADMIN_SECRET" ] || { echo "::error::could not read the admin client secret"; exit 1; }
+          echo "::add-mask::$ADMIN_SECRET"
+          PG_PASSWORD=$(az containerapp secret show --name mvhd-controlplane --resource-group "$RESOURCE_GROUP" \
+            --secret-name pg-flex-password --query value -o tsv)
+          [ -n "$PG_PASSWORD" ] || { echo "::error::could not read pg-flex-password from mvhd-controlplane"; exit 1; }
+          echo "::add-mask::$PG_PASSWORD"
+          VAULT_URL=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_URL'].value | [0]" -o tsv)
+          # The services' token is the control plane's ACA secret vault-token (#359).
+          VAULT_TOKEN=$(az containerapp secret show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+            --secret-name vault-token --query value -o tsv)
+          [ -n "$VAULT_URL" ] && [ -n "$VAULT_TOKEN" ] || { echo "::error::could not read the Vault URL and token from mvhd-controlplane"; exit 1; }
+          echo "::add-mask::$VAULT_TOKEN"
+          {
+            echo "ADMIN_SECRET=$ADMIN_SECRET"; echo "PG_PASSWORD=$PG_PASSWORD"
+            echo "VAULT_URL=$VAULT_URL"; echo "VAULT_TOKEN=$VAULT_TOKEN"
+          } >> "$GITHUB_ENV"
+          echo "credentials read (admin ${#ADMIN_SECRET}, postgres ${#PG_PASSWORD}, vault ${#VAULT_TOKEN} chars)"
+
+      - name: Run the job in the environment
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          SCOPE: ${{ github.event.inputs.scope }}
+        run: |
+          set -euo pipefail
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
+          export ENV_ID LOCATION
+          python3 - /tmp/job.yaml scripts/azure/retire-v018-in-env.sh <<'PY'
+          import os, sys, yaml
+          out, script = sys.argv[1], open(sys.argv[2]).read()
+          e = os.environ
+          env = {"MODE": e["MODE"], "SCOPE": e["SCOPE"], "KC": e["KC_PUBLIC"],
+                 "IH": "http://mvhd-identityhub:7082/api/identity",
+                 "VAULT_ADDR": e["VAULT_URL"],
+                 "PGHOST": e["PG_HOST"], "PGUSER": e["PG_USER"], "PGDATABASE": "cfm", "PGSSLMODE": "require"}
+          secrets = {"pg-password": e["PG_PASSWORD"], "vault-token": e["VAULT_TOKEN"],
+                     "admin-secret": e["ADMIN_SECRET"]}
+          refs = {"PGPASSWORD": "pg-password", "VAULT_TOKEN": "vault-token", "ADMIN_SECRET": "admin-secret"}
+          body = ("set -u\napk add --no-cache bash curl jq python3 postgresql-client >/dev/null 2>&1\n"
+                  "cat > /tmp/retire.sh <<'RETIRE_EOF'\n" + script + "\nRETIRE_EOF\n"
+                  "bash /tmp/retire.sh; rc=$?\necho \"=== retire exited with $rc ===\"\nsleep 30\nexit $rc\n")
+          doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
+            "configuration": {"triggerType": "Manual", "replicaTimeout": 900, "replicaRetryLimit": 0,
+              "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1},
+              "secrets": [{"name": k, "value": v} for k, v in secrets.items()]},
+            "template": {"containers": [{"name": "retire", "image": "docker.io/library/alpine:3.20",
+              "command": ["/bin/sh", "-c"], "args": [body], "resources": {"cpu": 0.25, "memory": "0.5Gi"},
+              "env": [{"name": k, "value": v} for k, v in env.items()]
+                     + [{"name": k, "secretRef": v} for k, v in refs.items()]}]}}}
+          yaml.safe_dump(doc, open(out, "w"), sort_keys=False)
+          PY
+          if az containerapp job show -n "$JOB" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n "$JOB" -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          rm -f /tmp/job.yaml
+          EXEC=$(az containerapp job start -n "$JOB" -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "EXEC=$EXEC" >> "$GITHUB_ENV"
+          STATUS=Pending
+          for _ in $(seq 1 60); do
+            STATUS=$(az containerapp job execution show -n "$JOB" -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query properties.status -o tsv 2>/dev/null || echo Pending)
+            case "$STATUS" in Succeeded|Failed|Stopped) break ;; esac
+            sleep 15
+          done
+          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      - name: Show the job log
+        if: always() && env.EXEC != ''
+        run: |
+          WS=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId -o tsv)
+          sleep 60
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerGroupName_s startswith '${EXEC}' | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | sed 's/\tPrimaryResult$//' | tee /tmp/job.txt | head -300
+          { echo "### In the environment (${{ github.event.inputs.mode }}, ${{ github.event.inputs.scope }})"; echo '```'; grep '^\[retire\]' /tmp/job.txt || true; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      # A job left behind is what step 5 had to delete by hand (mvhd-remove-tenants).
+      - name: Delete the job
+        if: always()
+        run: az containerapp job delete -n "$JOB" -g "$RESOURCE_GROUP" --yes -o none 2>/dev/null || true
+
+      - name: Verdict
+        run: |
+          echo "execution ${EXEC:-none}: ${STATUS:-unknown}"
+          [ "${STATUS:-}" = Succeeded ] || { echo "::error::the job did not succeed (${STATUS:-unknown})"; exit 1; }

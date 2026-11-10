@@ -13,9 +13,9 @@
 #
 #   ./scripts/azure/13-postgres-flexible-server.sh check   # read-only
 #   ./scripts/azure/13-postgres-flexible-server.sh 1       # create the server
-#   ./scripts/azure/13-postgres-flexible-server.sh 2       # create the 7 databases
+#   ./scripts/azure/13-postgres-flexible-server.sh 2       # create keycloak and cfm
 #   ./scripts/azure/13-postgres-flexible-server.sh 3       # cut Keycloak over
-#   ./scripts/azure/13-postgres-flexible-server.sh 3b      # move EDC + CFM over
+#   ./scripts/azure/13-postgres-flexible-server.sh 3b      # retired (#927)
 #   ./scripts/azure/13-postgres-flexible-server.sh 4       # retire mvhd-postgres
 #   ./scripts/azure/13-postgres-flexible-server.sh 4b      # retire the pg-data share
 #
@@ -51,9 +51,16 @@ PG_FLEX_VERSION="${PG_FLEX_VERSION:-17}"
 PG_FLEX_FQDN="${PG_FLEX_NAME}.postgres.database.azure.com"
 PG_SECRET_NAME="postgres-admin-password"
 
-# ADR-001's seven. `keycloak` first because it is the one that gates sign-in.
-PG_DATABASES=(keycloak controlplane dataplane dataplane_omop identityhub
-              issuerservice cfm)
+# `keycloak` first because it is the one that gates sign-in. `cfm` stays for
+# eclipse-cfm 0.0.7 (ADR-085), emptied of the 2026-03 managers' tables.
+#
+# ADR-001's other five (controlplane, dataplane, dataplane_omop, identityhub,
+# issuerservice) were EDC 0.18's and the April build's, dropped on 2026-11-05
+# (#594); listing them here put them back on every run of this phase, which
+# cfm-seed.yml made (#927). The databases EDC 1.0 reads are created by
+# create-edc-v1-databases.sh (edc-v1-databases.yml), vault by
+# 14-vault-on-postgres.sh, taskdb by wire-task-store.sh.
+PG_DATABASES=(keycloak cfm)
 
 say() { echo "[$(date -u +%H:%M:%S)] $*"; }
 die() { echo "FAIL: $*" >&2; exit 1; }
@@ -170,7 +177,7 @@ phase_1() {
   say "Phase 1 done. ${PG_FLEX_FQDN}"
 }
 
-# ── 2: the seven databases ──────────────────────────────────────────────────
+# ── 2: keycloak and cfm ─────────────────────────────────────────────────────
 phase_2() {
   say "Phase 2: create ${#PG_DATABASES[@]} databases on ${PG_FLEX_NAME}"
   local db
@@ -254,109 +261,13 @@ phase_3() {
   say "Phase 3 done. Sign in at https://${CUSTOM_DOMAIN}/auth/signin and prove it by hand."
 }
 
-# ── 3b: move every other consumer ───────────────────────────────────────────
-# The five EDC services and the two CFM managers. Measured 2026-10-02: all
-# seven named mvhd-postgres, and all seven carried the shared mvhdadmin
-# password in a plaintext env var, the one committed in env.sh. After this
-# phase they carry the Key Vault password as an ACA secret and nothing else.
-#
-# Pool budget (ADR-041): B1ms gives users 35 connections. Keycloak holds 10.
-#
-# EDC: commons-pool defaults max-total to 8, so five services alone would want
-# 40. The cap cannot go in as an env var: EDC maps EDC_FOO_BAR to edc.foo.bar,
-# and the key is `pool.connections.max-total`, whose hyphen no env name can
-# spell. EDC also reads JVM system properties (ConfigurationLoader takes
-# SystemProperties.ofDefault()), and the JVM honours JAVA_TOOL_OPTIONS by
-# itself, so that is the way in. None of these apps set it before.
-#
-# CFM: the managers use database/sql with lib/pq, which leaves open
-# connections unbounded and has no DSN parameter to cap them. At demo load
-# they hold a handful; if `too many clients` ever appears, they are the first
-# suspect and the fix is upstream (SetMaxOpenConns).
-EDC_DB_APPS=(
-  "mvhd-controlplane:controlplane"
-  "mvhd-dp-fhir:dataplane"
-  "mvhd-dp-omop:dataplane_omop"
-  "mvhd-identityhub:identityhub"
-  "mvhd-issuerservice:issuerservice"
-)
-CFM_DB_APPS=(mvhd-tenant-mgr mvhd-provision-mgr)
-EDC_POOL_MAX=3
-
+# ── 3b: retired ─────────────────────────────────────────────────────────────
+# Moved the five EDC 0.18 services and the two 2026-03 CFM managers from
+# mvhd-postgres to this server on 2026-10-02. All seven apps were deleted or
+# replaced by EDC 1.0 (#927); the 1.0 apps get their datasource from
+# migrate-edc-to-v1.sh. Run again, it would point them at dropped databases.
 phase_3b() {
-  say "Phase 3b: move the EDC services and CFM managers to ${PG_FLEX_FQDN}"
-  local pw entry app db
-  pw="$(pg_admin_password)"
-  [ -n "$pw" ] || die "no ${PG_SECRET_NAME} in ${KEY_VAULT_NAME}; run phase 1 first"
-
-  # The old password is still the pg-password secret on mvhd-postgres until
-  # phase 4, so the way back is not lost by this phase.
-  say "rollback, per app, if one does not come back:"
-  say "  az containerapp update -n <app> -g ${RG} --set-env-vars \\"
-  say "    'EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_APP}:5432/<db>' \\"
-  say "    'EDC_DATASOURCE_DEFAULT_USER=mvhdadmin' 'EDC_DATASOURCE_DEFAULT_PASSWORD=<pg-password secret on mvhd-postgres>'"
-
-  for entry in "${EDC_DB_APPS[@]}"; do
-    app="${entry%%:*}"
-    db="${entry##*:}"
-    say "  ${app} -> ${db}"
-    az containerapp secret set --name "$app" --resource-group "$RG" \
-      --secrets "pg-flex-password=${pw}" -o none || die "could not set the secret on ${app}"
-    az containerapp update --name "$app" --resource-group "$RG" \
-      --set-env-vars \
-        "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_FLEX_FQDN}:5432/${db}?sslmode=require" \
-        "EDC_DATASOURCE_DEFAULT_USER=${PG_FLEX_ADMIN}" \
-        "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-        "JAVA_TOOL_OPTIONS=-Dedc.datasource.default.pool.connections.max-total=${EDC_POOL_MAX}" \
-      -o none || die "could not update ${app}"
-  done
-
-  unset pw
-
-  # The CFM managers ignore DATABASE_URL. They read `dsn:` from the tm.env /
-  # pm.env file that 05-cfm-configure.sh mounts as a secret volume, so that
-  # script is the only way to move them. The first version of this phase set
-  # DATABASE_URL instead, reported success, and left CFM on mvhd-postgres
-  # (2026-10-02). Read the mounted file back to prove it names this server.
-  "${SCRIPT_DIR}/05-cfm-configure.sh" || die "05-cfm-configure.sh failed"
-  local secret_name file_secret
-  for entry in "${CFM_DB_APPS[@]}"; do
-    case "$entry" in
-      "$TENANT_MGR_APP") secret_name=tm-env ;;
-      *) secret_name=pm-env ;;
-    esac
-    file_secret=$(az containerapp secret show --name "$entry" --resource-group "$RG" \
-      --secret-name "$secret_name" --query value -o tsv 2>/dev/null || echo "")
-    case "$file_secret" in
-      *"@${PG_FLEX_FQDN}:"*) say "  ${entry}: ${secret_name} names ${PG_FLEX_FQDN}" ;;
-      *) die "${entry}: ${secret_name} does not name ${PG_FLEX_FQDN}" ;;
-    esac
-  done
-  unset file_secret
-
-  # The process, not the knob: read each app's newest revision health back.
-  say "waiting 120s for the new revisions to start"
-  sleep 120
-  local bad="" health
-  for entry in "${EDC_DB_APPS[@]}" "${CFM_DB_APPS[@]}"; do
-    app="${entry%%:*}"
-    health=$(az containerapp revision list --name "$app" --resource-group "$RG" \
-      --query "sort_by([?properties.active], &properties.createdTime)[-1].properties.healthState" \
-      -o tsv 2>/dev/null || echo "unknown")
-    printf '  %-22s %s\n' "$app" "$health"
-    [ "$health" = "Healthy" ] || bad="${bad} ${app}"
-  done
-  [ -z "$bad" ] || die "not healthy:${bad}. Read 'az containerapp logs show -n <app> -g ${RG} --tail 50'."
-
-  local left
-  left=$(pg_app_consumers)
-  if [ -n "$left" ]; then
-    echo "still pointing at ${PG_APP}:" >&2
-    printf '%s' "$left" >&2
-    die "some consumers were not moved"
-  fi
-  say "Phase 3b done. No app but ${PG_APP} itself names ${PG_APP} any more."
-  say "Next: reseed CFM with 'gh workflow run cfm-seed.yml', then phase 4."
+  die "phase 3b is retired (#927): the apps it moved are gone, and EDC 1.0 gets its datasource from migrate-edc-to-v1.sh"
 }
 
 # Every app other than mvhd-postgres and Keycloak whose env still names it.
