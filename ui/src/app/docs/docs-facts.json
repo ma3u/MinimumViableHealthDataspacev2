@@ -828,11 +828,6 @@
         "ports": []
       },
       {
-        "name": "cfm7-token-exchange",
-        "profiles": ["cfm"],
-        "ports": []
-      },
-      {
         "name": "cfm7-tmanager",
         "profiles": ["cfm"],
         "ports": ["18181:8080"]
@@ -848,12 +843,12 @@
         "ports": []
       },
       {
-        "name": "cfm7-mvhdconnectoragent",
+        "name": "cfm7-edcvagent",
         "profiles": ["cfm"],
         "ports": []
       },
       {
-        "name": "cfm7-mvhdidentityagent",
+        "name": "cfm7-ihagent",
         "profiles": ["cfm"],
         "ports": []
       },
@@ -1492,12 +1487,12 @@
   "lastUpdated": {
     "/docs": "2026-11-08",
     "/docs/user-guide": "2026-11-09",
-    "/docs/developer": "2026-11-09",
-    "/docs/developer/quality-gates": "2026-11-09",
+    "/docs/developer": "2026-11-10",
+    "/docs/developer/quality-gates": "2026-11-10",
     "/docs/developer/api": "2026-11-09",
     "/docs/developer/reference": "2026-11-09",
     "/docs/developer/[slug]": "2026-11-09",
-    "/docs/architecture": "2026-11-09",
+    "/docs/architecture": "2026-11-10",
     "/docs/security": "2026-11-09",
     "/docs/security/[slug]": "2026-11-09",
     "/docs/klarbefund": "2026-11-09",

@@ -1,5 +1,5 @@
-# CFM 0.0.7 Provision Manager (ADR-085, #973). Keys as in eclipse-cfm/core-platform-distribution v0.0.39
-# templates/cfm/provision-manager-config.yaml, with our hosts, and Keycloak behind jad/cfm/token-exchange.mjs for jwtlet.
+# CFM Provision Manager (the fork's v0.0.7-mvhd.2, ADR-085, #973). Keys as in eclipse-cfm/core-platform-distribution v0.0.39
+# templates/cfm/provision-manager-config.yaml, with our hosts; the managers check Keycloak tokens.
 uri: nats://cfm7-nats:4222
 # NATS token, local dev only (cfm7-nats --auth in docker-compose.jad.yml)
 nats.auth.method: token
