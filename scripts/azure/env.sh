@@ -12,7 +12,7 @@ set -euo pipefail
 # ── Azure resource names ─────────────────────────────────────────────────────
 export RG="rg-mvhd-dev"
 export LOCATION="westeurope"
-# Derived at source time so 05-cfm-ui.sh can inject it into the UI container.
+# Derived at source time for the scripts that pass it on (it once went into the UI container).
 export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
 export ACR_NAME="acrmvhdehds"
 export ACA_ENV="mvhd-env"
