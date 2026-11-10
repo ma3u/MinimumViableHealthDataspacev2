@@ -1,0 +1,81 @@
+# mvhd-cfm-agents: CFM's six orchestration agents from our fork, one container
+# each, as core-platform-distribution runs them in one deployment (ADR-088,
+# ADR-085 step 4). They take work from NATS and need no ingress. Every
+# container mounts the same secret volume and reads only <name>.env from it.
+# Rendered by scripts/azure/20-cfm-fork.sh; the $${NAME} placeholders are filled there, secrets too.
+name: mvhd-cfm-agents
+type: Microsoft.App/containerApps
+location: ${LOCATION}
+properties:
+  managedEnvironmentId: ${ENV_ID}
+  configuration:
+    activeRevisionsMode: Single
+    registries:
+      - server: ${ACR_LOGIN_SERVER}
+        username: ${ACR_NAME}
+        passwordSecretRef: acr-password
+  template:
+    containers:
+      - name: jwtletagent
+        image: ${IMAGE_PREFIX}/jwtletagent:${CFM_VERSION}
+        command: ["/jwtletagent", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+      - name: edcvagent
+        image: ${IMAGE_PREFIX}/edcvagent:${CFM_VERSION}
+        command: ["/edcvagent", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+      - name: ihagent
+        image: ${IMAGE_PREFIX}/ihagent:${CFM_VERSION}
+        command: ["/ihagent", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+      - name: regagent
+        image: ${IMAGE_PREFIX}/regagent:${CFM_VERSION}
+        command: ["/regagent", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+      - name: obagent
+        image: ${IMAGE_PREFIX}/obagent:${CFM_VERSION}
+        command: ["/obagent", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+      - name: sigletagent
+        image: ${IMAGE_PREFIX}/sigletagent:${CFM_VERSION}
+        command: ["/sigletagent", "--mode=debug"]
+        resources: { cpu: 0.25, memory: 0.5Gi }
+        env:
+          - { name: OTEL_TRACES_EXPORTER, value: "none" }
+          - { name: OTEL_METRICS_EXPORTER, value: "none" }
+          - { name: OTEL_LOGS_EXPORTER, value: "none" }
+        volumeMounts:
+          - { volumeName: cfm-config, mountPath: /etc/appname }
+    scale: { minReplicas: 1, maxReplicas: 1 }
+    volumes:
+      - { name: cfm-config, storageType: Secret }

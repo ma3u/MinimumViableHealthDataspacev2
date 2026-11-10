@@ -118,3 +118,28 @@ When the drop-check has dropped every patch, the profile goes back to
 eclipse-cfm's own release images (`ghcr.io/eclipse-cfm/cfm/<name>:<tag>`,
 pinned by digest), the `fork` block leaves `.github/upstream.json`, and the
 fork can be archived.
+
+## Azure (prepared, not deployed)
+
+ADR-085 step 4 is prepared and has not run. Three Container Apps, as in
+compose: `mvhd-cfm-tmanager` and `mvhd-cfm-pmanager` (internal ingress) and
+`mvhd-cfm-agents` (six containers). The definitions are in
+[`scripts/azure/cfm/`](../../../scripts/azure/cfm/), and
+[`scripts/azure/20-cfm-fork.sh`](../../../scripts/azure/20-cfm-fork.sh) handles them:
+
+```bash
+scripts/azure/20-cfm-fork.sh --check                  # report only
+scripts/azure/20-cfm-fork.sh render /tmp/cfm --offline  # review the definitions, no az
+scripts/azure/20-cfm-fork.sh images                   # az acr build of the eight images from fork.tag
+CFM_AZURE_GO="mvhd-cfm-tmanager" scripts/azure/20-cfm-fork.sh apps
+```
+
+`images` and `apps` change Azure. Each needs Matthias's go, per app, and an
+`az login` first. Three things come before `apps`:
+
+- the `cfm-agents` Keycloak client in the Azure realm, with its secret in Key
+  Vault as `cfm-agents-client-secret`;
+- the database `cfm` cleared of the old CFM's tables;
+- afterwards, seeding the CFM definitions inside the environment.
+
+The script's header lists them.
