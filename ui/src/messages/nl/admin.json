@@ -902,5 +902,5 @@
   "Remove participant": "Deelnemer verwijderen",
   "Removing…": "Wordt verwijderd…",
   "Removal failed": "Verwijderen mislukt",
-  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Deze deelnemer uit de dataruimte verwijderen? De context, de DID en de credentials worden verwijderd."
+  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Deze deelnemer uit de dataruimte verwijderen? De context, de DID en de bewijsstukken worden verwijderd."
 }
