@@ -384,6 +384,24 @@ components:
               TRUST_CENTER_OPERATOR,
               EDC_USER_PARTICIPANT,
             ]
+        cfm:
+          description: >-
+            Present only when the hub provisions through CFM (CFM_TENANT_URL
+            set, ADR-085) and the Tenant Manager answered: what CFM holds for
+            this participant, or null for a context CFM did not provision,
+            such as the seeded five.
+          nullable: true
+          type: object
+          required: [tenantId, profileId, state]
+          properties:
+            tenantId: { type: string }
+            profileId: { type: string }
+            state:
+              type: string
+              enum: [active, pending, disposed, error]
+            detail:
+              type: string
+              description: The profile's error, when state is error.
 
     NegotiationRequest:
       type: object

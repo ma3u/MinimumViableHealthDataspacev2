@@ -227,6 +227,58 @@ export async function provisionThroughCfm(
   return { contextId, did, steps };
 }
 
+/** What CFM's Tenant Manager holds for one participant, by its DID. */
+export interface CfmState {
+  tenantId: string;
+  profileId: string;
+  /**
+   * active: every agent deployed; pending: deploying or disposing; disposed:
+   * removed; error: an agent failed (detail says which).
+   */
+  state: "active" | "pending" | "disposed" | "error";
+  detail?: string;
+}
+
+function profileState(p: ParticipantProfile): CfmState["state"] {
+  const states = (p.vpas ?? []).map((v) => v.state);
+  if (p.error || states.includes("error")) return "error";
+  if (states.length > 0 && states.every((s) => s === "disposed")) {
+    return "disposed";
+  }
+  if (states.length > 0 && states.every((s) => s === "active")) return "active";
+  return "pending";
+}
+
+/**
+ * The Tenant Manager's participant profiles, by DID, so the participant list
+ * can say which contexts CFM provisioned and in what state (ADR-085 step 3).
+ * Of several profiles for one DID, a live one wins over a disposed one.
+ * Throws when the Tenant Manager cannot be asked; the caller lists the
+ * contexts without CFM's view then.
+ */
+export async function cfmStatesByDid(): Promise<Map<string, CfmState>> {
+  const s = settings();
+  const tm = tenantManager(s, await cfmToken(s));
+  const byDid = new Map<string, CfmState>();
+  for (const tenant of await tm<{ id: string }[]>("/v1alpha1/tenants")) {
+    const profiles = await tm<ParticipantProfile[]>(
+      `/v1alpha1/tenants/${tenant.id}/participant-profiles`,
+    );
+    for (const p of profiles) {
+      if (!p.identifier) continue;
+      const state: CfmState = {
+        tenantId: tenant.id,
+        profileId: p.id,
+        state: profileState(p),
+        ...(p.errorDetail ? { detail: p.errorDetail } : {}),
+      };
+      const known = byDid.get(p.identifier);
+      if (!known || known.state === "disposed") byDid.set(p.identifier, state);
+    }
+  }
+  return byDid;
+}
+
 /**
  * Removes the participant's tenant and profile from CFM, best effort. CFM
  * 0.0.7's dispose reaches no agent with the context id

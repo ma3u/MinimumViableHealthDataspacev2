@@ -115,6 +115,14 @@ registration's details onto them. What step 3 added is
   last, so a removal that stopped halfway can run again. Every step is in
   the answer; `complete` is false when one failed.
 - With `CFM_TENANT_URL` set, the CFM profile and tenant first, best effort.
+- `/onboarding` shows an `EDC_ADMIN` a "Remove participant" button, with a
+  confirmation, on a participant registered there and on no other.
+- With `CFM_TENANT_URL` set, `GET /api/participants` adds `cfm` to each
+  participant: its Tenant Manager profile and state (`active`, `pending`,
+  `disposed`, `error`), or `null` for one CFM did not provision. A Tenant
+  Manager that does not answer leaves the field out
+  ([`cfmStatesByDid()`](../../../ui/src/lib/edc/cfm-provision.ts), Bruno
+  `05/33`).
 
 Measured on the OrbStack stack with a dev server:
 
