@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# Phase 4: EDC-V core services — controlplane, dataplanes, identity hub, issuer.
+# Phase 4: EDC core services: NATS, control plane, identity hub, issuer, proxy.
 #
-# ADR-055: the EDC apps run the 0.18 build compose and CI run. This script
-# still creates them with the base settings only; the 0.18 settings, ports and
-# databases are applied by migrate-edc-to-v018.sh, after
-# create-edc-v018-databases.sh (runbook: docs/knowledge/runbooks/edc-v018-on-azure.md).
+# This creates the apps with base settings only. EDC 1.0 (ADR-078) runs them:
+# migrate-edc-to-v1.sh moves each to its launcher image and _v1 database
+# (runbook: docs/knowledge/runbooks/edc-1-on-azure.md). The images and the
+# database names below are still the ones this phase was written with; a
+# rebuild from nothing has not been rehearsed since 1.0 (#927 follow-up).
+# siglet is the data plane on 1.0 (17-siglet.sh); the two 0.18 data planes
+# this phase created were deleted on 2026-11-09 (#927).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
@@ -135,61 +138,6 @@ ok "NATS (JetStream enabled)"
 # The update made a new NATS revision under the control plane created above.
 restart_controlplane_after_nats_change
 
-# ── Data Plane FHIR ─────────────────────────────────────────────────────────
-# Web ports, ingress ports and the selector settings come from
-# configure-data-planes.sh after both creates (#421).
-log "Creating Data Plane FHIR container app..."
-az containerapp create \
-  --name "$DP_FHIR_APP" --resource-group "$RG" --environment "$ACA_ENV" \
-  --image "$DP_FHIR_IMAGE" \
-  --registry-server "$ACR_LOGIN_SERVER" \
-  --registry-username "$ACR_NAME" \
-  --registry-password "$ACR_PASSWORD" \
-  --cpu 0.5 --memory 1Gi \
-  --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 8080 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
-  --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane?sslmode=${PG_SSLMODE}" \
-    "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-fhir-private" \
-    "EDC_TRANSFER_PROXY_TOKEN_VERIFIER_PUBLICKEY_ALIAS=dataplane-fhir-public" \
-    "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
-    "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
-  -o none
-ok "Data Plane FHIR"
-
-# ── Data Plane OMOP ─────────────────────────────────────────────────────────
-log "Creating Data Plane OMOP container app..."
-az containerapp create \
-  --name "$DP_OMOP_APP" --resource-group "$RG" --environment "$ACA_ENV" \
-  --image "$DP_OMOP_IMAGE" \
-  --registry-server "$ACR_LOGIN_SERVER" \
-  --registry-username "$ACR_NAME" \
-  --registry-password "$ACR_PASSWORD" \
-  --cpu 0.5 --memory 1Gi \
-  --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 8080 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
-  --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop?sslmode=${PG_SSLMODE}" \
-    "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-omop-private" \
-    "EDC_TRANSFER_PROXY_TOKEN_VERIFIER_PUBLICKEY_ALIAS=dataplane-omop-public" \
-    "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
-    "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
-  -o none
-ok "Data Plane OMOP"
-
-# Ports, extra ingress ports and registration with the control plane, the same
-# script that repaired the live apps (#421): distinct ports per web context,
-# which the two creates above do not set.
-"${SCRIPT_DIR}/configure-data-planes.sh" apply
-
 # ── Identity Hub ─────────────────────────────────────────────────────────────
 log "Creating Identity Hub container app..."
 az containerapp create \
@@ -228,7 +176,7 @@ ok "Identity Hub"
 #
 # ACA ingress publishes exactly one port, so the admin context must be the one
 # on it. The default context moves to 10010, as in jad/issuerservice.env,
-# rather than colliding. Both callers, 05-cfm-ui.sh and 08-compliance-runner.sh,
+# rather than colliding. Both callers, the UI and 08-compliance-runner.sh,
 # already build https://$ISSUER_APP.internal.$ACA_DOMAIN/api/admin, so the
 # server was the only side that disagreed. That is #373: the route answered
 # 502 on the demo and 200 everywhere else, for as long as the demo existed.
@@ -267,7 +215,7 @@ ok "Issuer Service"
 # TCK_CONTROLPLANE_MGMT_URL overrides the default /api/mgmt path because the
 # controlplane on ACA is started with WEB_HTTP_MANAGEMENT_PATH=/management.
 # TCK_CLIENT_SECRET is not set here, for the same reason as
-# EDC_SERVICE_CLIENT_SECRET in 05-cfm-ui.sh: rotate-edc-admin-client-secret.sh
+# the UI's EDC_SERVICE_CLIENT_SECRET: rotate-edc-admin-client-secret.sh
 # wires it from Key Vault.
 log "Creating Neo4j Proxy container app..."
 az containerapp create \
@@ -300,8 +248,6 @@ ok "Neo4j Proxy"
 log "EDC-V services complete"
 echo "  NATS:         ${NATS_APP}"
 echo "  Control Plane:${CONTROLPLANE_APP}"
-echo "  DP FHIR:      ${DP_FHIR_APP}"
-echo "  DP OMOP:      ${DP_OMOP_APP}"
 echo "  Identity Hub: ${IDENTITYHUB_APP}"
 echo "  Issuer:       ${ISSUER_APP}"
 echo "  Neo4j Proxy:  ${NEO4J_PROXY_APP}"

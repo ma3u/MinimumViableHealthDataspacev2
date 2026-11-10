@@ -382,9 +382,9 @@ jobs:
 
       # #345. The control-plane seed above populates participant CONTEXTS on
       # the connector; IdentityHub is a different store and has always been
-      # empty here. Locally it is filled by jad/seed-health-tenants.sh via the
-      # CFM TenantManager, which does not fit a standard runner, so this talks
-      # to the Identity API directly.
+      # empty here. Locally scripts/seed-identity-layer.sh fills it through the
+      # same Identity API this talks to directly (the 2026-03 CFM did it before
+      # EDC 1.0, ADR-078).
       #
       # Not continue-on-error. Before #341 an empty IdentityHub scored 14
       # passed / 0 failed, so a silent seeding failure is exactly the thing
@@ -407,9 +407,8 @@ jobs:
 
       # #345. CI's IssuerService has never had an identity: no participant
       # context, no signing key loaded, no DID. Locally bootstrap-jad.sh gives it
-      # one (vault-bootstrap sidecar, jad-seed Step 2, seed-issuer-identity.sql
-      # plus a restart); jad-seed cannot run here because it waits for CFM.
-      # This reproduces those pieces and reads the DID document back. Every
+      # one (the vault-bootstrap sidecar, then scripts/seed-issuer-identity.sh).
+      # This runs those pieces and reads the DID document back. Every
       # issuer seed below depends on it, and the 401/404 pair the first runs
       # produced was this missing.
       - name: Give the issuer its identity (#345)

@@ -199,8 +199,7 @@ run_section_a() {
 
   # EDC services (check Docker health status — HTTP endpoints require auth)
   check_container "Control Plane" "health-dataspace-controlplane"
-  check_container "Data Plane FHIR" "health-dataspace-dataplane-fhir"
-  check_container "Data Plane OMOP" "health-dataspace-dataplane-omop"
+  check_container "siglet" "health-dataspace-siglet"
   check_container "Identity Hub" "health-dataspace-identityhub"
   check_container "Issuer Service" "health-dataspace-issuerservice"
   check_container "Neo4j" "health-dataspace-neo4j"

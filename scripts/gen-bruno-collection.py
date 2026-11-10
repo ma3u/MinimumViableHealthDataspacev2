@@ -518,7 +518,7 @@ req(f, "11 Participants as the hub lists them", "get", f"{B}/api/participants", 
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0]: isDefined"])
 req(f, "12 Onboard a participant, without a name (400)", "post", f"{B}/api/participants", body={},
     asserts=["res.status: eq 400", "res.body.error: contains displayName"],
-    docs="A full create provisions a CFM tenant and is not part of a smoke run; jad/seed-health-tenants.sh does that.")
+    docs="A full create provisions a participant (context, DID, credential; ADR-078) and is not part of a smoke run; scripts/seed-identity-layer.sh seeds the five demo participants.")
 req(f, "13 Change a participant, with nothing to change (400)", "patch",
     f"{B}/api/participants/{{{{uiParticipantId}}}}", body={},
     asserts=["res.status: eq 400", "res.body.error: contains properties"])

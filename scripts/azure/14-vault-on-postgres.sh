@@ -236,7 +236,7 @@ PY
     if printf '%s' "$log" | grep -q '\[vault-init\] ready'; then
       printf '%s\n' "$log" | grep -E 'vault-init|vault-unseal' | tail -8
       say "Phase 3 done: Vault is persistent and unsealed."
-      say "Next: repair-live-stack.sh 5 (bootstrap), then 05-cfm-agents.sh."
+      say "Next: repair-live-stack.sh 5 (bootstrap)."
       return 0
     fi
     if printf '%s' "$log" | grep -q 'ERROR'; then

@@ -48,9 +48,9 @@ env:
   # management-api:write, and differ only in a hardcoded `role` claim. The
   # control plane accepts reads from either and refuses a participant-context
   # create from `admin` with "Required user role not satisfied" (HTTP 403),
-  # measured on the live control plane. The CFM edcv-agent, which is what
-  # creates these contexts on the local stack, authenticates as provisioner
-  # (jad/edcv-agent-config.yaml). Dev-default credentials, as everywhere else
+  # measured on the live control plane. The identity reseed
+  # (edc-reseed-identity-layer.yml) creates them as provisioner for the same
+  # reason. Dev-default credentials, as everywhere else
   # in this repository.
   KC_CLIENT_ID: provisioner
   KC_CLIENT_SECRET: provisioner-secret

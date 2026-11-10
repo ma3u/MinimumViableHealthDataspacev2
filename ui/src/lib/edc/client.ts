@@ -231,8 +231,7 @@ async function apiRequest<T = unknown>(
  *   EDC 1.0.0-RC5 (docker-compose.jad.yml)   /v5       200, /v5beta 404
  *
  * A wrong segment is a 404 that GET /api/participants once turned into
- * bundled mock data (#317), so every deployment sets the variable explicitly;
- * 05-cfm-ui.sh does.
+ * bundled mock data (#317), so every deployment sets the variable explicitly.
  */
 const MGMT_API_VERSION = process.env.EDC_MGMT_API_VERSION || "v5";
 

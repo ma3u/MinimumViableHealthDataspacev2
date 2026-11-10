@@ -17,7 +17,7 @@
  * thing it failed to create), so it uses one shared bucket.
  *
  * Persistence: in-memory is acceptable because the ACA UI runs a single replica
- * (min=max=1, see `scripts/azure/05-cfm-ui.sh`). It does NOT survive a revision
+ * (min=max=1). It does NOT survive a revision
  * rollover, which is the right lifetime for a record that was never real: the
  * lists fall back to the bundled fixtures. The durable path is a seeded
  * controlplane, not a better store.

@@ -287,7 +287,7 @@
     {
       "clientId": "issuer",
       "name": "Issuer Client",
-      "description": "IssuerService identity: Vault access and issuer-admin API. Declared here so a fresh realm import has it; jad/seed-jad.sh only reconciles it (#345).",
+      "description": "IssuerService identity: Vault access and issuer-admin API. Declared here so a fresh realm import has it (#345).",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,

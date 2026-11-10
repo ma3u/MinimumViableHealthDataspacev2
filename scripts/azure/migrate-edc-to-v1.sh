@@ -12,7 +12,10 @@
 #   migrate-edc-to-v1.sh rollback <name>    put one app back from its backup
 #
 #   <name>: controlplane | identityhub | issuerservice
-#           (rollback: also siglet, proxy, ui, dp-fhir, dp-omop)
+#           (rollback: also siglet, proxy, ui)
+#
+# The 0.18 rollback ended on 2026-11-09 (#927): its apps and databases are
+# gone, so `rollback` restores 1.0 states saved by a later `backup`.
 #
 # Order, gates and the rollback: docs/knowledge/runbooks/edc-1-on-azure.md.
 # In short: backup; Keycloak scopes; the _v1 databases (workflow
@@ -20,10 +23,10 @@
 # issuerservice, each healthy before the next; siglet; the UI and the proxy
 # from the 1.0 branch; then the seeds.
 #
-# Each `app` step writes one new revision of the app as it runs on 0.18
-# (migrate-edc-to-v018.sh gave it its settings) with:
+# Each `app` step writes one new revision of the app as it ran on 0.18
+# (migrate-edc-to-v018.sh, retired, gave it the settings it keeps) with:
 #   - the launcher image mvhd-edc-<x>:${EDC1_TAG} (push-edc1-images.sh);
-#   - the database <db>_v1; the 0.18 database stays untouched for a rollback;
+#   - the database <db>_v1;
 #   - what 1.0 reads differently: `prefix.mapping` where 0.18 read
 #     `prefix-mapping`, and policy validation on (the launcher's
 #     EhdsPolicyVocabularyExtension declares the EHDS terms, ADR-078);
@@ -59,12 +62,10 @@ app_name() {
     siglet) echo "$SIGLET_APP" ;;
     ui) echo "$UI_APP" ;;
     proxy) echo "$NEO4J_PROXY_APP" ;;
-    dp-fhir) echo "$DP_FHIR_APP" ;;
-    dp-omop) echo "$DP_OMOP_APP" ;;
     *) err "unknown app '$1' (controlplane, identityhub, issuerservice, siglet, ui)"; exit 2 ;;
   esac
 }
-BACKED_UP=(controlplane identityhub issuerservice siglet ui proxy dp-fhir dp-omop)
+BACKED_UP=(controlplane identityhub issuerservice siglet ui proxy)
 
 need_tag() {
   [ -n "$EDC1_TAG" ] || { err "set EDC1_TAG to the tag push-edc1-images.sh pushed"; exit 2; }

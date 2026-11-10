@@ -9,8 +9,9 @@ name: EDC re-seed the demo participants (#574)
 # did:web:mvhd-identityhub%3A7083:<slug>, ending with a MembershipCredential
 # for each.
 #
-# Run cfm-remove-tenants.yml first: the IdentityHub step mirrors every
-# control-plane context, failed tenants included.
+# The IdentityHub step mirrors every control-plane context, failed tenants
+# included; the 2026-03 CFM's were removed before the first run (#574), by a
+# workflow that went with #927.
 #
 # Secrets never reach a log or a person: the Keycloak admin password is read
 # from the Keycloak app (the CI identity has listSecrets there, not Key Vault

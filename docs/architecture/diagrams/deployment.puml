@@ -36,7 +36,7 @@ rectangle "Infrastructure" as INFRA #C9E7B7 {
   Technology_SystemSoftware(nats, "NATS JetStream\nevent mesh, :4222 and :8222")
 }
 rectangle "Compose profiles, not started by default" as PROF #E5E7EB {
-  Technology_SystemSoftware(e018, "edc018\nDCore data planes, CFM managers, agents and shim, jad-seed")
+  Technology_SystemSoftware(cfm, "cfm\neclipse-cfm 0.0.7, managers and agents (ADR-085)")
   Technology_SystemSoftware(trust, "trust-check\nrogue-issuer, :10033")
   Technology_SystemSoftware(fed, "federated\nNeo4j SPE2, :7475 and :7688")
 }
@@ -93,7 +93,7 @@ vu -[hidden]right- kc
 kc -[hidden]right- pg
 EDC -[hidden]right- IDM
 INFRA -[hidden]down- PROF
-e018 -[hidden]right- trust
+cfm -[hidden]right- trust
 trust -[hidden]right- fed
 
 legend bottom left

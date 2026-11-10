@@ -44,19 +44,6 @@ pull_retag_push "Neo4j" "neo4j:${NEO4J_VERSION}" "$NEO4J_IMAGE"
 pull_retag_push "Keycloak" "quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}" "$KEYCLOAK_IMAGE"
 pull_retag_push "Vault" "hashicorp/vault:${VAULT_VERSION}" "$VAULT_IMAGE"
 pull_retag_push "NATS" "nats:${NATS_VERSION}" "$NATS_IMAGE"
-pull_retag_push "nginx (CFM control-plane shim)" "nginx:${NGINX_VERSION:-1.29-alpine}" "$CFM_CP_SHIM_IMAGE"
-
-# ── CFM provisioning agents ─────────────────────────────────────────────────
-# Not here. They are built from source, for both architectures, by
-# scripts/build-cfm-images.sh, which is a different job from mirroring a
-# third-party tag: it needs a specific upstream commit and it produces images
-# no registry serves ready-made.
-#
-#   scripts/build-cfm-images.sh --platform linux/amd64,linux/arm64 \
-#     --push "$ACR_LOGIN_SERVER" --tag "$CFM_AGENT_VERSION"
-#
-# Importing them from GHCR, which this script used to do, put linux/arm64
-# images into an amd64-only runtime (#318, #380).
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "All images pushed"
@@ -70,30 +57,7 @@ echo "    ${NEO4J_IMAGE}"
 echo "    ${KEYCLOAK_IMAGE}"
 echo "    ${VAULT_IMAGE}"
 echo "    ${NATS_IMAGE}"
-echo "    ${CFM_CP_SHIM_IMAGE}"
 echo ""
-echo "  CFM agents (scripts/build-cfm-images.sh, pushed separately):"
-echo "    ${CFM_KC_AGENT_IMAGE}"
-echo "    ${CFM_EDCV_AGENT_IMAGE}"
-echo "    ${CFM_REG_AGENT_IMAGE}"
-echo "    ${CFM_OB_AGENT_IMAGE}"
-echo ""
-echo "  JAD / CFM images are built from their own repositories, not this one."
-echo "  They currently resolve to :latest, which ACA caches and will not re-pull"
-echo "  on restart — see issue #116. env.sh routes them through JAD_VERSION and"
-echo "  CFM_VERSION, so pinning is a one-line change ONCE the tags exist in ACR."
-echo ""
-echo "  To pin, push tagged images FIRST, then set the variable. From each"
-echo "  upstream checkout, with JAD_VERSION set to that repo's git SHA:"
-echo ""
-for repo in jad-controlplane jad-dataplane jad-identity-hub jad-issuerservice; do
-  echo "    docker buildx build --platform linux/amd64 \\"
-  echo "      -t ${ACR_LOGIN_SERVER}/${repo}:\${JAD_VERSION} --push ."
-done
-for repo in cfm-tmanager cfm-pmanager; do
-  echo "    docker buildx build --platform linux/amd64 \\"
-  echo "      -t ${ACR_LOGIN_SERVER}/${repo}:\${CFM_VERSION} --push ."
-done
-echo ""
-echo "  Current resolution:"
-echo "    JAD_VERSION=${JAD_VERSION}  CFM_VERSION=${CFM_VERSION}"
+echo "  The EDC 1.0 launchers are built here, apart from this script:"
+echo "    scripts/azure/push-edc1-images.sh build | check | push   (ADR-076)"
+echo "  siglet is imported by 17-siglet.sh at the digest docker-compose.jad.yml pins."

@@ -263,18 +263,8 @@ write POST /transit/keys/signing-siglet '{"type":"ed25519"}'
 # values are in the repository and are for local use only.
 header "EDC keys (written once)"
 kv_once aes-key-alias "\$(head -c 32 /dev/urandom | base64)"
-for dp in dataplane-fhir dataplane-omop; do
-  code=\$(vault_call GET "/secret/data/\${dp}-private") || code=000
-  if [ "\$code" = 200 ]; then
-    echo "  kept  secret/\${dp}-private and -public (present)"
-  else
-    openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out /tmp/dp-priv 2>/dev/null
-    openssl pkey -in /tmp/dp-priv -pubout -out /tmp/dp-pub 2>/dev/null
-    kv_once "\${dp}-private" "\$(cat /tmp/dp-priv)"
-    kv_once "\${dp}-public" "\$(cat /tmp/dp-pub)"
-    rm -f /tmp/dp-priv /tmp/dp-pub
-  fi
-done
+# The 0.18 data planes' token key pairs (dataplane-fhir and -omop) are no longer
+# written: those apps were deleted with #927, and siglet signs on EDC 1.0.
 
 echo ""
 if [ "\$FAILED" -ne 0 ]; then

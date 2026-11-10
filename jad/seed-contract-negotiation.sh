@@ -22,7 +22,7 @@
 #
 # Prerequisites:
 #   - All JAD services running (docker compose up)
-#   - seed-jad.sh completed (tenants + VPAs)
+#   - scripts/seed-identity-layer.sh completed (participant contexts)
 #   - seed-data-assets.sh completed (assets + policies + contracts)
 # =============================================================================
 set -uo pipefail
@@ -40,8 +40,7 @@ MGMT_URL="${MGMT_URL:-http://localhost:11003/api/mgmt}"
 KC_URL="${KC_URL:-http://localhost:8080}"
 KC_REALM="edcv"
 
-# DIDs — assigned by CFM provisioning based on tenant slug
-# These match the participant contexts created by seed-health-tenants.sh
+# DIDs of the participant contexts scripts/seed-identity-layer.sh creates
 ALPHAKLINIK_DID="did:web:identityhub%3A7083:alpha-klinik"
 LMC_DID="did:web:identityhub%3A7083:lmc"
 PHARMACO_DID="did:web:identityhub%3A7083:pharmaco"
@@ -203,7 +202,7 @@ MEDREG_CTX=$(discover_ctx "medreg")
 IRS_CTX=$(discover_ctx "irs")
 
 if [ -z "$ALPHAKLINIK_CTX" ] && [ -z "$LMC_CTX" ] && [ -z "$PHARMACO_CTX" ]; then
-  fail "No participant contexts found in EDC-V — run seed-health-tenants.sh first"
+  fail "No participant contexts found in EDC-V; run scripts/seed-identity-layer.sh first"
 fi
 
 [ -n "$ALPHAKLINIK_CTX" ] && ok "AlphaKlinik Berlin  ctx=$ALPHAKLINIK_CTX" || warn "AlphaKlinik Berlin  ctx NOT found"

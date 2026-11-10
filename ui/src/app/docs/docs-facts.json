@@ -736,16 +736,6 @@
         "ports": ["11003:8081"]
       },
       {
-        "name": "dataplane-fhir",
-        "profiles": ["edc018"],
-        "ports": ["11002:11002"]
-      },
-      {
-        "name": "dataplane-omop",
-        "profiles": ["edc018"],
-        "ports": ["11012:11012"]
-      },
-      {
         "name": "neo4j-proxy",
         "profiles": [],
         "ports": ["9090:9090"]
@@ -784,46 +774,6 @@
         "name": "simpl-issuer",
         "profiles": ["simpl"],
         "ports": ["10043:8080"]
-      },
-      {
-        "name": "tenant-manager",
-        "profiles": ["edc018"],
-        "ports": ["11006:8080"]
-      },
-      {
-        "name": "provision-manager",
-        "profiles": ["edc018"],
-        "ports": ["11007:8080"]
-      },
-      {
-        "name": "cfm-cp-shim",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-agents",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-edcv-agent",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-registration-agent",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-onboarding-agent",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "jad-seed",
-        "profiles": ["seed", "edc018"],
-        "ports": []
       },
       {
         "name": "siglet",
@@ -883,15 +833,10 @@
     ]
   },
   "postgresDbs": [
-    "cfm",
     "cfm_v007",
     "controlplane",
     "controlplane_v1",
-    "dataplane",
-    "dataplane_omop",
-    "identityhub",
     "identityhub_v1",
-    "issuerservice",
     "issuerservice_v1",
     "keycloak",
     "redlinedb",

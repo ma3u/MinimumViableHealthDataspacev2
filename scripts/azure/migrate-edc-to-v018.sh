@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Move the EDC apps on Azure to the build compose and CI run (ADR-055, #503)
+# RETIRED (#927): moved the EDC apps on Azure to EDC 0.18 (ADR-055, #503)
 # =============================================================================
+# Do not run it. EDC 1.0 has run Azure since 2026-11-06 (ADR-078); the 0.18
+# data planes and the 2026-03 CFM were deleted on 2026-11-09 and the _v018
+# databases are dropped by edc-retire-v018-azure.yml (#927 step 6). It refuses
+# to start.
+#
+# It is kept for one reason: its app blocks below are the only record in the
+# repository of the base settings the 1.0 apps inherited when
+# migrate-edc-to-v1.sh layered 1.0 over them (the DCP scopes, the trusted
+# issuer, NATS, the web context ports). trusted-issuers.test.ts reads the
+# control plane's. Folding them into migrate-edc-to-v1.sh, checked with its
+# read-only `diff` against the live apps, is what lets this file go.
+#
 #   migrate-edc-to-v018.sh check              read-only: what each app runs
 #   migrate-edc-to-v018.sh backup             save every app's YAML first
 #   migrate-edc-to-v018.sh app <name>         move one app
@@ -36,6 +48,9 @@
 #
 # Needs: az (logged in, Container Apps Contributor), python3 with PyYAML.
 set -euo pipefail
+echo "migrate-edc-to-v018.sh is retired (#927): EDC 1.0 runs Azure; see the header." >&2
+exit 2
+# shellcheck disable=SC2317 # kept as a record, never reached
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
 

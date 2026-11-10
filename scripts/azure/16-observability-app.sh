@@ -245,7 +245,7 @@ done
 
 # The collector's OTLP/HTTP port and Prometheus' remote write, internal only:
 # http://mvhd-observability:4318 and :9090
-# from any app in the environment (as configure-data-planes.sh does, #421).
+# from any app in the environment (as the 0.18 data planes did, #421).
 # Persistence: Prometheus (the k6 runs), Loki, Tempo and Grafana keep their
 # data on an Azure Files share mounted at /data. Without it every deploy and
 # the nightly stop emptied them (2026-10-06: three deploys, the morning's k6
