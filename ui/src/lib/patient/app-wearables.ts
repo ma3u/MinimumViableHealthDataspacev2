@@ -2,12 +2,12 @@ import { runQuery } from "@/lib/neo4j";
 
 /**
  * Weekly device values the Klarbefund app sends into the patient's own
- * record (ADR-057): the four series its Trends screen shows, read from
+ * record (ADR-057): the series its Trends screen shows, read from
  * Apple Health, one mean per metric and week. Never a single day's value
  * or a raw sample: a week is the finest grain that leaves the phone.
  *
  * The app sends a FHIR R4 Bundle of Observations. Each must be exactly one
- * of the four metrics below, with its LOINC code and UCUM unit, a plausible
+ * of the five metrics below, with its LOINC code and UCUM unit, a plausible
  * value and an `effectivePeriod` of at most a week; anything else is
  * reported back as skipped. Each sync replaces the previous one, so the
  * record holds the series once, as the phone last saw it.
@@ -17,7 +17,7 @@ const LOINC = "http://loinc.org";
 const UCUM = "http://unitsofmeasure.org";
 const SOURCE_REPORT = "apple-health-weekly";
 export const SOURCE_KIND = "device-weekly-mean";
-/** Four metrics over two years of weeks, with room to spare. */
+/** Five metrics over two years of weeks, with room to spare. */
 export const MAX_WEARABLE_OBSERVATIONS = 1000;
 
 /** The metrics the app may send: LOINC code, UCUM unit, plausible range. */
@@ -51,6 +51,15 @@ const WEARABLE_METRICS: Record<
     category: "activity",
     min: 0,
     max: 100_000,
+  },
+  // Exercise minutes, a day's mean over the week: what the active year rule
+  // of a bonus program reads (#934 step 6, ADR-087). Never inferred from steps.
+  "55411-3": {
+    display: "Exercise duration",
+    unit: "min/d",
+    category: "activity",
+    min: 0,
+    max: 1440,
   },
   "29463-7": {
     display: "Body weight",
@@ -110,7 +119,7 @@ export function parseWearableBundle(
       const code = loinc ? str(loinc.code)! : null;
       const metric = code ? WEARABLE_METRICS[code] : undefined;
       if (!code || !metric) {
-        return refuse("not one of the four device metrics");
+        return refuse("not one of the five device metrics");
       }
       const quantity = obj(r.valueQuantity);
       const value = num(quantity.value);

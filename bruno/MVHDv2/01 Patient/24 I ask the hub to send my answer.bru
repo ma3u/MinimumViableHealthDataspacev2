@@ -17,7 +17,7 @@ headers {
 body:json {
   {
     "programmeId": "{{programmeId}}",
-    "year": 2027
+    "year": 2025
   }
 }
 
@@ -25,16 +25,18 @@ tests {
   if (!bru.getVar("programmeId")) {
     test("SKIPPED: no bonus program on this stack to send to (#934)", function () {});
   } else {
-    test("accepted: 202, the year and no answer until the hub evaluates it", function () {
+    test("accepted: 202, evaluated inside the record: the year and goal met, nothing else", function () {
       expect(res.getStatus()).to.equal(202);
       const t = res.getBody().transfer;
-      expect(t.year).to.equal(2027);
-      expect(t.goalMet).to.equal(null);
-      expect(t.status).to.equal("awaiting-evaluation");
+      expect(t.year).to.equal(2025);
+      expect(t.goalMet).to.be.a("boolean");
+      expect(t.status).to.equal("evaluated");
+      expect(Object.keys(t).sort()).to.eql(
+        ["goalMet", "programmeId", "requestedAt", "status", "transferId", "year"]);
     });
   }
 }
 
 docs {
-  ADR-080, decision 4, second path: the person tells the hub to send the program the year's answer. It goes out only under an open consent; the answer itself is computed in step 6.
+  ADR-080, decision 4, second path: the person tells the hub to send the program the year's answer. It goes out only under an open consent, for the ended year the rule covers; the hub works out goal met inside the record and records only that (step 6, ADR-087).
 }

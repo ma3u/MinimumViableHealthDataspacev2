@@ -32,10 +32,17 @@ The whole process, with what crosses to the insurer:
 - **The gate.** `programmeTransferAllowed()` returns the open consent or null;
   `POST /api/patient/programmes/transfer` answers 403 without one and records
   nothing. It does not read the opt-out.
-- **The transfer** carries the programme, the year and `goalMet`, which stays
-  null (`awaiting-evaluation`) until #934 step 6 computes it. Nothing reaches
-  the insurer before step 8.
-- **Surfaces.** `GET /api/patient/programmes`, `POST/DELETE
-/api/patient/programmes/consent`, `POST /api/patient/programmes/transfer`
+- **The evaluation** (#934 step 6, [ADR-087](../../ADRs/ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md))
+  reads one ended year inside the record: LOINC 55411-3 weekly exercise means
+  (times seven, over 52 weeks) and an Encounter coded SNOMED CT 185349003.
+  `GET /api/patient/programmes/evaluation` shows the member goal met and the
+  breakdown; a year not over answers `year-not-over`.
+- **The transfer** carries the programme, the year and `goalMet`, status
+  `evaluated`; 400 for a year the rule does not cover, 409 before the year
+  ends. Nothing reaches the insurer before step 8.
+- **Surfaces.** `GET /api/patient/programmes`, `GET
+/api/patient/programmes/evaluation`, `POST/DELETE
+/api/patient/programmes/consent`, `POST /api/patient/programmes/transfer`,
+  and their Klarbefund twins under `/api/patient/app/programmes`
   ([nextjs-api-routes](../apis/nextjs-api-routes.md)); the page
-  `/patient/programmes`; Bruno `01 Patient/22` to `26`; journeys J1092, J1094.
+  `/patient/programmes`; Bruno `01 Patient/22` to `27`; journeys J1092, J1094, J1099.

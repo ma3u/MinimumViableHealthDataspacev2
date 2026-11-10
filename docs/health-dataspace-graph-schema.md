@@ -534,7 +534,7 @@ answers 403.
 **Properties:**
 
 - `ProgrammeConsent`: `consentId: String!`, `patientId`, `programmeId`, `joinedAt: DateTime`, `withdrawnAt: DateTime` (null while open)
-- `ProgrammeTransfer`: `transferId: String!`, `patientId`, `programmeId`, `year: Integer`, `goalMet: Boolean` (null until step 6 evaluates the year), `status` (`awaiting-evaluation`), `requestedAt: DateTime`
+- `ProgrammeTransfer`: `transferId: String!`, `patientId`, `programmeId`, `year: Integer`, `goalMet: Boolean` (worked out by the hub for an ended year, #934 step 6, ADR-087; null on transfers recorded before it), `status` (`evaluated`; `awaiting-evaluation` before step 6), `requestedAt: DateTime`
 
 **Indexes:**
 

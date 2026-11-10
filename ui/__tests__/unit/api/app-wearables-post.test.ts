@@ -49,6 +49,21 @@ const bundle = (...observations: Record<string, unknown>[]) => ({
 });
 
 describe("parseWearableBundle", () => {
+  it("takes exercise minutes, the series a bonus program's rule reads (ADR-087)", () => {
+    const { rows, skipped } = parseWearableBundle(
+      bundle(weekly("ex", "55411-3", 24.3, "min/d")),
+      "KB-AB3DK7MN",
+    );
+    expect(skipped).toEqual([]);
+    expect(rows[0]).toMatchObject({
+      code: "55411-3",
+      display: "Exercise duration",
+      value: 24.3,
+      unit: "min/d",
+      category: "activity",
+    });
+  });
+
   it("takes the four metrics as weekly means with their week", () => {
     const { rows, skipped } = parseWearableBundle(
       bundle(
@@ -92,7 +107,7 @@ describe("parseWearableBundle", () => {
     );
     expect(rows.map((r) => r.value)).toEqual([54]);
     expect(Object.fromEntries(skipped.map((s) => [s.id, s.reason]))).toEqual({
-      lab: "not one of the four device metrics",
+      lab: "not one of the five device metrics",
       unit: "a number in /min (UCUM) is required",
       odd: "the value is not plausible",
       month: "a period longer than a week",

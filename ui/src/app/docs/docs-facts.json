@@ -282,6 +282,10 @@
       "methods": ["POST", "DELETE"]
     },
     {
+      "path": "/api/patient/app/programmes/evaluation",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/patient/app/programmes",
       "methods": ["GET"]
     },
@@ -324,6 +328,10 @@
     {
       "path": "/api/patient/programmes/consent",
       "methods": ["POST", "DELETE"]
+    },
+    {
+      "path": "/api/patient/programmes/evaluation",
+      "methods": ["GET"]
     },
     {
       "path": "/api/patient/programmes",
@@ -1403,6 +1411,12 @@
       "file": "ADR-086-tehdas2-ratings-after-the-requirement-check.md",
       "title": "The TEHDAS2 ratings after the requirement check",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-087",
+      "file": "ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md",
+      "title": "The hub evaluates a bonus year once it has ended",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1441,8 +1455,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 66,
-    "operations": 86
+    "paths": 68,
+    "operations": 88
   },
   "workflowJobs": {
     "test.yml": [

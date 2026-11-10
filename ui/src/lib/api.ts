@@ -76,6 +76,13 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/patient/research?", "/mock/patient_research.json"],
   ["/api/patient/opt-out?", "/mock/patient_opt_out.json"],
   ["/api/patient/observations?", "/mock/patient_observations.json"],
+  // Bonus programs (#934): the list for a named record, and the member's own
+  // result for a program year, which the static demo shows as goal met.
+  ["/api/patient/programmes?", "/mock/patient_programmes.json"],
+  [
+    "/api/patient/programmes/evaluation?",
+    "/mock/patient_programmes_evaluation.json",
+  ],
   // Persona overview (issue #271): the patient view is served, the rest say so
   ["/api/overview?persona=patient", "/mock/overview_patient.json"],
   ["/api/overview?persona=hdab", "/mock/overview_hdab.json"],

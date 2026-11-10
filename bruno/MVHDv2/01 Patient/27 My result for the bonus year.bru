@@ -1,0 +1,35 @@
+meta {
+  name: 27 My result for the bonus year
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/api/patient/programmes/evaluation?programmeId={{programmeId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  if (!bru.getVar("programmeId")) {
+    test("SKIPPED: no bonus program on this stack to evaluate (#934)", function () {});
+  } else {
+    test("the member's own result for the ended year, worked out inside the record", function () {
+      expect(res.getStatus()).to.equal(200);
+      const e = res.getBody().evaluation;
+      expect(e.year).to.equal(2025);
+      expect(e.status).to.equal("evaluated");
+      expect(e.goalMet).to.be.a("boolean");
+      expect(e.activity.required).to.equal(150);
+      expect(e.checkUp.required).to.equal(1);
+    });
+  }
+}
+
+docs {
+  ADR-080, decision 3, and ADR-087: the member sees the result before anything is sent. The breakdown (minutes a week, check-ups) is for the member only; a transfer carries the year and goal met.
+}
