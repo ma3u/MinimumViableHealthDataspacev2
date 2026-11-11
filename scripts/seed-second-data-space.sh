@@ -145,10 +145,14 @@ mgmt_put_or_post assets bonus-programme-answer "$(jq -nc --arg c "$EDC_CTX" --ar
   '{"@context":[$c],"@type":"Asset","@id":"bonus-programme-answer",
     properties:{name:"Bonus programme answer",description:$d,contenttype:"application/json"},
     dataAddress:{"@type":"DataAddress",type:"HttpData",baseUrl:"http://neo4j-proxy:9090/health"}}')"
-# Anyone admitted to the data space sees the offer (open-fhir-access-policy,
-# jad/seed-data-assets.sh); who may agree to it is the contract policy's.
+# Anyone admitted to the data space sees the offer; who may agree to it is
+# the contract policy's. Its own access policy, so this runs where
+# jad/seed-data-assets.sh has not (the CI compliance job).
+mgmt_put_or_post policydefinitions bonus-programme-access-policy "$(jq -nc --arg c "$EDC_CTX" \
+  '{"@context":[$c],"@type":"PolicyDefinition","@id":"bonus-programme-access-policy",
+    policy:{"@context":"http://www.w3.org/ns/odrl.jsonld","@type":"Set","permission":[{"action":"use","constraint":[]}]}}')"
 mgmt_put_or_post contractdefinitions bonus-programme-contract "$(jq -nc --arg c "$EDC_CTX" '{"@context":[$c],"@type":"ContractDefinition",
-  "@id":"bonus-programme-contract",accessPolicyId:"open-fhir-access-policy",contractPolicyId:"mvhd-bonus-programme",
+  "@id":"bonus-programme-contract",accessPolicyId:"bonus-programme-access-policy",contractPolicyId:"mvhd-bonus-programme",
   assetsSelector:[{"@type":"Criterion",operandLeft:"https://w3id.org/edc/v0.0.1/ns/id",operator:"=",operandRight:"bonus-programme-answer"}]}')"
 echo -e "${GREEN}OK${NC}: alpha-klinik offers bonus-programme-answer under mvhd-bonus-programme"
 
