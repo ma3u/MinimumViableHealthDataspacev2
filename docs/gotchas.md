@@ -27,6 +27,34 @@ not valid`. The agreement exists and had started a transfer minutes before;
   the 409 after 8.1 has used the same agreement, so the two cases cannot be
   mixed up.
 
+## 2026-11-11: a `contracts` load run on Azure left 132 negotiations retrying, and real ones queued behind them
+
+`load-tests/platform.js` sent `http://controlplane:8082/api/dsp` as the
+counterparty address, the compose name. On Azure the app is
+`mvhd-controlplane`, so every negotiation of the run failed with
+`controlplane: Name does not resolve` and went on retrying, each one at a
+time through the NATS consumer. Real negotiations waited behind them: the
+Demo Smoke run three quarters of an hour later failed its data-user contract
+requests and Playwright journey 53. The control plane never gave up on its
+own; the retry interval only grew.
+
+It also means no `contracts` run on Azure had negotiated for real since the
+scenario came in (#579, 2026-10-06): the October numbers measured requests to
+a name that does not resolve.
+
+Fix: the runners set `DSP_ADDRESS` (`run-load-test.sh` and `run.sh azure`
+use `mvhd-controlplane`, `run.sh local` the compose name, and a run against
+any other URL with `contracts` refuses to start without it). The stuck ones
+were ended through the management API, `POST
+/v5/participants/<ctx>/contractnegotiations/<id>/terminate` with
+`"@context": ["https://w3id.org/edc/connector/management/v2"]`, from a job
+inside the environment. Each logs one SEVERE line (the termination message
+has no provider process to name) and lands in `TERMINATED`; that is expected.
+
+Rule: an address a test sends to the connector comes from the stack it runs
+against, never from a constant. After a load run against Azure, check the
+control plane's log for `Name does not resolve` before calling it done.
+
 ## 2026-11-11: four things the first CFM deploy on Container Apps found
 
 - `az acr build` cannot build the CFM fork's Dockerfiles: ACR Tasks' dependency
@@ -215,6 +243,39 @@ events, `NatsTaskPublisher.created` for a task stream. Measured on the shared
 stack after the conversion: NATS restarted, then seed step 5 finalized two
 negotiations and started two transfers in 14 s, with 28 of the first and
 none of the second in the log.
+
+### Upstream: EDC keeps liveness to the runtime (2026-11-10)
+
+ADR-084's decision 6 proposed the stream check for EDC itself
+([eclipse-edc/Connector#6210](https://github.com/eclipse-edc/Connector/issues/6210),
+draft PR [#6211](https://github.com/eclipse-edc/Connector/pull/6211)). The
+maintainers declined it on 2026-11-10:
+
+- Streams and consumers are provisioned infrastructure, like a database
+  schema, and a missing one already fails visibly: `503 No Responders`, a 500
+  from the API, both logged.
+- Liveness should mean the runtime itself is broken. With the streams
+  provisioned outside EDC (`autocreate=false`) a restart cannot create them,
+  so a failing liveness would restart the control plane in a loop.
+- `autocreate` is meant for tests. In production the streams are provisioned
+  with file storage outside EDC; the EDC docs say so since
+  [eclipse-edc.github.io#253](https://github.com/eclipse-edc/eclipse-edc.github.io/pull/253).
+
+They called a liveness provider in our own launcher "a good fit". So
+`NatsTaskStreamsLivenessExtension` stays, and decision 6's "the extension
+goes once the launcher's EDC version covers it" will not happen. Two
+consequences:
+
+- The check is right only while the control plane creates the streams
+  itself, with `edc.nats.{cn,tp}.subscriber.autocreate=true` as
+  `docker-compose.jad.yml` and `scripts/azure/04-edc-services.sh` set it. A
+  deployment that provisions the streams outside EDC sets
+  `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false`, or a lost stream restarts
+  the control plane in a loop.
+- The compose stack already does what EDC recommends (`nats-streams`, the
+  file streams above). Azure would need a NATS with persistent storage, which
+  ADR-084's decision 5 leaves out; changing that takes a new ADR that
+  supersedes ADR-084.
 
 ## 2026-11-06: `$(curl -w '%{http_code}' ... || echo 000)` is never 000
 

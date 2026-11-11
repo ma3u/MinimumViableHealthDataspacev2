@@ -35,11 +35,13 @@ case "$TARGET" in
     BASE_URL="${BASE_URL:-http://localhost:3003}"
     PROXY_URL="${PROXY_URL:-http://localhost:9090}"
     COOKIE_NAME="${COOKIE_NAME:-next-auth.session-token}"
+    DSP_ADDRESS="${DSP_ADDRESS:-http://controlplane:8082/api/dsp}"
     ;;
   azure)
     BASE_URL="${BASE_URL:-https://ehds.mabu.red}"
     PROXY_URL=""
     COOKIE_NAME="${COOKIE_NAME:-__Secure-next-auth.session-token}"
+    DSP_ADDRESS="${DSP_ADDRESS:-http://mvhd-controlplane:8082/api/dsp}"
     [ -n "${NEXTAUTH_SECRET:-}" ] || { echo "azure needs NEXTAUTH_SECRET exported (the deployment's value)" >&2; exit 1; }
     case "$SCENARIO" in
       stress|spike|soak)
@@ -50,7 +52,12 @@ case "$TARGET" in
         fi ;;
     esac
     ;;
-  http*) BASE_URL="${TARGET%/}"; PROXY_URL="${PROXY_URL:-}"; COOKIE_NAME="${COOKIE_NAME:-__Secure-next-auth.session-token}" ;;
+  http*)
+    BASE_URL="${TARGET%/}"; PROXY_URL="${PROXY_URL:-}"; COOKIE_NAME="${COOKIE_NAME:-__Secure-next-auth.session-token}"
+    if [ "$SCENARIO" = contracts ] && [ -z "${DSP_ADDRESS:-}" ]; then
+      echo "contracts against $BASE_URL needs DSP_ADDRESS: the provider's DSP base as that hub's control plane reaches it" >&2
+      exit 2
+    fi ;;
   *) echo "unknown target $TARGET" >&2; exit 2 ;;
 esac
 
@@ -89,7 +96,7 @@ echo "k6 $SCENARIO against $BASE_URL, testid $TESTID"
 k6 run ${out[@]+"${out[@]}"} --tag "testid=$TESTID" \
   -e "SCENARIO=$SCENARIO" -e "BASE_URL=$BASE_URL" -e "PROXY_URL=$PROXY_URL" \
   -e "TESTID=$TESTID" -e "SESSIONS=$SESSIONS" -e "TIME_SCALE=${TIME_SCALE:-1}" \
-  -e "ABORT_ON=${ABORT_ON:-}" \
+  -e "ABORT_ON=${ABORT_ON:-}" -e "DSP_ADDRESS=${DSP_ADDRESS:-}" \
   -e "KC_USER=${KC_USER:-researcher}" -e "KC_PASSWORD=${KC_PASSWORD:-${KC_USER:-researcher}}" \
   -e "SUMMARY_PATH=$RESULTS/$TESTID.json" \
   "$HERE/platform.js"

@@ -117,6 +117,8 @@ Done on 2026-11-09: images `1.0.0-RC5-9be6b44cd517`, revision `mvhd-controlplane
 
 A script that changes `mvhd-nats` (`04-edc-services.sh`) restarts the control plane after it (`restart_controlplane_after_nats_change` in `env.sh`). Anything else that touches NATS, an image change by hand included, leaves it to the probe: about two minutes of 500s. `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` on the control plane turns the check off.
 
+The check stays: EDC declined it upstream on 2026-11-10 ([eclipse-edc/Connector#6211](https://github.com/eclipse-edc/Connector/pull/6211)), so ADR-084's decision 6 will not remove it. It assumes the control plane creates the streams (`EDC_NATS_CN_SUBSCRIBER_AUTOCREATE=true` and the `TP` one, set by `04-edc-services.sh`). If the streams are ever provisioned outside EDC, as EDC recommends for production, turn the check off, or a lost stream restarts the control plane in a loop (`docs/gotchas.md`, 2026-11-09, "Upstream").
+
 ## Rollback
 
 The way back to 0.18 is closed since 2026-11-09 (#927): the CFM apps and the 0.18 data planes are deleted, and `edc-retire-v018-azure.yml` (#927 step 6, PR #1048) drops the `_v018` databases. What follows is the record of the cutover's rollback, not a step to take.

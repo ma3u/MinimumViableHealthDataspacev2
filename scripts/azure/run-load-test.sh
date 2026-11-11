@@ -92,7 +92,7 @@ ENV_ID="$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" --qu
 ACR_PASSWORD="$(az acr credential show --name "$ACR_NAME" --query 'passwords[0].value' -o tsv)"
 # The job, as YAML (flags cannot express every field). Secrets are written to
 # the temporary file only, which the trap removes.
-export SCENARIO TESTID BASE_URL ENV_ID IMAGE ACR_PASSWORD ACR_NAME ACR_LOGIN_SERVER LOCATION NEO4J_PROXY_APP
+export SCENARIO TESTID BASE_URL ENV_ID IMAGE ACR_PASSWORD ACR_NAME ACR_LOGIN_SERVER LOCATION NEO4J_PROXY_APP CONTROLPLANE_APP
 export TIME_SCALE="${TIME_SCALE:-1}" ABORT_ON="${ABORT_ON:-}" KC_USER="${KC_USER:-researcher}"
 export KC_PASSWORD="${KC_PASSWORD:-${KC_USER}}"
 python3 - "$SPEC" "$SESSIONS_FILE" <<'PY'
@@ -102,6 +102,8 @@ e = os.environ
 env = {
     "SCENARIO": e["SCENARIO"], "TESTID": e["TESTID"], "BASE_URL": e["BASE_URL"],
     "PROXY_URL": "http://" + e["NEO4J_PROXY_APP"], "TIME_SCALE": e["TIME_SCALE"],
+    # the compose name `controlplane` does not resolve here (docs/gotchas.md, 2026-11-11)
+    "DSP_ADDRESS": "http://" + e["CONTROLPLANE_APP"] + ":8082/api/dsp",
     "ABORT_ON": e["ABORT_ON"], "KC_USER": e["KC_USER"],
     "K6_PROMETHEUS_RW_SERVER_URL": "http://mvhd-observability:9090/api/v1/write",
 }

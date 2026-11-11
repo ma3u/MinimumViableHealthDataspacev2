@@ -5,11 +5,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Mock the EDC client
-vi.mock("@/lib/edc", () => ({
+vi.mock("@/lib/edc", async (importOriginal) => ({
   edcClient: {
     management: vi.fn(),
   },
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
+  // The real query, so the tests see what the control plane is sent (#1076).
+  newestFirstQuery: (await importOriginal<typeof import("@/lib/edc")>())
+    .newestFirstQuery,
 }));
 
 // Mock fs to prevent loadMockNegotiations from reading bundled JSON

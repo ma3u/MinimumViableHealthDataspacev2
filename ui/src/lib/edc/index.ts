@@ -12,5 +12,5 @@
  *     protocol: DSP_PROTOCOL,  // see lib/dsp-protocol.ts (#180)
  *   });
  */
-export { edcClient, EDC_CONTEXT } from "./client";
+export { edcClient, EDC_CONTEXT, newestFirstQuery } from "./client";
 export type { ApiName, RequestOptions } from "./client";

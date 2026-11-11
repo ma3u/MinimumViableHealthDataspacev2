@@ -105,7 +105,12 @@ And two with their ADR:
   creates in memory and at startup only. EDC's own subscriber check sees only
   the connection, which the client reopens after a NATS restart. Read
   `/api/check/liveness`: `/api/check/health` is the startup status.
-  `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` turns it off.
+  `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false` turns it off. It stays here:
+  EDC declined the check upstream on 2026-11-10
+  ([eclipse-edc/Connector#6211](https://github.com/eclipse-edc/Connector/pull/6211)).
+  It assumes `edc.nats.{cn,tp}.subscriber.autocreate=true`; with the streams
+  provisioned outside EDC, turn it off, or a lost stream restarts the control
+  plane in a loop.
 
 The image build runs the unit tests of these extensions
 (`gradle :<runtime>:test :<runtime>:shadowJar` in the Dockerfile), so no image
