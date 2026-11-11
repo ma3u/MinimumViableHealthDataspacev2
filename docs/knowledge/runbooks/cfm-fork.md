@@ -149,6 +149,9 @@ and an `az login` first. Before `apps`:
 
 `mvhd-ui` has no `CFM_TENANT_URL`: the live `/onboarding` still provisions by
 the hub itself (ADR-078), and CFM runs beside it until that switch is decided.
+The three apps stop and start with the rest of the stack
+([`offhours.sh`](../../../scripts/azure/offhours.sh), ADR-053): first at the
+stop, after the EDC apps at the start.
 
 On a fresh NATS (every morning start, its JetStream is on temporary storage)
 the first manager to start creates `cfm-bucket`, and one that asks before the
