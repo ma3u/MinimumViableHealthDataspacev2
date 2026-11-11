@@ -794,7 +794,7 @@ paths:
         "201": { description: Dataset created }
         "400": { description: id and title are required }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs DATA_HOLDER or EDC_ADMIN" }
     delete:
       tags: [Catalog]
       summary: Delete dataset
@@ -996,7 +996,7 @@ paths:
         "400":
           { description: "patientId missing, or an id that is not on the list" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs PATIENT" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/patient/insights:
@@ -1502,7 +1502,7 @@ paths:
                     description: the hub has the hash key and the account service
                   linked: { type: boolean }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs PATIENT" }
         "502": { description: Keycloak failed }
     delete:
       tags: [Patient]
@@ -2824,7 +2824,7 @@ paths:
       responses:
         "200": { description: Tenant list }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs EDC_ADMIN" }
 
   /api/admin/audit:
     get:
@@ -2918,7 +2918,7 @@ paths:
                             removed: { type: [integer, "null"] }
                             inHub: { type: [integer, "null"] }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs EDC_ADMIN or HDAB_AUTHORITY" }
 
   /api/admin/spe:
     get:
@@ -3064,7 +3064,7 @@ paths:
                         recordedAt:
                           { type: [string, "null"], format: date-time }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs EDC_ADMIN or HDAB_AUTHORITY" }
 
   /api/admin/spe/power:
     post:
@@ -3224,7 +3224,7 @@ paths:
         "201": { description: Policy created }
         "400": { description: participantId and policy are required }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs EDC_ADMIN" }
     put:
       tags: [Admin]
       summary: Update an ODRL policy
@@ -3243,7 +3243,7 @@ paths:
       responses:
         "200": { description: Policy updated }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs EDC_ADMIN" }
     delete:
       tags: [Admin]
       summary: Delete an ODRL policy
@@ -3256,7 +3256,7 @@ paths:
       responses:
         "204": { description: Deleted }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+        "403": { description: "Needs EDC_ADMIN" }
 
   # The access body procedures, the sign-in flows and the operator routes
   # that were on docs/api-spec-drift-allowlist.txt until 2026-11-11.
