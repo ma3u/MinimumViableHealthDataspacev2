@@ -135,10 +135,27 @@ run.
   it is the one to watch when the `load` scenario runs with the EDC pages doing
   real work (step 4 of the runs still to do in the
   [load test index](../loadtest/README.md#the-runs-still-to-do)).
-- A transfer under load is not measured yet: the scenario transfers only when
-  the POST answers with an agreement, and a live negotiation agrees later.
-  Polling the negotiation until it is finalized and then transferring is the
-  next change to the scenario.
+- Transfers are measured now. The run above started none: the scenario
+  transferred only when the POST answered with an agreement, and a live
+  negotiation agrees later. Since then `contractJourney()` waits for the
+  agreement as the negotiate page does, asking
+  `GET /api/negotiations/<id>` after 1, 2, 3, 5 and then every 8 seconds, up
+  to `AGREEMENT_TIMEOUT_S` (60 s). On `FINALIZED` it runs
+  `POST /api/transfers` on the agreement, to the provider endpoint the
+  negotiation recorded, and one time in four the refused transfer for a
+  dataset no permit covers. A negotiation that ends `TERMINATED` or is still
+  open at the timeout is a failed check (`negotiation agrees within 60 s`)
+  and counts in `negotiations_unagreed`; `negotiation_agreed` is the time to
+  the poll that saw the agreement. The polls are tagged `kind:poll`, so the
+  API p95 and its threshold are the person's calls only.
+- On the compose stack (`20261111-1846-contracts-local`, the same 1 to 10
+  users) that gave 110 iterations and 623 requests, 0 failed, every check
+  passed: 110 negotiations agreed (p50 1.0 s, p95 3.0 s, at the polls'
+  resolution), 110 transfers started in the control plane (`201`, p95
+  115 ms), 33 refused (`403`). The 140 polls were 22.5 % of the requests;
+  the 483 other requests had a p95 of 107 ms. The Azure numbers for
+  transfers wait for the next `contracts` run there, which needs an
+  `az login` and must not overlap a merge to `main`.
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
 
