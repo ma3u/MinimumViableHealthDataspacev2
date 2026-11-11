@@ -253,3 +253,26 @@ describe("the routes that stay open", () => {
     expect(res.body).toEqual({ trustCenters: [] });
   });
 });
+
+describe("GET /trust-center/audit", () => {
+  it("answers 401 without a token and 403 for a data user", async () => {
+    const anon = await request.get("/trust-center/audit");
+    expect(anon.status).toBe(401);
+    expect(anon.body).toEqual({ error: "Unauthorized" });
+    const user = await request
+      .get("/trust-center/audit")
+      .set("Authorization", `Bearer ${await token(["DATA_USER"])}`);
+    expect(user.status).toBe(403);
+    expect(user.body).toEqual({ error: "Forbidden" });
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("lists the resolutions for an access body", async () => {
+    run.mockResolvedValue({ records: [] });
+    const res = await request
+      .get("/trust-center/audit")
+      .set("Authorization", `Bearer ${await token(["HDAB_AUTHORITY"])}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ total: 0, entries: [] });
+  });
+});

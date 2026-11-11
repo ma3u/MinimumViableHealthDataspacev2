@@ -13,7 +13,7 @@ import {
 // Phase 18: Trust Center — Pseudonym Resolution Protocol
 // EHDS Art. 66 (pseudonymisation) and Art. 73 (SPE): HDAB-authenticated endpoints only
 //
-// Resolve and revoke act for an access body: they take a Keycloak access
+// Resolve, revoke and the audit log act for an access body: they take a Keycloak access
 // token with HDAB_AUTHORITY or TRUST_CENTER_OPERATOR, 401 without one and 403
 // with another role (#1029, src/realm-auth.ts).
 // ============================================================
@@ -177,9 +177,13 @@ app.post(
  *
  * Returns the pseudonym resolution audit log for HDAB operators.
  * Supports ?studyId=... and ?trustCenter=... filters.
+ * It lists research pseudonyms and their studies, so it takes the same
+ * access body token as resolve and revoke (#1029).
  */
 app.get(
   "/trust-center/audit",
+  heavyLimiter,
+  requireRealmRole(TRUST_CENTER_ROLES),
   async (req: Request, res: Response, next: NextFunction) => {
     const studyId = req.query.studyId as string | undefined;
     const trustCenterName = req.query.trustCenter as string | undefined;
