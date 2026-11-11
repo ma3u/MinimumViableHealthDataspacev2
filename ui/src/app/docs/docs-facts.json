@@ -1368,7 +1368,7 @@
       "id": "ADR-089",
       "file": "ADR-089-the-java-edc-apps-shrink-to-what-they-use.md",
       "title": "The Java EDC apps shrink to what they use; they are not rewritten in Rust",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
