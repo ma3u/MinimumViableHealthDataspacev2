@@ -30,6 +30,8 @@ same_in_both = {
     "LOINC %@", "Ref. %@", "%@ · %@", "%@%@ %@", "%@  %@ %@", "%@ %@ · %@", "%@ %@, %@", "%@ %lld",
     "%@ %@ · LOINC %@", "https://<name>.openai.azure.com",
     "%@: %@", "Optimal", "Optimal %@ · %@",
+    # Export to my Mac (Relate): the same words in German.
+    "Mac", "Graph",
     # Analyte names and abbreviations a German report prints exactly as the
     # English one does. Listed rather than pattern-matched, so a new sentence
     # still has to be translated.

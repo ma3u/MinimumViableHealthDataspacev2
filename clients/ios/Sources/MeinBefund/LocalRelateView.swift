@@ -52,7 +52,8 @@ struct LocalRelateView: View {
       }
       Section("On the Mac") {
         Text("Run the receiver from the relate-hackathon-team repository:")
-        Text("python -m health_graph receive --db health.rl")
+        // A command line, not prose: never translated.
+        Text(verbatim: "python -m health_graph receive --db health.rl")
           .font(.system(.footnote, design: .monospaced))
           .textSelection(.enabled)
       }
