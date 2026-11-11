@@ -110,6 +110,62 @@ not resolve. The full account is the 2026-11-11 entry in
 The latencies of the three runs are not comparable: in the first the control
 plane was busy retrying, in the second every negotiation ended early.
 
+## Transfers under load: the evening runs
+
+The scenario now waits for each agreement and transfers on it (see
+[What follows](#what-follows)). Two `contracts` runs measured that on Azure
+the same evening, at the ADR-089 sizes. The stack had been stopped at 18:13
+UTC (ADR-053); it was started at 18:36, up at 18:46, held with
+`live-demo-hold-until` and stopped again at 19:08.
+
+| Measure                     | `20261111-1847-contracts-aca` (cold) | `20261111-1856-contracts-aca` (warm) |
+| --------------------------- | ------------------------------------ | ------------------------------------ |
+| Started after the stack     | 3 minutes                            | 11 minutes                           |
+| Iterations / requests       | 54 / 429                             | 61 / 465                             |
+| Failed requests             | **0**                                | **0**                                |
+| Negotiations agreed         | 54 of 54                             | 61 of 61                             |
+| Time to agreement p50 / p95 | 6.7 s / 14.8 s                       | 6.2 s / 19.6 s                       |
+| Transfers started (`201`)   | 54, all `STARTED` in the connector   | 61, all `STARTED` in the connector   |
+| Refused transfers (`403`)   | about 18                             | about 21                             |
+| Polls (`kind:poll`), share  | 186, 43 %                            | 191, 41 %                            |
+| API p95 (`kind:api`)        | **1.37 s**, over the 1 s SLO         | **1.58 s**, over the 1 s SLO         |
+| Control plane CPU peak      | 0.31 vCPU of 0.5                     | 0.36 vCPU of 0.5                     |
+| IdentityHub CPU peak        | 0.20 vCPU of 0.25                    | 0.12 vCPU of 0.25                    |
+| Control plane errors        | none                                 | none                                 |
+| k6 result                   | failed: `checks`, API p95            | failed: `checks`, API p95            |
+
+Every answer was the one expected, and every negotiation and transfer
+reached the connectors (the hub's `GET /api/negotiations` and
+`GET /api/transfers` for PharmaCo, filtered to each run's minutes). Both runs
+fail on latency only, and the second, warm one is no faster, so it is not a
+cold start. The p95 per endpoint (Prometheus, `k6_http_req_duration_seconds`
+by `name`) shows where:
+
+| Endpoint                            | p95, cold | p95, warm |
+| ----------------------------------- | --------- | --------- |
+| `GET /api/transfers`                | 1.26 s    | 2.18 s    |
+| `GET /api/negotiations` (catalogue) | 1.64 s    | 1.50 s    |
+| `POST /api/transfers`               | 562 ms    | 771 ms    |
+| `POST /api/negotiations`            | 618 ms    | 707 ms    |
+| `POST /api/transfers` (no permit)   | 302 ms    | 163 ms    |
+| poll, outside the threshold         | 401 ms    | 403 ms    |
+
+- **The transfer itself is not the slow step.** Its POST stays under the SLO.
+- **`GET /api/transfers` grows with what the runs leave behind.** The route
+  asks the control plane for the newest 200 transfer processes
+  (`newestFirstQuery()`). PharmaCo had a handful before these runs; after
+  the first it had about 140 and during the second the 200 rows were full,
+  each a JSON-LD transfer process. The transfer page reads the same list.
+- **The catalogue request was already the slowest call** in the 12:32 run,
+  and it is slower while the control plane also runs transfers.
+- **The control plane still has headroom:** 72 % of its half core at the
+  peak, against 66 % at 12:32. The IdentityHub's 80 % was in the cold run
+  only.
+
+The ADR-089 sizes are not what the threshold measures here. What it shows is
+two read paths, the transfer list and the catalogue, that need a page size or
+a cache before the `contracts` scenario can pass with transfers in it.
+
 ## Grafana
 
 The dashboards need a sign-in on <https://grafana.ehds.mabu.red> (see
@@ -121,6 +177,8 @@ is up ([ADR-053](../ADRs/ADR-053-everything-stops-off-hours.md)). Times are UTC.
 | `20261111-1232-contracts-aca` (valid)   | [12:31 to 12:40](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-1232-contracts-aca&from=1794400260000&to=1794400800000) | [12:31 to 12:40](https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers?from=1794400260000&to=1794400800000) |
 | `20261111-1223-contracts-aca` (invalid) | [12:21 to 12:31](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-1223-contracts-aca&from=1794399660000&to=1794400260000) | [12:21 to 12:31](https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers?from=1794399660000&to=1794400260000) |
 | `20261111-0807-contracts-aca` (invalid) | [08:05 to 08:15](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-0807-contracts-aca&from=1794384300000&to=1794384900000) | [08:05 to 08:15](https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers?from=1794384300000&to=1794384900000) |
+| `20261111-1847-contracts-aca` (cold)    | [18:46 to 18:55](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-1847-contracts-aca&from=1794422760000&to=1794423300000) | [18:46 to 18:55](https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers?from=1794422760000&to=1794423300000) |
+| `20261111-1856-contracts-aca` (warm)    | [18:55 to 19:04](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-1856-contracts-aca&from=1794423300000&to=1794423840000) | [18:55 to 19:04](https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers?from=1794423300000&to=1794423840000) |
 
 On **Load and stress test**, the "Load (k6)" row shows the users, requests and
 p95, and the "Containers" row the CPU and memory of the connectors. On **EDC
@@ -153,9 +211,15 @@ run.
   passed: 110 negotiations agreed (p50 1.0 s, p95 3.0 s, at the polls'
   resolution), 110 transfers started in the control plane (`201`, p95
   115 ms), 33 refused (`403`). The 140 polls were 22.5 % of the requests;
-  the 483 other requests had a p95 of 107 ms. The Azure numbers for
-  transfers wait for the next `contracts` run there, which needs an
-  `az login` and must not overlap a merge to `main`.
+  the 483 other requests had a p95 of 107 ms. On Azure, where an agreement
+  takes about 6 seconds, the polls are about 42 % of the requests; the
+  results are in [Transfers under load](#transfers-under-load-the-evening-runs).
+- The `contracts` scenario fails its API threshold on Azure since it
+  transfers, on `GET /api/transfers` and the catalogue request, not on the
+  transfer. A page size for the transfer list (the route reads 200 rows)
+  and a look at the catalogue request come before the next `contracts` run
+  is expected to pass. Each run adds about 60 transfer processes to
+  PharmaCo's list, so later runs read a full 200 rows.
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
 
