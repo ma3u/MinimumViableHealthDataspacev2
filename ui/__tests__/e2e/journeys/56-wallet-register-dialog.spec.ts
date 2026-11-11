@@ -61,34 +61,45 @@ test.describe("Register dialog on the hub", () => {
   test("J1105 the dialog's QR code is the hub's own wallet request", async ({
     page,
   }) => {
-    await page.goto("/");
-    const started = page.waitForResponse(
-      (r) =>
-        r.url().endsWith("/api/auth/eudi/start") &&
-        r.request().method() === "POST",
-    );
-    await page.getByRole("button", { name: /Register with d-you/ }).click();
-    const res = await started;
-    const dialog = page.getByRole("dialog");
-
-    if (res.ok()) {
-      // A stack with a verifier: the QR and the link are its request.
-      const body = (await res.json()) as {
-        qrDataUri: string;
-        walletLink: string;
+    // Every start the dialog makes: a dev server's strict mode starts twice,
+    // and the dialog shows whichever answer came last.
+    const starts: { ok: boolean; qrDataUri?: string; walletLink?: string }[] =
+      [];
+    page.on("response", async (r) => {
+      if (
+        !r.url().endsWith("/api/auth/eudi/start") ||
+        r.request().method() !== "POST"
+      ) {
+        return;
+      }
+      const body = (await r.json().catch(() => ({}))) as {
+        qrDataUri?: string;
+        walletLink?: string;
       };
-      await expect(
-        dialog.getByAltText("d-you OpenID4VP QR code"),
-      ).toHaveAttribute("src", body.qrDataUri, { timeout: T });
-      await expect(
-        dialog.getByRole("link", { name: /Tap to open d-you/ }),
-      ).toHaveAttribute("href", body.walletLink);
+      starts.push({ ok: r.ok(), ...body });
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: /Register with d-you/ }).click();
+    const dialog = page.getByRole("dialog");
+    const qr = dialog.getByAltText("d-you OpenID4VP QR code");
+    const unreachable = dialog.getByText("Could not reach the EUDI verifier.");
+    await expect(qr.or(unreachable)).toBeVisible({ timeout: T });
+
+    if (await qr.isVisible()) {
+      // A stack with a verifier: the QR and the link are its request.
+      const answered = starts.filter((s) => s.ok);
+      expect(answered.map((s) => s.qrDataUri)).toContain(
+        await qr.getAttribute("src"),
+      );
+      const link = dialog.getByRole("link", { name: /Tap to open d-you/ });
+      expect(answered.map((s) => s.walletLink)).toContain(
+        await link.getAttribute("href"),
+      );
     } else {
       // No verifier here (CI): the dialog says so rather than show a code
       // no wallet can answer.
-      await expect(
-        dialog.getByText("Could not reach the EUDI verifier."),
-      ).toBeVisible({ timeout: T });
+      expect(starts.length).toBeGreaterThan(0);
+      expect(starts.every((s) => !s.ok)).toBe(true);
     }
     // Never the fixed link to a page that it was before.
     await expect(
