@@ -423,9 +423,11 @@ services:
       # The fictional Simpl Governance Authority: membership of its data space.
       edc.iam.trustedissuer.simpl-ga.id: "did:web:simpl-ga-issuer%3A10016:simpl-ga"
       edc.iam.trustedissuer.simpl-ga.supportedtypes: '["MembershipCredential"]'
-      # A second data space's authority, for insurance and wellbeing (#934): membership only.
+      # A second data space's authority, for insurance and wellbeing (#934): membership,
+      # and the purpose its members process data for, which the bonus programme
+      # policy's ehds:attestedPurpose checks (ADR-090).
       edc.iam.trustedissuer.wellbeing-ga.id: "did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga"
-      edc.iam.trustedissuer.wellbeing-ga.supportedtypes: '["MembershipCredential"]'
+      edc.iam.trustedissuer.wellbeing-ga.supportedtypes: '["MembershipCredential","DataProcessingPurposeCredential"]'
     ports:
       - "11003:8081" # Management API (external port from planning doc)
     networks:

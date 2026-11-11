@@ -2,7 +2,8 @@
  * The hub's standard data-sharing policies (ADR-077, #876).
  *
  * A minimal set: four policies, one per way health data leaves a holder,
- * built from one vocabulary of clauses. Each clause names the provisions it
+ * and a fifth for a bonus programme's yes or no (ADR-090), built from one
+ * vocabulary of clauses. Each clause names the provisions it
  * answers, so the set can be read against the law it implements:
  *
  *   EHDS   Regulation (EU) 2025/327
@@ -25,7 +26,10 @@
  * Which clauses the connector enforces and which bind by contract is in
  * ADR-077: the connector filters out a constraint it has no function for,
  * so most of these are terms the parties agree to, enforced by the permit
- * gate, the SPE and audit, not by the negotiation.
+ * gate, the SPE and audit, not by the negotiation. The one the connector
+ * decides itself is ehds:attestedPurpose (ADR-090): the bonus programme
+ * policy admits only a recipient whose DataProcessingPurposeCredential attests
+ * the bonus payout.
  */
 
 const POLICY_CONTEXT = [
@@ -126,6 +130,25 @@ const C = {
     "GDPR Art. 6(1)(a) and Art. 9(2)(a), the user's consent",
     ["GDPR Art. 6(1)(a), Art. 9(2)(a)", "DA Art. 5(1)"],
   ),
+  purposeBonus: constraint(
+    "ehds:purpose",
+    "eq",
+    "EHDS Art. 7(3) - primary use the person directs: the bonus payout of a programme the member joined",
+    ["EHDS Art. 2(2)(d), Art. 7(3)", "GDPR Art. 5(1)(b)"],
+  ),
+  /** Decided by the hub's connector (ADR-090), not only agreed. */
+  attestedBonusPurpose: constraint(
+    "ehds:attestedPurpose",
+    "eq",
+    "bonus-payout",
+    ["EHDS Art. 7(3)", "GDPR Art. 5(1)(b)", "ADR-080, decision 5"],
+  ),
+  legalBasisProgrammeConsent: constraint(
+    "ehds:legalBasis",
+    "eq",
+    "GDPR Art. 9(2)(a), the member's explicit consent to the programme",
+    ["GDPR Art. 6(1)(a), Art. 9(2)(a)", "EHDS Art. 7(3)"],
+  ),
   purposeDataAct: constraint(
     "ehds:purpose",
     "eq",
@@ -156,6 +179,15 @@ const D = {
     "DA Art. 6(1)",
     "EHDS Art. 68(12)",
   ]),
+  deleteAfterPayout: action("delete", ["GDPR Art. 5(1)(c), (e)"], {
+    constraint: [
+      {
+        leftOperand: "event",
+        operator: "eq",
+        rightOperand: "after the bonus payout",
+      },
+    ],
+  }),
   reportIncident: action("ehds:reportIncident", [
     "EHDS Art. 61(5)",
     "GDPR Art. 33",
@@ -199,7 +231,7 @@ const P = {
   profile: action("ehds:profile", ["DA Art. 6(2)(b)", "GDPR Art. 22"]),
 } as const;
 
-/* ── The four policies ─────────────────────────────────────────── */
+/* ── The policies ──────────────────────────────────────────────── */
 
 function build(
   id: string,
@@ -341,9 +373,26 @@ const DEVICE_DATA = build(
   [P.competingProduct, P.gatekeeper, P.profile, P.outsideEurope],
 );
 
+/**
+ * A bonus programme's yes or no, which the member has the hub send to their
+ * insurer (#934 step 5, ADR-080 decision 5, ADR-090). Primary use the person
+ * directs, never secondary use: the insurer may use the answer for the payout
+ * and for nothing a premium, a profile or an advertisement could be built on.
+ */
+const BONUS_PROGRAMME = build(
+  "mvhd-bonus-programme",
+  "Bonus program: the member's yes or no, for the payout only",
+  "A program's goal met, yes or no, sent to the insurer that runs it, at the member's instruction.",
+  ["EHDS", "GDPR"],
+  [C.purposeBonus, C.attestedBonusPurpose, C.legalBasisProgrammeConsent],
+  [D.deleteAfterPayout],
+  [P.insurance, P.profile, P.advertise, P.detrimental],
+);
+
 export const STANDARD_POLICIES: StandardPolicy[] = [
   PERMIT_IN_SPE,
   ANONYMISED_REQUEST,
   AI_TRAINING,
   DEVICE_DATA,
+  BONUS_PROGRAMME,
 ];

@@ -110,6 +110,53 @@ describe("the standard policies", () => {
     expect(codes).toContain("ehds.data-act");
   });
 
+  it("the bonus programme policy permits the payout only and forbids what a premium could be built on (ADR-080, ADR-090)", () => {
+    const bonus = byId["mvhd-bonus-programme"];
+    expect(prohibited("mvhd-bonus-programme").sort()).toEqual(
+      [
+        "ehds:advertise",
+        "ehds:detrimentalDecision",
+        "ehds:insuranceDecision",
+        "ehds:profile",
+      ].sort(),
+    );
+    // The term the hub's connector decides, against the recipient's
+    // DataProcessingPurposeCredential (EhdsAttestedPurposeExtension).
+    const constraints = (
+      bonus.policy.permission as {
+        constraint: {
+          leftOperand: string;
+          operator: string;
+          rightOperand: unknown;
+        }[];
+        duty: { action: string; constraint?: { rightOperand: string }[] }[];
+      }[]
+    )[0];
+    expect(constraints.constraint).toContainEqual({
+      leftOperand: "ehds:attestedPurpose",
+      operator: "eq",
+      rightOperand: "bonus-payout",
+    });
+    expect(constraints.duty).toEqual([
+      expect.objectContaining({
+        action: "delete",
+        constraint: [
+          expect.objectContaining({ rightOperand: "after the bonus payout" }),
+        ],
+      }),
+    ]);
+    // Primary use the person directs, never secondary use (ADR-080, decision 1).
+    const codes = validatePolicy(bonus.policy).map((f) => f.code);
+    expect(codes).toContain("ehds.primary-use");
+    const text = describePolicy(bonus.policy)
+      .sentences.map((s) => renderPolicyText(s, english))
+      .join(" ");
+    expect(text).toMatch(
+      /the purpose the recipient's credential attests is "?bonus-payout/,
+    );
+    expect(text).toMatch(/decisions on insurance or credit/);
+  });
+
   it("reads in plain language", () => {
     const text = describePolicy(byId["mvhd-ehds-permit-spe"].policy)
       .sentences.map((s) => renderPolicyText(s, english))

@@ -27,6 +27,8 @@ edc-ih-api-did = { module = "org.eclipse.edc:did-api", version.ref = "edc" }
 edc-ih-api-participants = { module = "org.eclipse.edc:participant-context-api", version.ref = "edc" }
 edc-issuance-spi = { module = "org.eclipse.edc:issuerservice-issuance-spi", version.ref = "edc" }
 edc-spi-controlplane = { module = "org.eclipse.edc:control-plane-spi", version.ref = "edc" }
+# for the attested purpose scope extractor (ADR-090)
+edc-spi-dcp = { module = "org.eclipse.edc:decentralized-claims-spi", version.ref = "edc" }
 
 # the official DSP TCK against the control plane (controlplane-tck): EDC's own
 # connector-under-test pieces, published with every release

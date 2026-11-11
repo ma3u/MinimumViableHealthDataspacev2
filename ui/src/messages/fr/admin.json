@@ -902,5 +902,8 @@
   "Remove participant": "Retirer le participant",
   "Removing…": "Retrait…",
   "Removal failed": "Le retrait a échoué",
-  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Retirer ce participant de l’espace de données ? Son contexte, son DID et ses attestations sont supprimés."
+  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Retirer ce participant de l’espace de données ? Son contexte, son DID et ses attestations sont supprimés.",
+  "the purpose the recipient's credential attests": "la finalité qu'atteste l'attestation du destinataire",
+  "Bonus program: the member's yes or no, for the payout only": "Programme de bonus : le oui ou non du membre, pour le versement uniquement",
+  "A program's goal met, yes or no, sent to the insurer that runs it, at the member's instruction.": "Objectif d'un programme atteint, oui ou non, envoyé à l'assureur qui le gère, sur instruction du membre."
 }

@@ -113,9 +113,13 @@ describe("trusted issuers (#710)", () => {
     expect(ga?.name).toMatch(/fictional/);
   });
 
-  it("trusts the second data space's authority for membership only, run on demand (#934)", () => {
+  it("trusts the second data space's authority for membership and its members' purpose, run on demand (#934, ADR-090)", () => {
     const ga = trusted.issuers.find((i) => i.alias === "wellbeing-ga");
-    expect(ga?.types).toEqual(["MembershipCredential"]);
+    // The purpose is what the bonus programme policy's ehds:attestedPurpose checks.
+    expect(ga?.types).toEqual([
+      "MembershipCredential",
+      "DataProcessingPurposeCredential",
+    ]);
     expect(ga?.did).toBe("did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga");
     expect(ga?.name).toMatch(/fictional/);
     expect(ga?.environments).not.toContain("azure");

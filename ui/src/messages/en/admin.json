@@ -902,5 +902,8 @@
   "Remove participant": "Remove participant",
   "Removing…": "Removing…",
   "Removal failed": "Removal failed",
-  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Remove this participant from the dataspace? Its context, DID and credentials are deleted."
+  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Remove this participant from the dataspace? Its context, DID and credentials are deleted.",
+  "the purpose the recipient's credential attests": "the purpose the recipient's credential attests",
+  "Bonus program: the member's yes or no, for the payout only": "Bonus program: the member's yes or no, for the payout only",
+  "A program's goal met, yes or no, sent to the insurer that runs it, at the member's instruction.": "A program's goal met, yes or no, sent to the insurer that runs it, at the member's instruction."
 }

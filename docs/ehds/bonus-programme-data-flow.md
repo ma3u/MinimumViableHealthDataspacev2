@@ -120,11 +120,18 @@ sequenceDiagram
    Every later delivery path, the DSP agreement and the wallet alike, has to
    pass the same gate.
 
-Still to come: step 5 adds the bonus policy. It allows
-use for the payout only, forbids insurance decisions, profiling and
-advertising, and requires deletion after the payout. Step 8 delivers the yes or
-no over a DSP agreement with AlphaKasse's connector, or the member presents it
-from the EUDI Wallet.
+**The agreement AlphaKasse has to reach first (step 5).** AlphaKlinik offers
+the answer under the policy `mvhd-bonus-programme`
+([`standard-policies.ts`](../../ui/src/lib/standard-policies.ts),
+[ADR-090](../ADRs/ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md)):
+use for the bonus payout only; no insurance decision, profiling, advertising
+or decision to the member's detriment; delete after the payout. The hub's
+connector decides one of its terms itself, `ehds:attestedPurpose`: AlphaKasse
+reaches the agreement only when its `DataProcessingPurposeCredential`, issued
+by the insurance and wellbeing authority, attests the purpose `bonus-payout`.
+A credential that attests "premium-setting" is refused with 400, "Policy in
+scope contract.negotiation not fulfilled". Step 8 delivers the yes or no over
+that agreement, or the member presents it from the EUDI Wallet.
 
 ## What is stored, and where
 
@@ -196,6 +203,12 @@ rules apply to it (in Germany § 65a SGB V), and the design needs a legal review
 - **Browser journeys:** J1092, J1094 and J1099 in
   [`54-bonus-programmes.spec.ts`](../../ui/__tests__/e2e/journeys/54-bonus-programmes.spec.ts).
   They skip with a reason on a stack where the crawler has not run.
+- **The bonus policy at the connector (compose, JAD stack seeded):**
+  `./scripts/seed-second-data-space.sh` then
+  `./scripts/run-ehds-identity-checks.sh`; PURPOSE-7.1 to 7.4 negotiate the
+  offer with the bonus payout purpose (agreed), without a purpose (refused),
+  with "premium-setting" (refused by `ehds:attestedPurpose`) and with the bonus
+  payout purpose again (agreed).
 - **The catalogue against DCAT-AP:**
   `python3 scripts/healthdcat-ap/validate.py ui/src/content/catalogues/alphakasse-dcat-ap.json --dcat-ap`.
 - **The records in the graph:**
@@ -215,9 +228,12 @@ RETURN b.title, c.joinedAt, c.withdrawnAt, c.source, collect(t {.year, .goalMet,
   the member sees it before sending; Klarbefund sends exercise minutes
   ([ADR-087](../ADRs/ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md)).
 
+- Step 5: the bonus programme policy, its purpose decided by the hub's
+  connector against the insurer's purpose credential
+  ([ADR-090](../ADRs/ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md)).
+
 ## Open
 
-- Step 5: the bonus standard policy, enforced at the hub's connector.
 - The achievement attestation for the EUDI Wallet (ADR-080, decision 4,
   after #708).
 - Step 8: delivery to AlphaKasse's connector, which needs a `simpl-edc` with

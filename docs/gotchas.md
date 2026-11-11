@@ -20,6 +20,35 @@ entry at the top when you hit something that cost you more than 30 minutes.
   needs its own `httpport`, or all but one fail with `bind: address already
 in use`.
 
+## 2026-11-11: a DCP scope extractor runs on the provider's messages too, and the consumer answers 401
+
+The first policy term the control plane enforces, `ehds:attestedPurpose`
+(ADR-090), needs the consumer to present its
+`DataProcessingPurposeCredential`, so `AttestedPurposeScopeExtractor` maps the
+term to that credential's DCP scope. On compose, AlphaKasse's negotiation then
+stayed REQUESTED. The provider had accepted the purpose and built the
+agreement; sending it answered 401:
+
+    Attempt #1 failed to [Provider] send agreement ... code=401 ... /negotiations/<id>/agreement
+
+A scope extractor runs on every outgoing DSP message whose policy carries the
+term, the provider's agreement and termination included. The extractor asked
+AlphaKlinik's IdentityHub for a purpose credential it does not hold, its
+presentation failed, and AlphaKasse refused the message. Limit the extractor
+to the consumer's `ContractRequestMessage` and `TransferRequestMessage`, as
+EDC's own `DynamicScopeExtractor` does with its `SUPPORTED_MESSAGES`.
+
+Two more things learned on the way:
+
+- EDC's configured scopes (`edc.iam.dcp.scopes.<alias>.prefix.mapping`) match
+  a left operand with `startsWith`, and a stored left operand is an expanded
+  IRI (`https://w3id.org/ehds/...`), so a prefix such as
+  `DataProcessingPurposeCredential` never matches it. Map the IRI in code.
+- A consumer that holds no credential of a requested scope is refused at DCP
+  with 401, before any policy function runs, and EDC 1.0 logs no reason
+  (#881). Only a consumer that holds a credential reaches the function and its
+  400 "Policy in scope contract.negotiation not fulfilled".
+
 ## 2026-11-09: a NATS restart takes the control plane's task streams, and every negotiation answers 500
 
 On the EDC 1.0 compose stack every negotiation start answered HTTP 500, and

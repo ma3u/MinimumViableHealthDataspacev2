@@ -902,5 +902,8 @@
   "Remove participant": "Eliminar participante",
   "Removing…": "Eliminando…",
   "Removal failed": "No se pudo eliminar",
-  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "¿Eliminar a este participante del espacio de datos? Se borran su contexto, su DID y sus credenciales."
+  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "¿Eliminar a este participante del espacio de datos? Se borran su contexto, su DID y sus credenciales.",
+  "the purpose the recipient's credential attests": "la finalidad que acredita la credencial del destinatario",
+  "Bonus program: the member's yes or no, for the payout only": "Programa de bonificación: el sí o no del miembro, solo para el pago",
+  "A program's goal met, yes or no, sent to the insurer that runs it, at the member's instruction.": "Objetivo de un programa cumplido, sí o no, enviado a la aseguradora que lo gestiona, por indicación del miembro."
 }
