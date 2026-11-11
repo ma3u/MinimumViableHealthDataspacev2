@@ -83,6 +83,15 @@ struct WearableFHIRTests {
       .steps: ("41950-7", "/d"),
       .bodyMass: ("29463-7", "kg"),
       .exercise: ("55411-3", "min/d"),
+      .vo2Max: ("94122-9", "mL/min/kg"),
+      .respiratoryRate: ("9279-1", "/min"),
+      .oxygenSaturation: ("59408-5", "%"),
+      .activeEnergy: ("41981-2", "kcal/d"),
+      .bodyFat: ("41982-0", "%"),
+      .sleep: ("93832-4", "h/d"),
+      .deepSleep: ("93831-6", "min/d"),
+      .remSleep: ("93829-0", "min/d"),
+      .coreSleep: ("93830-8", "min/d"),
     ]
     for metric in WearableMetric.allCases {
       let coding = WearableFHIR.coding(metric)

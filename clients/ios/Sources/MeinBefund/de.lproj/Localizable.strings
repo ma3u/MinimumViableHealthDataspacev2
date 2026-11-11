@@ -636,3 +636,17 @@
 "The Mac answered %lld." = "Der Mac antwortete %lld.";
 "The Mac's certificate is not the one in the code, so nothing was sent." = "Das Zertifikat des Macs ist nicht das aus dem Code, daher wurde nichts gesendet.";
 "The Mac cannot be reached (%lld). Is the receiver running, and is the phone on the same Wi-Fi?" = "Der Mac ist nicht erreichbar (%lld). Läuft der Empfänger, und ist das Telefon im selben WLAN?";
+
+/* More Apple Health metrics for the local graph (Relate, Nov 2026). */
+"Cardio fitness (VO2 max)" = "Cardiofitness (VO2max)";
+"Respiratory rate" = "Atemfrequenz";
+"Blood oxygen" = "Blutsauerstoff";
+"Active energy" = "Aktivitätsenergie";
+"Sleep" = "Schlaf";
+"Deep sleep" = "Tiefschlaf";
+"REM sleep" = "REM-Schlaf";
+"Core sleep" = "Kernschlaf";
+"breaths/min" = "Atemzüge/min";
+"kcal per day" = "kcal pro Tag";
+"hours per night" = "Stunden pro Nacht";
+"minutes per night" = "Minuten pro Nacht";

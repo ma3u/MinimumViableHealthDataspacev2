@@ -82,8 +82,10 @@ targets:
           only when you have paired it by its QR code.
         INFOPLIST_KEY_NSHealthShareUsageDescription: >-
           Klarbefund reads resting heart rate, heart rate variability, steps,
-          weight and exercise minutes to show them beside your lab values. It
-          keeps no copy and writes nothing to Health.
+          weight, exercise minutes, cardio fitness (VO2 max), respiratory rate,
+          blood oxygen, active energy, body fat and sleep to show them beside
+          your lab values. It keeps no copy on this phone and writes nothing to
+          Health; weekly means leave the phone only where you switch that on.
         # The app asks for no write access (toShare: []), so iOS never shows
         # this. App Store Connect refuses an upload with the HealthKit
         # entitlement and no update string all the same (ITMS-90683, build
