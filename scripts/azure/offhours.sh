@@ -76,6 +76,11 @@ CORE_APPS=(mvhd-vault mvhd-keycloak mvhd-claude-federation mvhd-neo4j mvhd-nats
 # EDC 1.0 (ADR-078): the control plane, siglet as its data plane, the
 # IdentityHub and the IssuerService.
 EDC_APPS=(mvhd-controlplane mvhd-siglet mvhd-identityhub mvhd-issuerservice)
+# CFM from our fork (ADR-088, 20-cfm-fork.sh), each left out while it does not
+# exist. They read Postgres and NATS, so they stop first and start after the
+# EDC apps; the managers before the agents, since a manager creates the NATS
+# bucket the agents open (docs/knowledge/runbooks/cfm-fork.md).
+CFM_APPS=(mvhd-cfm-pmanager mvhd-cfm-tmanager mvhd-cfm-agents)
 # The two SPE workspaces, ACI confidential container groups, and the access
 # body's Trustee on ACA (ADR-069), from the moment 21-aci-confidential-spe.sh
 # has created them; each is left out while it does not exist. A stopped ACI
@@ -102,6 +107,13 @@ vault_state() { az containerapp show --name mvhd-vault --resource-group "$RESOUR
                   --query properties.runningStatus -o tsv; }
 pg_state()    { az postgres flexible-server show --name "$PG_FLEX_NAME" --resource-group "$RESOURCE_GROUP" \
                   --query state -o tsv 2>/dev/null || echo unknown; }
+cfm_apps() {  # the CFM apps that exist, in start order, one per line
+  local a
+  for a in "${CFM_APPS[@]}"; do
+    az containerapp show --name "$a" --resource-group "$RESOURCE_GROUP" --query name -o tsv >/dev/null 2>&1 && echo "$a"
+  done
+  return 0
+}
 trustee_present() { az containerapp show --name "$TRUSTEE_APP" --resource-group "$RESOURCE_GROUP" \
                       --query name -o tsv >/dev/null 2>&1; }
 spe_groups() {  # the SPE container groups that exist, one per line
@@ -268,6 +280,8 @@ do_stop() {
   # (PR #482). A stopped app keeps its revision and scale. Trustee goes with
   # the backend once the workspaces that ask it are down.
   local -a apps=()
+  local cfm
+  while read -r cfm; do [ -n "$cfm" ] && apps=("$cfm" "${apps[@]}"); done < <(cfm_apps)
   apps+=("${BACKEND_APPS[@]}")
   if trustee_present; then apps+=("$TRUSTEE_APP"); fi
   log "stopping ${#apps[@]} apps"
@@ -334,6 +348,14 @@ do_start() {
   log "EDC apps (ADR-024)"
   "${SCRIPT_DIR}/set-app-power.sh" start "${EDC_APPS[@]}" || warn "Not every EDC app reported running, see above"
   scale 1 1 "${EDC_APPS[@]}"
+
+  local -a cfm=()
+  local a
+  while read -r a; do [ -n "$a" ] && cfm+=("$a"); done < <(cfm_apps)
+  if [ "${#cfm[@]}" -gt 0 ]; then
+    log "CFM apps (ADR-088)"
+    "${SCRIPT_DIR}/set-app-power.sh" start "${cfm[@]}" || warn "Not every CFM app reported running, see above"
+  fi
 
   log "Vault bootstrap job"
   az containerapp job start --name mvhd-vault-bootstrap --resource-group "$RESOURCE_GROUP" -o none ||
