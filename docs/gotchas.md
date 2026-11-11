@@ -3,6 +3,30 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-11: a transfer needs a data plane on the consumer's side, and a failed transfer policy reads "agreement not found or not valid"
+
+Two things from the first pull of the bonus programme's answer (#934 step 8,
+ADR-091), both on EDC 1.0.0-RC5:
+
+- AlphaKasse's negotiation was FINALIZED, and its transfer ended TERMINATED
+  "No dataplane found" at once. The provider never heard of it: the
+  **consumer's** control plane refuses to start a transfer when its own
+  participant context has no data plane for the transfer type.
+  `jad/seed-contract-negotiation.sh` registers one for the participants CFM
+  creates; a context a script creates (`scripts/seed-second-data-space.sh`)
+  needs its own `PUT /participants/<ctx>/dataplanes`, with a `dataplaneId`
+  that is unique across participants (#542).
+- A policy that fails in the transfer scope is not reported as a policy. With
+  AlphaKasse's credential attesting "premium-setting", a transfer under its
+  existing agreement ended with the provider's
+  `409 Cannot process TransferRequestMessage because agreement not found or
+not valid`. The agreement exists and had started a transfer minutes before;
+  EDC folds "the policy does not hold for this consumer now" into the same
+  message. The negotiation scope, by contrast, names the constraint (400
+  "Policy in scope contract.negotiation not fulfilled"). DELIVER-8.6 asserts
+  the 409 after 8.1 has used the same agreement, so the two cases cannot be
+  mixed up.
+
 ## 2026-11-11: a `contracts` load run on Azure left 132 negotiations retrying, and real ones queued behind them
 
 `load-tests/platform.js` sent `http://controlplane:8082/api/dsp` as the

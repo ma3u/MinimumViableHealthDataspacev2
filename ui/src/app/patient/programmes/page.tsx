@@ -232,11 +232,11 @@ export default function BonusProgrammesPage() {
         ok: true,
         text: goalMet
           ? t(
-              "Recorded for {year}: goal met, yes. Only this answer goes to {publisher}, once the hub's delivery is connected.",
+              "Recorded for {year}: goal met, yes. Only this answer and your reference go to {publisher}, when it collects its answers from the hub.",
               { year, publisher: p.publisherName },
             )
           : t(
-              "Recorded for {year}: goal met, no. Only this answer goes to {publisher}, once the hub's delivery is connected.",
+              "Recorded for {year}: goal met, no. Only this answer and your reference go to {publisher}, when it collects its answers from the hub.",
               { year, publisher: p.publisherName },
             ),
       });
@@ -445,6 +445,31 @@ function ProgrammeConsentPanel({
             <CheckCircle2 size={12} />
             {t("You joined on {date}.", { date: day(open.joinedAt) })}
           </p>
+          {open.memberReference && (
+            <p
+              data-testid="bonus-programme-reference"
+              className="text-(--text-secondary)"
+            >
+              {t(
+                "Your reference for {publisher}: {reference}. Give it to {publisher} so that it can match your answer to you. The hub sends no name and no insurance number.",
+                {
+                  publisher: programme.publisherName,
+                  reference: open.memberReference,
+                },
+              )}
+            </p>
+          )}
+          {open.collectedAt && (
+            <p
+              data-testid="bonus-programme-collected"
+              className="text-(--text-secondary)"
+            >
+              {t("{publisher} collected your answer on {date}.", {
+                publisher: programme.publisherName,
+                date: day(open.collectedAt),
+              })}
+            </p>
+          )}
           <YearResult
             evaluation={evaluation}
             year={year}

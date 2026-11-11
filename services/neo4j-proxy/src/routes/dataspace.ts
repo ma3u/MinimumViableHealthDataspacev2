@@ -47,6 +47,10 @@ async function authorise(req: Request, res: Response, next: NextFunction) {
   // The consumer's rate budget and audit name.
   req.headers["x-participant"] = grant.consumer;
   res.locals.datasetRoute = route;
+  // What the token grants, for a route that answers a pull only and decides
+  // by the consumer (routes/programmes.ts). res.locals is the server's own:
+  // no header a caller sends can set it.
+  res.locals.dataspaceGrant = grant;
   next();
 }
 

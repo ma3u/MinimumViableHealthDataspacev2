@@ -35,6 +35,9 @@ export const DATASET_ROUTES: Record<
     method: "GET",
     path: "/catalog/datasets",
   },
+  // A bonus program's yes or no, for the insurer that published it (#934
+  // step 8, ADR-091; scripts/seed-second-data-space.sh).
+  "bonus-programme-answer": { method: "GET", path: "/programmes/answers" },
 };
 
 export interface DataspaceGrant {

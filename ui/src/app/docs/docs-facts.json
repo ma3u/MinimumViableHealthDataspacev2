@@ -1375,6 +1375,12 @@
       "file": "ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md",
       "title": "The connector admits only an attested bonus payout purpose",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-091",
+      "file": "ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md",
+      "title": "The insurer collects the yes or no, under a reference the hub issues",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {

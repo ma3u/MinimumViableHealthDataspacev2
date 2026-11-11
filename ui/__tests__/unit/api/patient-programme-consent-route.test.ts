@@ -100,7 +100,11 @@ describe("consent to a bonus program", () => {
     );
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.consent).toEqual(OPEN);
+    // With the reference the insurer's answer carries (step 8, ADR-091).
+    expect(body.consent).toEqual({
+      ...OPEN,
+      memberReference: "6G3S-4K9A-J3FY",
+    });
     expect(body.legalBasis).toContain("9(2)(a)");
     const [cypher, params] = mockRunQuery.mock.calls[0];
     expect(cypher).toBe(JOIN_PROGRAMME_CYPHER);

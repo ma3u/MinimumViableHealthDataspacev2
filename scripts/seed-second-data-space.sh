@@ -35,7 +35,7 @@ CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; RED='\033[0;31m'; NC
 step() { echo; echo -e "${CYAN}══ $*${NC}"; }
 fail() { echo -e "${RED}second data space NOT seeded${NC}: $*" >&2; exit 1; }
 
-step "1/7 AlphaKasse DE on the control plane"
+step "1/8 AlphaKasse DE on the control plane"
 TOKEN=$(curl -sS --max-time 20 -X POST "${KEYCLOAK_URL}/realms/edcv/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" 2>/dev/null |
@@ -44,22 +44,22 @@ TOKEN=$(curl -sS --max-time 20 -X POST "${KEYCLOAK_URL}/realms/edcv/protocol/ope
 PARTICIPANT_SLUGS="$HOLDER" CP="$EDC_MANAGEMENT_URL" TOKEN="$TOKEN" \
   bash "${REPO_DIR}/scripts/azure/05-cp-participants.sh" || fail "step 1"
 
-step "2/7 the same context in the IdentityHub, and its STS config"
+step "2/8 the same context in the IdentityHub, and its STS config"
 "${SCRIPT_DIR}/seed-identityhub-participants.sh" || fail "step 2"
 "${SCRIPT_DIR}/seed-cp-participant-config.sh" || fail "step 2, STS config"
 
-step "3/7 the insurance and wellbeing Governance Authority"
+step "3/8 the insurance and wellbeing Governance Authority"
 PROFILE=wellbeing SERVICE=wellbeing-ga-issuer CTX=wellbeing-ga DB="${WELLBEINGGA_DB:-wellbeingga_v1}" \
 ADMIN_PORT=10053 HOLDERS="did:web:identityhub%3A7083:${HOLDER}" \
   "${SCRIPT_DIR}/seed-test-issuer.sh" || fail "step 3"
 
-step "4/7 AlphaKasse requests its membership from the authority"
+step "4/8 AlphaKasse requests its membership from the authority"
 ISSUER_DID="$GA_DID" EDC_ISSUER_URL=http://localhost:10053/api/admin ISSUER_CTX=wellbeing-ga ONLY="$HOLDER" \
   "${SCRIPT_DIR}/request-participant-credentials.sh" || fail "step 4"
 
 # The control plane reads its trust list at start. One started before this
 # change does not trust the authority yet, and refuses AlphaKasse for that.
-step "5/7 the control plane trusts the authority"
+step "5/8 the control plane trusts the authority"
 if docker inspect "$CP_CONTAINER" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null |
   grep -qx "edc.iam.trustedissuer.wellbeing-ga.id=${GA_DID}"; then
   echo -e "${GREEN}OK${NC}: ${CP_CONTAINER} trusts ${GA_DID} (MembershipCredential)"
@@ -70,7 +70,7 @@ else
   echo -e "${YELLOW}WARN${NC}: no ${CP_CONTAINER} to inspect (not a local stack); trust follows docker-compose.jad.yml"
 fi
 
-step "6/7 the authority attests AlphaKasse's purpose: the bonus payout (ADR-090)"
+step "6/8 the authority attests AlphaKasse's purpose: the bonus payout (ADR-090)"
 GA_ADMIN="http://localhost:10053/api/admin/v1/participants/wellbeing-ga"
 ATOKEN=$(curl -sS --max-time 20 -X POST "${KEYCLOAK_URL}/realms/edcv/protocol/openid-connect/token" \
   -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" 2>/dev/null |
@@ -117,9 +117,11 @@ else
     "${SCRIPT_DIR}/request-participant-credentials.sh" || fail "step 6, the purpose credential"
 fi
 
-step "7/7 AlphaKlinik offers the bonus programme's answer under mvhd-bonus-programme"
-# The answer itself is delivered in #934 step 8; until then the asset's
-# address is the proxy's health probe, which carries no member data.
+step "7/8 AlphaKlinik offers the bonus programme's answer under mvhd-bonus-programme"
+# The neo4j-proxy serves the answer to a pull whose token names this asset
+# (DATASET_ROUTES in services/neo4j-proxy/src/dataspace-token.ts; #934 step 8,
+# ADR-091). The address says where; on EDC 1.0 the token decides, not the
+# address.
 PROVIDER_CTX=$(curl -sS --max-time 20 -H "Authorization: Bearer ${ATOKEN}" "${EDC_MANAGEMENT_URL}/v5/participants" 2>/dev/null |
   jq -r '[.[] | select((.identity // "") | endswith(":alpha-klinik"))] | .[0]["@id"] // empty')
 [ -n "$PROVIDER_CTX" ] || fail "step 7: no participant context for alpha-klinik"
@@ -144,7 +146,7 @@ ASSET_TEXT="A member's goal met, yes or no, for one programme and year (#934, AD
 mgmt_put_or_post assets bonus-programme-answer "$(jq -nc --arg c "$EDC_CTX" --arg d "$ASSET_TEXT" \
   '{"@context":[$c],"@type":"Asset","@id":"bonus-programme-answer",
     properties:{name:"Bonus programme answer",description:$d,contenttype:"application/json"},
-    dataAddress:{"@type":"DataAddress",type:"HttpData",baseUrl:"http://neo4j-proxy:9090/health"}}')"
+    dataAddress:{"@type":"DataAddress",type:"HttpData",baseUrl:"http://neo4j-proxy:9090/programmes/answers"}}')"
 # Anyone admitted to the data space sees the offer; who may agree to it is
 # the contract policy's. Its own access policy, so this runs where
 # jad/seed-data-assets.sh has not (the CI compliance job).
@@ -155,5 +157,19 @@ mgmt_put_or_post contractdefinitions bonus-programme-contract "$(jq -nc --arg c 
   "@id":"bonus-programme-contract",accessPolicyId:"bonus-programme-access-policy",contractPolicyId:"mvhd-bonus-programme",
   assetsSelector:[{"@type":"Criterion",operandLeft:"https://w3id.org/edc/v0.0.1/ns/id",operator:"=",operandRight:"bonus-programme-answer"}]}')"
 echo -e "${GREEN}OK${NC}: alpha-klinik offers bonus-programme-answer under mvhd-bonus-programme"
+
+step "8/8 AlphaKasse's data plane, so it can collect the answer (ADR-091)"
+# A transfer needs a data plane on the consumer's side too: without one the
+# consumer's own transfer ends TERMINATED "No dataplane found" before the
+# provider hears of it. jad/seed-contract-negotiation.sh registers the five
+# CFM participants; AlphaKasse is created here, so its registration is too.
+# The id is global, one per participant (#542).
+SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"
+DP_STATUS=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X PUT "${EDC_MANAGEMENT_URL}/v5/participants/${AK_CTX}/dataplanes" \
+  -H "Authorization: Bearer ${ATOKEN}" -H "Content-Type: application/json" \
+  -d "$(jq -nc --arg id "dataplane-fhir-${AK_CTX}" --arg e "${SIGLET_SIGNALING_URL}/${AK_CTX}/dataflows" \
+    '{dataplaneId:$id,endpoint:$e,transferTypes:["HttpData-PULL"]}')" 2>/dev/null) || DP_STATUS="000"
+case "$DP_STATUS" in 2??) ;; *) fail "step 8, AlphaKasse's data plane: HTTP ${DP_STATUS}" ;; esac
+echo -e "${GREEN}OK${NC}: ${HOLDER} has a data plane for HttpData-PULL"
 
 echo -e "\n${GREEN}second data space seeded${NC}: ${HOLDER} holds its MembershipCredential and its bonus payout purpose from ${GA_DID}"

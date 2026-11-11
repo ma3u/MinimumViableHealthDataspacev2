@@ -20,7 +20,7 @@ The whole process, with what crosses to the insurer:
 (:Patient)-[:GAVE_PROGRAMME_CONSENT]->(:ProgrammeConsent {consentId, patientId,
   programmeId, joinedAt, withdrawnAt, source})-[:FOR_PROGRAMME]->(:BonusProgramme)
 (:ProgrammeTransfer {transferId, patientId, programmeId, year, goalMet,
-  status, requestedAt})-[:UNDER_CONSENT]->(:ProgrammeConsent)
+  status, requestedAt, deliveredAt, deliveredTo})-[:UNDER_CONSENT]->(:ProgrammeConsent)
 ```
 
 - **The programme** comes from the crawl: a DCAT-AP `dcat:DataService` typed
@@ -39,10 +39,21 @@ The whole process, with what crosses to the insurer:
   breakdown; a year not over answers `year-not-over`.
 - **The transfer** carries the programme, the year and `goalMet`, status
   `evaluated`; 400 for a year the rule does not cover, 409 before the year
-  ends. Nothing reaches the insurer before step 8.
+  ends.
+- **The delivery** (#934 step 8, [ADR-091](../../ADRs/ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md)).
+  The insurer that published the programme collects over its bonus agreement:
+  a pull of the asset `bonus-programme-answer`, served by the neo4j-proxy's
+  `GET /programmes/answers` through `/dataspace/data` and refused with 403
+  any other way. Each answer is `programme`, `year`, `goalMet` and
+  `memberReference`, only under an open consent. The reference is derived
+  from the consent id (`memberReference()`, one copy in the UI and one in the
+  proxy, shared vectors) and shown to the member on `/patient/programmes`.
+  The first collection sets `status: 'delivered'`, `deliveredAt` and
+  `deliveredTo`.
 - **Surfaces.** `GET /api/patient/programmes`, `GET
 /api/patient/programmes/evaluation`, `POST/DELETE
 /api/patient/programmes/consent`, `POST /api/patient/programmes/transfer`,
   and their Klarbefund twins under `/api/patient/app/programmes`
   ([nextjs-api-routes](../apis/nextjs-api-routes.md)); the page
-  `/patient/programmes`; Bruno `01 Patient/22` to `27`; journeys J1092, J1094, J1099.
+  `/patient/programmes`; Bruno `01 Patient/22` to `27`; journeys J1092, J1094, J1099; identity
+  checks PURPOSE-7.1 to 7.4 and DELIVER-8.1 to 8.6.
