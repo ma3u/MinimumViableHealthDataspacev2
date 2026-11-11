@@ -14,7 +14,7 @@ security:
       - read
       - write
 paths:
-  /v1alpha/credentials:
+  /v1/credentials:
     get:
       tags:
         - Verifiable Credentials
@@ -68,7 +68,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/credentials/request/{holderPid}:
+  /v1/participants/{participantContextId}/credentials/request/{holderPid}:
     get:
       tags:
         - Verifiable Credentials
@@ -122,7 +122,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}:
+  /v1/participants/{participantContextId}:
     get:
       tags:
         - Participant Context
@@ -169,7 +169,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/dids:
+  /v1/dids:
     get:
       tags:
         - DID
@@ -223,7 +223,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/credentials:
+  /v1/participants/{participantContextId}/credentials:
     get:
       tags:
         - Verifiable Credentials
@@ -271,7 +271,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/credentials/request:
+  /v1/participants/{participantContextId}/credentials/request:
     post:
       tags:
         - Verifiable Credentials
@@ -325,7 +325,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/keypairs:
+  /v1/keypairs:
     get:
       tags:
         - Key Pairs
@@ -379,7 +379,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/dids/state:
+  /v1/participants/{participantContextId}/dids/state:
     post:
       tags:
         - DID
@@ -419,7 +419,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/keypairs:
+  /v1/participants/{participantContextId}/keypairs:
     get:
       tags:
         - Key Pairs
@@ -527,7 +527,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/keypairs/{keyPairId}:
+  /v1/participants/{participantContextId}/keypairs/{keyPairId}:
     get:
       tags:
         - Key Pairs
@@ -581,7 +581,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants:
+  /v1/participants:
     get:
       tags:
         - Participant Context
@@ -635,7 +635,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/keypairs/{keyPairId}/revoke:
+  /v1/participants/{participantContextId}/keypairs/{keyPairId}/revoke:
     post:
       tags:
         - Key Pairs
@@ -694,7 +694,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/keypairs/{keyPairId}/rotate:
+  /v1/participants/{participantContextId}/keypairs/{keyPairId}/rotate:
     post:
       tags:
         - Key Pairs

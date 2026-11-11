@@ -166,11 +166,11 @@ describe("the interactive API reference page", () => {
       "https://hl7.org/fhir/R4/",
       "https://ohdsi.github.io/CommonDataModel/cdm54.html",
       "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
-      "https://github.com/keycloak/keycloak/releases/tag/26.8.0",
-      "https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity",
     ]) {
       expect(hrefs).toContain(href);
     }
+    // The connector the protocols run on: the launchers this repo builds.
+    expect(hrefs.some((h) => h.endsWith("runtimes/edc/README.md"))).toBe(true);
     expect(hrefs.some((h) => h.includes("ADR-044-every-api-route"))).toBe(true);
     expect(hrefs.some((h) => h.includes("ADR-054-klarbefund"))).toBe(true);
   });

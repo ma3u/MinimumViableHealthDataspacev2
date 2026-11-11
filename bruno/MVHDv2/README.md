@@ -29,6 +29,7 @@ the work is tracked in [#349](https://github.com/ma3u/MinimumViableHealthDataspa
 | `10 Connecting partner`     | your own EDC connector        | DSP 2025-1 and DCP v1.0 against the Management API, IdentityHub and IssuerService                                                                                         |
 | `11 Platform`               | the platform team             | the Neo4j proxy on port 9090                                                                                                                                              |
 | `12 EUDI wallet`            | optional                      | wallet sign-in, needs `docker-compose.eudi.yml`                                                                                                                           |
+| `13 Static export`          | the GitHub Pages site         | the fixtures under `/mock/` that stand in for the API there, GET only                                                                                                     |
 
 Two folders hold procedures rather than personas. A data permit is a two-sided
 procedure: the data user applies, the access body decides, the data user reports,
@@ -42,7 +43,7 @@ request names the persona sending it.
 # the compose stack on localhost:3003
 ./scripts/run-api-tests.sh Local
 
-# the GitHub Pages export: the 36 GET requests that have a fixture, no auth
+# the GitHub Pages export: folder 13, the GET requests that have a fixture, no auth
 ./scripts/run-api-tests.sh Static-mock
 
 # the live demo, needs the deployment's NEXTAUTH_SECRET
@@ -68,13 +69,13 @@ the running UI container; for `Azure-Dev` it comes from the environment, and
 
 ## The environments
 
-|          | `Local`                                                                | `Azure-Dev`                        | `Static-mock`                        |
-| -------- | ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------------ |
-| base     | `http://localhost:3003`                                                | `https://ehds.mabu.red`            | the GitHub Pages export              |
-| cookie   | `next-auth.session-token`                                              | `__Secure-next-auth.session-token` | none needed                          |
-| sessions | forged from the UI container's secret                                  | forged from `NEXTAUTH_SECRET`      | none                                 |
-| folders  | all thirteen                                                           | `00` to `09`                       | the 36 requests in `static-mock.txt` |
-| needs    | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` | nothing local                      | nothing                              |
+|          | `Local`                                                                | `Azure-Dev`                        | `Static-mock`                   |
+| -------- | ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------- |
+| base     | `http://localhost:3003`                                                | `https://ehds.mabu.red`            | the GitHub Pages export         |
+| cookie   | `next-auth.session-token`                                              | `__Secure-next-auth.session-token` | none needed                     |
+| sessions | forged from the UI container's secret                                  | forged from `NEXTAUTH_SECRET`      | none                            |
+| folders  | `00` to `11`, and `12` with `BRUNO_EUDI=1`                             | `00` to `09`                       | folder `13` (`static-mock.txt`) |
+| needs    | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` | nothing local                      | nothing                         |
 
 `Azure-Dev` stops at folder 09 because the control plane, IdentityHub,
 IssuerService and the Neo4j proxy run on `.internal.` addresses in Azure
@@ -109,6 +110,11 @@ NEXTAUTH_SECRET="$(docker exec health-dataspace-ui printenv NEXTAUTH_SECRET)" \
 | `regulator`      | `HDAB_AUTHORITY` | `sessionTokenRegulator`       |
 | `edcadmin`       | `EDC_ADMIN`      | `sessionToken`                |
 
+Which persona a group of operations needs is the table above both API explorers
+(`/docs/developer/api`, `/docs/developer/reference`) and at the top of
+`ui/public/openapi.yaml`: start as `edcadmin`; the access body's decisions need
+`regulator`, a patient's phone and wallet `patient1`.
+
 Tokens last eight hours. Do not save them into the `.bru` file: the pre-commit
 check refuses a `.bru` carrying a session cookie, because gitleaks does not scan
 that extension and one sat in this directory for four months.
@@ -120,17 +126,17 @@ body. A 401, a 403 or a 404 is a failure unless the request exists to prove that
 boundary. The journeys carry ids between requests, so `07` and `08` genuinely
 exercise the procedure rather than nine independent calls.
 
-Measured on the compose stack on 2026-09-26: **135 passed, 14 failed, 0 skipped**
-over 149 requests. Those 14 are five real defects, each with a `docs` block on
-the request that says so:
+Measured on the compose stack on 2026-11-11, EDC 1.0.0-RC5, against the code of
+that day: **219 passed, 0 failed, 0 skipped** over 219 requests (folders `00` to
+`11`). With `BRUNO_DSP_LIVE=1`, `03 Data User` runs catalogue, negotiation,
+transfer, the data and the SPE import against the connector: 26 of 26.
 
-| Requests | Defect                                                                                                                                           |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 9        | the Neo4j proxy image pinned in `docker-compose.jad.yml` is from March and predates nine routes, so four proxy calls 404 and five hub routes 502 |
-| 1        | the DSP catalogue request has no provider dispatcher ([#345](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/345))                 |
-| 1        | a consent for a study that does not exist answers 200 and writes nothing                                                                         |
-| 2        | negotiation and transfer rows the hub lists cannot be opened, because the list merges demo rows                                                  |
-| 1        | `/api/patient` answers an anonymous caller                                                                                                       |
+The same day, against a UI container built two days earlier, the run scored
+210 passed and 9 failed. Seven of the nine were routes that container did not
+have yet (see Troubleshooting), one was request `03 Data User/21` asking for a
+transfer with an empty id, since fixed, and one was a single 401 from
+IdentityHub that did not repeat. A red run on a local stack is first a question
+about the age of the containers.
 
 The floor lives in `scripts/compliance-baseline.json` and the compliance workflow
 fails when a run drops below it.
@@ -162,9 +168,13 @@ value the deployment runs with.
 **Folder 10 fails from request 10 onwards.** The EDC layer is empty. Run
 `./scripts/seed-identity-layer.sh`; it is idempotent.
 
-**Folder 11 answers 404 and folder 03 answers 502.** The Neo4j proxy container is
-older than `services/neo4j-proxy/src/`. Known: the image is pinned by digest in
-`docker-compose.jad.yml`.
+**A request answers 404 with an HTML page, or 405.** The UI container is older
+than the route: compose builds `graph-explorer` once and keeps the image. On
+2026-11-11 a container built two days earlier answered 404 for
+`/api/patient/app/programmes` and 405 for `DELETE /api/participants/{id}`, seven
+requests in all. Rebuild it:
+`docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d --build graph-explorer`.
+The same holds for folder 11 and the Neo4j proxy (`neo4j-proxy`).
 
 **A journey request fails on a variable.** The journeys pass ids between
 requests, so they must run in one `bru run`. Running request 05 of folder 07 on
@@ -175,5 +185,5 @@ its own has no `applicationId`.
 - [ADR-032](../../docs/ADRs/ADR-032-persona-organised-api-collection.md): why the collection is shaped this way
 - [ADR-031](../../docs/ADRs/ADR-031-checks-must-assert.md): why every request must be able to fail
 - `.claude/rules/api-conventions.md`: the role matrix folder 09 asserts
-- `ui/public/openapi.yaml`: the machine-readable spec, kept honest by `scripts/check-api-spec-drift.py`
+- `ui/public/openapi.yaml`: the machine-readable spec, all operations and the roles each one needs, kept honest by `scripts/check-api-spec-drift.py`
 - `scripts/run-api-tests.sh`: the runner

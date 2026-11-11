@@ -14,7 +14,7 @@ security:
       - read
       - write
 paths:
-  /v1alpha/participants/{participantContextId}/credentials/{credentialId}/status:
+  /v1/participants/{participantContextId}/credentials/{credentialId}/status:
     get:
       tags:
         - Issuer Service Credentials Admin API
@@ -66,7 +66,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/holders/query:
+  /v1/participants/{participantContextId}/holders/query:
     post:
       tags:
         - Issuer Service Holder Admin API
@@ -120,7 +120,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/holders/{holderId}:
+  /v1/participants/{participantContextId}/holders/{holderId}:
     get:
       tags:
         - Issuer Service Holder Admin API
@@ -176,7 +176,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/credentialdefinitions/query:
+  /v1/participants/{participantContextId}/credentialdefinitions/query:
     post:
       tags:
         - Issuer Service Credential Definition Admin API
@@ -222,7 +222,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/credentialdefinitions/{credentialDefinitionId}:
+  /v1/participants/{participantContextId}/credentialdefinitions/{credentialDefinitionId}:
     get:
       tags:
         - Issuer Service Credential Definition Admin API
@@ -276,7 +276,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/credentials/query:
+  /v1/participants/{participantContextId}/credentials/query:
     post:
       tags:
         - Issuer Service Credentials Admin API
@@ -324,7 +324,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/issuanceprocesses/query:
+  /v1/participants/{participantContextId}/issuanceprocesses/query:
     post:
       tags:
         - Issuer Service Issuance Process Admin API
@@ -370,7 +370,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v1alpha/participants/{participantContextId}/issuanceprocesses/{issuanceProcessId}:
+  /v1/participants/{participantContextId}/issuanceprocesses/{issuanceProcessId}:
     get:
       tags:
         - Issuer Service Issuance Process Admin API

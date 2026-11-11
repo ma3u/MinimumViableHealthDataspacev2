@@ -59,7 +59,7 @@ const API_ENDPOINTS = {
     "http://health-dataspace-provision-manager:8080/api",
 } as const;
 
-/** JSON-LD context required by EDC Management API v5alpha */
+/** JSON-LD context the EDC Management API v5 expects (v5beta on EDC 0.18). */
 export const EDC_CONTEXT = "https://w3id.org/edc/connector/management/v2";
 
 type ApiName = keyof typeof API_ENDPOINTS;
@@ -143,6 +143,26 @@ interface RequestOptions {
   timeoutMs?: number;
 }
 
+/**
+ * An answer from a JAD service that was not 2xx. `status` is the service's
+ * own, so a route can tell "the connector has no such transfer" (404) from
+ * "the connector did not answer" and not report both as a bad gateway.
+ */
+export class EdcApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "EdcApiError";
+  }
+}
+
+/** True when a JAD service answered that the thing asked for does not exist. */
+export function isEdcNotFound(err: unknown): boolean {
+  return err instanceof EdcApiError && err.status === 404;
+}
+
 /** Default fetch timeout — short enough that a dead upstream doesn't stall
  *  operator dashboards, long enough for normal JAD startup latency. */
 const DEFAULT_TIMEOUT_MS = 8_000;
@@ -151,7 +171,7 @@ const DEFAULT_TIMEOUT_MS = 8_000;
  * Make a typed API request to a JAD service.
  *
  * @param api - Which API to call (management, identity, issuer, tenant, provision)
- * @param path - API path (e.g., '/v3/assets/request')
+ * @param path - API path (e.g., '/v5/participants/{ctxId}/assets/request')
  * @param method - HTTP method
  * @param body - Request body (will be JSON-serialized)
  * @param options - Additional request options
@@ -202,8 +222,9 @@ async function apiRequest<T = unknown>(
 
   if (!response.ok) {
     const errorBody = await response.text().catch(() => "No error body");
-    throw new Error(
+    throw new EdcApiError(
       `EDC API error [${api}] ${method} ${path}: ${response.status} ${response.statusText}\n${errorBody}`,
+      response.status,
     );
   }
 
