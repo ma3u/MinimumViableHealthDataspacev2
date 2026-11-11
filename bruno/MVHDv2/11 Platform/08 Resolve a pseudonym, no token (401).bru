@@ -1,0 +1,34 @@
+meta {
+  name: 08 Resolve a pseudonym, no token (401)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{proxyUrl}}/trust-center/resolve
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:json {
+  {
+    "studyId": "study-001",
+    "trustCenterName": "bruno-probe",
+    "providerPseudonyms": [
+      {
+        "psnId": "psn-bruno",
+        "providerId": "bruno"
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 401
+  res.body.error: eq Unauthorized
+}

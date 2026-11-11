@@ -134,10 +134,13 @@ app.post(
               return obj;
             });
             allResults.push({ source: label, records });
-          } catch (err: any) {
+          } catch (err) {
+            // The caller learns which SPE failed, not why: a driver error
+            // quotes the query and the address it failed on (#1029).
+            logger.error({ err, spe: label }, "federated SPE query failed");
             allResults.push({
               source: label,
-              records: [{ _source: label, _error: err.message }],
+              records: [{ _source: label, _error: "SPE query failed" }],
             });
           } finally {
             await session.close();

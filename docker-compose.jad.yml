@@ -501,6 +501,11 @@ services:
       AZURE_OPENAI_GPT4O_URL: "${AZURE_OPENAI_GPT4O_URL:-}"
       AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY:-}"
       AZURE_OPENAI_EMBEDDINGS_URL: "${AZURE_OPENAI_EMBEDDINGS_URL:-}"
+      # The trust centre's resolve and revoke take a realm token with an
+      # access body role (#1029, src/realm-auth.ts): its keys come from the
+      # internal URL, and a token may carry either issuer.
+      KEYCLOAK_ISSUER: "http://keycloak:8080/realms/edcv"
+      KEYCLOAK_PUBLIC_URL: "http://localhost:8080/realms/edcv"
     ports:
       - "9090:9090" # Exposed for local debugging; remove in production
     networks:
