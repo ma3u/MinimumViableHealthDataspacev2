@@ -74,7 +74,7 @@
         "repo": "ma3u/cfm",
         "base": "v0.0.7",
         "integration": "mvhd/integration",
-        "tag": "v0.0.7-mvhd.2",
+        "tag": "v0.0.7-mvhd.3",
         "runbook": "docs/knowledge/runbooks/cfm-fork.md",
         "patches": [
           {
@@ -98,7 +98,7 @@
           {
             "branch": "fix/edcv-delete-accepts-204",
             "fix": "e",
-            "drop_when": "the control plane client accepts 204 on a participant context delete (agent/common/controlplane)",
+            "drop_when": "the control plane and IdentityHub clients accept 204 on a participant context delete (agent/common/controlplane, agent/common/identityhub)",
             "issue": 1046
           },
           {

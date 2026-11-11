@@ -46,6 +46,11 @@ case "$*" in
       case "$*" in *"--name $g "*) echo "$g"; exit 0 ;; esac
     done
     echo "ResourceNotFound" >&2; exit 3 ;;
+  *"containerapp show --name mvhd-cfm-"*)
+    for a in $CFM_APPS_EXIST; do
+      case "$*" in *"--name $a "*) echo "$a"; exit 0 ;; esac
+    done
+    echo "ResourceNotFound" >&2; exit 3 ;;
   *"containerapp show --name mvhd-trustee"*)
     if [ "$TRUSTEE_EXISTS" = 1 ]; then echo mvhd-trustee; exit 0; fi
     echo "ResourceNotFound" >&2; exit 3 ;;
@@ -72,6 +77,7 @@ function run(
   opts: {
     groups: string[];
     trustee: boolean;
+    cfm?: string[];
     env?: Record<string, string>;
   },
 ) {
@@ -84,6 +90,7 @@ function run(
       STATE: dir,
       SPE_GROUPS_EXIST: opts.groups.join(" "),
       TRUSTEE_EXISTS: opts.trustee ? "1" : "0",
+      CFM_APPS_EXIST: (opts.cfm ?? []).join(" "),
       ...(opts.env ?? {}),
     },
     encoding: "utf8",
@@ -358,3 +365,42 @@ describe(
     });
   },
 );
+
+/**
+ * The CFM apps from the fork (ADR-088) read Postgres and NATS: they stop
+ * first, agents before managers, and start after the EDC apps, managers
+ * before agents. Only those that exist; none of them is the case above.
+ */
+describe("offhours.sh and the CFM apps (ADR-088)", SLOW, () => {
+  const CFM = ["mvhd-cfm-pmanager", "mvhd-cfm-tmanager", "mvhd-cfm-agents"];
+
+  it("stops the CFM apps first, agents before managers", () => {
+    const { status, stderr, log } = run("stop", { ...NONE, cfm: CFM });
+    expect(status, stderr).toBe(0);
+    const stopped = appsOf(log, "set-app-power.sh stop");
+    expect(stopped.slice(0, 3)).toEqual([
+      "mvhd-cfm-agents",
+      "mvhd-cfm-tmanager",
+      "mvhd-cfm-pmanager",
+    ]);
+    expect(stopped).toContain("mvhd-nats");
+  });
+
+  it("starts the CFM apps after the EDC apps, managers before agents", () => {
+    const { status, stderr, log } = run("start", { ...NONE, cfm: CFM });
+    expect(status, stderr).toBe(0);
+    const edc = indexOf(log, "set-app-power.sh start mvhd-controlplane");
+    const cfm = indexOf(log, "set-app-power.sh start mvhd-cfm-");
+    expect(edc).toBeGreaterThan(-1);
+    expect(cfm).toBeGreaterThan(edc);
+    expect(log[cfm].split(/\s+/).slice(2)).toEqual(CFM);
+  });
+
+  it("leaves the CFM apps out while they do not exist", () => {
+    for (const action of ["stop", "start"] as const) {
+      const { status, stderr, log } = run(action, NONE);
+      expect(status, stderr).toBe(0);
+      expect(log.filter((l) => /set-app-power.*mvhd-cfm-/.test(l))).toEqual([]);
+    }
+  });
+});

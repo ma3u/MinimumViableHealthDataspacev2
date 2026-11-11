@@ -1,5 +1,5 @@
 /**
- * Provisioning a participant through CFM (the fork's v0.0.7-mvhd.2, ADR-085,
+ * Provisioning a participant through CFM (the fork's v0.0.7-mvhd.3, ADR-085,
  * #973), behind the
  * setting CFM_TENANT_URL. Unset, /api/participants provisions with
  * provision.ts as before (ADR-078); set, it asks CFM's Tenant Manager.
