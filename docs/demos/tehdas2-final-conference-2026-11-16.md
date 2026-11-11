@@ -25,7 +25,7 @@ the persona menu.
 
 | #   | Session                       | Persona      | Page                    | What to show                                                                                  | TEHDAS2                        |
 | --- | ----------------------------- | ------------ | ----------------------- | --------------------------------------------------------------------------------------------- | ------------------------------ |
-| 1   | 1. Discovery and access       | researcher   | `/catalog`              | HealthDCAT-AP Release 8 entries; the SHACL validation has 0 violations                        | D5.1, D5.3                     |
+| 1   | 1. Discovery and access       | researcher   | `/catalog`              | HealthDCAT-AP R8 entries; say the 0 SHACL violations, a PR Gate check, not on the page        | D5.1, D5.3                     |
 | 2   | 1                             | researcher   | `/data/discover`        | Federated discovery across the participants' catalogues                                       | D5.3, navigating the catalogue |
 | 3   | 1                             | researcher   | `/applications`         | A new application: purpose, datasets, legal basis                                             | D6.2                           |
 | 4   | 1                             | regulator    | `/compliance`           | The access body's desk: the application, its decision deadline, the decision                  | D6.3, D6.4                     |
@@ -84,4 +84,8 @@ are partial, so say "in part" for them.
   decision deadlines and the register; the comparison with D6.4 is in #992.
 - **Can an access body reuse it?** The code is open on GitHub; the components
   are EDC, Neo4j, FHIR R4, OMOP 5.4 and HealthDCAT-AP R8.
-- **Real data?** Never. 127 synthetic patients and fictional organisations.
+- **Real data?** Never. Synthetic patients only, and fictional organisations. The
+  number depends on the view: the hub's FHIR cohort is 127 patients (the
+  catalogue's Synthea entry); the query page counts what the two SPE
+  workspaces hold, 200 together (167 and 34). Say "synthetic patients" and
+  give the number of the page on screen.
