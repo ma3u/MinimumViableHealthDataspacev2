@@ -5,11 +5,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Mock the EDC client
-vi.mock("@/lib/edc", () => ({
+vi.mock("@/lib/edc", async (importOriginal) => ({
   edcClient: {
     management: vi.fn(),
   },
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
+  // The real query, so the tests see what the control plane is sent (#1076).
+  newestFirstQuery: (await importOriginal<typeof import("@/lib/edc")>())
+    .newestFirstQuery,
 }));
 
 // Mock fs to prevent loadMockTransfers from reading bundled JSON
@@ -89,7 +92,13 @@ describe("/api/transfers", () => {
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5/participants/spe-1/transferprocesses/request",
         "POST",
-        expect.objectContaining({ "@type": "QuerySpec" }),
+        // Newest first and a page over 50, as for negotiations (#1076).
+        expect.objectContaining({
+          "@type": "QuerySpec",
+          sortField: "createdAt",
+          sortOrder: "DESC",
+          limit: 200,
+        }),
       );
     });
 

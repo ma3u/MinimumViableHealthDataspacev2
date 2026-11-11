@@ -62,6 +62,28 @@ const API_ENDPOINTS = {
 /** JSON-LD context the EDC Management API v5 expects (v5beta on EDC 0.18). */
 export const EDC_CONTEXT = "https://w3id.org/edc/connector/management/v2";
 
+/**
+ * The QuerySpec for a list a person reads: newest first, one page of `limit`.
+ *
+ * Without a limit and a sort the Management API answers its default page, the
+ * 50 oldest rows. A participant with more than 50 negotiations then never saw
+ * its newest one: on 2026-11-11 a load test left 132 terminated negotiations
+ * on pharmaco, and every live negotiation "did not finalize" in Demo Smoke
+ * because the hub's list did not contain it, although the connector had
+ * finalized it (#1076).
+ */
+export function newestFirstQuery(limit = 200) {
+  return {
+    "@context": [EDC_CONTEXT],
+    "@type": "QuerySpec",
+    filterExpression: [],
+    sortField: "createdAt",
+    sortOrder: "DESC",
+    limit,
+    offset: 0,
+  };
+}
+
 type ApiName = keyof typeof API_ENDPOINTS;
 
 // ---------------------------------------------------------------------------

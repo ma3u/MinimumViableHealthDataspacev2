@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
-import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { edcClient, EDC_CONTEXT, newestFirstQuery } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import {
   auditCallbackAddresses,
@@ -203,7 +203,7 @@ export async function GET(req: NextRequest) {
     realNegotiations = await edcClient.management<unknown[]>(
       `/v5/participants/${participantId}/contractnegotiations/request`,
       "POST",
-      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", filterExpression: [] },
+      newestFirstQuery(),
     );
     if (!Array.isArray(realNegotiations)) {
       realNegotiations = [];
