@@ -73,15 +73,16 @@ export const LATEST_UPDATES: Update[] = [
   },
   {
     date: "2026-11-06",
-    title: "EDC 1.0, tested before it goes live",
-    text: "On the local stack the connector, the identity hub and the issuer run on Eclipse Dataspace Components 1.0 (release candidate 5), with siglet as the data plane, and the hub provisions a new participant itself. The identity, dataspace and health checks pass there as they do on 0.18. The live hub, on EDC 0.18 since October with onboarding on Azure, moves once the final 1.0 is released.",
+    title: "EDC 1.0 on the live hub",
+    text: "Since 6 November the live hub on Azure runs Eclipse Dataspace Components 1.0 (release candidate 5), like the local stack and the nightly suites: the connector, the identity hub and the issuer, with siglet as the data plane. The participants were set up again with the same identifiers and new credentials, and a negotiation and a transfer run end to end. The 0.18 apps are gone, and the final 1.0 follows the same way once it is released.",
     links: [
       { label: "#881", href: `${REPO}/issues/881` },
       {
-        label: "ADR-055",
-        href: `${REPO}/blob/main/docs/ADRs/ADR-055-azure-runs-the-compose-jad-build.md`,
+        label: "ADR-078",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md`,
       },
-      ...[593, 615, 878].map(pr),
+      ...[920, 932].map(pr),
+      { label: "#927", href: `${REPO}/issues/927` },
     ],
   },
   {

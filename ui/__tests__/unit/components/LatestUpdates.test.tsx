@@ -52,6 +52,17 @@ describe("the latest updates", () => {
     expect(edc?.links.map((l) => l.label)).toContain("#881");
   });
 
+  it("says the live hub runs EDC 1.0, as it has since 6 November (#920)", () => {
+    const edc = LATEST_UPDATES.find((u) => u.title.includes("EDC 1.0"));
+    expect(edc?.text).toMatch(
+      /live hub on Azure runs Eclipse Dataspace Components 1\.0/,
+    );
+    expect(edc?.text).not.toMatch(/on EDC 0\.18 since/);
+    expect(edc?.links.map((l) => l.label)).toEqual(
+      expect.arrayContaining(["ADR-078", "#920", "#927"]),
+    );
+  });
+
   it("leads with the TEHDAS2 results, the roadmap epics and the Simpl hackathon", () => {
     const titles = LATEST_UPDATES.slice(0, 3).map((u) => u.title);
     expect(titles).toEqual([
