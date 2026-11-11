@@ -2,7 +2,7 @@
 
 Date: 2026-11-10
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-11, Matthias Buchhorn). Runs on the compose stack (round 4) and on Azure since 2026-11-11 from the fork's tag `v0.0.7-mvhd.3` (#1066, #1072): onboarding and disposing a participant through the Tenant Manager pass on both. Decision 6, the upstream step, waits for the ECA.
 **Supersedes:** [ADR-085](ADR-085-cfm-stays-as-eclipse-cfm-releases.md) decision 1 in part (the images come from the fork, not eclipse-cfm's release images) and decision 2 (no token exchange of ours: the fork's patch a replaces it)
 **Relates to:** [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md), [ADR-076](ADR-076-edc-1-runtimes-are-built-here.md)
 **Tracks:** [#973](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973) and its sub-issues [#1043](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1043) to [#1047](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1047)
