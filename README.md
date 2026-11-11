@@ -243,13 +243,13 @@ MinimumViableHealthDataspacev2/
 ├── LICENSE
 ├── clients/ios/                  # Klarbefund, the iPhone lab-report scanner (issue #186)
 ├── docs/
+│   ├── architecture/diagrams/            # PlantUML sources, rendered to architecture/img/ by scripts/render-plantuml.sh
 │   ├── klarbefund/                       # The iPhone app: user guide and developer guide with screenshots, evidence
 │   ├── planning-health-dataspace-v2.md   # 7-phase implementation roadmap
 │   ├── health-dataspace-graph-schema.md  # 5-layer Neo4j schema reference
 │   └── images/
 │       ├── social-preview.svg            # GitHub social preview / OG image
 │       ├── architecture.svg              # Five-layer reference architecture
-│       ├── container-dependencies.svg    # Compose services by startup tier
 │       ├── graph-schema.png              # Neo4j schema of the five layers
 │       ├── persona-overview.png          # The animated persona overview
 │       └── synthetic-patient-journey.png # Patient Journey view: FHIR events and their OMOP records
@@ -706,7 +706,7 @@ The UI driver (`ui/src/lib/neo4j.ts`) is configured with `{ disableLosslessInteg
 
 ### JAD Stack (EDC 1.0)
 
-The full dataspace connector stack is defined in `docker-compose.jad.yml`; it grew out of the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad). It runs the EDC 1.0 control plane with siglet as its data plane, IdentityHub, IssuerService, Keycloak, Vault, NATS, PostgreSQL, Traefik and the Neo4j Query Proxy. The hub provisions participants itself ([ADR-078](docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)); the EDC 0.18 data planes and the 2026-03 CFM build are gone (#927). CFM 0.0.7 from the eclipse-cfm releases runs only under `--profile cfm`, seeded by `scripts/seed-cfm.sh` ([ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)).
+The full dataspace connector stack is defined in `docker-compose.jad.yml`; it grew out of the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad). It runs the EDC 1.0 control plane with siglet as its data plane, IdentityHub, IssuerService, Keycloak, Vault, NATS, PostgreSQL, Traefik and the Neo4j Query Proxy. The hub provisions participants itself ([ADR-078](docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)); the EDC 0.18 data planes and the 2026-03 CFM build are gone (#927). CFM 0.0.7, built from our fork of eclipse-cfm, runs only under `--profile cfm`, seeded by `scripts/seed-cfm.sh` ([ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md), [ADR-088](docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md)).
 
 ```bash
 # Start full JAD stack (+ Neo4j from base compose)
@@ -885,7 +885,7 @@ The stack running locally in OrbStack's Activity Monitor. The `wallet-*` contain
 `edcv-control-plane` project are not part of the containers listed below.
 
 ```
-Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
+Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3
 ```
 
 #### Tier 0 — Infrastructure Foundations (no dependencies, start first)
@@ -924,15 +924,15 @@ Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
 
 #### Tier 3: Neo4j Query Proxy (depends on Tier 2)
 
-| #   | Service       | Container Name                 | Compose File             | Port(s) | Dependencies   | Description                                                                                                                                           |
-| --- | ------------- | ------------------------------ | ------------------------ | ------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 17  | `neo4j-proxy` | `health-dataspace-neo4j-proxy` | `docker-compose.jad.yml` | 9090    | `controlplane` | Node.js/Express bridge: translates DCore HTTP requests into Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
+| #   | Service       | Container Name                 | Compose File             | Port(s) | Dependencies   | Description                                                                                                                                                             |
+| --- | ------------- | ------------------------------ | ------------------------ | ------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 17  | `neo4j-proxy` | `health-dataspace-neo4j-proxy` | `docker-compose.jad.yml` | 9090    | `controlplane` | Node.js/Express bridge behind siglet: answers pulls at `/dataspace/data` with Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
 
 #### Profiles
 
 Services that start only with `--profile <name>`:
 
-- `cfm`: CFM 0.0.7 from the [eclipse-cfm releases](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7), its Tenant Manager (:18181), Provision Manager (:18182), agents and own NATS (`cfm7-*`), seeded by `scripts/seed-cfm.sh`. A spike ([ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)): on the default stack the hub provisions participants itself.
+- `cfm`: CFM 0.0.7, built from our fork's tag `v0.0.7-mvhd.3` of [eclipse-cfm v0.0.7](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7) by `scripts/build-cfm-fork-images.sh` ([ADR-088](docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md), superseding part of [ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)): its Tenant Manager (:18181), Provision Manager (:18182), six agents and own NATS (`cfm7-*`), seeded by `scripts/seed-cfm.sh`. On the default stack the hub provisions participants itself.
 - `wellbeing`: `wellbeing-ga-issuer` (:10053), the Governance Authority of the second data space (#934).
 - `simpl`: `simpl-issuer` (:10043) and `simpl-vault`, Simpl-Open's own issuer (#934 step 0a).
 - `trust-check`: `rogue-issuer` (:10033), the untrusted issuer the identity checks must refuse.
@@ -940,10 +940,15 @@ Services that start only with `--profile <name>`:
 
 #### Dependency Graph
 
-Generated from the `depends_on` entries of `docker-compose.yml` and `docker-compose.jad.yml`
-before #927, so it still shows the EDC 0.18 services and the 2026-03 CFM build:
+The 16 default services and their `depends_on`, grouped into application, EDC 1.0 (the
+control plane with siglet as its data plane), identity and infrastructure, and below them the
+14 services of the five profiles. It is drawn from
+`docker compose -f docker-compose.yml -f docker-compose.jad.yml config --format json`, once
+plain and once with every `--profile`. The source is
+[`container-dependencies.puml`](docs/architecture/diagrams/container-dependencies.puml):
+change it with the compose files and render it with `scripts/render-plantuml.sh`.
 
-![Container dependencies: the Docker Compose services by startup tier, before #927 removed the EDC 0.18 services](docs/images/container-dependencies.svg)
+![Container dependencies: the 16 default Docker Compose services by group, EDC 1.0 with siglet as its data plane, and the cfm, wellbeing, simpl, trust-check and federated profiles below](docs/architecture/img/container-dependencies.svg)
 
 ---
 
