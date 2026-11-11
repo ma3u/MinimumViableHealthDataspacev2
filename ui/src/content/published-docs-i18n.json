@@ -141,22 +141,22 @@
     },
     "operations/load-tests": {
       "de": {
-        "status": "current",
+        "status": "stale",
         "title": "Last-, Stress- und Spike-Tests: Ergebnisse und Dashboards",
         "summary": "Jeder Last-, Stress- und Spike-Lauf gegen den Live-Hub und den Compose-Stack, mit seinem Grafana-Dashboard, was er gefunden hat, was sich dadurch geändert hat, und die noch ausstehenden Läufe."
       },
       "fr": {
-        "status": "current",
+        "status": "stale",
         "title": "Tests de charge, de stress et de pic : résultats et tableaux de bord",
         "summary": "Chaque test de charge, de stress et de pic contre le hub en ligne et la pile Compose, avec son tableau de bord Grafana, ce qu’il a trouvé, ce qui a changé en conséquence et les tests encore à faire."
       },
       "nl": {
-        "status": "current",
+        "status": "stale",
         "title": "Belasting-, stress- en piektests: resultaten en dashboards",
         "summary": "Elke belasting-, stress- en piektest tegen de live hub en de Compose-stack, met het Grafana-dashboard ervan, wat die vond, wat daardoor veranderde en de tests die nog moeten."
       },
       "es": {
-        "status": "current",
+        "status": "stale",
         "title": "Pruebas de carga, estrés y picos: resultados y cuadros de mando",
         "summary": "Cada prueba de carga, estrés y picos contra el hub en producción y la pila de Compose, con su panel de Grafana, lo que encontró, lo que cambió por ello y las pruebas que faltan."
       }

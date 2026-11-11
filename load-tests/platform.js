@@ -194,8 +194,12 @@ function firstOffer(catalog) {
     let policies = ds.hasPolicy || ds["odrl:hasPolicy"] || [];
     if (!Array.isArray(policies)) policies = [policies];
     const offer = policies.find((p) => p && p["@id"]);
+    // The whole offer travels with the request, as the negotiate page sends
+    // it: the provider agrees on the policy it offered, and a consumer that
+    // asked for less refuses the agreement ("Policy in the contract agreement
+    // is not equal to the one in the contract offer", 2026-11-11).
     if (ds["@id"] && offer)
-      return { assetId: ds["@id"], offerId: offer["@id"] };
+      return { assetId: ds["@id"], offerId: offer["@id"], policy: offer };
   }
   return null;
 }
@@ -234,6 +238,7 @@ function contractJourney(persona) {
       counterPartyId: ctx.provider,
       providerDid: ctx.providerDid,
       offerId: offer.offerId,
+      policy: offer.policy,
     },
   });
   let agreement = null;

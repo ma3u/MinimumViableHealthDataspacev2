@@ -12,19 +12,31 @@ opens the **Load and stress test** dashboard on the run's `testid` and time
 range; the raw k6 summaries are on the laptop that ran them
 (`load-tests/results/<testid>*`) and in the issues.
 
-| Scenario    | What it does                                                | Last run live     | Result                                                                                                                                                                                 |
-| ----------- | ----------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `smoke`     | 1 user, 30 s, every endpoint once                           | 2026-10-05        | passes                                                                                                                                                                                 |
-| `load`      | 50 users, 15 min, the persona mix                           | 2026-10-06, 21:15 | **passes every SLO**: p95 155 ms API, 43 ms pages, 217 ms NLQ, 0 failed                                                                                                                |
-| `audited`   | 1 to 20 parallel NLQ queries through the audit chain        | 2026-10-05        | passes after [#534](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/534) and [#536](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/536) (per-user rate limit) |
-| `contracts` | up to 10 users negotiating and transferring through the EDC | 2026-10-06, 13:52 | passes: 578 requests, 0 failed, p95 287 ms                                                                                                                                             |
-| `stress`    | 50, 100, 200, 400 users, abort on failed requests           | 2026-10-06, 21:40 | **400 users, 0 failed**; latency SLOs break from 200 users, ceiling: UI                                                                                                                |
-| `spike`     | a sudden jump to many users and back                        | not yet           | next, after [`size-ui.sh`](../../scripts/azure/size-ui.sh) ([ADR-061](../ADRs/ADR-061-the-ui-scales-out-on-whole-cores.md))                                                            |
-| `soak`      | a steady load for two hours                                 | not yet           | after `spike`; measures the Postgres burst credits                                                                                                                                     |
-| `signin`    | 5 to 50 sign-ins a minute against Keycloak                  | not yet live      | compose: 12 of 127 sign-ins over 3 s                                                                                                                                                   |
-| `proxy`     | the proxy alone, 5 to 25 users                              | not yet live      | needs a job inside the environment; compose passes                                                                                                                                     |
+| Scenario    | What it does                                         | Last run live     | Result                                                                                                                                                                                                               |
+| ----------- | ---------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `smoke`     | 1 user, 30 s, every endpoint once                    | 2026-10-05        | passes                                                                                                                                                                                                               |
+| `load`      | 50 users, 15 min, the persona mix                    | 2026-10-06, 21:15 | **passes every SLO**: p95 155 ms API, 43 ms pages, 217 ms NLQ, 0 failed                                                                                                                                              |
+| `audited`   | 1 to 20 parallel NLQ queries through the audit chain | 2026-10-05        | passes after [#534](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/534) and [#536](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/536) (per-user rate limit)                               |
+| `contracts` | up to 10 users negotiating through the EDC           | 2026-11-11, 12:32 | passes at the [ADR-089](../ADRs/ADR-089-the-java-edc-apps-shrink-to-what-they-use.md) sizes: 559 requests, 0 failed, p95 775 ms ([report](../developer/edc-sizing-under-load.md)); the October runs never negotiated |
+| `stress`    | 50, 100, 200, 400 users, abort on failed requests    | 2026-10-06, 21:40 | **400 users, 0 failed**; latency SLOs break from 200 users, ceiling: UI                                                                                                                                              |
+| `spike`     | a sudden jump to many users and back                 | not yet           | next, after [`size-ui.sh`](../../scripts/azure/size-ui.sh) ([ADR-061](../ADRs/ADR-061-the-ui-scales-out-on-whole-cores.md))                                                                                          |
+| `soak`      | a steady load for two hours                          | not yet           | after `spike`; measures the Postgres burst credits                                                                                                                                                                   |
+| `signin`    | 5 to 50 sign-ins a minute against Keycloak           | not yet live      | compose: 12 of 127 sign-ins over 3 s                                                                                                                                                                                 |
+| `proxy`     | the proxy alone, 5 to 25 users                       | not yet live      | needs a job inside the environment; compose passes                                                                                                                                                                   |
 
 ## The live runs, newest first
+
+### 2026-11-11: contracts at the ADR-089 sizes
+
+The first `contracts` runs that negotiated for real, against the Java EDC
+apps halved by [ADR-089](../ADRs/ADR-089-the-java-edc-apps-shrink-to-what-they-use.md).
+[`20261111-1232-contracts-aca`](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-1232-contracts-aca&from=1794400260000&to=1794400800000)
+held every threshold: 559 requests, 0 failed, checks 99.28 %, p95 775 ms.
+The two runs before it found two bugs in the scenario (the compose DSP address,
+then an offer sent without its policy), and the first of them shows that no
+October `contracts` run on Azure negotiated at all. The report, with each EDC
+app's CPU and memory against its new size, is
+[EDC sizing under load](../developer/edc-sizing-under-load.md).
 
 ### 2026-10-06 evening: load and stress after the fixes of the day
 
