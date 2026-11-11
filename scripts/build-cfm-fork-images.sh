@@ -3,7 +3,7 @@ set -euo pipefail
 #
 # Builds the CFM images the compose profile `cfm` runs, from the fork's
 # integration tag (ADR-085, #973): mvhd/cfm-<name>:<version>, e.g.
-# mvhd/cfm-tmanager:0.0.7-mvhd.2. The fork is eclipse-cfm/cfm v0.0.7 with the
+# mvhd/cfm-tmanager:0.0.7-mvhd.3. The fork is eclipse-cfm/cfm v0.0.7 with the
 # six fixes listed in docs/planning/current/issue-973-cfm-0-0-7-spike.md;
 # each image is labelled with the commit it was built from.
 #
@@ -12,14 +12,14 @@ set -euo pipefail
 #
 #   scripts/build-cfm-fork-images.sh                 # ../cfm, or clones CFM_REPO
 #   scripts/build-cfm-fork-images.sh /path/to/cfm
-#   CFM_REF=v0.0.7-mvhd.2 scripts/build-cfm-fork-images.sh
+#   CFM_REF=v0.0.7-mvhd.3 scripts/build-cfm-fork-images.sh
 #
 # For a stack in another Docker context, export DOCKER_CONTEXT (e.g. orbstack).
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CFM_DIR="${1:-${CFM_DIR:-$REPO_ROOT/../cfm}}"
 CFM_REPO="${CFM_REPO:-https://github.com/ma3u/cfm.git}"
-CFM_REF="${CFM_REF:-v0.0.7-mvhd.2}"
+CFM_REF="${CFM_REF:-v0.0.7-mvhd.3}"
 VERSION="${CFM_REF#v}"
 IMAGES=(tmanager pmanager jwtletagent edcvagent ihagent regagent obagent sigletagent)
 
