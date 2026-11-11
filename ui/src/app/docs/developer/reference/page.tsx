@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import "@scalar/api-reference-react/style.css";
 import { IS_STATIC } from "@/lib/static-export";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { ApiSignInGuide } from "@/components/docs/ApiSignInGuide";
 import { useT } from "@/lib/i18n/translate";
 
 const ApiReferenceReact = dynamic(
@@ -44,11 +45,13 @@ const SPECS: { label: string; href: string }[] = [
 ];
 
 export default function ApiReferencePage() {
-  // Scalar's "Try it" panel would otherwise use the first server in the
-  // OpenAPI spec (http://localhost:3000) even when the page is served from
-  // ehds.mabu.red, leaving copy-pasted curl snippets pointing at the wrong
-  // host. Pinning baseServerURL to the actual origin makes every example
-  // self-consistent on whichever environment the user is viewing.
+  // Scalar's "Test Request" and its curl samples use the first server of the
+  // OpenAPI spec, the Azure demo, whichever hub serves the page. baseServerURL
+  // does not change that: it only completes relative server URLs, and the
+  // spec's are absolute (seen on 2026-11-11: a local stack's samples said
+  // https://ehds.mabu.red). `servers` replaces the list, so the one server on
+  // offer is the hub the reader is signed in to. The static export has no API
+  // routes and keeps the spec's list.
   const t = useT("docsDeveloper");
   const [baseServerUrl, setBaseServerUrl] = useState<string>("");
   useEffect(() => {
@@ -91,6 +94,9 @@ export default function ApiReferencePage() {
             </span>
           ))}
         </p>
+        <div className="mt-3 max-w-5xl">
+          <ApiSignInGuide returnTo="/docs/developer/reference" />
+        </div>
       </div>
       <div className="flex-1 bg-white">
         <ApiReferenceReact
@@ -104,7 +110,23 @@ export default function ApiReferencePage() {
             // needs one, ADR-044) and which some networks do not reach at
             // all. The in-page client already sends requests, signed in.
             hideClientButton: true,
+            // "Ask AI" sends the question and the document to Scalar's
+            // service, which this hub's Content-Security-Policy does not
+            // allow (connect-src 'self') and a reader did not ask for.
+            agent: { disabled: true },
+            // The roles an operation's gate admits, beside the operation.
+            showExtensions: ["x-required-roles"],
             ...(baseServerUrl ? { baseServerURL: baseServerUrl } : {}),
+            ...(baseServerUrl && !IS_STATIC
+              ? {
+                  servers: [
+                    {
+                      url: baseServerUrl,
+                      description: "This hub, where you are signed in",
+                    },
+                  ],
+                }
+              : {}),
             defaultHttpClient: {
               targetKey: "shell",
               clientKey: "curl",

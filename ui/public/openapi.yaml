@@ -1,23 +1,56 @@
 openapi: 3.1.0
 info:
-  title: EHDS Integration Hub — REST API
-  version: "2.0.0"
+  title: EHDS Integration Hub REST API
+  version: "2.1.0"
   description: |
-    REST API for the **EHDS Integration Hub** reference implementation.
+    REST API of the **EHDS Integration Hub** reference implementation:
+    Regulation (EU) 2025/327 on a connector stack of Eclipse EDC 1.0
+    (control plane, IdentityHub, IssuerService) with CFM for tenants.
 
-    Implements EHDS regulation through the layered protocol stack:
-    - **DSP 2025-1** — contract negotiation & data transfer
-    - **DCP v1.0** — Verifiable Credential attestation
-    - **FHIR R4** — clinical data exchange
-    - **OMOP CDM v5.4** — observational analytics
-    - **HealthDCAT-AP Release 8** — dataset catalogue metadata (ADR-063)
-    - **GDPR Art. 15–22** — patient data rights
-    - **ODRL 2.2** — policy expressions
+    ## Sign in first
 
-    All routes are Next.js 14 App Router handlers under `ui/src/app/api/`.
-    In the static GitHub Pages export the API folder is renamed away by the
-    workflow and requests fall back to fixtures in `ui/public/mock/*.json`
-    via `fetchApi()` in `ui/src/lib/api.ts`.
+    Every route needs a session, except `/api/health`, the sign-in flows and
+    the Klarbefund app's own account creation (ADR-044, ADR-054). Sign in to the hub in the browser (`/auth/signin`); the
+    explorers on `/docs/developer/reference` and `/docs/developer/api` then
+    send the session cookie with every request. Without a session a route
+    answers `401 { "error": "Unauthorized" }`, with the wrong role
+    `403 { "error": "Forbidden" }`.
+
+    Start as `edcadmin`. The operator may call most operations. The ones
+    that answer only another role carry `x-required-roles` and a `403`
+    response that names the roles.
+
+    | Sign in as | Role | Opens |
+    | --- | --- | --- |
+    | `edcadmin` | `EDC_ADMIN` | Start here: Admin, Participants, Assets, Catalog, Negotiations, Transfers, Trust Center, and every read but a patient's phone and wallet |
+    | `regulator` | `HDAB_AUTHORITY` | Access Body: the clock, permits, findings, information requests. Admin: audit trail, retention, policies, secure processing environments |
+    | `researcher` | `DATA_USER` | Access Body: applications, data requests, results. Negotiations, Transfers, Analytics and NLQ as a data user sees them: pseudonyms, nobody who opted out |
+    | `clinicuser`, `lmcuser` | `DATA_HOLDER` | Catalog: publish and withdraw a dataset. Access Body: decide a data request |
+    | `patient1`, `patient2` | `PATIENT` | Patient: the own record only, the opt-out, a consent per programme, the app pairing, the wallet link |
+    | `edcadmin` | `TRUST_CENTER_OPERATOR` | Trust Center. No demo user holds this role; the operator may read it |
+
+    The demo users are in `jad/keycloak-realm.json` (realm `edcv`); on the
+    demo realm each one's password is its user name.
+
+    ## What is behind it
+
+    - **DSP 2025-1**: catalogue, contract negotiation and transfer, through
+      the EDC 1.0 Management API (`/v5/participants/{context}/...`)
+    - **DCP v1.0**: verifiable credentials, through IdentityHub and
+      IssuerService (`/v1/participants/{context}/...`)
+    - **FHIR R4** and **OMOP CDM v5.4**: clinical data and analytics, served
+      by the Neo4j proxy
+    - **HealthDCAT-AP Release 8**: dataset catalogue metadata (ADR-063)
+    - **ODRL 2.2**: policies on data products
+    - **GDPR Art. 15 to 22**: the patient's rights
+
+    This document describes the hub's own API: the Next.js 15 App Router
+    handlers under `ui/src/app/api/`. The connector's Management, Identity
+    and Issuer APIs and the Neo4j proxy are not public; the hub calls them,
+    and `bruno/MVHDv2/10 Connecting partner` and `11 Platform` exercise them
+    on a local stack. In the static GitHub Pages export there are no API
+    routes: requests fall back to the fixtures in `ui/public/mock/*.json`
+    through `fetchApi()` in `ui/src/lib/api.ts`.
   contact:
     name: MVHDv2 Maintainers
     url: https://github.com/ma3u/MinimumViableHealthDataspacev2
@@ -25,36 +58,77 @@ info:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-  # The reference page overrides this at runtime via Scalar's
-  # baseServerURL so every "Try it" example points at the origin the user
-  # is actually viewing. The dropdown ordering below only matters when a
-  # user manually picks a different environment.
+  # The explorer pages override this at run time with the origin the page
+  # is served from, so every "Try it" request goes to the hub the reader is
+  # signed in to. The order below only matters when a reader picks another
+  # environment by hand or generates a client.
   - url: https://ehds.mabu.red
-    description: Azure Dev (ACA, Mon–Fri 07:00–20:00 Europe/Berlin per ADR-016)
-  - url: https://ma3u.github.io/MinimumViableHealthDataspacev2
-    description: GitHub Pages static export (mock JSON fixtures)
+    description: Azure demo (stopped off hours, ADR-053)
+  - url: http://localhost:3003
+    description: Local JAD stack (docker-compose.jad.yml)
   - url: http://localhost:3000
-    description: Local dev (Next.js)
+    description: Local dev (npm run dev)
+  - url: https://ma3u.github.io/MinimumViableHealthDataspacev2
+    description: GitHub Pages static export (fixtures under /mock, no API routes)
 
 tags:
   - name: Health
+    description: The liveness and readiness probe. No session needed.
+  - name: Auth
+    description: >
+      The sign-in flows: where Keycloak is, and the EUDI Wallet sign-in.
+      They answer without a session, because they are how one starts.
   - name: Catalog
+    description: >
+      HealthDCAT-AP datasets. Any signed-in participant reads; publishing
+      and withdrawing needs `DATA_HOLDER` (`clinicuser`) or `EDC_ADMIN`.
   - name: Graph
+    description: The knowledge graph and the overview. Any signed-in participant; the role decides whether a patient shows as a name or a pseudonym.
   - name: Patient
+    description: >
+      A person's own record, opt-out, consents, phone and wallet. Sign in as
+      `patient1` (`PATIENT`): a patient sees the own record only. `EDC_ADMIN`
+      may name a record on most of them; the phone and the wallet link answer
+      only the patient. The `/api/patient/app/...` routes take the
+      Klarbefund app's token, not a session.
   - name: Compliance
+    description: The compliance summary and the test suite results. Any signed-in participant.
+  - name: Access Body
+    description: >
+      The procedures of Chapter IV of Regulation (EU) 2025/327: applications,
+      data requests, permits, findings, information requests, results, and
+      the public registers. Any signed-in participant reads. Filing needs
+      `DATA_USER` (`researcher`) or `EDC_ADMIN`; deciding needs
+      `HDAB_AUTHORITY` (`regulator`), which the operator does not hold.
   - name: Credentials
+    description: Verifiable credentials through IdentityHub and IssuerService (DCP v1.0). Any signed-in participant.
   - name: Negotiations
+    description: DSP 2025-1 contract negotiations through the EDC 1.0 Management API. Any signed-in participant.
   - name: Transfers
+    description: DSP 2025-1 transfers and the import into a secure processing environment. Any signed-in participant; a transfer for secondary use needs a valid data permit.
   - name: Assets
+    description: The connector's assets. Any signed-in participant.
   - name: Participants
+    description: Participant contexts on the control plane and their CFM tenants. Any signed-in participant reads and registers; removing one needs `EDC_ADMIN`.
   - name: Tasks
+    description: Open negotiations and transfers as one list. Any signed-in participant.
   - name: Trust Center
+    description: Pseudonym resolution and SPE sessions. `TRUST_CENTER_OPERATOR` or `EDC_ADMIN`; no demo user holds the first, so sign in as `edcadmin`.
   - name: Federated
+    description: The federated catalogue the crawler collects. Any signed-in participant.
   - name: NLQ
+    description: Natural-language query. Any signed-in participant; a data user's query never reads a patient's identity.
   - name: EEHRxF
+    description: The European EHR exchange format profiles. Any signed-in participant.
   - name: Analytics
+    description: OMOP cohort statistics. Any signed-in participant; secondary-use roles and patients read them without anyone who opted out.
   - name: ODRL
+    description: The ODRL scope a participant holds. Any signed-in participant.
   - name: Admin
+    description: >
+      Operating the dataspace. Sign in as `edcadmin` (`EDC_ADMIN`). The audit
+      trail, its retention, the policies and the secure processing
+      environments also answer `HDAB_AUTHORITY` (`regulator`).
 
 components:
   securitySchemes:
@@ -63,8 +137,19 @@ components:
       in: cookie
       name: next-auth.session-token
       description: |
-        NextAuth.js session cookie issued by Keycloak (realm `edcv`).
-        Sign in via the UI at `/auth/signin` to obtain it.
+        The NextAuth.js session cookie the hub sets after a Keycloak (realm
+        `edcv`) or EUDI Wallet sign-in at `/auth/signin`. Over HTTPS its name
+        is `__Secure-next-auth.session-token`. It is HttpOnly: a browser
+        sends it by itself to the hub it signed in to, so the explorers need
+        no value here. For curl or a generated client, copy the cookie from
+        the browser's developer tools; it lasts eight hours.
+    dspCatalogToken:
+      type: http
+      scheme: bearer
+      description: |
+        The machine credential of the catalogue crawler (ADR-020, ADR-036):
+        `Authorization: Bearer <DSP_CATALOG_TOKEN>`. Only the demo DSP
+        catalogue endpoint takes it, in place of a session.
     klarbefundAppToken:
       type: http
       scheme: bearer
@@ -104,7 +189,7 @@ components:
         deviceName: { type: string }
         username: { type: string }
         connectedAt: { type: string, format: date-time }
-        lastSeenAt: { type: string, format: date-time, nullable: true }
+        lastSeenAt: { type: [string, "null"], format: date-time }
     Error:
       type: object
       required: [error]
@@ -179,19 +264,18 @@ components:
         license: { type: string, format: uri }
         datasetType: { type: string, format: uri }
         legalBasis: { type: string }
-        recordCount: { type: integer, nullable: true }
-        theme: { type: string, nullable: true }
+        recordCount: { type: [integer, "null"] }
+        theme: { type: [string, "null"] }
         healthCategories:
           description: >
             Art. 51(1) categories as HealthDCAT-AP health-category codes
             (EHRS, MRMR, ...), as the data holder stated them in the editor.
-          type: array
-          nullable: true
+          type: [array, "null"]
           items: { type: string }
-        populationCoverage: { type: string, nullable: true }
-        numberOfUniqueIndividuals: { type: integer, nullable: true }
-        minTypicalAge: { type: integer, nullable: true }
-        maxTypicalAge: { type: integer, nullable: true }
+        populationCoverage: { type: [string, "null"] }
+        numberOfUniqueIndividuals: { type: [integer, "null"] }
+        minTypicalAge: { type: [integer, "null"] }
+        maxTypicalAge: { type: [integer, "null"] }
         translations:
           description: >
             Title, description and keywords in the languages the dataset has
@@ -209,12 +293,10 @@ components:
                 items: { type: string }
         accessBody:
           description: The health data access body that governs the dataset.
-          type: string
-          nullable: true
+          type: [string, "null"]
         accessBodyCountry:
           description: Its country, ISO 3166-1 alpha-2.
-          type: string
-          nullable: true
+          type: [string, "null"]
         providers:
           type: array
           items: { type: string }
@@ -262,9 +344,9 @@ components:
               lawId: { type: string }
               title: { type: string }
               titleEn: { type: string }
-              citation: { type: string, nullable: true }
-              year: { type: integer, nullable: true }
-              url: { type: string, format: uri, nullable: true }
+              citation: { type: [string, "null"] }
+              year: { type: [integer, "null"] }
+              url: { type: [string, "null"], format: uri }
               status: { type: string, enum: [IN_FORCE, BILL, DRAFT] }
         milestones:
           type: array
@@ -287,7 +369,7 @@ components:
       properties:
         participantId: { type: string }
         name: { type: string }
-        type: { type: string, nullable: true }
+        type: { type: [string, "null"] }
     Patient:
       type: object
       properties:
@@ -314,8 +396,7 @@ components:
           type: boolean
           description: True when the list was narrowed to the caller's own record.
         lastEhrSync:
-          type: object
-          nullable: true
+          type: [object, "null"]
           properties:
             at: { type: string, format: date-time }
             source: { type: string }
@@ -339,14 +420,22 @@ components:
         provisioningStalled:
           type: boolean
           description: True when a VPA has been pending long enough to be stuck (#318).
+        provisioningComplete:
+          type: boolean
+          description: >
+            Without CFM, true when the participant's context holds its
+            membership credential.
+        provisioningFailed: { type: boolean }
+        stalledReason:
+          type: string
+          description: Present when provisioningStalled is true.
         vpaSummary:
           type: object
           properties:
             total: { type: integer }
             pending: { type: integer }
             pendingTypes: { type: array, items: { type: string } }
-            oldestPendingSince:
-              { type: string, format: date-time, nullable: true }
+            oldestPendingSince: { type: [string, "null"], format: date-time }
             stalled: { type: boolean }
 
     PatientProfile:
@@ -390,8 +479,7 @@ components:
             set, ADR-085) and the Tenant Manager answered: what CFM holds for
             this participant, or null for a context CFM did not provision,
             such as the seeded five.
-          nullable: true
-          type: object
+          type: [object, "null"]
           required: [tenantId, profileId, state]
           properties:
             tenantId: { type: string }
@@ -554,6 +642,18 @@ components:
     ParticipantId:
       name: participantId
       in: query
+      description: >
+        A participant context id on the control plane, as GET
+        /api/participants lists them. Optional here: without it the route
+        answers for every context.
+      schema: { type: string }
+    ParticipantIdRequired:
+      name: participantId
+      in: query
+      required: true
+      description: >
+        The participant context id on the control plane whose negotiations
+        or transfers are meant, as GET /api/participants lists them (`@id`).
       schema: { type: string }
     PatientId:
       name: patientId
@@ -625,6 +725,13 @@ paths:
                   "dcatap:applicableLegislation": { type: array }
                   "dct:type": { type: object }
                   "dcat:theme": { type: object }
+                  "dcat:dataset":
+                    type: array
+                    description: Without `id`, the datasets of the catalogue.
+                    items: { type: object }
+                  "dcat:themeTaxonomy":
+                    type: object
+                    description: Without `id`, the theme vocabulary the catalogue uses.
                   "dcat:keyword": { type: array }
                   "dct:provenance": { type: object }
                   "healthdcatap:healthCategory": { type: array }
@@ -656,6 +763,7 @@ paths:
                   "dct:publisher": { type: object }
                   "dcat:contactPoint": { type: object }
                   "dcat:distribution": { type: array }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { description: No dataset with this id }
         "502": { description: The catalogue is unavailable }
 
@@ -671,9 +779,11 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/HealthDataset" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Catalog]
       summary: Create HealthDCAT-AP dataset
+      x-required-roles: [DATA_HOLDER, EDC_ADMIN]
       description: Requires DATA_HOLDER or EDC_ADMIN role.
       requestBody:
         required: true
@@ -688,6 +798,7 @@ paths:
     delete:
       tags: [Catalog]
       summary: Delete dataset
+      x-required-roles: [DATA_HOLDER, EDC_ADMIN]
       parameters:
         - name: id
           in: query
@@ -696,6 +807,7 @@ paths:
       responses:
         "204": { description: Deleted }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: "Needs DATA_HOLDER or EDC_ADMIN" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/jurisdictions:
@@ -753,6 +865,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/GraphResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/graph/expand:
     get:
@@ -772,6 +885,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/GraphResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/graph/node:
     get:
@@ -788,6 +902,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/GraphNode" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/graph/validate:
@@ -796,6 +911,7 @@ paths:
       summary: Validate Neo4j schema constraints and counts
       responses:
         "200": { description: Validation result }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/patient:
     get:
@@ -813,6 +929,7 @@ paths:
     get:
       tags: [Patient]
       summary: Patient profile (encounters, conditions, observations, medications)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - $ref: "#/components/parameters/PatientId"
       responses:
@@ -826,12 +943,15 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/PatientProfile"
                   - $ref: "#/components/schemas/PatientProfileIndex"
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/patient/profile/interests:
     put:
       tags: [Patient]
       summary: Choose my health interests from the suggested list
+      x-required-roles: [PATIENT]
       description: >
         A patient names their own health interests, chosen from the list the
         profile suggests (`suggestedInterests`). The choice replaces the
@@ -883,15 +1003,19 @@ paths:
     get:
       tags: [Patient]
       summary: Aggregated patient insights
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - $ref: "#/components/parameters/PatientId"
       responses:
         "200": { description: Insight summary }
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/patient/programmes:
     get:
       tags: [Patient]
       summary: List bonus programmes found in other data spaces (#934)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - name: patientId
           in: query
@@ -920,7 +1044,7 @@ paths:
                         consentId: { type: string }
                         programmeId: { type: string }
                         joinedAt: { type: string }
-                        withdrawnAt: { type: string, nullable: true }
+                        withdrawnAt: { type: [string, "null"] }
                   programmes:
                     type: array
                     items:
@@ -928,21 +1052,22 @@ paths:
                       properties:
                         programmeId: { type: string }
                         title: { type: string }
-                        description: { type: string, nullable: true }
+                        description: { type: [string, "null"] }
                         publisherName: { type: string }
                         publisherDid: { type: string }
-                        dataSpace: { type: string, nullable: true }
-                        endpointUrl: { type: string, nullable: true }
-                        ruleTitle: { type: string, nullable: true }
-                        ruleDescription: { type: string, nullable: true }
-                        ruleVersion: { type: string, nullable: true }
-                        lastSeenAt: { type: string, nullable: true }
+                        dataSpace: { type: [string, "null"] }
+                        endpointUrl: { type: [string, "null"] }
+                        ruleTitle: { type: [string, "null"] }
+                        ruleDescription: { type: [string, "null"] }
+                        ruleVersion: { type: [string, "null"] }
+                        lastSeenAt: { type: [string, "null"] }
         "401": { description: No session }
         "403": { description: Not a patient or operator }
   /api/patient/programmes/consent:
     post:
       tags: [Patient]
       summary: Join a bonus programme (consent, GDPR Art. 9(2)(a)) (#934)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       description: >-
         Consent to one programme, its own record (ADR-080, decision 6); idempotent
         while a consent is open. A PATIENT joins on their own record.
@@ -975,15 +1100,18 @@ paths:
                       consentId: { type: string }
                       programmeId: { type: string }
                       joinedAt: { type: string }
-                      withdrawnAt: { type: string, nullable: true }
+                      withdrawnAt: { type: [string, "null"] }
         "400": { description: programmeId missing or an unknown source }
         "401": { description: No session }
         "403":
-          { description: Not a patient or operator, or another person's record }
+          {
+            description: "Not a patient or operator, or another person's record",
+          }
         "404": { description: No such programme or record }
     delete:
       tags: [Patient]
       summary: Withdraw from a bonus programme (GDPR Art. 7(3))
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - name: programmeId
           in: query
@@ -1009,12 +1137,15 @@ paths:
                       consentId: { type: string }
                       programmeId: { type: string }
                       joinedAt: { type: string }
-                      withdrawnAt: { type: string, nullable: true }
+                      withdrawnAt: { type: [string, "null"] }
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { description: No open consent to withdraw }
   /api/patient/programmes/evaluation:
     get:
       tags: [Patient]
       summary: The member's own result for a bonus programme year, before anything is sent (#934)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       description: >-
         Worked out inside the record (ADR-080, decision 3; ADR-087): goal met
         when the ended year averaged at least 150 minutes of exercise a week
@@ -1058,15 +1189,18 @@ paths:
                       activity: { type: object }
                       checkUp: { type: object }
         "400":
-          { description: No programmeId, or a year the rule does not cover }
+          { description: "No programmeId, or a year the rule does not cover" }
         "401": { description: No session }
         "403":
-          { description: Not a patient or operator, or another person's record }
+          {
+            description: "Not a patient or operator, or another person's record",
+          }
         "404": { description: No such programme or record }
   /api/patient/programmes/transfer:
     post:
       tags: [Patient]
       summary: Send a programme the year's answer, on the person's instruction
+      x-required-roles: [EDC_ADMIN, PATIENT]
       description: >-
         ADR-080, decision 4, second path. Only under an open consent; after a
         withdrawal the answer is 403. Only for the year the programme's rule
@@ -1099,14 +1233,12 @@ paths:
                       transferId: { type: string }
                       programmeId: { type: string }
                       year: { type: integer }
-                      goalMet: { type: boolean, nullable: true }
+                      goalMet: { type: [boolean, "null"] }
                       status: { type: string }
                       requestedAt: { type: string }
         "400":
-          {
-            description: programmeId and a calendar year are required,
-            or a year the rule does not cover,
-          }
+          description: "programmeId and a calendar year are required, or a year the rule does not cover"
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: No open consent to this programme }
         "404": { description: No such programme or record }
         "409":
@@ -1115,13 +1247,17 @@ paths:
     get:
       tags: [Patient]
       summary: List research programmes for patient
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - $ref: "#/components/parameters/PatientId"
       responses:
         "200": { description: Programme list }
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Patient]
       summary: Grant research consent (GDPR Art. 7)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       requestBody:
         required: true
         content:
@@ -1143,9 +1279,12 @@ paths:
                 properties:
                   consentId: { type: string }
         "400": { description: patientId and studyId are required }
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     delete:
       tags: [Patient]
       summary: Revoke research consent
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - $ref: "#/components/parameters/PatientId"
         - name: studyId
@@ -1154,11 +1293,14 @@ paths:
           schema: { type: string }
       responses:
         "204": { description: Consent revoked }
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/patient/opt-out:
     get:
       tags: [Patient]
       summary: My opt-out from secondary use (EHDS Art. 71)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       description: >
         Whether the person is opted out, since when, and every earlier opt-out
         and its reversal (ADR-062). A PATIENT reads their own record without
@@ -1176,10 +1318,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/OptOutState"
         "400": { description: No record named and none on the session }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: Another person's record }
     post:
       tags: [Patient]
       summary: Opt out of secondary use (EHDS Art. 71)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       description: >
         At once and without a reason; idempotent. Every new secondary-use
         extraction leaves the person out; what a permit received before is not
@@ -1200,10 +1344,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OptOutState"
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { description: No record with this id }
     delete:
       tags: [Patient]
       summary: Reverse the opt-out
+      x-required-roles: [EDC_ADMIN, PATIENT]
       parameters:
         - name: patientId
           in: query
@@ -1220,6 +1367,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OptOutState"
+        "403": { description: "Needs EDC_ADMIN or PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { description: There is no open opt-out to reverse }
 
   /api/app-accounts/challenge:
@@ -1332,6 +1481,7 @@ paths:
     get:
       tags: [Patient]
       summary: Whether the patient's account is linked to an EUDI Wallet PID
+      x-required-roles: [PATIENT]
       description: >
         ADR-067. Only a sandbox account (`kb-`) can be linked; a demo persona
         is answered `eligible: false`. The secure hash itself is never
@@ -1357,6 +1507,7 @@ paths:
     delete:
       tags: [Patient]
       summary: Disconnect the EUDI Wallet (ADR-067)
+      x-required-roles: [PATIENT]
       description: >
         Removes the attribute `pid_fingerprint` from the patient's own
         sandbox account; the account stays.
@@ -1378,6 +1529,7 @@ paths:
     get:
       tags: [Patient]
       summary: The patient's own record as a FHIR R4 Bundle (EHDS Art. 3, Art. 14)
+      x-required-roles: [EDC_ADMIN, PATIENT]
       description: >
         Observations as a FHIR R4 searchset Bundle, each with the range the
         laboratory printed, oldest first per code. With `include=all` the
@@ -1471,6 +1623,7 @@ paths:
     post:
       tags: [Patient]
       summary: Start connecting the Klarbefund app (QR code, device grant)
+      x-required-roles: [PATIENT]
       description: >
         Asks Keycloak for a device authorization for `klarbefund-app` and
         answers with the QR code, the `klarbefund://connect` link it carries
@@ -1513,6 +1666,7 @@ paths:
     get:
       tags: [Patient]
       summary: State of a pairing this patient started
+      x-required-roles: [PATIENT]
       parameters:
         - {
             name: pairingId,
@@ -1533,12 +1687,15 @@ paths:
                   status: { type: string, enum: [pending, connected, expired] }
                   expiresAt: { type: string, format: date-time }
                   deviceName: { type: string }
+        "403": { description: "Needs PATIENT" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/patient/app-devices:
     get:
       tags: [Patient]
       summary: The phones this patient connected
+      x-required-roles: [PATIENT]
       responses:
         "200":
           description: Connected phones, newest first
@@ -1552,6 +1709,7 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/AppConnection" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: "Needs PATIENT" }
     post:
       tags: [Patient]
       summary: Register the phone under a pairing (called by the app)
@@ -1583,19 +1741,17 @@ paths:
                 required: [connection]
                 properties:
                   connection: { $ref: "#/components/schemas/AppConnection" }
-        "400": { description: Not JSON, or deviceId is not a UUID v4 }
+        "400": { description: "Not JSON, or deviceId is not a UUID v4" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: No pairing of this login matches }
         "409":
-          {
-            description: The QR code already connected a phone,
-            or the device id belongs to another login,
-          }
+          description: "The QR code already connected a phone, or the device id belongs to another login"
 
   /api/patient/app-devices/{deviceId}:
     delete:
       tags: [Patient]
       summary: Disconnect a phone
+      x-required-roles: [PATIENT]
       description: >
         From the patient screen with a session, for any of the patient's
         phones; or from the app with its token, for its own device only.
@@ -1747,10 +1903,10 @@ paths:
                       consentId: { type: string }
                       programmeId: { type: string }
                       joinedAt: { type: string }
-                      withdrawnAt: { type: string, nullable: true }
+                      withdrawnAt: { type: [string, "null"] }
         "400": { description: programmeId missing }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "404": { description: No such programme, or no record for this login }
+        "404": { description: "No such programme, or no record for this login" }
     delete:
       tags: [Patient]
       summary: The Klarbefund app withdraws from a bonus programme (GDPR Art. 7(3))
@@ -1782,7 +1938,7 @@ paths:
                       consentId: { type: string }
                       programmeId: { type: string }
                       joinedAt: { type: string }
-                      withdrawnAt: { type: string, nullable: true }
+                      withdrawnAt: { type: [string, "null"] }
         "400": { description: programmeId missing }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { description: No open consent to withdraw }
@@ -1833,9 +1989,9 @@ paths:
                       activity: { type: object }
                       checkUp: { type: object }
         "400":
-          { description: No programmeId, or a year the rule does not cover }
+          { description: "No programmeId, or a year the rule does not cover" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "404": { description: No such programme, or no record for this login }
+        "404": { description: "No such programme, or no record for this login" }
   /api/patient/app/programmes/transfer:
     post:
       tags: [Patient]
@@ -1880,17 +2036,14 @@ paths:
                       transferId: { type: string }
                       programmeId: { type: string }
                       year: { type: integer }
-                      goalMet: { type: boolean, nullable: true }
+                      goalMet: { type: [boolean, "null"] }
                       status: { type: string }
                       requestedAt: { type: string }
         "400":
-          {
-            description: programmeId and a calendar year are required,
-            or a year the rule does not cover,
-          }
+          description: "programmeId and a calendar year are required, or a year the rule does not cover"
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: No open consent to this programme }
-        "404": { description: No such programme, or no record for this login }
+        "404": { description: "No such programme, or no record for this login" }
         "409":
           { description: The year is not over; nothing is sent before it ends }
   /api/patient/app/record:
@@ -1931,7 +2084,7 @@ paths:
                       properties:
                         id: { type: string }
                         reason: { type: string }
-        "400": { description: No report id, or not a FHIR Bundle }
+        "400": { description: "No report id, or not a FHIR Bundle" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: Not an account the app created }
         "413": { description: More than 500 values }
@@ -1967,6 +2120,7 @@ paths:
       summary: EHDS / GDPR / DSP / DCP compliance summary
       responses:
         "200": { description: Compliance status }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/compliance/tck:
     get:
@@ -1974,6 +2128,7 @@ paths:
       summary: DSP / DCP / EHDS test suite results
       responses:
         "200": { description: TCK results }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/credentials:
     get:
@@ -1990,6 +2145,7 @@ paths:
                   credentials:
                     type: array
                     items: { $ref: "#/components/schemas/Credential" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/credentials/definitions:
     get:
@@ -1997,6 +2153,7 @@ paths:
       summary: List credential definitions registered with IssuerService
       responses:
         "200": { description: Definitions list }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/credentials/request:
     post:
@@ -2015,6 +2172,7 @@ paths:
       responses:
         "201": { description: Issuance process started }
         "400": { description: Required fields missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/credentials/{id}:
     delete:
@@ -2035,7 +2193,7 @@ paths:
       tags: [Negotiations]
       summary: List DSP contract negotiations
       parameters:
-        - $ref: "#/components/parameters/ParticipantId"
+        - $ref: "#/components/parameters/ParticipantIdRequired"
       responses:
         "200":
           description: Negotiation list
@@ -2044,6 +2202,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Negotiation" }
+        "400": { description: participantId is missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Negotiations]
       summary: Initiate DSP contract negotiation
@@ -2059,6 +2219,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Negotiation" }
         "400": { description: Required fields missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/negotiations/{id}:
     get:
@@ -2069,21 +2230,24 @@ paths:
           in: path
           required: true
           schema: { type: string }
-        - $ref: "#/components/parameters/ParticipantId"
+        - $ref: "#/components/parameters/ParticipantIdRequired"
       responses:
         "200":
           description: Negotiation detail
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Negotiation" }
-        "404": { $ref: "#/components/responses/NotFound" }
+        "400": { description: participantId is missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: The connector has no such negotiation }
+        "502": { description: The connector did not answer or refused }
 
   /api/transfers:
     get:
       tags: [Transfers]
       summary: List data plane transfers
       parameters:
-        - $ref: "#/components/parameters/ParticipantId"
+        - $ref: "#/components/parameters/ParticipantIdRequired"
       responses:
         "200":
           description: Transfer list
@@ -2092,6 +2256,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/TransferProcess" }
+        "400": { description: participantId is missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Transfers]
       summary: Initiate data transfer
@@ -2107,6 +2273,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/TransferProcess" }
         "400": { description: Required fields missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/transfers/{id}:
     get:
@@ -2117,14 +2284,17 @@ paths:
           in: path
           required: true
           schema: { type: string }
-        - $ref: "#/components/parameters/ParticipantId"
+        - $ref: "#/components/parameters/ParticipantIdRequired"
       responses:
         "200":
           description: Transfer detail
           content:
             application/json:
               schema: { $ref: "#/components/schemas/TransferProcess" }
-        "404": { $ref: "#/components/responses/NotFound" }
+        "400": { description: participantId is missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: The connector has no such transfer }
+        "502": { description: The connector did not answer or refused }
 
   /api/transfers/{id}/data:
     get:
@@ -2140,7 +2310,7 @@ paths:
           in: path
           required: true
           schema: { type: string }
-        - $ref: "#/components/parameters/ParticipantId"
+        - $ref: "#/components/parameters/ParticipantIdRequired"
       responses:
         "200":
           description: The data, with its size and when it was fetched
@@ -2158,6 +2328,7 @@ paths:
                   fetchedAt: { type: string, format: date-time }
                   data: {}
         "400": { description: participantId and a transfer id are required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { description: The transfer is not STARTED }
         "502":
@@ -2226,10 +2397,8 @@ paths:
                       to the provider's data ends
                   graphUrl: { type: string }
         "400":
-          {
-            description: participantId,
-            a transfer id or a known SPE is missing,
-          }
+          description: "participantId, a transfer id or a known SPE is missing"
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409":
           description: >-
@@ -2278,6 +2447,7 @@ paths:
                         importedAt: { type: string, format: date-time }
                   unreachable: { type: array, items: { type: string } }
         "400": { description: ids is required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "502": { description: The SPE workspaces did not answer }
 
   /api/spe-imports/{id}/graph:
@@ -2309,6 +2479,7 @@ paths:
                   links: { type: array, items: { type: object } }
                   truncated: { type: boolean }
         "400": { description: A dataset id and a known SPE are required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "503": { description: The SPE workspace is not connected }
 
@@ -2325,7 +2496,7 @@ paths:
           in: path
           required: true
           schema: { type: string }
-        - $ref: "#/components/parameters/ParticipantId"
+        - $ref: "#/components/parameters/ParticipantIdRequired"
       responses:
         "200":
           description: The agreement
@@ -2342,6 +2513,7 @@ paths:
                   validUntil: { type: string }
                   policy: { type: object }
         "400": { description: participantId and an agreement id are required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/assets:
@@ -2352,6 +2524,7 @@ paths:
         - $ref: "#/components/parameters/ParticipantId"
       responses:
         "200": { description: Asset list }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Assets]
       summary: Register an EDC-V asset
@@ -2362,7 +2535,8 @@ paths:
             schema: { $ref: "#/components/schemas/Asset" }
       responses:
         "201": { description: Asset registered }
-        "400": { description: participantId, assetId, name required }
+        "400": { description: "participantId, assetId, name required" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/participants:
     get:
@@ -2376,6 +2550,7 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Participant" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Participants]
       summary: Create a new participant
@@ -2397,6 +2572,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Participant" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "503":
           description: >-
             The CFM Tenant Manager did not answer, so nothing was registered.
@@ -2432,9 +2608,11 @@ paths:
                 organization: { type: string }
       responses:
         "200": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     delete:
       tags: [Participants]
       summary: Remove a participant registered through /onboarding (EDC_ADMIN)
+      x-required-roles: [EDC_ADMIN]
       description: >-
         Removes the issuer holder, the siglet transfer type mapping, the
         IdentityHub participant and the control plane context, the context
@@ -2467,6 +2645,7 @@ paths:
                         step: { type: string }
                         ok: { type: boolean }
                         detail: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: Not an EDC_ADMIN }
         "404": { description: No context with this id }
         "409": { description: A seeded participant; nothing was removed }
@@ -2502,6 +2681,7 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Credential" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/tasks:
     get:
@@ -2535,6 +2715,7 @@ paths:
                     properties:
                       edc: { type: string }
                       store: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "502":
           description: Neither the connector nor the task store answered; both errors in `backend`.
           content:
@@ -2555,8 +2736,11 @@ paths:
     get:
       tags: [Trust Center]
       summary: Trust Center operator view
+      x-required-roles: [EDC_ADMIN, TRUST_CENTER_OPERATOR]
       responses:
         "200": { description: Trust state }
+        "403": { description: "Needs EDC_ADMIN or TRUST_CENTER_OPERATOR" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/federated:
     get:
@@ -2564,6 +2748,7 @@ paths:
       summary: Federated cross-site cohort query (k-anonymity)
       responses:
         "200": { description: Cohort summary }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "503":
           description: >
             An SPE workspace is stopped or still starting (ADR-072); a
@@ -2578,6 +2763,7 @@ paths:
       summary: List NLQ templates
       responses:
         "200": { description: Template list }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [NLQ]
       summary: Run a Text2Cypher natural language query
@@ -2596,6 +2782,7 @@ paths:
                   description: Ask every SPE workspace, not the hub graph
       responses:
         "200": { description: NLQ result }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "502": { description: Proxy error }
         "503":
           description: >
@@ -2611,6 +2798,7 @@ paths:
       summary: EEHRxF profile catalog (Layer 2b)
       responses:
         "200": { description: Profile list }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/analytics:
     get:
@@ -2618,6 +2806,7 @@ paths:
       summary: OMOP-derived dashboard analytics
       responses:
         "200": { description: Dashboard data }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/odrl/scope:
     get:
@@ -2625,19 +2814,23 @@ paths:
       summary: Effective ODRL scope for current participant
       responses:
         "200": { description: Scope }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/admin/tenants:
     get:
       tags: [Admin]
       summary: List CFM tenants (admin only)
+      x-required-roles: [EDC_ADMIN]
       responses:
         "200": { description: Tenant list }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/admin/audit:
     get:
       tags: [Admin]
       summary: Admin audit log
+      x-required-roles: [EDC_ADMIN, HDAB_AUTHORITY]
       parameters:
         - name: limit
           in: query
@@ -2706,31 +2899,32 @@ paths:
                               spe.workspace_destroyed,
                               spe.optout_synced,
                             ]
-                        recorded: { type: string, nullable: true }
-                        speId: { type: string, nullable: true }
-                        permitId: { type: string, nullable: true }
-                        policyHash: { type: string, nullable: true }
-                        teeType: { type: string, nullable: true }
-                        attestationScope: { type: string, nullable: true }
-                        simulated: { type: boolean, nullable: true }
-                        outcome: { type: string, nullable: true }
+                        recorded: { type: [string, "null"] }
+                        speId: { type: [string, "null"] }
+                        permitId: { type: [string, "null"] }
+                        policyHash: { type: [string, "null"] }
+                        teeType: { type: [string, "null"] }
+                        attestationScope: { type: [string, "null"] }
+                        simulated: { type: [boolean, "null"] }
+                        outcome: { type: [string, "null"] }
                         optOut:
                           description: >
                             spe.optout_synced only: the hub's Art. 71
                             opt-out labels pushed into the workspace, counts
                             only, never patient ids.
-                          type: object
-                          nullable: true
+                          type: [object, "null"]
                           properties:
-                            added: { type: integer, nullable: true }
-                            removed: { type: integer, nullable: true }
-                            inHub: { type: integer, nullable: true }
+                            added: { type: [integer, "null"] }
+                            removed: { type: [integer, "null"] }
+                            inHub: { type: [integer, "null"] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/admin/spe:
     get:
       tags: [Admin]
       summary: The confidential SPEs of ADR-068 (operator and access body)
+      x-required-roles: [EDC_ADMIN, HDAB_AUTHORITY]
       description: >
         Passes the query proxy's `/spe/status` through (#774). When the proxy
         has none yet or cannot be reached, answers without asking the proxy
@@ -2749,10 +2943,9 @@ paths:
                 properties:
                   environment: { type: string, enum: [azure, local, static] }
                   trustee:
-                    type: object
-                    nullable: true
+                    type: [object, "null"]
                     properties:
-                      url: { type: string, nullable: true }
+                      url: { type: [string, "null"] }
                       operator: { type: string }
                       verifier: { type: string }
                       reachable: { type: boolean }
@@ -2777,13 +2970,13 @@ paths:
                               "Attested: confidential workload",
                             ]
                         attestedAt:
-                          { type: string, format: date-time, nullable: true }
+                          { type: [string, "null"], format: date-time }
                         keyReleasedAt:
-                          { type: string, format: date-time, nullable: true }
-                        permitId: { type: string, nullable: true }
-                        policyHash: { type: string, nullable: true }
+                          { type: [string, "null"], format: date-time }
+                        permitId: { type: [string, "null"] }
+                        policyHash: { type: [string, "null"] }
                         policyCheckedByHardware: { type: boolean }
-                        patients: { type: integer, nullable: true }
+                        patients: { type: [integer, "null"] }
                         status:
                           type: string
                           enum: [ready, loading, refused, unreachable]
@@ -2795,57 +2988,43 @@ paths:
                           type: string
                           enum: [running, starting, stopped, unreachable]
                         armState:
-                          type: string
-                          nullable: true
+                          type: [string, "null"]
                           description: The group's instanceView.state on Azure
                         lastQueriedAt:
-                          type: string
+                          type: [string, "null"]
                           format: date-time
-                          nullable: true
                           description: The last federated query that asked it
                         attestation:
                           description: >
                             The evidence the Trustee verified; null in the
                             fallback and before the first attestation.
-                          type: object
-                          nullable: true
+                          type: [object, "null"]
                           properties:
-                            verifier: { type: string, nullable: true }
+                            verifier: { type: [string, "null"] }
                             result:
                               {
-                                type: string,
-                                enum: [pass, fail],
-                                nullable: true,
+                                type: [string, "null"],
+                                enum: [pass, fail, null],
                               }
-                            evidenceDigest: { type: string, nullable: true }
+                            evidenceDigest: { type: [string, "null"] }
                             tokenIssuedAt:
-                              {
-                                type: string,
-                                format: date-time,
-                                nullable: true,
-                              }
+                              { type: [string, "null"], format: date-time }
                             tokenExpiresAt:
-                              {
-                                type: string,
-                                format: date-time,
-                                nullable: true,
-                              }
-                            policyId: { type: string, nullable: true }
+                              { type: [string, "null"], format: date-time }
+                            policyId: { type: [string, "null"] }
                             claims:
-                              type: object
-                              nullable: true
+                              type: [object, "null"]
                               properties:
-                                tee: { type: string, nullable: true }
-                                measurement: { type: string, nullable: true }
-                                reportedTcb: { type: string, nullable: true }
-                                hostData: { type: string, nullable: true }
-                                reportData: { type: string, nullable: true }
+                                tee: { type: [string, "null"] }
+                                measurement: { type: [string, "null"] }
+                                reportedTcb: { type: [string, "null"] }
+                                hostData: { type: [string, "null"] }
+                                reportData: { type: [string, "null"] }
                                 pcrs:
-                                  type: object
-                                  nullable: true
+                                  type: [object, "null"]
                                   additionalProperties: { type: string }
-                                vmId: { type: string, nullable: true }
-                            refusalReason: { type: string, nullable: true }
+                                vmId: { type: [string, "null"] }
+                            refusalReason: { type: [string, "null"] }
                   residualTrust: { type: array, items: { type: string } }
                   fallback:
                     type: object
@@ -2856,7 +3035,7 @@ paths:
                     type: object
                     properties:
                       available: { type: boolean }
-                      reason: { type: string, nullable: true }
+                      reason: { type: [string, "null"] }
                   permits:
                     description: >
                       The data permits (HDABApproval) the hub records a policy
@@ -2868,11 +3047,10 @@ paths:
                       type: object
                       properties:
                         permitId: { type: string }
-                        name: { type: string, nullable: true }
-                        status: { type: string, nullable: true }
+                        name: { type: [string, "null"] }
+                        status: { type: [string, "null"] }
                         policyHash:
-                          type: string
-                          nullable: true
+                          type: [string, "null"]
                           description: The hash recorded last
                         policyHashBySpe:
                           type: object
@@ -2884,7 +3062,7 @@ paths:
                           items: { type: string }
                           description: e.g. default/spe-1/extract-key
                         recordedAt:
-                          { type: string, format: date-time, nullable: true }
+                          { type: [string, "null"], format: date-time }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
@@ -2892,6 +3070,7 @@ paths:
     post:
       tags: [Admin]
       summary: Start or stop the SPE workspaces (operator and access body)
+      x-required-roles: [EDC_ADMIN, HDAB_AUTHORITY]
       description: >
         ADR-072. Starts or stops the ACI confidential container groups
         mvhd-spe-1 and mvhd-spe-2 with the UI's managed identity. A start takes
@@ -2968,6 +3147,7 @@ paths:
     get:
       tags: [Admin]
       summary: System component catalog
+      x-required-roles: [EDC_ADMIN]
       responses:
         "200":
           description: Component list with the deployment it was read from
@@ -2984,18 +3164,24 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/Component" }
                   participants: { type: array, items: { type: object } }
+        "403": { description: "Needs EDC_ADMIN" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/admin/components/topology:
     get:
       tags: [Admin]
       summary: Service dependency topology graph
+      x-required-roles: [EDC_ADMIN]
       responses:
         "200": { description: Topology graph }
+        "403": { description: "Needs EDC_ADMIN" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/admin/policies:
     get:
       tags: [Admin]
       summary: List ODRL policies
+      x-required-roles: [EDC_ADMIN, HDAB_AUTHORITY]
       parameters:
         - $ref: "#/components/parameters/ParticipantId"
       responses:
@@ -3018,9 +3204,12 @@ paths:
                           items: { $ref: "#/components/schemas/OdrlPolicy" }
                   source: { type: string, enum: [edc, neo4j] }
                   offline: { type: boolean }
+        "403": { description: "Needs EDC_ADMIN or HDAB_AUTHORITY" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     post:
       tags: [Admin]
       summary: Create an ODRL policy
+      x-required-roles: [EDC_ADMIN]
       requestBody:
         required: true
         content:
@@ -3034,10 +3223,12 @@ paths:
       responses:
         "201": { description: Policy created }
         "400": { description: participantId and policy are required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
     put:
       tags: [Admin]
       summary: Update an ODRL policy
+      x-required-roles: [EDC_ADMIN]
       requestBody:
         required: true
         content:
@@ -3051,10 +3242,12 @@ paths:
                 policy: { $ref: "#/components/schemas/OdrlPolicy" }
       responses:
         "200": { description: Policy updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
     delete:
       tags: [Admin]
       summary: Delete an ODRL policy
+      x-required-roles: [EDC_ADMIN]
       parameters:
         - name: policyId
           in: query
@@ -3062,4 +3255,2881 @@ paths:
           schema: { type: string }
       responses:
         "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
+
+  # The access body procedures, the sign-in flows and the operator routes
+  # that were on docs/api-spec-drift-allowlist.txt until 2026-11-11.
+  /api/permits:
+    get:
+      tags: [Access Body]
+      summary: Public register of applications, decisions, measures and results
+      description: >-
+        The register of the health data access body, read from the graph
+        (Regulation (EU) 2025/327, #206): every application received
+        (Art. 57(1)(j)(ii)), permits issued and refusals with their
+        justification within 30 working days (Art. 57(1)(j)(iii)), measures
+        related to non-compliance (Art. 57(1)(j)(iv), Art. 63(3), Art. 64),
+        who has been granted access to which datasets and for what purpose
+        (Art. 58(1)(f)), health data requests (Art. 69) and the results
+        communicated by data users (Art. 57(1)(j)(v), Art. 61(4)). Any
+        signed-in participant may read it (ADR-044); the session does not
+        narrow the answer. No officer names and no ethics references leave
+        this route.
+      responses:
+        "200":
+          description: The register, newest decision first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [generatedAt, entries, articles]
+                properties:
+                  generatedAt: { type: string, format: date-time }
+                  entries:
+                    type: array
+                    description: Applications (Art. 67) and health data requests (Art. 69)
+                    items:
+                      type: object
+                      properties:
+                        kind: { type: string, enum: [application, request] }
+                        applicationId:
+                          type: string
+                          description: The application id, or the request id when kind is request
+                        applicant:
+                          {
+                            type: [string, "null"],
+                            description: "Name of the applicant organisation",
+                          }
+                        applicantDid: { type: [string, "null"] }
+                        applicantCountry: { type: [string, "null"] }
+                        accessBody:
+                          {
+                            type: [string, "null"],
+                            description: "Name of the body that decided",
+                          }
+                        purpose: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        submittedAt: { type: [string, "null"] }
+                        outcome:
+                          type: string
+                          enum:
+                            [
+                              pending,
+                              permit issued,
+                              refused,
+                              permit revoked,
+                              request approved,
+                            ]
+                        permitId: { type: [string, "null"] }
+                        decidedAt: { type: [string, "null"] }
+                        validUntil: { type: [string, "null"] }
+                        conditions: { type: array, items: { type: string } }
+                        justification: { type: [string, "null"] }
+                        publishBy: { type: [string, "null"], format: date }
+                        revokedAt: { type: [string, "null"] }
+                        revocationReason: { type: [string, "null"] }
+                        statisticalAlternativeOffered: { type: boolean }
+                        complete: { type: [boolean, "null"] }
+                        decidedUnder:
+                          {
+                            type: [string, "null"],
+                            description: "Art. 68, Art. 69(3) or Art. 72",
+                          }
+                        feeEur: { type: [number, "null"] }
+                        results:
+                          type: [object, "null"]
+                          description: Art. 61(4) results of an issued or revoked permit
+                          properties:
+                            deadline: { type: [string, "null"] }
+                            communicatedAt: { type: [string, "null"] }
+                            count: { type: integer }
+                            onTime: { type: [boolean, "null"] }
+                        decisionDue:
+                          { type: [string, "null"], format: date-time }
+                        daysToDecision: { type: [integer, "null"] }
+                        clockState:
+                          {
+                            type: string,
+                            enum: [none, running, extended, paused, decided],
+                          }
+                        completeBy:
+                          { type: [string, "null"], format: date-time }
+                        daysToComplete: { type: [integer, "null"] }
+                        extended: { type: boolean }
+                  measures:
+                    type: array
+                    description: Closed findings with a measure (Art. 57(1)(j)(iv))
+                    items:
+                      type: object
+                      properties:
+                        findingId: { type: string }
+                        party: { type: [string, "null"] }
+                        partyDid: { type: [string, "null"] }
+                        permitId: { type: [string, "null"] }
+                        measure:
+                          {
+                            type: string,
+                            enum: [WARNING, REVOCATION, EXCLUSION, FINE],
+                          }
+                        note: { type: [string, "null"] }
+                        exclusionMonths: { type: [integer, "null"] }
+                        fineEur: { type: [number, "null"] }
+                        notifiedAt: { type: [string, "null"] }
+                        closedAt: { type: [string, "null"] }
+                        accessBody: { type: [string, "null"] }
+                  results:
+                    type: array
+                    description: Results communicated by data users (Art. 61(4))
+                    items:
+                      type: object
+                      properties:
+                        resultId: { type: string }
+                        permitId: { type: [string, "null"] }
+                        applicant: { type: [string, "null"] }
+                        applicantName: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        kind: { type: string }
+                        title: { type: string }
+                        summary: { type: [string, "null"] }
+                        url: { type: [string, "null"] }
+                        communicatedAt: { type: [string, "null"] }
+                        deadline: { type: [string, "null"] }
+                        onTime: { type: [boolean, "null"] }
+                  articles:
+                    type: object
+                    description: The provision each part of the register rests on
+                    properties:
+                      requests: { type: string }
+                      applications: { type: string }
+                      decisions: { type: string }
+                      revocations: { type: string }
+                      measures: { type: string }
+                      results: { type: string }
+                      fees: { type: string }
+                      trustedHolders: { type: string }
+                      naturalPersons: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/information:
+    get:
+      tags: [Access Body]
+      summary: What the access body tells the public about secondary use
+      description: >-
+        The parts of the Art. 58(1) information (Regulation (EU) 2025/327) that
+        come from the graph: the access bodies and their contact, who has been
+        granted access to which datasets and for what purpose (Art. 58(1)(f)),
+        the results of the projects, the fee schedule (Art. 62), the log
+        retention (Art. 73(1)(e)) and the number of persons who opted out
+        (Art. 71). Any signed-in participant may read it (ADR-044); the session
+        does not narrow the answer.
+      responses:
+        "200":
+          description: The information page's data
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    article,
+                    generatedAt,
+                    bodies,
+                    access,
+                    results,
+                    optOut,
+                    retention,
+                    fees,
+                  ]
+                properties:
+                  article: { type: string }
+                  generatedAt: { type: string, format: date-time }
+                  bodies:
+                    type: array
+                    description: The health data access bodies
+                    items:
+                      type: object
+                      properties:
+                        name: { type: [string, "null"] }
+                        did: { type: string }
+                        country: { type: [string, "null"] }
+                        contactName: { type: [string, "null"] }
+                        contactEmail: { type: [string, "null"] }
+                  access:
+                    type: array
+                    description: Issued and revoked permits (Art. 58(1)(f))
+                    items:
+                      type: object
+                      properties:
+                        permitId: { type: string }
+                        applicant: { type: [string, "null"] }
+                        applicantCountry: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        holder: { type: [string, "null"] }
+                        purpose: { type: [string, "null"] }
+                        validFrom: { type: [string, "null"] }
+                        validUntil: { type: [string, "null"] }
+                        status: { type: string, enum: [APPROVED, REVOKED] }
+                        resultsDue:
+                          {
+                            type: [string, "null"],
+                            description: "18 months after validUntil (Art. 61(4))",
+                          }
+                  results:
+                    type: array
+                    description: Results communicated by data users (Art. 61(4))
+                    items:
+                      type: object
+                      properties:
+                        resultId: { type: string }
+                        permitId: { type: [string, "null"] }
+                        applicant: { type: [string, "null"] }
+                        applicantName: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        kind: { type: string }
+                        title: { type: string }
+                        summary: { type: [string, "null"] }
+                        url: { type: [string, "null"] }
+                        communicatedAt: { type: [string, "null"] }
+                        deadline: { type: [string, "null"] }
+                        onTime: { type: [boolean, "null"] }
+                  optOut:
+                    type: object
+                    properties:
+                      article: { type: string }
+                      optedOut:
+                        {
+                          type: integer,
+                          description: "Persons with an open Art. 71 opt-out",
+                        }
+                      patients: { type: integer }
+                  retention:
+                    type: object
+                    properties:
+                      months: { type: integer }
+                      article: { type: string }
+                  fees:
+                    type: object
+                    properties:
+                      article: { type: string }
+                      currency: { type: string }
+                      body:
+                        type: object
+                        properties:
+                          assessment: { type: number }
+                          perDataset: { type: number }
+                          spePerMonth: { type: number }
+                      holder:
+                        type: object
+                        properties:
+                          pseudonymised: { type: number }
+                          anonymised: { type: number }
+                      requestEur: { type: number }
+                      reductions:
+                        type: object
+                        description: Share taken off per applicant category (Art. 62(3))
+                        additionalProperties: { type: number }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/activity-report:
+    get:
+      tags: [Access Body]
+      summary: Activity report of the health data access body
+      description: >-
+        The report of Regulation (EU) 2025/327 Art. 59(1)(a) to (k), generated
+        from the graph for a period, the last 24 months by default (#206).
+        Organisations, counts, dates and reasons only; nothing personal. Any
+        signed-in participant may read it (ADR-044); the session does not
+        narrow the answer. With `format=md` the same report is answered as
+        Markdown.
+      parameters:
+        - name: from
+          in: query
+          required: false
+          schema: { type: string, format: date }
+          description: "Start of the period; default is 24 months before `to`. A value that is not a date is ignored."
+        - name: to
+          in: query
+          required: false
+          schema: { type: string, format: date }
+          description: "End of the period; default is now. A value that is not a date is ignored."
+        - name: format
+          in: query
+          required: false
+          schema: { type: string, enum: [md] }
+          description: "`md` answers text/markdown instead of JSON"
+      responses:
+        "200":
+          description: The report
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [article, generatedAt, period, accessBodies, items]
+                properties:
+                  article: { type: string }
+                  generatedAt: { type: string, format: date-time }
+                  period:
+                    type: object
+                    properties:
+                      from: { type: string, format: date-time }
+                      to: { type: string, format: date-time }
+                      months: { type: integer }
+                  accessBodies:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: [string, "null"] }
+                        did: { type: string }
+                        country: { type: [string, "null"] }
+                  items:
+                    type: object
+                    description: >-
+                      One object per letter of Art. 59(1). Each carries `title`
+                      and `note`, and the figures named here.
+                    properties:
+                      a:
+                        type: object
+                        description: >-
+                          Applications, permits and data accessed: applications,
+                          byApplicantType, permitsIssued, refused, revoked,
+                          pending, byPurpose, dataCategoriesAccessed,
+                          healthDataRequests, healthDataRequestsAnswered,
+                          resultsCommunicated
+                      b:
+                        type: object
+                        description: >-
+                          Obligations and fines: measures (revoked permits),
+                          otherMeasures, administrativeFines (count, amountEur)
+                      c:
+                        type: object
+                        description: >-
+                          Audits of data users in the secure processing
+                          environment: accessEvents, underPermit, refused, byUser
+                      d:
+                        {
+                          type: object,
+                          description: "Audits of the environment itself: audits",
+                        }
+                      e:
+                        {
+                          type: object,
+                          description: "Requests from natural persons: requests",
+                        }
+                      f:
+                        {
+                          type: object,
+                          description: "Engagement with stakeholders: activities",
+                        }
+                      g:
+                        {
+                          type: object,
+                          description: "Revenues: amountEur, permitsEur, requestsEur",
+                        }
+                      h:
+                        {
+                          type: object,
+                          description: "Average days between application and access: averageDays, basis, detail",
+                        }
+                      i:
+                        {
+                          type: object,
+                          description: "Data quality labels: total, byCoverage, labels",
+                        }
+                      j:
+                        {
+                          type: object,
+                          description: "Publications, policy documents and regulatory procedures: entries",
+                        }
+                      k:
+                        {
+                          type: object,
+                          description: "IT products developed using the data: entries",
+                        }
+            text/markdown:
+              schema: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/applications:
+    get:
+      tags: [Access Body]
+      summary: List health data access applications
+      description: >-
+        The access body's inbox (Regulation (EU) 2025/327, Art. 57(1)(e)):
+        every application with the eleven items of Art. 67(2), its
+        completeness, its decision and the Art. 68(4) clock, undecided ones
+        first by due date. Any signed-in participant may call it. The session
+        narrows the answer: HDAB_AUTHORITY and EDC_ADMIN see all applications
+        (`scope` is `all`), everyone else only the applications their own
+        organisation submitted (`scope` is `own`).
+      responses:
+        "200":
+          description: The applications the caller may see
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [applications, scope, article]
+                properties:
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        applicationId: { type: string }
+                        name: { type: [string, "null"] }
+                        applicant:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the applicant",
+                          }
+                        applicantName: { type: [string, "null"] }
+                        applicantCategory: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        purpose: { type: [string, "null"] }
+                        requestedPurpose: { type: [string, "null"] }
+                        status: { type: [string, "null"] }
+                        submittedAt: { type: [string, "null"] }
+                        justification: { type: [string, "null"] }
+                        ethicsCommitteeRef: { type: [string, "null"] }
+                        periodMonths: { type: [integer, "null"] }
+                        processingPeriodMonths: { type: [integer, "null"] }
+                        namedPersons: { type: [string, "null"] }
+                        intendedUse: { type: [string, "null"] }
+                        requestedData: { type: [string, "null"] }
+                        dataTimeRange: { type: [string, "null"] }
+                        dataFormats: { type: [string, "null"] }
+                        identifiability: { type: [string, "null"] }
+                        pseudonymisationJustification:
+                          { type: [string, "null"] }
+                        datasetsBroughtIn: { type: [string, "null"] }
+                        safeguards: { type: [string, "null"] }
+                        speTools: { type: [string, "null"] }
+                        art71Exception: { type: [boolean, "null"] }
+                        art71ExceptionJustification: { type: [string, "null"] }
+                        dataMinimisationStatement: { type: [string, "null"] }
+                        completedAt: { type: [string, "null"] }
+                        extendedAt: { type: [string, "null"] }
+                        extensionReason: { type: [string, "null"] }
+                        incompleteNoticeAt: { type: [string, "null"] }
+                        incompleteReason: { type: [string, "null"] }
+                        completeBy: { type: [string, "null"] }
+                        permitId: { type: [string, "null"] }
+                        decision:
+                          {
+                            type: [string, "null"],
+                            description: "APPROVED, REJECTED, REVOKED or empty",
+                          }
+                        decidedAt: { type: [string, "null"] }
+                        validUntil: { type: [string, "null"] }
+                        decisionJustification: { type: [string, "null"] }
+                        statisticalAlternativeOffered:
+                          { type: [boolean, "null"] }
+                        decisionDue:
+                          { type: [string, "null"], format: date-time }
+                        daysToDecision: { type: [integer, "null"] }
+                        clockState:
+                          {
+                            type: string,
+                            enum: [none, running, extended, paused, decided],
+                          }
+                        daysToComplete: { type: [integer, "null"] }
+                        extended: { type: boolean }
+                        completeness:
+                          type: object
+                          description: "Which of the eleven Art. 67(2) items are present: complete, present, total, missing"
+                        undecided: { type: boolean }
+                  scope: { type: string, enum: [all, own] }
+                  article: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Access Body]
+      summary: Submit a health data access application
+      x-required-roles: [DATA_USER, EDC_USER_PARTICIPANT, EDC_ADMIN]
+      description: >-
+        A data user applies for access with the items of Regulation (EU)
+        2025/327 Art. 67(2). Dataset, purpose and justification are the
+        minimum; the answer says which of the eleven items are missing, and
+        the access body may send the applicant back for them (Art. 68(4)).
+        The applicant is the organisation of the session and must be a
+        participant in the graph. Needs DATA_USER, EDC_USER_PARTICIPANT or
+        EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [datasetId, purpose, justification]
+              properties:
+                datasetId: { type: string }
+                purpose:
+                  type: string
+                  enum:
+                    [
+                      PUBLIC_HEALTH,
+                      POLICY_MAKING,
+                      STATISTICS,
+                      EDUCATION,
+                      SCIENTIFIC_RESEARCH,
+                      CARE_IMPROVEMENT,
+                    ]
+                  description: One of the Art. 53(1) purposes
+                justification: { type: string }
+                name:
+                  {
+                    type: string,
+                    description: "Title of the application; built from purpose and dataset when left out",
+                  }
+                applicantCategory:
+                  type: string
+                  enum: [PUBLIC_SECTOR, ACADEMIC, MICRO_ENTERPRISE, COMMERCIAL]
+                  default: COMMERCIAL
+                  description: Decides the fee reduction (Art. 62(3)); an unknown value counts as COMMERCIAL
+                dataMinimisationStatement: { type: string }
+                namedPersons: { type: string }
+                intendedUse: { type: string }
+                requestedData: { type: string }
+                dataTimeRange: { type: string }
+                dataFormats: { type: string }
+                identifiability:
+                  { type: string, enum: [PSEUDONYMISED, ANONYMISED] }
+                pseudonymisationJustification: { type: string }
+                datasetsBroughtIn: { type: string }
+                safeguards: { type: string }
+                processingPeriodMonths:
+                  type: integer
+                  minimum: 1
+                  maximum: 60
+                  default: 12
+                  description: "Clamped to 1 to 60; `periodMonths` is read as an alias"
+                speTools: { type: string }
+                ethicsCommitteeRef: { type: string }
+                art71Exception: { type: boolean }
+                art71ExceptionJustification: { type: string }
+      responses:
+        "201":
+          description: The application is on record as PENDING
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applicationId: { type: string }
+                  applicant:
+                    { type: string, description: "DID of the applicant" }
+                  applicantName: { type: [string, "null"] }
+                  applicantCategory: { type: string }
+                  datasetId: { type: string }
+                  datasetKnown:
+                    {
+                      type: boolean,
+                      description: "Whether the dataset is in the catalogue",
+                    }
+                  purpose: { type: string }
+                  periodMonths: { type: integer }
+                  status: { type: string, enum: [PENDING] }
+                  submittedAt: { type: string, format: date-time }
+                  decisionDue: { type: string, format: date-time }
+                  completeness:
+                    type: object
+                    properties:
+                      complete: { type: boolean }
+                      present: { type: integer }
+                      total: { type: integer }
+                      missing:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            item: { type: string }
+                            label: { type: string }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, a required field is missing, or the purpose is not an Art. 53(1) purpose; `purposes` lists them"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "Needs DATA_USER, EDC_USER_PARTICIPANT or EDC_ADMIN"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The applicant's organisation is not a participant in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/applications/clock:
+    post:
+      tags: [Access Body]
+      summary: Stop or extend the decision clock of an application
+      x-required-roles: [HDAB_AUTHORITY]
+      description: >-
+        The access body acts on the Art. 68(4) clock (Regulation (EU)
+        2025/327). INCOMPLETE tells the applicant which Art. 67(2) items are
+        missing, stops the three months and gives four weeks to complete.
+        EXTEND extends the three months once, by three, with reasons. Both are
+        recorded on the application and shown to the applicant. Needs
+        HDAB_AUTHORITY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applicationId, action, reason]
+              properties:
+                applicationId: { type: string }
+                action:
+                  {
+                    type: string,
+                    enum: [INCOMPLETE, EXTEND],
+                    description: "Read case-insensitively",
+                  }
+                reason:
+                  {
+                    type: string,
+                    description: "The missing items, or the reasons for the extension",
+                  }
+      responses:
+        "200":
+          description: The clock after the action
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applicationId: { type: string }
+                  action: { type: string, enum: [INCOMPLETE, EXTEND] }
+                  decisionDue: { type: [string, "null"], format: date-time }
+                  daysToDecision: { type: [integer, "null"] }
+                  clockState:
+                    {
+                      type: string,
+                      enum: [none, running, extended, paused, decided],
+                    }
+                  completeBy: { type: [string, "null"], format: date-time }
+                  daysToComplete: { type: [integer, "null"] }
+                  extended: { type: boolean }
+                  reason: { type: string }
+                  missing:
+                    type: array
+                    description: Only for INCOMPLETE, the Art. 67(2) items not on the application
+                    items:
+                      type: object
+                      properties:
+                        item: { type: string }
+                        label: { type: string }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or applicationId, a known action or the reason is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The application is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: "The application is decided, was extended once already, or is paused and has nothing to extend"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/applications/complete:
+    post:
+      tags: [Access Body]
+      summary: Complete an application with the missing items
+      x-required-roles: [DATA_USER, EDC_USER_PARTICIPANT, EDC_ADMIN]
+      description: >-
+        The applicant supplies the Art. 67(2) items the access body asked for
+        (Regulation (EU) 2025/327). Fields sent replace what was there, fields
+        left out stay. Once every item is present the application counts as
+        complete and the three months of Art. 68(4) run from now. Needs
+        DATA_USER, EDC_USER_PARTICIPANT or EDC_ADMIN; after that gate only the
+        organisation that submitted the application may complete it, or an
+        EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applicationId]
+              properties:
+                applicationId: { type: string }
+                namedPersons: { type: string }
+                intendedUse: { type: string }
+                requestedData: { type: string }
+                dataTimeRange: { type: string }
+                dataFormats: { type: string }
+                identifiability:
+                  { type: string, enum: [PSEUDONYMISED, ANONYMISED] }
+                pseudonymisationJustification: { type: string }
+                datasetsBroughtIn: { type: string }
+                safeguards: { type: string }
+                processingPeriodMonths:
+                  type: integer
+                  minimum: 1
+                  maximum: 60
+                  description: "Clamped to 1 to 60; `periodMonths` is read as an alias"
+                speTools: { type: string }
+                ethicsCommitteeRef: { type: string }
+                art71Exception: { type: boolean }
+                art71ExceptionJustification: { type: string }
+      responses:
+        "200":
+          description: The completeness and the clock after the update
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applicationId: { type: string }
+                  completeness:
+                    type: object
+                    properties:
+                      complete: { type: boolean }
+                      present: { type: integer }
+                      total: { type: integer }
+                      missing:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            item: { type: string }
+                            label: { type: string }
+                  decisionDue: { type: [string, "null"], format: date-time }
+                  daysToDecision: { type: [integer, "null"] }
+                  clockState:
+                    {
+                      type: string,
+                      enum: [none, running, extended, paused, decided],
+                    }
+                  completeBy: { type: [string, "null"], format: date-time }
+                  daysToComplete: { type: [integer, "null"] }
+                  extended: { type: boolean }
+                  restarted:
+                    {
+                      type: boolean,
+                      description: "True when the three months run again from this completion",
+                    }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or applicationId is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "Needs DATA_USER, EDC_USER_PARTICIPANT or EDC_ADMIN; and only the applicant (or an EDC_ADMIN) completes its own application"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The application is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: The application is decided
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/requests:
+    get:
+      tags: [Access Body]
+      summary: List health data requests
+      description: >-
+        Health data requests under Regulation (EU) 2025/327 Art. 69, access to
+        a statistic and never to the data, with the Art. 69(4) three-month
+        clock and, once decided, the anonymised answer. Any signed-in
+        participant may call it. The session narrows the answer:
+        HDAB_AUTHORITY and EDC_ADMIN see all requests (`scope` is `all`); a
+        DATA_HOLDER whose organisation is a trusted data holder also sees the
+        requests on the datasets it offers (Art. 72, `scope` is `holder`);
+        everyone else sees only their own organisation's requests (`scope` is
+        `own`). `canDecide` says whether this caller may decide a request.
+      responses:
+        "200":
+          description: The requests the caller may see, undecided ones first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requests, scope, article]
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        requestId: { type: string }
+                        holder:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the participant offering the dataset",
+                          }
+                        decidedUnder:
+                          {
+                            type: [string, "null"],
+                            description: "Art. 69(3) or Art. 72",
+                          }
+                        feeEur: { type: [number, "null"] }
+                        applicant:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the applicant",
+                          }
+                        applicantName: { type: [string, "null"] }
+                        question: { type: [string, "null"] }
+                        purpose: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        statisticalContent: { type: [string, "null"] }
+                        safeguards: { type: [string, "null"] }
+                        legalBasis: { type: [string, "null"] }
+                        status:
+                          {
+                            type: string,
+                            enum: [PENDING, APPROVED, ANSWERED, REJECTED],
+                          }
+                        submittedAt: { type: [string, "null"] }
+                        decidedAt: { type: [string, "null"] }
+                        decidedBy: { type: [string, "null"] }
+                        justification: { type: [string, "null"] }
+                        answer:
+                          type: [array, "null"]
+                          description: The anonymised statistical rows, once answered
+                          items: { type: object }
+                        answerTemplate: { type: [string, "null"] }
+                        answerError: { type: [string, "null"] }
+                        answeredAt: { type: [string, "null"] }
+                        suppressedCells: { type: [integer, "null"] }
+                        decisionDue:
+                          { type: [string, "null"], format: date-time }
+                        daysToDecision: { type: [integer, "null"] }
+                        undecided: { type: boolean }
+                        canDecide: { type: boolean }
+                  scope: { type: string, enum: [all, holder, own] }
+                  trustedHolder:
+                    {
+                      type: boolean,
+                      description: "Whether the caller acts as a trusted data holder (Art. 72)",
+                    }
+                  article: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Access Body]
+      summary: Submit a health data request
+      x-required-roles: [DATA_USER, EDC_USER_PARTICIPANT, EDC_ADMIN]
+      description: >-
+        A data user asks a question and describes the statistical content, the
+        safeguards and the legal basis (Regulation (EU) 2025/327, Art. 69(2)).
+        The access body decides within three months (Art. 69(4)). The
+        applicant is the organisation of the session and must be a participant
+        in the graph. Needs DATA_USER, EDC_USER_PARTICIPANT or EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question, purpose, statisticalContent]
+              properties:
+                question: { type: string }
+                purpose:
+                  type: string
+                  enum:
+                    [
+                      PUBLIC_HEALTH,
+                      POLICY_MAKING,
+                      STATISTICS,
+                      EDUCATION,
+                      SCIENTIFIC_RESEARCH,
+                      CARE_IMPROVEMENT,
+                    ]
+                  description: One of the Art. 53(1) purposes
+                statisticalContent: { type: string }
+                datasetId: { type: string }
+                safeguards: { type: string }
+                legalBasis:
+                  type: string
+                  default: "GDPR Art. 6(1)(e), Regulation (EU) 2025/327 Art. 53(1)"
+      responses:
+        "201":
+          description: The request is on record as PENDING
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId: { type: string }
+                  applicant:
+                    { type: string, description: "DID of the applicant" }
+                  applicantName: { type: [string, "null"] }
+                  question: { type: string }
+                  purpose: { type: string }
+                  datasetId: { type: [string, "null"] }
+                  status: { type: string, enum: [PENDING] }
+                  submittedAt: { type: string, format: date-time }
+                  decisionDue: { type: string, format: date-time }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, a required field is missing, or the purpose is not an Art. 53(1) purpose; `purposes` lists them"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "Needs DATA_USER, EDC_USER_PARTICIPANT or EDC_ADMIN"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The applicant's organisation is not a participant in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/requests/decide:
+    post:
+      tags: [Access Body]
+      summary: Decide a health data request
+      x-required-roles: [HDAB_AUTHORITY, DATA_HOLDER]
+      description: >-
+        The decision on a health data request (Regulation (EU) 2025/327,
+        Art. 69(3) and (4)). On approval the question is run once, in the
+        applicant's name, and only the anonymised statistical result is kept
+        on the request; the applicant never receives the query, the records or
+        a count below the k-anonymity threshold (Art. 69(1)). A refusal needs
+        a written justification, which is published (Art. 57(1)(j)(iii)).
+        Needs HDAB_AUTHORITY or DATA_HOLDER. A DATA_HOLDER is admitted only as
+        a trusted data holder and only for a request on a dataset it offers
+        (Art. 72); otherwise the answer is 403.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestId, decision]
+              properties:
+                requestId: { type: string }
+                decision:
+                  {
+                    type: string,
+                    enum: [APPROVED, REJECTED],
+                    description: "Read case-insensitively",
+                  }
+                justification:
+                  { type: string, description: "Required for REJECTED" }
+      responses:
+        "200":
+          description: >-
+            The decision. An approval carries the statistical answer, or
+            `answered: false` with `answerError` when the question yields none
+            or the statistical service was unreachable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId: { type: string }
+                  decision: { type: string, enum: [APPROVED, REJECTED] }
+                  decidedAt: { type: string, format: date-time }
+                  decidedBy:
+                    {
+                      type: string,
+                      description: "DID of the deciding body or holder",
+                    }
+                  decidedUnder:
+                    { type: string, enum: ["Art. 69(3)", "Art. 72"] }
+                  justification:
+                    { type: string, description: "Only on a refusal" }
+                  feeEur:
+                    {
+                      type: number,
+                      description: "Only on an approval (Art. 62)",
+                    }
+                  publishBy: { type: string, format: date }
+                  answered:
+                    { type: boolean, description: "Only on an approval" }
+                  answer:
+                    type: [array, "null"]
+                    description: The anonymised statistical rows
+                    items: { type: object }
+                  answerTemplate: { type: [string, "null"] }
+                  answerError: { type: [string, "null"] }
+                  suppressedCells: { type: integer }
+                  kAnonymity: { type: integer }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, requestId or a known decision is missing, or a refusal has no justification"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "Needs HDAB_AUTHORITY, or DATA_HOLDER as a trusted data holder deciding on its own dataset (Art. 72)"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The health data request is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/permits:
+    post:
+      tags: [Access Body]
+      summary: Decide an access application and issue or refuse the data permit
+      x-required-roles: [HDAB_AUTHORITY]
+      description: >-
+        The access body decides on an application (Regulation (EU) 2025/327,
+        Art. 68). An approval issues the data permit with the Art. 53(1)
+        purpose, the validity period, the conditions, the Art. 68(1)(a) to (h)
+        criteria as assessed and the fee (Art. 62). A refusal needs a written
+        justification, published with the decision within 30 working days
+        (Art. 57(1)(j)(iii)), and may offer an anonymised statistical answer
+        instead (Art. 68(3), Art. 69). There is one decision per application
+        (`permit-<applicationId>`); deciding again replaces it. Needs
+        HDAB_AUTHORITY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applicationId, decision]
+              properties:
+                applicationId: { type: string }
+                decision:
+                  {
+                    type: string,
+                    enum: [APPROVED, REJECTED],
+                    description: "Read case-insensitively",
+                  }
+                justification:
+                  { type: string, description: "Required for REJECTED" }
+                purpose:
+                  type: string
+                  enum:
+                    [
+                      PUBLIC_HEALTH,
+                      POLICY_MAKING,
+                      STATISTICS,
+                      EDUCATION,
+                      SCIENTIFIC_RESEARCH,
+                      CARE_IMPROVEMENT,
+                    ]
+                  description: The permitted purpose; the requested purpose when left out
+                validUntil:
+                  type: string
+                  format: date-time
+                  description: Must lie in the future; 12 months from the decision when left out
+                conditions:
+                  description: A list of conditions, or one string with a condition per line
+                  oneOf:
+                    - type: array
+                      items: { type: string }
+                    - type: string
+                criteria:
+                  type: object
+                  description: The Art. 68(1) criteria as assessed, keys a to h
+                  additionalProperties: { type: boolean }
+                riskNote: { type: string }
+                statisticalAlternative:
+                  type: boolean
+                  description: With a refusal, offer an anonymised statistical answer instead (Art. 68(3))
+                datasetId:
+                  {
+                    type: string,
+                    description: "The dataset granted; the requested dataset when left out",
+                  }
+      responses:
+        "200":
+          description: The decision as recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permitId: { type: string }
+                  applicationId: { type: string }
+                  decision: { type: string, enum: [APPROVED, REJECTED] }
+                  applicant:
+                    {
+                      type: [string, "null"],
+                      description: "DID of the applicant",
+                    }
+                  applicantName: { type: [string, "null"] }
+                  datasetId: { type: [string, "null"] }
+                  purpose: { type: [string, "null"] }
+                  validUntil: { type: [string, "null"], format: date-time }
+                  decidedAt: { type: string, format: date-time }
+                  decidedBy:
+                    { type: string, description: "DID of the access body" }
+                  officer: { type: string }
+                  conditions: { type: array, items: { type: string } }
+                  justification: { type: string }
+                  criteria:
+                    type: [object, "null"]
+                    additionalProperties: { type: boolean }
+                  statisticalAlternative: { type: boolean }
+                  fee:
+                    type: [object, "null"]
+                    description: The Art. 62 fee on an issued permit
+                    properties:
+                      category: { type: string }
+                      categoryLabel: { type: string }
+                      reduction: { type: number }
+                      bodyEur: { type: number }
+                      holderEur: { type: number }
+                      totalEur: { type: number }
+                      basis: { type: array, items: { type: string } }
+                      article: { type: string }
+                  publishBy: { type: string, format: date }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, applicationId or a known decision is missing, a refusal has no justification, or validUntil is not in the future"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The application is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/permits/revoke:
+    post:
+      tags: [Access Body]
+      summary: Revoke a data permit
+      x-required-roles: [HDAB_AUTHORITY]
+      description: >-
+        The access body revokes an issued data permit (Regulation (EU)
+        2025/327, Art. 63(3)). The permit keeps its history and gets the
+        revocation date, the reason and who took the measure; transfers and
+        queries under it fail at once, and the public register lists the
+        measure (Art. 57(1)(j)(iv)). Needs HDAB_AUTHORITY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permitId, reason]
+              properties:
+                permitId: { type: string }
+                reason:
+                  { type: string, description: "Published with the measure" }
+      responses:
+        "200":
+          description: The permit is revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permitId: { type: string }
+                  applicationId: { type: [string, "null"] }
+                  applicant:
+                    {
+                      type: [string, "null"],
+                      description: "DID of the permit holder",
+                    }
+                  applicantName: { type: [string, "null"] }
+                  decision: { type: string, enum: [REVOKED] }
+                  revokedAt: { type: string, format: date-time }
+                  revokedBy:
+                    { type: string, description: "DID of the access body" }
+                  officer: { type: string }
+                  reason: { type: string }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or permitId or the reason is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: There is no approved data permit with this id
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/findings:
+    get:
+      tags: [Access Body]
+      summary: List non-compliance findings
+      description: >-
+        Findings under Regulation (EU) 2025/327 Art. 63, with the party's
+        views (Art. 63(2)) and the measure taken (Art. 63(3)). Any signed-in
+        participant may call it. The session narrows the answer:
+        HDAB_AUTHORITY and EDC_ADMIN see every finding (`scope` is `all`),
+        everyone else only the findings against their own organisation
+        (`scope` is `own`).
+      responses:
+        "200":
+          description: The findings the caller may see, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [findings, scope, article]
+                properties:
+                  findings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        findingId: { type: string }
+                        party:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the party the finding is against",
+                          }
+                        partyName: { type: [string, "null"] }
+                        partyType: { type: [string, "null"] }
+                        permitId: { type: [string, "null"] }
+                        description: { type: [string, "null"] }
+                        gdprBreach: { type: boolean }
+                        supervisoryAuthorityInformed: { type: boolean }
+                        status:
+                          { type: string, enum: [OPEN, VIEWS_RECEIVED, CLOSED] }
+                        notifiedAt: { type: [string, "null"] }
+                        respondBy: { type: [string, "null"] }
+                        views: { type: [string, "null"] }
+                        respondedAt: { type: [string, "null"] }
+                        measure:
+                          {
+                            type: [string, "null"],
+                            enum:
+                              [
+                                NONE,
+                                WARNING,
+                                REVOCATION,
+                                EXCLUSION,
+                                FINE,
+                                null,
+                              ],
+                          }
+                        measureNote: { type: [string, "null"] }
+                        exclusionMonths: { type: [integer, "null"] }
+                        fineEur: { type: [number, "null"] }
+                        closedAt: { type: [string, "null"] }
+                        foundBy:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the access body",
+                          }
+                        accessBody: { type: [string, "null"] }
+                        daysToRespond:
+                          {
+                            type: [integer, "null"],
+                            description: "Only while the finding is OPEN",
+                          }
+                  scope: { type: string, enum: [all, own] }
+                  article: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Access Body]
+      summary: Record a non-compliance finding
+      x-required-roles: [HDAB_AUTHORITY]
+      description: >-
+        The access body records that a data user or holder failed to comply
+        (Regulation (EU) 2025/327, Art. 63(1)), with the permit it concerns if
+        any, and gives the party four weeks to state its views (Art. 63(2)).
+        With `gdprBreach` the record says that the supervisory authority is
+        informed. Needs HDAB_AUTHORITY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [partyDid, description]
+              properties:
+                partyDid:
+                  {
+                    type: string,
+                    description: "DID of a participant in the graph",
+                    example: "did:web:pharmaco.de:research",
+                  }
+                description: { type: string }
+                permitId: { type: string }
+                gdprBreach: { type: boolean, default: false }
+      responses:
+        "201":
+          description: The finding is OPEN and the party is notified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  findingId: { type: string }
+                  party: { type: string }
+                  partyName: { type: [string, "null"] }
+                  permitId: { type: [string, "null"] }
+                  gdprBreach: { type: boolean }
+                  supervisoryAuthorityInformed: { type: boolean }
+                  status: { type: string, enum: [OPEN] }
+                  notifiedAt: { type: string, format: date-time }
+                  respondBy: { type: string, format: date-time }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or partyDid or the description is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The party is not a participant in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/findings/respond:
+    post:
+      tags: [Access Body]
+      summary: State the party's views on a finding
+      description: >-
+        The party a finding is against states its views (Regulation (EU)
+        2025/327, Art. 63(2)), while the finding is not closed. Any signed-in
+        participant passes the gate; after it only the organisation the
+        finding is against may answer, or an EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [findingId, views]
+              properties:
+                findingId: { type: string }
+                views: { type: string }
+      responses:
+        "200":
+          description: The views are on record
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  findingId: { type: string }
+                  status: { type: string, enum: [VIEWS_RECEIVED] }
+                  respondedAt: { type: string, format: date-time }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or findingId or the views are missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Only the party the finding is against (or an EDC_ADMIN) states its views
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The finding is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: The finding is closed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/findings/close:
+    post:
+      tags: [Access Body]
+      summary: Close a finding with a measure
+      x-required-roles: [HDAB_AUTHORITY]
+      description: >-
+        The access body closes a finding with the measure it takes (Regulation
+        (EU) 2025/327, Art. 63(3)): none, a warning, revocation of the permit
+        the finding concerns, exclusion from access for a period, or an
+        administrative fine (Art. 64). A revocation takes effect on the permit
+        at once. Every measure but NONE needs a written reason, because it is
+        published (Art. 57(1)(j)(iv)). Needs HDAB_AUTHORITY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [findingId, measure]
+              properties:
+                findingId: { type: string }
+                measure:
+                  type: string
+                  enum: [NONE, WARNING, REVOCATION, EXCLUSION, FINE]
+                  description: Read case-insensitively
+                note:
+                  {
+                    type: string,
+                    description: "The written reason; required unless the measure is NONE",
+                  }
+                exclusionMonths:
+                  type: integer
+                  minimum: 1
+                  maximum: 60
+                  default: 12
+                  description: Only read for EXCLUSION
+                fineEur:
+                  type: integer
+                  minimum: 0
+                  description: Only read for FINE
+      responses:
+        "200":
+          description: The finding is closed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  findingId: { type: string }
+                  partyName: { type: [string, "null"] }
+                  status: { type: string, enum: [CLOSED] }
+                  measure:
+                    {
+                      type: string,
+                      enum: [NONE, WARNING, REVOCATION, EXCLUSION, FINE],
+                    }
+                  note: { type: string }
+                  exclusionMonths: { type: [integer, "null"] }
+                  fineEur: { type: [integer, "null"] }
+                  permitId: { type: [string, "null"] }
+                  permitRevoked: { type: boolean }
+                  closedAt: { type: string, format: date-time }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, findingId or a known measure is missing, or a measure has no written reason"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The finding is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/information-requests:
+    get:
+      tags: [Access Body]
+      summary: List requests for information
+      description: >-
+        What the access body asked data users and holders about their use of
+        the data, and the answers (Regulation (EU) 2025/327, Art. 63(1)). Any
+        signed-in participant may call it. The session narrows the answer:
+        HDAB_AUTHORITY and EDC_ADMIN see every request (`scope` is `all`),
+        everyone else only what was asked of their own organisation (`scope`
+        is `own`).
+      responses:
+        "200":
+          description: The requests the caller may see, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requests, scope, article]
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        requestId: { type: string }
+                        party:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the party asked",
+                          }
+                        partyName: { type: [string, "null"] }
+                        permitId: { type: [string, "null"] }
+                        findingId: { type: [string, "null"] }
+                        question: { type: [string, "null"] }
+                        status: { type: string, enum: [OPEN, ANSWERED] }
+                        requestedAt: { type: [string, "null"] }
+                        answerBy: { type: [string, "null"] }
+                        answer: { type: [string, "null"] }
+                        answeredAt: { type: [string, "null"] }
+                        requestedBy:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the access body",
+                          }
+                        accessBody: { type: [string, "null"] }
+                        daysToAnswer:
+                          {
+                            type: [integer, "null"],
+                            description: "Only while the request is OPEN",
+                          }
+                  scope: { type: string, enum: [all, own] }
+                  article: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Access Body]
+      summary: Ask a party for information
+      x-required-roles: [HDAB_AUTHORITY]
+      description: >-
+        The access body asks a data user or holder for information on its use
+        of the data (Regulation (EU) 2025/327, Art. 57(1)(a)(ii) and
+        Art. 63(1)); the party has four weeks to answer. The request can name
+        the permit and the finding it is about. Needs HDAB_AUTHORITY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [partyDid, question]
+              properties:
+                partyDid:
+                  {
+                    type: string,
+                    description: "DID of a participant in the graph",
+                    example: "did:web:pharmaco.de:research",
+                  }
+                question: { type: string }
+                permitId: { type: string }
+                findingId: { type: string }
+      responses:
+        "201":
+          description: The request is OPEN
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId: { type: string }
+                  party: { type: string }
+                  partyName: { type: [string, "null"] }
+                  permitId: { type: [string, "null"] }
+                  findingId: { type: [string, "null"] }
+                  status: { type: string, enum: [OPEN] }
+                  requestedAt: { type: string, format: date-time }
+                  answerBy: { type: string, format: date-time }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or partyDid or the question is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The party is not a participant in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/information-requests/answer:
+    post:
+      tags: [Access Body]
+      summary: Answer a request for information
+      description: >-
+        The party answers the access body's request for information
+        (Regulation (EU) 2025/327, Art. 63(1)); the answer is on record. Any
+        signed-in participant passes the gate; after it only the organisation
+        that was asked may answer, or an EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestId, answer]
+              properties:
+                requestId: { type: string }
+                answer: { type: string }
+      responses:
+        "200":
+          description: The answer is on record
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId: { type: string }
+                  status: { type: string, enum: [ANSWERED] }
+                  answeredAt: { type: string, format: date-time }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or requestId or the answer is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Only the party asked (or an EDC_ADMIN) answers
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The information request is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/compliance/results:
+    get:
+      tags: [Access Body]
+      summary: List results communicated by data users
+      description: >-
+        Every result a permit holder communicated (Regulation (EU) 2025/327,
+        Art. 61(4)), which the access body publishes (Art. 57(1)(j)(v)) and
+        reports (Art. 59(1)(j) and (k)). Any signed-in participant may read
+        them (ADR-044); the session does not narrow the answer.
+      responses:
+        "200":
+          description: The results, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [results, article]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        resultId: { type: string }
+                        permitId: { type: [string, "null"] }
+                        applicant:
+                          {
+                            type: [string, "null"],
+                            description: "DID of the permit holder",
+                          }
+                        applicantName: { type: [string, "null"] }
+                        datasetId: { type: [string, "null"] }
+                        datasetTitle: { type: [string, "null"] }
+                        kind:
+                          type: string
+                          enum:
+                            [
+                              PUBLICATION,
+                              POLICY_DOCUMENT,
+                              REGULATORY_PROCEDURE,
+                              IT_PRODUCT,
+                              OTHER,
+                            ]
+                        title: { type: string }
+                        summary: { type: [string, "null"] }
+                        url: { type: [string, "null"] }
+                        communicatedAt: { type: [string, "null"] }
+                        deadline: { type: [string, "null"] }
+                        onTime: { type: [boolean, "null"] }
+                  article: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    post:
+      tags: [Access Body]
+      summary: Communicate a result of a data permit
+      x-required-roles: [DATA_USER, EDC_USER_PARTICIPANT, EDC_ADMIN]
+      description: >-
+        The holder of a data permit reports what came of the use: a
+        publication, a policy document, a regulatory procedure, an IT product
+        (Regulation (EU) 2025/327, Art. 61(4)). The deadline is 18 months
+        after the end of the processing, the permit's validity end; the record
+        says whether it was met. Needs DATA_USER, EDC_USER_PARTICIPANT or
+        EDC_ADMIN; after that gate only the organisation the permit was issued
+        to may report, or an EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permitId, kind, title]
+              properties:
+                permitId: { type: string }
+                kind:
+                  type: string
+                  enum:
+                    [
+                      PUBLICATION,
+                      POLICY_DOCUMENT,
+                      REGULATORY_PROCEDURE,
+                      IT_PRODUCT,
+                      OTHER,
+                    ]
+                  description: Read case-insensitively
+                title: { type: string }
+                summary: { type: string }
+                url:
+                  {
+                    type: string,
+                    format: uri,
+                    description: "Kept only when it starts with http:// or https://",
+                  }
+      responses:
+        "201":
+          description: The result is on record
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultId: { type: string }
+                  permitId: { type: string }
+                  kind: { type: string }
+                  title: { type: string }
+                  communicatedAt: { type: string, format: date-time }
+                  deadline: { type: [string, "null"], format: date-time }
+                  onTime: { type: [boolean, "null"] }
+                  article: { type: string }
+        "400":
+          description: "The body is not JSON, or permitId, a known kind or the title is missing"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "Needs DATA_USER, EDC_USER_PARTICIPANT or EDC_ADMIN; and only the holder of the permit (or an EDC_ADMIN) communicates its results"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: The data permit is not in the graph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: No data permit was issued on this application
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/auth/eudi/start:
+    post:
+      tags: [Auth]
+      summary: Start an EUDI Wallet presentation
+      description: >-
+        Starts an OpenID4VP cross-device presentation at the verifier and
+        answers an opaque `sid`, the wallet deep link and a QR code of it; the
+        verifier's transaction id and nonce stay on the server. A plain POST
+        (no body) starts a sign-in and needs no session: it is how a person
+        signs in. With `purpose: link` it starts a link instead (ADR-067): the
+        PID presented is connected to the signed-in account, which needs a
+        PATIENT session on a sandbox account (ADR-054). With `demo: true` it
+        completes a transaction for the demo patient without a wallet, only
+        where the deployment sets EUDI_DEMO_WALLET=true. Poll
+        /api/auth/eudi/status with the `sid`. Declared without security
+        because the sign-in start is anonymous; only the link variant sends
+        the session cookie.
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                purpose:
+                  {
+                    type: string,
+                    enum: [link],
+                    description: "Connect the PID to the signed-in sandbox account",
+                  }
+                demo:
+                  {
+                    type: boolean,
+                    description: "Sign in as the demo patient without a wallet",
+                  }
+      responses:
+        "200":
+          description: >-
+            The transaction. A wallet start carries `walletLink` and
+            `qrDataUri`; a demo start carries `demo: true` instead.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sid]
+                properties:
+                  sid:
+                    {
+                      type: string,
+                      description: "Opaque id to poll the status with",
+                    }
+                  walletLink:
+                    {
+                      type: string,
+                      description: "Deep link that opens the wallet",
+                    }
+                  qrDataUri:
+                    {
+                      type: string,
+                      description: "PNG data URI of the QR code for the wallet link",
+                    }
+                  demo: { type: boolean }
+        "401":
+          description: "`purpose: link` without a session"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: "`purpose: link` needs PATIENT, on an account the Klarbefund app or a wallet created"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: "`demo: true` on a deployment without the simulated wallet"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: The verifier did not start the presentation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: "`purpose: link` on a hub that does not connect wallets to accounts"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/auth/eudi/status:
+    get:
+      tags: [Auth]
+      summary: Poll an EUDI Wallet presentation
+      description: >-
+        The coarse status of a presentation started with /api/auth/eudi/start,
+        never the PID claims. Answers without a session: it is part of the
+        sign-in flow, and the `sid` is the only handle. While pending it says
+        whether the wallet has fetched the request. A sign-in completes when
+        the PID belongs to a demo persona or to an account that holds its hash
+        (ADR-065, ADR-067); a PID on no account is refused with
+        `canRegister: true` when it could create one through
+        /api/auth/eudi/register. A link answers `linked`, or 409 when another
+        account holds the PID. A transient verifier error is answered as
+        `pending`, so the client keeps polling.
+      security: []
+      parameters:
+        - name: sid
+          in: query
+          required: true
+          schema: { type: string }
+          description: "The `sid` the start route answered"
+      responses:
+        "200":
+          description: Pending, or done
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [pending, completed, linked] }
+                  walletOpened:
+                    {
+                      type: boolean,
+                      description: "While pending, whether the wallet has fetched the request",
+                    }
+        "403":
+          description: The presentation does not sign in or link
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, error]
+                properties:
+                  status: { type: string, enum: [refused] }
+                  error: { type: string }
+                  canRegister:
+                    {
+                      type: boolean,
+                      description: "Present and true when this PID may create an account",
+                    }
+        "404":
+          description: Unknown or expired `sid`
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, error]
+                properties:
+                  status: { type: string, enum: [error] }
+                  error: { type: string }
+        "409":
+          description: A link was refused because the PID is connected to another account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, error]
+                properties:
+                  status: { type: string, enum: [refused] }
+                  error: { type: string }
+
+  /api/keycloak-config:
+    get:
+      tags: [Auth]
+      summary: Where Keycloak is, for the sign-in banner
+      description: >-
+        The public Keycloak realm URL and the UI's client id, read by client
+        components at runtime instead of being baked into the browser bundle.
+        Answers without a session: the sign-in page needs it, and the browser
+        sees both values as soon as a person signs in.
+      security: []
+      responses:
+        "200":
+          description: The Keycloak address and client
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [publicUrl, clientId]
+                properties:
+                  publicUrl:
+                    {
+                      type: string,
+                      format: uri,
+                      example: "http://localhost:8080/realms/edcv",
+                    }
+                  clientId: { type: string, example: health-dataspace-ui }
+
+  /api/admin/audit/retention:
+    get:
+      tags: [Admin]
+      summary: Retention policy and state of the access logs
+      x-required-roles: [HDAB_AUTHORITY, EDC_ADMIN]
+      description: >-
+        The retention of the secure processing environment's logs (Regulation
+        (EU) 2025/327, Art. 73(1)(e), at least one year): the policy, and for
+        access events and recorded transfers how many there are, the oldest
+        and newest, how many are past their retention date and how many are
+        protected. Needs HDAB_AUTHORITY or EDC_ADMIN.
+      responses:
+        "200":
+          description: The policy and the counts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [policy, events, transfers]
+                properties:
+                  policy:
+                    type: object
+                    properties:
+                      months: { type: integer }
+                      article: { type: string }
+                      rule: { type: string }
+                  events:
+                    type: object
+                    description: Access events (TransferEvent)
+                    properties:
+                      total: { type: integer }
+                      withRetention: { type: integer }
+                      expired: { type: integer }
+                      protectedCount: { type: integer }
+                      oldest: { type: [string, "null"] }
+                      newest: { type: [string, "null"] }
+                  transfers:
+                    type: object
+                    description: Recorded transfers (DataTransfer)
+                    properties:
+                      total: { type: integer }
+                      withRetention: { type: integer }
+                      expired: { type: integer }
+                      protectedCount: { type: integer }
+                      oldest: { type: [string, "null"] }
+                      newest: { type: [string, "null"] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY or EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    post:
+      tags: [Admin]
+      summary: Delete the log records past their retention date
+      x-required-roles: [HDAB_AUTHORITY, EDC_ADMIN]
+      description: >-
+        Deletes the access events and recorded transfers whose `retainUntil`
+        has passed, and nothing else: a record without `retainUntil` is never
+        touched, and neither is one younger than a year (Regulation (EU)
+        2025/327, Art. 73(1)(e)). At most 10000 of each per call. Without
+        `confirm: true` nothing is deleted and the answer is a 400 that
+        carries the policy and the counts, as a dry run. Needs HDAB_AUTHORITY
+        or EDC_ADMIN.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirm:
+                  {
+                    type: boolean,
+                    description: "Must be true for anything to be deleted",
+                  }
+      responses:
+        "200":
+          description: What was deleted, and the counts after it
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policy:
+                    type: object
+                    properties:
+                      months: { type: integer }
+                      article: { type: string }
+                      rule: { type: string }
+                  deleted:
+                    type: object
+                    properties:
+                      events: { type: integer }
+                      transfers: { type: integer }
+                  events:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      withRetention: { type: integer }
+                      expired: { type: integer }
+                      protectedCount: { type: integer }
+                      oldest: { type: [string, "null"] }
+                      newest: { type: [string, "null"] }
+                  transfers:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      withRetention: { type: integer }
+                      expired: { type: integer }
+                      protectedCount: { type: integer }
+                      oldest: { type: [string, "null"] }
+                      newest: { type: [string, "null"] }
+                  article: { type: string }
+        "400":
+          description: "`confirm: true` was not sent; nothing is deleted, and `policy`, `events` and `transfers` say what a run would find"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs HDAB_AUTHORITY or EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/admin/components/{name}/diagnosis:
+    get:
+      tags: [Admin]
+      summary: Known boot issue of a system component
+      x-required-roles: [EDC_ADMIN]
+      description: >-
+        What is known about why a component does not start, from a static
+        catalogue of config-driven boot errors (ADR-018): severity, cause,
+        the boot error and what would fix it. A component that is not in the
+        catalogue is answered as healthy. Needs EDC_ADMIN.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema: { type: string }
+          description: "Container app name, for example mvhd-controlplane"
+      responses:
+        "200":
+          description: The diagnosis
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [name, severity, summary, cause]
+                properties:
+                  name: { type: string }
+                  severity:
+                    {
+                      type: string,
+                      enum: [critical, warning, healthy, unknown],
+                    }
+                  summary: { type: string }
+                  cause: { type: string }
+                  bootError: { type: string }
+                  remediation: { type: string }
+                  trackingIssue: { type: string, format: uri }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/admin/components/{name}/restart:
+    post:
+      tags: [Admin]
+      summary: Restart a system component on Azure
+      x-required-roles: [EDC_ADMIN]
+      description: >-
+        Restarts one container app of the Azure deployment. An app scaled to
+        zero gets a minimum of one replica first, so the restart has something
+        to start. Only on the Azure deployment and only for the hub's own
+        apps. Needs EDC_ADMIN. The request has no body.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - mvhd-controlplane
+              - mvhd-siglet
+              - mvhd-identityhub
+              - mvhd-issuerservice
+              - mvhd-keycloak
+              - mvhd-vault
+              - mvhd-nats
+              - mvhd-neo4j
+              - mvhd-neo4j-proxy
+              - mvhd-ui
+          description: Container app name
+      responses:
+        "200":
+          description: The restart was triggered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  name: { type: string }
+                  scaledUp:
+                    {
+                      type: boolean,
+                      description: "True when the minimum replicas went from 0 to 1 first",
+                    }
+                  message: { type: string }
+        "400":
+          description: "The component is not one that may be restarted, or this is not the Azure deployment"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500":
+          description: The Azure subscription or resource group is not configured
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: "Azure refused the restart; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/admin/participants:
+    get:
+      tags: [Admin]
+      summary: List the participant directory
+      x-required-roles: [EDC_ADMIN]
+      description: >-
+        Every participant in the graph with the fields the catalog crawler
+        reads (source, wallet type, country, DSP catalog URL, whether it is
+        crawled) and the number of datasets it publishes (#8). Needs
+        EDC_ADMIN.
+      responses:
+        "200":
+          description: The directory and a summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [participants, summary]
+                properties:
+                  participants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        participantId:
+                          { type: string, description: "The participant's DID" }
+                        name: { type: [string, "null"] }
+                        participantType: { type: [string, "null"] }
+                        source: { type: [string, "null"] }
+                        walletType: { type: [string, "null"] }
+                        country: { type: [string, "null"] }
+                        dspCatalogUrl: { type: [string, "null"] }
+                        crawlerEnabled: { type: [boolean, "null"] }
+                        onboardedAt: { type: [string, "null"] }
+                        datasetCount: { type: integer }
+                  summary:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      crawlable:
+                        {
+                          type: integer,
+                          description: "Crawler enabled and a DSP catalog URL set",
+                        }
+                      bySource:
+                        type: object
+                        description: Count per source; a participant without one counts as unknown
+                        additionalProperties: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: The graph did not answer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    post:
+      tags: [Admin]
+      summary: Add or update a participant in the directory
+      x-required-roles: [EDC_ADMIN]
+      description: >-
+        Creates the participant, or updates the one with this DID. The next
+        crawler tick picks the change up; nothing is restarted. An empty
+        country or participant type leaves the stored value, an empty DSP
+        catalog URL clears it. Needs EDC_ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [participantId, name]
+              properties:
+                participantId:
+                  {
+                    type: string,
+                    description: "Must start with did:",
+                    example: "did:web:lmc.nl:clinic",
+                  }
+                name: { type: string, example: Limburg Medical Centre }
+                walletType:
+                  { type: string, enum: [business, private], default: business }
+                source:
+                  type: string
+                  enum: [seed, dcp, business-wallet, private-wallet]
+                  default: business-wallet
+                country:
+                  {
+                    type: string,
+                    description: "Stored in upper case",
+                    example: NL,
+                  }
+                dspCatalogUrl:
+                  { type: string, format: uri, description: "http or https" }
+                participantType: { type: string }
+                crawlerEnabled:
+                  {
+                    type: boolean,
+                    description: "Default true for a new participant",
+                  }
+      responses:
+        "201":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  participantId: { type: string }
+        "400":
+          description: "The body is not JSON, the id is not a DID, the name is missing, or wallet type, source or catalog URL is not valid"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: The graph did not save the participant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      tags: [Admin]
+      summary: Remove a participant from the directory
+      x-required-roles: [EDC_ADMIN]
+      description: >-
+        Deletes the participant node and its relationships, seeded
+        participants included. A seeded participant returns with the next
+        deploy, because the seed scripts create it again; the answer says so.
+        Needs EDC_ADMIN.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: string }
+          description: "The participant's DID"
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  seeded: { type: boolean }
+                  returnsOnDeploy: { type: boolean }
+        "400":
+          description: The query parameter id is missing
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: No participant with this DID
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: The graph did not delete the participant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/debug/phase26:
+    get:
+      tags: [Admin]
+      summary: Federated discovery diagnostics
+      x-required-roles: [EDC_ADMIN]
+      description: >-
+        An operator's read-only summary of whether the federated discovery
+        plumbing is in place: crawler targets, federated datasets and NLQ
+        glossary rows, as the neo4j-proxy counts them. Counts only, no
+        per-dataset payload. Needs EDC_ADMIN (#377).
+      responses:
+        "200":
+          description: The counts
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    crawlerTargetCount,
+                    participants,
+                    healthDatasets,
+                    nlqGlossary,
+                  ]
+                properties:
+                  crawlerTargetCount: { type: integer }
+                  participants:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      withSource: { type: integer }
+                      withDspCatalogUrl: { type: integer }
+                  healthDatasets:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      federated: { type: integer }
+                  nlqGlossary:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      kinds: { type: array, items: { type: string } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs EDC_ADMIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500":
+          description: "The neo4j-proxy could not run the counts; its status and body are passed through"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: The neo4j-proxy did not answer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/mock-dsp/{participant}/catalog/request:
+    get:
+      tags: [Catalog]
+      summary: Mock DSP catalog of one participant, for inspection
+      description: >-
+        The same catalog the POST answers, as a GET for a browser or curl; DSP
+        2025-1 itself uses POST. A session or the crawler's bearer token
+        admits; a wrong token is a 401 and never falls back to the session
+        (ADR-044, ADR-020). The session does not narrow the answer.
+      security:
+        - nextAuthSession: []
+        - dspCatalogToken: []
+      parameters:
+        - name: participant
+          in: path
+          required: true
+          schema: { type: string }
+          description: "One of alpha-klinik, limburg-medical, pharmaco-research, institut-recherche-sante, alphakasse"
+      responses:
+        "200":
+          description: >-
+            A dcat:Catalog in JSON-LD. The four health participants list
+            `dcat:dataset`; alphakasse answers a DCAT-AP 3.0.1 catalogue with
+            `dcat:service` and language-tagged titles.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["@context", "@type", "dct:title", "dct:publisher"]
+                properties:
+                  "@context": { type: object }
+                  "@id": { type: string }
+                  "@type": { type: string, example: "dcat:Catalog" }
+                  "dct:title":
+                    description: A string, or a list of language-tagged values
+                    oneOf:
+                      - type: string
+                      - type: array
+                        items: { type: object }
+                  "dct:description": { type: array, items: { type: object } }
+                  "dct:publisher":
+                    type: object
+                    description: "The publisher: @id (its DID), foaf:name, and dct:spatial or @type"
+                  "dct:modified": { type: object }
+                  "dcat:dataset":
+                    type: array
+                    items:
+                      type: object
+                      description: "A dcat:Dataset: @id, @type, dct:title, dct:description, dct:license, dct:spatial, dcat:theme, odrl:hasPolicy"
+                  "dcat:service":
+                    type: array
+                    items:
+                      type: object
+                      description: "A dcat:DataService: @id, @type, dct:title, dct:description, dct:publisher, dcat:endpointURL and more"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "No mock catalog for this participant; `available` lists the ones there are"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+                  available: { type: array, items: { type: string } }
+    post:
+      tags: [Catalog]
+      summary: Mock DSP catalog request of one participant
+      description: >-
+        A stand-in for a participant's DSP 2025-1 `/catalog/request`: the
+        catalog crawler POSTs here every five minutes for each participant
+        whose `dspCatalogUrl` points at the hub (ADR-020), and the enricher
+        turns the answer into federated datasets. The body, the crawler's
+        QuerySpec, is ignored. A session or the crawler's bearer token admits;
+        a wrong token is a 401 and never falls back to the session (ADR-044).
+      security:
+        - nextAuthSession: []
+        - dspCatalogToken: []
+      parameters:
+        - name: participant
+          in: path
+          required: true
+          schema: { type: string }
+          description: "One of alpha-klinik, limburg-medical, pharmaco-research, institut-recherche-sante, alphakasse"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: A DSP QuerySpec; not read
+      responses:
+        "200":
+          description: >-
+            A dcat:Catalog in JSON-LD. The four health participants list
+            `dcat:dataset`; alphakasse answers a DCAT-AP 3.0.1 catalogue with
+            `dcat:service` and language-tagged titles.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["@context", "@type", "dct:title", "dct:publisher"]
+                properties:
+                  "@context": { type: object }
+                  "@id": { type: string }
+                  "@type": { type: string, example: "dcat:Catalog" }
+                  "dct:title":
+                    description: A string, or a list of language-tagged values
+                    oneOf:
+                      - type: string
+                      - type: array
+                        items: { type: object }
+                  "dct:description": { type: array, items: { type: object } }
+                  "dct:publisher":
+                    type: object
+                    description: "The publisher: @id (its DID), foaf:name, and dct:spatial or @type"
+                  "dct:modified": { type: object }
+                  "dcat:dataset":
+                    type: array
+                    items:
+                      type: object
+                      description: "A dcat:Dataset: @id, @type, dct:title, dct:description, dct:license, dct:spatial, dcat:theme, odrl:hasPolicy"
+                  "dcat:service":
+                    type: array
+                    items:
+                      type: object
+                      description: "A dcat:DataService: @id, @type, dct:title, dct:description, dct:publisher, dcat:endpointURL and more"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: No mock catalog for this participant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/nlq/backend:
+    get:
+      tags: [NLQ]
+      summary: Which NLP backend the query engine found
+      description: >-
+        The backend detection of the neo4j-proxy: which chat and embeddings
+        providers are configured, which vector indexes are online and whether
+        GraphRAG is ready, so the query page can show a status badge. Any
+        signed-in participant may read it (ADR-044); the session does not
+        narrow the answer.
+      responses:
+        "200":
+          description: The detected backends
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [chat, embeddings, vectorIndexes, graphragReady, cascade]
+                properties:
+                  chat:
+                    {
+                      type: string,
+                      enum: [azure-openai, openai, ollama, anthropic, none],
+                    }
+                  embeddings:
+                    { type: string, enum: [azure-openai, ollama, openai, none] }
+                  vectorIndexes: { type: array, items: { type: string } }
+                  graphragReady: { type: boolean }
+                  cascade:
+                    type: array
+                    description: The order in which the engine tries to answer
+                    items: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: The neo4j-proxy did not answer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/patient/ehr-sync:
+    post:
+      tags: [Patient]
+      summary: Record that my EHR data was just transferred
+      x-required-roles: [PATIENT]
+      description: >-
+        Records that the patient's electronic health record was just
+        transferred into the portal, the "Request EHR data" flow (EHDS
+        Art. 3): stamps the time and the source on the record the login owns
+        and answers the new sync. Needs PATIENT, and only the patient's own
+        record is stamped; the request has no body and names no record.
+      responses:
+        "200":
+          description: The sync as recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId: { type: string }
+                  lastEhrSync:
+                    type: object
+                    properties:
+                      at: { type: string, format: date-time }
+                      source: { type: [string, "null"] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Needs PATIENT
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: "No record is assigned to this login, or the record is not in the graph"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: The graph did not answer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/overview:
+    get:
+      tags: [Graph]
+      summary: State-first overview for one persona
+      description: >-
+        One view per persona (#271): layers, nodes with status and series,
+        links, and the signals sorted worst first. Trends, chains of trust and
+        clocks are computed from the graph on each call. Any signed-in
+        participant may call it, and the session decides which view opens:
+        PATIENT the patient view, DATA_USER the researcher view,
+        HDAB_AUTHORITY and TRUST_CENTER_OPERATOR the hdab view, DATA_HOLDER
+        the hospital view; EDC_ADMIN may open any. Asking for another role's
+        persona is a 403. Without `persona` the view of the session's role
+        opens. In the patient view a PATIENT always gets their own record,
+        whatever `patientId` says; other callers name one, P1 by default.
+      parameters:
+        - name: persona
+          in: query
+          required: false
+          schema: { type: string, enum: [patient, researcher, hdab, hospital] }
+          description: "The view to open; default is the one of the session's role"
+        - name: patientId
+          in: query
+          required: false
+          schema: { type: string, default: P1 }
+          description: "Patient view only: the record to show, ignored for a PATIENT session"
+        - name: asOf
+          in: query
+          required: false
+          schema: { type: string, format: date }
+          description: "The day the view is computed for; default is today"
+        - name: me
+          in: query
+          required: false
+          schema: { type: string }
+          description: "Researcher, hdab and hospital views: DID of the participant whose view to compute; default is the session's organisation"
+      responses:
+        "200":
+          description: The view
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    persona,
+                    asOf,
+                    me,
+                    title,
+                    question,
+                    article,
+                    layers,
+                    nodes,
+                    links,
+                    signals,
+                    legend,
+                  ]
+                properties:
+                  persona:
+                    {
+                      type: string,
+                      enum: [patient, researcher, hdab, hospital],
+                    }
+                  asOf: { type: string, format: date }
+                  me:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      name: { type: string }
+                  title: { type: string }
+                  question: { type: string }
+                  article: { type: string }
+                  layers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        name: { type: string }
+                        z: { type: integer, description: "Stacking order" }
+                        color: { type: string }
+                  nodes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        label: { type: string }
+                        layer: { type: string }
+                        kind:
+                          {
+                            type: string,
+                            description: "The record type in plain words",
+                          }
+                        status: { type: string }
+                        pulse: { type: boolean }
+                        size: { type: number }
+                        color: { type: string }
+                        pin:
+                          {
+                            type: array,
+                            items: { type: number },
+                            description: "Fixed x and y on its layer",
+                          }
+                        title: { type: string }
+                        sub: { type: string }
+                        description: { type: [string, "null"] }
+                        facts:
+                          {
+                            type: array,
+                            items: { type: array, items: { type: string } },
+                          }
+                        article: { type: string }
+                        links: { type: array, items: { type: object } }
+                        series: { type: array, items: { type: object } }
+                        unit: { type: string }
+                        measure: { type: string }
+                        range: { type: [object, "null"] }
+                        higherIsWorse: { type: boolean }
+                        expand:
+                          {
+                            type: object,
+                            description: "Nodes and links a click unfolds from this node",
+                          }
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        source: { type: string }
+                        target: { type: string }
+                        kind: { type: string }
+                        status: { type: string }
+                        color: { type: string }
+                        width: { type: number }
+                        distance: { type: number }
+                        particles: { type: integer }
+                        arrow: { type: boolean }
+                  signals:
+                    type: array
+                    description: Sorted worst first
+                    items:
+                      type: object
+                      properties:
+                        severity: { type: string }
+                        nodeId: { type: string }
+                        code:
+                          { type: string, description: "Stable machine code" }
+                        text: { type: string }
+                        article: { type: string }
+                  legend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        color: { type: string }
+                        text: { type: string }
+                  dataNote: { type: string }
+        "400":
+          description: "Unknown persona; `personas` lists the four"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "The session's role does not open this persona (`reason` says which it opens), or a route the view reads refused the record"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: A route the view reads did not find the record; its status and body are passed through
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: "The graph did not answer; `detail` says why"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }

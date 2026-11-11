@@ -29,6 +29,7 @@ the work is tracked in [#349](https://github.com/ma3u/MinimumViableHealthDataspa
 | `10 Connecting partner`     | your own EDC connector        | DSP 2025-1 and DCP v1.0 against the Management API, IdentityHub and IssuerService                                                                                         |
 | `11 Platform`               | the platform team             | the Neo4j proxy on port 9090                                                                                                                                              |
 | `12 EUDI wallet`            | optional                      | wallet sign-in, needs `docker-compose.eudi.yml`                                                                                                                           |
+| `13 Static export`          | the GitHub Pages site         | the fixtures under `/mock/` that stand in for the API there, GET only                                                                                                     |
 
 Two folders hold procedures rather than personas. A data permit is a two-sided
 procedure: the data user applies, the access body decides, the data user reports,
@@ -42,7 +43,7 @@ request names the persona sending it.
 # the compose stack on localhost:3003
 ./scripts/run-api-tests.sh Local
 
-# the GitHub Pages export: the 36 GET requests that have a fixture, no auth
+# the GitHub Pages export: folder 13, the GET requests that have a fixture, no auth
 ./scripts/run-api-tests.sh Static-mock
 
 # the live demo, needs the deployment's NEXTAUTH_SECRET
@@ -68,13 +69,13 @@ the running UI container; for `Azure-Dev` it comes from the environment, and
 
 ## The environments
 
-|          | `Local`                                                                | `Azure-Dev`                        | `Static-mock`                        |
-| -------- | ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------------ |
-| base     | `http://localhost:3003`                                                | `https://ehds.mabu.red`            | the GitHub Pages export              |
-| cookie   | `next-auth.session-token`                                              | `__Secure-next-auth.session-token` | none needed                          |
-| sessions | forged from the UI container's secret                                  | forged from `NEXTAUTH_SECRET`      | none                                 |
-| folders  | all thirteen                                                           | `00` to `09`                       | the 36 requests in `static-mock.txt` |
-| needs    | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` | nothing local                      | nothing                              |
+|          | `Local`                                                                | `Azure-Dev`                        | `Static-mock`                   |
+| -------- | ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------- |
+| base     | `http://localhost:3003`                                                | `https://ehds.mabu.red`            | the GitHub Pages export         |
+| cookie   | `next-auth.session-token`                                              | `__Secure-next-auth.session-token` | none needed                     |
+| sessions | forged from the UI container's secret                                  | forged from `NEXTAUTH_SECRET`      | none                            |
+| folders  | `00` to `11`, and `12` with `BRUNO_EUDI=1`                             | `00` to `09`                       | folder `13` (`static-mock.txt`) |
+| needs    | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` | nothing local                      | nothing                         |
 
 `Azure-Dev` stops at folder 09 because the control plane, IdentityHub,
 IssuerService and the Neo4j proxy run on `.internal.` addresses in Azure

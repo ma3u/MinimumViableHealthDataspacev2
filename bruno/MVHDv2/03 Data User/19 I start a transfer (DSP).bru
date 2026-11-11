@@ -26,7 +26,11 @@ body:json {
 
 tests {
   const body = res.getBody() || {};
-  bru.setVar("dspTransferId", body["@id"] || "");
+  // Never empty: requests 21 to 25 put it in a path, and "/api/transfers//data"
+  // is redirected to "/api/transfers/data", which asks the connector for a
+  // transfer called "data" (a 502 until 2026-11-11, on every run without
+  // BRUNO_DSP_LIVE=1).
+  bru.setVar("dspTransferId", body["@id"] || "no-transfer-started");
   if (bru.getEnvVar("dspLiveFlow") !== "true") {
     test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
   } else {

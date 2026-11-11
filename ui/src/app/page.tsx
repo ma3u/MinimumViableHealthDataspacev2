@@ -533,10 +533,18 @@ export default function Home() {
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
           <T
             area="home"
-            tags={{ b: <strong className="text-(--text-primary)" /> }}
+            tags={{
+              b: <strong className="text-(--text-primary)" />,
+              a: (
+                <Link
+                  href="/auth/signin?callbackUrl=%2Fdocs%2Fdeveloper%2Freference"
+                  className="text-(--accent) underline"
+                />
+              ),
+            }}
           >
             {
-              "Every endpoint is documented in <b>OpenAPI 3.1</b> and can be exercised from three interactive explorers, a portable Bruno collection, or any HTTP client. Use them to test flows, build integrations, or wire the platform into a downstream system."
+              "Every operation of the hub's API is documented in <b>OpenAPI 3.1</b> and can be tried from two interactive explorers, a Bruno collection, or any HTTP client. The API needs a session: <a>sign in</a> first, as <b>edcadmin</b> to start. Each explorer says which role opens which group of operations."
             }
           </T>
         </p>
@@ -587,7 +595,7 @@ export default function Home() {
             <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
               <T area="home">
                 {
-                  "Classic OpenAPI explorer for testing endpoints against the live instance with OIDC auth."
+                  "Classic OpenAPI explorer: try each operation against the hub you are signed in to, with your session."
                 }
               </T>
             </p>
@@ -646,7 +654,7 @@ export default function Home() {
             <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
               <T area="home">
                 {
-                  "Git-friendly, offline-capable API client. Clone the repo and run every DSP, FHIR, and OMOP journey locally."
+                  "Requests in git, one folder per EHDS role, with a session per demo user. Clone the repo and run each role's journey against a local stack."
                 }
               </T>
             </p>

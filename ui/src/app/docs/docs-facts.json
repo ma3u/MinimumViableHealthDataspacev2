@@ -1407,8 +1407,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 68,
-    "operations": 88
+    "paths": 96,
+    "operations": 125
   },
   "workflowJobs": {
     "test.yml": [

@@ -55,4 +55,30 @@ describe("the API reference's Scalar configuration", () => {
     expect(scalar.configuration?.baseServerURL).toBe(window.location.origin);
     expect(scalar.configuration?.url).toBe("/openapi.yaml");
   });
+
+  // baseServerURL alone left the spec's first server, the Azure demo, in every
+  // sample and request (2026-11-11): the server list has to be replaced.
+  it("offers the hub the page is served from as the only server", () => {
+    render(<ApiReferencePage />);
+    expect(scalar.configuration?.servers).toEqual([
+      {
+        url: window.location.origin,
+        description: "This hub, where you are signed in",
+      },
+    ]);
+  });
+
+  it("switches off Ask AI and shows each operation's roles", () => {
+    render(<ApiReferencePage />);
+    expect(scalar.configuration?.agent).toEqual({ disabled: true });
+    expect(scalar.configuration?.showExtensions).toEqual(["x-required-roles"]);
+  });
+
+  it("says who to sign in as, above the reference", () => {
+    const { getByTestId } = render(<ApiReferencePage />);
+    expect(getByTestId("api-sign-in-guide")).toHaveTextContent("edcadmin");
+    expect(getByTestId("api-sign-in-row-HDAB_AUTHORITY")).toHaveTextContent(
+      "regulator",
+    );
+  });
 });
