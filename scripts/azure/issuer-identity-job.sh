@@ -4,7 +4,7 @@
 # creates. Gives the IssuerService its identity (ADR-055, #503, #881).
 # =============================================================================
 # The Azure port of what compose and CI do in jad/bootstrap-vault.sh,
-# jad/seed-jad.sh steps 2 to 4 and scripts/seed-issuer-identity.sh, with the
+# scripts/seed-issuer-identity.sh and jad/seed-issuer-defs.sh, with the
 # DID and endpoints on mvhd-issuerservice and a key generated here rather than
 # the compose key, which is in the repository.
 #
@@ -14,7 +14,7 @@
 #   3. 0.18 only: the activation records (keypair, DID document, state 300),
 #      the SQL of jad/seed-issuer-identity.sql with the key's x substituted.
 #      For 1.0 the wrapper sends no SQL: the identity API activates;
-#   4. the attestation and credential definitions of jad/seed-jad.sh;
+#   4. the attestation and credential definitions (jad/seed-issuer-defs.sh);
 #   5. MODE=verify only: the DID document must resolve with a key. It does so
 #      only after the IssuerService restarted and loaded steps 2 and 3, which
 #      the wrapper does between the two runs.

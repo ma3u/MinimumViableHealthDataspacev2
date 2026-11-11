@@ -10,8 +10,8 @@ set -euo pipefail
 # reach Keycloak's token endpoint could get a token for the EDC management
 # API with it.
 #
-# Keycloak stays the source of truth: 05-cfm-agents.sh and the identity
-# reseed (edc-reseed-identity-layer.yml) read the secret from Keycloak at
+# Keycloak stays the source of truth: the identity reseed
+# (edc-reseed-identity-layer.yml) reads the secret from Keycloak at
 # run time. The apps cannot, so they get it the ADR-036 way, as in
 # wire-dsp-catalog-token.sh: one copy in Key Vault, referenced through the
 # managed identity, never printed.
@@ -20,7 +20,6 @@ set -euo pipefail
 #   Key Vault       edc-admin-client-secret
 #   mvhd-ui         EDC_SERVICE_CLIENT_SECRET=secretref:edc-admin-client-secret
 #   mvhd-neo4j-proxy TCK_CLIENT_SECRET=secretref:edc-admin-client-secret
-#   CFM agents      05-cfm-agents.sh (reads Keycloak, restarts on change)
 #
 # Usage:
 #   rotate-edc-admin-client-secret.sh --rotate   # new secret in Keycloak, then wire
@@ -88,12 +87,7 @@ wire() {
 wire "$UI_APP" EDC_SERVICE_CLIENT_SECRET
 wire "$NEO4J_PROXY_APP" TCK_CLIENT_SECRET
 
-# ── 4. CFM agents ───────────────────────────────────────────────────────────
-log "05-cfm-agents.sh: the agents read the secret from Keycloak and restart on change"
-"$SCRIPT_DIR/05-cfm-agents.sh" >/dev/null
-ok "CFM agents rewired"
-
-# ── 5. Check ────────────────────────────────────────────────────────────────
+# ── 4. Check ────────────────────────────────────────────────────────────────
 token_status() {
   curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X POST \
     "${KC}/realms/edcv/protocol/openid-connect/token" \

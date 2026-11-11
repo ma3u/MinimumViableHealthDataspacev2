@@ -8,7 +8,7 @@
 # Execution order:
 #   1. ../scripts/seed-identity-layer.sh: the five participants on EDC 1.0
 #      (control plane contexts, IdentityHub, the issuer's identity, holders, a
-#      MembershipCredential each; ADR-078). CFM's seed-health-tenants.sh is 0.18.
+#      MembershipCredential each; ADR-078).
 #   2. seed-ehds-credentials.sh — Register EHDS credential types on IssuerService
 #   3. seed-ehds-policies.sh    — Create ODRL policies for all participants
 #   4. seed-data-assets.sh      — Register data assets + contracts on EDC-V

@@ -3,10 +3,9 @@
 # Seed participant contexts directly into IdentityHub. #345
 # ---------------------------------------------------------------------------
 # The CI ephemeral stack's IdentityHub holds zero participants, so every DCP
-# check that needs a DID, a key pair or a credential fails. Locally these are
-# created by jad/seed-health-tenants.sh, which drives the CFM TenantManager;
-# CFM wants 8 GB of Docker and does not fit a standard runner, so CI has never
-# had them.
+# check that needs a DID, a key pair or a credential fails. The 2026-03 CFM
+# created them locally and did not fit a standard runner, so CI never had them;
+# on EDC 1.0 this script creates them everywhere (scripts/seed-identity-layer.sh).
 #
 # This talks to the IdentityHub Identity API instead, which needs no CFM.
 # Note that POST /v1/participants is NOT in jad/openapi/identity-api.yaml

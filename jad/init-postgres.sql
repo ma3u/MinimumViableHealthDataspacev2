@@ -1,36 +1,18 @@
 -- =============================================================================
 -- JAD PostgreSQL Initialization Script
 -- =============================================================================
--- Creates all databases and users required by the EDC-V / CFM services.
--- Local only (Compose). On Azure the databases live on Flexible Server and are
--- created by scripts/azure/13-postgres-flexible-server.sh (ADR-041).
+-- Creates the users of the EDC 1.0 and CFM services, and the databases that
+-- are not EDC's (keycloak, taskdb). The EDC 1.0 databases and CFM 0.0.7's
+-- follow in jad/init-postgres-edc1.sql, owned by the users made here.
+-- Local only (Compose). On Azure the databases live on Flexible Server (ADR-041).
 -- Default database (controlplane/cp/cp) is created by POSTGRES_DB/USER/PASSWORD env vars.
+-- EDC 0.18's identityhub, issuerservice, dataplane and dataplane_omop and the
+-- 2026-03 CFM's cfm were removed with #927; an older volume still has them.
 -- =============================================================================
 
-CREATE DATABASE identityhub;
+-- The owners of identityhub_v1 and issuerservice_v1 (init-postgres-edc1.sql).
 CREATE USER ih WITH PASSWORD 'ih';
-GRANT ALL PRIVILEGES ON DATABASE identityhub TO ih;
-\c identityhub
-GRANT ALL ON SCHEMA public TO ih;
-
-CREATE DATABASE issuerservice;
 CREATE USER issuer WITH PASSWORD 'issuer';
-GRANT ALL PRIVILEGES ON DATABASE issuerservice TO issuer;
-\c issuerservice
-GRANT ALL ON SCHEMA public TO issuer;
-
-CREATE DATABASE dataplane;
-CREATE USER dp WITH PASSWORD 'dp';
-GRANT ALL PRIVILEGES ON DATABASE dataplane TO dp;
-\c dataplane
-GRANT ALL ON SCHEMA public TO dp;
-
--- ADR-2: Separate database for the OMOP DCore data plane instance
-CREATE DATABASE dataplane_omop;
-CREATE USER dp_omop WITH PASSWORD 'dp_omop';
-GRANT ALL PRIVILEGES ON DATABASE dataplane_omop TO dp_omop;
-\c dataplane_omop
-GRANT ALL ON SCHEMA public TO dp_omop;
 
 CREATE DATABASE keycloak;
 CREATE USER kc WITH PASSWORD 'kc';
@@ -38,11 +20,8 @@ GRANT ALL PRIVILEGES ON DATABASE keycloak TO kc;
 \c keycloak
 GRANT ALL ON SCHEMA public TO kc;
 
-CREATE DATABASE cfm;
+-- The owner of cfm_v007, CFM 0.0.7's database (ADR-085, init-postgres-edc1.sql).
 CREATE USER cfm WITH PASSWORD 'cfm';
-GRANT ALL PRIVILEGES ON DATABASE cfm TO cfm;
-\c cfm
-GRANT ALL ON SCHEMA public TO cfm;
 
 CREATE DATABASE redlinedb;
 CREATE USER redline WITH PASSWORD 'redline';

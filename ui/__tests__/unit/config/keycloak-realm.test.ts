@@ -95,8 +95,9 @@ describe("keycloak-realm.json — health-dataspace-ui client", () => {
 
 /**
  * Recurrence (2026-09-26, #345): the `issuer` client existed on every
- * bootstrapped local stack and on no CI stack, because jad/seed-jad.sh created
- * it at runtime through the admin API and CI never runs that container. Every
+ * bootstrapped local stack and on no CI stack, because the 2026-03 seed
+ * container (jad/seed-jad.sh, removed with #927) created it at runtime through
+ * the admin API and CI never ran that container. Every
  * seed that authenticates as `issuer` failed in CI, and the three DCP checks
  * that depend on them (ISS-4.3, VC-3.2, VC-3.3) had no reachable failure until
  * #341, so nobody saw it. The realm file is the source of truth; this pins the
@@ -112,7 +113,7 @@ describe("keycloak-realm.json — issuer client (#345)", () => {
     expect(issuer).toBeDefined();
   });
 
-  it("is a confidential service account, as seed-jad.sh creates it", () => {
+  it("is a confidential service account", () => {
     expect(issuer?.publicClient).toBe(false);
     expect(issuer?.serviceAccountsEnabled).toBe(true);
     expect(issuer?.standardFlowEnabled).toBe(false);

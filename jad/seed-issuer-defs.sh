@@ -3,8 +3,8 @@
 # Seed IssuerService Attestation + Credential Definitions (Host-Side)
 # =============================================================================
 # Creates ALL attestation and credential definitions required for the Health
-# Dataspace on the IssuerService admin API. Includes base definitions (from
-# jad-seed Steps 3-4) and EHDS credential types.
+# Dataspace on the IssuerService admin API: the base definitions (once also
+# in jad/seed-jad.sh, removed with #927) and the EHDS credential types.
 #
 # This script is idempotent — HTTP 409 (Conflict) is treated as success.
 #

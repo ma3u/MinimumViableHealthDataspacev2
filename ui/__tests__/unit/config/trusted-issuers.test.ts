@@ -39,10 +39,11 @@ const onCompose = trusted.issuers.filter((i) =>
 
 /**
  * The same keys on Azure: -D lines of the controlplane block in
- * scripts/azure/migrate-edc-to-v018.sh, which go into JAVA_TOOL_OPTIONS.
+ * scripts/azure/migrate-edc-to-v1.sh, which go into JAVA_TOOL_OPTIONS (until
+ * #927 they were in migrate-edc-to-v018.sh, and 1.0 inherited them).
  */
 const migrate = readFileSync(
-  join(ROOT, "scripts/azure/migrate-edc-to-v018.sh"),
+  join(ROOT, "scripts/azure/migrate-edc-to-v1.sh"),
   "utf-8",
 );
 const envSh = readFileSync(join(ROOT, "scripts/azure/env.sh"), "utf-8");

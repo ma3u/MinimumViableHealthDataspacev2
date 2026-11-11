@@ -18,8 +18,7 @@
 #   - At least 8 GB RAM allocated to Docker
 #   - The host ports of the default stack available: 80, 3000, 3003, 4222,
 #     5432, 7474, 7687, 8080, 8090, 8200, 8222, 9000, 9090, 10013, 10023,
-#     11003, 11005 (the 0.18 ports 11002, 11006, 11007, 11012 belong to the
-#     edc018 profile, which this script does not start)
+#     11003, 11005
 # =============================================================================
 set -euo pipefail
 
@@ -525,7 +524,7 @@ start_stack() {
   log "=== Phase 4: Starting the EDC 1.0 services and siglet ==="
   # EDC 1.0 (#881, ADR-078): the launchers from runtimes/edc, which compose
   # builds on the first run (a few minutes of Gradle); siglet is the data
-  # plane. JAD's data planes and CFM are 0.18 only (profile edc018).
+  # plane. CFM 0.0.7 runs only under the cfm profile (ADR-085).
   docker compose $COMPOSE_FILES up -d controlplane identityhub issuerservice simpl-ga-issuer siglet
 
   wait_for_api "Control Plane" "http://localhost:11003/api/mgmt/v5/participants" 60 5 || exit 1

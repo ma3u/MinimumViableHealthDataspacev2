@@ -23,9 +23,8 @@
 #   - seed-ehds-credentials.sh has been run (credential definitions exist)
 #   - IssuerService running
 #
-# Run:
-#   docker compose -f docker-compose.yml -f docker-compose.jad.yml \
-#     exec jad-seed sh /workspace/jad/issue-ehds-credentials.sh
+# Run from the Docker host:
+#   ./jad/issue-ehds-credentials.sh
 # =============================================================================
 
 set -e

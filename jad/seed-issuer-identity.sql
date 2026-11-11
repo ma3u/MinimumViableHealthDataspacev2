@@ -7,7 +7,8 @@
 -- the IssuerService's issuer participant is fully configured for DCP credential
 -- issuance.
 --
--- Run after seed-jad.sh:
+-- EDC 0.18 only (1.0's identity API activates by itself, see
+-- scripts/seed-issuer-identity.sh). Was run after the participant create:
 --   docker exec health-dataspace-postgres psql -U issuer -d issuerservice \
 --     -f /docker-entrypoint-initdb.d/seed-issuer-identity.sql
 --

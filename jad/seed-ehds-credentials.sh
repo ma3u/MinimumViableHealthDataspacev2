@@ -7,15 +7,12 @@
 #   2. DataProcessingPurposeCredential — EHDS Art 53 permitted purpose
 #   3. DataQualityLabelCredential    — data quality metrics attestation
 #
-# Run from jad-seed container or Docker host:
-#   docker compose -f docker-compose.yml -f docker-compose.jad.yml \
-#     exec jad-seed sh /workspace/jad/seed-ehds-credentials.sh
-#
-# Or via docker exec:
-#   docker exec -i health-dataspace-jad-seed sh < jad/seed-ehds-credentials.sh
+# Run from the Docker host (jad/seed-all.sh does, as step 2):
+#   ./jad/seed-ehds-credentials.sh
 #
 # Prerequisites:
-#   - IssuerService running with issuer tenant created (seed-jad.sh Step 1-2)
+#   - IssuerService running with its identity (scripts/seed-issuer-identity.sh,
+#     step 3 of scripts/seed-identity-layer.sh)
 #   - Keycloak edcv realm with issuer client
 # =============================================================================
 
@@ -25,7 +22,7 @@ set -e
 # as step 2, and every other step defaults to localhost; this one defaulted to
 # the container names keycloak/issuerservice, which the host does not resolve,
 # so step 2 failed with "Failed to get issuer token" on every host-side run
-# (#345). Inside the jad-seed container, pass KC_HOST/ISSUER_HOST explicitly.
+# (#345). From inside the Docker network, pass KC_HOST/ISSUER_HOST explicitly.
 KC_HOST="${KC_HOST:-http://localhost:8080}"
 ISSUER_HOST="${ISSUER_HOST:-http://localhost}"
 
@@ -64,7 +61,7 @@ ok "Got IssuerService admin token"
 echo ""
 echo "── Step 2: Verify existing AttestationDefinitions ──"
 
-# Verify membership attestation exists (created by seed-jad.sh)
+# Verify membership attestation exists (seed-issuer-defs.sh creates it)
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
   "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/attestations" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \

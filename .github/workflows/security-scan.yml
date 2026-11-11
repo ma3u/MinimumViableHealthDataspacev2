@@ -108,14 +108,10 @@ jobs:
           - nats:2.15.2-alpine
           - natsio/nats-box:0.20.2
           - traefik:v3.7
-          - nginx:1.31-alpine
           - hashicorp/vault:2.2
-          - curlimages/curl:8.23.0
-          # JAD's 0.18 data plane, still in docker-compose.jad.yml behind the
-          # edc018 profile until #927; tagged by upstream git SHA, not
-          # digest-pinned, so the tag can move. The EDC 1.0 launchers are built
-          # here (mvhd/*, runtimes/edc) and covered by the source scan.
-          - ghcr.io/metaform/jad/dataplane:4a7e5bd096c58814748e956cc9329586ad309698
+          # nginx (the CFM shim), curl (jad-seed) and JAD's 0.18 data plane
+          # left compose with #927. The EDC 1.0 launchers are built here
+          # (mvhd/*, runtimes/edc) and covered by the source scan.
     steps:
       # Two runs on purpose, because the Security tab and a human reviewer want
       # different things from the same scan.

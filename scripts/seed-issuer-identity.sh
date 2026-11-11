@@ -13,18 +13,15 @@
 #
 #   1. the signing key      jad/bootstrap-vault.sh, via the vault-bootstrap
 #                           sidecar, at participants/issuer/<url-encoded alias>
-#   2. the participant      jad/seed-jad.sh Step 2, POST to the issuer's own
-#      context              identity API on 10015 from inside the network
+#   2. the participant      this script, POST to the issuer's own identity API
+#      context              on 10015 from inside the network
 #   3. activation           on 0.18, jad/seed-issuer-identity.sql, then a restart,
 #                           because the API create "does not always complete the
 #                           full activation lifecycle" (the SQL's own words); on
 #                           1.0 the API create is enough (see step 3 below)
 #
-# jad-seed cannot simply run here: it is `set -e` and waits for the CFM
-# TenantManager and ProvisionManager, which a standard runner does not have.
-# So this reproduces Step 2 and Phase 8. The manifest below is a copy of the
-# one in jad/seed-jad.sh; keep the two in sync, the way 05-cp-participants.sh
-# and edc-seed-cp-participants.yml do.
+# This began as a copy of Step 2 and Phase 8 of jad/seed-jad.sh, which needed
+# the 2026-03 CFM and went with #927; the manifest below is now the only one.
 #
 # Read-back (ADR-031): the issuer's DID document must resolve from inside the
 # network with a verification method. Token acceptance is checked by the step
@@ -89,7 +86,7 @@ TOKEN=$(curl -sS --max-time 20 -X POST "${KEYCLOAK_URL}/realms/${REALM}/protocol
   2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true)
 [ -n "$TOKEN" ] || die "no provisioner token from ${KEYCLOAK_URL}/realms/${REALM}"
 
-# Copy of jad/seed-jad.sh Step 2. The public key x matches the private JWK
+# The participant manifest. The public key x matches the private JWK
 # bootstrap-vault.sh stores under the same alias.
 MANIFEST=$(cat <<JSON
 {

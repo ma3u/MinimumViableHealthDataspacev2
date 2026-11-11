@@ -15,11 +15,11 @@
 #
 #   ./scripts/azure/repair-live-stack.sh check  # read-only, safe any time
 #   ./scripts/azure/repair-live-stack.sh 1      # WITHDRAWN, refuses and explains
-#   ./scripts/azure/repair-live-stack.sh 2      # recreate the 6 other databases
+#   ./scripts/azure/repair-live-stack.sh 2      # recreate the EDC 1.0 databases
 #   ./scripts/azure/repair-live-stack.sh 3      # restart Keycloak (Liquibase)
 #   ./scripts/azure/repair-live-stack.sh 4      # re-import the edcv realm
 #   ./scripts/azure/repair-live-stack.sh 5      # Vault bootstrap + provisioner role
-#   ./scripts/azure/repair-live-stack.sh 6      # CFM agents to min=1 (#318)
+#   ./scripts/azure/repair-live-stack.sh 6      # retired with the 2026-03 CFM (#927)
 #
 # Run them in order and read the output. Each phase verifies itself and exits
 # non-zero rather than continuing on a bad state.
@@ -37,8 +37,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 source "${SCRIPT_DIR}/env.sh"
 
 KC_PUBLIC_URL="${KEYCLOAK_PUBLIC_URL:-https://auth.ehds.mabu.red}"
-CFM_APPS=(mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent
-          mvhd-cfm-regagent mvhd-cfm-obagent)
 
 say()  { echo "[$(date -u +%H:%M:%S)] $*"; }
 die()  { echo "FAIL: $*" >&2; exit 1; }
@@ -90,18 +88,6 @@ for c in t['containers']:
   az containerapp revision list --name "$PG_APP" --resource-group "$RG" \
     --query "[].{rev:name,health:properties.healthState,state:properties.runningState,traffic:properties.trafficWeight}" \
     -o table || true
-
-  echo ""
-  say "CFM agents"
-  local app
-  for app in "${CFM_APPS[@]}"; do
-    printf "  %-22s min=%s  " "$app" \
-      "$(az containerapp show --name "$app" --resource-group "$RG" \
-           --query 'properties.template.scale.minReplicas' -o tsv 2>/dev/null)"
-    az containerapp revision list --name "$app" --resource-group "$RG" \
-      --query "[?properties.active].{r:properties.replicas,h:properties.healthState,s:properties.runningState}" \
-      -o tsv 2>/dev/null | tr '\t' ' '
-  done
 }
 
 # ── 1: withdrawn (ADR-041) ──────────────────────────────────────────────────
@@ -140,16 +126,18 @@ MSG
   exit 1
 }
 
-# ── 2: the six non-keycloak databases ───────────────────────────────────────
+# ── 2: the EDC 1.0 databases ────────────────────────────────────────────────
+# controlplane_v1, identityhub_v1, issuerservice_v1 and siglet_v1, created as
+# the CI identity: creating a database needs more than the maintainer's role.
+# keycloak and cfm come from 13-postgres-flexible-server.sh 2, vault from
+# 14-vault-on-postgres.sh 1, taskdb from wire-task-store.sh. Until #927 this
+# ran cfm-seed.yml, which recreated the 0.18 databases and seeded the 2026-03
+# CFM.
 phase_2() {
-  say "Phase 2: recreate controlplane, dataplane, dataplane_omop, identityhub,"
-  say "         issuerservice and cfm"
-  # Not 06-post-deploy.sh: its creates go through `az containerapp exec`, which
-  # needs a TTY and dies headless. cfm-seed.yml runs a one-shot ACA job instead,
-  # and also reseeds the cell and dataspace profile that /onboarding reads.
-  gh workflow run cfm-seed.yml -f keep_apps_warm=true
+  say "Phase 2: recreate the EDC 1.0 databases (edc-v1-databases.yml)"
+  gh workflow run edc-v1-databases.yml
   say "started. Watch it with:"
-  say "  gh run watch \$(gh run list --workflow=cfm-seed.yml --limit 1 --json databaseId -q '.[0].databaseId')"
+  say "  gh run watch \$(gh run list --workflow=edc-v1-databases.yml --limit 1 --json databaseId -q '.[0].databaseId')"
 }
 
 # ── 3: Keycloak schema ──────────────────────────────────────────────────────
@@ -238,34 +226,11 @@ phase_5() {
   say "  az containerapp job execution list --name ${VAULT_BOOTSTRAP_JOB} --resource-group ${RG} -o table"
 }
 
-# ── 6: the CFM agents ───────────────────────────────────────────────────────
+# ── 6: retired ──────────────────────────────────────────────────────────────
+# Brought the 2026-03 CFM agents to min=1 (#318). Those apps were deleted on
+# 2026-11-09 (#927); CFM 0.0.7 (ADR-085) gets its own apps and script.
 phase_6() {
-  say "Phase 6: CFM agents to min=1, restart the two that authenticate to Vault"
-  # min=1 is not a preference: the four agents are NATS consumers with no HTTP
-  # ingress, so no request exists that could scale them up from zero, and a
-  # participant onboarded while they are at zero keeps all three activities
-  # pending for ever. That is #318.
-  local app rev
-  for app in "${CFM_APPS[@]}"; do
-    say "  ${app} -> 1/1"
-    az containerapp update --name "$app" --resource-group "$RG" \
-      --min-replicas 1 --max-replicas 1 -o none
-  done
-  for app in mvhd-cfm-kcagent mvhd-cfm-edcvagent; do
-    rev=$(az containerapp show --name "$app" --resource-group "$RG" \
-      --query "properties.latestRevisionName" -o tsv)
-    say "  restarting ${app} (${rev})"
-    az containerapp revision restart --name "$app" --resource-group "$RG" \
-      --revision "$rev" -o none
-  done
-  say "waiting 60s"
-  sleep 60
-  for app in mvhd-cfm-kcagent mvhd-cfm-edcvagent; do
-    echo "--- ${app} ---"
-    az containerapp logs show --name "$app" --resource-group "$RG" --tail 15 2>/dev/null | tail -8
-  done
-  say "An app being Running is not an agent consuming. Onboard a participant and"
-  say "read its three activities before calling #318 done."
+  die "phase 6 is retired (#927): the 2026-03 CFM agents are gone"
 }
 
 case "${1:-}" in

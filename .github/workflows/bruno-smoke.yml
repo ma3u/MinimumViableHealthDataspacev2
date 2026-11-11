@@ -17,7 +17,6 @@ on:
       - "scripts/run-api-tests.sh"
       - "scripts/check-compliance-baseline.py"
       - "scripts/compliance-baseline.json"
-      - "jad/seed-jad.sh"
       - "jad/keycloak-realm.json"
       - ".github/workflows/bruno-smoke.yml"
   pull_request:

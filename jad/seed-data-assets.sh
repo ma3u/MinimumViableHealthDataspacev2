@@ -14,7 +14,7 @@
 #
 # Prerequisites:
 #   - All JAD services running
-#   - seed-jad.sh and seed-health-tenants.sh executed
+#   - scripts/seed-identity-layer.sh executed (participant contexts)
 # =============================================================================
 set -euo pipefail
 

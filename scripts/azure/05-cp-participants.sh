@@ -178,9 +178,7 @@ print(json.dumps({
       log "       $(head -c 300 "$RESP" | tr '\n' ' ')"
       log "       the token's role claim is '${TOKEN_ROLE:-none}'. Creating a"
       log "       participant context needs the 'provisioner' role, not 'admin':"
-      log "       the two Keycloak clients differ only in that claim, and the"
-      log "       CFM edcv-agent, which creates these contexts locally, uses"
-      log "       'provisioner' (jad/edcv-agent-config.yaml). Set"
+      log "       the two Keycloak clients differ only in that claim. Set"
       log "       KC_CLIENT_ID=provisioner."
       FAILED=$((FAILED + 1))
       ;;

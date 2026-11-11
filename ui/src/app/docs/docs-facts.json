@@ -736,16 +736,6 @@
         "ports": ["11003:8081"]
       },
       {
-        "name": "dataplane-fhir",
-        "profiles": ["edc018"],
-        "ports": ["11002:11002"]
-      },
-      {
-        "name": "dataplane-omop",
-        "profiles": ["edc018"],
-        "ports": ["11012:11012"]
-      },
-      {
         "name": "neo4j-proxy",
         "profiles": [],
         "ports": ["9090:9090"]
@@ -784,46 +774,6 @@
         "name": "simpl-issuer",
         "profiles": ["simpl"],
         "ports": ["10043:8080"]
-      },
-      {
-        "name": "tenant-manager",
-        "profiles": ["edc018"],
-        "ports": ["11006:8080"]
-      },
-      {
-        "name": "provision-manager",
-        "profiles": ["edc018"],
-        "ports": ["11007:8080"]
-      },
-      {
-        "name": "cfm-cp-shim",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-agents",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-edcv-agent",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-registration-agent",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "cfm-onboarding-agent",
-        "profiles": ["edc018"],
-        "ports": []
-      },
-      {
-        "name": "jad-seed",
-        "profiles": ["seed", "edc018"],
-        "ports": []
       },
       {
         "name": "siglet",
@@ -878,15 +828,10 @@
     ]
   },
   "postgresDbs": [
-    "cfm",
     "cfm_v007",
     "controlplane",
     "controlplane_v1",
-    "dataplane",
-    "dataplane_omop",
-    "identityhub",
     "identityhub_v1",
-    "issuerservice",
     "issuerservice_v1",
     "keycloak",
     "redlinedb",
@@ -1513,21 +1458,21 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
-    "/docs/developer": "2026-11-10",
-    "/docs/developer/quality-gates": "2026-11-10",
-    "/docs/developer/api": "2026-11-10",
-    "/docs/developer/reference": "2026-11-10",
-    "/docs/developer/[slug]": "2026-11-10",
+    "/docs/developer": "2026-11-11",
+    "/docs/developer/quality-gates": "2026-11-11",
+    "/docs/developer/api": "2026-11-11",
+    "/docs/developer/reference": "2026-11-11",
+    "/docs/developer/[slug]": "2026-11-11",
     "/docs/architecture": "2026-11-11",
-    "/docs/security": "2026-11-10",
-    "/docs/security/[slug]": "2026-11-10",
-    "/docs/klarbefund": "2026-11-10",
-    "/docs/ehds": "2026-11-10",
+    "/docs/security": "2026-11-11",
+    "/docs/security/[slug]": "2026-11-11",
+    "/docs/klarbefund": "2026-11-11",
+    "/docs/ehds": "2026-11-11",
     "/docs/ehds/glossary": "2026-11-08",
-    "/docs/ehds/[slug]": "2026-11-10",
+    "/docs/ehds/[slug]": "2026-11-11",
     "/docs/roadmap": "2026-11-10",
-    "/docs/operations": "2026-11-10",
-    "/docs/operations/[slug]": "2026-11-10",
-    "/docs/klarbefund/[slug]": "2026-11-10"
+    "/docs/operations": "2026-11-11",
+    "/docs/operations/[slug]": "2026-11-11",
+    "/docs/klarbefund/[slug]": "2026-11-11"
   }
 }

@@ -12,7 +12,7 @@ set -euo pipefail
 # ── Azure resource names ─────────────────────────────────────────────────────
 export RG="rg-mvhd-dev"
 export LOCATION="westeurope"
-# Derived at source time so 05-cfm-ui.sh can inject it into the UI container.
+# Derived at source time for the scripts that pass it on (it once went into the UI container).
 export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
 export ACR_NAME="acrmvhdehds"
 export ACA_ENV="mvhd-env"
@@ -65,22 +65,11 @@ export KEYCLOAK_APP="mvhd-keycloak"
 export VAULT_APP="mvhd-vault"
 export NATS_APP="mvhd-nats"
 export CONTROLPLANE_APP="mvhd-controlplane"
-export DP_FHIR_APP="mvhd-dp-fhir"
-export DP_OMOP_APP="mvhd-dp-omop"
 export IDENTITYHUB_APP="mvhd-identityhub"
 export ISSUER_APP="mvhd-issuerservice"
-export TENANT_MGR_APP="mvhd-tenant-mgr"
-export PROVISION_MGR_APP="mvhd-provision-mgr"
-# The four CFM provisioning agents (#318). Without them a participant created
-# through /onboarding keeps all three of its activities pending for ever:
-# cfm.connector, cfm.credentialservice, cfm.dataplane.
-export CFM_KC_AGENT_APP="mvhd-cfm-kcagent"
-export CFM_EDCV_AGENT_APP="mvhd-cfm-edcvagent"
-export CFM_REG_AGENT_APP="mvhd-cfm-regagent"
-export CFM_OB_AGENT_APP="mvhd-cfm-obagent"
-# nginx that rewrites the agents' compiled-in v5alpha management segment to
-# whatever this control plane serves. The local stack calls it cfm-cp-shim.
-export CFM_CP_SHIM_APP="mvhd-cfm-cp-shim"
+# EDC 0.18's two data planes and the seven apps of the 2026-03 CFM were
+# deleted on 2026-11-09 (#927). CFM 0.0.7's apps (ADR-085) are named in
+# 20-cfm-fork.sh.
 
 # ── ACA Jobs ─────────────────────────────────────────────────────────────────
 export NEO4J_SEED_JOB="mvhd-neo4j-seed"
@@ -167,51 +156,15 @@ export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
 # scripts/check-deployed-image-pins.sh fails if any deployed app resolves to
 # `:latest`, which is the check that was missing when #116 went unnoticed.
 #
-# ADR-055 (#503) replaces the April build with the one compose and CI run:
-# ghcr.io/metaform/jad/*:4a7e5bd096c5..., EDC 0.18, which does carry its source
-# commit, so here the tag is the commit. scripts/azure/import-jad-images.sh
-# copies the images into ACR under it; docs/knowledge/runbooks/edc-v018-on-azure.md
-# moves the apps, one at a time.
-# The April images stay in ACR as :2026-04-14, the rollback target.
-export JAD_VERSION="${JAD_VERSION:-4a7e5bd096c5}"
-export CFM_VERSION="${CFM_VERSION:-2026-04-14}"
-export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}"
-export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
-export DP_OMOP_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
-export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/jad-identity-hub:${JAD_VERSION}"
-export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/jad-issuerservice:${JAD_VERSION}"
-export TENANT_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-tmanager:${CFM_VERSION}"
-export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:${CFM_VERSION}"
-
-# Built from source by scripts/build-cfm-images.sh and pushed here as
-# multi-arch (linux/amd64 + linux/arm64), tag 2026-03-09, on 2026-09-29.
-#
-# They are NOT imported from GHCR any more. The six GHCR digests that
-# docker-compose.jad.yml pins are linux/arm64 only, and Azure Container Apps is
-# amd64 only, so importing them would have put images in ACR that ACA starts,
-# reports Started, and never runs (#318, #380). GHCR `:latest` is amd64 but is
-# a different program: the 2026-04-11 Fulcrum agent build that panics without a
-# job coordinator this stack does not run (ADR-029, #181).
-#
-# Source of truth: https://github.com/Metaform/connector-fabric-manager at
-# commit 9aa627f38, the last before the original images' 2026-03-09T21:08Z
-# build. Each image carries that as an OCI revision label, so the next reader
-# does not have to work it out from timestamps the way #318 did.
-#
-# Rebuild and re-push with:
-#   scripts/build-cfm-images.sh --platform linux/amd64,linux/arm64 \
-#     --push "$ACR_LOGIN_SERVER" --tag "$CFM_AGENT_VERSION"
-export CFM_AGENT_VERSION="${CFM_AGENT_VERSION:-2026-03-09}"
-export CFM_KC_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-kcagent:${CFM_AGENT_VERSION}"
-export CFM_EDCV_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-edcvagent:${CFM_AGENT_VERSION}"
-export CFM_REG_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-regagent:${CFM_AGENT_VERSION}"
-# The onboarding agent carries jad/cfm-patches/0001 (#577): a credential
-# request that is still REQUESTED is polled every 5 s instead of retried at
-# once, about 30 times a second. Build it with
-#   scripts/build-cfm-images.sh --only cfm-obagent --push "$ACR_LOGIN_SERVER" --tag "$CFM_OB_AGENT_VERSION"
-export CFM_OB_AGENT_VERSION="${CFM_OB_AGENT_VERSION:-2026-03-09-p1}"
-export CFM_OB_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-obagent:${CFM_OB_AGENT_VERSION}"
-export CFM_CP_SHIM_IMAGE="${ACR_LOGIN_SERVER}/nginx:${NGINX_VERSION:-1.29-alpine}"
+# The EDC 1.0 launchers, built here (runtimes/edc, ADR-076) and pushed by
+# push-edc1-images.sh as mvhd-edc-<x>:<EDC1_TAG>. 04-edc-services.sh creates
+# the apps from them; migrate-edc-to-v1.sh gives each its full settings. The
+# jad-* images of EDC 0.18 and the April build, and the 2026-03 CFM's, were
+# deleted from ACR on 2026-11-10 (#927).
+export EDC1_TAG="${EDC1_TAG:-}"
+export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}"
+export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}"
+export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}"
 
 # ── Neo4j ────────────────────────────────────────────────────────────────────
 export NEO4J_USER="neo4j"

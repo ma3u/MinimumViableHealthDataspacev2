@@ -25,9 +25,10 @@
 #               6. a MembershipCredential each  scripts/request-participant-credentials.sh
 #
 # The issuer's own identity and definitions are not touched: Azure has them
-# from issuer-identity-job.sh (#572). Run the tenant cleanup
-# (cfm-remove-tenants.yml) first: step 3 mirrors every control-plane context,
-# so a failed tenant still there would get an IdentityHub record again.
+# from issuer-identity-job.sh (#572). Step 3 mirrors every control-plane
+# context, so a failed tenant still there would get an IdentityHub record
+# again; the 2026-03 CFM's failed tenants were removed before the first run
+# (cfm-remove-tenants.yml, #574, gone with #927).
 #
 # Environment (from the job definition): MODE, CP, IH, ISSUER, KC, DID_HOST,
 # CREDENTIALS_BASE, PROTOCOL_BASE, VAULT_ADDR; secrets ADMIN_SECRET,
@@ -138,7 +139,7 @@ export VAULT_ADDR VAULT_TOKEN
 # The issuer as mvhd-env resolves it. request-participant-credentials.sh
 # defaults to compose's did:web:issuerservice%3A10016:issuer, which IdentityHub
 # cannot resolve here (UnknownHostException), so every request went to ERROR
-# (2026-10-07). 05-cfm-seed.sh and migrate-edc-to-v018.sh use this one.
+# (2026-10-07). The 2026-03 CFM seed and the 0.18 migration used this one.
 export ISSUER_DID="${ISSUER_DID:-did:web:mvhd-issuerservice%3A10016:issuer}"
 
 log "2/6 control-plane contexts"
@@ -151,7 +152,7 @@ bash scripts/seed-identityhub-participants.sh || fail "step 3"
 # answered 500 "No configuration found for participant context"; pharmaco's
 # did on 2026-10-28 (#710). CFM writes the config where it provisions; this
 # writes the same entries where it did not, and never overwrites one. The
-# token URL is the one 05-cfm-agents.sh gives the EDC-V agent.
+# token URL is the one the 2026-03 CFM's EDC-V agent was given.
 log "3b/6 each participant context's STS config on the control plane"
 STS_TOKEN_URL="${STS_TOKEN_URL:-http://mvhd-identityhub:7084/api/sts/token}" \
   bash scripts/seed-cp-participant-config.sh || fail "step 3b"

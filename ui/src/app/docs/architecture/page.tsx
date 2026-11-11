@@ -117,24 +117,6 @@ const services: ServiceInfo[] = [
     layer: "EDC",
   },
   {
-    name: "Data Plane FHIR",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L437",
-    port: ":11002",
-    depends: "PostgreSQL, Vault, Control Plane",
-    purpose:
-      "Only with the edc018 profile: the EDC 0.18 data plane for <fhir>FHIR R4</fhir> transfers, retired with <issue927>#927</issue927>",
-    layer: "EDC",
-  },
-  {
-    name: "Data Plane OMOP",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L516",
-    port: ":11012",
-    depends: "PostgreSQL, Vault, Control Plane",
-    purpose:
-      "Only with the edc018 profile: the EDC 0.18 data plane for <omop>OMOP CDM</omop> transfers, retired with <issue927>#927</issue927>",
-    layer: "EDC",
-  },
-  {
     name: "Identity Hub",
     href: "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5",
     port: ":11005",
@@ -152,64 +134,12 @@ const services: ServiceInfo[] = [
     layer: "Identity",
   },
   {
-    name: "Tenant Manager",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L853",
-    port: ":11006",
-    depends: "PostgreSQL, Keycloak",
+    name: "CFM 0.0.7",
+    href: "https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7",
+    port: ":18181 / :18182",
+    depends: "PostgreSQL, NATS, Keycloak",
     purpose:
-      "Only with the edc018 profile: <cfm>CFM</cfm> multi-tenant participant management, retired with <issue927>#927</issue927>",
-    layer: "CFM",
-  },
-  {
-    name: "Provision Manager",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L895",
-    port: ":11007",
-    depends: "PostgreSQL, Keycloak, Control Plane",
-    purpose:
-      "Only with the edc018 profile: <cfm>CFM</cfm> resource provisioning, retired with <issue927>#927</issue927>",
-    layer: "CFM",
-  },
-  {
-    name: "cfm-cp-shim",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L934",
-    port: "--",
-    depends: "Control Plane",
-    purpose:
-      "Only with the edc018 profile: nginx shim, the 2026-03 CFM agents call Management API v5alpha, EDC 0.18 serves v5beta (<issue181>#181</issue181>)",
-    layer: "CFM",
-  },
-  {
-    name: "cfm-keycloak-agent",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L963",
-    port: "--",
-    depends: "Keycloak",
-    purpose:
-      "Only with the edc018 profile: syncs the Keycloak realm configuration",
-    layer: "CFM",
-  },
-  {
-    name: "cfm-edcv-agent",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L992",
-    port: "--",
-    depends: "Control Plane",
-    purpose:
-      "Only with the edc018 profile: manages the EDC 0.18 connector lifecycle",
-    layer: "CFM",
-  },
-  {
-    name: "cfm-registration-agent",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1021",
-    port: "--",
-    depends: "Identity Hub",
-    purpose: "Only with the edc018 profile: registers participant DIDs",
-    layer: "CFM",
-  },
-  {
-    name: "cfm-onboarding-agent",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1052",
-    port: "--",
-    depends: "Tenant Manager",
-    purpose: "Only with the edc018 profile: automates tenant onboarding",
+      "Only with the cfm profile: eclipse-cfm's Tenant and Provision Managers and its agents, the provisioning layer <adr85>ADR-085</adr85> measures; by default the hub provisions participants itself (<adr78>ADR-078</adr78>)",
     layer: "CFM",
   },
   {
@@ -247,15 +177,6 @@ const services: ServiceInfo[] = [
       "Persona overviews, catalog, governance and exchange: {pages} pages, {routes} API routes",
     vars: { pages: facts.uiPages.length, routes: facts.apiRoutes.length },
     layer: "Application",
-  },
-  {
-    name: "jad-seed",
-    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1092",
-    port: "--",
-    depends: "All services",
-    purpose:
-      "Only with the seed and edc018 profiles: one-shot seeding through CFM; on EDC 1.0, <seed>seed-identity-layer.sh</seed> creates the participants",
-    layer: "Seed",
   },
   {
     name: "GitHub Pages",
@@ -330,20 +251,13 @@ const SERVICE_TAGS = {
   src: ext(
     "https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/runtimes/edc",
   ),
-  issue927: ext(
-    "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/927",
-  ),
-  cfm: ext("https://github.com/Metaform/connector-fabric-manager"),
-  issue181: ext(
-    "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/181",
+  adr85: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md",
   ),
   apoc: ext("https://neo4j.com/docs/apoc/5/"),
   apocx: ext("https://github.com/neo4j-contrib/neo4j-apoc-procedures"),
   gds: ext("https://neo4j.com/docs/graph-data-science/current/"),
   n10s: ext("https://neo4j.com/labs/neosemantics/"),
-  seed: ext(
-    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/seed-identity-layer.sh",
-  ),
 };
 
 export default function ArchitecturePage() {
@@ -1202,8 +1116,11 @@ export default function ArchitecturePage() {
                   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
                 ),
                 a: ext(STATIC_SITE),
-                edc018: ext(
-                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L437-L441",
+                cfm: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/seed-cfm.sh",
+                ),
+                adr85: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md",
                 ),
                 aca: ext(
                   "https://learn.microsoft.com/en-us/azure/container-apps/overview",
@@ -1218,7 +1135,7 @@ export default function ArchitecturePage() {
               }}
             >
               {
-                "The stack grew out of <jad>JAD</jad> and runs {count} Docker Compose services, profiles included: infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC 1.0 (the control plane, with <siglet>siglet</siglet> as its data plane, <adr78>ADR-078</adr78>), identity (Identity Hub, Issuer Service), application (Neo4j, proxy, UI) and a <a>static GitHub Pages export</a>. The CFM services and the EDC 0.18 data planes start only with the <edc018>edc018 profile</edc018>. The same topology runs on <aca>Azure Container Apps</aca> at <code>{host}</code> (<adr>ADR-012</adr>); the apps there are the ones the <apps>off-hours script</apps> stops and starts. Arrows show runtime dependencies."
+                "The stack grew out of <jad>JAD</jad> and runs {count} Docker Compose services, profiles included: infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC 1.0 (the control plane, with <siglet>siglet</siglet> as its data plane, <adr78>ADR-078</adr78>), identity (Identity Hub, Issuer Service), application (Neo4j, proxy, UI) and a <a>static GitHub Pages export</a>. CFM 0.0.7 starts only with the <cfm>cfm profile</cfm> (<adr85>ADR-085</adr85>). The same topology runs on <aca>Azure Container Apps</aca> at <code>{host}</code> (<adr>ADR-012</adr>); the apps there are the ones the <apps>off-hours script</apps> stops and starts. Arrows show runtime dependencies."
               }
             </T>
           </p>

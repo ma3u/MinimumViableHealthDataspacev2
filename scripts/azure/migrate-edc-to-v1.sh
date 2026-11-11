@@ -12,7 +12,10 @@
 #   migrate-edc-to-v1.sh rollback <name>    put one app back from its backup
 #
 #   <name>: controlplane | identityhub | issuerservice
-#           (rollback: also siglet, proxy, ui, dp-fhir, dp-omop)
+#           (rollback: also siglet, proxy, ui)
+#
+# The 0.18 rollback ended on 2026-11-09 (#927): its apps and databases are
+# gone, so `rollback` restores 1.0 states saved by a later `backup`.
 #
 # Order, gates and the rollback: docs/knowledge/runbooks/edc-1-on-azure.md.
 # In short: backup; Keycloak scopes; the _v1 databases (workflow
@@ -20,10 +23,9 @@
 # issuerservice, each healthy before the next; siglet; the UI and the proxy
 # from the 1.0 branch; then the seeds.
 #
-# Each `app` step writes one new revision of the app as it runs on 0.18
-# (migrate-edc-to-v018.sh gave it its settings) with:
+# Each `app` step writes one new revision of the app with:
 #   - the launcher image mvhd-edc-<x>:${EDC1_TAG} (push-edc1-images.sh);
-#   - the database <db>_v1; the 0.18 database stays untouched for a rollback;
+#   - the database <db>_v1;
 #   - what 1.0 reads differently: `prefix.mapping` where 0.18 read
 #     `prefix-mapping`, and policy validation on (the launcher's
 #     EhdsPolicyVocabularyExtension declares the EHDS terms, ADR-078);
@@ -44,6 +46,8 @@ source "${SCRIPT_DIR}/env.sh"
 BACKUP_DIR="${MVHD_ROLLBACK_DIR:-${HOME}/.mvhd/edc-v1-rollback}"
 EDC1_TAG="${EDC1_TAG:-}"
 ISSUER_DID="did:web:${ISSUER_APP}%3A10016:issuer"
+KC_ISSUER="${KEYCLOAK_PUBLIC_URL:-https://auth.ehds.mabu.red}/realms/edcv"
+NATS_URL="nats://${NATS_APP}:4222"
 
 # The proxy's internal address, from the environment's domain (env.sh).
 proxy_url() {
@@ -59,22 +63,35 @@ app_name() {
     siglet) echo "$SIGLET_APP" ;;
     ui) echo "$UI_APP" ;;
     proxy) echo "$NEO4J_PROXY_APP" ;;
-    dp-fhir) echo "$DP_FHIR_APP" ;;
-    dp-omop) echo "$DP_OMOP_APP" ;;
     *) err "unknown app '$1' (controlplane, identityhub, issuerservice, siglet, ui)"; exit 2 ;;
   esac
 }
-BACKED_UP=(controlplane identityhub issuerservice siglet ui proxy dp-fhir dp-omop)
+BACKED_UP=(controlplane identityhub issuerservice siglet ui proxy)
 
 need_tag() {
   [ -n "$EDC1_TAG" ] || { err "set EDC1_TAG to the tag push-edc1-images.sh pushed"; exit 2; }
 }
 
 # The settings per service, as KEY=VALUE lines. A line starting with -D goes
-# into JAVA_TOOL_OPTIONS; UNSET=<name> removes that variable; PROBES=edc sets
-# the probes of an EDC launcher (patch_yaml). Values from
-# docker-compose.jad.yml, the stack the suites
+# into JAVA_TOOL_OPTIONS; UNSET=<name> removes that variable; PORTS lists the
+# extra ingress ports; PROBES=edc sets the probes of an EDC launcher
+# (patch_yaml). Values from docker-compose.jad.yml, the stack the suites
 # passed on locally (#881).
+#
+# Each block is complete: the base settings (hostnames, NATS, the DCP scopes,
+# the trusted issuer, the web contexts and their ports) came from the 0.18
+# migration until #927, and the 1.0 apps inherited them from their 0.18
+# revisions. Replayed on the definitions saved on 2026-11-09, these blocks
+# change no setting of the three apps. Keys with a hyphen (ehds-participant) and the trusted
+# issuers' cannot be spelled as environment variables, so they go into
+# JAVA_TOOL_OPTIONS as -D.
+#
+# The trusted issuer's types are a JSON list, and JAVA_TOOL_OPTIONS strips
+# double quotes: written plain, the control plane would read
+# [MembershipCredential,...], which is not JSON. Inside single quotes the JVM
+# keeps them (measured with the controlplane image's own java, 2026-10-28).
+# The list is ui/src/content/trusted-issuers.json; trusted-issuers.test.ts
+# keeps the two equal (#710).
 settings() {
   case "$1" in
     controlplane) cat <<EOF
@@ -82,22 +99,89 @@ IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}
 DB=controlplane_v1
 EDC_POLICY_VALIDATION_ENABLED=true
 PROBES=edc
+EDC_HOSTNAME=${CONTROLPLANE_APP}
+EDC_PARTICIPANT_ID=did:web:connector
+EDC_IAM_DID_WEB_USE_HTTPS=false
+EDC_IAM_CREDENTIAL_REVOCATION_MIMETYPE=application/json
+EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias
+EDC_EVENTS_NATS_URL=${NATS_URL}
+EDC_EVENTS_NATS_STREAM=edc-events
+EDC_EVENTS_NATS_STREAM_CREATE=true
+EDC_DSP_PROFILES_ENABLE_ALL=true
+WEB_HTTP_PROTOCOL_VIRTUAL=true
+UNSET=EDC_DSP_CALLBACK_ADDRESS
+EDC_IAM_DCP_SCOPES_MEMBERSHIP_ID=membership-scope
+EDC_IAM_DCP_SCOPES_MEMBERSHIP_TYPE=DEFAULT
+EDC_IAM_DCP_SCOPES_MEMBERSHIP_VALUE=org.eclipse.dspace.dcp.vc.type:MembershipCredential:read
+EDC_IAM_DCP_SCOPES_MANUFACTURER_ID=manufacturer-scope
+EDC_IAM_DCP_SCOPES_MANUFACTURER_TYPE=POLICY
+EDC_IAM_DCP_SCOPES_MANUFACTURER_VALUE=org.eclipse.dspace.dcp.vc.type:ManufacturerCredential:read
 -Dedc.iam.dcp.scopes.manufacturer.prefix.mapping=ManufacturerCredential
+-Dedc.iam.dcp.scopes.ehds-participant.id=ehds-participant-scope
+-Dedc.iam.dcp.scopes.ehds-participant.type=POLICY
+-Dedc.iam.dcp.scopes.ehds-participant.value=org.eclipse.dspace.dcp.vc.type:EHDSParticipantCredential:read
 -Dedc.iam.dcp.scopes.ehds-participant.prefix.mapping=EHDSParticipantCredential
+-Dedc.iam.dcp.scopes.data-processing-purpose.id=data-processing-purpose-scope
+-Dedc.iam.dcp.scopes.data-processing-purpose.type=POLICY
+-Dedc.iam.dcp.scopes.data-processing-purpose.value=org.eclipse.dspace.dcp.vc.type:DataProcessingPurposeCredential:read
 -Dedc.iam.dcp.scopes.data-processing-purpose.prefix.mapping=DataProcessingPurposeCredential
+-Dedc.iam.dcp.scopes.data-quality-label.id=data-quality-label-scope
+-Dedc.iam.dcp.scopes.data-quality-label.type=POLICY
+-Dedc.iam.dcp.scopes.data-quality-label.value=org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read
 -Dedc.iam.dcp.scopes.data-quality-label.prefix.mapping=DataQualityLabelCredential
+-Dedc.iam.trustedissuer.issuer.id=${ISSUER_DID}
+-Dedc.iam.trustedissuer.issuer.supportedtypes='["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
 EOF
       ;;
     identityhub) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}
 DB=identityhub_v1
+PORTS=7082 7083 7084 7085
 EDC_IAM_CREDENTIAL_REVOCATION_MIMETYPE=application/json
+EDC_HOSTNAME=${IDENTITYHUB_APP}
+EDC_IAM_DID_WEB_USE_HTTPS=false
+EDC_IH_IAM_PUBLICKEY_ALIAS=publickey-alias
+EDC_IAM_ACCESSTOKEN_JTI_VALIDATION=true
+EDC_IAM_CREDENTIAL_RENEWAL_GRACEPERIOD=86400
+EDC_IAM_OAUTH2_ISSUER=${KC_ISSUER}
+WEB_HTTP_PATH=/api
+WEB_HTTP_IDENTITY_PATH=/api/identity
+WEB_HTTP_DID_PORT=7083
+WEB_HTTP_DID_PATH=/
+WEB_HTTP_STS_PORT=7084
+WEB_HTTP_STS_PATH=/api/sts
+WEB_HTTP_CREDENTIALS_PORT=7085
+WEB_HTTP_CREDENTIALS_PATH=/api/credentials
+EDC_EVENTS_NATS_URL=${NATS_URL}
+EDC_EVENTS_NATS_STREAM=edc-events
+EDC_EVENTS_NATS_CREATE=true
+EDC_EVENTS_NATS_CREATE_FORCE=false
 EOF
       ;;
     issuerservice) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}
 DB=issuerservice_v1
 MEMBERSHIP_DB=issuerservice_v1
+PORTS=9999 10011 10012 10015 10016
+EDC_HOSTNAME=${ISSUER_APP}
+EDC_IAM_DID_WEB_USE_HTTPS=false
+EDC_ISSUER_STATUSLIST_SIGNING_KEY_ALIAS=statuslist-signing-key
+EDC_IAM_ACCESSTOKEN_JTI_VALIDATION=true
+EDC_IAM_OAUTH2_ISSUER=${KC_ISSUER}
+WEB_HTTP_STS_PORT=10011
+WEB_HTTP_STS_PATH=/api/sts
+WEB_HTTP_ISSUANCE_PORT=10012
+WEB_HTTP_ISSUANCE_PATH=/api/issuance
+WEB_HTTP_IDENTITY_PORT=10015
+WEB_HTTP_IDENTITY_PATH=/api/identity
+WEB_HTTP_DID_PORT=10016
+WEB_HTTP_DID_PATH=/
+WEB_HTTP_STATUSLIST_PORT=9999
+WEB_HTTP_STATUSLIST_PATH=/statuslist
+EDC_EVENTS_NATS_URL=${NATS_URL}
+EDC_EVENTS_NATS_STREAM=edc-events
+EDC_EVENTS_NATS_CREATE=true
+EDC_EVENTS_NATS_CREATE_FORCE=false
 EOF
       ;;
   esac
@@ -119,7 +203,7 @@ spec = [l.rstrip("\n") for l in open(spec_path) if l.strip()]
 with open(path) as f: doc = yaml.safe_load(f)
 c = doc['properties']['template']['containers'][0]
 env = {e['name']: e for e in c.get('env') or []}
-props = []
+props, ports = [], []
 def jdbc(db): return f"jdbc:postgresql://{pg_host}:{pg_port}/{db}?sslmode={pg_ssl}"
 for line in spec:
     if line.startswith('-D'):
@@ -139,6 +223,7 @@ for line in spec:
         env['EDC_DATASOURCE_MEMBERSHIP_USER'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_USER', 'value': pg_admin}
         env['EDC_DATASOURCE_MEMBERSHIP_PASSWORD'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_PASSWORD', 'secretRef': 'pg-flex-password'}
     elif k == 'UNSET': env.pop(v, None)
+    elif k == 'PORTS': ports = [int(p) for p in v.split()]
     elif k == 'PROBES':
         # ADR-084. The runtime is ready 3 to 4 s after it boots (Azure,
         # 2026-11-09), so startup has 10 + 10 x 10 s. Liveness fails when NATS
@@ -154,8 +239,8 @@ for line in spec:
              'periodSeconds': 10, 'timeoutSeconds': 5, 'failureThreshold': 3},
         ]
     else: env[k] = {'name': k, 'value': v}
-# JAVA_TOOL_OPTIONS: keep what is there (the pool cap, the scopes, the trusted
-# issuer), drop the 0.18 spelling `prefix-mapping`, replace our -D keys.
+# JAVA_TOOL_OPTIONS: keep what is there (the pool cap), drop the 0.18 spelling
+# `prefix-mapping`, replace our -D keys (the scopes, the trusted issuer).
 # The trusted issuer moves to `edc.iam.trustedissuer`: 0.18 still read the
 # deprecated `trusted-issuer`, which Azure kept (#754 changed only the
 # script), and 1.0 does not, so it trusted no issuer and every DSP request
@@ -167,6 +252,13 @@ kept = [t for t in jto.split()
         if t.split('=', 1)[0] not in keys and '.prefix-mapping=' not in t]
 env['JAVA_TOOL_OPTIONS'] = {'name': 'JAVA_TOOL_OPTIONS', 'value': ' '.join(kept + props)}
 c['env'] = list(env.values())
+# The extra ingress ports the web contexts need; ones already there stay.
+if ports:
+    ing = doc['properties']['configuration']['ingress']
+    have = {m['targetPort']: m for m in ing.get('additionalPortMappings') or []}
+    for p in ports:
+        have.setdefault(p, {'targetPort': p, 'exposedPort': p, 'external': False})
+    ing['additionalPortMappings'] = sorted(have.values(), key=lambda m: m['targetPort'])
 # `show` returns secrets without values; sent back empty they would be wiped.
 doc['properties']['configuration'].pop('secrets', None)
 for k in ('latestRevisionName', 'latestReadyRevisionName', 'latestRevisionFqdn',

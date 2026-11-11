@@ -153,7 +153,8 @@ describe("the docs pages' texts are in their dictionaries", () => {
     const purposes = strings(page, /purpose:\s*"((?:[^"\\]|\\.)*)"/g);
     const layers = strings(page, /layer: "((?:[^"\\]|\\.)*)"/g);
     expect(toc).toHaveLength(9);
-    expect(purposes.length).toBeGreaterThan(25);
+    // 17 since #927 took the ten edc018 services and jad-seed off the page.
+    expect(purposes.length).toBeGreaterThan(15);
     const statuses = [...new Set(facts.adrs.map((a) => a.status))].filter(
       Boolean,
     );
@@ -163,7 +164,6 @@ describe("the docs pages' texts are in their dictionaries", () => {
         ...purposes,
         ...statuses,
         ...[...new Set(layers)].filter((l) => !["EDC", "CFM"].includes(l)),
-        "All services",
         "Next.js UI (static export)",
       ]),
     ).toEqual([]);

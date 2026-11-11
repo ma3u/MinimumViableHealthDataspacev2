@@ -40,7 +40,7 @@ KC_REALM="${KC_REALM:-edcv}"
 KC_CLIENT_ID="${KC_CLIENT_ID:-admin}"
 KC_CLIENT_SECRET="${KC_CLIENT_SECRET:-edc-v-admin-secret}"
 
-# Five participants, matching jad/seed-health-tenants.sh and the names the
+# Five participants, matching scripts/seed-identity-layer.sh and the names the
 # TCK probe iterates over in services/neo4j-proxy/src/index.ts.
 PARTICIPANTS=(
   "alpha-klinik|did:web:alpha-klinik.de:participant"
@@ -90,7 +90,7 @@ for entry in "${PARTICIPANTS[@]}"; do
   log "POST participant $PID  (did=$DID)"
 
   # KeyDescriptor: provide an explicit publicKeyJwk (Ed25519, same shape
-  # jad/seed-jad.sh uses for the issuer participant). The keyGeneratorParams
+  # scripts/seed-issuer-identity.sh uses for the issuer participant). The keyGeneratorParams
   # path was rejected by IH v0.13.x with NullPointerException on the curve
   # field — the map keys EDC expects there are not the documented ones.
   # publicKeyJwk is the proven-working pattern. Each participant gets its
