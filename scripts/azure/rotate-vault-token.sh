@@ -51,12 +51,45 @@ for c in a["properties"]["template"]["containers"]:
             print("%s %s=%s" % (c["name"], e["name"], kind))'
 }
 
+# Every app and job in the resource group that holds a Vault token as a plain
+# env value, one "<app|job> <name> <container> <variable>" per line; never the
+# value. The EDC 1.0 apps inherited the literal "root" from their 0.18
+# revisions (found 2026-11-11, #927), so the list is read, not assumed.
+plain_token_holders() {
+  local f
+  f=$(mktemp)
+  {
+    az containerapp list --resource-group "$RG" -o json | python3 -c 'import json,sys; [print(json.dumps(["app", a])) for a in json.load(sys.stdin)]'
+    az containerapp job list --resource-group "$RG" -o json | python3 -c 'import json,sys; [print(json.dumps(["job", a])) for a in json.load(sys.stdin)]'
+  } >"$f"
+  python3 - "$f" <<'PY2'
+import json, sys
+for line in open(sys.argv[1]):
+    kind, it = json.loads(line)
+    t = it["properties"]["template"]
+    for c in (t.get("containers") or []) + (t.get("initContainers") or []):
+        for e in c.get("env") or []:
+            n = e["name"]
+            if "VAULT" in n and "TOKEN" in n and "secretRef" not in e and e.get("value"):
+                print(kind, it["name"], c["name"], n)
+PY2
+  rm -f "$f"
+}
+
 check() {
-  local app
+  local app holders
   for app in "${EDC_APPS[@]}" "$SIGLET" "$VAULT_APP"; do
     printf '%-20s %s\n' "$app" "$(token_kind "$app" | tr '\n' ' ')"
   done
   printf '%-20s %s\n' "$JOB" "$(az containerapp job show -n "$JOB" -g "$RG" --query name -o tsv 2>/dev/null || echo "not created")"
+  holders=$(plain_token_holders)
+  echo
+  if [ -n "$holders" ]; then
+    echo "Plain Vault tokens in the resource group (names only):"
+    sed 's/^/  /' <<<"$holders"
+  else
+    ok "no app or job holds a Vault token as a plain value"
+  fi
 }
 
 latest_health() {
@@ -170,6 +203,16 @@ revoke_root() {
     token_kind "$app" | grep -q "${TOKEN_ENV}=secretref:vault-token" ||
       { err "$app does not use secretref:vault-token yet"; exit 1; }
   done
+  # Nothing else may still hold a token as a plain value: after the revocation
+  # it would fail. The sidecar's VAULT_ENSURE_TOKEN_ID and the bootstrap job's
+  # VAULT_DEV_ROOT_TOKEN_ID are changed below.
+  local rest
+  rest=$(plain_token_holders | grep -v -E "^app ${VAULT_APP} .* VAULT_ENSURE_TOKEN_ID$|^job mvhd-vault-bootstrap .* VAULT_DEV_ROOT_TOKEN_ID$" || true)
+  if [ -n "$rest" ]; then
+    err "these still hold a Vault token as a plain value; move them to the secret first:"
+    sed 's/^/  /' <<<"$rest" >&2
+    exit 1
+  fi
   NEW_TOKEN=$(vault_service_token)
   OLD_TOKEN="$VAULT_ROOT_TOKEN"
   VAULT_URL=$(az containerapp show -n "$CONTROLPLANE_APP" -g "$RG" \
