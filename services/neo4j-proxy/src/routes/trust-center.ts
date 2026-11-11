@@ -243,6 +243,9 @@ app.get(
  */
 app.delete(
   "/trust-center/revoke/:rpsn",
+  // Before the token check, as on resolve: a flood of bad tokens is limited
+  // too, and each one costs a signature check.
+  heavyLimiter,
   requireRealmRole(TRUST_CENTER_ROLES),
   async (req: Request, res: Response, next: NextFunction) => {
     const { rpsn } = req.params;
