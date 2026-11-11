@@ -1,10 +1,13 @@
 "use client";
 
 /**
- * Homepage hero CTA cluster. "Register with d-you" opens the RegisterDialog
- * (QR + interactive wallet approval); on approval the demo signs the visitor in
- * as the demo patient and forwards them to their personal health record.
- * The other two links (journey explainer, returning-user sign-in) are unchanged.
+ * Homepage hero CTA cluster. "Register with d-you" opens the RegisterDialog.
+ * On the hub its QR code is a real wallet request (sign in to your own
+ * account, or create one from your PID) and its simulated phone signs in as
+ * the demo patient; both land on /patient with a session. In the static
+ * export there is no session, so approving the phone sets the demo persona
+ * in the browser instead. The other two links (journey explainer,
+ * returning-user sign-in) are unchanged.
  */
 import { useState } from "react";
 import Link from "next/link";
@@ -21,9 +24,9 @@ export function HomeRegisterCta() {
   const router = useRouter();
 
   const onComplete = () => {
-    // Demo only: a completed wallet registration signs the visitor in as the
-    // demo patient (sessionStorage drives the nav, localStorage drives the
-    // restricted /api/patient mock — see lib/api.ts).
+    // Static export only: no session exists there, so the demo patient is a
+    // persona in the browser (sessionStorage drives the nav, localStorage
+    // drives the restricted /api/patient mock, see lib/api.ts).
     setDemoPersona("patient1");
     try {
       localStorage.setItem("demo-persona", "patient1");
@@ -73,9 +76,10 @@ export function HomeRegisterCta() {
           mode="register"
           title={t("Register in the European Health Data Space")}
           subtitle={t(
-            "Create your EHDS patient account with {wallet}, the German EUDI wallet. You share only the exact identity claims requested (name, age over 18).",
+            "Create your EHDS patient account with {wallet}, the German EUDI wallet. You share only the claims requested: your name and date of birth, which the hub keeps only as a secure hash.",
             { wallet: CITIZEN_WALLET.name },
           )}
+          callbackUrl="/patient"
           onClose={() => setOpen(false)}
           onComplete={onComplete}
         />

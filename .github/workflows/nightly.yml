@@ -195,6 +195,8 @@ jobs:
           NEO4J_PASSWORD: healthdataspace
           NEXTAUTH_SECRET: ci-test-secret-not-for-production
           NEXTAUTH_URL: http://localhost:3000
+          # The register dialog's simulated phone signs in as patient1 (J1104).
+          EUDI_DEMO_WALLET: "true"
 
       # Every spec, the WCAG 2.2 AA audit (27) and the OWASP/BSI checks (28)
       # included. A failure fails the job, so the report job below opens the

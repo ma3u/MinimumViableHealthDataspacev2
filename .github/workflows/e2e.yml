@@ -103,6 +103,9 @@ jobs:
     env:
       CI: true
       E2E_FORGED_SESSIONS: "1"
+      # The register dialog's simulated phone signs in as patient1 only where
+      # the deployment allows it, as compose and the Azure demo do (J1104).
+      EUDI_DEMO_WALLET: "true"
       PLAYWRIGHT_BASE_URL: http://localhost:3000
       NEXT_PUBLIC_STATIC_EXPORT: "false"
       NEO4J_URI: bolt://localhost:7687

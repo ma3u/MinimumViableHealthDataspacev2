@@ -1,11 +1,17 @@
 "use client";
 
 /**
- * RegisterDialog — a lightweight modal wrapping EudiApprovalFlow. Used by the
+ * RegisterDialog — a lightweight modal around the wallet approval. Used by the
  * homepage "Register with d-you" CTA and the /patient "Request EHR data"
  * button. No dialog dependency — plain Tailwind overlay with ESC/backdrop close,
  * role="dialog" + aria-modal, and body-scroll lock. z-70 sits above the nav
  * (z-50) and UserMenu dropdown.
+ *
+ * On the hub, the citizen wallet's register and login run for real
+ * (`WalletSignInFlow`): the QR code is the verifier's request and the
+ * simulated phone signs in as the demo patient, both with a session, landing
+ * on `callbackUrl`. The ePA transfer, and everything in the static export,
+ * stays the simulation of `EudiApprovalFlow`, which calls `onComplete`.
  */
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -15,18 +21,24 @@ import {
   EudiApprovalFlow,
   type ApprovalMode,
 } from "@/components/wallet/EudiApprovalFlow";
+import { WalletSignInFlow } from "@/components/wallet/WalletSignInFlow";
+import { IS_STATIC } from "@/lib/static-export";
 
 export function RegisterDialog({
   mode = "register",
   title,
   subtitle,
+  callbackUrl = "/patient",
   onClose,
   onComplete,
 }: {
   mode?: ApprovalMode;
   title: string;
   subtitle?: string;
+  /** where a real wallet sign-in lands (on the hub, register and login only) */
+  callbackUrl?: string;
   onClose: () => void;
+  /** the simulation's end: the ePA transfer, and the static export */
   onComplete: () => void;
 }) {
   const t = useT("patient");
@@ -105,11 +117,19 @@ export function RegisterDialog({
         </div>
 
         <div className="mt-5">
-          <EudiApprovalFlow
-            mode={mode}
-            onComplete={onComplete}
-            onCancel={onClose}
-          />
+          {!IS_STATIC && mode !== "ehr" ? (
+            <WalletSignInFlow
+              mode={mode}
+              callbackUrl={callbackUrl}
+              onCancel={onClose}
+            />
+          ) : (
+            <EudiApprovalFlow
+              mode={mode}
+              onComplete={onComplete}
+              onCancel={onClose}
+            />
+          )}
         </div>
       </div>
     </div>,

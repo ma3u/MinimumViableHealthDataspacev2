@@ -265,7 +265,7 @@
   "{n} out of {total} from Digital ID": "{n} sur {total} de l’identité numérique",
   "Given name(s)": "Prénom(s)",
   "Family name": "Nom de famille",
-  "Age over 18": "Plus de 18 ans",
+  "Date of birth": "Date de naissance",
   "Show details": "Afficher les détails",
   "Enter Digital ID code to confirm": "Saisissez votre code d’identité pour confirmer",
   "Your 6-digit code, set when you added your ID to d-you.": "Votre code à 6 chiffres, choisi lors de l’ajout de votre identité à d-you.",

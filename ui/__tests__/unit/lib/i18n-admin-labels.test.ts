@@ -154,9 +154,10 @@ describe("the admin area knows every label its pages take from elsewhere", () =>
       "Failed to load participants",
       "Data Protection Officer",
       "is any of",
+      // the wallet sign-in's messages, kept as their English key
       ...all(
-        "src/app/auth/eudi-qr/page.tsx",
-        /^const [A-Z_]+ =\s*"([^"]+)";$/gm,
+        "src/lib/use-wallet-sign-in.ts",
+        /^export const (?:HUB_COULD_NOT_CREATE|SIMULATION_ONLY) =\s*"([^"]+)";$/gm,
       ),
       // a key with double quotes inside, written in single quotes
       ...all(
@@ -176,7 +177,7 @@ describe("the admin area knows every label its pages take from elsewhere", () =>
       "src/app/admin/components/_components/SpeTopologySection.tsx",
       "src/app/admin/audit/_components/RetentionLine.tsx",
       "src/app/admin/attestation/_components/AttestationExplainer.tsx",
-      "src/app/auth/eudi-qr/page.tsx",
+      "src/components/wallet/WalletSignInStatus.tsx",
       "src/app/auth/unauthorized/page.tsx",
       "src/app/settings/page.tsx",
       "src/components/spe/SpeStatusCard.tsx",

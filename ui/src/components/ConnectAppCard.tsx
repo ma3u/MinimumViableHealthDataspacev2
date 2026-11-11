@@ -19,6 +19,9 @@ import type { CatalogLanguage } from "@/lib/metadata-language";
  * On a phone the QR code is useless, so the same link is offered as "Open in
  * Klarbefund". In the static GitHub Pages build there is no Keycloak to ask,
  * so the card says where connecting works instead.
+ *
+ * `#connect-app` is where a new wallet account lands when its owner chose to
+ * connect the app next (`CONNECT_APP_PATH`, ADR-067).
  */
 
 interface Device {
@@ -59,6 +62,9 @@ function formatDate(iso: string | null, lang: CatalogLanguage): string {
 /** The app's own menu path, as Klarbefund labels it. */
 const APP_MENU = "More, Connect to EHDS";
 
+/** The card's anchor, `CONNECT_APP_PATH` in `lib/use-wallet-sign-in.ts`. */
+const CARD_ID = "connect-app";
+
 export default function ConnectAppCard() {
   const t = useT("patient");
   const lang = useLanguage();
@@ -74,6 +80,12 @@ export default function ConnectAppCard() {
   }, []);
 
   useEffect(loadDevices, [loadDevices]);
+
+  // Arriving at #connect-app, from the register dialog: show the card.
+  useEffect(() => {
+    if (window.location.hash !== `#${CARD_ID}`) return;
+    document.getElementById(CARD_ID)?.scrollIntoView({ block: "start" });
+  }, []);
 
   // While the QR code shows: count down, and ask whether the phone arrived.
   useEffect(() => {
@@ -136,7 +148,8 @@ export default function ConnectAppCard() {
 
   return (
     <section
-      className="mb-6 rounded-lg border border-(--border) bg-(--surface) p-4"
+      id={CARD_ID}
+      className="mb-6 rounded-lg border border-(--border) bg-(--surface) p-4 scroll-mt-24"
       data-testid="connect-app-card"
       aria-labelledby="connect-app-heading"
     >
