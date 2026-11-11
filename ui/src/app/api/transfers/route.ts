@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
-import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { edcClient, EDC_CONTEXT, newestFirstQuery } from "@/lib/edc";
 import { requireAuth, isAuthError, type AuthSession } from "@/lib/auth-guard";
 import { recordDemo, listDemo, DemoRecord } from "@/lib/demo-records";
 import {
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     realTransfers = await edcClient.management<unknown[]>(
       `/v5/participants/${participantId}/transferprocesses/request`,
       "POST",
-      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", filterExpression: [] },
+      newestFirstQuery(),
     );
     if (!Array.isArray(realTransfers)) {
       realTransfers = [];

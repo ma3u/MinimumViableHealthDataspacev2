@@ -10,11 +10,14 @@ import { NextRequest } from "next/server";
 
 // ── Mocks ────────────────────────────────────────────────────────────
 const mockManagement = vi.fn();
-vi.mock("@/lib/edc", () => ({
+vi.mock("@/lib/edc", async (importOriginal) => ({
   edcClient: {
     management: (...args: unknown[]) => mockManagement(...args),
   },
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
+  // The real query, so the tests see what the control plane is sent (#1076).
+  newestFirstQuery: (await importOriginal<typeof import("@/lib/edc")>())
+    .newestFirstQuery,
 }));
 
 const mockReadFile = vi.fn();
@@ -271,6 +274,11 @@ describe("GET /api/negotiations", () => {
       expect.objectContaining({
         "@type": "QuerySpec",
         filterExpression: [],
+        // Newest first and a page over 50: the default page of 50 oldest rows
+        // hid every new negotiation once a participant had more (#1076).
+        sortField: "createdAt",
+        sortOrder: "DESC",
+        limit: 200,
       }),
     );
   });
