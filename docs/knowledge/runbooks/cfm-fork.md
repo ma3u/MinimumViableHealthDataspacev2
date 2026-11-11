@@ -119,27 +119,39 @@ eclipse-cfm's own release images (`ghcr.io/eclipse-cfm/cfm/<name>:<tag>`,
 pinned by digest), the `fork` block leaves `.github/upstream.json`, and the
 fork can be archived.
 
-## Azure (prepared, not deployed)
+## Azure
 
-ADR-085 step 4 is prepared and has not run. Three Container Apps, as in
-compose: `mvhd-cfm-tmanager` and `mvhd-cfm-pmanager` (internal ingress) and
-`mvhd-cfm-agents` (six containers). The definitions are in
+Deployed 2026-11-11 (ADR-085 step 4). Three Container Apps, as in compose:
+`mvhd-cfm-tmanager` and `mvhd-cfm-pmanager` (internal ingress) and
+`mvhd-cfm-agents` (six containers, ports 8081 to 8086 because they share one
+network namespace). The definitions are in
 [`scripts/azure/cfm/`](../../../scripts/azure/cfm/), and
 [`scripts/azure/20-cfm-fork.sh`](../../../scripts/azure/20-cfm-fork.sh) handles them:
 
 ```bash
 scripts/azure/20-cfm-fork.sh --check                  # report only
 scripts/azure/20-cfm-fork.sh render /tmp/cfm --offline  # review the definitions, no az
-scripts/azure/20-cfm-fork.sh images                   # az acr build of the eight images from fork.tag
+scripts/azure/20-cfm-fork.sh images                   # docker buildx linux/amd64 of fork.tag, pushed to ACR
 CFM_AZURE_GO="mvhd-cfm-tmanager" scripts/azure/20-cfm-fork.sh apps
+scripts/azure/20-cfm-fork.sh seed                     # definitions, cell, profile, from a one-shot job
 ```
 
-`images` and `apps` change Azure. Each needs Matthias's go, per app, and an
-`az login` first. Three things come before `apps`:
+`images`, `apps` and `seed` change Azure. Each needs Matthias's go, per app,
+and an `az login` first. Before `apps`:
 
 - the `cfm-agents` Keycloak client in the Azure realm, with its secret in Key
-  Vault as `cfm-agents-client-secret`;
-- the database `cfm` cleared of the old CFM's tables;
-- afterwards, seeding the CFM definitions inside the environment.
+  Vault as `cfm-agents-client-secret` (as `scripts/seed-cfm.sh` creates it
+  locally, against `https://auth.ehds.mabu.red` with the admin password from
+  the `mvhd-keycloak` secret `keycloak-admin-password`);
+- the database `cfm` cleared of the old CFM's tables
+  (`.github/workflows/edc-retire-v018-azure.yml`, which refuses once any
+  `mvhd-cfm-*` app exists).
 
-The script's header lists them.
+`mvhd-ui` has no `CFM_TENANT_URL`: the live `/onboarding` still provisions by
+the hub itself (ADR-078), and CFM runs beside it until that switch is decided.
+
+On a fresh NATS (every morning start, its JetStream is on temporary storage)
+the first manager to start creates `cfm-bucket`, and one that asks before the
+bucket is ready panics with `unable to access jetstream key value store ...
+context deadline exceeded`. Container Apps restarts it; the tmanager needed a
+revision restart once on 2026-11-11.

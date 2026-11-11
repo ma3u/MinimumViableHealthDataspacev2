@@ -3,6 +3,23 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-11: four things the first CFM deploy on Container Apps found
+
+- `az acr build` cannot build the CFM fork's Dockerfiles: ACR Tasks' dependency
+  scanner fails on `FROM --platform=$BUILDPLATFORM` ("unable to understand
+  line"), and a git context `repo.git#<tag>` fails to download (it takes a
+  branch or commit). `20-cfm-fork.sh images` builds with local buildx for
+  linux/amd64 and pushes.
+- `az containerapp create --yaml` (extension 1.3.0b5) gets a 400 "The JSON
+  value could not be converted to System.Boolean. Path: $" for an app whose
+  definition is valid. `az rest --method put` of the same ARM body works.
+- NATS has TCP ingress: `nats://mvhd-nats:4222` reaches it, the `.internal`
+  FQDN does not. The client retries silently (`RetryOnFailedConnect`), so the
+  only symptom is a KV `context deadline exceeded` at start.
+- Six containers in one app share one network namespace: each CFM agent
+  needs its own `httpport`, or all but one fail with `bind: address already
+in use`.
+
 ## 2026-11-09: a NATS restart takes the control plane's task streams, and every negotiation answers 500
 
 On the EDC 1.0 compose stack every negotiation start answered HTTP 500, and
