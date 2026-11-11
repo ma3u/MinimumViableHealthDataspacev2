@@ -18,11 +18,14 @@ import {
   Mail,
   MapPin,
   ShieldCheck,
+  Trash2,
   UserPlus,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import type { VpaSummary } from "@/lib/provisioning";
 import { useT } from "@/lib/i18n/translate";
+import { useDemoPersona } from "@/lib/use-demo-persona";
+import { useTabSession } from "@/lib/use-tab-session";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,6 +47,8 @@ interface Tenant {
     role?: string;
     ehdsParticipantType?: string;
     organization?: string;
+    /** Set on a context registered through this page; only those can be removed. */
+    registeredAt?: string;
   };
   participantProfiles: ParticipantProfile[];
   /** false for a registration nothing could provision (issue #203). */
@@ -411,12 +416,110 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
 // ---------------------------------------------------------------------------
 // Expandable participant card
 // ---------------------------------------------------------------------------
+/**
+ * Removing a participant registered through this page (ADR-085 step 3),
+ * EDC_ADMIN only: a first click asks, a second removes. The route refuses a
+ * seeded participant with 409, so the button is shown only where it can work.
+ */
+function RemoveParticipant({
+  tenant,
+  onRemoved,
+}: {
+  tenant: Tenant;
+  onRemoved: () => void;
+}) {
+  const t = useT("admin");
+  const [confirming, setConfirming] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const remove = async () => {
+    setRemoving(true);
+    setError(null);
+    try {
+      const res = await fetchApi(
+        `/api/participants/${encodeURIComponent(tenant.id)}`,
+        { method: "DELETE" },
+      );
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        detail?: string;
+      };
+      if (!res.ok) {
+        throw new Error(body.detail || body.error || t("Removal failed"));
+      }
+      onRemoved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("Removal failed"));
+      setRemoving(false);
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      {confirming ? (
+        <>
+          <span className="text-xs text-(--text-secondary)">
+            {t(
+              "Remove this participant from the dataspace? Its context, DID and credentials are deleted.",
+            )}
+          </span>
+          <button
+            type="button"
+            data-testid="confirm-remove-participant"
+            onClick={remove}
+            disabled={removing}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-red-700 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-900/20 disabled:opacity-60"
+          >
+            {removing ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <Trash2 size={12} />
+            )}
+            {removing ? t("Removing…") : t("Remove")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            disabled={removing}
+            className="text-xs text-(--text-secondary) hover:underline"
+          >
+            {t("Cancel")}
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          data-testid="remove-participant"
+          onClick={() => setConfirming(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-(--border) px-3 py-1.5 text-xs text-(--text-secondary) hover:border-red-700 hover:text-red-700 dark:hover:text-red-300"
+        >
+          <Trash2 size={12} />
+          {t("Remove participant")}
+        </button>
+      )}
+      {error && (
+        <p
+          role="alert"
+          className="w-full text-xs text-red-700 dark:text-red-300"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ParticipantCard({
   tenant,
   defaultExpanded = false,
+  onRemoved,
 }: {
   tenant: Tenant;
   defaultExpanded?: boolean;
+  /** Given when the viewer may remove this participant. */
+  onRemoved?: () => void;
 }) {
   const t = useT("admin");
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -558,6 +661,10 @@ function ParticipantCard({
             )}
             <OnboardingSteps tenant={tenant} />
           </div>
+
+          {onRemoved && (
+            <RemoveParticipant tenant={tenant} onRemoved={onRemoved} />
+          )}
         </div>
       )}
     </div>
@@ -649,6 +756,20 @@ function OnboardingContent() {
   const [displayName, setDisplayName] = useState("");
   const [organization, setOrganization] = useState("");
   const [role, setRole] = useState("data-holder");
+
+  // Only an EDC_ADMIN removes participants, and only one registered here
+  // (registeredAt); the static build has nothing to remove.
+  const demoPersona = useDemoPersona();
+  const { session: tabSession } = useTabSession();
+  const roles: string[] = IS_STATIC
+    ? demoPersona
+      ? [...demoPersona.roles]
+      : []
+    : tabSession?.roles ?? [];
+  const canRemove = (tenant: Tenant) =>
+    !IS_STATIC &&
+    roles.includes("EDC_ADMIN") &&
+    Boolean(tenant.properties.registeredAt);
 
   // quiet: refresh in place, without the loading state, for the polling below.
   const loadTenants = (quiet = false) => {
@@ -758,6 +879,7 @@ function OnboardingContent() {
                   key={t.id}
                   tenant={t}
                   defaultExpanded={t.id === highlightTenantId}
+                  onRemoved={canRemove(t) ? () => loadTenants(true) : undefined}
                 />
               ))}
             </div>

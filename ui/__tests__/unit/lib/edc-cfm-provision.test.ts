@@ -12,7 +12,11 @@ vi.mock("@/lib/edc", () => ({
 
 import { edcClient } from "@/lib/edc";
 import { ProvisioningError } from "@/lib/edc/provision";
-import { cfmProvisioning, provisionThroughCfm } from "@/lib/edc/cfm-provision";
+import {
+  cfmProvisioning,
+  cfmStatesByDid,
+  provisionThroughCfm,
+} from "@/lib/edc/cfm-provision";
 
 const mgmt = vi.mocked(edcClient.management);
 const TM = "http://cfm7-tmanager:8080/api";
@@ -194,5 +198,83 @@ describe("provisionThroughCfm", () => {
     }).catch((e) => e);
     expect(err).toBeInstanceOf(ProvisioningError);
     expect(err.unreachable).toBe(true);
+  });
+});
+
+describe("cfmStatesByDid", () => {
+  const DID_A = "did:web:identityhub%3A7083:hospital-a";
+  const DID_B = "did:web:identityhub%3A7083:research-b";
+  const DID_C = "did:web:identityhub%3A7083:hdab-c";
+
+  beforeEach(() => {
+    vi.stubEnv("CFM_TENANT_URL", TM);
+    vi.stubEnv("CFM_CLIENT_SECRET", "test-only");
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("reads every tenant's profiles and keys their state by DID", async () => {
+    stubFetch({
+      "POST token": { body: { access_token: "tok" } },
+      "GET /v1alpha1/tenants": { body: [{ id: "t-1" }, { id: "t-2" }] },
+      "GET /v1alpha1/tenants/t-1/participant-profiles": {
+        body: [
+          { id: "p-old", identifier: DID_A, vpas: vpas("disposed") },
+          { id: "p-a", identifier: DID_A, vpas: vpas("active") },
+          { id: "p-b", identifier: DID_B, vpas: vpas("pending") },
+        ],
+      },
+      "GET /v1alpha1/tenants/t-2/participant-profiles": {
+        body: [
+          {
+            id: "p-c",
+            identifier: DID_C,
+            error: true,
+            errorDetail: "siglet refused",
+            vpas: vpas("error"),
+          },
+          { id: "p-none", vpas: vpas("active") },
+        ],
+      },
+    });
+
+    const byDid = await cfmStatesByDid();
+
+    expect(byDid.size).toBe(3);
+    expect(byDid.get(DID_A)).toEqual({
+      tenantId: "t-1",
+      profileId: "p-a",
+      state: "active",
+    });
+    expect(byDid.get(DID_B)?.state).toBe("pending");
+    expect(byDid.get(DID_C)).toEqual({
+      tenantId: "t-2",
+      profileId: "p-c",
+      state: "error",
+      detail: "siglet refused",
+    });
+  });
+
+  it("reports a disposed profile as disposed when it is the only one", async () => {
+    stubFetch({
+      "POST token": { body: { access_token: "tok" } },
+      "GET /v1alpha1/tenants": { body: [{ id: "t-1" }] },
+      "GET /v1alpha1/tenants/t-1/participant-profiles": {
+        body: [{ id: "p-a", identifier: DID_A, vpas: vpas("disposed") }],
+      },
+    });
+
+    expect((await cfmStatesByDid()).get(DID_A)?.state).toBe("disposed");
+  });
+
+  it("throws when the Tenant Manager refuses, so the list goes without it", async () => {
+    stubFetch({
+      "POST token": { body: { access_token: "tok" } },
+      "GET /v1alpha1/tenants": { status: 401, body: { error: "unauthorized" } },
+    });
+
+    await expect(cfmStatesByDid()).rejects.toThrow("Tenant Manager 401");
   });
 });

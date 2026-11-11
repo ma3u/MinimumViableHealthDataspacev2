@@ -25,6 +25,53 @@ const pr = (n: number) => ({ label: `#${n}`, href: `${REPO}/pull/${n}` });
  *  that every language has them. */
 export const LATEST_UPDATES: Update[] = [
   {
+    date: "2026-11-09",
+    title: "The TEHDAS2 results, checked against the hub",
+    text: "Each of the 21 TEHDAS2 documents is mapped to the hub: its status, where the hub does it, what is missing and the issue that closes it. The Regulation comes first, and every deliberate deviation is stated. A demo along the sessions of the Joint Action's final conference on 16 November is prepared.",
+    links: [
+      {
+        label: "The mapping",
+        href: `${BASE_PATH}/docs/ehds/tehdas2-mapping`,
+      },
+      { label: "#990", href: `${REPO}/issues/990` },
+      {
+        label: "ADR-083",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-083-what-the-hub-takes-over-from-tehdas2.md`,
+      },
+      {
+        label: "ADR-086",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-086-tehdas2-ratings-after-the-requirement-check.md`,
+      },
+      ...[1004, 1015, 1034].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-09",
+    title: "The roadmap to 2031, epic by epic",
+    text: "Every open issue belongs to one of ten epics, from identity and wallets to the TEHDAS2 results. The roadmap draws them as an interactive timeline you can filter and search, and gives each epic its priority, its window, how much is done and its dated items. The plan is edited in a public GitHub Project.",
+    links: [
+      { label: "Roadmap", href: `${BASE_PATH}/docs/roadmap` },
+      ...[956, 982, 1011, 1023].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-09",
+    title: "A challenge for the Simpl hackathon",
+    text: "For the Simpl hackathon on 9 December in Brussels the hub proposes a challenge: an insurer's bonus programme across a Simpl-Open data space and an EHDS health data space, where the insurer receives only a yes or no and never the health data. Today the two do not connect yet: the DSP compatibility kit passes 65 of 65 tests against the hub and 1 of 65 against Simpl's connector.",
+    links: [
+      { label: "#960", href: `${REPO}/issues/960` },
+      {
+        label: "ADR-080",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md`,
+      },
+      {
+        label: "Data flow",
+        href: `${BASE_PATH}/docs/ehds/bonus-programme-data-flow`,
+      },
+      ...[955, 970, 1014, 1020].map(pr),
+    ],
+  },
+  {
     date: "2026-11-06",
     title: "EDC 1.0, tested before it goes live",
     text: "On the local stack the connector, the identity hub and the issuer run on Eclipse Dataspace Components 1.0 (release candidate 5), with siglet as the data plane, and the hub provisions a new participant itself. The identity, dataspace and health checks pass there as they do on 0.18. The live hub, on EDC 0.18 since October with onboarding on Azure, moves once the final 1.0 is released.",

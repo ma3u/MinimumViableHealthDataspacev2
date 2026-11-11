@@ -1,0 +1,38 @@
+meta {
+  name: 32 Remove a seeded participant, refused (409)
+  type: http
+  seq: 32
+}
+
+delete {
+  url: {{baseUrl}}/api/participants/{{seededParticipantId}}
+  body: none
+  auth: inherit
+}
+
+script:pre-request {
+  // ADR-085 step 3: only a participant registered through /onboarding can be
+  // removed. This asks to remove the seeded AlphaKlinik Berlin context, found
+  // here by its DID and by having no registeredAt, never by a variable another
+  // request set: a wrong id would remove a participant someone onboarded.
+  const axios = require("axios");
+  const headers = { Cookie: `${bru.getEnvVar("cookieName")}=${bru.getEnvVar("sessionToken") || bru.getVar("sessionToken")}` };
+  const rows = (await axios.get(`${bru.getEnvVar("baseUrl")}/api/participants`, { headers, validateStatus: () => true })).data;
+  const seeded = Array.isArray(rows)
+    ? rows.find((r) => /:alpha-klinik$/.test(r.identity || "") && !(r.properties && r.properties.registeredAt))
+    : null;
+  bru.setVar("seededParticipantId", seeded ? seeded["@id"] || seeded.participantId : "no-seeded-alpha-klinik");
+}
+
+tests {
+  if (bru.getVar("seededParticipantId") === "no-seeded-alpha-klinik") {
+    test("SKIPPED: no seeded alpha-klinik context on this stack, so nothing to refuse", function () {});
+  } else {
+    test("a seeded participant is refused", function () {
+      expect(res.getStatus()).to.equal(409);
+    });
+    test("the refusal says why", function () {
+      expect(res.getBody().error, "an { error } body").to.contain("onboarding");
+    });
+  }
+}

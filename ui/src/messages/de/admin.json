@@ -898,5 +898,9 @@
   "EHDS secondary use for training an AI system, in a confidential SPE": "EHDS-Sekundärnutzung zum Trainieren eines KI-Systems, in einer vertraulichen sicheren Verarbeitungsumgebung",
   "Scientific research that trains or validates an AI system on pseudonymised data.": "Wissenschaftliche Forschung, die ein KI-System auf pseudonymisierten Daten trainiert oder validiert.",
   "Data Act: device data shared at the user's request": "Data Act: Gerätedaten, auf Wunsch der Person geteilt",
-  "Data a connected device generates (a glucose sensor, a wearable), shared with a recipient the user chose.": "Daten, die ein vernetztes Gerät erzeugt (ein Glukosesensor, ein Wearable), geteilt mit einem Empfänger, den die Person gewählt hat."
+  "Data a connected device generates (a glucose sensor, a wearable), shared with a recipient the user chose.": "Daten, die ein vernetztes Gerät erzeugt (ein Glukosesensor, ein Wearable), geteilt mit einem Empfänger, den die Person gewählt hat.",
+  "Remove participant": "Teilnehmer entfernen",
+  "Removing…": "Wird entfernt…",
+  "Removal failed": "Entfernen fehlgeschlagen",
+  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Diesen Teilnehmer aus dem Datenraum entfernen? Sein Kontext, seine DID und seine Nachweise werden gelöscht."
 }
