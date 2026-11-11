@@ -47,10 +47,22 @@ describe("the latest updates", () => {
     expect(new Set(titles).size).toBe(titles.length);
   });
 
-  it("leads with the EDC 1.0 migration and its tracking issue", () => {
-    const [first] = LATEST_UPDATES;
-    expect(first.title).toContain("EDC 1.0");
-    expect(first.links.map((l) => l.label)).toContain("#881");
+  it("keeps the EDC 1.0 migration with its tracking issue", () => {
+    const edc = LATEST_UPDATES.find((u) => u.title.includes("EDC 1.0"));
+    expect(edc?.links.map((l) => l.label)).toContain("#881");
+  });
+
+  it("leads with the TEHDAS2 results, the roadmap epics and the Simpl hackathon", () => {
+    const titles = LATEST_UPDATES.slice(0, 3).map((u) => u.title);
+    expect(titles).toEqual([
+      "The TEHDAS2 results, checked against the hub",
+      "The roadmap to 2031, epic by epic",
+      "A challenge for the Simpl hackathon",
+    ]);
+    const labels = LATEST_UPDATES.slice(0, 3).flatMap((u) =>
+      u.links.map((l) => l.label),
+    );
+    expect(labels).toEqual(expect.arrayContaining(["#990", "#960"]));
   });
 
   it("links every entry to its pull request, issue or decision", () => {
