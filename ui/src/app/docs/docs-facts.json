@@ -1418,6 +1418,12 @@
       "file": "ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md",
       "title": "CFM runs from our fork of eclipse-cfm until upstream takes the patches",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-089",
+      "file": "ADR-089-the-java-edc-apps-shrink-to-what-they-use.md",
+      "title": "The Java EDC apps shrink to what they use; they are not rewritten in Rust",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1512,7 +1518,7 @@
     "/docs/developer/api": "2026-11-10",
     "/docs/developer/reference": "2026-11-10",
     "/docs/developer/[slug]": "2026-11-10",
-    "/docs/architecture": "2026-11-10",
+    "/docs/architecture": "2026-11-11",
     "/docs/security": "2026-11-10",
     "/docs/security/[slug]": "2026-11-10",
     "/docs/klarbefund": "2026-11-10",
