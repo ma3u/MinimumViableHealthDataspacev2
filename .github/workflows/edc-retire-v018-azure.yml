@@ -112,9 +112,14 @@ jobs:
           echo "::add-mask::$PG_PASSWORD"
           VAULT_URL=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
             --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_URL'].value | [0]" -o tsv)
-          # The services' token is the control plane's ACA secret vault-token (#359).
+          # The services' token: the control plane's ACA secret vault-token after
+          # rotate-vault-token.sh (#359), otherwise its plain env value, which is
+          # what the 1.0 control plane carries (as edc-reseed-identity-layer.yml
+          # reads it). The first plan run stopped on the missing secret.
           VAULT_TOKEN=$(az containerapp secret show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
-            --secret-name vault-token --query value -o tsv)
+            --secret-name vault-token --query value -o tsv 2>/dev/null || true)
+          [ -n "$VAULT_TOKEN" ] || VAULT_TOKEN=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_TOKEN'].value | [0]" -o tsv)
           [ -n "$VAULT_URL" ] && [ -n "$VAULT_TOKEN" ] || { echo "::error::could not read the Vault URL and token from mvhd-controlplane"; exit 1; }
           echo "::add-mask::$VAULT_TOKEN"
           {
