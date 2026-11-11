@@ -97,6 +97,10 @@ DOCS = [
      "A glossary of the stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, the "
      "proxy, the catalogue services) and how it fits together; prerequisites, the two local stacks, "
      "seed phases, ports, environment variables, the iPhone app and the day-one gotchas."),
+    ("developer", "edc-sizing-under-load", "docs/developer/edc-sizing-under-load.md",
+     "Whether the EDC control plane, IdentityHub and IssuerService still negotiate under load at the "
+     "ADR-089 sizes: the k6 contracts run of 2026-11-11 with its latencies, each app's CPU and memory "
+     "against its new size, the two runs before it that measured nothing and why, and the Grafana links."),
     ("developer", "secure-processing-environment", "docs/developer/secure-processing-environment.md",
      "How the hub builds the secure processing environment of Art. 73 from confidential containers: "
      "the two SPE workspaces on ACI with AMD SEV-SNP, the Trustee the access body runs, how a "
