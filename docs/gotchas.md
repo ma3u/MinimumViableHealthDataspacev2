@@ -3,6 +3,34 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-11: a `contracts` load run on Azure left 132 negotiations retrying, and real ones queued behind them
+
+`load-tests/platform.js` sent `http://controlplane:8082/api/dsp` as the
+counterparty address, the compose name. On Azure the app is
+`mvhd-controlplane`, so every negotiation of the run failed with
+`controlplane: Name does not resolve` and went on retrying, each one at a
+time through the NATS consumer. Real negotiations waited behind them: the
+Demo Smoke run three quarters of an hour later failed its data-user contract
+requests and Playwright journey 53. The control plane never gave up on its
+own; the retry interval only grew.
+
+It also means no `contracts` run on Azure had negotiated for real since the
+scenario came in (#579, 2026-10-06): the October numbers measured requests to
+a name that does not resolve.
+
+Fix: the runners set `DSP_ADDRESS` (`run-load-test.sh` and `run.sh azure`
+use `mvhd-controlplane`, `run.sh local` the compose name, and a run against
+any other URL with `contracts` refuses to start without it). The stuck ones
+were ended through the management API, `POST
+/v5/participants/<ctx>/contractnegotiations/<id>/terminate` with
+`"@context": ["https://w3id.org/edc/connector/management/v2"]`, from a job
+inside the environment. Each logs one SEVERE line (the termination message
+has no provider process to name) and lands in `TERMINATED`; that is expected.
+
+Rule: an address a test sends to the connector comes from the stack it runs
+against, never from a constant. After a load run against Azure, check the
+control plane's log for `Name does not resolve` before calling it done.
+
 ## 2026-11-11: four things the first CFM deploy on Container Apps found
 
 - `az acr build` cannot build the CFM fork's Dockerfiles: ACR Tasks' dependency

@@ -151,7 +151,11 @@ const JOURNEYS = {
 
 const CONSUMER = "pharmaco";
 const PROVIDER = "alpha-klinik";
-const DSP_ADDRESS = "http://controlplane:8082/api/dsp";
+// The provider's DSP base as the hub's control plane reaches it. It differs
+// per stack: `controlplane` on compose, `mvhd-controlplane` on Azure, where the
+// compose name does not resolve and every negotiation retried until it was
+// terminated by hand (2026-11-11, docs/gotchas.md). The runners set it.
+const DSP_ADDRESS = __ENV.DSP_ADDRESS || "http://controlplane:8082/api/dsp";
 /** A dataset no permit names: the transfer the access body's rule refuses. */
 const UNPERMITTED_DATASET = "dataset:load-test-no-permit";
 
