@@ -15,6 +15,9 @@ vi.mock("qrcode", () => ({
 // HomeRegisterCta uses the App Router.
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+// The simulation these tests drive is what the static export shows; on the hub
+// the dialog runs the real wallet sign-in (register-dialog-live.test.tsx).
+vi.mock("@/lib/static-export", () => ({ IS_STATIC: true, BASE_PATH: "" }));
 
 import { EudiApprovalFlow } from "@/components/wallet/EudiApprovalFlow";
 import { RegisterDialog } from "@/components/RegisterDialog";
@@ -90,8 +93,8 @@ describe("RegisterDialog", () => {
   });
 });
 
-describe("HomeRegisterCta", () => {
-  it("opens the register dialog on click and signs in as the demo patient on completion", () => {
+describe("HomeRegisterCta in the static export", () => {
+  it("opens the register dialog on click and sets the demo patient persona on completion", () => {
     render(<HomeRegisterCta />);
     expect(screen.queryByRole("dialog")).toBeNull();
     fireEvent.click(

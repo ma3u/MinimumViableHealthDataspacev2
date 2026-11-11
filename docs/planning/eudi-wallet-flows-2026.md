@@ -179,3 +179,29 @@ three taps. This is allowed only where `EUDI_DEMO_WALLET=true` (compose and the 
 set it); anywhere else the route answers 404 and the page says "Simulation only on this
 deployment". The static export keeps the demo-persona path (ADR-028 §5: no fixture fakes an
 auth). Plan and the real d-you path: issue #182.
+
+## 2026-11-11: the start page's register dialog runs the real sign-in
+
+The "Register with d-you" dialog on the start page did neither of its two jobs on the hub.
+Its simulated phone set a persona in the browser and opened `/patient`, which needs a
+session since #357, so the visitor was sent to sign in. Its QR code was a fixed link to
+`/auth/eudi-qr`, which no wallet can answer.
+
+On the hub the dialog now runs what `/auth/eudi-qr` runs, from one place
+(`useWalletSignIn` in `ui/src/lib/use-wallet-sign-in.ts`, `WalletSignInStatus` and
+`WalletSignInFlow` in `ui/src/components/wallet/`):
+
+- **The simulated phone** signs in as the demo patient `patient1` through the
+  `eudi-wallet` provider (assurance low) and lands on `/patient`. `EUDI_DEMO_WALLET=true`
+  as before; CI's E2E servers set it too (J1104).
+- **The QR code** is the verifier's OpenID4VP request. A PID on an account signs in to it
+  and lands on `/patient`. A PID on no account creates one (ADR-067), shown once with its
+  password, and its owner may tick "Connect the Klarbefund app next (optional)": the sign-in
+  then lands on the profile page's card (`/patient/profile#connect-app`, ADR-049), where
+  Keycloak asks for that login once to approve the phone. No second pairing path.
+
+The dialog's subtitle said the wallet shares "name, age over 18". The request asks for the
+name and the birth date (ADR-067 decision 4; checked on the hub on 2026-11-11: `family_name`,
+`given_name`, `birthdate`) and never for an age, so the subtitle, the simulated consent
+screen (`PID_CLAIMS`) and the rule in `.claude/rules/api-conventions.md` now say so. The
+static export keeps the simulation (spec 19, J319).

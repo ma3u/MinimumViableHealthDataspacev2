@@ -680,6 +680,8 @@
   "Username": "Nom d’utilisateur",
   "Password": "Mot de passe",
   "I have saved them, sign me in": "Je les ai enregistrés, me connecter",
+  "Connect the Klarbefund app next (optional)": "Connecter ensuite l’app Klarbefund (facultatif)",
+  "Klarbefund reads this record on your iPhone. To approve it, Keycloak asks once for this username and password. You can also connect it later on your profile.": "Klarbefund lit ce dossier sur votre iPhone. Pour l’autoriser, Keycloak demande une fois ce nom d’utilisateur et ce mot de passe. Vous pouvez aussi la connecter plus tard depuis votre profil.",
   "This sign-in request expired.": "Cette demande de connexion a expiré.",
   "Could not reach the EUDI verifier.": "Impossible de joindre le vérificateur EUDI.",
   "You can create a sandbox account with this PID. The hub keeps only a secure hash of your name and birth date on it, never the name or the date (<a>privacy notice</a>).": "Vous pouvez créer un compte de test avec ce PID. Le hub n’y conserve qu’une empreinte sécurisée de votre nom et de votre date de naissance, jamais le nom ni la date (<a>avis de confidentialité</a>).",

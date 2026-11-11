@@ -35,7 +35,8 @@ describe("WalletFlow with REGISTER_STEPS (d-you's PID presentation)", () => {
     expect(screen.getByText("Reject")).toBeInTheDocument();
     expect(screen.getByText("Next")).toBeInTheDocument();
 
-    // step 2: the consent with the Digital ID card, age over 18, no birth date
+    // step 2: the consent with the Digital ID card: the name and the birth
+    // date the hub's request asks for (ADR-067), no age
     act(() => {
       vi.advanceTimersByTime(3300);
     });
@@ -45,8 +46,8 @@ describe("WalletFlow with REGISTER_STEPS (d-you's PID presentation)", () => {
     expect(
       screen.getByText(/3 out of 14 from Digital ID/i),
     ).toBeInTheDocument();
-    expect(screen.getByText("Age over 18")).toBeInTheDocument();
-    expect(screen.queryByText(/Date of birth/i)).toBeNull();
+    expect(screen.getByText("Date of birth")).toBeInTheDocument();
+    expect(screen.queryByText(/Age over/i)).toBeNull();
 
     // step 3: the Digital ID code
     act(() => {

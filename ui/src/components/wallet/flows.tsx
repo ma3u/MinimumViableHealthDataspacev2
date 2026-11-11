@@ -44,8 +44,12 @@ const card: React.CSSProperties = {
   borderRadius: 12,
 };
 
-/** The claims we ask for, labelled as `pid_presentation.data_consent.label_*`. */
-export const PID_CLAIMS = ["Given name(s)", "Family name", "Age over 18"];
+/**
+ * The claims the hub's request asks for (`pidQuery` in `lib/eudi-verifier.ts`),
+ * labelled as `pid_presentation.data_consent.label_*`: the name, and the birth
+ * date for the secure hash of ADR-067. No age: the hub does not ask for it.
+ */
+export const PID_CLAIMS = ["Given name(s)", "Family name", "Date of birth"];
 const PID_CLAIM_TOTAL = 14;
 
 const muted = { color: DYOU.onSurfaceVariant };

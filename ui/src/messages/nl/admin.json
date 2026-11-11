@@ -680,6 +680,8 @@
   "Username": "Gebruikersnaam",
   "Password": "Wachtwoord",
   "I have saved them, sign me in": "Opgeslagen, log me in",
+  "Connect the Klarbefund app next (optional)": "Daarna de Klarbefund-app koppelen (optioneel)",
+  "Klarbefund reads this record on your iPhone. To approve it, Keycloak asks once for this username and password. You can also connect it later on your profile.": "Klarbefund leest dit dossier op uw iPhone. Om dat goed te keuren vraagt Keycloak één keer om deze gebruikersnaam en dit wachtwoord. U kunt de app ook later via uw profiel koppelen.",
   "This sign-in request expired.": "Dit inlogverzoek is verlopen.",
   "Could not reach the EUDI verifier.": "De EUDI-verificateur was niet bereikbaar.",
   "You can create a sandbox account with this PID. The hub keeps only a secure hash of your name and birth date on it, never the name or the date (<a>privacy notice</a>).": "U kunt met deze PID een sandboxaccount aanmaken. De hub bewaart daarin alleen een veilige hash van uw naam en geboortedatum, nooit de naam of de datum (<a>privacyverklaring</a>).",

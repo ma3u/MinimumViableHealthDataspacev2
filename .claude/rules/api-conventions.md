@@ -130,7 +130,10 @@ parameter such as `persona`:
   real person's PID, so a patient session shows no name and no birth date
   anywhere: `/api/patient`, `/api/patient/profile`, `/api/overview`, the
   graph (the own node included) and the session's display name. The wallet
-  request asks for `age_over_18`, never for `birth_date`.
+  request asks for the name and, where the registration certificate names
+  it (`EUDI_PID_BIRTHDATE=true`, the hub), the birth date, only to compute
+  the keyed fingerprint of ADR-067; neither is stored, logged or shown. It
+  never asks for an age (`pidQuery()` in `ui/src/lib/eudi-verifier.ts`).
 - Everyone else (`DATA_USER`, `HDAB_AUTHORITY`, `TRUST_CENTER_OPERATOR`) sees
   `patientPseudonym()`, the birth year and no residence, in the graph, the
   node view and the cohort list. The NLQ proxy refuses any query that would
