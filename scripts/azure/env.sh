@@ -168,7 +168,13 @@ export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}"
 
 # ── Neo4j ────────────────────────────────────────────────────────────────────
 export NEO4J_USER="neo4j"
-export NEO4J_PASSWORD="healthdataspace"
+# The hub graph's password is not in this file (#359). Until 2026-11-11 it was
+# the compose default, "healthdataspace", on every app and job that opens the
+# graph. It is the Key Vault secret neo4j-password now, and each app or job
+# holds it as the ACA secret neo4j-password with
+# NEO4J_PASSWORD=secretref:neo4j-password (wire_neo4j_password below).
+# rotate-neo4j-password.sh changes it in Neo4j and in every holder.
+export NEO4J_PASSWORD_SECRET="neo4j-password"
 # Bolt is the only way in. mvhd-neo4j has TCP ingress with targetPort and
 # exposedPort 7687 and no additionalPortMappings, and ACA routes environment-
 # local TCP by short app name only — the internal FQDN is HTTP ingress and
@@ -247,6 +253,44 @@ pg_admin_password() {
     echo "[env] run 13-postgres-flexible-server.sh 1 if the server does not exist yet." >&2
   fi
   printf '%s' "$value"
+}
+
+# The hub Neo4j password. Key Vault first, then the ACA secret on the proxy, for
+# the reason kc_admin_password falls back: the CI identity cannot read the vault
+# but may list an app's secrets. A non-empty argument suppresses the warning.
+neo4j_password() {
+  local value
+  value=$(kv_secret "$NEO4J_PASSWORD_SECRET" quiet)
+  if [ -z "$value" ]; then
+    value=$(az containerapp secret show --name "$NEO4J_PROXY_APP" --resource-group "$RG" \
+      --secret-name "$NEO4J_PASSWORD_SECRET" --query value -o tsv 2>/dev/null) || true
+  fi
+  if [ -z "$value" ] && [ -z "${1:-}" ]; then
+    echo "[env] WARNING: no ${NEO4J_PASSWORD_SECRET} from $KEY_VAULT_NAME or from" >&2
+    echo "[env] the ACA secret on $NEO4J_PROXY_APP. Run 'az login'; on a first deploy," >&2
+    echo "[env] 02-data-layer.sh creates it." >&2
+  fi
+  printf '%s' "$value"
+}
+
+# wire_neo4j_password app|job <name> [variable]: the password as the ACA secret
+# neo4j-password on <name>, and <variable> (default NEO4J_PASSWORD) as a
+# reference to it. The value is never printed. An app gets a new revision.
+wire_neo4j_password() {
+  local kind="$1" name="$2" var="${3:-NEO4J_PASSWORD}" pw
+  pw=$(neo4j_password)
+  [ -n "$pw" ] || { echo "[env] no Neo4j password to give ${name}" >&2; return 1; }
+  if [ "$kind" = job ]; then
+    az containerapp job secret set --name "$name" --resource-group "$RG" \
+      --secrets "${NEO4J_PASSWORD_SECRET}=${pw}" -o none
+    az containerapp job update --name "$name" --resource-group "$RG" \
+      --set-env-vars "${var}=secretref:${NEO4J_PASSWORD_SECRET}" -o none
+  else
+    az containerapp secret set --name "$name" --resource-group "$RG" \
+      --secrets "${NEO4J_PASSWORD_SECRET}=${pw}" -o none
+    az containerapp update --name "$name" --resource-group "$RG" \
+      --set-env-vars "${var}=secretref:${NEO4J_PASSWORD_SECRET}" -o none
+  fi
 }
 
 # ── Keycloak ─────────────────────────────────────────────────────────────────

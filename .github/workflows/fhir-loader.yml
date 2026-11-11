@@ -118,7 +118,6 @@ jobs:
               --set-env-vars \
                 "NEO4J_URI=${NEO4J_URI}" \
                 "NEO4J_USER=neo4j" \
-                "NEO4J_PASSWORD=healthdataspace" \
               -o none
           else
             echo "Creating job ${{ env.JOB_NAME }}..."
@@ -135,8 +134,11 @@ jobs:
               --env-vars \
                 "NEO4J_URI=${NEO4J_URI}" \
                 "NEO4J_USER=neo4j" \
-                "NEO4J_PASSWORD=healthdataspace" \
               -o none
+            # The graph password as an ACA secret from Key Vault, never a
+            # plain value (#359); an existing one keeps the secret it has.
+            source scripts/azure/env.sh
+            wire_neo4j_password job "${{ env.JOB_NAME }}"
           fi
 
       - name: Start loader execution

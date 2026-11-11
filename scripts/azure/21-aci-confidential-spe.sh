@@ -434,7 +434,7 @@ properties:
       - server: ${ACR_LOGIN_SERVER}
         identity: ${tid}
     secrets:
-      - {name: hub-neo4j-password, value: "${NEO4J_PASSWORD}"}
+      - {name: hub-neo4j-password, value: "$(neo4j_password)"}
   template:
     containers:
       - name: trustee-admin

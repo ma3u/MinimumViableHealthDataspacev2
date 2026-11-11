@@ -130,7 +130,7 @@ else
     RESULT=$(az containerapp exec \
       --name "$NEO4J_APP" --resource-group "$RG" \
       --revision "$NEO4J_REV" --replica "$NEO4J_REPLICA" \
-      --command "cypher-shell -a bolt://localhost:7687 -u ${NEO4J_USER} -p ${NEO4J_PASSWORD} --non-interactive --format plain \"MATCH (n) RETURN 'NODECOUNT=' + toString(count(n)) AS c\"" \
+      --command "cypher-shell -a bolt://localhost:7687 -u ${NEO4J_USER} -p $(neo4j_password) --non-interactive --format plain \"MATCH (n) RETURN 'NODECOUNT=' + toString(count(n)) AS c\"" \
       2>&1 || echo "")
     TOTAL=$(printf '%s' "$RESULT" | sed -n 's/.*NODECOUNT=\([0-9][0-9]*\).*/\1/p' | head -1)
     if [[ -n "$TOTAL" ]]; then

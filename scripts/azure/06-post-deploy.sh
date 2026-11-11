@@ -59,7 +59,6 @@ if az containerapp job show --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o n
       "NEO4J_HOST=${NEO4J_APP}" \
       "NEO4J_PORT=7687" \
       "NEO4J_USER=${NEO4J_USER}" \
-      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     -o none
   ok "Neo4j seed job updated"
 else
@@ -75,10 +74,11 @@ else
       "NEO4J_HOST=${NEO4J_APP}" \
       "NEO4J_PORT=7687" \
       "NEO4J_USER=${NEO4J_USER}" \
-      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     -o none
   ok "Neo4j seed job created"
 fi
+# The graph password as an ACA secret, never a plain value (#359).
+wire_neo4j_password job "$NEO4J_SEED_JOB"
 
 log "Starting Neo4j seed job..."
 az containerapp job start --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o none

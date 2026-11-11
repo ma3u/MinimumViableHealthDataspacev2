@@ -75,7 +75,6 @@ ENV_VARS=(
   "KEYCLOAK_URL=${KC_URL}"
   "NEO4J_BOLT_URI=${NEO4J_BOLT_URI}"
   "NEO4J_USER=${NEO4J_USER}"
-  "NEO4J_PASSWORD=${NEO4J_PASSWORD}"
 )
 
 if az containerapp job show --name "$COMPLIANCE_JOB" --resource-group "$RG" -o none 2>/dev/null; then
@@ -103,6 +102,8 @@ else
     -o none
   ok "Job created"
 fi
+# The graph password as an ACA secret, never a plain value (#359).
+wire_neo4j_password job "$COMPLIANCE_JOB"
 
 # The suites get a token as the Keycloak client `admin`. Its secret on Azure
 # is no longer the public default (rotate-edc-admin-client-secret.sh), so the
