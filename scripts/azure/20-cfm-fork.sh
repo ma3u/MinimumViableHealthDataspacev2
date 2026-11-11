@@ -30,8 +30,9 @@ set -euo pipefail
 #   - the Keycloak client cfm-agents and its scopes in the Azure realm, as
 #     scripts/seed-cfm.sh creates them locally, its secret in Key Vault as
 #     cfm-agents-client-secret;
-#   - the database `cfm` on the Flexible Server, emptied of the 0.18 CFM's
-#     tables (#927 step 6);
+#   - the database `cfm` on the Flexible Server, emptied of the 2026-03 CFM's
+#     tables by .github/workflows/edc-retire-v018-azure.yml (#927 step 6).
+#     Run that first: it refuses while any mvhd-cfm-* app exists;
 #   - afterwards, the CFM definitions, cell and dataspace profile, as
 #     seed-cfm.sh seeds them, run inside the environment (the managers have
 #     internal ingress only).
@@ -205,6 +206,16 @@ report() {
   done
   echo "  fork     ${FORK_REPO} ${FORK_TAG}"
 }
+
+# Every mode asks Azure. An expired login (AADSTS70043 after the conditional
+# access hour) used to make --check report every item MISSING, which reads as
+# "nothing is there"; stop and say so instead.
+if [[ "$MODE" != render || "${3:-}" != --offline ]]; then
+  az account get-access-token --query expiresOn -o none 2>/dev/null || {
+    err "az is not signed in, or its token expired: az login first"
+    exit 2
+  }
+fi
 
 case "$MODE" in
   --check)

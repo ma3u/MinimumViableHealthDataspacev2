@@ -72,7 +72,7 @@ az containerapp create \
   --registry-server "$ACR_LOGIN_SERVER" \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
-  --cpu 1 --memory 2Gi \
+  --cpu "$EDC_CP_CPU" --memory "$EDC_CP_MEMORY" \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
@@ -80,7 +80,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_DSP_PROFILES_ENABLE_ALL=true" \
     "WEB_HTTP_PROTOCOL_VIRTUAL=true" \
@@ -148,7 +148,7 @@ az containerapp create \
   --registry-server "$ACR_LOGIN_SERVER" \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
-  --cpu 0.5 --memory 1Gi \
+  --cpu "$EDC_ID_CPU" --memory "$EDC_ID_MEMORY" \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 7081 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
@@ -156,7 +156,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
@@ -189,7 +189,7 @@ az containerapp create \
   --registry-server "$ACR_LOGIN_SERVER" \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
-  --cpu 0.5 --memory 1Gi \
+  --cpu "$EDC_ID_CPU" --memory "$EDC_ID_MEMORY" \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 10013 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
@@ -197,7 +197,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
