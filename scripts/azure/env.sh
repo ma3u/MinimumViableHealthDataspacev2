@@ -115,6 +115,18 @@ export UI_MEMORY="2Gi"
 export UI_MIN_REPLICAS="1"
 export UI_MAX_REPLICAS="6"
 export UI_SCALE_CONCURRENCY="15"
+# The Java EDC apps' size (ADR-089). Measured over seven days on 2026-11-11:
+# the control plane held 305 to 379 MiB and 0.015 vCPU (p95), IdentityHub and
+# the IssuerService under 200 MiB and 0.005 vCPU each, on 2 vCPU and 4 GiB
+# between them. A JVM takes a quarter of the container's memory as its heap
+# unless told otherwise, so halving the container would halve the heap:
+# EDC_JVM_HEAP_OPTS keeps the heap ceiling where it was (512 MiB for the
+# control plane, 256 MiB for the other two). size-edc.sh applies these.
+export EDC_CP_CPU="0.5"
+export EDC_CP_MEMORY="1Gi"
+export EDC_ID_CPU="0.25"
+export EDC_ID_MEMORY="0.5Gi"
+export EDC_JVM_HEAP_OPTS="-XX:MaxRAMPercentage=50"
 export KEYCLOAK_VERSION="26.8.0" # minor bump from 26.6.4 (#556, ADR-029 cadence)
 export VAULT_VERSION="2.0"
 export NATS_VERSION="2.14.3-alpine"
