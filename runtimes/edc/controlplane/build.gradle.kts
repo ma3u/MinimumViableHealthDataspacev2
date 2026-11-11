@@ -1,6 +1,8 @@
 dependencies {
     // for the EHDS policy vocabulary (see the extension's comment)
     implementation(libs.edc.spi.controlplane)
+    // for ehds:attestedPurpose's scope extractor (ADR-090)
+    implementation(libs.edc.spi.dcp)
     // for the task streams liveness check (ADR-084)
     implementation(libs.jnats)
 

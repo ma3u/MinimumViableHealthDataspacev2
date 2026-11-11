@@ -1,2 +1,3 @@
 eu.mvhd.edc.controlplane.policy.EhdsPolicyVocabularyExtension
 eu.mvhd.edc.controlplane.nats.NatsTaskStreamsLivenessExtension
+eu.mvhd.edc.controlplane.policy.EhdsAttestedPurposeExtension

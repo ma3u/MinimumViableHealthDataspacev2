@@ -28,8 +28,8 @@
       "alias": "wellbeing-ga",
       "did": "did:web:wellbeing-ga-issuer%3A10016:wellbeing-ga",
       "name": "Insurance and wellbeing data space, Governance Authority (fictional)",
-      "role": "A second data space's Governance Authority (#934): membership of its data space, accepted as membership of the hub's for that type only. AlphaKasse DE holds its membership from it.",
-      "types": ["MembershipCredential"],
+      "role": "A second data space's Governance Authority (#934): membership of its data space, accepted as membership of the hub's, and the purpose a member processes data for (ADR-090). AlphaKasse DE holds its membership and its bonus payout purpose from it.",
+      "types": ["MembershipCredential", "DataProcessingPurposeCredential"],
       "environments": ["compose", "ci"]
     }
   ]

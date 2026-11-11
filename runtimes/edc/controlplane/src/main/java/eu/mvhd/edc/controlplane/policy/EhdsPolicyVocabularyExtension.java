@@ -25,8 +25,10 @@ import java.util.List;
  * skip these constraints, exactly as EDC 0.18 did. Enforcing a term, such as
  * ehds:purpose against the consumer's DataProcessingPurposeCredential, means
  * binding it to a real scope with a function that decides; that is separate
- * work. The lists are the terms RC5 refused, measured by posting the four
- * standard policies with validation on.
+ * work. The lists are the terms RC5 refused, measured by posting the standard
+ * policies with validation on (odrl:event since the bonus programme's duty,
+ * ADR-090). ehds:attestedPurpose is not here: EhdsAttestedPurposeExtension
+ * enforces it.
  */
 @Extension(EhdsPolicyVocabularyExtension.NAME)
 public class EhdsPolicyVocabularyExtension implements ServiceExtension {
@@ -48,7 +50,7 @@ public class EhdsPolicyVocabularyExtension implements ServiceExtension {
             EHDS + "shareWithGatekeeper", EHDS + "transferOutsideEU");
 
     static final List<String> LEFT_OPERANDS = List.of(
-            ODRL + "spatial",
+            ODRL + "event", ODRL + "spatial",
             EHDS + "certification", EHDS + "dataPermit", EHDS + "hdabApproval", EHDS + "kAnonymity",
             EHDS + "legalBasis", EHDS + "processingEnvironment", EHDS + "purpose");
 

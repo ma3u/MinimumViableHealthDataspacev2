@@ -76,14 +76,24 @@ What the 1.0 stack needs beyond the image swap, found in the spike:
 
 Two pieces of code, both exceptions to ADR-076 decision 1 awaiting their own ADR:
 
-- `issuerservice/.../DemoAttestationsExtension.java`: the "membership" and
-  "manufacturer" attestation types our seeds use.
+- `issuerservice/.../DemoAttestationsExtension.java`: the "membership",
+  "manufacturer" and "purpose" attestation types our seeds use ("purpose"
+  since ADR-090, for a DataProcessingPurposeCredential).
 - `controlplane/.../EhdsPolicyVocabularyExtension.java`: declares the EHDS
   actions and left operands of the standard policies (ADR-077), so 1.0's
   policy validation accepts them. Declared, not enforced: they are bound to a
   scope EDC never evaluates, as on 0.18, where they were not enforced either.
 
-And one with its ADR:
+And two with their ADR:
+
+- `controlplane/.../policy/EhdsAttestedPurposeExtension.java`
+  ([ADR-090](../../docs/ADRs/ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md)):
+  the one EHDS term the control plane enforces, `ehds:attestedPurpose`, bound
+  to the negotiation and transfer scopes. The consumer presents its
+  DataProcessingPurposeCredential for it (`AttestedPurposeScopeExtractor`) and
+  the provider admits only a purpose the policy names
+  (`AttestedPurposeFunction`). The bonus programme policy uses it; the TCK
+  launcher has no DCP, so there only the function is bound.
 
 - `controlplane/.../nats/NatsTaskStreamsLivenessExtension.java`
   ([ADR-084](../../docs/ADRs/ADR-084-the-control-plane-restarts-when-its-nats-task-streams-are-gone.md)):

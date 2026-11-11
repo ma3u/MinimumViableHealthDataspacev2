@@ -916,6 +916,175 @@ trust_rogue_round() {
 }
 
 # ---------------------------------------------------------------------------
+# Category 7: The bonus programme's purpose, decided by the connector (#934 step 5, ADR-090)
+# ---------------------------------------------------------------------------
+# AlphaKlinik offers bonus-programme-answer under mvhd-bonus-programme, whose
+# ehds:attestedPurpose admits only a consumer whose DataProcessingPurposeCredential
+# attests "bonus-payout". AlphaKasse DE holds that credential from the
+# insurance and wellbeing authority (scripts/seed-second-data-space.sh). 7.3
+# swaps it for one attesting "premium-setting" and puts it back afterwards.
+# Like 6.3 to 6.9, these need a working DSP path and skip loudly without one.
+PURPOSE_ASSET="bonus-programme-answer"
+PURPOSE_GA_ADMIN="${PURPOSE_GA_ADMIN:-http://localhost:10053/api/admin}"
+
+# Negotiates the bonus offer for a consumer context. Prints the final state,
+# a space, and the reason the consumer recorded (empty when FINALIZED).
+purpose_negotiate() {
+  local consumer_ctx="$1" provider_ctx provider_did dsp catalog offer body id state="" detail="" i
+  provider_ctx=$(trust_ctx "$TRUST_PROVIDER_SLUG")
+  provider_did="did:web:identityhub%3A7083:${TRUST_PROVIDER_SLUG}"
+  dsp="${DSP_INTERNAL_URL:-http://controlplane:8082/api/dsp}/${provider_ctx}/${DSP_PROTOCOL:-http-dsp-profile-2025-1}"
+  catalog=$(curl -s --max-time 60 -X POST -H "$(auth_header)" -H "Content-Type: application/json" \
+    -d "{\"@context\":[\"https://w3id.org/edc/connector/management/v2\"],\"@type\":\"CatalogRequest\",\"counterPartyAddress\":\"${dsp}\",\"counterPartyId\":\"${provider_did}\",\"protocol\":\"${DSP_PROTOCOL:-http-dsp-profile-2025-1}\"}" \
+    "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/catalog/request" 2>/dev/null) || catalog=""
+  # The offer goes back whole, as jad/seed-contract-negotiation.sh sends it.
+  offer=$(printf '%s' "$catalog" | python3 -c '
+import json, sys
+try: d = json.load(sys.stdin)
+except Exception: sys.exit(0)
+ds = d.get("dataset", []); ds = [ds] if isinstance(ds, dict) else ds
+for x in ds:
+    if x.get("@id") == sys.argv[2]:
+        p = x.get("hasPolicy"); p = p[0] if isinstance(p, list) else p
+        p = {k: v for k, v in p.items() if k != "@context" and v != []}
+        p.update({"@context": "http://www.w3.org/ns/odrl.jsonld", "@type": "Offer", "assigner": sys.argv[1], "target": sys.argv[2]})
+        print(json.dumps(p)); break
+' "$provider_did" "$PURPOSE_ASSET" 2>/dev/null)
+  if [ -z "$offer" ]; then
+    printf 'NO-OFFER %s' "$TRUST_PROVIDER_SLUG's catalogue has no ${PURPOSE_ASSET} (run scripts/seed-second-data-space.sh)"
+    return
+  fi
+  body="{\"@context\":[\"https://w3id.org/edc/connector/management/v2\"],\"@type\":\"ContractRequest\",\"counterPartyAddress\":\"${dsp}\",\"protocol\":\"${DSP_PROTOCOL:-http-dsp-profile-2025-1}\",\"policy\":${offer}}"
+  id=$(curl -s --max-time 30 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$body" \
+    "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations" 2>/dev/null | jq -r '."@id" // empty' 2>/dev/null)
+  [ -n "$id" ] || { printf 'NOT-STARTED the contract request was not accepted'; return; }
+  for i in $(seq 1 30); do
+    state=$(curl -s --max-time 15 -H "$(auth_header)" \
+      "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations/${id}" 2>/dev/null | jq -r '.state // empty' 2>/dev/null)
+    case "$state" in FINALIZED|TERMINATED) break ;; esac
+    sleep 2
+  done
+  detail=$(curl -s --max-time 15 -H "$(auth_header)" \
+    "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations/${id}" 2>/dev/null | jq -r '.errorDetail // empty' 2>/dev/null)
+  printf '%s %s' "${state:-UNKNOWN}" "$detail"
+}
+
+# The ids of a holder's DataProcessingPurposeCredentials, with their purpose.
+purpose_credentials() {
+  curl -s --max-time 20 -H "$(auth_header)" "${IDENTITY_API}/v1/participants/$1/credentials" 2>/dev/null |
+    jq -r '.[]? | select((.verifiableCredential.credential.type // []) | index("DataProcessingPurposeCredential"))
+      | "\(.id) \([.verifiableCredential.credential.credentialSubject] | flatten | .[0].purpose // "?")"' 2>/dev/null
+}
+
+purpose_drop_all() {
+  local cred
+  for cred in $(purpose_credentials "$1" | awk '{print $1}'); do
+    curl -s -o /dev/null --max-time 20 -X DELETE -H "$(auth_header)" \
+      "${IDENTITY_API}/v1/participants/$1/credentials/${cred}" 2>/dev/null || true
+  done
+}
+
+# Has the authority issue the holder a purpose credential from definition $2.
+purpose_issue() {
+  local repo_dir
+  repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  ISSUER_DID="$TRUST_WELLBEING_GA_DID" EDC_ISSUER_URL="$PURPOSE_GA_ADMIN" ISSUER_CTX=wellbeing-ga ONLY="$1" WAIT_SECONDS=60 \
+    CREDENTIAL_TYPE=DataProcessingPurposeCredential CREDENTIAL_DEFINITION_ID="$2" \
+    "${repo_dir}/scripts/request-participant-credentials.sh" >/dev/null 2>&1
+}
+
+run_purpose_tests() {
+  log "Category 7: The bonus programme's purpose, decided by the connector (#934 step 5, ADR-090)"
+  local test_id ak_ctx control_ctx provider_ctx provider_did res held ga_post_ok=1
+  if ! docker inspect health-dataspace-wellbeing-ga-issuer >/dev/null 2>&1; then
+    for test_id in PURPOSE-7.1 PURPOSE-7.2 PURPOSE-7.3 PURPOSE-7.4; do
+      skip "$test_id: no insurance and wellbeing authority on this stack (not a local stack, or scripts/seed-second-data-space.sh not run)"
+      record_result "$test_id" "purpose" "skipped" "authority not running"
+    done
+    return
+  fi
+  ak_ctx=$(trust_ctx "$TRUST_WELLBEING_SLUG")
+  control_ctx=$(trust_ctx pharmaco)
+  provider_ctx=$(trust_ctx "$TRUST_PROVIDER_SLUG")
+  provider_did="did:web:identityhub%3A7083:${TRUST_PROVIDER_SLUG}"
+  res=$(trust_catalog "${control_ctx:-none}" "${provider_ctx:-none}" "$provider_did")
+  if [ -z "$ak_ctx" ] || [ "${res#* }" != "Catalog" ]; then
+    for test_id in PURPOSE-7.1 PURPOSE-7.2 PURPOSE-7.3 PURPOSE-7.4; do
+      skip "$test_id: no ${TRUST_WELLBEING_SLUG} context, or the DSP path does not work here (pharmaco's catalogue answered ${res})"
+      record_result "$test_id" "purpose" "skipped" "DSP path not working"
+    done
+    return
+  fi
+
+  # 7.1 — The bonus payout purpose is admitted
+  test_id="PURPOSE-7.1"
+  held=$(purpose_credentials "$ak_ctx" | awk '{print $2}' | sort -u | tr '\n' ' ')
+  res=$(purpose_negotiate "$ak_ctx")
+  if [ "${res%% *}" = "FINALIZED" ]; then
+    pass "$test_id: ${TRUST_WELLBEING_SLUG}, whose purpose credential attests [${held% }], agrees to ${PURPOSE_ASSET} under mvhd-bonus-programme"
+    record_result "$test_id" "purpose" "passed"
+  else
+    fail "$test_id: ${TRUST_WELLBEING_SLUG} (purposes [${held% }]) negotiating ${PURPOSE_ASSET} ended ${res}"
+    record_result "$test_id" "purpose" "failed" "bonus payout refused"
+  fi
+
+  # 7.2 — A consumer with no purpose credential is refused
+  test_id="PURPOSE-7.2"
+  res=$(purpose_negotiate "$control_ctx")
+  if [ "${res%% *}" = "TERMINATED" ]; then
+    pass "$test_id: pharmaco, which holds no purpose credential, is refused (${res:11:110})"
+    record_result "$test_id" "purpose" "passed"
+  else
+    fail "$test_id: pharmaco without a purpose credential ended ${res}"
+    record_result "$test_id" "purpose" "failed" "no purpose admitted"
+  fi
+
+  # 7.3 — A purpose of premium setting is refused by ehds:attestedPurpose
+  test_id="PURPOSE-7.3"
+  purpose_drop_all "$ak_ctx"
+  for body in \
+    '{"attestationType":"purpose","id":"premium-setting-purpose-attestation","configuration":{"purpose":"premium-setting","legalBasis":"none"}}' \
+    '{"attestations":["premium-setting-purpose-attestation"],"credentialType":"DataProcessingPurposeCredential","id":"premium-setting-purpose-credential-def","jsonSchema":"{}","jsonSchemaUrl":"https://w3id.org/ehds/schema/data-processing-purpose-credential.json","mappings":[{"input":"purpose","output":"credentialSubject.purpose","required":true},{"input":"legalBasis","output":"credentialSubject.legalBasis","required":true},{"input":"since","output":"credentialSubject.since","required":true}],"rules":[],"format":"VC1_0_JWT","validity":"604800"}'; do
+    local what=attestations status
+    case "$body" in *credentialType*) what=credentialdefinitions ;; esac
+    status=$(curl -s -o /dev/null --max-time 20 -w '%{http_code}' -X POST -H "$(auth_header)" -H "Content-Type: application/json" \
+      -d "$body" "${PURPOSE_GA_ADMIN}/v1/participants/wellbeing-ga/${what}" 2>/dev/null) || status=000
+    case "$status" in 2??|409) ;; *) ga_post_ok=0 ;; esac
+  done
+  if [ "$ga_post_ok" -ne 1 ] || ! purpose_issue "$TRUST_WELLBEING_SLUG" premium-setting-purpose-credential-def; then
+    fail "$test_id: could not have the authority attest premium-setting to ${TRUST_WELLBEING_SLUG}"
+    record_result "$test_id" "purpose" "failed" "premium setting credential setup"
+  else
+    held=$(purpose_credentials "$ak_ctx" | awk '{print $2}' | sort -u | tr '\n' ' ')
+    res=$(purpose_negotiate "$ak_ctx")
+    if [ "${res%% *}" = "TERMINATED" ] && [[ "$res" == *"attestedPurpose"* ]]; then
+      pass "$test_id: with a purpose credential attesting [${held% }], ${TRUST_WELLBEING_SLUG} is refused by ehds:attestedPurpose (contract.negotiation not fulfilled)"
+      record_result "$test_id" "purpose" "passed"
+    else
+      fail "$test_id: with purposes [${held% }] the negotiation ended ${res}; want TERMINATED naming ehds:attestedPurpose"
+      record_result "$test_id" "purpose" "failed" "premium setting not refused by the policy"
+    fi
+  fi
+
+  # 7.4 — With the bonus payout purpose back, the agreement is reached again
+  test_id="PURPOSE-7.4"
+  purpose_drop_all "$ak_ctx"
+  if ! purpose_issue "$TRUST_WELLBEING_SLUG" bonus-payout-purpose-credential-def; then
+    fail "$test_id: could not give ${TRUST_WELLBEING_SLUG} its bonus-payout purpose back (run scripts/seed-second-data-space.sh)"
+    record_result "$test_id" "purpose" "failed" "bonus purpose not restored"
+    return
+  fi
+  res=$(purpose_negotiate "$ak_ctx")
+  if [ "${res%% *}" = "FINALIZED" ]; then
+    pass "$test_id: with the bonus-payout purpose back, ${TRUST_WELLBEING_SLUG} agrees to ${PURPOSE_ASSET} again"
+    record_result "$test_id" "purpose" "passed"
+  else
+    fail "$test_id: after restoring bonus-payout the negotiation ended ${res}"
+    record_result "$test_id" "purpose" "failed" "not admitted after restore"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Generate JSON report
 # ---------------------------------------------------------------------------
 write_report() {
@@ -969,6 +1138,8 @@ main() {
   run_scope_tests
   echo ""
   run_trust_tests
+  echo ""
+  run_purpose_tests
 
   echo ""
   echo "═══════════════════════════════════════════════════════════════"

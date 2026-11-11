@@ -902,5 +902,8 @@
   "Remove participant": "Deelnemer verwijderen",
   "Removing…": "Wordt verwijderd…",
   "Removal failed": "Verwijderen mislukt",
-  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Deze deelnemer uit de dataruimte verwijderen? De context, de DID en de bewijsstukken worden verwijderd."
+  "Remove this participant from the dataspace? Its context, DID and credentials are deleted.": "Deze deelnemer uit de dataruimte verwijderen? De context, de DID en de bewijsstukken worden verwijderd.",
+  "the purpose the recipient's credential attests": "het doel dat het bewijsstuk van de ontvanger bevestigt",
+  "Bonus program: the member's yes or no, for the payout only": "Bonusprogramma: het ja of nee van het lid, alleen voor de uitbetaling",
+  "A program's goal met, yes or no, sent to the insurer that runs it, at the member's instruction.": "Of het doel van een programma is gehaald, ja of nee, op verzoek van het lid verstuurd naar de verzekeraar die het aanbiedt."
 }

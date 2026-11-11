@@ -9,6 +9,9 @@ dependencies {
     // the hub's own extension, without :controlplane's DCP and Vault modules
     implementation(project(":controlplane")) { isTransitive = false }
     implementation(libs.edc.spi.controlplane)
+    // EhdsAttestedPurposeExtension names the DCP scope extractor registry; without
+    // DCP it is absent and the extension binds the provider's check only
+    implementation(libs.edc.spi.dcp)
 
     runtimeOnly(libs.edc.bom.controlplane.virtual) {
         // as EDC's TCK connector: no data plane signalling to authorise

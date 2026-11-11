@@ -499,6 +499,8 @@ const OPERAND_LABELS: Record<string, string> = {
   processingEnvironment: "the processing environment",
   certification: "the certification",
   legalBasis: "the legal basis",
+  // Decided by the hub's connector against a DataProcessingPurposeCredential (ADR-090)
+  attestedPurpose: "the purpose the recipient's credential attests",
 };
 
 /** ODRL 2.2's operators. */
