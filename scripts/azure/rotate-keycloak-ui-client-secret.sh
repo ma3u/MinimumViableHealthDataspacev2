@@ -17,14 +17,16 @@ set -euo pipefail
 #   mvhd-ui         KEYCLOAK_CLIENT_SECRET=secretref:keycloak-ui-client-secret
 #
 # Usage:
-#   rotate-keycloak-ui-client-secret.sh --check    # report, change nothing
-#   rotate-keycloak-ui-client-secret.sh --rotate   # new secret in Keycloak, then wire
-#   rotate-keycloak-ui-client-secret.sh            # wire Keycloak's current secret
+#   rotate-keycloak-ui-client-secret.sh --check        # report, change nothing
+#   rotate-keycloak-ui-client-secret.sh --rotate       # new secret: Key Vault, mvhd-ui, Keycloak
+#   rotate-keycloak-ui-client-secret.sh --to-keycloak  # Key Vault's secret into Keycloak only
+#   rotate-keycloak-ui-client-secret.sh                # wire Keycloak's current secret
 #
 # --rotate breaks sign-in from the moment mvhd-ui's new revision serves until
 # Keycloak has the new secret, a few seconds. Sessions already open stay.
 # A realm re-import brings the default back (runbook keycloak-realm-drift.md):
-# rerun with --rotate afterwards, as for rotate-edc-admin-client-secret.sh.
+# --to-keycloak puts the Key Vault secret back, and needs no new UI revision.
+# It is also the way out when --rotate stopped after step 3.
 #
 # Needs: Key Vault Secrets Officer (the PIM role), Container Apps Contributor.
 # =============================================================================
@@ -33,11 +35,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/env.sh"
 ROTATE=false
 CHECK_ONLY=false
+TO_KEYCLOAK=false
 case "${1:-}" in
   --rotate) ROTATE=true ;;
   --check) CHECK_ONLY=true ;;
+  --to-keycloak) TO_KEYCLOAK=true ;;
   "") ;;
-  *) echo "usage: $0 [--check|--rotate]" >&2; exit 64 ;;
+  *) echo "usage: $0 [--check|--rotate|--to-keycloak]" >&2; exit 64 ;;
 esac
 CLIENT_ID="health-dataspace-ui"
 SECRET_NAME="keycloak-ui-client-secret"
@@ -80,19 +84,48 @@ if [ "$CHECK_ONLY" = true ]; then
   exit 0
 fi
 
-# ── 1. Keycloak ─────────────────────────────────────────────────────────────
-KC_ADMIN_PASS=$(kc_admin_password)
-[ -n "$KC_ADMIN_PASS" ] || { err "no Keycloak admin password"; exit 1; }
-MASTER=$(curl -sS --max-time 30 -X POST "${KC}/realms/master/protocol/openid-connect/token" \
-  --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
-  --data-urlencode username=admin --data-urlencode "password=${KC_ADMIN_PASS}" \
-  | python3 -c 'import json,sys; print(json.load(sys.stdin).get("access_token",""))')
-unset KC_ADMIN_PASS
-[ -n "$MASTER" ] || { err "no Keycloak admin token"; exit 1; }
-UUID=$(curl -sS --max-time 30 -H "Authorization: Bearer ${MASTER}" \
-  "${KC}/admin/realms/edcv/clients?clientId=${CLIENT_ID}" \
-  | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0]["id"] if d else "")')
-[ -n "$UUID" ] || { err "no client '${CLIENT_ID}' in realm edcv"; exit 1; }
+# A master-realm admin token. It lives a minute, so each use fetches one: the
+# first --rotate run on 2026-11-11 held one across the UI rollout and Keycloak
+# refused the update with 401, leaving sign-in down until --to-keycloak.
+kc_master() {
+  local pass token
+  pass=$(kc_admin_password)
+  [ -n "$pass" ] || { err "no Keycloak admin password"; return 1; }
+  token=$(curl -sS --max-time 30 -X POST "${KC}/realms/master/protocol/openid-connect/token" \
+    --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
+    --data-urlencode username=admin --data-urlencode "password=${pass}" \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin).get("access_token",""))')
+  [ -n "$token" ] || { err "no Keycloak admin token"; return 1; }
+  printf '%s' "$token"
+}
+
+# set_keycloak_secret <value>: the client's secret in Keycloak, set rather than
+# regenerated. The representation goes through a pipe, never a file.
+set_keycloak_secret() {
+  local master uuid code
+  master=$(kc_master) || return 1
+  uuid=$(curl -sS --max-time 30 -H "Authorization: Bearer ${master}" \
+    "${KC}/admin/realms/edcv/clients?clientId=${CLIENT_ID}" \
+    | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0]["id"] if d else "")')
+  [ -n "$uuid" ] || { err "no client '${CLIENT_ID}' in realm edcv"; return 1; }
+  code=$(curl -sS --max-time 30 -H "Authorization: Bearer ${master}" \
+    "${KC}/admin/realms/edcv/clients/${uuid}" |
+    NEW_SECRET="$1" python3 -c 'import json,os,sys; r=json.load(sys.stdin); r["secret"]=os.environ["NEW_SECRET"]; json.dump(r, sys.stdout)' |
+    curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X PUT \
+      -H "Authorization: Bearer ${master}" -H "Content-Type: application/json" \
+      --data-binary @- "${KC}/admin/realms/edcv/clients/${uuid}")
+  [ "$code" = 204 ] || { err "Keycloak answered HTTP ${code} to the new secret"; return 1; }
+}
+
+if [ "$TO_KEYCLOAK" = true ]; then
+  SECRET=$(kv_secret "$SECRET_NAME")
+  [ -n "$SECRET" ] || exit 1
+  set_keycloak_secret "$SECRET"
+  accepted "$SECRET" || { err "Keycloak does not take the secret in Key Vault"; exit 1; }
+  unset SECRET
+  ok "Keycloak has the Key Vault secret for ${CLIENT_ID}"
+  exit 0
+fi
 
 KV_URI="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv)"
 IDENTITY_ID="$(az identity show --name "$IDENTITY_NAME" --resource-group "$RG" --query id -o tsv)"
@@ -101,11 +134,17 @@ REF="keyvaultref:${KV_URI%/}/secrets/${SECRET_NAME},identityref:${IDENTITY_ID}"
 if [ "$ROTATE" = true ]; then
   SECRET=$(openssl rand -hex 24)
 else
+  MASTER=$(kc_master)
+  UUID=$(curl -sS --max-time 30 -H "Authorization: Bearer ${MASTER}" \
+    "${KC}/admin/realms/edcv/clients?clientId=${CLIENT_ID}" \
+    | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0]["id"] if d else "")')
+  [ -n "$UUID" ] || { err "no client '${CLIENT_ID}' in realm edcv"; exit 1; }
   SECRET=$(curl -sS --max-time 30 -H "Authorization: Bearer ${MASTER}" \
     "${KC}/admin/realms/edcv/clients/${UUID}/client-secret" \
     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("value",""))')
   [ -n "$SECRET" ] || { err "could not read the ${CLIENT_ID} client secret"; exit 1; }
   [ "$SECRET" != "$DEFAULT_SECRET" ] || warn "Keycloak still has the public default; run with --rotate"
+  unset MASTER
 fi
 
 # ── 2. Key Vault ────────────────────────────────────────────────────────────
@@ -145,24 +184,10 @@ ok "${UI_APP} reads KEYCLOAK_CLIENT_SECRET from Key Vault (${after})"
 # ── 4. Keycloak takes it (--rotate) ─────────────────────────────────────────
 # Set, not regenerated: the value is already in Key Vault and in the UI.
 if [ "$ROTATE" = true ]; then
-  umask 077
-  REP=$(mktemp)
-  curl -sS --max-time 30 -H "Authorization: Bearer ${MASTER}" \
-    "${KC}/admin/realms/edcv/clients/${UUID}" -o "$REP"
-  SECRET="$SECRET" python3 - "$REP" <<'PY2'
-import json, os, sys
-rep = json.load(open(sys.argv[1]))
-rep["secret"] = os.environ["SECRET"]
-json.dump(rep, open(sys.argv[1], "w"))
-PY2
-  code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X PUT \
-    -H "Authorization: Bearer ${MASTER}" -H "Content-Type: application/json" \
-    --data-binary "@${REP}" "${KC}/admin/realms/edcv/clients/${UUID}")
-  rm -f "$REP"
-  [ "$code" = 204 ] || { err "Keycloak answered HTTP ${code} to the new secret; sign-in is down, rerun"; exit 1; }
+  set_keycloak_secret "$SECRET" ||
+    { err "sign-in is down until Keycloak has it: $0 --to-keycloak"; exit 1; }
   ok "Keycloak has the new ${CLIENT_ID} secret"
 fi
-unset MASTER
 
 # ── 5. Check ────────────────────────────────────────────────────────────────
 accepted "$SECRET" || { err "Keycloak does not take the secret in Key Vault"; exit 1; }
