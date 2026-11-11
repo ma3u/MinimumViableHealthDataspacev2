@@ -30,11 +30,34 @@ public enum WearableMetric: String, CaseIterable, Sendable, Codable {
   /// Apple Health's exercise minutes, a day's total. What a bonus program's
   /// active year rule reads (#934 step 6, ADR-087); never inferred from steps.
   case exercise
+  /// Apple Watch's cardio fitness estimate, VO2 max. An estimate from a walk
+  /// or a run, not the measured peak of a spiroergometry; it is coded like
+  /// one so the two can be drawn side by side, and its source says which.
+  case vo2Max = "vo2-max"
+  case respiratoryRate = "respiratory-rate"
+  case oxygenSaturation = "oxygen-saturation"
+  /// Active energy, a day's total.
+  case activeEnergy = "active-energy"
+  case bodyFat = "body-fat"
+  /// Time asleep in a night, all stages together, and the three stages a
+  /// watch tells apart. Read from sleep analysis, not a quantity.
+  case sleep
+  case deepSleep = "deep-sleep"
+  case remSleep = "rem-sleep"
+  case coreSleep = "core-sleep"
 
   /// How a week of daily values becomes one point.
   public enum Aggregation: Sendable { case mean, sum }
 
-  public var aggregation: Aggregation { self == .steps || self == .exercise ? .sum : .mean }
+  public var aggregation: Aggregation {
+    switch self {
+    case .steps, .exercise, .activeEnergy: return .sum
+    default: return .mean
+    }
+  }
+
+  /// Read from sleep analysis (a category), not from a quantity type.
+  public var isSleep: Bool { [.sleep, .deepSleep, .remSleep, .coreSleep].contains(self) }
 
   /// The unit the series is expressed in, as a person reads it.
   public var unit: String {
@@ -44,6 +67,12 @@ public enum WearableMetric: String, CaseIterable, Sendable, Codable {
     case .steps: return String(localized: "steps per day")
     case .bodyMass: return "kg"
     case .exercise: return String(localized: "minutes per day")
+    case .vo2Max: return "mL/kg/min"
+    case .respiratoryRate: return String(localized: "breaths/min")
+    case .oxygenSaturation, .bodyFat: return "%"
+    case .activeEnergy: return String(localized: "kcal per day")
+    case .sleep: return String(localized: "hours per night")
+    case .deepSleep, .remSleep, .coreSleep: return String(localized: "minutes per night")
     }
   }
 
@@ -54,6 +83,15 @@ public enum WearableMetric: String, CaseIterable, Sendable, Codable {
     case .steps: return String(localized: "Steps")
     case .bodyMass: return String(localized: "Body weight")
     case .exercise: return String(localized: "Exercise minutes")
+    case .vo2Max: return String(localized: "Cardio fitness (VO2 max)")
+    case .respiratoryRate: return String(localized: "Respiratory rate")
+    case .oxygenSaturation: return String(localized: "Blood oxygen")
+    case .activeEnergy: return String(localized: "Active energy")
+    case .bodyFat: return String(localized: "Body fat")
+    case .sleep: return String(localized: "Sleep")
+    case .deepSleep: return String(localized: "Deep sleep")
+    case .remSleep: return String(localized: "REM sleep")
+    case .coreSleep: return String(localized: "Core sleep")
     }
   }
 }

@@ -19,7 +19,7 @@ settings:
     MARKETING_VERSION: "1.0"
     # Rises with every upload: App Store Connect refuses a build number it has
     # already seen, and it refuses it after the upload, having spent minutes.
-    CURRENT_PROJECT_VERSION: "11"
+    CURRENT_PROJECT_VERSION: "13"
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
@@ -74,10 +74,18 @@ targets:
         # Read only, asked for on the Trends screen when the person taps
         # "Show trends from Apple Health" and never at launch (#186
         # criterion 3). German in de.lproj/InfoPlist.strings.
+        # Export to my Mac (Relate): the phone talks to a receiver on the
+        # person's own Wi-Fi, which iOS asks about once. German in
+        # de.lproj/InfoPlist.strings.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: >-
+          Klarbefund sends your values to your own Mac on this network, and
+          only when you have paired it by its QR code.
         INFOPLIST_KEY_NSHealthShareUsageDescription: >-
           Klarbefund reads resting heart rate, heart rate variability, steps,
-          weight and exercise minutes to show them beside your lab values. It
-          keeps no copy and writes nothing to Health.
+          weight, exercise minutes, cardio fitness (VO2 max), respiratory rate,
+          blood oxygen, active energy, body fat and sleep to show them beside
+          your lab values. It keeps no copy on this phone and writes nothing to
+          Health; weekly means leave the phone only where you switch that on.
         # The app asks for no write access (toShare: []), so iOS never shows
         # this. App Store Connect refuses an upload with the HealthKit
         # entitlement and no update string all the same (ITMS-90683, build

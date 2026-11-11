@@ -49,6 +49,47 @@ public enum WearableFHIR {
       return Coding(
         loinc: "55411-3", display: "Exercise duration", ucum: "min/d", category: "activity",
         decimals: 0)
+    case .vo2Max:
+      // The same code as a spiroergometry's VO2 peak (analytes.ts), so the
+      // watch's estimate and the measured value meet in a graph; the
+      // Observation's source says it is a device estimate.
+      return Coding(
+        loinc: "94122-9",
+        display: "Oxygen consumption (VO2)/Body weight [Volume Rate Content] --peak during exercise",
+        ucum: "mL/min/kg", category: "vital-signs", decimals: 1)
+    case .respiratoryRate:
+      return Coding(
+        loinc: "9279-1", display: "Respiratory rate", ucum: "/min", category: "vital-signs",
+        decimals: 1)
+    case .oxygenSaturation:
+      return Coding(
+        loinc: "59408-5", display: "Oxygen saturation in Arterial blood by Pulse oximetry",
+        ucum: "%", category: "vital-signs", decimals: 1)
+    case .activeEnergy:
+      return Coding(
+        loinc: "41981-2", display: "Calories burned", ucum: "kcal/d", category: "activity",
+        decimals: 0)
+    case .bodyFat:
+      return Coding(
+        loinc: "41982-0", display: "Percentage of body fat Measured", ucum: "%",
+        category: "vital-signs", decimals: 1)
+    case .sleep:
+      return Coding(
+        loinc: "93832-4", display: "Sleep duration", ucum: "h/d", category: "activity",
+        decimals: 2)
+    case .deepSleep:
+      return Coding(
+        loinc: "93831-6", display: "Deep sleep duration", ucum: "min/d", category: "activity",
+        decimals: 0)
+    case .remSleep:
+      return Coding(
+        loinc: "93829-0", display: "REM sleep duration", ucum: "min/d", category: "activity",
+        decimals: 0)
+    case .coreSleep:
+      // Apple's "core" sleep is what LOINC and most trackers call light sleep.
+      return Coding(
+        loinc: "93830-8", display: "Light sleep duration", ucum: "min/d", category: "activity",
+        decimals: 0)
     }
   }
 

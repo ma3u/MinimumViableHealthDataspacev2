@@ -604,3 +604,49 @@
 "%@ is not over. The hub works out your result from %@; nothing can be sent before." = "%1$@ ist nicht vorbei. Der Hub ermittelt Ihr Ergebnis ab dem %2$@; vorher kann nichts gesendet werden.";
 "Working out your result…" = "Ihr Ergebnis wird ermittelt…";
 "Your result could not be worked out (HTTP %lld)." = "Ihr Ergebnis konnte nicht ermittelt werden (HTTP %lld).";
+
+/* Export to my Mac (Relate) */
+"Export to my Mac (Relate)" = "An meinen Mac exportieren (Relate)";
+"Export to my Mac" = "An meinen Mac exportieren";
+"Keep a connected copy of your values in a Relate graph on your own Mac: your reports with their LOINC codes and where each value came from, and your Apple Health weekly means. It goes over your Wi-Fi, encrypted, to that Mac only. No cloud is involved." = "Behalten Sie eine verknüpfte Kopie Ihrer Werte in einem Relate-Graphen auf Ihrem eigenen Mac: Ihre Befunde mit LOINC-Codes und der Herkunft jedes Werts sowie Ihre Wochenmittel aus Apple Health. Die Übertragung läuft verschlüsselt über Ihr WLAN, nur an diesen Mac. Keine Cloud ist beteiligt.";
+"On the Mac" = "Auf dem Mac";
+"On this phone" = "Auf diesem Telefon";
+"Run the receiver from the relate-hackathon-team repository:" = "Starten Sie den Empfänger aus dem Repository relate-hackathon-team:";
+"Scan the Mac's QR code" = "QR-Code des Macs scannen";
+"Or paste the klarbefund://relate link" = "Oder den klarbefund://relate-Link einfügen";
+"Pair" = "Verbinden";
+"Paired" = "Verbunden";
+"Values on the Mac" = "Werte auf dem Mac";
+"Send my reports" = "Meine Befunde senden";
+"Send Apple Health weekly means" = "Wochenmittel aus Apple Health senden";
+"While on, each report you scan or correct goes to the Mac. Device trends are the weekly means of resting heart rate, heart rate variability, steps and weight that Trends shows. Switching off stops further sending; the Mac keeps what it has." = "Solange eingeschaltet, geht jeder Befund, den Sie scannen oder korrigieren, an den Mac. Geräte-Trends sind die Wochenmittel von Ruhepuls, Herzfrequenzvariabilität, Schritten und Gewicht, die Trends zeigt. Ausschalten beendet weiteres Senden; der Mac behält, was er hat.";
+"Send everything now" = "Jetzt alles senden";
+"Forget this Mac" = "Diesen Mac vergessen";
+"Forget %@?" = "%@ vergessen?";
+"Forget" = "Vergessen";
+"This phone stops sending. The graph on the Mac stays as it is; delete health.rl there to remove it." = "Dieses Telefon sendet nicht mehr. Der Graph auf dem Mac bleibt, wie er ist; löschen Sie dort health.rl, um ihn zu entfernen.";
+"Paired with %@. Your values go to %@ on that Mac only." = "Mit %1$@ verbunden. Ihre Werte gehen nur an %2$@ auf diesem Mac.";
+"Sent %lld values from %lld reports to %@." = "%1$lld Werte aus %2$lld Befunden an %3$@ gesendet.";
+"Sent %lld weekly values from %lld device trends to %@." = "%1$lld Wochenwerte aus %2$lld Geräte-Trends an %3$@ gesendet.";
+"That is not a Relate pairing code. On the Mac, run the receiver and scan the code it shows." = "Das ist kein Relate-Kopplungscode. Starten Sie auf dem Mac den Empfänger und scannen Sie den Code, den er zeigt.";
+"The code asks for an unencrypted connection. Klarbefund only sends over HTTPS." = "Der Code verlangt eine unverschlüsselte Verbindung. Klarbefund sendet nur über HTTPS.";
+"%@ is not on your own network. Klarbefund only exports to a Mac on your Wi-Fi." = "%@ ist nicht in Ihrem eigenen Netzwerk. Klarbefund exportiert nur an einen Mac in Ihrem WLAN.";
+"The code is incomplete. Show it again on the Mac and scan once more." = "Der Code ist unvollständig. Zeigen Sie ihn auf dem Mac erneut an und scannen Sie noch einmal.";
+"The Mac no longer knows this phone. Scan its code again." = "Der Mac kennt dieses Telefon nicht mehr. Scannen Sie seinen Code erneut.";
+"The Mac answered %lld." = "Der Mac antwortete %lld.";
+"The Mac's certificate is not the one in the code, so nothing was sent." = "Das Zertifikat des Macs ist nicht das aus dem Code, daher wurde nichts gesendet.";
+"The Mac cannot be reached (%lld). Is the receiver running, and is the phone on the same Wi-Fi?" = "Der Mac ist nicht erreichbar (%lld). Läuft der Empfänger, und ist das Telefon im selben WLAN?";
+
+/* More Apple Health metrics for the local graph (Relate, Nov 2026). */
+"Cardio fitness (VO2 max)" = "Cardiofitness (VO2max)";
+"Respiratory rate" = "Atemfrequenz";
+"Blood oxygen" = "Blutsauerstoff";
+"Active energy" = "Aktivitätsenergie";
+"Sleep" = "Schlaf";
+"Deep sleep" = "Tiefschlaf";
+"REM sleep" = "REM-Schlaf";
+"Core sleep" = "Kernschlaf";
+"breaths/min" = "Atemzüge/min";
+"kcal per day" = "kcal pro Tag";
+"hours per night" = "Stunden pro Nacht";
+"minutes per night" = "Minuten pro Nacht";
