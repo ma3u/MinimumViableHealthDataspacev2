@@ -37,10 +37,13 @@ size_of() { # <app>: the cpu and memory env.sh names for it
 }
 
 # JAVA_TOOL_OPTIONS with our heap option in it once: what is there stays, an
-# earlier -XX:MaxRAMPercentage goes. Reads the old value as $1.
+# earlier -XX:MaxRAMPercentage goes. Reads the old value as $1. The words are
+# split by read, not by an unquoted expansion: the control plane's options
+# carry JSON lists, and a [ or * in one must not be matched against file names.
 with_heap_opts() {
-  local kept=() word
-  for word in $1; do
+  local kept=() words=() word
+  read -ra words <<<"$1"
+  for word in ${words[@]+"${words[@]}"}; do
     [[ "$word" == -XX:MaxRAMPercentage=* ]] || kept+=("$word")
   done
   kept+=("$EDC_JVM_HEAP_OPTS")
