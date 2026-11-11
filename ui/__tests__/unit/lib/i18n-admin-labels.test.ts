@@ -157,7 +157,7 @@ describe("the admin area knows every label its pages take from elsewhere", () =>
       // the wallet sign-in's messages, kept as their English key
       ...all(
         "src/lib/use-wallet-sign-in.ts",
-        /^export const (?:HUB_COULD_NOT_CREATE|SIMULATION_ONLY) =\s*"([^"]+)";$/gm,
+        /^const (?:HUB_COULD_NOT_CREATE|SIMULATION_ONLY) =\s*"([^"]+)";$/gm,
       ),
       // a key with double quotes inside, written in single quotes
       ...all(

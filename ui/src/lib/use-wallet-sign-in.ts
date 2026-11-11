@@ -24,8 +24,8 @@ import {
  */
 
 /** Messages kept in state as their English key and translated when shown. */
-export const HUB_COULD_NOT_CREATE = "The hub could not create the account.";
-export const SIMULATION_ONLY =
+const HUB_COULD_NOT_CREATE = "The hub could not create the account.";
+const SIMULATION_ONLY =
   "Simulation only on this deployment. Scan the QR code with {wallet} to sign in.";
 
 /**
@@ -33,7 +33,7 @@ export const SIMULATION_ONLY =
  * the card of ADR-049 on the profile page, the one way the app connects to
  * an account the website created.
  */
-export const CONNECT_APP_PATH = "/patient/profile#connect-app";
+const CONNECT_APP_PATH = "/patient/profile#connect-app";
 
 /** The account a PID created (ADR-067), shown once and then never again. */
 export interface NewAccount {
