@@ -51,7 +51,6 @@ if az containerapp job show --name "$CATALOG_CRAWLER_JOB" --resource-group "$RG"
       "NATS_SUBJECT=dataspace.catalog.raw" \
       "NEO4J_URI=bolt://${NEO4J_APP}:7687" \
       "NEO4J_USER=${NEO4J_USER}" \
-      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
       "CRAWLER_DID=did:web:${CUSTOM_DOMAIN}:crawler" \
     -o none
   ok "Job updated"
@@ -72,11 +71,12 @@ else
       "NATS_SUBJECT=dataspace.catalog.raw" \
       "NEO4J_URI=bolt://${NEO4J_APP}:7687" \
       "NEO4J_USER=${NEO4J_USER}" \
-      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
       "CRAWLER_DID=did:web:${CUSTOM_DOMAIN}:crawler" \
     -o none
   ok "Job created"
 fi
+# The graph password as an ACA secret, never a plain value (#359).
+wire_neo4j_password job "$CATALOG_CRAWLER_JOB"
 
 # #404 (ADR-044): the crawler authenticates to the hub's demo DSP route with a
 # token from Key Vault. --create makes the token once if the vault lacks it.

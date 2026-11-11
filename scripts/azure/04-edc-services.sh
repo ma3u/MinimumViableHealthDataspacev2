@@ -233,7 +233,6 @@ az containerapp create \
     "NEO4J_URI=bolt://${NEO4J_APP}:7687" \
     "NEO4J_ENCRYPTED=false" \
     "NEO4J_USER=${NEO4J_USER}" \
-    "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     "PORT=9090" \
     "TCK_KEYCLOAK_URL=${KEYCLOAK_PUBLIC_URL:-}" \
     "TCK_KEYCLOAK_REALM=edcv" \
@@ -246,6 +245,8 @@ az containerapp create \
     "TCK_ISSUER_URL=https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin" \
     "TCK_INFRA_OPTIONAL=true" \
   -o none
+# The graph password as an ACA secret, never a plain value (#359).
+wire_neo4j_password app "$NEO4J_PROXY_APP"
 ok "Neo4j Proxy"
 
 # ── Summary ──────────────────────────────────────────────────────────────────

@@ -89,7 +89,6 @@ jobs:
             "NATS_SUBJECT=dataspace.catalog.raw"
             "NEO4J_URI=bolt://${{ env.NEO4J_APP }}:7687"
             "NEO4J_USER=neo4j"
-            "NEO4J_PASSWORD=healthdataspace"
             "CRAWLER_DID=did:web:${{ env.CUSTOM_DOMAIN }}:crawler"
           )
 
@@ -124,6 +123,10 @@ jobs:
               --cron-expression "$CRAWLER_CRON" \
               --env-vars "${COMMON_ENV[@]}" \
               -o none
+            # The graph password as an ACA secret from Key Vault, never a
+            # plain value (#359); an existing one keeps the secret it has.
+            source scripts/azure/env.sh
+            wire_neo4j_password job "${{ env.JOB_NAME }}"
           fi
 
       # #404 (ADR-044): the hub's demo DSP route needs a session or this

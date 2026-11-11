@@ -126,6 +126,16 @@ KEYCLOAK_PUBLIC_HOSTNAME=auth.ehds.mabu.red \
   ./scripts/azure/rotate-edc-admin-client-secret.sh --rotate
 ```
 
+The `health-dataspace-ui` client comes back with its pinned default too, while
+mvhd-ui reads the rotated one from Key Vault (#359), so nobody can sign in.
+Rotate it as well; the pin in the realm file is what keeps a re-import from
+minting an unknown secret, the rotation is what keeps the live one private:
+
+```bash
+KEYCLOAK_PUBLIC_URL=https://auth.ehds.mabu.red \
+  ./scripts/azure/rotate-keycloak-ui-client-secret.sh --rotate
+```
+
 Verify with the real thing rather than with discovery alone:
 
 ```bash
