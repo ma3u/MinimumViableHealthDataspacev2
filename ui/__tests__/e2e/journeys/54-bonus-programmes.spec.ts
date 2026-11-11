@@ -22,6 +22,11 @@
 import { expect, test } from "@playwright/test";
 import { loginAs, skipIfKeycloakDown } from "./helpers";
 
+// J1094 and J1099 both join, send and withdraw on patient1's one consent to
+// the program. Run side by side (fullyParallel, any run with more than one
+// worker), one withdraws while the other sends, and the send is refused.
+test.describe.configure({ mode: "serial" });
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     try {
