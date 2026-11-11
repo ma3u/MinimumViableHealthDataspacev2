@@ -26,7 +26,10 @@
     "neverpanic": "^0.0.7",
     "fast-uri": "^3.1.2",
     "postcss": "$postcss",
-    "katex": "0.18.10"
+    "katex": "0.18.10",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   },
   "dependencies": {
     "@scalar/api-reference-react": "^0.9.88",
