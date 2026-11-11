@@ -220,6 +220,39 @@ stack after the conversion: NATS restarted, then seed step 5 finalized two
 negotiations and started two transfers in 14 s, with 28 of the first and
 none of the second in the log.
 
+### Upstream: EDC keeps liveness to the runtime (2026-11-10)
+
+ADR-084's decision 6 proposed the stream check for EDC itself
+([eclipse-edc/Connector#6210](https://github.com/eclipse-edc/Connector/issues/6210),
+draft PR [#6211](https://github.com/eclipse-edc/Connector/pull/6211)). The
+maintainers declined it on 2026-11-10:
+
+- Streams and consumers are provisioned infrastructure, like a database
+  schema, and a missing one already fails visibly: `503 No Responders`, a 500
+  from the API, both logged.
+- Liveness should mean the runtime itself is broken. With the streams
+  provisioned outside EDC (`autocreate=false`) a restart cannot create them,
+  so a failing liveness would restart the control plane in a loop.
+- `autocreate` is meant for tests. In production the streams are provisioned
+  with file storage outside EDC; the EDC docs say so since
+  [eclipse-edc.github.io#253](https://github.com/eclipse-edc/eclipse-edc.github.io/pull/253).
+
+They called a liveness provider in our own launcher "a good fit". So
+`NatsTaskStreamsLivenessExtension` stays, and decision 6's "the extension
+goes once the launcher's EDC version covers it" will not happen. Two
+consequences:
+
+- The check is right only while the control plane creates the streams
+  itself, with `edc.nats.{cn,tp}.subscriber.autocreate=true` as
+  `docker-compose.jad.yml` and `scripts/azure/04-edc-services.sh` set it. A
+  deployment that provisions the streams outside EDC sets
+  `MVHD_NATS_TASKSTREAMS_LIVENESS_ENABLED=false`, or a lost stream restarts
+  the control plane in a loop.
+- The compose stack already does what EDC recommends (`nats-streams`, the
+  file streams above). Azure would need a NATS with persistent storage, which
+  ADR-084's decision 5 leaves out; changing that takes a new ADR that
+  supersedes ADR-084.
+
 ## 2026-11-06: `$(curl -w '%{http_code}' ... || echo 000)` is never 000
 
 curl prints `000` for its `-w` code when nothing answers, and exits non-zero,
