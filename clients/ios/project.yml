@@ -74,6 +74,12 @@ targets:
         # Read only, asked for on the Trends screen when the person taps
         # "Show trends from Apple Health" and never at launch (#186
         # criterion 3). German in de.lproj/InfoPlist.strings.
+        # Export to my Mac (Relate): the phone talks to a receiver on the
+        # person's own Wi-Fi, which iOS asks about once. German in
+        # de.lproj/InfoPlist.strings.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: >-
+          Klarbefund sends your values to your own Mac on this network, and
+          only when you have paired it by its QR code.
         INFOPLIST_KEY_NSHealthShareUsageDescription: >-
           Klarbefund reads resting heart rate, heart rate variability, steps,
           weight and exercise minutes to show them beside your lab values. It

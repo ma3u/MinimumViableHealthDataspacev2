@@ -3,3 +3,4 @@
 "NSHealthShareUsageDescription" = "Klarbefund liest Ruhepuls, Herzfrequenzvariabilität, Schritte, Gewicht und Trainingsminuten, um sie neben Ihren Laborwerten zu zeigen. Die App behält keine Kopie und schreibt nichts in Health.";
 "NSHealthUpdateUsageDescription" = "Klarbefund schreibt nie in Health. Die App liest nur die in der Leseanfrage genannten Werte, um sie neben Ihren Laborwerten zu zeigen.";
 "NSFaceIDUsageDescription" = "Klarbefund öffnet deine Ergebnisse mit Face ID, damit niemand sonst mit dem iPhone in der Hand sie lesen kann. Dein Code funktioniert ebenso.";
+"NSLocalNetworkUsageDescription" = "Klarbefund sendet Ihre Werte an Ihren eigenen Mac in diesem Netzwerk, und nur, wenn Sie ihn über seinen QR-Code verbunden haben.";

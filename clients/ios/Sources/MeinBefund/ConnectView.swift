@@ -515,6 +515,8 @@ struct DataspaceRecordView: View {
 /// VisionKit is already what reads the lab sheets, so this adds no framework
 /// and no permission: the camera prompt is the one the document scanner uses.
 struct QRScanner: UIViewControllerRepresentable {
+  /// Which Klarbefund link this scan is for: the EHDS hub's, or a local Relate receiver's.
+  var prefix = "klarbefund://connect"
   let onCode: (String) -> Void
   let onCancel: () -> Void
 
@@ -536,12 +538,16 @@ struct QRScanner: UIViewControllerRepresentable {
 
   func updateUIViewController(_ controller: UINavigationController, context: Context) {}
 
-  func makeCoordinator() -> Coordinator { Coordinator(onCode: onCode) }
+  func makeCoordinator() -> Coordinator { Coordinator(prefix: prefix, onCode: onCode) }
 
   final class Coordinator: NSObject, DataScannerViewControllerDelegate {
+    let prefix: String
     let onCode: (String) -> Void
     private var done = false
-    init(onCode: @escaping (String) -> Void) { self.onCode = onCode }
+    init(prefix: String, onCode: @escaping (String) -> Void) {
+      self.prefix = prefix
+      self.onCode = onCode
+    }
 
     func dataScanner(
       _ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem],
@@ -551,7 +557,7 @@ struct QRScanner: UIViewControllerRepresentable {
       // poster in the background cannot hijack the scan.
       for item in addedItems {
         if case let .barcode(code) = item, let text = code.payloadStringValue,
-          text.hasPrefix("klarbefund://connect"), !done
+          text.hasPrefix(prefix), !done
         {
           done = true
           dataScanner.stopScanning()
