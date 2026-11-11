@@ -101,14 +101,21 @@ final class LocalRelateExport: ObservableObject {
     var reportsSent = 0
     var values = 0
     var failed: [String] = []
-    for report in reports where !report.extraction.coded.isEmpty {
+    // Unlike the EHDS sync, a report with only uncoded values goes too: the
+    // Mac is the person's own copy of everything the paper said.
+    for report in reports
+    where !(report.extraction.coded.isEmpty && report.extraction.unmapped.isEmpty) {
       let key = report.id.uuidString.lowercased()
-      let print = EHDSConnection.fingerprint(report)
+      let print = LocalGraphExport.fingerprint(
+        coded: EHDSConnection.fingerprint(report), unmapped: report.extraction.unmapped)
       guard all || sent[key] != print else { continue }
       do {
         let (status, body) = try await request(
           "POST", link.recordEndpoint, link: link,
-          body: Data(ReportExport.fhirJSON(report).utf8), headers: ["X-Klarbefund-Report": key])
+          body: LocalGraphExport.bundle(
+            fhirJSON: Data(ReportExport.fhirJSON(report).utf8),
+            unmapped: report.extraction.unmapped),
+          headers: ["X-Klarbefund-Report": key])
         guard status == 201 else { throw ReceiverError(status: status, body: body) }
         let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
         values += (json["stored"] as? Int) ?? 0
