@@ -1,0 +1,37 @@
+meta {
+  name: 07 A token without an access body role
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{keycloakUrl}}/realms/edcv/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:form-urlencoded {
+  grant_type: client_credentials
+  client_id: {{edcClientId}}
+  client_secret: {{edcClientSecret}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isString
+  res.body.token_type: eq Bearer
+}
+
+tests {
+  test("stores a realm token that holds no access body role", function () {
+    bru.setVar("noRoleToken", res.getBody().access_token);
+  });
+}
+
+docs {
+  The connector's service account: a valid realm token, signed by Keycloak, without HDAB_AUTHORITY or TRUST_CENTER_OPERATOR.
+}

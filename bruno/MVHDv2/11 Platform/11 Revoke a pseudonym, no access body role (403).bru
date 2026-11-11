@@ -1,0 +1,24 @@
+meta {
+  name: 11 Revoke a pseudonym, no access body role (403)
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{proxyUrl}}/trust-center/revoke/rpsn-bruno-probe
+  body: none
+  auth: bearer
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{noRoleToken}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.error: eq Forbidden
+}

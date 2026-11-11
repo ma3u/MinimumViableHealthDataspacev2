@@ -1,0 +1,20 @@
+meta {
+  name: 10 Revoke a pseudonym, no token (401)
+  type: http
+  seq: 10
+}
+
+delete {
+  url: {{proxyUrl}}/trust-center/revoke/rpsn-bruno-probe
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 401
+  res.body.error: eq Unauthorized
+}

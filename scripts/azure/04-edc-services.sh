@@ -238,6 +238,8 @@ az containerapp create \
     "TCK_KEYCLOAK_URL=${KEYCLOAK_PUBLIC_URL:-}" \
     "TCK_KEYCLOAK_REALM=edcv" \
     "TCK_CLIENT_ID=admin" \
+    "KEYCLOAK_ISSUER=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv" \
+    "KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv" \
     "TCK_CONTROLPLANE_DEFAULT_URL=https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}" \
     "TCK_CONTROLPLANE_MGMT_URL=https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/management" \
     "TCK_IDENTITY_URL=https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity" \

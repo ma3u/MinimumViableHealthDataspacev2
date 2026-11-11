@@ -3,10 +3,19 @@ import neo4j from "neo4j-driver";
 import { getSession } from "../db.js";
 import { app, heavyLimiter } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
+import {
+  requireRealmRole,
+  TRUST_CENTER_ROLES,
+  type RealmCaller,
+} from "../realm-auth.js";
 
 // ============================================================
 // Phase 18: Trust Center — Pseudonym Resolution Protocol
 // EHDS Art. 66 (pseudonymisation) and Art. 73 (SPE): HDAB-authenticated endpoints only
+//
+// Resolve and revoke act for an access body: they take a Keycloak access
+// token with HDAB_AUTHORITY or TRUST_CENTER_OPERATOR, 401 without one and 403
+// with another role (#1029, src/realm-auth.ts).
 // ============================================================
 
 // Trust Center HMAC key (in production: loaded from Vault / HSM)
@@ -34,7 +43,7 @@ function deriveResearchPsn(
  * POST /trust-center/resolve
  *
  * Maps one or more provider-specific pseudonyms to a shared research pseudonym.
- * Only HDAB-authority-scoped tokens may call this endpoint.
+ * Only a token with HDAB_AUTHORITY or TRUST_CENTER_OPERATOR may call it.
  * Data users never interact with the Trust Center directly.
  *
  * Body: {
@@ -47,6 +56,7 @@ function deriveResearchPsn(
 app.post(
   "/trust-center/resolve",
   heavyLimiter,
+  requireRealmRole(TRUST_CENTER_ROLES),
   async (req: Request, res: Response, next: NextFunction) => {
     const {
       studyId,
@@ -233,8 +243,10 @@ app.get(
  */
 app.delete(
   "/trust-center/revoke/:rpsn",
+  requireRealmRole(TRUST_CENTER_ROLES),
   async (req: Request, res: Response, next: NextFunction) => {
     const { rpsn } = req.params;
+    const caller = res.locals.caller as RealmCaller;
     const session = getSession();
     try {
       const result = await session.run(
@@ -251,7 +263,8 @@ app.delete(
         `,
         {
           rpsnId: rpsn,
-          revokedBy: req.headers["x-participant-id"] ?? "hdab-operator",
+          // The verified caller, not a header anyone could set.
+          revokedBy: caller.username,
         },
       );
 

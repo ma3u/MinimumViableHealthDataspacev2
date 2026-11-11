@@ -1,0 +1,38 @@
+meta {
+  name: 09 Resolve a pseudonym, no access body role (403)
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{proxyUrl}}/trust-center/resolve
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{noRoleToken}}
+}
+
+body:json {
+  {
+    "studyId": "study-001",
+    "trustCenterName": "bruno-probe",
+    "providerPseudonyms": [
+      {
+        "psnId": "psn-bruno",
+        "providerId": "bruno"
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.error: eq Forbidden
+}
