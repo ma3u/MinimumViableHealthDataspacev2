@@ -1,0 +1,129 @@
+@startuml container-dependencies
+' The services and depends_on of
+'   docker compose -f docker-compose.yml -f docker-compose.jad.yml config --format json
+' and, for the profile band, the same with --profile cfm --profile wellbeing
+' --profile simpl --profile trust-check --profile federated. Change this file
+' when a service, a profile or a depends_on changes; render it with
+' scripts/render-plantuml.sh (README.md, "Dependency Graph").
+!include <archimate/Archimate>
+title Container dependencies (ArchiMate 3.2, technology view)\nthe depends_on of docker-compose.yml and docker-compose.jad.yml: EDC 1.0 with siglet as its data plane (#927)
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 12
+skinparam ranksep 44
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+rectangle "Application" as APP #D9F0CB {
+  Technology_SystemSoftware(ui, "graph-explorer\nNext.js UI, :3000 and :3003")
+  Technology_SystemSoftware(proxy, "neo4j-proxy\nExpress bridge behind siglet, :9090")
+  Technology_SystemSoftware(neo4j, "neo4j\nNeo4j 5 knowledge graph, :7474 and :7687")
+}
+rectangle "EDC 1.0" as EDC #D9F0CB {
+  Technology_SystemSoftware(cp, "controlplane\nDSP 2025-1, management API, :11003")
+  Technology_SystemSoftware(sig, "siglet\ndata plane: signalling and pull tokens")
+}
+rectangle "Identity" as IDM #D9F0CB {
+  Technology_SystemSoftware(ih, "identityhub\nDCP v1.0 credential store, :11005")
+  Technology_SystemSoftware(is, "issuerservice\ncredential issuer, :10013")
+  Technology_SystemSoftware(sga, "simpl-ga-issuer\nSimpl Governance Authority, :10023")
+}
+rectangle "Infrastructure" as INFRA #C9E7B7 {
+  Technology_SystemSoftware(tfk, "traefik\nAPI gateway, :80 and :8090")
+  Technology_SystemSoftware(vb, "vault-bootstrap\none-shot: auth, policies, keys")
+  Technology_SystemSoftware(kc, "keycloak\nOIDC, :8080 and :9000")
+  Technology_SystemSoftware(ns, "nats-streams\none-shot: cn-stream and tp-stream")
+  Technology_SystemSoftware(vu, "vault-unseal\ninit and unseal sidecar")
+  Technology_Node(pg, "postgres\nPostgreSQL 17, :5432")
+  Technology_SystemSoftware(vault, "vault\nHashiCorp Vault, file storage, :8200")
+  Technology_SystemSoftware(nats, "nats\nNATS JetStream, :4222 and :8222")
+}
+
+rectangle "Compose profiles, started only with --profile <name>" as PROF #E5E7EB {
+  rectangle "cfm: eclipse-cfm 0.0.7 from the mvhd fork, v0.0.7-mvhd.3 (ADR-085, ADR-088)" as CFM #F3F4F6 {
+    Technology_SystemSoftware(tm, "cfm7-tmanager\nTenant Manager, :18181")
+    Technology_SystemSoftware(pm, "cfm7-pmanager\nProvision Manager, :18182")
+    Technology_SystemSoftware(agents, "cfm7-edcvagent, cfm7-ihagent,\ncfm7-jwtletagent, cfm7-obagent,\ncfm7-regagent, cfm7-sigletagent\norchestration agents")
+    Technology_SystemSoftware(cnats, "cfm7-nats\nCFM's own NATS JetStream")
+  }
+  rectangle "wellbeing" as WB #F3F4F6 {
+    Technology_SystemSoftware(wga, "wellbeing-ga-issuer\nsecond data space's authority, :10053\nwaits for postgres, vault, keycloak")
+  }
+  rectangle "trust-check" as TC #F3F4F6 {
+    Technology_SystemSoftware(rogue, "rogue-issuer\nuntrusted issuer, :10033\nwaits for postgres, vault, keycloak")
+  }
+  rectangle "simpl" as SIMPL #F3F4F6 {
+    Technology_SystemSoftware(si, "simpl-issuer\nSimpl-Open issuer, :10043")
+    Technology_SystemSoftware(sv, "simpl-vault\nits secret store")
+  }
+  rectangle "federated" as FED #F3F4F6 {
+    Technology_SystemSoftware(spe2, "neo4j-spe2\nsecond SPE, :7475 and :7688")
+  }
+}
+
+' ── depends_on, drawn from the dependent to what it waits for ──────────────
+' solid: service_healthy, dashed: service_started,
+' dotted: service_completed_successfully.
+
+' Application
+ui -[#475569,dashed]-> neo4j
+proxy -[#475569]-> cp
+
+' EDC 1.0
+cp -[#475569]-> pg
+cp -[#475569]-> vault
+cp -[#475569]-> nats
+cp -[#475569]-> kc
+cp -[#475569,dotted]-> ns
+sig -[#475569]-> vault
+
+' Identity
+ih -[#475569]-> pg
+ih -[#475569]-> vault
+ih -[#475569]-> kc
+is -[#475569]-> pg
+is -[#475569]-> vault
+is -[#475569]-> kc
+sga -[#475569]-> pg
+sga -[#475569]-> vault
+sga -[#475569]-> kc
+
+' Infrastructure
+kc -[#475569]-> pg
+vb -[#475569]-> vault
+vb -[#475569]-> kc
+vu -[#475569,dashed]-> vault
+ns -[#475569]-> nats
+
+' Profiles
+tm -[#475569]-> cnats
+pm -[#475569]-> cnats
+agents -[#475569]-> cnats
+si -[#475569]-> sv
+
+' ── Rows ────────────────────────────────────────────────────────────────────
+ui -[hidden]right- proxy
+proxy -[hidden]right- neo4j
+cp -[hidden]right- sig
+ih -[hidden]right- is
+is -[hidden]right- sga
+tm -[hidden]right- pm
+pm -[hidden]right- agents
+INFRA -[hidden]down- PROF
+pg -[hidden]down- tm
+pg -[hidden]down- wga
+pg -[hidden]down- rogue
+
+legend bottom left
+|= Arrow |= depends_on condition |
+| solid | service_healthy: waits for the healthcheck to pass |
+| dashed | service_started: waits for the container to start |
+| dotted | service_completed_successfully: waits for the one-shot job to exit 0 |
+| grey band | a compose profile; the services in it start only with --profile <name> |
+| "waits for" | a profile service's service_healthy on the default stack, written out rather than drawn |
+| one box, six agents | each of the six cfm7-*agent services waits for cfm7-nats on its own |
+| no arrow | no depends_on: neo4j, postgres, vault, nats, traefik, simpl-vault, cfm7-nats, neo4j-spe2 |
+endlegend
+@enduml
