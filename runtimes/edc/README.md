@@ -72,7 +72,11 @@ What the 1.0 stack needs beyond the image swap, found in the spike:
   (`GET /tokens/{participantContextId}/{transferId}` on port 8080), and the
   endpoint is the neo4j-proxy's `/dataspace/data`, which verifies the token
   against siglet's JWKS and serves the dataset the token names. The JAD data
-  planes `dataplane-fhir` and `dataplane-omop` are not needed.
+  planes `dataplane-fhir` and `dataplane-omop` are not needed. A consumer
+  context needs a data plane registration as well as the provider's, or its
+  transfer ends "No dataplane found". The bonus programme's answer
+  (`bonus-programme-answer`, ADR-091) is one of those datasets, and its route
+  answers such a pull only.
 
 Two pieces of code, both exceptions to ADR-076 decision 1 awaiting their own ADR:
 

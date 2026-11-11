@@ -85,6 +85,7 @@ const EVALUATED = {
 function route(
   evaluation: unknown,
   transfer?: { status: number; body: unknown },
+  list: unknown = LIST,
 ) {
   mockFetchApi.mockImplementation((url: string) => {
     if (url.startsWith("/api/patient/programmes/evaluation")) {
@@ -93,7 +94,7 @@ function route(
     if (url.startsWith("/api/patient/programmes/transfer")) {
       return ok(transfer?.body ?? {}, transfer?.status ?? 202);
     }
-    return ok(LIST);
+    return ok(list);
   });
 }
 
@@ -190,5 +191,52 @@ describe("BonusProgrammesPage: the year's result (ADR-087)", () => {
     expect(
       screen.getByRole("button", { name: /Send my answer for 2025/ }),
     ).toBeDisabled();
+  });
+});
+
+describe("BonusProgrammesPage: what the insurer collects (step 8, ADR-091)", () => {
+  beforeEach(() => {
+    mockFetchApi.mockReset();
+  });
+
+  const joined = (extra: Record<string, unknown>) => ({
+    ...LIST,
+    consents: [{ ...LIST.consents[0], ...extra }],
+  });
+
+  it("shows the member the reference the answer is tied to", async () => {
+    route(EVALUATED, undefined, joined({ memberReference: "6G3S-4K9A-J3FY" }));
+    render(<BonusProgrammesPage />);
+    const reference = await screen.findByTestId("bonus-programme-reference");
+    expect(reference).toHaveTextContent(
+      "Your reference for AlphaKasse DE: 6G3S-4K9A-J3FY.",
+    );
+    expect(reference).toHaveTextContent(
+      "The hub sends no name and no insurance number.",
+    );
+    // Nothing was collected, so the page does not say so.
+    expect(screen.queryByTestId("bonus-programme-collected")).toBeNull();
+  });
+
+  it("says when the insurer collected the answer", async () => {
+    route(
+      EVALUATED,
+      undefined,
+      joined({
+        memberReference: "6G3S-4K9A-J3FY",
+        collectedAt: "2026-11-11T12:00:00Z",
+      }),
+    );
+    render(<BonusProgrammesPage />);
+    expect(
+      await screen.findByTestId("bonus-programme-collected"),
+    ).toHaveTextContent(/^AlphaKasse DE collected your answer on /);
+  });
+
+  it("shows no reference where the record has none (the static build)", async () => {
+    route(EVALUATED);
+    render(<BonusProgrammesPage />);
+    await screen.findByTestId("bonus-programme-joined");
+    expect(screen.queryByTestId("bonus-programme-reference")).toBeNull();
   });
 });

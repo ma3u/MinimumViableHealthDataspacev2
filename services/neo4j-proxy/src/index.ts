@@ -60,6 +60,7 @@ import "./routes/trust-center.js";
 import "./routes/dsp-audit.js";
 import "./routes/spe.js";
 import "./routes/dataspace.js";
+import "./routes/programmes.js";
 import "./routes/spe-import.js";
 import "./error-handler.js";
 import { logger } from "./logger.js";
