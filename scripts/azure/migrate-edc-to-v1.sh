@@ -43,7 +43,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=env.sh
 source "${SCRIPT_DIR}/env.sh"
 
-BACKUP_DIR="${MVHD_ROLLBACK_DIR:-${HOME}/.mvhd/edc-v1-rollback}"
+# Per resource group (MVHD_LOCAL_DIR, env.sh): a rehearsal in a second one
+# must not move the hub's `latest`, which `rollback` would then restore.
+BACKUP_DIR="${MVHD_ROLLBACK_DIR:-${MVHD_LOCAL_DIR}/edc-v1-rollback}"
 EDC1_TAG="${EDC1_TAG:-}"
 ISSUER_DID="did:web:${ISSUER_APP}%3A10016:issuer"
 KC_ISSUER="${KEYCLOAK_PUBLIC_URL:-https://auth.ehds.mabu.red}/realms/edcv"
@@ -288,6 +290,8 @@ cmd_check() {
   local short app
   for short in controlplane identityhub issuerservice siglet ui proxy; do
     app=$(app_name "$short")
+    az containerapp show --name "$app" --resource-group "$RG" -o none 2>/dev/null ||
+      { printf '%-20s (not created yet)\n' "$app"; continue; }
     az containerapp show --name "$app" --resource-group "$RG" -o json | python3 -c "
 import json,sys
 a=json.load(sys.stdin); c=a['properties']['template']['containers'][0]
@@ -387,11 +391,20 @@ cmd_backup() {
   local ts dir short
   ts=$(date -u +%Y%m%dT%H%M%SZ); dir="${BACKUP_DIR}/${ts}"
   mkdir -p "$dir"; chmod 700 "$BACKUP_DIR" "$dir"
+  local saved=0 app
   for short in "${BACKED_UP[@]}"; do
-    show_yaml "$(app_name "$short")" > "${dir}/${short}.yaml"
+    app=$(app_name "$short")
+    # On a build from nothing siglet and the UI come later than the EDC apps
+    # (docs/azure-deployment-guide.md, section 4); back up what exists.
+    if ! az containerapp show --name "$app" --resource-group "$RG" -o none 2>/dev/null; then
+      warn "${app} does not exist yet; not backed up"
+      continue
+    fi
+    show_yaml "$app" > "${dir}/${short}.yaml"
+    saved=$((saved + 1))
   done
   ln -sfn "$dir" "${BACKUP_DIR}/latest"
-  ok "saved ${#BACKED_UP[@]} app definitions to ${dir} (secrets are not in them; the apps keep theirs)"
+  ok "saved ${saved} app definitions to ${dir} (secrets are not in them; the apps keep theirs)"
 }
 
 cmd_app() {
