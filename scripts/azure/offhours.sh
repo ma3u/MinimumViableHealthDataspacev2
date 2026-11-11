@@ -279,9 +279,11 @@ do_stop() {
   # A stop, not min=0: scale-to-zero only reaches zero for an app nobody calls
   # (PR #482). A stopped app keeps its revision and scale. Trustee goes with
   # the backend once the workspaces that ask it are down.
+  # ${apps[@]+...}: bash before 4.4 (macOS /bin/bash 3.2, where the unit
+  # test runs it) calls an empty array unbound under set -u.
   local -a apps=()
   local cfm
-  while read -r cfm; do [ -n "$cfm" ] && apps=("$cfm" "${apps[@]}"); done < <(cfm_apps)
+  while read -r cfm; do [ -n "$cfm" ] && apps=("$cfm" ${apps[@]+"${apps[@]}"}); done < <(cfm_apps)
   apps+=("${BACKEND_APPS[@]}")
   if trustee_present; then apps+=("$TRUSTEE_APP"); fi
   log "stopping ${#apps[@]} apps"
