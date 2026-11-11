@@ -92,13 +92,19 @@ print(" ".join(sorted(dbs)))')
   fi
 done
 
-apps_json=$(az containerapp list --resource-group "$RG" -o json)
-jobs_json=$(az containerapp job list --resource-group "$RG" -o json)
+# As files: the definitions of every app run to megabytes, more than an
+# argument may carry ("Argument list too long", the first plan run, 2026-11-11).
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+apps_json="${tmp}/apps.json"
+jobs_json="${tmp}/jobs.json"
+az containerapp list --resource-group "$RG" -o json >"$apps_json"
+az containerapp job list --resource-group "$RG" -o json >"$jobs_json"
 
 gone=$(python3 -c '
 import json, re, sys
 pat = re.compile(sys.argv[1])
-names = [a["name"] for a in json.loads(sys.argv[2])] + [j["name"] for j in json.loads(sys.argv[3])]
+names = [a["name"] for a in json.load(open(sys.argv[2]))] + [j["name"] for j in json.load(open(sys.argv[3]))]
 print(" ".join(sorted(n for n in names if pat.match(n))))' \
   "$GONE_APP_PATTERN" "$apps_json" "$jobs_json")
 if [ -z "$gone" ]; then
@@ -112,7 +118,7 @@ users=$(python3 -c "${DB_OF_ENV}"'
 targets = set(sys.argv[1].split()) | {"cfm"}
 core = set(sys.argv[2].split())
 hits = []
-for kind, items in (("app", json.loads(sys.argv[3])), ("job", json.loads(sys.argv[4]))):
+for kind, items in (("app", json.load(open(sys.argv[3]))), ("job", json.load(open(sys.argv[4])))):
     for it in items:
         if it["name"] in core:
             continue
