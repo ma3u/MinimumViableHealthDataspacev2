@@ -23,21 +23,21 @@ Personas on the live hub: `researcher` (PharmaCo Research AG, data user),
 holder), `patient1` (a citizen). On the static site, pick the same personas in
 the persona menu.
 
-| #   | Session                       | Persona      | Page                    | What to show                                                                                  | TEHDAS2                        |
-| --- | ----------------------------- | ------------ | ----------------------- | --------------------------------------------------------------------------------------------- | ------------------------------ |
-| 1   | 1. Discovery and access       | researcher   | `/catalog`              | HealthDCAT-AP R8 entries; say the 0 SHACL violations, a PR Gate check, not on the page        | D5.1, D5.3                     |
-| 2   | 1                             | researcher   | `/data/discover`        | Federated discovery across the participants' catalogues                                       | D5.3, navigating the catalogue |
-| 3   | 1                             | researcher   | `/applications`         | A new application: purpose, datasets, legal basis                                             | D6.2                           |
-| 4   | 1                             | regulator    | `/compliance`           | The access body's desk: the application, its decision deadline, the decision                  | D6.3, D6.4                     |
-| 5   | 1                             | regulator    | `/permits`              | The permit and the register of permits                                                        | D6.3, D6.4                     |
-| 6   | 2. Safe and secure use        | regulator    | `/admin/attestation`    | The SPE workspaces as confidential containers; the key released only to an attested workspace | D7.1, D7.4                     |
-| 7   | 2                             | researcher   | `/query`                | Only aggregates leave; groups under five are suppressed                                       | D7.1, D7.2                     |
-| 8   | 2                             | regulator    | `/graph`                | Linkage through research pseudonyms in the trust centre                                       | Linkage of datasets            |
-| 9   | 2                             | regulator    | `/compliance` (results) | Results published with attribution under the permit's duties                                  | Research outcomes              |
-| 10  | 3. Citizens at the heart      | patient1     | `/patient/research`     | The Art. 71 opt-out as a record and a label; the query proxy filters the person out           | D8.1                           |
-| 11  | 3                             | (signed out) | `/information`          | The information page; it needs a sign-in today (#995)                                         | Citizen Information Point      |
-| 12  | 3                             | patient1     | `/auth/eudi-qr`         | Sign-in with an EUDI Wallet                                                                   | (Regulation 2026/2099)         |
-| 13  | 4. Building the EHDS together | any          | `/docs/roadmap#e990`    | What the hub takes over, defers and leaves out (ADR-083), and the roadmap                     | all 21                         |
+| #   | Session                       | Persona      | Page                 | What to show                                                                                                       | TEHDAS2                        |
+| --- | ----------------------------- | ------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| 1   | 1. Discovery and access       | researcher   | `/catalog`           | HealthDCAT-AP R8 entries; say the 0 SHACL violations, a PR Gate check, not on the page                             | D5.1, D5.3                     |
+| 2   | 1                             | researcher   | `/data/discover`     | Federated discovery across the participants' catalogues                                                            | D5.3, navigating the catalogue |
+| 3   | 1                             | researcher   | `/applications`      | A new application: purpose, datasets, legal basis                                                                  | D6.2                           |
+| 4   | 1                             | regulator    | `/compliance`        | The access body's desk: the application, its decision deadline, the decision                                       | D6.3, D6.4                     |
+| 5   | 1                             | regulator    | `/permits`           | The permit and the register of permits                                                                             | D6.3, D6.4                     |
+| 6   | 2. Safe and secure use        | regulator    | `/admin/attestation` | The SPE workspaces as confidential containers; the key released only to an attested workspace                      | D7.1, D7.4                     |
+| 7   | 2                             | researcher   | `/query`             | Only aggregates leave; groups under five are suppressed                                                            | D7.1, D7.2                     |
+| 8   | 2                             | regulator    | `/graph`             | Linkage through research pseudonyms in the trust centre                                                            | Linkage of datasets            |
+| 9   | 2                             | regulator    | `/permits` (results) | The results the data user communicated, Art. 61(4), on the public register; the user sends them on `/applications` | Research outcomes              |
+| 10  | 3. Citizens at the heart      | patient1     | `/patient/research`  | The Art. 71 opt-out as a record and a label; the query proxy filters the person out                                | D8.1                           |
+| 11  | 3                             | (signed out) | `/information`       | The information page; it needs a sign-in today (#995)                                                              | Citizen Information Point      |
+| 12  | 3                             | patient1     | `/auth/eudi-qr`      | Sign-in with an EUDI Wallet                                                                                        | (Regulation 2026/2099)         |
+| 13  | 4. Building the EHDS together | any          | `/docs/roadmap#e990` | What the hub takes over, defers and leaves out (ADR-083), and the roadmap                                          | all 21                         |
 
 Ten minutes: steps 1, 3, 4, 5, 6, 7, 10 and 13. Three minutes: steps 1, 4, 10, 13.
 
@@ -86,6 +86,7 @@ are partial, so say "in part" for them.
   are EDC, Neo4j, FHIR R4, OMOP 5.4 and HealthDCAT-AP R8.
 - **Real data?** Never. Synthetic patients only, and fictional organisations. The
   number depends on the view: the hub's FHIR cohort is 127 patients (the
-  catalogue's Synthea entry); the query page counts what the two SPE
-  workspaces hold, 200 together (167 and 34). Say "synthetic patients" and
+  catalogue's Synthea entry); the query page adds up what the two SPE
+  workspaces hold after the Art. 71 opt-outs, 200 on the static site; read the
+  live number off the screen at the rehearsal. Say "synthetic patients" and
   give the number of the page on screen.

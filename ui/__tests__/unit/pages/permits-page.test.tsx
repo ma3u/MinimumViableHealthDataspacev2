@@ -64,6 +64,20 @@ describe("/permits", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/94 days overdue/)).toBeInTheDocument();
     expect(screen.getByText(/75 days left/)).toBeInTheDocument();
+    // Art. 61(4): the static site shows the result the live register shows
+    // (TEHDAS2 demo, step 9).
+    expect(
+      screen.getByText(
+        /Results communicated by data users, Art\. 61\(4\) \(1\)/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByTestId("result-row")).toHaveLength(1);
+    expect(
+      screen.getByText(/Readmission after cardiac surgery/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/results communicated 2026-09-01, within the 18 months/),
+    ).toBeInTheDocument();
   });
 
   it("shows a revoked permit with its reason", async () => {
