@@ -1,6 +1,6 @@
 # ADR-089: The Java EDC apps shrink to what they use; they are not rewritten in Rust
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-11, Matthias Buchhorn). Applied to the live apps the same day with `size-edc.sh`: each of the three was ready 22 to 26 seconds after its new revision was created. A negotiation under load at the new sizes is not measured yet.
 **Date:** 2026-11-11
 **Relates to:** [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-056](ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md), [ADR-061](ADR-061-the-ui-scales-out-on-whole-cores.md), [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md)
 
