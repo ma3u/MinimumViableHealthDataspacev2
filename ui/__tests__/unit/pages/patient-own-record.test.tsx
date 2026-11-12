@@ -9,7 +9,7 @@
  * says so instead of passing for an empty list.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "fs";
 import path from "path";
@@ -129,7 +129,16 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-afterEach(() => {
+afterEach(async () => {
+  // In static mode fetchApi waits out a simulated latency before it calls
+  // fetch, so a test can end with a request still pending (the profile test
+  // ends once the page has asked). Unmount, then let every request settle
+  // while the stub still answers: unstubbed, the real fetch gets the relative
+  // mock path and the page's rejection goes unhandled in a later test file.
+  cleanup();
+  await Promise.allSettled(
+    vi.mocked(fetchApi).mock.results.map((r) => r.value),
+  );
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
