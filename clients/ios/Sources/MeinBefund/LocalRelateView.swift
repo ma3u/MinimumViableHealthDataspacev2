@@ -156,6 +156,15 @@ struct LocalRelateView: View {
         Text("While on, each report you scan or correct goes to the Mac. Device trends are the weekly means of resting heart rate, heart rate variability, steps and weight that Trends shows. Switching off stops further sending; the Mac keeps what it has.")
       }
       Section {
+        Toggle(
+          "Send year of birth and sex",
+          isOn: Binding(get: { export.sendsPerson }, set: { export.setSendsPerson($0) })
+        )
+        .accessibilityIdentifier("relate-sends-person")
+      } footer: {
+        Text("From your Profile, to this Mac only, so it can work out scores that depend on age and sex. Only the year is sent, never the day. Nothing about you goes to the EHDS hub or into a report for your doctor.")
+      }
+      Section {
         Button {
           Task {
             await export.export(reports(), all: true)

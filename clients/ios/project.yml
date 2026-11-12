@@ -28,8 +28,8 @@ packages:
   # what a TestFlight build contains.
   HealthGraph:
     url: https://github.com/ma3u/relate-hackathon-team
-    # ba77396: a value repeated on one report, or found in two reports, counts once.
-    revision: ba773964cdf0f1a286f484eea7d2077a63cd1045
+    # 2f3b111: a value counts once (ba77396), and Patient takes year of birth and sex when sent.
+    revision: 2f3b1118525b7216de7b0092d730a5c67334c624
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
