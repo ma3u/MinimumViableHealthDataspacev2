@@ -84,7 +84,7 @@ struct LocalRelateView: View {
         }
       }
     } footer: {
-      Text("No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac. Only the paired Mac receives anything. Keep this screen open until it is done.")
+      Text("No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done.")
     }
   }
 
@@ -94,11 +94,17 @@ struct LocalRelateView: View {
         Text("Keep a connected copy of your values in a Relate graph on your own Mac: your reports with their LOINC codes and where each value came from, and your Apple Health weekly means. It goes over your Wi-Fi, encrypted, to that Mac only. No cloud is involved.")
       }
       Section("On the Mac") {
-        Text("Run the receiver from the relate-hackathon-team repository:")
-        // A command line, not prose: never translated.
-        Text(verbatim: "scripts/health_vault.sh receive")
-          .font(.system(.footnote, design: .monospaced))
-          .textSelection(.enabled)
+        Text("Open Klarbefund for Mac and scan the QR code it shows. It comes from TestFlight, the same beta as this app.")
+        Link(destination: URL(string: "https://testflight.apple.com/join/ssADSXX6")!) {
+          Label("Klarbefund for Mac on TestFlight", systemImage: "desktopcomputer")
+        }
+        .accessibilityIdentifier("relate-mac-app")
+        DisclosureGroup("Command-line receiver") {
+          // A command line, not prose: never translated.
+          Text(verbatim: "scripts/health_vault.sh receive")
+            .font(.system(.footnote, design: .monospaced))
+            .textSelection(.enabled)
+        }
       }
       Section("On this phone") {
         if QRScanner.isAvailable {
@@ -169,6 +175,18 @@ struct LocalRelateView: View {
         }
       }
       usbSection
+      if QRScanner.isAvailable {
+        Section {
+          Button {
+            scanning = true
+          } label: {
+            Label("Pair with another Mac", systemImage: "qrcode.viewfinder")
+          }
+          .accessibilityIdentifier("relate-rescan")
+        } footer: {
+          Text("For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac.")
+        }
+      }
       Section {
         Button("Forget this Mac", role: .destructive) { confirmingForget = true }
           .confirmationDialog(

@@ -438,7 +438,7 @@ final class LocalRelateExport: ObservableObject {
   static func explain(_ error: Error) -> String {
     switch error {
     case LocalRelateLink.Problem.notARelateLink:
-      return String(localized: "That is not a Relate pairing code. On the Mac, run the receiver and scan the code it shows.")
+      return String(localized: "That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows.")
     case LocalRelateLink.Problem.notHTTPS:
       return String(localized: "The code asks for an unencrypted connection. Klarbefund only sends over HTTPS.")
     case let LocalRelateLink.Problem.notLocal(host):
