@@ -1,5 +1,5 @@
 /**
- * The page a list route reads from `limit` and `offset` (#1086).
+ * The page a list route reads from `limit` and `offset` (#1088).
  */
 import { describe, it, expect } from "vitest";
 import { pageFrom, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/list-page";

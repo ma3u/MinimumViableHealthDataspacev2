@@ -246,7 +246,7 @@ refused for the dataset no permit covers.
 - The `contracts` scenario fails its API threshold on Azure since it
   transfers, on `GET /api/transfers` and the catalogue request, not on the
   transfer. Each run adds about 60 transfer processes to PharmaCo's list,
-  so later runs read a full 200 rows. Since #1086 both reads do less:
+  so later runs read a full 200 rows. Since #1088 both reads do less:
 
   - **The lists are paged.** `GET /api/transfers` and `GET /api/negotiations`
     take `limit` and `offset` (`ui/src/lib/list-page.ts`): 50 rows unless
@@ -280,7 +280,7 @@ refused for the dataset no permit covers.
   before it side by side on the same stack, against PharmaCo's 200+
   transfers and negotiations. Twenty requests after each other per route:
 
-  | Route, p50 / p90                   | Before #1086   | #1086        |
+  | Route, p50 / p90                   | Before #1088   | #1088        |
   | ---------------------------------- | -------------- | ------------ |
   | `GET /api/transfers` (one page)    | 256 / 642 ms   | 59 / 113 ms  |
   | `GET /api/negotiations` (one page) | 542 / 1,173 ms | 147 / 266 ms |

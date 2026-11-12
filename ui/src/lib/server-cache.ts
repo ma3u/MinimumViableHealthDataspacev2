@@ -85,7 +85,7 @@ const inFlight = new Map<string, Promise<unknown>>();
  * One load at a time per key, and nothing kept after it: callers that arrive
  * while a load runs get its answer, the next caller after it starts a new
  * one. For answers that must not be served old but are often asked for at
- * the same moment, such as a provider's DSP catalogue (#1086).
+ * the same moment, such as a provider's DSP catalogue (#1088).
  */
 export function shareInFlight<T>(
   key: string,

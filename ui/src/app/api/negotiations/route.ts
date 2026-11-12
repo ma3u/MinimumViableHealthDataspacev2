@@ -104,7 +104,7 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  *
  * The catalog request takes the provider's DSP address, which carries its
  * context id, while the page only knows the provider's DID. The id comes
- * from the kept context list (lib/edc/context-lookup.ts); before #1086 every
+ * from the kept context list (lib/edc/context-lookup.ts); before #1088 every
  * catalogue request listed every context first. When the request fails on a
  * kept id, the list is read afresh and the request tried once more, so a
  * stack reset costs one retry rather than a demo catalogue.

@@ -1,6 +1,6 @@
 /**
  * The two reads of the contract journey that failed the `contracts` load
- * test's API threshold on Azure (#1086, docs/developer/edc-sizing-under-load.md):
+ * test's API threshold on Azure (#1088, docs/developer/edc-sizing-under-load.md):
  *
  * - GET /api/transfers and GET /api/negotiations read one page, 50 rows
  *   unless asked, and only the first page carries the demo and mock rows.

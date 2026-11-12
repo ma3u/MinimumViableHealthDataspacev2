@@ -174,7 +174,7 @@ const UNPERMITTED_DATASET = "dataset:load-test-no-permit";
  */
 const AGREEMENT_TIMEOUT_S = Number(__ENV.AGREEMENT_TIMEOUT_S || "60");
 const POLL_WAITS_S = [1, 2, 3, 5, 8];
-/** Rows per list request, the transfer page's page size (#1086). */
+/** Rows per list request, the transfer page's page size (#1088). */
 const LIST_PAGE_SIZE = 50;
 
 /** This VU's participant contexts, looked up once (each VU has its own copy). */

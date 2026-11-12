@@ -110,7 +110,7 @@ describe("GET /api/negotiations", () => {
 
     expect(res.status).toBe(502);
     expect(data.detail).toContain("did:web:unknown.example");
-    // The list was read for this request, so a miss is not asked again (#1086).
+    // The list was read for this request, so a miss is not asked again (#1088).
     expect(mockManagement).toHaveBeenCalledTimes(1);
   });
 

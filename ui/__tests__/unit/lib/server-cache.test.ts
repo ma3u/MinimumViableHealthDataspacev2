@@ -161,7 +161,7 @@ describe("forget", () => {
   });
 });
 
-describe("shareInFlight (#1086)", () => {
+describe("shareInFlight (#1088)", () => {
   it("gives callers that arrive during a load the same answer", async () => {
     let resolve!: (v: string) => void;
     const loader = vi.fn(() => new Promise<string>((r) => (resolve = r)));

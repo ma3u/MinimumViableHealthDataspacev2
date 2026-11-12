@@ -92,7 +92,7 @@ describe("/api/transfers", () => {
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5/participants/spe-1/transferprocesses/request",
         "POST",
-        // Newest first, one page of 50 unless asked (#1076, #1086).
+        // Newest first, one page of 50 unless asked (#1076, #1088).
         expect.objectContaining({
           "@type": "QuerySpec",
           sortField: "createdAt",

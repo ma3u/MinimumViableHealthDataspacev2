@@ -20,7 +20,7 @@ assert {
 }
 
 tests {
-  test("the connector's rows are at most the page asked for (#1086)", function () {
+  test("the connector's rows are at most the page asked for (#1088)", function () {
     const rows = res.getBody().filter((r) => r.source === "controlplane");
     expect(rows.length).to.be.at.most(5);
   });

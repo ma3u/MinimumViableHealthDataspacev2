@@ -1,5 +1,5 @@
 /**
- * The kept list of participant contexts (#1086): one management call serves
+ * The kept list of participant contexts (#1088): one management call serves
  * the lookups of a minute, a miss asks again at once, and forgetting it
  * makes the next lookup ask.
  */
