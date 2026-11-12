@@ -3,6 +3,29 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-11: a build from nothing met two things Azure decides, not the scripts
+
+The rebuild rehearsal in a second resource group (#927,
+`docs/azure-deployment-guide.md` section 4) stopped twice on the subscription
+rather than on our code:
+
+- **Key Vault needs purge protection.** The tenant's policy "Key vaults should
+  have deletion protection enabled" (`ass-ssg-prd-cloud-inf_stg-restrictions`)
+  denies a vault created without it. So a deleted vault keeps its name for its
+  soft-delete days and cannot be purged sooner: a second rehearsal takes a new
+  suffix. `01-foundation.sh` now creates it with `--enable-purge-protection`.
+- **West Europe gave no new `Standard_B1ms`.** `az postgres flexible-server
+create` answered `SkuNotAvailable` after three minutes, in every zone,
+  although `list-skus` offered B1ms there; the hub's server, made on
+  2026-10-02, is unaffected. North Europe took it. A refused create leaves the
+  server `Dropping` for a few minutes, during which phase 1 of
+  `13-postgres-flexible-server.sh` used to report "done", and its name stays
+  bound to West Europe for a while after, so the retry elsewhere needs a new
+  name.
+
+Rule: a rebuild sets `PG_FLEX_LOCATION` (and a fresh `PG_FLEX_NAME`) when West
+Europe refuses, and expects the Key Vault name to be spent for a week.
+
 ## 2026-11-11: a `contracts` load run on Azure left 132 negotiations retrying, and real ones queued behind them
 
 `load-tests/platform.js` sent `http://controlplane:8082/api/dsp` as the

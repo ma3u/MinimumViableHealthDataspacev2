@@ -3,18 +3,25 @@
 # Source this file — do not execute directly.
 #   source scripts/azure/env.sh
 #
-# Workaround B (ADR-018): this subscription (INF-STG-EU_EHDS) cannot register
-# Microsoft.DBforPostgreSQL or Microsoft.OperationalInsights. Postgres runs as
-# an ACA container app on Azure Files; Log Analytics is skipped.
+# The hub's names are the defaults. A second resource group, such as a rebuild
+# rehearsal (docs/azure-deployment-guide.md, section 4), sets RG and its own
+# globally unique names (KEY_VAULT_NAME, ACR_NAME, PG_FLEX_NAME, SPE_DNS_SUFFIX)
+# and an empty CUSTOM_DOMAIN in the environment before sourcing this file;
+# guard_second_rg below refuses to go on while any of them still names the hub's.
+#
+# Workaround B (ADR-018) is over: Microsoft.DBforPostgreSQL and
+# Microsoft.OperationalInsights are registered, Postgres is the Flexible Server
+# (ADR-041) and the environment logs to Log Analytics.
 
 set -euo pipefail
 
 # ── Azure resource names ─────────────────────────────────────────────────────
-export RG="rg-mvhd-dev"
+export HUB_RG="rg-mvhd-dev"
+export RG="${RG:-$HUB_RG}"
 export LOCATION="westeurope"
 # Derived at source time for the scripts that pass it on (it once went into the UI container).
 export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
-export ACR_NAME="acrmvhdehds"
+export ACR_NAME="${ACR_NAME:-acrmvhdehds}"
 export ACA_ENV="mvhd-env"
 # Log Analytics workspace. The ACA environment logs to mvhd-logs; law-mvhd-dev no longer exists, and
 # 07-observability.sh failed on its first call while this still named it.
@@ -51,10 +58,20 @@ export PG_SSLMODE="require"
 # pg_upgrade/dump-restore migration exists — local dev runs 17.x.
 export POSTGRES_VERSION="16.14"
 export PG_IMAGE="${ACR_NAME}.azurecr.io/postgres:${POSTGRES_VERSION}"
-export PG_DATABASES=(keycloak controlplane dataplane dataplane_omop identityhub issuerservice cfm)
+# The databases on the Flexible Server, and who creates each (status.sh lists
+# them). The EDC 0.18 set (controlplane, dataplane, dataplane_omop,
+# identityhub, issuerservice) was dropped with #594 and #927.
+#   keycloak cfm                           13-postgres-flexible-server.sh 2
+#   vault                                  14-vault-on-postgres.sh 1
+#   controlplane_v1 identityhub_v1
+#   issuerservice_v1 siglet_v1             create-edc-v1-databases.sh
+#   taskdb                                 wire-task-store.sh
+export PG_DATABASES=(keycloak cfm vault controlplane_v1 identityhub_v1 issuerservice_v1 siglet_v1 taskdb)
 
 # ── Custom domain (24/7 public demo) ────────────────────────────────────────
-export CUSTOM_DOMAIN="ehds.mabu.red"
+# Empty for a second resource group: 06-post-deploy.sh then binds no hostname,
+# and the UI and Keycloak answer on their Container Apps addresses.
+export CUSTOM_DOMAIN="${CUSTOM_DOMAIN-ehds.mabu.red}"
 
 # ── Container Apps ───────────────────────────────────────────────────────────
 export NEO4J_APP="mvhd-neo4j"
@@ -70,6 +87,30 @@ export ISSUER_APP="mvhd-issuerservice"
 # EDC 0.18's two data planes and the seven apps of the 2026-03 CFM were
 # deleted on 2026-11-09 (#927). CFM 0.0.7's apps (ADR-085) are named in
 # 20-cfm-fork.sh.
+
+# Keycloak's public host. The hub's is auth.ehds.mabu.red, which most scripts
+# take as their default. A second resource group has no custom domain, so its
+# Keycloak answers on its Container Apps address; once 01-foundation.sh has
+# made the environment, that address is the default here, and every script
+# reaches this resource group's Keycloak rather than the hub's.
+if [ "$RG" != "$HUB_RG" ] && [ -z "${KEYCLOAK_PUBLIC_HOSTNAME:-}" ]; then
+  _aca_domain=$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" \
+    --query properties.defaultDomain -o tsv 2>/dev/null || true)
+  if [ -n "$_aca_domain" ]; then
+    export KEYCLOAK_PUBLIC_HOSTNAME="${KEYCLOAK_APP}.${_aca_domain}"
+    export KEYCLOAK_PUBLIC_URL="${KEYCLOAK_PUBLIC_URL:-https://${KEYCLOAK_PUBLIC_HOSTNAME}}"
+  fi
+  unset _aca_domain
+fi
+# The base URL the admin scripts (wire-*.sh, secure-accounts.sh, ...) call:
+# auth.<custom domain> where there is one, otherwise the address above.
+# get_aca_fqdns does not touch it, so evaluating that does not move a script
+# from the custom domain to the Container Apps address.
+if [ -n "$CUSTOM_DOMAIN" ]; then
+  export KEYCLOAK_BASE_URL="https://auth.${CUSTOM_DOMAIN}"
+else
+  export KEYCLOAK_BASE_URL="${KEYCLOAK_PUBLIC_URL:-}"
+fi
 
 # ── ACA Jobs ─────────────────────────────────────────────────────────────────
 export NEO4J_SEED_JOB="mvhd-neo4j-seed"
@@ -191,7 +232,7 @@ export NEO4J_BOLT_URI="bolt://${NEO4J_APP}:7687"
 # (pol-ssg-prd-restriction_sku_kubernetes, ADR-069). Bolt with TLS on each
 # group's public DNS name; the CA is ours and the proxy pins it.
 export SPE_ACI_GROUPS=(mvhd-spe-1 mvhd-spe-2)
-export SPE_DNS_SUFFIX="b53a0449"   # ACI DNS labels are unique per region
+export SPE_DNS_SUFFIX="${SPE_DNS_SUFFIX:-b53a0449}"   # ACI DNS labels are unique per region
 export SPE_PERMIT_ID="hdab-medreg-spe-2026-001"
 export SPE_PULL_IDENTITY="id-mvhd-spe-pull"           # AcrPull for the groups
 export SPE_LOADER_REPO="mvhd-spe-loader"               # in ACR_NAME
@@ -210,8 +251,18 @@ export SHARE_TRUSTEE_DATA="trustee-data"
 export SHARE_SPE_EXTRACTS="spe-extracts"
 export TRUSTEE_KBS_SOURCE="ghcr.io/confidential-containers/key-broker-service:built-in-as-v0.22.0@sha256:c1960cb4df0b1bdc0e4309f97dc65b0a1a777a92dabb2211acb45542f906c625"
 export TRUSTEE_KBS_IMAGE="${ACR_LOGIN_SERVER}/key-broker-service:built-in-as-${TRUSTEE_VERSION}"
+# State this laptop keeps per resource group, outside the repository: the
+# rollback copies of migrate-edc-to-v1.sh and the SPE CA and state of
+# 21-aci-confidential-spe.sh. The hub's stays where it always was; a second
+# resource group gets its own folder, so a rehearsal never replaces the hub's
+# rollback point or CA.
+if [ "$RG" = "$HUB_RG" ]; then
+  export MVHD_LOCAL_DIR="${MVHD_LOCAL_DIR:-${HOME}/.mvhd}"
+else
+  export MVHD_LOCAL_DIR="${MVHD_LOCAL_DIR:-${HOME}/.mvhd/rg/${RG}}"
+fi
 # Outside the repository: the CA that signs the workspaces' Bolt certificates.
-export SPE_CA_DIR="${SPE_CA_DIR:-${HOME}/.mvhd/spe-ca}"
+export SPE_CA_DIR="${SPE_CA_DIR:-${MVHD_LOCAL_DIR}/spe-ca}"
 # Hub Key Vault (ADR-036): the workspaces' Neo4j passwords, which the proxy
 # reads by keyvaultref. Not in the key path: the extract keys are Trustee's.
 export KV_SPE1_NEO4J_PASSWORD="spe-1-neo4j-password"
@@ -220,6 +271,32 @@ export KV_SPE2_NEO4J_PASSWORD="spe-2-neo4j-password"
 # ── Azure Key Vault (ADR-036) ────────────────────────────────────────────────
 # Operator secrets live here and are referenced, never copied into this file.
 export KEY_VAULT_NAME="${KEY_VAULT_NAME:-kv-mvhd-b53a0449}"
+# The identity every keyvaultref in the hub's apps and jobs goes through (Key
+# Vault Secrets User on KEY_VAULT_NAME). Named for the first app that used it
+# (11-claude-federation.sh); 01-foundation.sh creates it and grants the role.
+export KV_READER_IDENTITY="id-mvhd-claude-federation"
+
+# A second resource group must not reach the hub's globally named resources:
+# Key Vault, registry, Flexible Server and the ACI DNS labels are addressed by
+# name alone, so a rehearsal that kept a default would write into the hub's
+# vault and registry while every resource group argument pointed elsewhere.
+guard_second_rg() {
+  [ "$RG" = "$HUB_RG" ] && return 0
+  local bad="" pair var hub
+  for pair in "KEY_VAULT_NAME=kv-mvhd-b53a0449" "ACR_NAME=acrmvhdehds" \
+    "PG_FLEX_NAME=mvhd-pg-b53a0449" "SPE_DNS_SUFFIX=b53a0449" "CUSTOM_DOMAIN=ehds.mabu.red"; do
+    var="${pair%%=*}"; hub="${pair#*=}"
+    [ "${!var}" = "$hub" ] && bad="${bad} ${var}"
+  done
+  case "${KEYCLOAK_PUBLIC_HOSTNAME:-}${KEYCLOAK_PUBLIC_URL:-}" in
+    *ehds.mabu.red*) bad="${bad} KEYCLOAK_PUBLIC_HOSTNAME/URL" ;;
+  esac
+  [ -z "$bad" ] && return 0
+  echo "[env] RG=${RG} is not the hub (${HUB_RG}), but these still name the hub's:${bad}." >&2
+  echo "[env] Set each to this resource group's own value (CUSTOM_DOMAIN to empty) first." >&2
+  return 1
+}
+guard_second_rg || { return 1 2>/dev/null || exit 1; }
 
 # Reads a secret from the vault. Returns empty and warns rather than failing, so
 # sourcing this file still works for the many scripts that need no secret at all.

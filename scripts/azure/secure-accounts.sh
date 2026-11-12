@@ -26,7 +26,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # shellcheck source=env.sh
 source "${SCRIPT_DIR}/env.sh"
 
-KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
+KEYCLOAK_URL="${KEYCLOAK_BASE_URL:?no Keycloak address (env.sh)}"
 SIGNIN_URL="https://${CUSTOM_DOMAIN}/auth/signin"
 ADMIN="${KEYCLOAK_URL}/admin/realms/edcv"
 REALM_FILE="${REPO_ROOT}/jad/keycloak-realm.json"

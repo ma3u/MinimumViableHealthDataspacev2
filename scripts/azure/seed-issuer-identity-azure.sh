@@ -35,7 +35,13 @@ case "$MODE" in seed|verify) ;; *) sed -n '2,8p' "$0"; exit 2 ;; esac
 EDC_LINE="${EDC_LINE:-v1}"
 case "$EDC_LINE" in v1|v018) ;; *) err "EDC_LINE is v1 or v018, not '${EDC_LINE}'"; exit 2 ;; esac
 JOB="mvhd-issuer-identity"
-KC_URL="https://${KEYCLOAK_PUBLIC_HOSTNAME_OVERRIDE:-auth.ehds.mabu.red}"
+# The hub's Keycloak by its custom domain; a second resource group's by the
+# address env.sh derives (it has no custom domain).
+if [ "$RG" = "$HUB_RG" ]; then
+  KC_URL="https://${KEYCLOAK_PUBLIC_HOSTNAME_OVERRIDE:-auth.ehds.mabu.red}"
+else
+  KC_URL="${KEYCLOAK_PUBLIC_URL:?no Keycloak address for ${RG}}"
+fi
 COMPOSE_X="I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
 
 # ── Secrets, never printed ──────────────────────────────────────────────────

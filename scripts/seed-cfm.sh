@@ -17,6 +17,11 @@ set -euo pipefail
 # Needs the stack and the profile up:
 #   docker compose -f docker-compose.yml -f docker-compose.jad.yml --profile cfm up -d
 # For a stack in another Docker context, export DOCKER_CONTEXT (e.g. orbstack).
+#
+# SEED_CFM_ONLY=keycloak runs step 2 alone, against KC_URL: what Container Apps
+# needs before scripts/azure/20-cfm-fork.sh apps, where the database is the
+# Flexible Server's and the managers are seeded by `20-cfm-fork.sh seed`
+# (scripts/azure/wire-cfm-agents-client.sh calls it so).
 
 KC_URL="${KC_URL:-http://localhost:8080}"
 KC_ADMIN_USER="${KC_ADMIN_USER:-admin}"
@@ -34,7 +39,9 @@ die() {
 }
 
 # --- 1. database -------------------------------------------------------------
-if [[ "$(docker exec "$PG_CONTAINER" psql -U cp -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='cfm_v007'")" != "1" ]]; then
+if [[ "${SEED_CFM_ONLY:-}" == keycloak ]]; then
+  say "1. database: skipped (SEED_CFM_ONLY=keycloak)"
+elif [[ "$(docker exec "$PG_CONTAINER" psql -U cp -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='cfm_v007'")" != "1" ]]; then
   docker exec "$PG_CONTAINER" psql -U cp -d postgres -qc "CREATE DATABASE cfm_v007 OWNER cfm" >/dev/null
   say "1. database cfm_v007 created"
 else
@@ -107,6 +114,10 @@ done <<<"$scope_ids"
 TOKEN="$(curl -sf -X POST "$KC_URL/realms/edcv/protocol/openid-connect/token" \
   -u "cfm-agents:$CFM_CLIENT_SECRET" -d grant_type=client_credentials |
   python3 -I -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')" || die "cfm-agents cannot get a token"
+if [[ "${SEED_CFM_ONLY:-}" == keycloak ]]; then
+  say "2. cfm-agents gets a token; done (SEED_CFM_ONLY=keycloak)"
+  exit 0
+fi
 
 # --- 3. Provision Manager ----------------------------------------------------
 for _ in $(seq 1 40); do curl -sf -o /dev/null "$PM_URL/health" && curl -sf -o /dev/null "$TM_URL/health" && break; sleep 3; done
