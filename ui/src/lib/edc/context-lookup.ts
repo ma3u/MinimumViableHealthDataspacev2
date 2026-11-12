@@ -44,11 +44,6 @@ function kept(): Promise<Kept> {
   return cached(KEY, TTL_MS, load);
 }
 
-/** The contexts, from the kept list when it is fresh. */
-export async function listContextsKept(): Promise<ContextRow[]> {
-  return (await kept()).rows;
-}
-
 /** Drops the kept list; the next lookup asks the control plane. */
 export function forgetContexts() {
   forget(KEY);
