@@ -245,10 +245,72 @@ refused for the dataset no permit covers.
   results are in [Transfers under load](#transfers-under-load-the-evening-runs).
 - The `contracts` scenario fails its API threshold on Azure since it
   transfers, on `GET /api/transfers` and the catalogue request, not on the
-  transfer. A page size for the transfer list (the route reads 200 rows)
-  and a look at the catalogue request come before the next `contracts` run
-  is expected to pass. Each run adds about 60 transfer processes to
-  PharmaCo's list, so later runs read a full 200 rows.
+  transfer. Each run adds about 60 transfer processes to PharmaCo's list,
+  so later runs read a full 200 rows. Since #1088 both reads do less:
+
+  - **The lists are paged.** `GET /api/transfers` and `GET /api/negotiations`
+    take `limit` and `offset` (`ui/src/lib/list-page.ts`): 50 rows unless
+    asked, at most 200, a `400` with `{ error }` for anything that is not a
+    whole number. The demo and mock rows come on the first page only. The
+    transfer page, the negotiate page and the k6 step ask for one page of 50. What a list costs is the control plane compacting each row as
+    JSON-LD, so it grows with the rows: on the compose stack, asked
+    directly, 200 negotiations were 545 kB and 430 to 570 ms, 50 were
+    140 kB and 83 to 108 ms; 200 transfers 160 to 300 ms, 50 about 40 ms.
+  - **The catalogue request no longer lists every context first.** The
+    participant contexts are kept for a minute
+    (`ui/src/lib/edc/context-lookup.ts`), for the catalogue's DID lookup and
+    for the transfer POST's lookup of the consumer's DID, which also listed
+    them on every live transfer. A DID the kept list does not name is
+    looked up again at once, and a catalogue request that fails on a kept
+    context id reads the list afresh and tries once more. Requests for the
+    same catalogue at the same moment share one DSP request
+    (`shareInFlight()` in `ui/src/lib/server-cache.ts`); nothing is kept
+    after it answers, so a new offer shows on the next request.
+  - **Where the catalogue time goes is not settled.** On the compose stack
+    the DSP catalogue request itself takes 25 to 54 ms warm and the context
+    list about 20 ms, so neither explains 1.5 s on Azure. There the request
+    runs the DCP exchange between the apps (a token from the IdentityHub,
+    its presentation, the DID documents) through the Container Apps
+    ingress, on a control plane that is also compacting the 200-row lists.
+    The next Azure run tells whether the smaller lists free enough of it;
+    if the catalogue is still over the SLO, the calls the control plane
+    makes to the IdentityHub during one request are the place to look next.
+
+  Measured on the compose stack on 2026-11-12, the branch's UI and the one
+  before it side by side on the same stack, against PharmaCo's 200+
+  transfers and negotiations. Twenty requests after each other per route:
+
+  | Route, p50 / p90                   | Before #1088   | #1088        |
+  | ---------------------------------- | -------------- | ------------ |
+  | `GET /api/transfers` (one page)    | 256 / 642 ms   | 59 / 113 ms  |
+  | `GET /api/negotiations` (one page) | 542 / 1,173 ms | 147 / 266 ms |
+  | `GET /api/negotiations` catalogue  | 74 / 128 ms    | 62 / 96 ms   |
+
+  The `contracts` scenario, back to back (`K6_JSON=1`, then
+  `load-tests/p95-by-name.py`):
+
+  | p95                                 | `20261112-base-contracts-local` | `20261112-branch-contracts-local` |
+  | ----------------------------------- | ------------------------------- | --------------------------------- |
+  | `GET /api/transfers`                | 553 ms (p50 307 ms)             | **302 ms** (p50 111 ms)           |
+  | `GET /api/negotiations` (catalogue) | 199 ms                          | 321 ms                            |
+  | `POST /api/negotiations`            | 210 ms                          | 540 ms                            |
+  | `POST /api/transfers`               | 222 ms                          | 306 ms                            |
+  | All `kind:api`                      | 433 ms                          | **364 ms**                        |
+  | Answers over 1 s                    | 1 of 470                        | 10 of 435                         |
+  | Failed requests                     | 0                               | 0                                 |
+
+  The compose stack shares the laptop with other containers whose load
+  comes in bursts, and the runs show it: 9 of the branch run's 10 slow
+  answers came within two seconds (09:16:34 to 09:16:36 UTC+1) on every
+  route at once, the catalogue and the negotiation POST included, which is
+  the host and not a route. A third run (`20261112-branch2-contracts-local`)
+  at a load average of 25 was slow on every route, the refused transfer
+  that hardly reaches the connector included (p95 813 ms), and is not
+  counted. The transfer list is the measure that holds across the runs. An
+  Azure `contracts` run with this change decides whether the API threshold
+  holds there; it needs `az login`, a stack that is up (ADR-053) and no
+  merge to `main` while it runs.
+
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
 

@@ -174,6 +174,8 @@ const UNPERMITTED_DATASET = "dataset:load-test-no-permit";
  */
 const AGREEMENT_TIMEOUT_S = Number(__ENV.AGREEMENT_TIMEOUT_S || "60");
 const POLL_WAITS_S = [1, 2, 3, 5, 8];
+/** Rows per list request, the transfer page's page size (#1088). */
+const LIST_PAGE_SIZE = 50;
 
 /** This VU's participant contexts, looked up once (each VU has its own copy). */
 let contexts = null;
@@ -359,8 +361,12 @@ function contractJourney(persona) {
       think();
     }
   }
+  // One page, as the transfer page asks for it (DEFAULT_PAGE_SIZE in
+  // ui/src/lib/list-page.ts). The whole list grows with every run.
   request(BASE_URL, persona, {
-    ...api(`/api/transfers?participantId=${ctx.consumer}`),
+    ...api(
+      `/api/transfers?participantId=${ctx.consumer}&limit=${LIST_PAGE_SIZE}`,
+    ),
     name: "GET /api/transfers",
   });
 }

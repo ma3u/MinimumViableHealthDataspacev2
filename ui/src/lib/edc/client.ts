@@ -63,7 +63,9 @@ const API_ENDPOINTS = {
 export const EDC_CONTEXT = "https://w3id.org/edc/connector/management/v2";
 
 /**
- * The QuerySpec for a list a person reads: newest first, one page of `limit`.
+ * The QuerySpec for a list a person reads: newest first, one page of `limit`
+ * rows from `offset`. The routes take the page from the request
+ * (`pageFrom()` in lib/list-page.ts, 50 rows unless asked).
  *
  * Without a limit and a sort the Management API answers its default page, the
  * 50 oldest rows. A participant with more than 50 negotiations then never saw
@@ -72,7 +74,7 @@ export const EDC_CONTEXT = "https://w3id.org/edc/connector/management/v2";
  * because the hub's list did not contain it, although the connector had
  * finalized it (#1076).
  */
-export function newestFirstQuery(limit = 200) {
+export function newestFirstQuery(limit = 200, offset = 0) {
   return {
     "@context": [EDC_CONTEXT],
     "@type": "QuerySpec",
@@ -80,7 +82,7 @@ export function newestFirstQuery(limit = 200) {
     sortField: "createdAt",
     sortOrder: "DESC",
     limit,
-    offset: 0,
+    offset,
   };
 }
 

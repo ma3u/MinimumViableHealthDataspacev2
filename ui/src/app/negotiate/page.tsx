@@ -24,6 +24,7 @@ import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
+import { DEFAULT_PAGE_SIZE } from "@/lib/list-page";
 
 interface ParticipantCtx {
   "@id": string;
@@ -373,7 +374,9 @@ function NegotiateContent() {
   useEffect(() => {
     if (!selectedCtx) return;
     setLoading(true);
-    fetchApi(`/api/negotiations?participantId=${selectedCtx}`)
+    fetchApi(
+      `/api/negotiations?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
+    )
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
         setNegotiations(Array.isArray(d) ? d : d.negotiations ?? []);
@@ -493,7 +496,7 @@ function NegotiateContent() {
       polls += 1;
       try {
         const res = await fetchApi(
-          `/api/negotiations?participantId=${selectedCtx}`,
+          `/api/negotiations?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
         );
         const body = await res.json();
         const list = (
@@ -591,7 +594,7 @@ function NegotiateContent() {
           });
         }
         const updated = await fetchApi(
-          `/api/negotiations?participantId=${selectedCtx}`,
+          `/api/negotiations?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
         );
         const ud = await updated.json();
         const list = (Array.isArray(ud) ? ud : ud.negotiations ?? []) as

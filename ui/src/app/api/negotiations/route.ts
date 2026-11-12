@@ -11,6 +11,9 @@ import {
 import { recordDemo, listDemo } from "@/lib/demo-records";
 import { buildDemoCatalog, type DemoAssetEntry } from "@/lib/demo-catalog";
 import { loadTestId } from "@/lib/proxy";
+import { pageFrom } from "@/lib/list-page";
+import { contextIdForDid, forgetContexts } from "@/lib/edc/context-lookup";
+import { shareInFlight } from "@/lib/server-cache";
 import { tagRows } from "@/lib/row-provenance";
 import { promises as fs } from "fs";
 import path from "path";
@@ -97,22 +100,47 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 }
 
 /**
- * The participant context whose identity is this DID. The catalog request
- * takes the provider's DSP address, which carries its context id, while the
- * page only knows the provider's DID.
+ * The provider's DSP catalogue, as the consumer context asks for it.
+ *
+ * The catalog request takes the provider's DSP address, which carries its
+ * context id, while the page only knows the provider's DID. The id comes
+ * from the kept context list (lib/edc/context-lookup.ts); before #1088 every
+ * catalogue request listed every context first. When the request fails on a
+ * kept id, the list is read afresh and the request tried once more, so a
+ * stack reset costs one retry rather than a demo catalogue.
+ *
+ * Requests for the same catalogue at the same moment share one DSP request:
+ * the answer depends on the consumer context and the provider only (the
+ * control plane is called with the hub's service token, not the person's),
+ * and nothing is kept once it has answered.
  */
-async function providerContextId(did: string): Promise<string> {
-  const participants =
-    await edcClient.management<{ "@id"?: string; identity?: string }[]>(
-      "/v5/participants",
+async function requestCatalog(
+  participantId: string,
+  providerDid: string,
+): Promise<unknown> {
+  const ask = (providerCtx: string) =>
+    edcClient.management(
+      `/v5/participants/${participantId}/catalog/request`,
+      "POST",
+      {
+        "@context": [EDC_CONTEXT],
+        "@type": "CatalogRequest",
+        counterPartyAddress: buildDspEndpoint(DSP_BASE, providerCtx),
+        counterPartyId: providerDid,
+        protocol: DSP_PROTOCOL,
+      },
     );
-  const match = Array.isArray(participants)
-    ? participants.find((p) => p.identity === did)
-    : undefined;
-  if (!match?.["@id"]) {
-    throw new Error(`No participant context has the identity ${did}`);
-  }
-  return match["@id"];
+  return shareInFlight(`catalog:${participantId}:${providerDid}`, async () => {
+    const provider = await contextIdForDid(providerDid);
+    try {
+      return await ask(provider.id);
+    } catch (err) {
+      if (!provider.kept) throw err;
+      forgetContexts();
+      const fresh = await contextIdForDid(providerDid);
+      return ask(fresh.id);
+    }
+  });
 }
 
 /**
@@ -130,7 +158,13 @@ async function providerContextId(did: string): Promise<string> {
  *   policy:              the offer's ODRL policy as the catalog gave it
  * }
  *
- * GET /api/negotiations?participantId=<id> — List negotiations for participant.
+ * GET /api/negotiations?participantId=<id>[&limit=<n>&offset=<n>]: one page
+ * of the participant's negotiations, newest first; `limit` 50 unless asked,
+ * at most 200 (lib/list-page.ts). The demo and mock rows come on the first
+ * page (offset 0) only.
+ *
+ * GET /api/negotiations?participantId=<id>&catalog=true&providerDid=<did>:
+ * the provider's DSP catalogue for that consumer context.
  */
 
 export async function GET(req: NextRequest) {
@@ -159,18 +193,7 @@ export async function GET(req: NextRequest) {
     try {
       // The v1alpha catalog-by-DID endpoint is gone in EDC 0.18 (404, #542);
       // catalog/request takes the provider's DSP address instead.
-      const providerCtx = await providerContextId(providerDid);
-      const catalogData = await edcClient.management(
-        `/v5/participants/${participantId}/catalog/request`,
-        "POST",
-        {
-          "@context": [EDC_CONTEXT],
-          "@type": "CatalogRequest",
-          counterPartyAddress: buildDspEndpoint(DSP_BASE, providerCtx),
-          counterPartyId: providerDid,
-          protocol: DSP_PROTOCOL,
-        },
-      );
+      const catalogData = await requestCatalog(participantId, providerDid);
       return NextResponse.json(catalogData);
     } catch (err) {
       console.error("Failed to fetch provider catalog:", err);
@@ -198,12 +221,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const page = pageFrom(req.nextUrl.searchParams);
+  if ("error" in page) {
+    return NextResponse.json({ error: page.error }, { status: 400 });
+  }
+
   let realNegotiations: unknown[] = [];
   try {
     realNegotiations = await edcClient.management<unknown[]>(
       `/v5/participants/${participantId}/contractnegotiations/request`,
       "POST",
-      newestFirstQuery(),
+      newestFirstQuery(page.limit, page.offset),
     );
     if (!Array.isArray(realNegotiations)) {
       realNegotiations = [];
@@ -218,10 +246,14 @@ export async function GET(req: NextRequest) {
   // Negotiations this process recorded because the connector could not take
   // them (see lib/demo-records.ts). They come first: the newest is the one the
   // user just made, and the transfer page reads its agreements from this list.
-  const demoNegotiations = listDemo("negotiation", participantId);
+  // Only the first page carries them, so a later page does not repeat them.
+  const firstPage = page.offset === 0;
+  const demoNegotiations = firstPage
+    ? listDemo("negotiation", participantId)
+    : [];
 
   // Merge with demo negotiations so the full workflow is always demonstrable
-  const mockNegotiations = await loadMockNegotiations();
+  const mockNegotiations = firstPage ? await loadMockNegotiations() : [];
   const realIds = new Set(
     realNegotiations.map((n) => (n as Record<string, unknown>)["@id"]),
   );
