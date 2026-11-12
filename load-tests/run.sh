@@ -15,7 +15,8 @@
 # Variables: TESTID (default <date>-<scenario>-<target>), TIME_SCALE (0.05
 # shortens every stage for a dry run), ABORT_ON=failures (stress, spike, soak:
 # abort on failed requests only, not on latency), KC_USER/KC_PASSWORD (signin), YES=1
-# (skip the confirmation for a stress, spike or soak run against azure).
+# (skip the confirmation for a stress, spike or soak run against azure),
+# AGREEMENT_TIMEOUT_S (contracts: how long a negotiation may take to agree, 60).
 #
 # A run against azure sets the repository variable LOAD_TEST_RUNNING for its
 # duration, and deploy-azure.yml waits for it to clear (#571).
@@ -97,6 +98,7 @@ k6 run ${out[@]+"${out[@]}"} --tag "testid=$TESTID" \
   -e "SCENARIO=$SCENARIO" -e "BASE_URL=$BASE_URL" -e "PROXY_URL=$PROXY_URL" \
   -e "TESTID=$TESTID" -e "SESSIONS=$SESSIONS" -e "TIME_SCALE=${TIME_SCALE:-1}" \
   -e "ABORT_ON=${ABORT_ON:-}" -e "DSP_ADDRESS=${DSP_ADDRESS:-}" \
+  -e "AGREEMENT_TIMEOUT_S=${AGREEMENT_TIMEOUT_S:-60}" \
   -e "KC_USER=${KC_USER:-researcher}" -e "KC_PASSWORD=${KC_PASSWORD:-${KC_USER:-researcher}}" \
   -e "SUMMARY_PATH=$RESULTS/$TESTID.json" \
   "$HERE/platform.js"

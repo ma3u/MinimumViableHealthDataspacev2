@@ -7,12 +7,14 @@
 //
 //   SCENARIO=smoke k6 run load-tests/platform.js        (see config.js)
 //
-// Pages and APIs are tagged `kind` (page, api, nlq) and `name` (the route,
-// never a URL with ids), so the dashboard shows the website's and the API's
-// response time apart, and the slowest endpoint by name.
+// Pages and APIs are tagged `kind` (page, api, nlq, poll) and `name` (the
+// route, never a URL with ids), so the dashboard shows the website's and the
+// API's response time apart, and the slowest endpoint by name. `poll` is the
+// contract journey waiting for an agreement: no person waits on one of those
+// answers, so they stay out of the API's p95.
 import http from "k6/http";
 import { check, sleep } from "k6";
-import { Counter } from "k6/metrics";
+import { Counter, Trend } from "k6/metrics";
 import { textSummary } from "https://jslib.k6.io/k6-summary/0.1.0/index.js";
 import {
   BASE_URL,
@@ -51,6 +53,11 @@ export const options = {
 
 /** 429s, so the rate-limit bottleneck (#519 hypothesis 1) has its own number. */
 export const rateLimited = new Counter("rate_limited");
+
+/** From the negotiation's POST to the poll that saw it FINALIZED, in ms. */
+export const negotiationAgreed = new Trend("negotiation_agreed", true);
+/** Negotiations that ended TERMINATED or were still open at the timeout. */
+export const negotiationsUnagreed = new Counter("negotiations_unagreed");
 
 const SESSIONS = SCENARIO === "signin" ? {} : loadSessions();
 
@@ -158,6 +165,15 @@ const PROVIDER = "alpha-klinik";
 const DSP_ADDRESS = __ENV.DSP_ADDRESS || "http://controlplane:8082/api/dsp";
 /** A dataset no permit names: the transfer the access body's rule refuses. */
 const UNPERMITTED_DATASET = "dataset:load-test-no-permit";
+/**
+ * How long a negotiation may take to agree before it counts as failed, and
+ * the waits between the polls that ask. The waits grow, so a negotiation that
+ * agrees in a few seconds costs two or three polls and one that never agrees
+ * costs ten in a minute, not thirty: the polls must not outnumber what the
+ * person does. The negotiate page asks every 3 s for two minutes.
+ */
+const AGREEMENT_TIMEOUT_S = Number(__ENV.AGREEMENT_TIMEOUT_S || "60");
+const POLL_WAITS_S = [1, 2, 3, 5, 8];
 
 /** This VU's participant contexts, looked up once (each VU has its own copy). */
 let contexts = null;
@@ -204,7 +220,75 @@ function firstOffer(catalog) {
   return null;
 }
 
-/** Catalogue, contract, transfer, and now and then a refused transfer. */
+/** A negotiation's field, compacted or with the EDC prefix (as the page reads it). */
+function negotiationField(n, field) {
+  if (!n) return "";
+  return String(n[field] ?? n[`edc:${field}`] ?? "");
+}
+
+function jsonOf(res) {
+  try {
+    return res.json();
+  } catch (_err) {
+    return null;
+  }
+}
+
+/**
+ * Waits for the negotiation to agree, asking the hub's own route for it as
+ * the negotiate page does, and returns the FINALIZED negotiation or null.
+ * One that ends TERMINATED, or is still open at the timeout, is a failed
+ * check: a run in which nothing agrees must not pass as a run without
+ * transfers (the 2026-11-11 runs whose 170 negotiations all terminated).
+ */
+function awaitAgreement(persona, consumer, started) {
+  const id = negotiationField(started, "@id");
+  const begun = Date.now();
+  // The demo path answers the POST with the agreement already in it.
+  if (negotiationField(started, "contractAgreementId"))
+    return settle(started, "FINALIZED", begun);
+  if (!id) return settle(null, "no id in the answer", begun);
+
+  let state = "";
+  let last = null;
+  for (let i = 0; ; i += 1) {
+    const wait = POLL_WAITS_S[Math.min(i, POLL_WAITS_S.length - 1)];
+    const left = AGREEMENT_TIMEOUT_S - (Date.now() - begun) / 1000;
+    if (left <= 0) break;
+    sleep(Math.min(wait, left));
+    const res = request(BASE_URL, persona, {
+      kind: "poll",
+      method: "GET",
+      path: `/api/negotiations/${encodeURIComponent(
+        id,
+      )}?participantId=${consumer}`,
+      name: "GET /api/negotiations/:id (poll)",
+    });
+    last = jsonOf(res) || last;
+    state = negotiationField(last, "state").toUpperCase();
+    if (state === "FINALIZED" || state === "TERMINATED") break;
+  }
+  return settle(last, state || "no answer", begun);
+}
+
+function settle(negotiation, state, begun) {
+  const agreed =
+    state === "FINALIZED" &&
+    !!negotiationField(negotiation, "contractAgreementId");
+  check(
+    negotiation,
+    { [`negotiation agrees within ${AGREEMENT_TIMEOUT_S} s`]: () => agreed },
+    { kind: "contract", state: state || "open" },
+  );
+  if (!agreed) {
+    negotiationsUnagreed.add(1, { state: state || "open" });
+    return null;
+  }
+  negotiationAgreed.add(Date.now() - begun);
+  return negotiation;
+}
+
+/** Catalogue, contract, agreement, transfer, and now and then a refused transfer. */
 function contractJourney(persona) {
   const ctx = participantContexts(persona);
   if (!ctx) return;
@@ -217,16 +301,12 @@ function contractJourney(persona) {
     ...api(`/api/negotiations?${query}`),
     name: "GET /api/negotiations (catalogue)",
   });
-  let offer = null;
-  try {
-    offer = firstOffer(catalog.json());
-  } catch (_err) {
-    offer = null;
-  }
+  const catalogBody = jsonOf(catalog);
+  const offer = catalogBody ? firstOffer(catalogBody) : null;
   if (!offer) return;
   think();
 
-  const negotiation = request(BASE_URL, persona, {
+  const started = request(BASE_URL, persona, {
     kind: "api",
     method: "POST",
     path: "/api/negotiations",
@@ -241,18 +321,17 @@ function contractJourney(persona) {
       policy: offer.policy,
     },
   });
-  let agreement = null;
-  try {
-    agreement = negotiation.json().contractAgreementId || null;
-  } catch (_err) {
-    agreement = null;
-  }
+
+  // A live negotiation has no agreement when the POST answers: the connectors
+  // agree afterwards. The person on the negotiate page watches it finalize,
+  // then opens the transfer page; this waits the same way.
+  const agreed =
+    started.status === 201
+      ? awaitAgreement(persona, ctx.consumer, jsonOf(started))
+      : null;
   think();
 
-  // A live negotiation has no agreement yet when the POST answers (the
-  // connector agrees later, and reports it to the chain itself), so the
-  // transfer runs only on an agreement the answer names: a demo one today.
-  if (agreement) {
+  if (agreed) {
     const transfer = {
       kind: "api",
       method: "POST",
@@ -260,9 +339,12 @@ function contractJourney(persona) {
       expect: [201],
       body: {
         participantId: ctx.consumer,
-        contractId: agreement,
+        contractId: negotiationField(agreed, "contractAgreementId"),
         assetId: offer.assetId,
-        counterPartyAddress: DSP_ADDRESS,
+        // The provider's endpoint as the negotiation recorded it, with its
+        // context and profile; the transfer page sends the same.
+        counterPartyAddress:
+          negotiationField(agreed, "counterPartyAddress") || DSP_ADDRESS,
       },
     };
     request(BASE_URL, persona, transfer);
@@ -318,15 +400,14 @@ function request(base, persona, step) {
       ? http.post(url, JSON.stringify(step.body), params)
       : http.get(url, params);
   if (res.status === 429) rateLimited.add(1, { name: params.tags.name });
-  check(
-    res,
-    {
-      [`${step.kind} answers as expected`]: (r) => expect.includes(r.status),
-      [`${step.kind} under ${SLO_MS[step.kind]} ms`]: (r) =>
-        r.timings.duration < SLO_MS[step.kind],
-    },
-    { kind: step.kind },
-  );
+  const checks = {
+    [`${step.kind} answers as expected`]: (r) => expect.includes(r.status),
+  };
+  // A poll has no SLO: nobody waits on its answer, only on the agreement.
+  if (SLO_MS[step.kind])
+    checks[`${step.kind} under ${SLO_MS[step.kind]} ms`] = (r) =>
+      r.timings.duration < SLO_MS[step.kind];
+  check(res, checks, { kind: step.kind });
   return res;
 }
 

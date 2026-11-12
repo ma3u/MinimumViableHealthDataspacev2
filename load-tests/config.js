@@ -104,8 +104,8 @@ export const SCENARIOS = {
       ["30s", 0],
     ]),
   },
-  // contracts and transfers only: catalogue, negotiation, transfer, a refused
-  // transfer, each on the audit trail (#571)
+  // contracts and transfers only: catalogue, negotiation, the wait for the
+  // agreement, transfer, a refused transfer, each on the audit trail (#571)
   contracts: {
     executor: "ramping-vus",
     exec: "contracts",
@@ -115,6 +115,9 @@ export const SCENARIOS = {
       ["2m", 10],
       ["30s", 0],
     ]),
+    // A journey can wait up to AGREEMENT_TIMEOUT_S for its agreement; the
+    // default 30 s ramp-down would cut those off and count nothing.
+    gracefulRampDown: "90s",
   },
   // the proxy directly, from inside the network (hypothesis 1)
   proxy: {
