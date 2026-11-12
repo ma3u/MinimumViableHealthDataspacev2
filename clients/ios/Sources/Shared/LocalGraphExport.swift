@@ -15,6 +15,28 @@ import Foundation
 public enum LocalGraphExport {
   static let ext = "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-"
 
+  /// Year of birth and sex on the bundle's Patient, for the person's own Mac
+  /// only and only when they switch on "Send year of birth and sex" (the Mac
+  /// computes age-dependent risk scores from them). The profile otherwise never
+  /// leaves the phone (ADR-034); this is the one place it may, and it carries
+  /// the year, never the day. Nothing set leaves the bundle as it was.
+  public static func withPerson(_ bundle: Data, birthYear: Int?, sex: RangeSex) -> Data {
+    guard birthYear != nil || sex != .any,
+      var json = (try? JSONSerialization.jsonObject(with: bundle)) as? [String: Any],
+      var entries = json["entry"] as? [[String: Any]]
+    else { return bundle }
+    for index in entries.indices {
+      guard var resource = entries[index]["resource"] as? [String: Any],
+        resource["resourceType"] as? String == "Patient"
+      else { continue }
+      if let birthYear { resource["birthDate"] = String(format: "%04d", birthYear) }
+      if sex != .any { resource["gender"] = sex.rawValue }
+      entries[index]["resource"] = resource
+    }
+    json["entry"] = entries
+    return (try? JSONSerialization.data(withJSONObject: json)) ?? bundle
+  }
+
   public static func bundle(fhirJSON: Data, unmapped: [UnmappedLabValue]) -> Data {
     guard !unmapped.isEmpty,
       var bundle = (try? JSONSerialization.jsonObject(with: fhirJSON)) as? [String: Any],
