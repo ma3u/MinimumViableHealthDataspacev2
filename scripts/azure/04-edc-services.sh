@@ -21,13 +21,18 @@ log "Phase 4: EDC-V core services"
 # password reaches each app as the pg-flex-password ACA secret. The pool cap
 # goes in through JAVA_TOOL_OPTIONS because EDC maps env names `_` -> `.` and
 # no env name can spell `pool.connections.max-total`; commons-pool's default
-# of 8 per service would want 40 of B1ms's 35 user connections.
+# of 8 per service would want 40 of B1ms's 35 user connections. The control
+# plane alone gets 8: with 3, its state machines held every connection and a
+# management request waited for one while Postgres sat idle (the contracts
+# run of 2026-11-12, docs/developer/edc-sizing-under-load.md). The most the
+# server held in that run was 24, so five more stay under 35.
 EDC_DB_PW="$(pg_admin_password)"
 [ -n "$EDC_DB_PW" ] || { err "no Flexible Server password; run 13-postgres-flexible-server.sh 1 and 2 first"; exit 1; }
 # The services' Vault token as an ACA secret, never a plain env value (#359):
 # the rotated one when it exists, otherwise the fresh-environment default.
 VAULT_SVC_TOKEN="$(vault_service_token)"
 EDC_POOL_OPTS="-Dedc.datasource.default.pool.connections.max-total=3"
+EDC_CP_POOL_OPTS="-Dedc.datasource.default.pool.connections.max-total=8"
 az acr login --name "$ACR_NAME"
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
@@ -80,7 +85,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane_v1?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
-    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
+    "JAVA_TOOL_OPTIONS=${EDC_CP_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_DSP_PROFILES_ENABLE_ALL=true" \
     "WEB_HTTP_PROTOCOL_VIRTUAL=true" \
