@@ -351,6 +351,17 @@ export const REFERENCE_RANGES: readonly ReferenceRange[] = [
     source: ESC_2019,
   },
   {
+    analyteKey: "apolipoprotein-b",
+    ucum: "g/L",
+    group: "cardiovascular",
+    sex: "any",
+    guidelineHigh: 1.0,
+    optimalHigh: 0.65,
+    basis: "guideline",
+    summary: `Targets: below 1.0 at low or moderate risk, 0.8 at high and 0.65 at very high risk. ${LIPID_TIERS}`,
+    source: ESC_2019,
+  },
+  {
     analyteKey: "cholesterol-hdl",
     ucum: "mg/dL",
     group: "cardiovascular",
