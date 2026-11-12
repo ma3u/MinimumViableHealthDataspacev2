@@ -918,6 +918,8 @@ final class AppModel: ObservableObject {
   @Published var showingConnect = false
   /// The Export to my Mac (Relate) sheet.
   @Published var showingLocalRelate = false
+  /// The Health graph on this iPhone (Relate) sheet.
+  @Published var showingOnDeviceGraph = false
   /// The research export, held until the person confirms it, when no
   /// registry consent is recorded.
   @Published var confirmingResearchExport = false
@@ -1011,6 +1013,7 @@ struct ContentView: View {
   @StateObject private var connection = EHDSConnection()
   @Environment(\.scenePhase) private var scenePhase
   @StateObject private var localRelate = LocalRelateExport()
+  @StateObject private var onDeviceGraph = OnDeviceGraph()
   @State private var scanning = false
   @State private var path: [UUID] = []
 
@@ -1188,6 +1191,11 @@ struct ContentView: View {
                 Label("Consents", systemImage: "checkmark.seal")
               }
               Button {
+                model.showingOnDeviceGraph = true
+              } label: {
+                Label("Health graph on this iPhone", systemImage: "point.3.connected.trianglepath.dotted")
+              }
+              Button {
                 model.showingLocalRelate = true
               } label: {
                 Label("Export to my Mac (Relate)", systemImage: "desktopcomputer.and.arrow.down")
@@ -1269,6 +1277,9 @@ struct ContentView: View {
     .modifier(ReportActions(model: model, path: $path, scanning: $scanning))
     .modifier(ConnectSheet(model: model, connection: connection))
     .modifier(LocalRelateSheet(model: model, export: localRelate))
+    .modifier(
+      OnDeviceGraphSheet(
+        isPresented: $model.showingOnDeviceGraph, graph: onDeviceGraph, reports: model.reports))
     // My values into my record (#473 phase 3): whenever the reports change,
     // and when the person switches sending on, while it is on.
     .onChange(of: model.reports) { _, reports in
@@ -1358,6 +1369,8 @@ struct ContentView: View {
         model.showingConsents = true
       case .connect, .programmes:
         model.showingConnect = true
+      case .graph:
+        model.showingOnDeviceGraph = true
       case .list, nil:
         break
       }

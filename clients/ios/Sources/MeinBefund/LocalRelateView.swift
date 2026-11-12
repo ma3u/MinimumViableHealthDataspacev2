@@ -53,7 +53,7 @@ struct LocalRelateView: View {
       Section("On the Mac") {
         Text("Run the receiver from the relate-hackathon-team repository:")
         // A command line, not prose: never translated.
-        Text(verbatim: "python -m health_graph receive --db health.rl")
+        Text(verbatim: "scripts/health_vault.sh receive")
           .font(.system(.footnote, design: .monospaced))
           .textSelection(.enabled)
       }
