@@ -21,6 +21,15 @@ settings:
     # already seen, and it refuses it after the upload, having spent minutes.
     CURRENT_PROJECT_VERSION: "13"
 
+packages:
+  # Health graph on this iPhone: Relate (Neo4j's embedded graph database,
+  # github.com/relatedb/relate) through the HealthGraph library, the same code
+  # the Mac receiver runs. Pinned to a commit: a moving branch would change
+  # what a TestFlight build contains.
+  HealthGraph:
+    url: https://github.com/ma3u/relate-hackathon-team
+    revision: a2553d018a1c089500ec33c2673735ee6b9993ef
+
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
   # exactly the same sources, including the generated analyte table.
@@ -40,6 +49,8 @@ targets:
     platform: iOS
     dependencies:
       - target: Shared
+      - package: HealthGraph
+        product: HealthGraph
     sources:
       # One entry only. xcodegen finds en.lproj and de.lproj underneath and
       # builds a variant group per file, which is what both the resource copy

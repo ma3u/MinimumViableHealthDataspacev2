@@ -73,6 +73,8 @@
       case connect
       /// Bonus programs (#934), connected to the demo hub as `patient1`.
       case programmes
+      /// Health graph on this iPhone (Relate on the device).
+      case graph
     }
 
     static var screen: Screen? {

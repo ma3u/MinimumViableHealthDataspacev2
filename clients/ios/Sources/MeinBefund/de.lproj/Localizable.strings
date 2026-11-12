@@ -650,3 +650,37 @@
 "kcal per day" = "kcal pro Tag";
 "hours per night" = "Stunden pro Nacht";
 "minutes per night" = "Minuten pro Nacht";
+
+/* Health graph on this iPhone (Relate on the device, Nov 2026). */
+"Health graph on this iPhone" = "Gesundheitsgraph auf diesem iPhone";
+"Health graph" = "Gesundheitsgraph";
+"Keep a connected graph of your values on this iPhone, in Relate, Neo4j's embedded graph database: every value linked to its report, its LOINC code and where it came from. It is built here from your reports, encrypted by iOS while the phone is locked, never backed up and never sent anywhere." = "Behalten Sie einen verknüpften Graphen Ihrer Werte auf diesem iPhone, in Relate, der eingebetteten Graphdatenbank von Neo4j: jeder Wert verbunden mit seinem Befund, seinem LOINC-Code und seiner Herkunft. Er wird hier aus Ihren Befunden erstellt, von iOS verschlüsselt, solange das Telefon gesperrt ist, nie gesichert und nie irgendwohin gesendet.";
+"Keep a graph on this iPhone" = "Graph auf diesem iPhone führen";
+"Include Apple Health weekly means" = "Wochenmittel aus Apple Health einbeziehen";
+"The graph follows your reports: scanning, correcting or deleting one updates it. Switching off deletes the graph; your reports stay." = "Der Graph folgt Ihren Befunden: Scannen, Korrigieren oder Löschen eines Befunds aktualisiert ihn. Ausschalten löscht den Graphen; Ihre Befunde bleiben.";
+"In the graph" = "Im Graphen";
+"Lab values" = "Laborwerte";
+"Kinds of test (LOINC)" = "Arten von Tests (LOINC)";
+"Values without a code" = "Werte ohne Code";
+"Apple Health weekly values" = "Wochenwerte aus Apple Health";
+"OMOP measurements" = "OMOP-Messungen";
+"Rebuild now" = "Jetzt neu aufbauen";
+"Your tests over time" = "Ihre Tests im Zeitverlauf";
+"Each list is a Cypher query answered by the graph on this iPhone." = "Jede Liste ist eine Cypher-Abfrage, die der Graph auf diesem iPhone beantwortet.";
+"Delete the graph" = "Graphen löschen";
+"Delete the graph on this iPhone?" = "Den Graphen auf diesem iPhone löschen?";
+"Your reports stay. You can build the graph again at any time." = "Ihre Befunde bleiben. Sie können den Graphen jederzeit neu aufbauen.";
+"Weekly mean from a device, not a lab value" = "Wochenmittel von einem Gerät, kein Laborwert";
+"The graph could not be built: %@" = "Der Graph konnte nicht erstellt werden: %@";
+
+/* Send over USB cable (Export to my Mac, Nov 2026). */
+"Send over USB cable" = "Über USB-Kabel senden";
+"Waiting for the Mac…" = "Warte auf den Mac…";
+"On the Mac, run:" = "Auf dem Mac ausführen:";
+"Sending over USB…" = "Wird über USB gesendet…";
+"No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac. Only the paired Mac receives anything. Keep this screen open until it is done." = "Kein gemeinsames WLAN nötig: Verbinden Sie dieses iPhone per Kabel mit dem Mac, tippen Sie auf „Über USB-Kabel senden“ und führen Sie dann den Befehl auf dem Mac aus. Nur der gekoppelte Mac erhält etwas. Lassen Sie diese Ansicht geöffnet, bis es fertig ist.";
+"Sent %lld values from %lld reports and %lld weekly values over USB to %@." = "%1$lld Werte aus %2$lld Befunden und %3$lld Wochenwerte über USB an %4$@ gesendet.";
+"USB transfer failed: %@" = "USB-Übertragung fehlgeschlagen: %@";
+"The Mac on the cable is not the paired one, so nothing was sent." = "Der Mac am Kabel ist nicht der gekoppelte, daher wurde nichts gesendet.";
+"Paired with %@. It cannot be reached over Wi-Fi right now; you can send over a USB cable instead." = "Mit %@ verbunden. Er ist gerade nicht über WLAN erreichbar; Sie können stattdessen über ein USB-Kabel senden.";
+"%@ cannot be reached over Wi-Fi right now. Nothing was sent; you can send over a USB cable instead." = "%@ ist gerade nicht über WLAN erreichbar. Es wurde nichts gesendet; Sie können stattdessen über ein USB-Kabel senden.";
