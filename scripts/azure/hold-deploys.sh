@@ -6,6 +6,7 @@
 #   hold-deploys.sh end <id>         laptop: close it
 #   hold-deploys.sh check            one look at both signals; exit 1 if unreadable
 #   hold-deploys.sh wait             deploy-azure.yml: wait while either is on
+#   hold-deploys.sh deploying        the runners: exit 3 while a deploy is past its hold
 #
 # Two signals, each readable by the deploy job without a stored credential:
 #
@@ -26,6 +27,13 @@
 # step: an unreadable signal stops the deploy, visibly, and the next push or a
 # dispatch with ignore_load_test_hold=true goes ahead.
 #
+# The other direction: a run started after a deploy's hold step let it through
+# lands in the middle of that deploy (#1091's deploy and the contracts run of
+# 2026-11-12, three seconds apart). deploying lists the runs of deploy-azure.yml
+# whose build-and-deploy job is running with its hold step done: they replace
+# the UI and the proxy now, or verify the new revisions. A deploy still
+# building, or waiting in its hold, does not count: it will see the run.
+#
 # Variables: RESOURCE_GROUP (rg-mvhd-dev), LOAD_TEST_JOB (mvhd-load-test),
 # HOLD_ENVIRONMENT (load-test), AZURE_SIGNAL=skip (check only, off main where
 # there is no Azure login), WAIT_MINUTES, POLL_SECONDS (60).
@@ -38,6 +46,7 @@ WAIT_MINUTES="${WAIT_MINUTES:-180}"
 POLL_SECONDS="${POLL_SECONDS:-60}"
 STALE_SECONDS=14400
 MAX_READ_FAILURES=3
+DEPLOY_WORKFLOW=deploy-azure.yml
 if [[ "${AZURE_SIGNAL:-read}" == skip ]]; then
   CHECKED="GitHub environment ${ENVIRONMENT}; Container Apps job ${JOB} not checked"
 else
@@ -120,6 +129,51 @@ active_runs() {
   return 0
 }
 
+# Deploy runs past their hold step, one "deploy <run url> <current step>" line
+# each, and "e2e <run url>" for a live E2E run; fails if the runs cannot be
+# read. The job and step names are the ones in deploy-azure.yml. A running
+# job whose step list does not name the hold step counts as past it.
+deploys_past_hold() {
+  local r runs id url jobs kind step
+  r="$(repo)" || return 1
+  runs="$(gh api "repos/${r}/actions/workflows/${DEPLOY_WORKFLOW}/runs?per_page=20" \
+    --jq '.workflow_runs[] | select(.status != "completed") | "\(.id) \(.html_url)"')" || return 1
+  while read -r id url; do
+    [[ -n "$id" ]] || continue
+    # shellcheck disable=SC2016 # jq's own \(...) and $names, not the shell's
+    jobs="$(gh api "repos/${r}/actions/runs/${id}/jobs" --jq '.jobs[] | select(.status == "in_progress")
+      | if .name == "build-and-deploy" then
+          ((.steps // []) | map(select(.name == "Wait while a load test runs"))[0]) as $hold
+          | ((.steps // []) | map(select(.status == "in_progress"))[0].name // "between steps") as $now
+          | if $hold == null or $hold.status == "completed" then "deploy \($now)" else empty end
+        elif .name == "E2E Tests (Azure)" then "e2e"
+        else empty end')" || return 1
+    while read -r kind step; do
+      if [[ -n "$kind" ]]; then echo "${kind} ${url} ${step}"; fi
+    done <<<"$jobs"
+  done <<<"$runs"
+  return 0
+}
+
+cmd_deploying() {
+  local out kind url step found=0
+  out="$(deploys_past_hold)" || {
+    echo "the runs of ${DEPLOY_WORKFLOW} could not be read" >&2
+    return 1
+  }
+  while read -r kind url step; do
+    case "$kind" in
+      deploy)
+        echo "deploying: ${url} (${step})"
+        found=1
+        ;;
+      e2e) echo "note: the E2E tests of ${url} run against the hub; their requests show in a run started now" >&2 ;;
+    esac
+  done <<<"$out"
+  if ((found)); then return 3; fi
+  echo "no deploy past its hold"
+}
+
 # A long wait outlives the Azure access token of the job's OIDC login; log in
 # again with a fresh GitHub OIDC token. Only in a workflow with id-token: write.
 azure_relogin() {
@@ -200,5 +254,6 @@ case "${1:-}" in
   end) cmd_end "${2:-}" ;;
   check) cmd_check ;;
   wait) cmd_wait ;;
-  *) sed -n '5,8p' "$0"; exit 64 ;;
+  deploying) cmd_deploying ;;
+  *) sed -n '5,9p' "$0"; exit 64 ;;
 esac

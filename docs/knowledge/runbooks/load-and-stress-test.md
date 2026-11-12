@@ -90,6 +90,16 @@ that cannot read either signal three times in a row fails rather than deploy;
 `gh workflow run deploy-azure.yml --ref main -f ignore_load_test_hold=true`
 deploys anyway, and `-f hold_check_only=true` reads the hold without deploying.
 
+The other way round, both run scripts refuse to start while a deploy is past
+its hold step, replacing the UI and the proxy or verifying the new revisions
+(`scripts/azure/hold-deploys.sh deploying`; the contracts run of 2026-11-12
+started three seconds before #1091's proxy deploy ended). A deploy still
+building does not stop them: it sees the run and waits. `run-load-test.sh`
+checks at the start and again right before the execution starts;
+`load-tests/run.sh azure` checks after it has opened its hold, so no deploy
+slips in between. Wait for the deploy run to finish (the message links it), or
+start anyway with `DEPLOY_CHECK=skip` when the GitHub API cannot be read.
+
 ### Scale the UI (ADR-061)
 
 The UI is one Node process per replica, and three replicas of 0.5 vCPU were

@@ -121,6 +121,8 @@ jobs:
       # (ADR-092). The repository variable LOAD_TEST_RUNNING read here before
       # was never readable by this token, so the hold never held (gotchas,
       # 2026-11-12). The script renews the Azure login during a long wait.
+      # hold-deploys.sh deploying finds this step and the job by name, so a
+      # load test refuses to start once a deploy is past it: rename both there.
       - name: Wait while a load test runs
         if: ${{ !inputs.ignore_load_test_hold }}
         timeout-minutes: 190

@@ -22,7 +22,8 @@
 #
 # A run against azure opens a deployment to the GitHub environment "load-test"
 # for its duration, and deploy-azure.yml waits while it is open (#571, ADR-092;
-# scripts/azure/hold-deploys.sh).
+# scripts/azure/hold-deploys.sh). It refuses to start while a deploy is past
+# its hold step (DEPLOY_CHECK=skip starts anyway).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HERE="$ROOT/load-tests"
@@ -96,6 +97,19 @@ if [ "$TARGET" = azure ]; then
   if HOLD_ID="$(cd "$ROOT" && scripts/azure/hold-deploys.sh start "$TESTID" 2>/dev/null)"; then
     trap '(cd "$ROOT" && scripts/azure/hold-deploys.sh end "$HOLD_ID" 2>/dev/null) || echo "release the deploys: scripts/azure/hold-deploys.sh end $HOLD_ID" >&2' EXIT
     echo "deploys wait: load-test deployment $HOLD_ID ($TESTID)"
+    # The hold is open, so a deploy not yet past its hold step waits; one that
+    # is past it replaces the UI and the proxy now (hold-deploys.sh deploying).
+    if [ "${DEPLOY_CHECK:-on}" != skip ]; then
+      rc=0; deploying="$(cd "$ROOT" && scripts/azure/hold-deploys.sh deploying)" || rc=$?
+      if [ "$rc" -eq 3 ]; then
+        echo "a deploy is replacing the UI and the proxy; start the run when it has finished:" >&2
+        echo "$deploying" >&2
+        exit 1
+      elif [ "$rc" -ne 0 ]; then
+        echo "could not check for a deploy in progress; DEPLOY_CHECK=skip starts anyway" >&2
+        exit 1
+      fi
+    fi
   else
     echo "could not open the deploy hold (gh signed in?): a merge to main would redeploy during the run" >&2
   fi

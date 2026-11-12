@@ -17,6 +17,11 @@
 # execution is the signal, so nothing has to be set or cleared, WAIT=0 included:
 # scripts/azure/hold-deploys.sh check shows what a deploy would see.
 #
+# The other way round, it refuses to start while a deploy is past its hold
+# (hold-deploys.sh deploying): once at the start, and again right before the
+# execution starts. A deploy still building will wait for the run instead.
+# DEPLOY_CHECK=skip starts anyway, for when the GitHub API cannot be read.
+#
 # Sessions are forged here (8 hours valid) and handed to the job as a secret;
 # nothing is printed. Jobs need the PIM role rol-ssg-prd-project_owner active:
 # Container Apps Contributor has no Microsoft.App/jobs action.
@@ -44,6 +49,28 @@ case "$SCENARIO" in
       [[ "$answer" == y ]] || exit 1
     fi ;;
 esac
+
+refuse_during_deploy() {
+  if [[ "${DEPLOY_CHECK:-on}" == skip ]]; then
+    warn "DEPLOY_CHECK=skip: not checking for a deploy in progress"
+    return 0
+  fi
+  local out rc=0
+  out="$(cd "$REPO_ROOT" && "${SCRIPT_DIR}/hold-deploys.sh" deploying)" || rc=$?
+  case "$rc" in
+    0) return 0 ;;
+    3)
+      err "a deploy is replacing the UI and the proxy; start the run when it has finished:"
+      echo "$out" >&2
+      exit 1
+      ;;
+    *)
+      err "could not check for a deploy in progress (gh signed in?); DEPLOY_CHECK=skip starts anyway"
+      exit 1
+      ;;
+  esac
+}
+refuse_during_deploy
 
 TAG="$(git -C "$REPO_ROOT" log -1 --format=%h -- load-tests)"
 IMAGE="${ACR_LOGIN_SERVER}/mvhd-k6:${TAG}"
@@ -124,6 +151,7 @@ else
 fi
 rm -f "$SPEC" "$SESSIONS_FILE"
 
+refuse_during_deploy
 log "Starting $SCENARIO, testid $TESTID"
 EXECUTION="$(az containerapp job start --name "$JOB" --resource-group "$RG" --query name -o tsv)"
 ok "execution $EXECUTION; deploys wait while it runs"
