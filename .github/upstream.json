@@ -66,15 +66,15 @@
     },
     {
       "repo": "eclipse-cfm/cfm",
-      "known": "v0.0.7",
+      "known": "v0.0.8",
       "prerelease": false,
       "where": "docker-compose.jad.yml (profile cfm), built from the fork below",
       "issue": 973,
       "fork": {
         "repo": "ma3u/cfm",
-        "base": "v0.0.7",
+        "base": "v0.0.8",
         "integration": "mvhd/integration",
-        "tag": "v0.0.7-mvhd.3",
+        "tag": "v0.0.8-mvhd.1",
         "runbook": "docs/knowledge/runbooks/cfm-fork.md",
         "patches": [
           {

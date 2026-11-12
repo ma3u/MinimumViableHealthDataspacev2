@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 #
-# Seeds CFM 0.0.7 (compose profile `cfm`, ADR-085, #973). Idempotent.
+# Seeds CFM 0.0.8 (compose profile `cfm`, ADR-085, #973). Idempotent.
 #
 #   1. the database `cfm_v007` (owner `cfm`) on an existing Postgres volume;
 #   2. Keycloak: the client scopes the agents and managers ask for, and the
@@ -51,9 +51,11 @@ kc() { curl -sf -H "Authorization: Bearer $ADMIN_TOKEN" -H 'Content-Type: applic
 REALM="$KC_URL/admin/realms/edcv"
 
 # The scopes CFM asks for that the realm does not define yet: the agents'
-# (cfm agent/common/*: identityhub L37-L38, siglet L32-L33, jwtletagent
-# agentScopes L83-L93) and the managers' (decision record 2026-06-01).
+# (cfm agent/common/*: identityhub L37-L38, siglet L32-L33, issuerservice
+# L36-L38 since v0.0.8 (eclipse-cfm#234), jwtletagent agentScopes L82-L91)
+# and the managers' (decision record 2026-06-01).
 NEW_SCOPES=(identity-api:credentials:read identity-api:credentials:write
+  issuer-admin-api:holders:write issuer-admin-api:credentials:read issuer-admin-api:credentials:write
   siglet-mgmt-api:read siglet-mgmt-api:write read write
   tenant-manager-api:read tenant-manager-api:write tenant-manager-api:admin
   provision-manager-api:read provision-manager-api:write provision-manager-api:admin)

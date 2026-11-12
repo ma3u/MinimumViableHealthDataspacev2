@@ -42,7 +42,7 @@ rectangle "Infrastructure" as INFRA #C9E7B7 {
 }
 
 rectangle "Compose profiles, started only with --profile <name>" as PROF #E5E7EB {
-  rectangle "cfm: eclipse-cfm 0.0.7 from the mvhd fork, v0.0.7-mvhd.3 (ADR-085, ADR-088)" as CFM #F3F4F6 {
+  rectangle "cfm: eclipse-cfm 0.0.8 from the mvhd fork, v0.0.8-mvhd.1 (ADR-085, ADR-088)" as CFM #F3F4F6 {
     Technology_SystemSoftware(tm, "cfm7-tmanager\nTenant Manager, :18181")
     Technology_SystemSoftware(pm, "cfm7-pmanager\nProvision Manager, :18182")
     Technology_SystemSoftware(agents, "cfm7-edcvagent, cfm7-ihagent,\ncfm7-jwtletagent, cfm7-obagent,\ncfm7-regagent, cfm7-sigletagent\norchestration agents")
