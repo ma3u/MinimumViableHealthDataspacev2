@@ -317,7 +317,7 @@ refused for the dataset no permit covers.
   The run is not clean: #1090 was merged as it started, and its deploy
   replaced `mvhd-ui` (revision `--0001014`, 10:16:38 UTC) and
   `mvhd-neo4j-proxy` (`--0000931`, 10:16:52) at the run's peak of 10 users.
-  The deploy's wait for a load test did not hold it (see the pool run below).
+  The deploy's wait for a load test did not hold it (see below).
   Per endpoint (Prometheus through Grafana, by `name`, over the run):
 
   | Endpoint                            | p50    | p95    | Evening p95, 200 rows |
@@ -347,8 +347,8 @@ refused for the dataset no permit covers.
   takes half a second to a second with nothing else running. Neither is
   CPU on the apps; both are time spent waiting on the Azure side.
 
-- **Where the control plane waits: most likely its database pool.** Read the
-  same day from Azure Monitor and the app definitions:
+- **The first guess was the database pool.** Read the same day from Azure
+  Monitor and the app definitions:
 
   - The Flexible Server (`mvhd-pg-b53a0449`, `Standard_B1ms`, 1 vCore,
     120 IOPS) was idle through the run: CPU at most 20 %, CPU credits flat
@@ -361,65 +361,69 @@ refused for the dataset no permit covers.
     connections per app, where commons-pool's default, which the compose
     stack keeps, is 8. The cap is there because five services at 8 would
     want 40 of B1ms's 35 user connections.
-  - The control plane's state machines (negotiations, transfers and the
-    rest) poll the database all the time, so with three connections a
-    management request can wait for one while CPU and Postgres look idle.
-    That fits both what the run shows (time grows with concurrency, not
-    with CPU) and what one request shows on an idle hub (a one-row list
-    costs a few hundred milliseconds on Azure and tens on the compose
-    stack). It is an inference: nothing outside the container shows the
-    pool's wait, and running a probe inside the production UI container
-    was refused.
-  - The test is to raise the control plane's cap and run `contracts` again.
-    The budget allows it: at 8 the control plane adds 5 connections to the
-    24 seen, under the 35 user connections the deploy script counts for B1ms.
+  - The control plane's state machines poll the database all the time, so
+    with three connections a management request could wait for one while
+    CPU and Postgres look idle. Nothing outside the container shows the
+    pool's wait, and running a probe inside the production UI container was
+    refused, so the guess was tested by changing the cap.
 
-- **With eight connections the `contracts` run passes.** The control plane's
-  cap went to 8 at 11:44 UTC (revision `mvhd-controlplane--0000203`, every
-  other `JAVA_TOOL_OPTIONS` value unchanged; the IdentityHub and the
-  IssuerService keep 3), and the deploy script gives it the same since. Run
-  `20261112-1148-contracts-aca`, 11:49 to 11:53 UTC, no deploy during it:
-  61 iterations, 466 requests, **0 failed**, checks 99.37 % (5 of 272
-  answers over a second, the slowest 1.16 s), **API p95 783 ms**, and every
-  k6 threshold held. 61 negotiations agreed, p50 6.2 s and p95 19.2 s, the
-  evening's times again.
+- **The pool was not it; deploys during the runs were.** Four runs of the
+  same scenario, each started the same way (the control plane's revision
+  ready, the one-request probe, then k6), one change at a time. The cap was
+  set on the live app with every other `JAVA_TOOL_OPTIONS` value unchanged;
+  the IdentityHub and the IssuerService kept 3 throughout.
 
-  | Endpoint, p95                       | 10:12, cap 3 | 11:48, cap 8 | p50 at 11:48 |
-  | ----------------------------------- | ------------ | ------------ | ------------ |
-  | `GET /api/transfers` (one page)     | 1.44 s       | **958 ms**   | 444 ms       |
-  | `GET /api/negotiations` (catalogue) | 1.76 s       | **917 ms**   | 429 ms       |
-  | `POST /api/transfers`               | 825 ms       | 439 ms       | 273 ms       |
-  | `POST /api/negotiations`            | 738 ms       | 491 ms       | 266 ms       |
-  | `POST /api/transfers` (no permit)   | 214 ms       | 151 ms       | 92 ms        |
-  | poll, outside the threshold         | 395 ms       | 184 ms       | 36 ms        |
+  | Run, 2026-11-12 | Cap | Alongside the run                                                                                              | API p95 | Over 1 s  | k6     |
+  | --------------- | --- | -------------------------------------------------------------------------------------------------------------- | ------- | --------- | ------ |
+  | `1012`          | 3   | #1090's deploy replaced `mvhd-ui` and `mvhd-neo4j-proxy` at 10:16, at the peak                                 | 1.50 s  | not read  | failed |
+  | `1148`          | 8   | nothing                                                                                                        | 783 ms  | 5 of 272  | held   |
+  | `1209`          | 3   | #1091's deploy replaced the UI at 12:10:06 and the proxy at 12:10:20; its E2E Tests (Azure) ran 12:12 to 12:17 | 994 ms  | 13 of 256 | failed |
+  | `1228`          | 3   | nothing (pull request CI only, on GitHub's runners)                                                            | 854 ms  | 6         | held   |
 
-  The Flexible Server held at most 25 connections (24 before), CPU at most
-  28 %, at most 29 IOPS. The control plane peaked at 0.41 vCPU of 0.5 in
-  the run's first minute and stayed under 0.3 after it; the IdentityHub at
-  0.12, the UI at 0.07. The control plane logged no error, one NATS retry.
+  The two runs with nothing alongside, per endpoint, p95 (p50):
 
-  What this does and does not show:
+  | Endpoint                            | Cap 3, `1228`   | Cap 8, `1148`   |
+  | ----------------------------------- | --------------- | --------------- |
+  | `GET /api/transfers` (one page)     | 891 ms (459 ms) | 958 ms (444 ms) |
+  | `GET /api/negotiations` (catalogue) | 805 ms (451 ms) | 917 ms (429 ms) |
+  | `POST /api/negotiations`            | 917 ms (286 ms) | 491 ms (266 ms) |
+  | `POST /api/transfers`               | 917 ms (289 ms) | 439 ms (273 ms) |
+  | `POST /api/transfers` (no permit)   | 424 ms (71 ms)  | 151 ms (92 ms)  |
+  | poll, outside the threshold         | 279 ms (41 ms)  | 184 ms (36 ms)  |
+  | All `kind:api`, p99 / slowest       | 1.87 s / 3.4 s  | 1.08 s / 1.16 s |
+  | Agreement p50 / p95                 | 6.2 s / 11.4 s  | 6.2 s / 19.2 s  |
+  | Postgres connections, CPU (max)     | 22, 26 %        | 25, 28 %        |
 
-  - The 10:12 run is a weak baseline: a deploy replaced the UI and the proxy
-    in it. So the gain is the larger pool and a run without a deploy
-    together, not the pool alone. The evening runs, which had no deploy,
-    failed at 1.37 and 1.58 s with 200-row lists and three connections.
-  - One request at a time on the idle hub hardly changed: after the run,
-    warm, `limit=1` took 0.21 to 0.23 s, `limit=50` 0.40 to 0.46 s and the
-    catalogue 0.38 to 0.63 s, each with about 0.13 s of round trip. A pool
-    cap costs time when requests queue for a connection, which is what 10
-    users do and one request does not, so the idle cost is something else.
-  - The two slow reads stay the slowest, just under the SLO at p95. A
-    `load` run with the EDC pages, or a few more users, may cross it again.
-    A clean comparison is the same run with the cap back at 3.
+  - **With nothing alongside, both caps pass.** API p95 854 against
+    783 ms, 6 against 5 answers over a second, every median within 30 ms.
+    The two evening runs, the same setup a few minutes apart, were 0.2 s
+    apart at p95, so this difference is noise.
+  - **The two failed runs had the hub changing under them.** In `1012` a
+    deploy replaced the UI at the peak; in `1209` a deploy replaced it in
+    the first minute and Playwright ran against the live hub over the peak.
+    So #1088 is enough on Azure: the 1.50 s of this morning was the deploy.
+  - **Eight connections may trim the writes' tail**: the two POSTs at p95
+    917 against about 470 ms, the slowest answer 3.4 against 1.16 s. With
+    about 60 answers per route, the p95 is the third slowest, so one run
+    each does not establish it. The cap of 8 stays, as the deploy script
+    has it since #1093: it costs three connections at the peak.
+  - **One request on an idle hub costs the same at 3 and at 8.** Right
+    after each revision started, `limit=50` took 0.71 to 1.63 s (cap 3)
+    and 0.59 to 1.61 s (cap 8), the catalogue 0.62 to 3.38 s and 0.87 to
+    2.60 s; warm, after the run at 8, 0.40 to 0.46 s and 0.38 to 0.63 s,
+    each with about 0.13 s of round trip.
+  - The transfer list and the catalogue are still the slowest reads, at
+    0.8 to 0.96 s p95: a `load` run with the EDC pages, or more users, may
+    cross the SLO on them.
 
-- **The deploy did not wait for the load test.** `deploy-azure.yml` reads
-  the repository variable `LOAD_TEST_RUNNING` with `gh api
-.../actions/variables/...` and the workflow token, which answers
-  `HTTP 403 Resource not accessible by integration`. The step treats that as
-  "could not read; deploying". Every deploy sampled from 2026-11-11 05:35 to
-  2026-11-12 10:12 logged the same warning, so the hold of #571 has not held
-  one, and a merge during a run redeploys in the middle of it.
+- **The deploy did not wait for the load test.** `deploy-azure.yml` read the
+  repository variable `LOAD_TEST_RUNNING` through the variables API with the
+  workflow token, which is refused with HTTP 403 ("Resource not accessible
+  by integration"), and the step deployed anyway ("could not read"). Every
+  deploy sampled from 2026-11-11 05:35 to 2026-11-12 10:12 logged it, and
+  the one at 12:05 went ahead during a run as well, so the hold of #571
+  never held a deploy; it cost two of the four runs above. #1095 and #1096
+  each fix it.
 
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
