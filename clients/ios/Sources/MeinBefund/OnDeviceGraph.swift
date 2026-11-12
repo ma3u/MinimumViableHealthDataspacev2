@@ -18,6 +18,8 @@ final class OnDeviceGraph: ObservableObject {
     var labValues = 0
     var codedAnalytes = 0
     var unmapped = 0
+    /// Values another report already has (one sheet scanned twice): kept, counted once.
+    var copies = 0
     var weekly = 0
     var omop = 0
   }
@@ -185,9 +187,11 @@ final class OnDeviceGraph: ObservableObject {
       try store.rows(
         cypher: """
           MATCH (o:Observation)
-          RETURN sum(CASE WHEN o.sourceReport = 'apple-health-weekly' THEN 0 ELSE 1 END) AS lab,
-                 sum(CASE WHEN o.sourceReport = 'apple-health-weekly' THEN 1 ELSE 0 END) AS weekly,
-                 sum(CASE WHEN o.code IS NULL THEN 1 ELSE 0 END) AS unmapped
+          WITH o, o.sourceReport = 'apple-health-weekly' AS weekly, o.duplicateOf IS NOT NULL AS copy
+          RETURN sum(CASE WHEN weekly OR copy THEN 0 ELSE 1 END) AS lab,
+                 sum(CASE WHEN weekly THEN 1 ELSE 0 END) AS weekly,
+                 sum(CASE WHEN copy THEN 1 ELSE 0 END) AS copies,
+                 sum(CASE WHEN o.code IS NULL AND NOT copy THEN 1 ELSE 0 END) AS unmapped
           """
       ).first ?? [:]
     let summary = Summary(
@@ -195,11 +199,13 @@ final class OnDeviceGraph: ObservableObject {
       labValues: Int(counts["lab"] ?? "") ?? 0,
       codedAnalytes: try store.count("LoincCode"),
       unmapped: Int(counts["unmapped"] ?? "") ?? 0,
+      copies: Int(counts["copies"] ?? "") ?? 0,
       weekly: Int(counts["weekly"] ?? "") ?? 0,
       omop: try store.count("OMOPMeasurement"))
     let analytes = try store.rows(
       cypher: """
         MATCH (o:Observation)-[:CODED_BY]->(lc:LoincCode)
+        WHERE o.duplicateOf IS NULL
         RETURN lc.code AS loinc, collect(DISTINCT o.display)[0] AS label, count(o) AS n,
                left(max(o.effectiveDate), 10) AS last
         ORDER BY n DESC, label
