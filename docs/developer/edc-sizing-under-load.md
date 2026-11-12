@@ -314,6 +314,10 @@ refused for the dataset no permit covers.
   checks 95.32 %, **API p95 1.50 s**; k6 failed on `checks` and
   `http_req_duration{kind:api}`. Agreements took longer than the evening
   before (p50 11.4 s, p95 19.8 s, against 6.2 to 6.7 s and 14.8 to 19.6 s).
+  The run is not clean: #1090 was merged as it started, and its deploy
+  replaced `mvhd-ui` (revision `--0001014`, 10:16:38 UTC) and
+  `mvhd-neo4j-proxy` (`--0000931`, 10:16:52) at the run's peak of 10 users.
+  The deploy's wait for a load test did not hold it (see the pool run below).
   Per endpoint (Prometheus through Grafana, by `name`, over the run):
 
   | Endpoint                            | p50    | p95    | Evening p95, 200 rows |
@@ -369,6 +373,53 @@ refused for the dataset no permit covers.
   - The test is to raise the control plane's cap and run `contracts` again.
     The budget allows it: at 8 the control plane adds 5 connections to the
     24 seen, under the 35 user connections the deploy script counts for B1ms.
+
+- **With eight connections the `contracts` run passes.** The control plane's
+  cap went to 8 at 11:44 UTC (revision `mvhd-controlplane--0000203`, every
+  other `JAVA_TOOL_OPTIONS` value unchanged; the IdentityHub and the
+  IssuerService keep 3), and the deploy script gives it the same since. Run
+  `20261112-1148-contracts-aca`, 11:49 to 11:53 UTC, no deploy during it:
+  61 iterations, 466 requests, **0 failed**, checks 99.37 % (5 of 272
+  answers over a second, the slowest 1.16 s), **API p95 783 ms**, and every
+  k6 threshold held. 61 negotiations agreed, p50 6.2 s and p95 19.2 s, the
+  evening's times again.
+
+  | Endpoint, p95                       | 10:12, cap 3 | 11:48, cap 8 | p50 at 11:48 |
+  | ----------------------------------- | ------------ | ------------ | ------------ |
+  | `GET /api/transfers` (one page)     | 1.44 s       | **958 ms**   | 444 ms       |
+  | `GET /api/negotiations` (catalogue) | 1.76 s       | **917 ms**   | 429 ms       |
+  | `POST /api/transfers`               | 825 ms       | 439 ms       | 273 ms       |
+  | `POST /api/negotiations`            | 738 ms       | 491 ms       | 266 ms       |
+  | `POST /api/transfers` (no permit)   | 214 ms       | 151 ms       | 92 ms        |
+  | poll, outside the threshold         | 395 ms       | 184 ms       | 36 ms        |
+
+  The Flexible Server held at most 25 connections (24 before), CPU at most
+  28 %, at most 29 IOPS. The control plane peaked at 0.41 vCPU of 0.5 in
+  the run's first minute and stayed under 0.3 after it; the IdentityHub at
+  0.12, the UI at 0.07. The control plane logged no error, one NATS retry.
+
+  What this does and does not show:
+
+  - The 10:12 run is a weak baseline: a deploy replaced the UI and the proxy
+    in it. So the gain is the larger pool and a run without a deploy
+    together, not the pool alone. The evening runs, which had no deploy,
+    failed at 1.37 and 1.58 s with 200-row lists and three connections.
+  - One request at a time on the idle hub hardly changed: after the run,
+    warm, `limit=1` took 0.21 to 0.23 s, `limit=50` 0.40 to 0.46 s and the
+    catalogue 0.38 to 0.63 s, each with about 0.13 s of round trip. A pool
+    cap costs time when requests queue for a connection, which is what 10
+    users do and one request does not, so the idle cost is something else.
+  - The two slow reads stay the slowest, just under the SLO at p95. A
+    `load` run with the EDC pages, or a few more users, may cross it again.
+    A clean comparison is the same run with the cap back at 3.
+
+- **The deploy did not wait for the load test.** `deploy-azure.yml` reads
+  the repository variable `LOAD_TEST_RUNNING` with `gh api
+.../actions/variables/...` and the workflow token, which answers
+  `HTTP 403 Resource not accessible by integration`. The step treats that as
+  "could not read; deploying". Every deploy sampled from 2026-11-11 05:35 to
+  2026-11-12 10:12 logged the same warning, so the hold of #571 has not held
+  one, and a merge during a run redeploys in the middle of it.
 
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
