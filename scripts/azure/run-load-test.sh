@@ -13,7 +13,7 @@
 # (no question for stress, spike or soak), WAIT=0 (do not wait for the end).
 #
 # While the run is on, the repository variable LOAD_TEST_RUNNING holds its
-# testid and start, and deploy-azure.yml waits for it to clear (#571: a merge
+# testid and start, and deploy-azure.yml waits for the run to end (#571: a merge
 # redeployed the UI and the proxy in the middle of a stress run). With WAIT=0
 # the variable stays set; clear it after the run: gh variable delete LOAD_TEST_RUNNING
 #

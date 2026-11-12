@@ -8,7 +8,6 @@ on:
 permissions:
   id-token: write
   contents: read
-  actions: read # the LOAD_TEST_RUNNING repository variable (#571)
 
 # Concurrency is per job, not per workflow. A workflow-wide group made each
 # deploy wait for the previous run's E2E job (about 19 minutes against the
@@ -25,7 +24,10 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 30 minutes of building and deploying plus the three hours the load-test
+    # hold may wait (a soak is two). At 30 the job was cancelled long before
+    # the hold could have ended.
+    timeout-minutes: 215
     outputs:
       live: ${{ steps.auth.outputs.live }}
     concurrency:
@@ -76,35 +78,20 @@ jobs:
             --push ./services/neo4j-proxy
 
       # A merge during a k6 run redeploys the UI and the proxy in the middle of
-      # it (#559 on 2026-10-06, #571). scripts/azure/run-load-test.sh and
-      # load-tests/run.sh set the repository variable LOAD_TEST_RUNNING to
-      # "<testid> <start, UTC>" while a run against the live hub is on and
-      # clear it at the end; this waits until it is clear, up to three hours
-      # (soak is two). A value older than four hours is a run that did not
-      # clean up, and the deploy goes ahead with a warning.
+      # it (#559 on 2026-10-06, #571, #1090 on 2026-11-12). The run scripts set
+      # the repository variable LOAD_TEST_RUNNING to "<testid> <start, UTC>"
+      # while a run against the live hub is on. It comes in through the vars
+      # context: the workflow token cannot read variables through the API (no
+      # permission grants it), and every deploy until 2026-11-12 got a 403
+      # there and deployed anyway. The vars context is read once, when the job
+      # starts, so the script follows the run through the live executions of
+      # the mvhd-load-test job, waits up to three hours, and fails rather than
+      # deploys when it cannot tell whether a run is on.
       - name: Wait while a load test runs
+        timeout-minutes: 185
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          for i in $(seq 1 180); do
-            if value="$(gh api "repos/${GITHUB_REPOSITORY}/actions/variables/LOAD_TEST_RUNNING" --jq .value 2>/tmp/gh-err)"; then
-              :
-            elif grep -q 'Not Found' /tmp/gh-err; then
-              value=""
-            else
-              echo "::warning::could not read LOAD_TEST_RUNNING ($(cat /tmp/gh-err)); deploying"
-              break
-            fi
-            [ -n "$value" ] || break
-            testid="${value%% *}"; started="${value#* }"
-            age=$(( $(date -u +%s) - $(date -u -d "$started" +%s 2>/dev/null || echo 0) ))
-            if [ "$age" -gt 14400 ]; then
-              echo "::warning::LOAD_TEST_RUNNING=$value is older than four hours; deploying"
-              break
-            fi
-            [ "$i" -eq 1 ] && echo "::notice::load test $testid runs since $started; waiting for it"
-            sleep 60
-          done
+          LOAD_TEST_RUNNING: ${{ vars.LOAD_TEST_RUNNING }}
+        run: ./scripts/azure/wait-for-load-test.sh
 
       # ── Deploy to Azure Container Apps ───────────────────────
       # DEPLOYMENT_TARGET=azure flips /api/admin/components to render

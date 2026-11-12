@@ -3,6 +3,27 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-12: the deploy's load-test hold never held, because the workflow token cannot read variables
+
+`deploy-azure.yml` read the repository variable `LOAD_TEST_RUNNING` with `gh
+api repos/.../actions/variables/LOAD_TEST_RUNNING` and the workflow's
+`GITHUB_TOKEN`. That endpoint needs the fine-grained "Variables" permission,
+and `permissions:` has no key that grants it to the workflow token;
+`actions: read`, which the job had, covers runs and artifacts only. Every
+deploy got `Resource not accessible by integration (HTTP 403)`, logged a
+warning nobody read, and deployed. On 2026-11-12 the deploy of #1090 replaced
+`mvhd-ui` and the proxy in the middle of the 10:12 UTC `contracts` run.
+
+Fix: the variable comes in through `${{ vars.LOAD_TEST_RUNNING }}`, no API
+call. That context is read once, when the job starts, so
+`scripts/azure/wait-for-load-test.sh` follows the run through the live
+executions of the `mvhd-load-test` job (matched by its `TESTID` or start
+time) and fails, rather than deploys, when the variable is set and it cannot
+follow the run (a k6 run from the laptop, or the executions unreadable).
+
+Rule: a guard that cannot read its input fails closed. A `::warning::` on a
+push-triggered deploy is a message to nobody.
+
 ## 2026-11-11: a `contracts` load run on Azure left 132 negotiations retrying, and real ones queued behind them
 
 `load-tests/platform.js` sent `http://controlplane:8082/api/dsp` as the
