@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.eval.json",
     "eval:score": "tsx eval/score.ts",
     "generate:swift": "tsx src/generate-swift-analytes.ts",
-    "golden:fhir": "tsx src/generate-fhir-golden.ts"
+    "golden:fhir": "tsx src/generate-fhir-golden.ts",
+    "export:reference-ranges": "tsx src/export-reference-ranges.ts"
   },
   "dependencies": {},
   "optionalDependencies": {

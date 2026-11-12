@@ -4240,6 +4240,26 @@ export const ANALYTE_KEYS: readonly string[] = [
 export const ANALYTE_UNITS: Readonly<Record<string, readonly string[]>> =
   Object.fromEntries(DEFINITIONS.map((d) => [d.key, Object.keys(d.byUnit)]));
 
+/**
+ * The LOINC code each analyte has in each UCUM unit (null: LOINC has no term),
+ * for exports that join on the code, such as the reference ranges a local
+ * graph keys by LOINC. Where an analyte has several definitions (an analyser's
+ * and a microscope's count), the first one that codes a unit wins.
+ */
+export const ANALYTE_CODINGS: Readonly<
+  Record<string, Readonly<Record<string, string | null>>>
+> = DEFINITIONS.reduce<Record<string, Record<string, string | null>>>(
+  (acc, d) => {
+    const units = (acc[d.key] ??= {});
+    for (const [ucum, coding] of Object.entries(d.byUnit)) {
+      if (!(ucum in units) || units[ucum] === null)
+        units[ucum] = coding.loincNumber;
+    }
+    return acc;
+  },
+  {},
+);
+
 /** What each analyte measures, for the reader and the Swift generator. */
 export const ANALYTE_DESCRIPTIONS: Readonly<Record<string, string>> =
   Object.fromEntries(
