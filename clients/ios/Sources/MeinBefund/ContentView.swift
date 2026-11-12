@@ -1373,7 +1373,15 @@ struct ContentView: View {
       case .connect, .programmes:
         model.showingConnect = true
       case .graph:
+        // Switched on, so the shot shows the counts. Demo launches keep the
+        // switch and the store under their own names (HealthGraphDemo).
+        if DemoSeed.isRequested { await onDeviceGraph.setEnabled(true, reports: model.reports) }
         model.showingOnDeviceGraph = true
+      case .relate:
+        model.showingLocalRelate = true
+      case .relatePaired, .relateUSB, .relateUSBDone:
+        localRelate.showFictionalPairing(DemoSeed.screen!)
+        model.showingLocalRelate = true
       case .list, nil:
         break
       }
