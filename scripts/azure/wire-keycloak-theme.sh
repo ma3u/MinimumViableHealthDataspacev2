@@ -21,7 +21,7 @@ source "${SCRIPT_DIR}/env.sh"
 MODE="${1:-deploy}"
 case "$MODE" in deploy | --realm | --check) ;; *) sed -n '5,7p' "$0"; exit 64 ;; esac
 
-KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
+KEYCLOAK_URL="${KEYCLOAK_BASE_URL:?no Keycloak address (env.sh)}"
 THEME="ehds-hub"
 DISPLAY_NAME="EHDS Integration Hub"
 

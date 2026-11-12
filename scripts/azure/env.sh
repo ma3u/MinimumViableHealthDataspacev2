@@ -102,6 +102,15 @@ if [ "$RG" != "$HUB_RG" ] && [ -z "${KEYCLOAK_PUBLIC_HOSTNAME:-}" ]; then
   fi
   unset _aca_domain
 fi
+# The base URL the admin scripts (wire-*.sh, secure-accounts.sh, ...) call:
+# auth.<custom domain> where there is one, otherwise the address above.
+# get_aca_fqdns does not touch it, so evaluating that does not move a script
+# from the custom domain to the Container Apps address.
+if [ -n "$CUSTOM_DOMAIN" ]; then
+  export KEYCLOAK_BASE_URL="https://auth.${CUSTOM_DOMAIN}"
+else
+  export KEYCLOAK_BASE_URL="${KEYCLOAK_PUBLIC_URL:-}"
+fi
 
 # ── ACA Jobs ─────────────────────────────────────────────────────────────────
 export NEO4J_SEED_JOB="mvhd-neo4j-seed"

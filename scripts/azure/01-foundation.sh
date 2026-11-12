@@ -25,12 +25,16 @@ ok "Resource group ${RG}"
 # Keycloak admin password, 13 the Flexible Server password), and the apps read
 # it by keyvaultref. RBAC mode; whoever runs this gets Key Vault Secrets
 # Officer, because creating a vault grants no access to its secrets.
+# Purge protection is not a choice: the tenant's policy "Key vaults should have
+# deletion protection enabled" (ass-ssg-prd-cloud-inf_stg-restrictions) denies
+# a vault without it. So a deleted vault keeps its name for the 7 days of
+# soft delete and cannot be purged sooner (rebuild rehearsal, #927).
 if az keyvault show --name "$KEY_VAULT_NAME" -o none 2>/dev/null; then
   ok "Key Vault ${KEY_VAULT_NAME} exists"
 else
   log "Creating Key Vault ${KEY_VAULT_NAME}..."
   az keyvault create --name "$KEY_VAULT_NAME" --resource-group "$RG" --location "$LOCATION" \
-    --enable-rbac-authorization true --retention-days 7 -o none
+    --enable-rbac-authorization true --retention-days 7 --enable-purge-protection true -o none
   ok "Key Vault ${KEY_VAULT_NAME}"
 fi
 KV_ID=$(az keyvault show --name "$KEY_VAULT_NAME" --query id -o tsv)

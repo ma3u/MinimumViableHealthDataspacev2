@@ -272,12 +272,20 @@ PY
 }
 
 wait_healthy() {
-  local app="$1" rev="$2" state=""
+  local app="$1" rev="$2" state="" unhealthy=0
   for _ in $(seq 1 40); do
     state=$(az containerapp revision show --name "$app" --resource-group "$RG" --revision "$rev" \
       --query "properties.healthState" -o tsv 2>/dev/null || echo "")
     [ "$state" = "Healthy" ] && { ok "${rev} Healthy"; return 0; }
-    [ "$state" = "Unhealthy" ] && break
+    # A new revision can read Unhealthy for its first seconds and turn Healthy
+    # (the control plane on a fresh build, 2026-11-11, #927): give up only
+    # after a minute of it.
+    if [ "$state" = "Unhealthy" ]; then
+      unhealthy=$((unhealthy + 1))
+      [ "$unhealthy" -ge 4 ] && break
+    else
+      unhealthy=0
+    fi
     sleep 15
   done
   err "${rev} is '${state:-unknown}' after waiting. Look at its log, then roll back:"
@@ -333,6 +341,7 @@ AZURE_ONLY = {
 }
 LOCAL_ONLY = {
     r"^edc\.iam\.trustedissuer\.simpl-ga\.": "the Simpl test issuer runs only locally",
+    r"^edc\.iam\.trustedissuer\.wellbeing-ga\.": "the second data space's issuer runs only locally (#934)",
     r"^web\.http\.identity\.auth\.key$": "the local stack's API key",
     r"^edc\.ih\.api\.superuser\.key$": "the local stack's superuser key",
 }

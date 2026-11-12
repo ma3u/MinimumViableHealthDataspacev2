@@ -274,14 +274,21 @@ case "$MODE" in
       [[ " ${APPS[*]} " == *" ${app} "* ]] || { err "unknown app ${app}"; exit 1; }
       # The ARM body as rendered, by PUT: the containerapp extension's --yaml
       # (1.3.0b5) sends a body the API refuses with a 400 for an app.
+      existed=false
+      az containerapp show --name "$app" --resource-group "$RG" -o none 2>/dev/null && existed=true
       log "putting ${app}"
       az rest --method put --only-show-errors -o none \
         --url "https://management.azure.com${ENV_ID%/providers/*}/providers/Microsoft.App/containerApps/${app}?api-version=2024-03-01" \
         --body "@${work}/${app}.json"
       # A change to the configs alone starts no revision, and a running replica
-      # keeps the secret volume it mounted (docs/gotchas.md 2026-11-06).
-      rev=$(az containerapp show --name "$app" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
-      az containerapp revision restart --name "$app" --resource-group "$RG" --revision "$rev" -o none
+      # keeps the secret volume it mounted (docs/gotchas.md 2026-11-06). A new
+      # app's first revision reads them as it starts, and restarting it while
+      # it is still provisioning answers 405 Method Not Allowed (rebuild
+      # rehearsal, #927), so only an app that was there before is restarted.
+      if $existed; then
+        rev=$(az containerapp show --name "$app" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
+        az containerapp revision restart --name "$app" --resource-group "$RG" --revision "$rev" -o none
+      fi
       ok "${app}"
     done
     ;;
