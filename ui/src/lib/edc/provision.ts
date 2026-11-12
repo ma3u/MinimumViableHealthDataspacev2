@@ -149,9 +149,16 @@ function stsConfig(contextId: string, did: string) {
 }
 
 /** The MembershipCredential definition on the issuer, by type, as the seed finds it. */
-async function membershipDefinitionId(): Promise<string> {
+/**
+ * The issuer's MembershipCredential definition: its id, and the format it
+ * issues in. The request names that format. From IdentityHub 1.0.0-RC6 a
+ * definition takes the format of the issuer's DCP profile (VC2_0_JOSE by
+ * default, IdentityHub #1248), and the holder refuses a delivered credential
+ * whose format differs from the request with 403 (RC5 accepted it).
+ */
+async function membershipDefinition(): Promise<{ id: string; format: string }> {
   const defs = await edcClient.issuer<
-    { id?: string; credentialType?: string }[]
+    { id?: string; credentialType?: string; format?: string }[]
   >(`/v1/participants/${ISSUER_CTX}/credentialdefinitions/query`, "POST", {});
   const def = (Array.isArray(defs) ? defs : []).find(
     (d) => d.credentialType === "MembershipCredential",
@@ -159,7 +166,7 @@ async function membershipDefinitionId(): Promise<string> {
   if (!def?.id) {
     throw new Error("the issuer has no MembershipCredential definition");
   }
-  return def.id;
+  return { id: def.id, format: def.format || "VC1_0_JWT" };
 }
 
 /**
@@ -258,6 +265,9 @@ export async function provisionParticipant(
       edcClient.management(`/v5/participants/${contextId}/dataplanes`, "PUT", {
         dataplaneId: `siglet-${contextId}`,
         endpoint: `${SIGLET_SIGNALING_URL}/${contextId}/dataflows`,
+        // RC6 renamed transferTypes to profiles (Connector #6196); EDC ignores
+        // the field it does not know, so both keep RC5 (Azure) and RC6 working.
+        profiles: ["HttpData-PULL"],
         transferTypes: ["HttpData-PULL"],
       }),
     ),
@@ -287,7 +297,7 @@ export async function provisionParticipant(
   });
 
   await run("MembershipCredential request", async () => {
-    const definitionId = await membershipDefinitionId();
+    const definition = await membershipDefinition();
     // A 2xx whose body is the bare holderPid, not JSON, is a success.
     await bodyNotNeeded(
       edcClient.identity(
@@ -297,9 +307,9 @@ export async function provisionParticipant(
           issuerDid: ISSUER_DID,
           credentials: [
             {
-              id: definitionId,
+              id: definition.id,
               type: "MembershipCredential",
-              format: "VC1_0_JWT",
+              format: definition.format,
             },
           ],
         },

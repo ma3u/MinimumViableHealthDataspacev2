@@ -111,11 +111,11 @@ jobs:
       matrix:
         include:
           - runtime: controlplane
-            image: mvhd/edc-controlplane:1.0.0-RC5
+            image: mvhd/edc-controlplane:1.0.0-RC6
           - runtime: identity-hub
-            image: mvhd/edc-identity-hub:1.0.0-RC5
+            image: mvhd/edc-identity-hub:1.0.0-RC6
           - runtime: issuerservice
-            image: mvhd/edc-issuerservice:1.0.0-RC5
+            image: mvhd/edc-issuerservice:1.0.0-RC6
     steps:
       - uses: actions/checkout@v7
 
@@ -127,7 +127,7 @@ jobs:
 
       - name: Build
         run: |
-          docker build --build-arg RUNTIME=${{ matrix.runtime }} --build-arg EDC_VERSION=1.0.0-RC5 \
+          docker build --build-arg RUNTIME=${{ matrix.runtime }} --build-arg EDC_VERSION=1.0.0-RC6 \
             --build-arg SOURCE_REVISION=${{ github.sha }} -t ${{ matrix.image }} runtimes/edc
           docker save ${{ matrix.image }} | gzip -1 > edc-${{ matrix.runtime }}.tar.gz
           ls -lh edc-${{ matrix.runtime }}.tar.gz
