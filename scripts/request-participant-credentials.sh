@@ -33,7 +33,12 @@ CLIENT_ID="${EDC_CLIENT_ID:-admin}"
 CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 ISSUER_DID="${ISSUER_DID:-did:web:issuerservice%3A10016:issuer}"
 CREDENTIAL_TYPE="${CREDENTIAL_TYPE:-MembershipCredential}"
-CREDENTIAL_FORMAT="${CREDENTIAL_FORMAT:-VC1_0_JWT}"
+# The format is the definition's, read below with its id. From IdentityHub
+# 1.0.0-RC6 a definition takes the format of the issuer's DCP profile
+# (VC2_0_JOSE by default, IdentityHub #1248) whatever the seed sent, and the
+# holder refuses a delivery whose format differs from its request with 403
+# "No credential request was made for Credentials of type ...". RC5 accepted it.
+CREDENTIAL_FORMAT="${CREDENTIAL_FORMAT:-}"
 # The issuer resolves a request by credential DEFINITION id, not by type. CI
 # run 36259831503 answered every request with 400 "A Credential definition ID
 # 'null' does not exist" because this script sent {type, format} only; the
@@ -57,22 +62,30 @@ TOKEN=$(curl -sS --max-time 20 -X POST \
   2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true)
 [ -n "$TOKEN" ] || { echo -e "${RED}ERROR${NC}: no Keycloak token from ${KEYCLOAK_URL}/realms/${REALM}." >&2; exit 1; }
 
-if [ -z "$CREDENTIAL_DEFINITION_ID" ]; then
-  CREDENTIAL_DEFINITION_ID=$(curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" \
+if [ -z "$CREDENTIAL_DEFINITION_ID" ] || [ -z "$CREDENTIAL_FORMAT" ]; then
+  # "<id> <format>" of the definition named by CREDENTIAL_DEFINITION_ID, or
+  # else of the first one of CREDENTIAL_TYPE
+  def_row=$(curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" -d '{}' \
     "${ISSUER_API}/v1/participants/${ISSUER_CTX}/credentialdefinitions/query" 2>/dev/null \
     | python3 -c "import json,sys
-t=sys.argv[1]
+t,want=sys.argv[1],sys.argv[2]
 try: rows=json.load(sys.stdin)
 except Exception: rows=[]
-ids=[r.get('id') for r in rows if isinstance(r,dict) and r.get('credentialType')==t and r.get('id')]
-print(ids[0] if ids else '')" "$CREDENTIAL_TYPE" 2>/dev/null || true)
+rows=[r for r in rows if isinstance(r,dict) and r.get('id')]
+hit=[r for r in rows if r.get('id')==want] if want else [r for r in rows if r.get('credentialType')==t]
+print((hit[0]['id']+' '+(hit[0].get('format') or '')) if hit else '')" "$CREDENTIAL_TYPE" "$CREDENTIAL_DEFINITION_ID" 2>/dev/null || true)
+  [ -n "$CREDENTIAL_DEFINITION_ID" ] || CREDENTIAL_DEFINITION_ID="${def_row%% *}"
+  [ -n "$CREDENTIAL_FORMAT" ] || CREDENTIAL_FORMAT="${def_row#* }"
 fi
+# The admin API was not reachable, or the definition carries no format: the
+# format every definition had before RC6.
+[ -n "$CREDENTIAL_FORMAT" ] && [ "$CREDENTIAL_FORMAT" != "$CREDENTIAL_DEFINITION_ID" ] || CREDENTIAL_FORMAT="VC1_0_JWT"
 if [ -z "$CREDENTIAL_DEFINITION_ID" ]; then
   echo -e "${RED}ERROR${NC}: the issuer has no credential definition of type ${CREDENTIAL_TYPE}; run jad/seed-issuer-defs.sh first." >&2
   exit 1
 fi
-log "requesting ${CREDENTIAL_TYPE} as definition '${CREDENTIAL_DEFINITION_ID}' from ${ISSUER_DID}"
+log "requesting ${CREDENTIAL_TYPE} as definition '${CREDENTIAL_DEFINITION_ID}' (${CREDENTIAL_FORMAT}) from ${ISSUER_DID}"
 
 PAIRS=""
 for v in $MGMT_V_CANDIDATES; do

@@ -156,6 +156,22 @@ describe("provisionParticipant", () => {
     });
   });
 
+  it("requests the format the definition issues in (IdentityHub RC6 #1248)", async () => {
+    happyPath();
+    issuer.mockImplementation(async (path: string) =>
+      path.endsWith("/credentialdefinitions/query")
+        ? [{ ...DEFS[0], format: "VC2_0_JOSE" }]
+        : undefined,
+    );
+    await provisionParticipant(REG);
+    const req = identity.mock.calls.find((c) =>
+      c[0].endsWith("/credentials/request"),
+    );
+    expect(req?.[2]).toMatchObject({
+      credentials: [{ id: "membership-credential-def", format: "VC2_0_JOSE" }],
+    });
+  });
+
   it("takes a request answered with a bare holderPid as accepted", async () => {
     happyPath();
     identity.mockImplementation(async (path: string) => {
