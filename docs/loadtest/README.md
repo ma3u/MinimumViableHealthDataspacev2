@@ -34,7 +34,8 @@ Azure,
 on a cold stack and
 [`20261111-1856-contracts-aca`](https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test?var-testid=20261111-1856-contracts-aca&from=1794423300000&to=1794423840000)
 on a warm one: 0 failed requests, every negotiation agreed and every transfer
-`STARTED` in the connector (115 in all), and both over the API SLO (p95
+`STARTED` in the connector (115 in all, 37 more refused for want of a permit,
+all on the DSP audit chain), and both over the API SLO (p95
 1.37 s, 1.58 s). The transfer POST stays under 1 s; the slow calls are
 `GET /api/transfers`, which reads the newest 200 transfer processes, and the
 catalogue request. Details in

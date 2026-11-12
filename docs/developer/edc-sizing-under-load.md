@@ -126,7 +126,7 @@ UTC (ADR-053); it was started at 18:36, up at 18:46, held with
 | Negotiations agreed         | 54 of 54                             | 61 of 61                             |
 | Time to agreement p50 / p95 | 6.7 s / 14.8 s                       | 6.2 s / 19.6 s                       |
 | Transfers started (`201`)   | 54, all `STARTED` in the connector   | 61, all `STARTED` in the connector   |
-| Refused transfers (`403`)   | about 18                             | about 21                             |
+| Refused transfers (`403`)   | 17                                   | 20                                   |
 | Polls (`kind:poll`), share  | 186, 43 %                            | 191, 41 %                            |
 | API p95 (`kind:api`)        | **1.37 s**, over the 1 s SLO         | **1.58 s**, over the 1 s SLO         |
 | Control plane CPU peak      | 0.31 vCPU of 0.5                     | 0.36 vCPU of 0.5                     |
@@ -136,19 +136,28 @@ UTC (ADR-053); it was started at 18:36, up at 18:46, held with
 
 Every answer was the one expected, and every negotiation and transfer
 reached the connectors (the hub's `GET /api/negotiations` and
-`GET /api/transfers` for PharmaCo, filtered to each run's minutes). Both runs
-fail on latency only, and the second, warm one is no faster, so it is not a
-cold start. The p95 per endpoint (Prometheus, `k6_http_req_duration_seconds`
-by `name`) shows where:
+`GET /api/transfers` for PharmaCo, filtered to each run's minutes) and the
+audit trail. The **EDC contracts and transfers** dashboard, which reads the
+DSP chain, counts for the two runs' windows 54 and 61 negotiations agreed and
+finalized, 54 and 61 transfers started, 17 and 20 refused for want of a
+data permit, and none terminated or failed. None is completed either: an
+`HttpData-PULL` transfer stays `STARTED` while its data address is valid, and
+the scenario does not fetch the data.
 
-| Endpoint                            | p95, cold | p95, warm |
-| ----------------------------------- | --------- | --------- |
-| `GET /api/transfers`                | 1.26 s    | 2.18 s    |
-| `GET /api/negotiations` (catalogue) | 1.64 s    | 1.50 s    |
-| `POST /api/transfers`               | 562 ms    | 771 ms    |
-| `POST /api/negotiations`            | 618 ms    | 707 ms    |
-| `POST /api/transfers` (no permit)   | 302 ms    | 163 ms    |
-| poll, outside the threshold         | 401 ms    | 403 ms    |
+Both runs fail on latency only, and the second, warm one is no faster, so it
+is not a cold start. Latency per endpoint (Prometheus through Grafana,
+`k6_http_req_duration_seconds` by `name` over each run's six minutes; the
+counts are Prometheus's estimate, a few above k6's own) shows where:
+
+| Endpoint                            | Requests, cold / warm | p50, cold / warm | p95, cold / warm |
+| ----------------------------------- | --------------------- | ---------------- | ---------------- |
+| `GET /api/transfers`                | 55 / 63               | 582 / 805 ms     | 1.26 s / 2.18 s  |
+| `GET /api/negotiations` (catalogue) | 55 / 62               | 904 / 522 ms     | 1.64 s / 1.50 s  |
+| `POST /api/transfers`               | 55 / 62               | 288 / 267 ms     | 562 / 771 ms     |
+| `POST /api/negotiations`            | 55 / 62               | 275 / 257 ms     | 618 / 707 ms     |
+| `POST /api/transfers` (no permit)   | 18 / 21               | 78 / 62 ms       | 302 / 163 ms     |
+| `GET /api/participants`             | 10 / 10               | 35 / 33 ms       | 185 / 143 ms     |
+| poll, outside the threshold         | 189 / 194             | 50 / 37 ms       | 401 / 403 ms     |
 
 - **The transfer itself is not the slow step.** Its POST stays under the SLO.
 - **`GET /api/transfers` grows with what the runs leave behind.** The route
@@ -168,9 +177,28 @@ a cache before the `contracts` scenario can pass with transfers in it.
 
 ## Grafana
 
-The dashboards need a sign-in on <https://grafana.ehds.mabu.red> (see
-[Dashboards](../operations/dashboards.md)) and show data only while the stack
-is up ([ADR-053](../ADRs/ADR-053-everything-stops-off-hours.md)). Times are UTC.
+The dashboards need a sign-in on <https://grafana.ehds.mabu.red>: the
+operator account `admin`, whose password is the Key Vault secret
+`grafana-admin-password` in `kv-mvhd-b53a0449` (see
+[Dashboards](../operations/dashboards.md)). They show data only while the
+stack is up ([ADR-053](../ADRs/ADR-053-everything-stops-off-hours.md)), and
+keep it: the evening runs were read the next morning. Times are UTC.
+
+The same account answers Grafana's HTTP API, which is how the per-endpoint
+numbers above were read, without a browser and without
+`az containerapp exec` into `mvhd-observability` (which drops quotes from the
+query and is rate-limited after a few calls). With the password in
+`GF_PW`:
+
+```bash
+curl -s -u "admin:$GF_PW" -G \
+  https://grafana.ehds.mabu.red/api/datasources/proxy/uid/prometheus/api/v1/query \
+  --data-urlencode 'time=2026-11-11T19:01:35Z' \
+  --data-urlencode 'query=histogram_quantile(0.95, sum by (name) (increase(k6_http_req_duration_seconds{testid="20261111-1856-contracts-aca"}[6m])))'
+```
+
+The DSP chain behind the EDC dashboard answers on
+`/api/datasources/proxy/uid/mvhd-audit/audit/chains/dsp/stats?from=<ms>&to=<ms>`.
 
 | Run                                     | Load and stress test                                                                                                                                             | EDC contracts and transfers                                                                                                    |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -185,7 +213,8 @@ p95, and the "Containers" row the CPU and memory of the connectors. On **EDC
 contracts and transfers**, the valid run's negotiations count as requested and
 then finalized. In the first invalid run they stay requested until they were
 terminated by hand after 12:00; in the second they end terminated within the
-run.
+run. In the evening runs the "Data transfers" row fills too: started, and
+refused for the dataset no permit covers.
 
 ## What follows
 
