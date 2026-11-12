@@ -320,3 +320,13 @@ repos:
         files: ^(docker-compose.*\.yml|\.github/workflows/security-scan\.yml)$
         pass_filenames: false
         stages: [pre-commit]
+      # Dependabot reads an architecture suffix as a newer version: it moved the
+      # OTel collector from 0.161.0 to 0.164.0-386 (#976), a linux/386-only
+      # image. Its ignore rules cannot match a tag pattern, so the gate does.
+      - id: compose-arch-tags
+        name: No compose image pinned to a single-architecture tag
+        language: system
+        entry: ./scripts/check-compose-arch-tags.sh
+        files: ^(docker-compose.*\.yml|scripts/check-compose-arch-tags\.sh)$
+        pass_filenames: false
+        stages: [pre-commit]

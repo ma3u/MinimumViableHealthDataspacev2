@@ -669,6 +669,12 @@
       "name": "CVE scan covers every compose image",
       "source": "local",
       "stage": "pre-commit"
+    },
+    {
+      "id": "compose-arch-tags",
+      "name": "No compose image pinned to a single-architecture tag",
+      "source": "local",
+      "stage": "pre-commit"
     }
   ],
   "composeServices": {
