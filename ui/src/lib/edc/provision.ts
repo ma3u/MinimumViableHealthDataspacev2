@@ -258,6 +258,9 @@ export async function provisionParticipant(
       edcClient.management(`/v5/participants/${contextId}/dataplanes`, "PUT", {
         dataplaneId: `siglet-${contextId}`,
         endpoint: `${SIGLET_SIGNALING_URL}/${contextId}/dataflows`,
+        // RC6 renamed transferTypes to profiles (Connector #6196); EDC ignores
+        // the field it does not know, so both keep RC5 (Azure) and RC6 working.
+        profiles: ["HttpData-PULL"],
         transferTypes: ["HttpData-PULL"],
       }),
     ),

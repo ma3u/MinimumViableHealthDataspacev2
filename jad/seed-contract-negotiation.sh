@@ -226,7 +226,9 @@ echo "────────────────────────�
 
 register_dataplane() {
   local ctx_id="$1" label="$2"
-  # v5beta takes a plain registration (dataplaneId, endpoint, transferTypes),
+  # v5 takes a plain registration (dataplaneId, endpoint, profiles; RC5 called
+  # profiles transferTypes, so both are sent and EDC ignores the one it does not
+  # know, Connector #6196),
   # not JSON-LD, under the participant and as a PUT. The old body's "url" is
   # not a field there, so the controller hit a null endpoint and answered 500;
   # the old path POST /dataplanes/<ctx> answers 404 (#542). The id is global:
@@ -235,6 +237,7 @@ register_dataplane() {
   local payload="{
     \"dataplaneId\": \"dataplane-fhir-$ctx_id\",
     \"endpoint\": \"$SIGLET_SIGNALING_URL/$ctx_id/dataflows\",
+    \"profiles\": [\"HttpData-PULL\"],
     \"transferTypes\": [\"HttpData-PULL\"]
   }"
   local http_code

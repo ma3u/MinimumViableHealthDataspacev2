@@ -3,14 +3,14 @@
   "repos": [
     {
       "repo": "eclipse-edc/Connector",
-      "known": "v1.0.0-RC5",
+      "known": "v1.0.0-RC6",
       "prerelease": true,
       "where": "runtimes/edc/gradle/libs.versions.toml",
       "issue": 930
     },
     {
       "repo": "eclipse-edc/IdentityHub",
-      "known": "v1.0.0-RC5",
+      "known": "v1.0.0-RC6",
       "prerelease": true,
       "where": "runtimes/edc/gradle/libs.versions.toml",
       "issue": 930

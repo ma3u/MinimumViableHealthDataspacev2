@@ -112,6 +112,12 @@ describe("provisionParticipant", () => {
       "@type": "AssociateDataspaceProfile",
       profiles: ["http-dsp-profile-2025-1"],
     });
+    // RC6 reads profiles, RC5 transferTypes (Connector #6196): both are sent.
+    const dataplane = mgmt.mock.calls.find((c) => c[0].endsWith("/dataplanes"));
+    expect(dataplane?.[2]).toMatchObject({
+      profiles: ["HttpData-PULL"],
+      transferTypes: ["HttpData-PULL"],
+    });
     const config = mgmt.mock.calls.find((c) => c[0].endsWith("/config"));
     expect(config?.[2]).toMatchObject({
       entries: {
