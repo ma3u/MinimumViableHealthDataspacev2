@@ -306,10 +306,46 @@ refused for the dataset no permit covers.
   the host and not a route. A third run (`20261112-branch2-contracts-local`)
   at a load average of 25 was slow on every route, the refused transfer
   that hardly reaches the connector included (p95 813 ms), and is not
-  counted. The transfer list is the measure that holds across the runs. An
-  Azure `contracts` run with this change decides whether the API threshold
-  holds there; it needs `az login`, a stack that is up (ADR-053) and no
-  merge to `main` while it runs.
+  counted. The transfer list is the measure that holds across the runs.
+
+- **On Azure #1088 is not enough.** Run `20261112-1012-contracts-aca`,
+  10:12 to 10:18 UTC, the UI at `ccd9ef8f` (#1088 deployed, the Azure E2E
+  tests green before it): 51 iterations, 424 requests, 1 failed (0.23 %),
+  checks 95.32 %, **API p95 1.50 s**; k6 failed on `checks` and
+  `http_req_duration{kind:api}`. Agreements took longer than the evening
+  before (p50 11.4 s, p95 19.8 s, against 6.2 to 6.7 s and 14.8 to 19.6 s).
+  Per endpoint (Prometheus through Grafana, by `name`, over the run):
+
+  | Endpoint                            | p50    | p95    | Evening p95, 200 rows |
+  | ----------------------------------- | ------ | ------ | --------------------- |
+  | `GET /api/transfers` (one page)     | 553 ms | 1.44 s | 1.26 s / 2.18 s       |
+  | `GET /api/negotiations` (catalogue) | 758 ms | 1.76 s | 1.64 s / 1.50 s       |
+  | `POST /api/transfers`               | 351 ms | 825 ms | 562 / 771 ms          |
+  | `POST /api/negotiations`            | 327 ms | 738 ms | 618 / 707 ms          |
+  | `POST /api/transfers` (no permit)   | 86 ms  | 214 ms | 302 / 163 ms          |
+  | poll, outside the threshold         | 64 ms  | 395 ms | 401 / 403 ms          |
+
+  No app was short of CPU: the highest one-minute value was 0.27 vCPU of
+  0.5 for the control plane, 0.16 of 0.25 for the IdentityHub and 0.09 of
+  0.5 for the UI. Asked one request at a time from a laptop after the run,
+  with the hub idle (each answer includes about 118 ms of round trip, what
+  `/api/health` takes):
+
+  | Request                        | Five answers                   |
+  | ------------------------------ | ------------------------------ |
+  | `GET /api/transfers?limit=1`   | 0.24, 0.42, 0.33, 0.26, 0.80 s |
+  | `GET /api/transfers?limit=50`  | 0.61, 0.48, 0.55, 0.44, 0.47 s |
+  | `GET /api/transfers?limit=200` | 1.26, 2.02, 1.28, 1.24, 1.12 s |
+  | Catalogue                      | 0.76, 0.57, 0.65, 0.59, 1.08 s |
+
+  So the page makes the list about three times cheaper on Azure too, but
+  one row still takes a few hundred milliseconds, and the catalogue request
+  takes half a second to a second with nothing else running. Neither is
+  CPU on the apps; both are time spent waiting on the Azure side, in the
+  control plane's store or in the calls between the apps. Measuring that
+  inside the environment (the control plane's request times against its
+  database, and the DCP calls of one catalogue request) comes before any
+  further change to the UI.
 
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
