@@ -34,6 +34,8 @@ MODE="${1:-}"
 case "$MODE" in seed|verify) ;; *) sed -n '2,8p' "$0"; exit 2 ;; esac
 EDC_LINE="${EDC_LINE:-v1}"
 case "$EDC_LINE" in v1|v018) ;; *) err "EDC_LINE is v1 or v018, not '${EDC_LINE}'"; exit 2 ;; esac
+# the issuer's database: on 1.0 the set EDC_DB_SUFFIX names (env.sh)
+if [ "$EDC_LINE" = v018 ]; then PG_DB=issuerservice_v018; else PG_DB="issuerservice${EDC_DB_SUFFIX}"; fi
 JOB="mvhd-issuer-identity"
 KC_URL="https://${KEYCLOAK_PUBLIC_HOSTNAME_OVERRIDE:-auth.ehds.mabu.red}"
 COMPOSE_X="I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
@@ -102,7 +104,7 @@ out, script = sys.argv[1], open(sys.argv[2]).read()
 env = {
   "MODE": "${MODE}", "ISSUER_HOST": "${ISSUER_APP}", "VAULT_URL": "${VAULT_URL}",
   "KC_URL": "${KC_URL}", "PG_HOST": "${PG_HOST}", "PG_USER": "${PG_ADMIN}",
-  "PG_DB": "issuerservice_${EDC_LINE}", "SQL_B64": "${SQL_B64}",
+  "PG_DB": "${PG_DB}", "SQL_B64": "${SQL_B64}",
 }
 secrets = {"vault-token": "VAULT_TOKEN", "provisioner-secret": "PROVISIONER_SECRET",
            "issuer-secret": "ISSUER_SECRET", "pg-password": "PG_PASSWORD"}

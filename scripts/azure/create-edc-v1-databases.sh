@@ -20,7 +20,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=env.sh
 source "${SCRIPT_DIR}/env.sh"
 
-DBS=(controlplane_v1 identityhub_v1 issuerservice_v1 siglet_v1)
+# EDC_DB_SUFFIX (env.sh) names the set: _v1 for RC5, _v1rc6 for RC6.
+DBS=("controlplane${EDC_DB_SUFFIX}" "identityhub${EDC_DB_SUFFIX}" "issuerservice${EDC_DB_SUFFIX}" siglet_v1)
 
 if [ "${1:-}" != check ]; then
   for db in "${DBS[@]}"; do

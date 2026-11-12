@@ -25,7 +25,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # shellcheck source=env.sh
 source "${SCRIPT_DIR}/env.sh"
 
-EDC_VERSION="${EDC_VERSION:-1.0.0-RC5}"
+EDC_VERSION="${EDC_VERSION:-1.0.0-RC6}"
 # The last commit that changed the launchers, so later commits elsewhere do
 # not change the tag of the same images.
 REV="$(git -C "$REPO_ROOT" log -1 --format=%H -- runtimes/edc)"
