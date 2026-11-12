@@ -23,6 +23,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Run as a pre-push hook, git exports GIT_DIR and friends. SwiftPM's own git
+# checkouts of the app's packages (HealthGraph, Relate) inherit them, act on
+# this repository instead and fail with "Couldn't check out revision".
+# shellcheck disable=SC2046
+unset $(git rev-parse --local-env-vars)
+
 command -v codeql >/dev/null || { echo "codeql not found: brew install --cask codeql"; exit 2; }
 command -v xcodegen >/dev/null || { echo "xcodegen not found: brew install xcodegen"; exit 2; }
 
@@ -50,6 +56,11 @@ xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \\
   clean build -quiet
 BUILD
 chmod +x "$work/build.sh"
+
+# Swift packages (HealthGraph, Relate) are fetched first, so the traced build
+# below only compiles; `clean` keeps the checkouts.
+xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
+  -derivedDataPath "$work/dd" -resolvePackageDependencies -quiet
 
 echo "codeql-swift: building under CodeQL (several minutes)"
 codeql database create "$db" --language=swift --source-root . --overwrite \
