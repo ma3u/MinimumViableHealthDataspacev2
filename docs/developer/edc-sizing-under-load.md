@@ -341,11 +341,34 @@ refused for the dataset no permit covers.
   So the page makes the list about three times cheaper on Azure too, but
   one row still takes a few hundred milliseconds, and the catalogue request
   takes half a second to a second with nothing else running. Neither is
-  CPU on the apps; both are time spent waiting on the Azure side, in the
-  control plane's store or in the calls between the apps. Measuring that
-  inside the environment (the control plane's request times against its
-  database, and the DCP calls of one catalogue request) comes before any
-  further change to the UI.
+  CPU on the apps; both are time spent waiting on the Azure side.
+
+- **Where the control plane waits: most likely its database pool.** Read the
+  same day from Azure Monitor and the app definitions:
+
+  - The Flexible Server (`mvhd-pg-b53a0449`, `Standard_B1ms`, 1 vCore,
+    120 IOPS) was idle through the run: CPU at most 20 %, CPU credits flat
+    at 51, at most 23 IOPS, no disk queue, at most 24 connections open of
+    its 50 (`max_connections`, 10 of them reserved).
+  - The control plane, the IdentityHub and the IssuerService each run with
+    `-Dedc.datasource.default.pool.connections.max-total=3`
+    ([`scripts/azure/04-edc-services.sh`](../../scripts/azure/04-edc-services.sh),
+    since the move to the Flexible Server, #318): at most three database
+    connections per app, where commons-pool's default, which the compose
+    stack keeps, is 8. The cap is there because five services at 8 would
+    want 40 of B1ms's 35 user connections.
+  - The control plane's state machines (negotiations, transfers and the
+    rest) poll the database all the time, so with three connections a
+    management request can wait for one while CPU and Postgres look idle.
+    That fits both what the run shows (time grows with concurrency, not
+    with CPU) and what one request shows on an idle hub (a one-row list
+    costs a few hundred milliseconds on Azure and tens on the compose
+    stack). It is an inference: nothing outside the container shows the
+    pool's wait, and running a probe inside the production UI container
+    was refused.
+  - The test is to raise the control plane's cap and run `contracts` again.
+    The budget allows it: at 8 the control plane adds 5 connections to the
+    24 seen, under the 35 user connections the deploy script counts for B1ms.
 
 - After any `contracts` run against Azure, check the control plane's log for
   `Name does not resolve` and the negotiation states before calling it done.
