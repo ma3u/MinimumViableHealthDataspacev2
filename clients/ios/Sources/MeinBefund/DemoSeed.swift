@@ -75,6 +75,14 @@
       case programmes
       /// Health graph on this iPhone (Relate on the device).
       case graph
+      /// Export to my Mac (Relate), before pairing.
+      case relate
+      /// The same, paired with a fictional Mac that cannot be reached.
+      case relatePaired
+      /// Send over USB cable, waiting for that fictional Mac.
+      case relateUSB
+      /// Send over USB cable, after a transfer with fictional counts.
+      case relateUSBDone
     }
 
     static var screen: Screen? {
