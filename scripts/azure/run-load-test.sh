@@ -12,10 +12,10 @@
 # Variables: TIME_SCALE, ABORT_ON=failures, KC_USER/KC_PASSWORD (signin), YES=1
 # (no question for stress, spike or soak), WAIT=0 (do not wait for the end).
 #
-# While the run is on, the repository variable LOAD_TEST_RUNNING holds its
-# testid and start, and deploy-azure.yml waits for it to clear (#571: a merge
-# redeployed the UI and the proxy in the middle of a stress run). With WAIT=0
-# the variable stays set; clear it after the run: gh variable delete LOAD_TEST_RUNNING
+# While the job's execution runs, deploy-azure.yml waits (#571: a merge
+# redeployed the UI and the proxy in the middle of a stress run; ADR-092). The
+# execution is the signal, so nothing has to be set or cleared, WAIT=0 included:
+# scripts/azure/hold-deploys.sh check shows what a deploy would see.
 #
 # Sessions are forged here (8 hours valid) and handed to the job as a secret;
 # nothing is printed. Jobs need the PIM role rol-ssg-prd-project_owner active:
@@ -53,30 +53,9 @@ if ! az acr repository show-tags --name "$ACR_NAME" --repository mvhd-k6 -o tsv 
     --file "${REPO_ROOT}/load-tests/azure/Dockerfile" "${REPO_ROOT}/load-tests" --no-logs -o none
 fi
 
-# Deploys wait on this variable (deploy-azure.yml); cleared on exit unless
-# the run is left running (WAIT=0).
-DEPLOY_HOLD=""
-hold_deploys() {
-  if (cd "$REPO_ROOT" && gh variable set LOAD_TEST_RUNNING --body "${TESTID} $(date -u +%Y-%m-%dT%H:%M:%SZ)" 2>/dev/null); then
-    DEPLOY_HOLD=1
-    ok "deploys wait: LOAD_TEST_RUNNING=${TESTID}"
-  else
-    warn "could not set LOAD_TEST_RUNNING (gh signed in?): a merge to main would redeploy during the run"
-  fi
-}
-release_deploys() {
-  [[ "$DEPLOY_HOLD" == 1 ]] || return 0
-  if [[ "${WAIT:-1}" == 1 ]]; then
-    (cd "$REPO_ROOT" && gh variable delete LOAD_TEST_RUNNING 2>/dev/null) && ok "deploys released" ||
-      warn "could not clear LOAD_TEST_RUNNING: gh variable delete LOAD_TEST_RUNNING"
-  else
-    warn "the run goes on: clear the hold after it with gh variable delete LOAD_TEST_RUNNING"
-  fi
-}
-
 SESSIONS_FILE="$(mktemp)"
 SPEC="$(mktemp)"
-trap 'rm -f "$SESSIONS_FILE" "$SPEC"; release_deploys' EXIT
+trap 'rm -f "$SESSIONS_FILE" "$SPEC"' EXIT
 if [[ "$SCENARIO" != signin ]]; then
   log "Forging sessions"
   NEXTAUTH_SECRET="$(az containerapp secret show --name "$UI_APP" --resource-group "$RG" \
@@ -145,10 +124,9 @@ else
 fi
 rm -f "$SPEC" "$SESSIONS_FILE"
 
-hold_deploys
 log "Starting $SCENARIO, testid $TESTID"
 EXECUTION="$(az containerapp job start --name "$JOB" --resource-group "$RG" --query name -o tsv)"
-ok "execution $EXECUTION"
+ok "execution $EXECUTION; deploys wait while it runs"
 echo "Watch: ${GRAFANA_URL}/d/mvhd-load-test/load-and-stress-test?var-testid=${TESTID}&from=now-30m&to=now&refresh=10s"
 [[ "${WAIT:-1}" == 1 ]] || exit 0
 

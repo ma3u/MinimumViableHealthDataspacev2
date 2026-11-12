@@ -3,6 +3,37 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-12: the deploy hold for load tests never held; the workflow token cannot read repository variables
+
+`deploy-azure.yml` waited while the repository variable `LOAD_TEST_RUNNING`
+was set (#571, PR #648), read with
+`gh api repos/$GITHUB_REPOSITORY/actions/variables/LOAD_TEST_RUNNING` and
+`GH_TOKEN: ${{ github.token }}`. That token has no permission for variables
+at all; `actions: read` is a different scope, and there is no `variables:`
+key to grant. Every read answered `HTTP 403 Resource not accessible by
+integration`, and the step took every error other than "Not Found" as
+"could not read; deploying". Every deploy from 2026-11-11 05:35 to
+2026-11-12 10:12 UTC logged the warning, and the #1090 deploy replaced the UI
+and the proxy in the middle of run `20261112-1012-contracts-aca`. A warning on
+a green run is read by nobody.
+
+Two more faults waited behind it: the job's `timeout-minutes: 30` would have
+cancelled any real wait, and the Azure token of the job's OIDC login lasts
+about an hour, so the deploy after a long wait could not have signed in.
+
+Fix (ADR-092): the deploy reads signals it can read.
+`scripts/azure/hold-deploys.sh wait` holds while an execution of
+`mvhd-load-test` runs (Azure login) or a deployment to the GitHub environment
+`load-test` is open (`deployments: read`; `load-tests/run.sh azure` opens and
+closes it). Three failed reads fail the deploy, with the override in the
+error. The job's timeout is 220 minutes, and the script renews the Azure
+login with a fresh GitHub OIDC token while it waits.
+
+Rule: a guard that cannot read its input fails; it never takes "unknown" as
+"clear". Prove the read on a run (`-f hold_check_only=true`), not by the YAML
+parsing. `${{ vars.X }}` reads a variable without a token, but only once, when
+the job starts.
+
 ## 2026-11-11: a `contracts` load run on Azure left 132 negotiations retrying, and real ones queued behind them
 
 `load-tests/platform.js` sent `http://controlplane:8082/api/dsp` as the

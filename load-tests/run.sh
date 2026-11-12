@@ -20,8 +20,9 @@
 # K6_JSON=1 also writes every sample to results/<testid>.ndjson, for the p95
 # per endpoint without Prometheus (load-tests/README.md, "Per endpoint").
 #
-# A run against azure sets the repository variable LOAD_TEST_RUNNING for its
-# duration, and deploy-azure.yml waits for it to clear (#571).
+# A run against azure opens a deployment to the GitHub environment "load-test"
+# for its duration, and deploy-azure.yml waits while it is open (#571, ADR-092;
+# scripts/azure/hold-deploys.sh).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HERE="$ROOT/load-tests"
@@ -91,12 +92,12 @@ if [ "${K6_JSON:-}" = 1 ]; then
 fi
 
 if [ "$TARGET" = azure ]; then
-  # Deploys wait on this variable (deploy-azure.yml); cleared when k6 exits.
-  if (cd "$ROOT" && gh variable set LOAD_TEST_RUNNING --body "$TESTID $(date -u +%Y-%m-%dT%H:%M:%SZ)" 2>/dev/null); then
-    trap '(cd "$ROOT" && gh variable delete LOAD_TEST_RUNNING 2>/dev/null) || echo "clear the hold: gh variable delete LOAD_TEST_RUNNING" >&2' EXIT
-    echo "deploys wait: LOAD_TEST_RUNNING=$TESTID"
+  # Deploys wait while this deployment is open (deploy-azure.yml); closed when k6 exits.
+  if HOLD_ID="$(cd "$ROOT" && scripts/azure/hold-deploys.sh start "$TESTID" 2>/dev/null)"; then
+    trap '(cd "$ROOT" && scripts/azure/hold-deploys.sh end "$HOLD_ID" 2>/dev/null) || echo "release the deploys: scripts/azure/hold-deploys.sh end $HOLD_ID" >&2' EXIT
+    echo "deploys wait: load-test deployment $HOLD_ID ($TESTID)"
   else
-    echo "could not set LOAD_TEST_RUNNING (gh signed in?): a merge to main would redeploy during the run" >&2
+    echo "could not open the deploy hold (gh signed in?): a merge to main would redeploy during the run" >&2
   fi
 fi
 

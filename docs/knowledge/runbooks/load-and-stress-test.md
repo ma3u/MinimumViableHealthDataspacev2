@@ -73,13 +73,22 @@ job as a secret, starts it and waits. Jobs need the PIM role `rol-ssg-prd-projec
 active: Container Apps Contributor has no `Microsoft.App/jobs` action.
 
 **No merge while a run is on.** A merge to `main` redeploys the UI and the proxy
-(#559 landed in the middle of the stress run of 2026-10-06). Both run scripts set
-the repository variable `LOAD_TEST_RUNNING` to `<testid> <start>` for a run
-against the live hub and clear it at the end; `deploy-azure.yml` waits for it to
-clear, up to three hours, and goes ahead with a warning when the value is older
-than four. With `WAIT=0` the variable stays set: clear it after the run with
-`gh variable delete LOAD_TEST_RUNNING`. The hold needs `gh` signed in on the
-laptop; without it the script warns and runs anyway.
+(#559 landed in the middle of the stress run of 2026-10-06). `deploy-azure.yml`
+waits while a run is on, up to three hours
+([ADR-092](../../ADRs/ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md)):
+
+- a run in Azure is seen as the running execution of `mvhd-load-test`; nothing
+  to set or clear, `WAIT=0` included;
+- `load-tests/run.sh azure` opens a deployment to the GitHub environment
+  `load-test` and closes it when k6 exits. It needs `gh` signed in on the
+  laptop; without it the script warns and runs anyway. After a hard kill,
+  release it with `scripts/azure/hold-deploys.sh end <id>`; at four hours old
+  it is ignored.
+
+`scripts/azure/hold-deploys.sh check` shows what a deploy would see. A deploy
+that cannot read either signal three times in a row fails rather than deploy;
+`gh workflow run deploy-azure.yml --ref main -f ignore_load_test_hold=true`
+deploys anyway, and `-f hold_check_only=true` reads the hold without deploying.
 
 ### Scale the UI (ADR-061)
 

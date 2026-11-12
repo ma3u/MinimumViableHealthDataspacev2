@@ -377,7 +377,8 @@ Chaque push vers `main` exécute [`deploy-azure.yml`](../.github/workflows/deplo
    fait confiance à la branche `main` de ce dépôt) ;
 2. construction des images de l’UI et du proxy Neo4j, envoi vers le registre
    `acrmvhdehds` ;
-3. attente pendant qu’un test de charge tourne (la variable `LOAD_TEST_RUNNING`), afin qu’une fusion
+3. attente pendant qu’un test de charge tourne (une exécution en cours de `mvhd-load-test` ou un
+   déploiement `load-test` ouvert, [ADR-092](ADRs/ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md)), afin qu’une fusion
    ne redéploie pas sous [k6](https://grafana.com/docs/k6/latest/) ;
 4. déploiement des deux sur Container Apps dans `rg-mvhd-dev` sous forme de nouvelle révision (ACA
    met [`:latest`](../CLAUDE.md#L75) en cache, si bien qu’un simple redémarrage ne récupérerait pas l’image) ;
