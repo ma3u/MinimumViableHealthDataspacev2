@@ -2,7 +2,7 @@
 # CFM fork: the patches still build and pass, at our tag and on upstream main
 # ---------------------------------------------------------------------------
 # The compose profile `cfm` runs eclipse-cfm/cfm from our fork ma3u/cfm with
-# five patches (ADR-088, #973, sub-issues #1043 to #1047). Two jobs:
+# six patches (ADR-088, #973, sub-issues #1043 to #1047 and #1105). Two jobs:
 #
 # - "Fork at its tag": the integration tag `.github/upstream.json` pins
 #   (fork.tag) passes the fork's Go tests, the Testcontainers ones included,
