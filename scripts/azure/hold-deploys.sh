@@ -38,6 +38,11 @@ WAIT_MINUTES="${WAIT_MINUTES:-180}"
 POLL_SECONDS="${POLL_SECONDS:-60}"
 STALE_SECONDS=14400
 MAX_READ_FAILURES=3
+if [[ "${AZURE_SIGNAL:-read}" == skip ]]; then
+  CHECKED="GitHub environment ${ENVIRONMENT}; Container Apps job ${JOB} not checked"
+else
+  CHECKED="GitHub environment ${ENVIRONMENT}, Container Apps job ${JOB}"
+fi
 
 repo() {
   if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
@@ -136,7 +141,7 @@ cmd_check() {
   local runs
   runs="$(active_runs)" || return 1
   if [[ -z "$runs" ]]; then
-    echo "no load test runs (checked: GitHub environment ${ENVIRONMENT}, Container Apps job ${JOB})"
+    echo "no load test runs (checked: ${CHECKED})"
   else
     echo "load test running:"
     echo "$runs" | sed 's/^/  /'
@@ -159,7 +164,7 @@ cmd_wait() {
     fi
     failures=0
     if [[ -z "$runs" ]]; then
-      echo "no load test runs (checked: GitHub environment ${ENVIRONMENT}, Container Apps job ${JOB}); deploying"
+      echo "no load test runs (checked: ${CHECKED}); deploying"
       if ((waited)); then azure_relogin; fi
       return 0
     fi
