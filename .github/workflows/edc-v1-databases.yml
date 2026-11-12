@@ -1,8 +1,9 @@
 name: EDC 1.0 databases (#881)
 
 # Creates the four databases the EDC 1.0 launchers and siglet 0.1.6 use on
-# Azure: controlplane_v1, identityhub_v1, issuerservice_v1, siglet_v1. The
-# 0.18 databases stay untouched as the rollback.
+# Azure: controlplane, identityhub and issuerservice with the suffix
+# EDC_DB_SUFFIX in scripts/azure/env.sh (_v1 for RC5, _v1rc6 for RC6, #930),
+# and siglet_v1. The databases of the release before stay as the rollback.
 #
 # Runs as the CI identity because creating a database on the Flexible Server
 # needs more than the maintainer's Container Apps Contributor role. The work

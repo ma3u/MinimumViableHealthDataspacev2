@@ -96,7 +96,7 @@ settings() {
   case "$1" in
     controlplane) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}
-DB=controlplane_v1
+DB=controlplane${EDC_DB_SUFFIX}
 EDC_POLICY_VALIDATION_ENABLED=true
 PROBES=edc
 EDC_HOSTNAME=${CONTROLPLANE_APP}
@@ -135,7 +135,7 @@ EOF
       ;;
     identityhub) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}
-DB=identityhub_v1
+DB=identityhub${EDC_DB_SUFFIX}
 PORTS=7082 7083 7084 7085
 EDC_IAM_CREDENTIAL_REVOCATION_MIMETYPE=application/json
 EDC_HOSTNAME=${IDENTITYHUB_APP}
@@ -160,8 +160,8 @@ EOF
       ;;
     issuerservice) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}
-DB=issuerservice_v1
-MEMBERSHIP_DB=issuerservice_v1
+DB=issuerservice${EDC_DB_SUFFIX}
+MEMBERSHIP_DB=issuerservice${EDC_DB_SUFFIX}
 PORTS=9999 10011 10012 10015 10016
 EDC_HOSTNAME=${ISSUER_APP}
 EDC_IAM_DID_WEB_USE_HTTPS=false

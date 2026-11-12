@@ -82,7 +82,7 @@ az containerapp create \
   --ingress internal --target-port 8080 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane_v1?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane${EDC_DB_SUFFIX}?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_CP_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
@@ -158,7 +158,7 @@ az containerapp create \
   --ingress internal --target-port 7081 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub_v1?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub${EDC_DB_SUFFIX}?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
@@ -199,7 +199,7 @@ az containerapp create \
   --ingress internal --target-port 10013 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice_v1?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice${EDC_DB_SUFFIX}?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
