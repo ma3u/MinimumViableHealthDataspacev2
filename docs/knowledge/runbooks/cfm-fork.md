@@ -10,7 +10,7 @@ status: draft
 # Runbook: keeping the CFM fork in step with eclipse-cfm (#973)
 
 The hub's `cfm` compose profile runs [eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm)
-with six fixes that make it work on EDC 1.0 runtimes outside Kubernetes
+with seven fixes that make it work on EDC 1.0 runtimes outside Kubernetes
 ([ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md); the
 fixes, why each is needed and how they were measured:
 [spike note, round 4](../../planning/current/issue-973-cfm-0-0-7-spike.md)).

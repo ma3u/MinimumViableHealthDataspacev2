@@ -106,6 +106,12 @@
             "fix": "f",
             "drop_when": "the registration agent no longer keys the issuer holder by the DID (agent/orchestration/registration)",
             "issue": 1047
+          },
+          {
+            "branch": "fix/revoke-accepts-204",
+            "fix": "g",
+            "drop_when": "the IssuerService client accepts 204 on a credential revocation (agent/common/issuerservice/issuer.go, RevokeCredential)",
+            "issue": 1105
           }
         ],
         "adr": "docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md"

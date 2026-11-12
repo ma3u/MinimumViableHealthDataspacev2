@@ -874,7 +874,7 @@ services:
   # ---------------------------------------------------------------------------
   # CFM (Connector Fabric Manager), ADR-085, #973. Profile `cfm`.
   # ---------------------------------------------------------------------------
-  # eclipse-cfm/cfm v0.0.8 with six fixes, from the fork's tag v0.0.8-mvhd.1
+  # eclipse-cfm/cfm v0.0.8 with seven fixes, from the fork's tag v0.0.8-mvhd.1
   # (scripts/build-cfm-fork-images.sh builds mvhd/cfm-*:0.0.8-mvhd.1; the fixes and why
   # are in docs/planning/current/issue-973-cfm-0-0-7-spike.md). Tenant Manager,
   # Provision Manager and the six orchestration agents of

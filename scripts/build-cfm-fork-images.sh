@@ -4,7 +4,7 @@ set -euo pipefail
 # Builds the CFM images the compose profile `cfm` runs, from the fork's
 # integration tag (ADR-085, #973): mvhd/cfm-<name>:<version>, e.g.
 # mvhd/cfm-tmanager:0.0.8-mvhd.1. The fork is eclipse-cfm/cfm v0.0.8 with the
-# six fixes listed in docs/planning/current/issue-973-cfm-0-0-7-spike.md;
+# seven fixes listed in .github/upstream.json (fork.patches);
 # each image is labelled with the commit it was built from.
 #
 # Built from a clean export of the tag (git archive), not the working tree, so

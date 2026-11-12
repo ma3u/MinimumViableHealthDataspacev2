@@ -26,6 +26,14 @@ TM_URL="${CFM_TM_URL:-http://localhost:18181}"
 PM_URL="${CFM_PM_URL:-http://localhost:18182}"
 PG_CONTAINER="${PG_CONTAINER:-health-dataspace-postgres}"
 ISSUER_DID="${EDC_ISSUER_DID:-did:web:issuerservice%3A10016:issuer}"
+ISSUER_API="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
+# The MembershipCredential's definition and format, read from the issuer below
+# unless set. From IdentityHub 1.0.0-RC6 a definition takes the format of the
+# issuer's DCP profile (VC2_0_JOSE, IdentityHub #1248), and the holder refuses
+# a delivery in another format than it requested: the onboarding agent then
+# waits on a request that stays REQUESTED (#1094). RC5 issued VC1_0_JWT.
+CREDENTIAL_DEFINITION_ID="${CFM_CREDENTIAL_DEFINITION_ID:-}"
+CREDENTIAL_FORMAT="${CFM_CREDENTIAL_FORMAT:-}"
 
 say() { printf '%s\n' "$*"; }
 die() {
@@ -169,6 +177,21 @@ if [[ -z "$CELL_ID" ]]; then
 fi
 say "4. cell $CELL_ID"
 
+if [[ -z "$CREDENTIAL_DEFINITION_ID" || -z "$CREDENTIAL_FORMAT" ]]; then
+  defs="$(api -X POST -d '{}' "$ISSUER_API/v1/participants/issuer/credentialdefinitions/query")"
+  def_row="$(body_of "$defs" | python3 -I -c '
+import json, sys
+try: rows = json.load(sys.stdin)
+except Exception: rows = []
+hit = [r for r in rows if isinstance(r, dict) and r.get("credentialType") == "MembershipCredential" and r.get("id")]
+print(hit[0]["id"] + " " + (hit[0].get("format") or "") if hit else "")')"
+  [[ -n "$CREDENTIAL_DEFINITION_ID" ]] || CREDENTIAL_DEFINITION_ID="${def_row%% *}"
+  [[ -n "$CREDENTIAL_FORMAT" ]] || CREDENTIAL_FORMAT="${def_row#* }"
+fi
+# The issuer was not reachable, or its definition carries no format: as before RC6.
+[[ -n "$CREDENTIAL_DEFINITION_ID" ]] || CREDENTIAL_DEFINITION_ID="membership-credential-def"
+[[ -n "$CREDENTIAL_FORMAT" && "$CREDENTIAL_FORMAT" != "$CREDENTIAL_DEFINITION_ID" ]] || CREDENTIAL_FORMAT="VC1_0_JWT"
+
 profiles="$(api "$TM_URL/api/v1alpha1/dataspace-profiles")"
 DS_ID="$(body_of "$profiles" | first_id)"
 if [[ -z "$DS_ID" ]]; then
@@ -177,13 +200,24 @@ if [[ -z "$DS_ID" ]]; then
     \"properties\": {\"name\": \"ehds\"},
     \"dataspaceSpec\": {
       \"protocolStack\": [\"dsp-2025-1\", \"dcp-2025-1\"],
-      \"credentialSpecs\": [{\"id\": \"membership-credential-def\", \"type\": \"MembershipCredential\",
-                              \"issuer\": \"$ISSUER_DID\", \"format\": \"VC1_0_JWT\"}]
+      \"credentialSpecs\": [{\"id\": \"$CREDENTIAL_DEFINITION_ID\", \"type\": \"MembershipCredential\",
+                              \"issuer\": \"$ISSUER_DID\", \"format\": \"$CREDENTIAL_FORMAT\"}]
     }}")"
   [[ "$(status_of "$r")" -lt 300 ]] || die "dataspace profile: HTTP $(status_of "$r") $(body_of "$r")"
   DS_ID="$(body_of "$r" | python3 -I -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
   r="$(api -X POST "$TM_URL/api/v1alpha1/dataspace-profiles/$DS_ID/deployments" -d "{\"profileId\":\"$DS_ID\",\"cellId\":\"$CELL_ID\"}")"
   [[ "$(status_of "$r")" -lt 300 ]] || die "dataspace profile deployment: HTTP $(status_of "$r") $(body_of "$r")"
 fi
-say "4. dataspace profile $DS_ID"
+say "4. dataspace profile $DS_ID (MembershipCredential: $CREDENTIAL_DEFINITION_ID, $CREDENTIAL_FORMAT)"
+# An existing profile is kept as it is; one seeded on RC5 asks for VC1_0_JWT.
+seeded_format="$(body_of "$profiles" | python3 -I -c '
+import json, sys
+try: rows = json.load(sys.stdin)
+except Exception: rows = []
+specs = (rows[0].get("dataspaceSpec") or {}).get("credentialSpecs") or [] if isinstance(rows, list) and rows else []
+print(" ".join(sorted({c.get("format", "") for c in specs if c.get("type") == "MembershipCredential"})))')"
+if [[ -n "$seeded_format" && "$seeded_format" != "$CREDENTIAL_FORMAT" ]]; then
+  say "   WARNING: the profile asks for $seeded_format, the issuer issues $CREDENTIAL_FORMAT; onboarding will wait"
+  say "   on a REQUESTED credential. Empty the database cfm_v007 and seed again."
+fi
 say "CFM seeded."
