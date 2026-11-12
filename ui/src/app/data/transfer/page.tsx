@@ -34,6 +34,7 @@ import {
 } from "@/lib/spe-import";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
+import { DEFAULT_PAGE_SIZE } from "@/lib/list-page";
 
 /* ── Types ── */
 
@@ -886,11 +887,15 @@ function DataTransferContent() {
     if (!selectedCtx) return;
     setLoading(true);
     Promise.all([
-      fetchApi(`/api/transfers?participantId=${selectedCtx}`)
+      fetchApi(
+        `/api/transfers?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
+      )
         .then((r) => (r.ok ? r.json() : []))
         .then((d) => (Array.isArray(d) ? d : d.transfers || []))
         .catch(() => []),
-      fetchApi(`/api/negotiations?participantId=${selectedCtx}`)
+      fetchApi(
+        `/api/negotiations?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
+      )
         .then((r) => (r.ok ? r.json() : []))
         .then((d) => {
           const negs = Array.isArray(d) ? d : d.negotiations || [];
@@ -932,7 +937,9 @@ function DataTransferContent() {
         clearInterval(timer);
         return;
       }
-      fetchApi(`/api/transfers?participantId=${selectedCtx}`)
+      fetchApi(
+        `/api/transfers?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
+      )
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           if (d) setTransfers(Array.isArray(d) ? d : d.transfers || []);
@@ -948,7 +955,9 @@ function DataTransferContent() {
     if (!selectedCtx) return;
     setRefreshing(true);
     try {
-      const res = await fetchApi(`/api/transfers?participantId=${selectedCtx}`);
+      const res = await fetchApi(
+        `/api/transfers?participantId=${selectedCtx}&limit=${DEFAULT_PAGE_SIZE}`,
+      );
       const d = await res.json();
       setTransfers(Array.isArray(d) ? d : d.transfers || []);
     } catch {

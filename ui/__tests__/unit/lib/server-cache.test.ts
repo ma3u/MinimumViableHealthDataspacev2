@@ -7,7 +7,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { cached, __resetCacheForTests } from "@/lib/server-cache";
+import {
+  cached,
+  forget,
+  shareInFlight,
+  __resetCacheForTests,
+} from "@/lib/server-cache";
 
 beforeEach(() => {
   __resetCacheForTests();
@@ -145,5 +150,49 @@ describe("server-cache", () => {
     });
 
     await expect(cached("k6", 1000, loader)).rejects.toThrow("boom");
+  });
+});
+
+describe("forget", () => {
+  it("makes the next caller load afresh", async () => {
+    await cached("f1", 60_000, async () => "old");
+    forget("f1");
+    expect(await cached("f1", 60_000, async () => "new")).toBe("new");
+  });
+});
+
+describe("shareInFlight (#1086)", () => {
+  it("gives callers that arrive during a load the same answer", async () => {
+    let resolve!: (v: string) => void;
+    const loader = vi.fn(() => new Promise<string>((r) => (resolve = r)));
+    const a = shareInFlight("s1", loader);
+    const b = shareInFlight("s1", loader);
+    resolve("catalog");
+    expect(await Promise.all([a, b])).toEqual(["catalog", "catalog"]);
+    expect(loader).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps nothing once the load has answered", async () => {
+    expect(await shareInFlight("s2", async () => 1)).toBe(1);
+    expect(await shareInFlight("s2", async () => 2)).toBe(2);
+  });
+
+  it("passes a failure to every waiting caller, and the next caller tries again", async () => {
+    let reject!: (e: Error) => void;
+    const failing = () => new Promise<string>((_, r) => (reject = r));
+    const a = shareInFlight("s3", failing);
+    const b = shareInFlight("s3", failing);
+    reject(new Error("dsp down"));
+    await expect(a).rejects.toThrow("dsp down");
+    await expect(b).rejects.toThrow("dsp down");
+    expect(await shareInFlight("s3", async () => "ok")).toBe("ok");
+  });
+
+  it("keeps keys apart", async () => {
+    const [x, y] = await Promise.all([
+      shareInFlight("s4", async () => "x"),
+      shareInFlight("s5", async () => "y"),
+    ]);
+    expect([x, y]).toEqual(["x", "y"]);
   });
 });

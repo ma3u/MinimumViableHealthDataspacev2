@@ -11,6 +11,8 @@ import {
 } from "@/lib/dsp-audit";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { loadTestId } from "@/lib/proxy";
+import { pageFrom } from "@/lib/list-page";
+import { identityOfContext } from "@/lib/edc/context-lookup";
 import { tagRows } from "@/lib/row-provenance";
 import {
   PERMIT_ARTICLE,
@@ -56,9 +58,11 @@ async function loadMockNegotiations(): Promise<unknown[]> {
 }
 
 /**
- * GET /api/transfers?participantId=<id> — List transfers for participant.
- * Returns real transfers from the controlplane merged with demo data.
- * POST /api/transfers — Initiate a data transfer.
+ * GET /api/transfers?participantId=<id>[&limit=<n>&offset=<n>]: one page of
+ * the participant's transfers, newest first; `limit` 50 unless asked, at
+ * most 200 (lib/list-page.ts). The control plane's rows are merged with the
+ * demo and mock rows, which only the first page (offset 0) carries.
+ * POST /api/transfers: initiate a data transfer.
  */
 
 export async function GET(req: NextRequest) {
@@ -74,12 +78,17 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  const page = pageFrom(req.nextUrl.searchParams);
+  if ("error" in page) {
+    return NextResponse.json({ error: page.error }, { status: 400 });
+  }
+
   let realTransfers: unknown[] = [];
   try {
     realTransfers = await edcClient.management<unknown[]>(
       `/v5/participants/${participantId}/transferprocesses/request`,
       "POST",
-      newestFirstQuery(),
+      newestFirstQuery(page.limit, page.offset),
     );
     if (!Array.isArray(realTransfers)) {
       realTransfers = [];
@@ -95,10 +104,12 @@ export async function GET(req: NextRequest) {
   // (see lib/demo-records.ts). They come first: the page refetches this list
   // right after starting a transfer, and a row that vanishes on the refetch
   // looks like a failure.
-  const demoTransfers = listDemo("transfer", participantId);
+  // Only the first page carries them, so a later page does not repeat them.
+  const firstPage = page.offset === 0;
+  const demoTransfers = firstPage ? listDemo("transfer", participantId) : [];
 
   // Merge with demo transfers so the FHIR viewer is always demonstrable
-  const mockTransfers = await loadMockTransfers();
+  const mockTransfers = firstPage ? await loadMockTransfers() : [];
   const realIds = new Set(
     realTransfers.map((t) => (t as Record<string, unknown>)["@id"]),
   );
@@ -164,13 +175,9 @@ async function participantContextDid(
   participantId: string,
 ): Promise<string | null> {
   try {
-    const contexts = await edcClient.management<
-      { "@id"?: string; identity?: string; participantId?: string }[]
-    >("/v5alpha/participants");
-    const ctx = Array.isArray(contexts)
-      ? contexts.find((c) => c["@id"] === participantId)
-      : undefined;
-    const identity = ctx?.identity ?? ctx?.participantId;
+    // The kept list (lib/edc/context-lookup.ts): a context's identity does
+    // not change between transfers, and this ran on every live one.
+    const identity = await identityOfContext(participantId);
     if (!identity) return null;
     // The host differs per deployment; the slug at the end names the
     // participant on all of them.

@@ -1,0 +1,27 @@
+meta {
+  name: 17 One page of my transfers
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/api/transfers?participantId={{uiParticipantId}}&limit=5
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("the connector's rows are at most the page asked for (#1086)", function () {
+    const rows = res.getBody().filter((r) => r.source === "controlplane");
+    expect(rows.length).to.be.at.most(5);
+  });
+}

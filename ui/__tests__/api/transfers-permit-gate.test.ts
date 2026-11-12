@@ -28,6 +28,7 @@ import { edcClient } from "@/lib/edc";
 import { requireAuth } from "@/lib/auth-guard";
 import { checkPermit, recordPermittedTransfer } from "@/lib/permit-gate";
 import { __resetDemoRecordsForTests } from "@/lib/demo-records";
+import { __resetCacheForTests } from "@/lib/server-cache";
 import { GET, POST } from "@/app/api/transfers/route";
 
 const mockManagement = vi.mocked(edcClient.management);
@@ -90,6 +91,7 @@ function postTransfer(body: Record<string, unknown>) {
 describe("POST /api/transfers: the data permit gate", () => {
   beforeEach(() => {
     __resetDemoRecordsForTests();
+    __resetCacheForTests();
     mockManagement.mockReset();
     mockCheckPermit.mockReset();
     mockRecord.mockClear();
@@ -189,7 +191,7 @@ describe("POST /api/transfers: the data permit gate", () => {
     } as never);
     mockCheckPermit.mockResolvedValue(ALLOWED);
     mockManagement.mockImplementation(async (path: string) => {
-      if (path === "/v5alpha/participants") {
+      if (path === "/v5/participants") {
         return [
           {
             "@id": "alpha-ctx",

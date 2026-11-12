@@ -17,6 +17,8 @@
 # abort on failed requests only, not on latency), KC_USER/KC_PASSWORD (signin), YES=1
 # (skip the confirmation for a stress, spike or soak run against azure),
 # AGREEMENT_TIMEOUT_S (contracts: how long a negotiation may take to agree, 60).
+# K6_JSON=1 also writes every sample to results/<testid>.ndjson, for the p95
+# per endpoint without Prometheus (load-tests/README.md, "Per endpoint").
 #
 # A run against azure sets the repository variable LOAD_TEST_RUNNING for its
 # duration, and deploy-azure.yml waits for it to clear (#571).
@@ -81,6 +83,11 @@ if curl -s -o /dev/null -m 10 "${RW%/api/v1/write}/-/ready"; then
   echo "dashboard: http://localhost:3300/d/mvhd-load-test/load-and-stress-test?var-testid=$TESTID"
 else
   echo "no Prometheus at $RW; metrics stay in the summary only"
+fi
+
+if [ "${K6_JSON:-}" = 1 ]; then
+  out+=(-o "json=$RESULTS/$TESTID.ndjson")
+  echo "samples → $RESULTS/$TESTID.ndjson"
 fi
 
 if [ "$TARGET" = azure ]; then

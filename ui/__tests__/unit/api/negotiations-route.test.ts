@@ -33,10 +33,12 @@ vi.mock("fs", () => ({
 }));
 
 import { GET, POST } from "@/app/api/negotiations/route";
+import { __resetCacheForTests } from "@/lib/server-cache";
 
 // ── Setup ────────────────────────────────────────────────────────────
 beforeEach(() => {
   vi.clearAllMocks();
+  __resetCacheForTests();
   mockReadFile.mockReset();
 });
 
@@ -108,6 +110,7 @@ describe("GET /api/negotiations", () => {
 
     expect(res.status).toBe(502);
     expect(data.detail).toContain("did:web:unknown.example");
+    // The list was read for this request, so a miss is not asked again (#1086).
     expect(mockManagement).toHaveBeenCalledTimes(1);
   });
 
@@ -278,7 +281,7 @@ describe("GET /api/negotiations", () => {
         // hid every new negotiation once a participant had more (#1076).
         sortField: "createdAt",
         sortOrder: "DESC",
-        limit: 200,
+        limit: 50,
       }),
     );
   });
