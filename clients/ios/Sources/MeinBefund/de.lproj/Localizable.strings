@@ -672,3 +672,15 @@
 "Your reports stay. You can build the graph again at any time." = "Ihre Befunde bleiben. Sie können den Graphen jederzeit neu aufbauen.";
 "Weekly mean from a device, not a lab value" = "Wochenmittel von einem Gerät, kein Laborwert";
 "The graph could not be built: %@" = "Der Graph konnte nicht erstellt werden: %@";
+
+/* Send over USB cable (Export to my Mac, Nov 2026). */
+"Send over USB cable" = "Über USB-Kabel senden";
+"Waiting for the Mac…" = "Warte auf den Mac…";
+"On the Mac, run:" = "Auf dem Mac ausführen:";
+"Sending over USB…" = "Wird über USB gesendet…";
+"No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac. Only the paired Mac receives anything. Keep this screen open until it is done." = "Kein gemeinsames WLAN nötig: Verbinden Sie dieses iPhone per Kabel mit dem Mac, tippen Sie auf „Über USB-Kabel senden“ und führen Sie dann den Befehl auf dem Mac aus. Nur der gekoppelte Mac erhält etwas. Lassen Sie diese Ansicht geöffnet, bis es fertig ist.";
+"Sent %lld values from %lld reports and %lld weekly values over USB to %@." = "%1$lld Werte aus %2$lld Befunden und %3$lld Wochenwerte über USB an %4$@ gesendet.";
+"USB transfer failed: %@" = "USB-Übertragung fehlgeschlagen: %@";
+"The Mac on the cable is not the paired one, so nothing was sent." = "Der Mac am Kabel ist nicht der gekoppelte, daher wurde nichts gesendet.";
+"Paired with %@. It cannot be reached over Wi-Fi right now; you can send over a USB cable instead." = "Mit %@ verbunden. Er ist gerade nicht über WLAN erreichbar; Sie können stattdessen über ein USB-Kabel senden.";
+"%@ cannot be reached over Wi-Fi right now. Nothing was sent; you can send over a USB cable instead." = "%@ ist gerade nicht über WLAN erreichbar. Es wurde nichts gesendet; Sie können stattdessen über ein USB-Kabel senden.";

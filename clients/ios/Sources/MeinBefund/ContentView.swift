@@ -1277,6 +1277,9 @@ struct ContentView: View {
     .modifier(ReportActions(model: model, path: $path, scanning: $scanning))
     .modifier(ConnectSheet(model: model, connection: connection))
     .modifier(LocalRelateSheet(model: model, export: localRelate))
+    #if DEBUG
+      .task { localRelate.startUSBSelfTest() }
+    #endif
     .modifier(
       OnDeviceGraphSheet(
         isPresented: $model.showingOnDeviceGraph, graph: onDeviceGraph, reports: model.reports))

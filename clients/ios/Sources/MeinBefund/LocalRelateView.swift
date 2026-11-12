@@ -42,6 +42,49 @@ struct LocalRelateView: View {
         }
       }
       .task { await export.refreshStatus() }
+      .onDisappear { export.stopUSB() }
+    }
+  }
+
+  /// Send over USB cable: for a Mac that is not on the same Wi-Fi.
+  private var usbSection: some View {
+    Section {
+      switch export.usb {
+      case .off, .done, .failed:
+        if case .done(let message) = export.usb {
+          Label(message, systemImage: "checkmark.circle")
+            .accessibilityIdentifier("relate-usb-result")
+        }
+        if case .failed(let message) = export.usb {
+          Label(message, systemImage: "exclamationmark.triangle")
+            .accessibilityIdentifier("relate-usb-result")
+        }
+        Button {
+          Task { await export.startUSB(reports()) }
+        } label: {
+          Label("Send over USB cable", systemImage: "cable.connector")
+        }
+        .accessibilityIdentifier("relate-usb")
+      case .waiting:
+        HStack(spacing: 10) {
+          ProgressView()
+          Text("Waiting for the Mac…")
+        }
+        Text("On the Mac, run:")
+        // A command line, not prose: never translated.
+        Text(verbatim: "scripts/health_vault.sh usb")
+          .font(.system(.footnote, design: .monospaced))
+          .textSelection(.enabled)
+        Button("Cancel", role: .cancel) { export.stopUSB() }
+          .accessibilityIdentifier("relate-usb-cancel")
+      case .sending:
+        HStack(spacing: 10) {
+          ProgressView()
+          Text("Sending over USB…")
+        }
+      }
+    } footer: {
+      Text("No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac. Only the paired Mac receives anything. Keep this screen open until it is done.")
     }
   }
 
@@ -125,6 +168,7 @@ struct LocalRelateView: View {
             .accessibilityIdentifier("relate-result")
         }
       }
+      usbSection
       Section {
         Button("Forget this Mac", role: .destructive) { confirmingForget = true }
           .confirmationDialog(
