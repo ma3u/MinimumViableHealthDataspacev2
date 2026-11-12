@@ -65,6 +65,10 @@ struct OnDeviceGraphView: View {
           .accessibilityIdentifier("graph-values")
         LabeledContent("Kinds of test (LOINC)", value: "\(s.codedAnalytes)")
         LabeledContent("Values without a code", value: "\(s.unmapped)")
+        if s.copies > 0 {
+          LabeledContent("Also in another report, counted once", value: "\(s.copies)")
+            .accessibilityIdentifier("graph-copies")
+        }
         if graph.includesWearables {
           LabeledContent("Apple Health weekly values", value: "\(s.weekly)")
         }
