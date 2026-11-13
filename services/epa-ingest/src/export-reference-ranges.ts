@@ -7,15 +7,18 @@
  *   npm run export:reference-ranges -- <file>      (stdout without a file)
  *
  * Nothing is added or converted: every field is the one in reference-ranges.ts,
- * plus `loinc` (null when LOINC has no term for the analyte in that unit).
+ * plus `loinc` (null when LOINC has no term for the analyte in that unit) and
+ * `validFrom`/`validUntil` (the edition's dates; null when open).
  */
 import { writeFileSync } from "node:fs";
 import { ANALYTE_CODINGS } from "./analytes.js";
-import { REFERENCE_RANGES } from "./reference-ranges.js";
+import { REFERENCE_RANGES, validFrom } from "./reference-ranges.js";
 
 const ranges = REFERENCE_RANGES.map((r) => ({
   ...r,
   loinc: ANALYTE_CODINGS[r.analyteKey]?.[r.ucum] ?? null,
+  validFrom: validFrom(r) ?? null,
+  validUntil: r.validUntil ?? null,
 }));
 
 const unknown = ranges.filter((r) => !(r.analyteKey in ANALYTE_CODINGS));
