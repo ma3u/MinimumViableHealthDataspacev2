@@ -3,8 +3,10 @@
 - **Status:** Final, as of 27 October 2026
 - **Updated:** 7 November 2026, with what Simpl-Open's published code shows
   ([section 2](#what-the-published-code-shows)) and the use case that tests it
-  ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934))
-- **Discussion:** [#701, Simpl-Open vs. this EHDS hub](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701)
+  ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934));
+  13 November 2026, with the hub on EDC 1.0 ([section 2](#the-hub-on-edc-10))
+- **Discussions:** [#701, Simpl-Open vs. this EHDS hub](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701);
+  [#1092, the EDC 1.0 migration and whether to start it on a release candidate](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092)
 - **Decision:** [ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)
 - **Plan:** [#725, closing the EHDS and Simpl-Open gaps](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725), one issue per gap, prioritised
 - **Compares:** Simpl-Open as its programme describes it; the European Health
@@ -35,6 +37,14 @@ decentralised claims (DCP) through an IdentityHub, with credentials issued by
 the data space's Governance Authority. The hub speaks DCP 1.0, so it can meet
 Simpl-Open there without running a Simpl agent, and keeps the EHDS rules in its
 own health extension ([ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)).
+
+Since November 2026 the two connectors are further apart. The hub runs EDC
+1.0.0-RC6 on Azure, in CI and locally, with DCP, the IdentityHub and the
+IssuerService from the same release. Simpl-Open's published connector still
+builds on EDC 0.10.1, from late 2024. Moving the hub from EDC 0.18 to 1.0 meant
+a new security model, new API versions, no EDC data plane, and 29 breaks found
+only by running the full test suites. What it took, and whether to start on a
+release candidate, is in [discussion #1092](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092).
 
 The Simpl requirements that touch the EHDS most directly are at "proposed"
 status and open for comment: DOME onboarding and discovery (BP02F, BP02G), AI
@@ -123,6 +133,13 @@ pages leave open:
 | [`edc-connector-adapter-be`](https://code.europa.eu/simpl/simpl-open/integration/resource-sharing/resource-sharing-runtime/connector/edc-connector-adapter-be), 1.20.1 of 4 November 2026          | the management backend in front of the connector; active, with ODRL policy mapping and Kafka streaming ([`CHANGELOG.md`](https://code.europa.eu/simpl/simpl-open/integration/resource-sharing/resource-sharing-runtime/connector/edc-connector-adapter-be/-/blob/main/CHANGELOG.md)), on the same EDC                                                                                                                                                                                                                           |
 | [`issuer-service-be`](https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be), updated 5 November 2026                   | Simpl's own Java service that issues and verifies W3C credentials as JSON-LD with Ed25519 proofs ([`README.md` lines 29 to 32 at `v1.6.0`](https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be/-/blob/v1.6.0/README.md#L29-32)). It is not EDC's [IdentityHub](https://github.com/eclipse-edc/IdentityHub) or IssuerService and does not implement [DCP v1.0](https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/)'s flows |
 
+Read again on 13 November 2026: `simpl-edc` has no release after 1.0.26, its
+`main` still builds on EDC 0.10.1, and the newest work on any branch dates from
+17 August 2026 ([tags](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/tags),
+[branches](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/branches)).
+No branch moves to EDC 1.0, which is at
+[v1.0.0-RC6](https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC6) (9 November 2026).
+
 No public Simpl-Open repository implements DCP. Two consequences:
 
 - **Simpl's move to DCP and to EDC 1.0 fit together.** EDC 1.0 ships DCP, the
@@ -186,6 +203,47 @@ No public Simpl-Open repository implements DCP. Two consequences:
   `identityAttributes` makes it answer 500 (#711). A negotiation between the
   hub and `simpl-edc` on a Governance Authority credential (#934, step 8)
   therefore needs DCP in `simpl-edc` as well as the hub's half of the fix.
+
+  Checked again on EDC 1.0.0-RC6, which the hub runs since 12 November 2026:
+  barriers 2 and 3 are unchanged. The control plane still registers
+  `JsonWebSignature2020` only
+  ([`DcpCoreExtension.java` line 236 at `v1.0.0-RC6`](https://github.com/eclipse-edc/Connector/blob/v1.0.0-RC6/extensions/common/iam/decentralized-claims/decentralized-claims-core/src/main/java/org/eclipse/edc/iam/decentralizedclaims/core/DcpCoreExtension.java#L236)),
+  and EDC resolves `did:web` only. RC6 also checks the issuer's trust before
+  it fetches anything remote
+  ([Connector #6150](https://github.com/eclipse-edc/Connector/pull/6150)), so
+  an untrusted issuer now fails at barrier 4 before barriers 1 to 3 are reached.
+
+### The hub on EDC 1.0
+
+The hub moved its connector from EDC 0.18 to EDC 1.0 in November 2026: to
+1.0.0-RC5 on 6 November and to 1.0.0-RC6 on 12 November, on Azure, in CI and
+on the local stack ([#881](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/881),
+[#930](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/930)). The full account, with every break and the
+recommendation on release candidates, is
+[discussion #1092](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092). What matters for Simpl-Open:
+
+- **One release carries the connector, DCP, the IdentityHub and the
+  IssuerService.** The hub builds its three launchers from released EDC
+  artifacts ([ADR-076](ADRs/ADR-076-edc-1-runtimes-are-built-here.md),
+  [ADR-078](ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)). SSI Tier 2
+  on EDC 1.0 gets DCP from upstream instead of building it twice.
+- **The data plane is the work.** EDC 1.0 removes its data plane framework;
+  the hub serves transfers through siglet, a data plane that speaks the Data
+  Plane Signaling protocol (DPS), and a token check in its query proxy, about
+  150 lines. Simpl's Kafka and object storage transfers extend that framework
+  and would have to become DPS data planes.
+- **The security model changes.** EDC 1.0 authorises its APIs by OAuth scope
+  and ignores the `role` claim. An API path moves to `v5` (management) and
+  `v1` (identity, issuer); the old paths answer 404.
+- **Credentials are VC 2.0 by default.** Since RC6 the IssuerService issues
+  in the format of its DCP profile, `vc20-bssl/jwt` (VC 2.0 secured with JOSE),
+  and a holder refuses a credential in another format than it requested
+  ([IdentityHub #1248](https://github.com/eclipse-edc/IdentityHub/pull/1248)).
+  That is the format recommendation 8 below asks of Simpl's issuer.
+- **No upgrade path between release candidates.** Each RC changes the
+  database schemas without a migration, so every RC starts on fresh
+  databases and the participants are seeded again. A production move waits
+  for 1.0.0 final; the preparation does not (#1092).
 
 ### Catalogue
 
@@ -254,10 +312,11 @@ says that HealthData@EU or a national access body will run on Simpl-Open.
 ## 3. The hub
 
 The hub plays the roles of the Regulation (data holders, a data user, access
-bodies, a trust centre, persons) on an Eclipse EDC virtual runtime:
+bodies, a trust centre, persons) on Eclipse EDC 1.0.0-RC6, a virtual control
+plane for all participants, with siglet as the data plane:
 
-- **Exchange:** DSP 2025-1, checked by the DSP technology compatibility kit in
-  `compliance.yml`; DCP v1.0 with an IdentityHub and an IssuerService issuing
+- **Exchange:** DSP 2025-1, checked by the official Eclipse DSP technology
+  compatibility kit (65 of 65) in `compliance.yml`; DCP v1.0 with an IdentityHub and an IssuerService issuing
   membership, participant, processing purpose and quality label credentials
   to `did:web` participants.
 - **Data:** FHIR R4 and OMOP CDM 5.4 in one Neo4j graph with SNOMED CT, LOINC,
@@ -276,20 +335,20 @@ bodies, a trust centre, persons) on an Eclipse EDC virtual runtime:
 
 ## 4. Layer by layer
 
-| Layer                      | Simpl-Open                                                                                                    | The hub                                                                                                                                                                    | Gap and bridge                                                                                                                                                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Connector                  | EDC-based, the three DSP parts; version not published                                                         | EDC virtual runtime; DSP 2025-1, checked by the TCK in `compliance.yml`                                                                                                    | Confirm Simpl's DSP version; run the TCK against a Simpl agent                                                                                                                                                                                |
-| Organisation identity      | Inside the agent: Governance Authority x509, mTLS. Outside: DCP. DIDs and VCs in Innsbruck                    | DCP 1.0, `did:web`, IdentityHub and IssuerService; membership, participant, purpose and quality-label credentials; each issuer trusted for its own credential types (#710) | Built and checked for a fictional Governance Authority (#710): trusted for `MembershipCredential` only, a participant admitted on its credential, an unlisted issuer refused (TRUST-6.1 to 6.5). A real authority waits on Hamburg 4.1 (#711) |
-| Person identity            | Keycloak; EU Login and eIDAS login in EHDS2; wallet credentials in Hamburg                                    | EUDI PID over OpenID4VP and HAIP (SD-JWT VC or mdoc), bound to one record, asking only the name (ADR-065)                                                                  | Both sides: healthcare attestations of 2026/2099                                                                                                                                                                                              |
-| Acting for an organisation | Not described                                                                                                 | Not yet                                                                                                                                                                    | DOME uses LEAR credentials; the European Business Wallet is still in negotiation. Neither side has a mandate credential                                                                                                                       |
-| Catalogue                  | XFSC federated catalogue; DCAT-AP as the Innsbruck model; HealthDCAT-AP not named                             | HealthDCAT-AP Release 8 over the DSP catalogue, validated with the official SHACL; federated crawler (ADR-020)                                                             | A HealthDCAT-AP profile for Simpl's DCAT-AP adoption, which 2026/2098 requires for health from 2029                                                                                                                                           |
-| Policy                     | Decision point, no named language; access policies on the provider's connector                                | ODRL 2.2, evaluated per query in front of the SPEs                                                                                                                         | Usage control inside the SPE is where the EHDS needs it most (Art. 73)                                                                                                                                                                        |
-| Contracts                  | Bilateral consumer and provider                                                                               | DSP agreements plus the access body's data permit (Art. 68)                                                                                                                | A permit binds an access body, one or more holders and a user                                                                                                                                                                                 |
-| Fees                       | One monetisation model per participant type; provider bills consumer; Governance Authority bills participants | Art. 62 schedule: body and holder shares, Art. 62(3) reductions by applicant category (`ui/src/lib/fees.ts`)                                                               | Category-based reductions do not fit one model per participant type                                                                                                                                                                           |
-| Opt-out                    | Consent management in onboarding (Innsbruck)                                                                  | Art. 71 record and label; every secondary-use query excludes opted-out persons (ADR-062)                                                                                   | A person-level filter needs the middleware to see persons in the data                                                                                                                                                                         |
-| Marketplace                | DOME onboarding, discovery and AI services through the Governance Authority                                   | None                                                                                                                                                                       | SPE and analytics services as offerings, usable only inside an SPE                                                                                                                                                                            |
-| Health semantics           | Not named                                                                                                     | FHIR R4, OMOP CDM 5.4, SNOMED CT, LOINC, ICD-10, RxNorm in one graph                                                                                                       | A health extension on top of Simpl                                                                                                                                                                                                            |
-| Cross-border secondary use | Federated search across data spaces (Innsbruck); eDelivery proof of concept announced                         | Federated statistics and queries across two SPEs; a second access body                                                                                                     | HealthData@EU connects national contact points over dispatchers and eDelivery (TEHDAS2 D7.3), not over DSP                                                                                                                                    |
+| Layer                      | Simpl-Open                                                                                                     | The hub                                                                                                                                                                    | Gap and bridge                                                                                                                                                                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Connector                  | EDC 0.10.1 in the published code (`simpl-edc` 1.0.26), DSP 2024/1 and v0.8; the programme publishes no version | EDC 1.0.0-RC6; DSP 2025-1, the official TCK 65 of 65 in `compliance.yml`                                                                                                   | Move to EDC 1.0 with SSI Tier 2; the DSP TCK passes 1 of 65 against `simpl-edc` 1.0.26 (#711)                                                                                                                                                 |
+| Organisation identity      | Inside the agent: Governance Authority x509, mTLS. Outside: DCP. DIDs and VCs in Innsbruck                     | DCP 1.0, `did:web`, IdentityHub and IssuerService; membership, participant, purpose and quality-label credentials; each issuer trusted for its own credential types (#710) | Built and checked for a fictional Governance Authority (#710): trusted for `MembershipCredential` only, a participant admitted on its credential, an unlisted issuer refused (TRUST-6.1 to 6.5). A real authority waits on Hamburg 4.1 (#711) |
+| Person identity            | Keycloak; EU Login and eIDAS login in EHDS2; wallet credentials in Hamburg                                     | EUDI PID over OpenID4VP and HAIP (SD-JWT VC or mdoc), bound to one record, asking only the name (ADR-065)                                                                  | Both sides: healthcare attestations of 2026/2099                                                                                                                                                                                              |
+| Acting for an organisation | Not described                                                                                                  | Not yet                                                                                                                                                                    | DOME uses LEAR credentials; the European Business Wallet is still in negotiation. Neither side has a mandate credential                                                                                                                       |
+| Catalogue                  | XFSC federated catalogue; DCAT-AP as the Innsbruck model; HealthDCAT-AP not named                              | HealthDCAT-AP Release 8 over the DSP catalogue, validated with the official SHACL; federated crawler (ADR-020)                                                             | A HealthDCAT-AP profile for Simpl's DCAT-AP adoption, which 2026/2098 requires for health from 2029                                                                                                                                           |
+| Policy                     | Decision point, no named language; access policies on the provider's connector                                 | ODRL 2.2, evaluated per query in front of the SPEs                                                                                                                         | Usage control inside the SPE is where the EHDS needs it most (Art. 73)                                                                                                                                                                        |
+| Contracts                  | Bilateral consumer and provider                                                                                | DSP agreements plus the access body's data permit (Art. 68)                                                                                                                | A permit binds an access body, one or more holders and a user                                                                                                                                                                                 |
+| Fees                       | One monetisation model per participant type; provider bills consumer; Governance Authority bills participants  | Art. 62 schedule: body and holder shares, Art. 62(3) reductions by applicant category (`ui/src/lib/fees.ts`)                                                               | Category-based reductions do not fit one model per participant type                                                                                                                                                                           |
+| Opt-out                    | Consent management in onboarding (Innsbruck)                                                                   | Art. 71 record and label; every secondary-use query excludes opted-out persons (ADR-062)                                                                                   | A person-level filter needs the middleware to see persons in the data                                                                                                                                                                         |
+| Marketplace                | DOME onboarding, discovery and AI services through the Governance Authority                                    | None                                                                                                                                                                       | SPE and analytics services as offerings, usable only inside an SPE                                                                                                                                                                            |
+| Health semantics           | Not named                                                                                                      | FHIR R4, OMOP CDM 5.4, SNOMED CT, LOINC, ICD-10, RxNorm in one graph                                                                                                       | A health extension on top of Simpl                                                                                                                                                                                                            |
+| Cross-border secondary use | Federated search across data spaces (Innsbruck); eDelivery proof of concept announced                          | Federated statistics and queries across two SPEs; a second access body                                                                                                     | HealthData@EU connects national contact points over dispatchers and eDelivery (TEHDAS2 D7.3), not over DSP                                                                                                                                    |
 
 ## 5. EHDS duties against Simpl and the hub
 
@@ -442,6 +501,8 @@ Comments on the proposed requirements and questions for the programme:
    `2024/1` and `v0.8` only; 46 of the failures need a test hook the
    connector does not have, the other 17 are the protocol version
    ([#711](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/711)).
+   The hub's own move from EDC 0.18 to 1.0, and what it would mean to start
+   one on a release candidate, is in [discussion #1092](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092).
 2. Make HealthDCAT-AP a profile of the DCAT-AP model adopted in Innsbruck, so a
    health data space can meet 2026/2098 without a second catalogue.
 3. Let BP02E express reductions by applicant category and a split between the
@@ -459,7 +520,8 @@ Comments on the proposed requirements and questions for the programme:
    attributes on offerings (SPE certification, permit required).
 8. Let the Governance Authority's issuer speak DCP 1.0's issuance flow and
    sign in a format EDC 1.0 verifies out of the box (a JWT credential under a
-   `did:web` resolved as the DID method defines it), and publish the JSON-LD
+   `did:web` resolved as the DID method defines it; since RC6 an EDC
+   IssuerService issues VC 2.0 secured with JOSE by default), and publish the JSON-LD
    context of its membership credential at a stable address. Today a
    credential from `issuer-service-be` 1.6.0 reaches an EDC 1.0 connector only
    by hand and fails verification there
@@ -489,7 +551,9 @@ with its priority (P1 to P3) and the evidence that closes it.
 3. Express the `fees.ts` schedule as a BP02E monetisation model and record what
    does not fit.
 4. Contact the EHDS2 Simpl-Live pilot.
-5. Close the open EHDS items: #696 (opt-out follow-ups), #697 (implementing
+5. Keep the connector on EDC 1.0 releases: 1.0.0 final replaces RC6 by the
+   steps of [#930](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/930), on fresh databases, as RC5 moved to RC6.
+6. Close the open EHDS items: #696 (opt-out follow-ups), #697 (implementing
    acts and Chapter IV duties), #698 (Chapter II rights, EU FHIR guides, EUDI
    health attestations).
 
