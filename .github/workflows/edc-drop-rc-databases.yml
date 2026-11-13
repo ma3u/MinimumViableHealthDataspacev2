@@ -1,0 +1,69 @@
+name: EDC databases of a previous release candidate (#930)
+
+# Drops the database set of an EDC release candidate the hub has moved on
+# from: controlplane<suffix>, identityhub<suffix>, issuerservice<suffix>
+# (scripts/azure/env.sh, EDC_DB_SUFFIX). Each RC starts on fresh databases and
+# the set before it stays as the rollback until this runs.
+#
+# `plan` changes nothing: it shows the guards and which databases are present.
+# `drop` needs Matthias's go on a plan run. The guards
+# (scripts/azure/drop-edc-rc-databases.sh) refuse the set the apps run on,
+# refuse while any active revision of the control plane, IdentityHub or
+# IssuerService reads another database than its current one, and refuse while
+# any other app or job names one of the databases.
+#
+# Runs as the CI identity: dropping a database needs write access to the
+# Flexible Server, which the maintainer account does not have. Run it during
+# office hours: the server stops at night (ADR-053).
+#
+# Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or drop"
+        type: choice
+        options: [plan, drop]
+        default: plan
+      suffix:
+        description: "the set to drop, e.g. _v1 for RC5"
+        type: string
+        required: true
+        default: "_v1"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  drop:
+    name: Databases ${{ github.event.inputs.suffix }} (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Guards and databases
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          SUFFIX: ${{ github.event.inputs.suffix }}
+        run: |
+          ./scripts/azure/drop-edc-rc-databases.sh "$MODE" "$SUFFIX" </dev/null | tee drop.log
+          {
+            echo "### EDC databases ${SUFFIX} (${MODE})"
+            echo '```'
+            cat drop.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

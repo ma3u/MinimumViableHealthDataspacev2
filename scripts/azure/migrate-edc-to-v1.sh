@@ -329,6 +329,7 @@ AZURE_ONLY = {
 }
 LOCAL_ONLY = {
     r"^edc\.iam\.trustedissuer\.simpl-ga\.": "the Simpl test issuer runs only locally",
+    r"^edc\.iam\.trustedissuer\.wellbeing-ga\.": "the second data space's issuer (#934, ADR-080) runs only locally",
     r"^web\.http\.identity\.auth\.key$": "the local stack's API key",
     r"^edc\.ih\.api\.superuser\.key$": "the local stack's superuser key",
 }

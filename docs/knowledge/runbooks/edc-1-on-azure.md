@@ -133,6 +133,8 @@ An EDC release candidate ships no schema migration from the one before it: RC6 c
 
 Rollback: `migrate-edc-to-v1.sh rollback <app>`, newest first. The previous database set and its keys in Vault are untouched.
 
+8. After the first off-hours stop and start on the new RC (Demo Smoke green after the morning start), drop the previous set: the workflow **EDC databases of a previous release candidate** (`edc-drop-rc-databases.yml`), `plan` with the old suffix, then `drop` on Matthias's go. It refuses the set the apps run on. From then on there is no rollback to the previous RC. RC5's `_v1` set: checked 2026-11-13, it held only the five demo participants, all re-seeded on RC6.
+
 ## Rollback
 
 The way back to 0.18 is closed since 2026-11-09 (#927): the CFM apps and the 0.18 data planes are deleted, and `edc-retire-v018-azure.yml` (#927 step 6, PR #1048) drops the `_v018` databases. What follows is the record of the cutover's rollback, not a step to take.
