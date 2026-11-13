@@ -233,16 +233,17 @@ recommendation on release candidates, is
   150 lines. Simpl's Kafka and object storage transfers extend that framework
   and would have to become DPS data planes.
 - **The security model changes.** EDC 1.0 authorises its APIs by OAuth scope
-  and ignores the `role` claim. An API path moves to `v5` (management) and
-  `v1` (identity, issuer); the old paths answer 404.
+  and ignores the `role` claim. The APIs move to `v5` (management) and `v1`
+  (identity, issuer); the old paths answer 404.
 - **Credentials are VC 2.0 by default.** Since RC6 the IssuerService issues
   in the format of its DCP profile, `vc20-bssl/jwt` (VC 2.0 secured with JOSE),
   and a holder refuses a credential in another format than it requested
   ([IdentityHub #1248](https://github.com/eclipse-edc/IdentityHub/pull/1248)).
   That is the format recommendation 8 below asks of Simpl's issuer.
-- **No upgrade path between release candidates.** Each RC changes the
-  database schemas without a migration, so every RC starts on fresh
-  databases and the participants are seeded again. A production move waits
+- **No upgrade path between release candidates.** RC6 changed fourteen
+  database schemas without a migration
+  ([Connector #6186](https://github.com/eclipse-edc/Connector/pull/6186)), so
+  the hub moved to it on fresh databases and seeded the participants again. A production move waits
   for 1.0.0 final; the preparation does not (#1092).
 
 ### Catalogue
