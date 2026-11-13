@@ -57,33 +57,53 @@ struct PrivacySummary: View {
               """)
           }
 
-          Group {
-            Text("Where the explanation comes from")
-              .font(.headline)
-            Text(
-              """
-              By default the model on this iPhone answers, so your question \
-              never reaches a network at all. You may instead choose the \
-              Klarbefund service, which processes in the EU, or your own Azure \
-              resource or Anthropic key, in which case your phone talks to \
-              your service directly and neither your key nor your values reach \
-              the app provider at all. Whichever is in use is named on the \
-              screen before you send.
+          // The Klarbefund service is described only where the build offers
+          // it; TestFlight builds do not (BringYourOwnProvider.offeredKinds).
+          if BringYourOwnProvider.hostedIsConfigured {
+            Group {
+              Text("Where the explanation comes from")
+                .font(.headline)
+              Text(
+                """
+                By default the model on this iPhone answers, so your question \
+                never reaches a network at all. You may instead choose the \
+                Klarbefund service, which processes in the EU, or your own Azure \
+                resource or Anthropic key, in which case your phone talks to \
+                your service directly and neither your key nor your values reach \
+                the app provider at all. Whichever is in use is named on the \
+                screen before you send.
 
-              No model vendor uses your values for training.
-              """)
-          }
+                No model vendor uses your values for training.
+                """)
+            }
 
-          Group {
-            Text("Why signing in is sometimes asked for")
-              .font(.headline)
-            Text(
-              """
-              Only the default service asks you to sign in, and only so the \
-              limit of 20 explanations a day can be counted per person. The \
-              counter stores a one-way hash and a number, not your name. With \
-              your own provider there is no sign-in and no limit.
-              """)
+            Group {
+              Text("Why signing in is sometimes asked for")
+                .font(.headline)
+              Text(
+                """
+                Only the default service asks you to sign in, and only so the \
+                limit of 20 explanations a day can be counted per person. The \
+                counter stores a one-way hash and a number, not your name. With \
+                your own provider there is no sign-in and no limit.
+                """)
+            }
+          } else {
+            Group {
+              Text("Where the explanation comes from")
+                .font(.headline)
+              Text(
+                """
+                By default the model on this iPhone answers, so your question \
+                never reaches a network at all. You may instead choose your own \
+                Azure resource or Anthropic key, in which case your phone talks \
+                to your service directly and neither your key nor your values \
+                reach the app provider at all. Whichever is in use is named on \
+                the screen before you send.
+
+                No model vendor uses your values for training.
+                """)
+            }
           }
 
           Divider()

@@ -14,8 +14,14 @@ final class TestFlightReviewUITests: XCTestCase {
   /// address, so the Klarbefund service must not be offered.
   func testTheProviderListOffersOnlyWhatThisBuildCanReach() {
     let app = AppDriver.launch(.settings)
-    AppDriver.require(AppDriver.text(containing: "On this iPhone", in: app), "the on-device provider")
-    AppDriver.require(AppDriver.text(containing: "Your own Anthropic API key", in: app), "the own-key provider")
+    // An inline picker's rows are buttons, not texts.
+    func row(_ label: String) -> XCUIElement {
+      app.descendants(matching: .any)
+        .matching(NSPredicate(format: "label CONTAINS[c] %@", label)).firstMatch
+    }
+    AppDriver.require(app.navigationBars.firstMatch, "the settings sheet")
+    AppDriver.scrollTo(row("On this iPhone"), in: app)
+    AppDriver.scrollTo(row("Your own Anthropic API key"), in: app)
     XCTAssertFalse(
       AppDriver.visibleText(app).contains("Klarbefund service"),
       "the hosted service is not offered by a build that cannot reach it")
@@ -31,6 +37,10 @@ final class TestFlightReviewUITests: XCTestCase {
 
   func testPrivacyAndSafetyCarriesTheLoincAndUcumNotices() {
     let app = AppDriver.launch(.privacy)
+    AppDriver.require(app.navigationBars["Privacy and safety"], "the privacy sheet")
+    XCTAssertFalse(
+      AppDriver.visibleText(app).contains("Klarbefund service"),
+      "the privacy text does not describe a service this build does not offer")
     let loinc = AppDriver.scrollTo(app.staticTexts["legal-loinc"], in: app)
     XCTAssertTrue(loinc.label.contains("Regenstrief Institute"), loinc.label)
     XCTAssertTrue(loinc.label.contains("loinc.org/license"), loinc.label)

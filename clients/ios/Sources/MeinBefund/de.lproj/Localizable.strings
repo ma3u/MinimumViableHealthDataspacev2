@@ -695,3 +695,4 @@
 "Codes and units" = "Codes und Einheiten";
 "LOINC license" = "LOINC-Lizenz";
 "UCUM license" = "UCUM-Lizenz";
+"By default the model on this iPhone answers, so your question never reaches a network at all. You may instead choose your own Azure resource or Anthropic key, in which case your phone talks to your service directly and neither your key nor your values reach the app provider at all. Whichever is in use is named on the screen before you send.\n\nNo model vendor uses your values for training." = "Standardmäßig antwortet das Modell auf diesem iPhone, Ihre Frage erreicht also gar kein Netz. Sie können stattdessen Ihre eigene Azure-Ressource oder Ihren Anthropic-Schlüssel wählen. Dann spricht Ihr iPhone direkt mit Ihrem Dienst, und weder Ihr Schlüssel noch Ihre Werte erreichen den Anbieter dieser App. Was gerade verwendet wird, steht vor dem Senden auf dem Bildschirm.\n\nKein Modellanbieter nutzt Ihre Werte für Training.";
