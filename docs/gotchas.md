@@ -3,6 +3,32 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-12: on EDC RC6 no credential arrived, and nothing said why
+
+After the move to EDC 1.0.0-RC6 (#1094) every MembershipCredential request
+was accepted and none arrived: the issuance processes sat in `DELIVERING`
+(state 150) and retried. The issuer logged `Attempt #8 failed to Deliver
+Credentials. Cause: ` with an empty cause, even at debug; the holder's
+IdentityHub logged nothing.
+
+A capture on the IdentityHub's port 7082 showed the answer: `403 No
+credential request was made for Credentials of type '[VerifiableCredential,
+MembershipCredential]' serialized as 'VC2_0_JOSE'`. IdentityHub RC6
+([#1248](https://github.com/eclipse-edc/IdentityHub/pull/1248)) gives a
+credential definition the format of the issuer's DCP profile
+(`vc20-bssl/jwt`, so `VC2_0_JOSE`) and ignores the `format` the admin API
+receives; the holder then refuses a delivery in another format than it
+requested, and our requests said `VC1_0_JWT`. The empty cause is upstream:
+`IssuanceProcessManagerImpl.deliverCredentials` drops the detail, and
+`DcpCredentialStorageClient` does not log a non-2xx answer.
+
+Fix: request the format the definition holds; the request script, the hub's
+provisioning and Bruno `10/40` read it from the issuer.
+
+Rule: when a DCP delivery retries without a cause, capture the holder's
+credential port (`tcpdump` in the IdentityHub's network namespace); the
+answer is in the response body and nowhere else.
+
 ## 2026-11-12: the deploy hold for load tests never held; the workflow token cannot read repository variables
 
 `deploy-azure.yml` waited while the repository variable `LOAD_TEST_RUNNING`
