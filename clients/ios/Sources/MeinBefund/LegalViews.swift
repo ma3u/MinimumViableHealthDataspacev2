@@ -104,6 +104,32 @@ struct PrivacySummary: View {
               """)
           }
 
+          Divider()
+
+          // The LOINC and UCUM licenses ask for their notice wherever the
+          // content ships; every coded value in this app carries both. Kept
+          // verbatim (not localised): it is the licensors' wording.
+          Group {
+            Label("Codes and units", systemImage: "text.book.closed")
+              .font(.headline)
+            Text(
+              verbatim:
+                "This material contains content from LOINC (http://loinc.org). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc."
+            )
+            .font(.footnote)
+            .accessibilityIdentifier("legal-loinc")
+            Text(
+              verbatim:
+                "Units follow UCUM. UCUM is copyright © 1999-2024 Regenstrief Institute, Inc. All rights reserved. Used under the UCUM License, Version 1.1 (https://unitsofmeasure.org/license), provided \"AS IS\", without warranties or conditions of any kind."
+            )
+            .font(.footnote)
+            .accessibilityIdentifier("legal-ucum")
+            Link("LOINC license", destination: URL(string: "https://loinc.org/license/")!)
+              .font(.footnote)
+            Link("UCUM license", destination: URL(string: "https://unitsofmeasure.org/license")!)
+              .font(.footnote)
+          }
+
           Link(
             "Full privacy policy",
             destination: URL(

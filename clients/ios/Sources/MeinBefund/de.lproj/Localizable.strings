@@ -402,6 +402,8 @@
 "The code shown on the website must read the same. If it does not, cancel." = "Der Code auf der Website muss genauso lauten. Wenn nicht, brechen Sie ab.";
 "The connection was declined on the consent page." = "Die Verbindung wurde auf der Einwilligungsseite abgelehnt.";
 "The hub refused (%lld): %@" = "Der Hub hat abgelehnt (%1$lld): %2$@";
+"The EHDS demo hub is offline right now. It runs on weekdays, about 07:00 to 19:00 Berlin time. Try again then; everything else in Klarbefund works without it." = "Der EHDS-Demo-Hub ist gerade offline. Er läuft werktags etwa von 7 bis 19 Uhr (Berliner Zeit). Versuchen Sie es dann noch einmal; alles andere in Klarbefund funktioniert ohne ihn.";
+"The EHDS demo hub runs on weekdays, about 07:00 to 19:00 Berlin time. Outside those hours, creating an account, signing in and sending wait until it is back." = "Der EHDS-Demo-Hub läuft werktags etwa von 7 bis 19 Uhr (Berliner Zeit). Außerhalb dieser Zeiten warten Konto anlegen, Anmelden und Senden, bis er wieder da ist.";
 "This device cannot scan codes with its camera. Paste the link instead, or use the iPhone camera app, which opens Klarbefund from the code." = "Dieses Gerät kann keine Codes mit der Kamera scannen. Fügen Sie stattdessen den Link ein, oder nutzen Sie die Kamera-App des iPhones, die Klarbefund aus dem Code öffnet.";
 "This is my account" = "Das ist mein Konto";
 "This is not a Klarbefund connection code." = "Das ist kein Verbindungscode von Klarbefund.";
@@ -690,3 +692,6 @@
 "For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac." = "Zum Beispiel Klarbefund für Mac: Scannen Sie den Code, den es zeigt. Dieses iPhone sendet dann alles an diesen Mac.";
 "No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done." = "Kein gemeinsames WLAN nötig: Verbinden Sie dieses iPhone per Kabel mit dem Mac, tippen Sie auf Über USB-Kabel senden und führen Sie dann den Befehl auf dem Mac aus (der Empfänger für die Kommandozeile; Klarbefund für Mac empfängt über WLAN). Nur der gekoppelte Mac erhält etwas. Lassen Sie diesen Bildschirm offen, bis es fertig ist.";
 "That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows." = "Das ist kein Relate-Kopplungscode. Öffnen Sie auf dem Mac Klarbefund für Mac und scannen Sie den Code, den es zeigt.";
+"Codes and units" = "Codes und Einheiten";
+"LOINC license" = "LOINC-Lizenz";
+"UCUM license" = "UCUM-Lizenz";
