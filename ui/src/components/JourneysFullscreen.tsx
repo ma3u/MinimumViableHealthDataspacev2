@@ -169,7 +169,7 @@ function StepPanel({
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5"
           style={{ color: lane.color, border: `1px solid ${lane.color}` }}
         >
-          {lane.label.map((l) => t(l).replace("\n", " ")).join(" ")}
+          {lane.label.map((l) => t(l).replaceAll("\n", " ")).join(" ")}
         </span>
       </div>
 
