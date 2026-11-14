@@ -238,7 +238,6 @@
   "Demo 2 · secondary use · governance in the query path": "Demo 2 · secundair gebruik · governance in het querypad",
   "The researcher's journey: from registration to an audited result": "De route van de onderzoeker: van registratie naar een geaudit resultaat",
   "Secondary use: the researcher": "Secundair gebruik: de onderzoeker",
-  "Synthetic data, real protocols: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP 2.1 · ODRL 2.2 · FHIR R4 · OMOP 5.4": "Synthetische gegevens, echte protocollen: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP 2.1 · ODRL 2.2 · FHIR R4 · OMOP 5.4",
   "Registration": "Registratie",
   "and trust": "en vertrouwen",
   "Data holder": "Gegevenshouder",
@@ -281,5 +280,11 @@
   "enables analysis": "maakt analyse mogelijk",
   "OMOP results": "OMOP-resultaten",
   "reports use": "meldt gebruik",
-  "Swipe sideways to see the whole journey.": "Veeg opzij om de hele route te zien."
+  "Swipe sideways to see the whole journey.": "Veeg opzij om de hele route te zien.",
+  "Synthetic data, real protocols: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP Release 8 · ODRL 2.2 · FHIR R4 · OMOP 5.4": "Synthetische gegevens, echte protocollen: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP Release 8 · ODRL 2.2 · FHIR R4 · OMOP 5.4",
+  "Implemented": "Gerealiseerd",
+  "Partial": "Gedeeltelijk",
+  "Planned": "Gepland",
+  "Step by step: what is implemented and what is planned": "Stap voor stap: wat gerealiseerd is en wat gepland is",
+  "Status of each step:": "Stand van elke stap:"
 }

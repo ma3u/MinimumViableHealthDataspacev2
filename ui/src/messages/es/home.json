@@ -238,7 +238,6 @@
   "Demo 2 · secondary use · governance in the query path": "Demo 2 · uso secundario · gobernanza en el camino de la consulta",
   "The researcher's journey: from registration to an audited result": "El recorrido del investigador: del registro a un resultado auditado",
   "Secondary use: the researcher": "Uso secundario: el investigador",
-  "Synthetic data, real protocols: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP 2.1 · ODRL 2.2 · FHIR R4 · OMOP 5.4": "Datos sintéticos, protocolos reales: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP 2.1 · ODRL 2.2 · FHIR R4 · OMOP 5.4",
   "Registration": "Registro",
   "and trust": "y confianza",
   "Data holder": "Tenedor de datos",
@@ -281,5 +280,11 @@
   "enables analysis": "permite el análisis",
   "OMOP results": "resultados OMOP",
   "reports use": "informa del uso",
-  "Swipe sideways to see the whole journey.": "Deslice hacia un lado para ver todo el recorrido."
+  "Swipe sideways to see the whole journey.": "Deslice hacia un lado para ver todo el recorrido.",
+  "Synthetic data, real protocols: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP Release 8 · ODRL 2.2 · FHIR R4 · OMOP 5.4": "Datos sintéticos, protocolos reales: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP Release 8 · ODRL 2.2 · FHIR R4 · OMOP 5.4",
+  "Implemented": "Implementado",
+  "Partial": "Parcial",
+  "Planned": "Previsto",
+  "Step by step: what is implemented and what is planned": "Paso a paso: qué está implementado y qué está previsto",
+  "Status of each step:": "Estado de cada paso:"
 }

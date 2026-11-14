@@ -65,6 +65,12 @@ DOCS = [
     ("ehds", "tehdas2-mapping", "docs/ehds/tehdas2-mapping.md",
      "The 21 TEHDAS2 guidelines and specifications against the hub, after a requirement-by-requirement "
      "check: what it implements, where it stops on purpose, and the issue that closes each gap."),
+    ("ehds", "person-journey", "docs/ehds/person-journey.md",
+     "The person's journey, step by step: a paper result read into Klarbefund and brought into the EHDS "
+     "record, with what is implemented, what is planned with its issue, and what is not planned."),
+    ("ehds", "researcher-journey", "docs/ehds/researcher-journey.md",
+     "The researcher's journey, step by step: registration, catalogue, application, permit, secure "
+     "processing and results, with what is implemented, what is planned with its issue, and what is not planned."),
     ("klarbefund", "klarbefund-user-guide", "docs/klarbefund/user-guide.md",
      "The app as a person uses it, screen by screen with screenshots: getting a report in, checking a "
      "value against the paper, trends, consents, connecting to the EHDS, exports and your data rights."),

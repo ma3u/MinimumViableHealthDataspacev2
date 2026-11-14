@@ -39,18 +39,22 @@ import EhdsDocPage, { generateStaticParams } from "@/app/docs/ehds/[slug]/page";
 import { docsInSection } from "@/lib/docs/published-docs";
 
 describe("the EHDS documents", () => {
-  it("are the implementation page, the numbering reference, the bonus programme's data flow and the TEHDAS2 mapping", () => {
+  it("are the implementation page, the numbering reference, the bonus programme's data flow, the TEHDAS2 mapping and the two journeys", () => {
     expect(docsInSection("ehds").map((d) => d.slug)).toEqual([
       "regulation-implementation",
       "article-numbering",
       "bonus-programme-data-flow",
       "tehdas2-mapping",
+      "person-journey",
+      "researcher-journey",
     ]);
     expect(generateStaticParams().map((p) => p.slug)).toEqual([
       "regulation-implementation",
       "article-numbering",
       "bonus-programme-data-flow",
       "tehdas2-mapping",
+      "person-journey",
+      "researcher-journey",
     ]);
   });
 
@@ -90,6 +94,8 @@ describe("the EHDS documents", () => {
       "/docs/ehds/article-numbering",
       "/docs/ehds/bonus-programme-data-flow",
       "/docs/ehds/tehdas2-mapping",
+      "/docs/ehds/person-journey",
+      "/docs/ehds/researcher-journey",
     ]);
     expect(
       screen.getByText(/Regulation \(EU\) 2025\/327 on EUR-Lex/).closest("a"),
