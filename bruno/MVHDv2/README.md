@@ -172,9 +172,21 @@ value the deployment runs with.
 than the route: compose builds `graph-explorer` once and keeps the image. On
 2026-11-11 a container built two days earlier answered 404 for
 `/api/patient/app/programmes` and 405 for `DELETE /api/participants/{id}`, seven
-requests in all. Rebuild it:
-`docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d --build graph-explorer`.
-The same holds for folder 11 and the Neo4j proxy (`neo4j-proxy`).
+requests in all. Rebuild it in the compose project the stack runs as, and leave
+the other services alone:
+
+```bash
+docker compose -p "$(docker inspect health-dataspace-ui --format '{{index .Config.Labels "com.docker.compose.project"}}')" \
+  -f docker-compose.yml -f docker-compose.jad.yml up -d --build --no-deps graph-explorer
+```
+
+The project name matters. Compose names a project after the folder it runs in,
+so the plain command, run from another checkout than the one the stack was
+started in (a git worktree, say), starts a second project: it builds an image,
+creates a network and two volumes, and stops at the first container name that is
+taken. That happened on 2026-11-11, with the command this section gave until
+then. The same holds for folder 11 and the Neo4j proxy (`neo4j-proxy`, whose
+container is `health-dataspace-neo4j-proxy`).
 
 **A journey request fails on a variable.** The journeys pass ids between
 requests, so they must run in one `bru run`. Running request 05 of folder 07 on
