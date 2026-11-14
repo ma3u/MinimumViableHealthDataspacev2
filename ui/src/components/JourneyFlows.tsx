@@ -9,7 +9,7 @@
  */
 import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Play, Presentation } from "lucide-react";
+import { ListChecks, Maximize2, Play, Presentation } from "lucide-react";
 import { BASE_PATH, IS_STATIC } from "@/lib/static-export";
 import { T, useT } from "@/lib/i18n/translate";
 import { useLanguage } from "@/lib/use-language";
@@ -23,6 +23,7 @@ import {
   type FlowId,
   type FlowNode,
   type JourneyFlow,
+  type StepStatus,
 } from "@/lib/journey-flows";
 
 export const DEMO_SITES = {
@@ -33,6 +34,43 @@ export type DemoSite = keyof typeof DEMO_SITES;
 
 const THIS_SITE: DemoSite = IS_STATIC ? "static" : "live";
 const DECK = `${BASE_PATH}/presentations/hl7-showcase-2026/index.html`;
+
+/** The mark in a box's corner: filled when the step works end to end, amber
+ *  when part of it does, an open ring when it is planned. Its words are in
+ *  the legend and in the box's accessible name, never only in the colour. */
+export const STATUS_MARK: Record<
+  StepStatus,
+  { label: string; fill: string; stroke: string; dash?: string }
+> = {
+  implemented: { label: "Implemented", fill: "#58d68d", stroke: "#58d68d" },
+  partial: { label: "Partial", fill: "#f5b041", stroke: "#f5b041" },
+  planned: { label: "Planned", fill: "none", stroke: "#aab4bf", dash: "3 2" },
+};
+
+function StatusMark({
+  status,
+  cx,
+  cy,
+}: {
+  status: StepStatus;
+  cx: number;
+  cy: number;
+}) {
+  const m = STATUS_MARK[status];
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={6}
+      fill={m.fill}
+      stroke={m.stroke}
+      strokeWidth={2}
+      strokeDasharray={m.dash}
+      data-status={status}
+      aria-hidden="true"
+    />
+  );
+}
 
 /** Widest a box's text may be before it is squeezed to fit, in viewBox units. */
 const TEXT_MAX = BOX.width - 16;
@@ -56,10 +94,16 @@ function NodeBox({
   label,
   title,
   sub,
+  selected,
+  onSelect,
 }: {
   node: FlowNode;
   color: string;
   site: DemoSite;
+  /** In select mode (the full-screen page) the box picks its step instead
+   *  of opening a page, and the picked one is drawn brighter. */
+  selected?: boolean;
+  onSelect?: () => void;
   label: string;
   title: string;
   sub: string;
@@ -73,9 +117,9 @@ function NodeBox({
         width={BOX.width}
         height={BOX.height}
         rx={12}
-        fill="#0d162b"
-        stroke={color}
-        strokeWidth={2}
+        fill={selected ? "#16264a" : "#0d162b"}
+        stroke={selected ? "#fbfbf8" : color}
+        strokeWidth={selected ? 4 : 2}
       />
       <text
         x={cx}
@@ -98,9 +142,38 @@ function NodeBox({
       >
         {sub}
       </text>
+      {node.status && (
+        <StatusMark
+          status={node.status}
+          cx={node.x + BOX.width - 13}
+          cy={node.y + 13}
+        />
+      )}
     </>
   );
   const style = { animationDelay: `${node.delay}s` };
+  if (onSelect) {
+    return (
+      <g
+        className="jf-n jf-link"
+        style={style}
+        role="button"
+        tabIndex={0}
+        aria-label={label}
+        aria-pressed={selected ? "true" : "false"}
+        data-testid="journey-flow-step"
+        onClick={onSelect}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+      >
+        {box}
+      </g>
+    );
+  }
   if (!node.href) {
     return (
       <g className="jf-n" style={style} data-testid="journey-flow-step">
@@ -130,14 +203,19 @@ function NodeBox({
   );
 }
 
-function FlowDiagram({
+export function FlowDiagram({
   flow,
   play,
   site,
+  selected,
+  onSelect,
 }: {
   flow: JourneyFlow;
   play: boolean;
   site: DemoSite;
+  /** The picked box, by index, in select mode. */
+  selected?: number;
+  onSelect?: (index: number) => void;
 }) {
   const t = useT("home");
   const lang = useLanguage();
@@ -263,15 +341,20 @@ function FlowDiagram({
       {flow.nodes.map((node, i) => {
         const title = stepTitle(node);
         const sub = t(node.sub);
+        const status = node.status
+          ? ` (${t(STATUS_MARK[node.status].label)})`
+          : "";
         return (
           <NodeBox
             key={i}
             node={node}
             color={flow.lanes[node.lane].color}
             site={site}
-            label={`${title}: ${sub}`}
+            label={`${title}: ${sub}${status}`}
             title={title}
             sub={sub}
+            selected={selected === i}
+            onSelect={onSelect ? () => onSelect(i) : undefined}
           />
         );
       })}
@@ -443,6 +526,41 @@ export function JourneyFlows() {
               site={site}
             />
           </div>
+        </div>
+        <div
+          className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#aab4bf]"
+          data-testid="journey-status-legend"
+        >
+          <span>{t("Status of each step:")}</span>
+          {(Object.keys(STATUS_MARK) as StepStatus[]).map((s) => (
+            <span key={s} className="inline-flex items-center gap-1">
+              <svg
+                width={14}
+                height={14}
+                viewBox="0 0 14 14"
+                aria-hidden="true"
+              >
+                <StatusMark status={s} cx={7} cy={7} />
+              </svg>
+              {t(STATUS_MARK[s].label)}
+            </span>
+          ))}
+          <Link
+            href={flow.details}
+            className="inline-flex items-center gap-1 font-semibold text-[#fbfbf8] underline underline-offset-2 hover:text-white"
+            data-testid="journey-details"
+          >
+            <ListChecks size={13} aria-hidden="true" />
+            {t("Step by step: what is implemented and what is planned")}
+          </Link>
+          <Link
+            href={`/journeys?flow=${flow.id}`}
+            className="inline-flex items-center gap-1 font-semibold text-[#fbfbf8] underline underline-offset-2 hover:text-white"
+            data-testid="journey-fullscreen"
+          >
+            <Maximize2 size={13} aria-hidden="true" />
+            {t("Full screen, every step described")}
+          </Link>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#aab4bf]">
           <span>{t(flow.footnote)}</span>

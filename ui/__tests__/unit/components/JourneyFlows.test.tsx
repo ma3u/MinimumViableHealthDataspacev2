@@ -11,8 +11,10 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import {
   DEMO_SITES,
   JourneyFlows,
+  STATUS_MARK,
   nodeTarget,
 } from "@/components/JourneyFlows";
+import { findDoc } from "@/lib/docs/published-docs";
 import {
   JOURNEY_FLOWS,
   arrowHead,
@@ -62,6 +64,37 @@ describe("the journey data", () => {
         existsSync(path.resolve("src/app", `.${href}`, "page.tsx")),
         href,
       ).toBe(true);
+    }
+  });
+
+  it("gives every step but the paper result a status, and each journey its page", () => {
+    for (const f of JOURNEY_FLOWS) {
+      const unrated = f.nodes.filter((n) => !n.status).map((n) => n.title);
+      expect(unrated, f.id).toEqual(
+        f.id === "primary" ? ["Result on paper"] : [],
+      );
+      expect(f.details).toMatch(/^\/docs\/ehds\//);
+      const slug = f.details.split("/").pop() ?? "";
+      const doc = findDoc("ehds", slug);
+      expect(doc, f.details).toBeDefined();
+      // The page rates the steps with the words the legend uses.
+      for (const s of new Set(
+        f.nodes.flatMap((n) => (n.status ? [n.status] : [])),
+      )) {
+        expect(doc?.markdown, `${f.id} ${s}`).toContain(
+          `**${STATUS_MARK[s].label}**`,
+        );
+      }
+    }
+    for (const lang of LANGS) {
+      const home = MESSAGES[lang].home;
+      for (const key of [
+        ...Object.values(STATUS_MARK).map((m) => m.label),
+        "Status of each step:",
+        "Step by step: what is implemented and what is planned",
+      ]) {
+        expect(home[key], `${lang}: ${key}`).toBeTruthy();
+      }
     }
   });
 
@@ -177,6 +210,37 @@ describe("JourneyFlows", () => {
     expect(
       screen.getByRole("link", { name: /In the HL7 showcase deck/ }),
     ).toHaveAttribute("href", "/presentations/hl7-showcase-2026/index.html#/4");
+  });
+
+  it("says each step's status in its name and links the journey's page", () => {
+    render(<JourneyFlows />);
+    expect(
+      screen.getByRole("link", { name: /7 · Sign in with d-you.*\(Partial\)/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: /8 · Consent or opt out.*\(Implemented\)/,
+      }),
+    ).toBeInTheDocument();
+    const legend = screen.getByTestId("journey-status-legend");
+    expect(legend).toHaveTextContent(/Implemented.*Partial.*Planned/);
+    expect(screen.getByTestId("journey-details")).toHaveAttribute(
+      "href",
+      "/docs/ehds/person-journey",
+    );
+    expect(screen.getByTestId("journey-fullscreen")).toHaveAttribute(
+      "href",
+      "/journeys?flow=primary",
+    );
+    fireEvent.click(screen.getAllByRole("tab")[1]);
+    expect(screen.getByTestId("journey-details")).toHaveAttribute(
+      "href",
+      "/docs/ehds/researcher-journey",
+    );
+    expect(screen.getByTestId("journey-fullscreen")).toHaveAttribute(
+      "href",
+      "/journeys?flow=secondary",
+    );
   });
 
   it("starts drawing when it is on screen, and draws again on Replay", () => {

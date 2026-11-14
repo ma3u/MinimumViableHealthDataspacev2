@@ -32,7 +32,14 @@ export interface FlowNode {
   delay: number;
   /** A page of the demo, or an anchor on the start page. */
   href?: string;
+  /** How far the hub and the app implement the step; none for the starting
+   *  point. The journey's page under /docs/ehds says why, step by step. */
+  status?: StepStatus;
 }
+
+/** The statuses of docs/ehds/person-journey.md and researcher-journey.md:
+ *  a step that is planned, not partial, has nothing to show yet. */
+export type StepStatus = "implemented" | "partial" | "planned";
 
 export interface FlowEdge {
   points: readonly Point[];
@@ -58,6 +65,9 @@ export interface JourneyFlow {
   footnote: string;
   /** The flow's slide in the HL7 showcase deck. */
   deckSlide: string;
+  /** The journey step by step, with what is implemented, planned and not
+   *  planned: a page under /docs/ehds. */
+  details: string;
   lanes: readonly FlowLane[];
   nodes: readonly FlowNode[];
   edges: readonly FlowEdge[];
@@ -86,6 +96,7 @@ const PRIMARY: JourneyFlow = {
   accent: "#7fd1bf",
   footnote: "Synthetic data and invented reports; the phone app is Klarbefund.",
   deckSlide: "#/2",
+  details: "/docs/ehds/person-journey",
   lanes: [
     { label: ["The person"], color: PERSON },
     { label: ["Study centre", "or laboratory"], color: SOURCE },
@@ -106,6 +117,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "2",
       title: "Scan or import",
+      status: "implemented",
       sub: "read on the device",
       x: 215,
       y: 293,
@@ -116,6 +128,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "3",
       title: "Coded, checkable",
+      status: "implemented",
       sub: "LOINC, UCUM, page and line",
       x: 475,
       y: 293,
@@ -126,6 +139,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "4",
       title: "Trend and band",
+      status: "implemented",
       sub: "published range, sourced",
       x: 735,
       y: 293,
@@ -136,6 +150,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "5",
       title: "Export",
+      status: "implemented",
       sub: "FHIR R4 bundle + PDF",
       x: 995,
       y: 293,
@@ -146,6 +161,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "6",
       title: "To the ePA, the GP",
+      status: "partial",
       sub: "PDF + bundle",
       x: 995,
       y: 417,
@@ -156,6 +172,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "7",
       title: "Sign in with d-you",
+      status: "partial",
       sub: "EUDI wallet, own record",
       x: 475,
       y: 45,
@@ -166,6 +183,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "8",
       title: "Consent or opt out",
+      status: "implemented",
       sub: "for research, revocable",
       x: 835,
       y: 45,
@@ -176,6 +194,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "9",
       title: "My EHDS record",
+      status: "implemented",
       sub: "FHIR in the graph, coded",
       x: 1275,
       y: 541,
@@ -186,6 +205,7 @@ const PRIMARY: JourneyFlow = {
     {
       step: "10",
       title: "What came back",
+      status: "implemented",
       sub: "aggregate only, k ≥ 5",
       x: 1275,
       y: 45,
@@ -284,8 +304,9 @@ const SECONDARY: JourneyFlow = {
   background: "linear-gradient(135deg, #3a2a10 0%, #14213d 70%)",
   accent: "#f0b27a",
   footnote:
-    "Synthetic data, real protocols: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP 2.1 · ODRL 2.2 · FHIR R4 · OMOP 5.4",
+    "Synthetic data, real protocols: DSP 2025-1 · DCP 1.0 · HealthDCAT-AP Release 8 · ODRL 2.2 · FHIR R4 · OMOP 5.4",
   deckSlide: "#/4",
+  details: "/docs/ehds/researcher-journey",
   lanes: [
     { label: ["Registration", "and trust"], color: PERSON },
     { label: ["Data holder", "(hospital)"], color: SOURCE },
@@ -297,6 +318,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "1a",
       title: "Hospital registers",
+      status: "implemented",
       sub: "did:web + credential",
       x: 195,
       y: 45,
@@ -307,6 +329,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "1b",
       title: "Researcher registers",
+      status: "implemented",
       sub: "did:web + credential",
       x: 515,
       y: 45,
@@ -317,6 +340,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "1c",
       title: "HDAB registers",
+      status: "implemented",
       sub: "did:web + credential",
       x: 1135,
       y: 45,
@@ -327,6 +351,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "2",
       title: "Publish data",
+      status: "implemented",
       sub: "HealthDCAT-AP catalogue",
       x: 195,
       y: 169,
@@ -337,6 +362,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "3",
       title: "Discover data",
+      status: "partial",
       sub: "federated catalogue",
       x: 515,
       y: 293,
@@ -347,6 +373,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "4",
       title: "Negotiate contract",
+      status: "implemented",
       sub: "DSP offer, accept, finalise",
       x: 785,
       y: 293,
@@ -357,6 +384,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "4b",
       title: "Approve data permit",
+      status: "implemented",
       sub: "Art. 68, opt-out checked",
       x: 875,
       y: 417,
@@ -367,6 +395,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "5",
       title: "Extract and upload",
+      status: "partial",
       sub: "FHIR, pseudonymised",
       x: 875,
       y: 169,
@@ -376,6 +405,7 @@ const SECONDARY: JourneyFlow = {
     },
     {
       title: "Provision SPE",
+      status: "partial",
       sub: "and ingest the data",
       x: 1135,
       y: 541,
@@ -386,6 +416,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "6",
       title: "Analyse in the SPE",
+      status: "partial",
       sub: "OMOP, pseudonyms only",
       x: 1135,
       y: 293,
@@ -396,6 +427,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "7",
       title: "Share results",
+      status: "implemented",
       sub: "OMOP output, plain-language",
       x: 1375,
       y: 293,
@@ -406,6 +438,7 @@ const SECONDARY: JourneyFlow = {
     {
       step: "8",
       title: "Audit report",
+      status: "partial",
       sub: "FHIR AuditEvent, chained",
       x: 1375,
       y: 417,
