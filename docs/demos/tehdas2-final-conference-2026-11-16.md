@@ -59,7 +59,9 @@ uses it.
 Switching persona on the live hub means signing out and in again, which costs
 more than a step. Sign in before the session, one browser profile per persona
 (`researcher`, `regulator`, `edcadmin`, `patient1`) and one private window
-signed out for steps 11 and 12, and switch windows instead.
+signed out for steps 11 and 12, and switch windows instead. Who signs in for
+which step, and with which password on each site, is on the journey pages
+under `/docs/ehds` (#1117).
 
 ### What each step shows, from the rehearsal of 14 November
 
@@ -117,7 +119,26 @@ are partial, so say "in part" for them.
 - [ ] Live walk on Monday morning, 08:00 to 12:00 CET, on https://ehds.mabu.red, each persona signed in in its own browser profile; read the live counts for steps 1, 7 and the patient question
 - [x] The live stack: Monday is a working day, so the off-hours schedule starts it at 06:17 CET (05:17 UTC) and stops it at 19:13 CET ([runbook](../knowledge/runbooks/live-demo-off-hours.md), ADR-053). The conference ends at 18:00, so no hold is needed. Check at 12:00 CET with `scripts/azure/check-keycloak-health.sh`
 - [x] Fallback: the static site with the same personas; every page answers 200 on 14 November, step 7 excepted
-- [ ] A recorded run of the ten-minute version, for step 7 and for a dead network
+- [ ] A recorded run of the ten-minute version, for step 7 and for a dead network. [`ui/scripts/record-tehdas2-demo.ts`](../../ui/scripts/record-tehdas2-demo.ts) records it against the live hub on Monday morning, about 11 minutes, with a caption per step:
+
+  ```bash
+  cd ui
+  PLAYWRIGHT_BASE_URL=https://ehds.mabu.red npx tsx scripts/record-tehdas2-demo.ts
+  ```
+
+  `researcher`, `regulator` and `patient1` sign in with their published
+  password, the username, which the script uses when no `RECORD_PASS_<USER>`
+  is set. `edcadmin` (steps 6 and 8) does too until
+  `scripts/azure/secure-accounts.sh` has run for it; after that its password
+  is the Key Vault secret `keycloak-user-edcadmin-password`, read without
+  printing it:
+
+  ```bash
+  export RECORD_PASS_EDCADMIN="$(az keyvault secret show --vault-name kv-mvhd-b53a0449 --name keycloak-user-edcadmin-password --query value -o tsv)"
+  ```
+
+  It only reads (no form is submitted) and writes `tehdas2-demo-10min.mp4` to a folder in the system temp directory.
+
 - [ ] Contacts: the work-package leads to meet, from the local contact list (never committed)
 
 ## Questions to expect
