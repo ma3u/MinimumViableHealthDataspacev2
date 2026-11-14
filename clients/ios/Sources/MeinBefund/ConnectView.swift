@@ -160,6 +160,12 @@ struct ConnectView: View {
       .foregroundStyle(.secondary)
     } header: {
       Text("Or connect an account by QR code")
+    } footer: {
+      // Said before anyone tries, not only after a 503: the hub is stopped
+      // at night and at weekends (ADR-053), and a tester in another time zone
+      // otherwise meets it as a broken feature.
+      Text("The EHDS demo hub runs on weekdays, about 07:00 to 19:00 Berlin time. Outside those hours, creating an account, signing in and sending wait until it is back.")
+        .accessibilityIdentifier("connect-hub-hours")
     }
 
     Section {
