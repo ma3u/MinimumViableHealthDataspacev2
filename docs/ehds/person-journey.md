@@ -32,9 +32,10 @@ The column "Sign in as" names the demo user for the step:
   menu.
 - **Local stack** (`http://localhost:3003`): the password is the username.
 - **Live hub** (`https://ehds.mabu.red`): the demo users of the realm keep
-  their published password, the username. `edcadmin` is the exception: its
-  password is generated and kept in Key Vault, because the administrator
-  reads every record (see the
+  their published password, the username. `edcadmin` is meant to be the
+  exception, because the administrator reads every record: once
+  `scripts/azure/secure-accounts.sh` has run for it, its password is
+  generated and kept in Key Vault, and the operator hands it out (see the
   [realm runbook](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/keycloak-realm-drift.md)).
 - **Klarbefund**: the app creates its own account (`kb-…`) with a password
   it generates, or connects to `patient1` by the QR code on the patient screen.
