@@ -48,7 +48,7 @@ final class TestFlightReviewUITests: XCTestCase {
     XCTAssertTrue(ucum.label.contains("UCUM License"), ucum.label)
   }
 
-  /// Build 16: Export to my Mac can send the year of birth and sex, for the
+  /// Build 17: Export to my Mac can send the year of birth and sex, for the
   /// Mac's age-dependent scores (SCORE2, eGFR, FIB-4). Off until the person
   /// switches it on: the profile otherwise stays on the phone (ADR-034).
   func testExportToMyMacOffersYearOfBirthAndSexSwitchedOff() {
