@@ -1388,6 +1388,12 @@
       "file": "ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md",
       "title": "The deploy hold reads signals the deploy job can read",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-093",
+      "file": "ADR-093-a-health-professional-reads-what-the-person-has-not-restricted-and-every-read-is-logged.md",
+      "title": "A health professional reads what the person has not restricted, and every read is logged",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
