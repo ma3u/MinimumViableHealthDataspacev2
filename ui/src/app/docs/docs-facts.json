@@ -1391,7 +1391,7 @@
     },
     {
       "id": "ADR-093",
-      "file": "ADR-093-a-health-professional-reads-what-the-person-has-not-restricted-and-every-read-is-logged.md",
+      "file": "ADR-093-a-professional-reads-what-the-person-has-not-restricted.md",
       "title": "A health professional reads what the person has not restricted, and every read is logged",
       "status": "Proposed"
     }
