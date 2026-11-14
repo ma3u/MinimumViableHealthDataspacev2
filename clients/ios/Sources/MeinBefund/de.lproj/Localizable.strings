@@ -660,6 +660,7 @@
 "Lab values" = "Laborwerte";
 "Kinds of test (LOINC)" = "Arten von Tests (LOINC)";
 "Values without a code" = "Werte ohne Code";
+"Also in another report, counted once" = "Auch in einem anderen Befund, einmal gezählt";
 "Apple Health weekly values" = "Wochenwerte aus Apple Health";
 "OMOP measurements" = "OMOP-Messungen";
 "Rebuild now" = "Jetzt neu aufbauen";

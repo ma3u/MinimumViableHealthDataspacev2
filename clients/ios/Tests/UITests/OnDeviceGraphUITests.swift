@@ -42,4 +42,22 @@ final class OnDeviceGraphUITests: XCTestCase {
       app.descendants(matching: .any).matching(identifier: "graph-reports").firstMatch
         .waitForExistence(timeout: 2), "switching off removes the graph")
   }
+
+  /// The development dataset has one lipid panel in two reports of the same
+  /// day (fictional): each of those values is counted once, and the copies
+  /// are shown as such instead of as more lab values.
+  func testAValueInTwoReportsIsCountedOnce() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-MBDevData", "-MBShot", "graph"]
+    app.launch()
+    let enabled = AppDriver.require(app.switches["graph-enabled"], "the graph switch")
+    if enabled.value as? String != "1" { enabled.switches.firstMatch.tap() }
+
+    let copies = AppDriver.require(
+      app.descendants(matching: .any).matching(identifier: "graph-copies").firstMatch,
+      "the row for values also in another report", timeout: 30)
+    XCTAssertFalse(copies.label.hasSuffix(" 0"), copies.label)
+
+    enabled.switches.firstMatch.tap()  // leave the demo graph off for the next run
+  }
 }
