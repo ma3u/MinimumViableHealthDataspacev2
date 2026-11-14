@@ -11,6 +11,8 @@ says for each step what the hub implements, what is planned and what is not
 planned. Where the Regulation leaves the how open, the hub follows the TEHDAS2
 guidelines ([the mapping](tehdas2-mapping.md)).
 
+[Full screen, every step described](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=secondary): the diagram with a panel per step, its user and its page on the static demo and the live app.
+
 All organisations are fictional and all data is synthetic.
 
 **Status**, checked on 14 November 2026 against

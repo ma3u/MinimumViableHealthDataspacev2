@@ -10,6 +10,8 @@ This page walks the journey step by step, as the first diagram on the
 [start page](https://ma3u.github.io/MinimumViableHealthDataspacev2/) draws it, and says for each step
 what is implemented, what is planned and what is not planned.
 
+[Full screen, every step described](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=primary): the diagram with a panel per step, its user and its page on the static demo and the live app.
+
 The hub holds synthetic records of fictional people only. The app reads a
 person's own reports and keeps them on their iPhone; it sends them to the
 demo hub only when the person connects it and decides so.

@@ -9,7 +9,7 @@
  */
 import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ListChecks, Play, Presentation } from "lucide-react";
+import { ListChecks, Maximize2, Play, Presentation } from "lucide-react";
 import { BASE_PATH, IS_STATIC } from "@/lib/static-export";
 import { T, useT } from "@/lib/i18n/translate";
 import { useLanguage } from "@/lib/use-language";
@@ -94,10 +94,16 @@ function NodeBox({
   label,
   title,
   sub,
+  selected,
+  onSelect,
 }: {
   node: FlowNode;
   color: string;
   site: DemoSite;
+  /** In select mode (the full-screen page) the box picks its step instead
+   *  of opening a page, and the picked one is drawn brighter. */
+  selected?: boolean;
+  onSelect?: () => void;
   label: string;
   title: string;
   sub: string;
@@ -111,9 +117,9 @@ function NodeBox({
         width={BOX.width}
         height={BOX.height}
         rx={12}
-        fill="#0d162b"
-        stroke={color}
-        strokeWidth={2}
+        fill={selected ? "#16264a" : "#0d162b"}
+        stroke={selected ? "#fbfbf8" : color}
+        strokeWidth={selected ? 4 : 2}
       />
       <text
         x={cx}
@@ -146,6 +152,28 @@ function NodeBox({
     </>
   );
   const style = { animationDelay: `${node.delay}s` };
+  if (onSelect) {
+    return (
+      <g
+        className="jf-n jf-link"
+        style={style}
+        role="button"
+        tabIndex={0}
+        aria-label={label}
+        aria-pressed={selected ? "true" : "false"}
+        data-testid="journey-flow-step"
+        onClick={onSelect}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+      >
+        {box}
+      </g>
+    );
+  }
   if (!node.href) {
     return (
       <g className="jf-n" style={style} data-testid="journey-flow-step">
@@ -175,14 +203,19 @@ function NodeBox({
   );
 }
 
-function FlowDiagram({
+export function FlowDiagram({
   flow,
   play,
   site,
+  selected,
+  onSelect,
 }: {
   flow: JourneyFlow;
   play: boolean;
   site: DemoSite;
+  /** The picked box, by index, in select mode. */
+  selected?: number;
+  onSelect?: (index: number) => void;
 }) {
   const t = useT("home");
   const lang = useLanguage();
@@ -320,6 +353,8 @@ function FlowDiagram({
             label={`${title}: ${sub}${status}`}
             title={title}
             sub={sub}
+            selected={selected === i}
+            onSelect={onSelect ? () => onSelect(i) : undefined}
           />
         );
       })}
@@ -517,6 +552,14 @@ export function JourneyFlows() {
           >
             <ListChecks size={13} aria-hidden="true" />
             {t("Step by step: what is implemented and what is planned")}
+          </Link>
+          <Link
+            href={`/journeys?flow=${flow.id}`}
+            className="inline-flex items-center gap-1 font-semibold text-[#fbfbf8] underline underline-offset-2 hover:text-white"
+            data-testid="journey-fullscreen"
+          >
+            <Maximize2 size={13} aria-hidden="true" />
+            {t("Full screen, every step described")}
           </Link>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#aab4bf]">

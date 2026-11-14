@@ -228,10 +228,18 @@ describe("JourneyFlows", () => {
       "href",
       "/docs/ehds/person-journey",
     );
+    expect(screen.getByTestId("journey-fullscreen")).toHaveAttribute(
+      "href",
+      "/journeys?flow=primary",
+    );
     fireEvent.click(screen.getAllByRole("tab")[1]);
     expect(screen.getByTestId("journey-details")).toHaveAttribute(
       "href",
       "/docs/ehds/researcher-journey",
+    );
+    expect(screen.getByTestId("journey-fullscreen")).toHaveAttribute(
+      "href",
+      "/journeys?flow=secondary",
     );
   });
 

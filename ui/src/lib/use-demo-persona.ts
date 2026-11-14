@@ -18,6 +18,7 @@
 
 import { useState, useEffect } from "react";
 import { DEMO_PERSONAS } from "@/lib/auth";
+import { IS_STATIC } from "@/lib/static-export";
 
 const DEMO_PERSONA_KEY = "demo-persona";
 /** Sentinel value indicating user explicitly signed out. */
@@ -84,6 +85,19 @@ export function useDemoPersona(): DemoPersona | null {
       if (found) setPersona(found);
     }
 
+    // The static demo opens as the user a link names (?persona=researcher):
+    // the full-screen journeys page links each step that way. Only a known
+    // demo user is taken; the static build has no passwords to bypass.
+    if (IS_STATIC) {
+      const named = new URLSearchParams(window.location.search).get("persona");
+      if (
+        named &&
+        DEMO_PERSONAS.some((p) => p.username === named) &&
+        sessionStorage.getItem(DEMO_PERSONA_KEY) !== named
+      ) {
+        setDemoPersona(named);
+      }
+    }
     read(); // synchronous first read after hydration
     // emitter handles same-tab reactivity; no cross-tab sync by design
     emitter?.addEventListener("change", read);
