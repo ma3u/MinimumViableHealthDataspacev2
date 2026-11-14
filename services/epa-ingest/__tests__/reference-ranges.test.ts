@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   REFERENCE_RANGES,
+  appliesOn,
   rangeFor,
+  validFrom,
   rangesForAnalyte,
   type ReferenceRange,
 } from "../src/reference-ranges.js";
@@ -21,6 +23,34 @@ describe("the reference-range table", () => {
       expect(range.source.label.length, range.analyteKey).toBeGreaterThan(20);
       expect(range.summary.length, range.analyteKey).toBeGreaterThan(20);
     }
+  });
+
+  it("links every indexed source to PubMed and its DOI, with the edition's year", () => {
+    for (const { source } of REFERENCE_RANGES) {
+      const pubmed = source.url.match(/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)/);
+      if (pubmed) expect(source.pmid, source.label).toBe(pubmed[1]);
+      if (source.pmid) {
+        expect(source.doi, source.label).toMatch(/^10\.\d{4,}\//);
+        expect(source.year, source.label).toBeGreaterThan(1990);
+      }
+    }
+  });
+
+  it("keeps a superseded range, dated, with what replaced it", () => {
+    for (const range of REFERENCE_RANGES.filter((r) => r.validUntil)) {
+      expect(range.supersededBy?.length, range.analyteKey).toBeGreaterThan(20);
+      expect(validFrom(range)! < range.validUntil!, range.analyteKey).toBe(
+        true,
+      );
+    }
+    // Vitamin D: the 2011 thresholds applied to a value from 2023, not to one from 2025.
+    const vitD = rangeFor("vitamin-d", "ng/mL")!;
+    expect(vitD.validUntil).toBe("2024-06-03");
+    expect(appliesOn(vitD, "2023-05-10")).toBe(true);
+    expect(rangeFor("vitamin-d", "ng/mL", "any", "2025-02-01")).toBeNull();
+    expect(rangeFor("vitamin-d", "ng/mL", "any", "2023-05-10")).toBe(vitD);
+    // A range with no successor still applies today.
+    expect(rangeFor("hba1c", "%", "any", "2026-11-13")).not.toBeNull();
   });
 
   it("states a range per unit, never per analyte", () => {

@@ -35,6 +35,12 @@ export interface RangeSource {
   label: string;
   /** Where a reader checks it. */
   url: string;
+  /** The year of the edition quoted; absent for a source with no dated edition. */
+  year?: number;
+  /** PubMed id, when the source is indexed there. */
+  pmid?: string;
+  /** DOI, when the source has one. */
+  doi?: string;
 }
 
 export interface ReferenceRange {
@@ -54,6 +60,16 @@ export interface ReferenceRange {
   /** One or two sentences, in the source's own terms. */
   summary: string;
   source: RangeSource;
+  /**
+   * Versioning. A range applies from `validFrom` (ISO date; the source's year
+   * when absent) until `validUntil`, the day a newer edition of its source
+   * stopped stating it. A superseded range is kept, not deleted, so a value
+   * measured while it applied can still be explained; `supersededBy` says
+   * what replaced it, in the newer source's own terms.
+   */
+  validFrom?: string;
+  validUntil?: string;
+  supersededBy?: string;
 }
 
 export type RangeGroup =
@@ -86,124 +102,189 @@ const ESC_2019: RangeSource = {
   label:
     "ESC/EAS 2019 dyslipidaemia guidelines (Mach et al., Eur Heart J 2020;41:111-188)",
   url: "https://pubmed.ncbi.nlm.nih.gov/31504418/",
+  year: 2019,
+  pmid: "31504418",
+  doi: "10.1093/eurheartj/ehz455",
 };
 const EAS_LPA_2022: RangeSource = {
   label:
     "EAS consensus on lipoprotein(a) (Kronenberg et al., Eur Heart J 2022;43:3925-3946)",
   url: "https://pubmed.ncbi.nlm.nih.gov/36036785/",
+  year: 2022,
+  pmid: "36036785",
+  doi: "10.1093/eurheartj/ehac361",
 };
 const AHA_CDC_2003: RangeSource = {
   label:
     "AHA/CDC statement on inflammation markers (Pearson et al., Circulation 2003;107:499-511)",
   url: "https://pubmed.ncbi.nlm.nih.gov/12551878/",
+  year: 2003,
+  pmid: "12551878",
+  doi: "10.1161/01.cir.0000052939.59093.45",
 };
 const REFSUM_2004: RangeSource = {
   label:
     "Total homocysteine, expert opinion (Refsum et al., Clin Chem 2004;50:3-32)",
   url: "https://pubmed.ncbi.nlm.nih.gov/14709635/",
+  year: 2004,
+  pmid: "14709635",
+  doi: "10.1373/clinchem.2003.021634",
 };
 const ADA_2025: RangeSource = {
   label:
     "ADA Standards of Care 2025, diagnosis and classification (Diabetes Care 2025;48:S27-S49)",
   url: "https://pubmed.ncbi.nlm.nih.gov/39651986/",
+  year: 2025,
+  pmid: "39651986",
+  doi: "10.2337/dc25-S002",
 };
 const SELVIN_2010: RangeSource = {
   label:
     "Glycated haemoglobin and cardiovascular risk in non-diabetic adults (Selvin et al., N Engl J Med 2010;362:800-811)",
   url: "https://pubmed.ncbi.nlm.nih.gov/20200384/",
+  year: 2010,
+  pmid: "20200384",
+  doi: "10.1056/NEJMoa0908359",
 };
 const KDIGO_2024: RangeSource = {
   label:
     "KDIGO 2024 CKD guideline, executive summary (Levin et al., Kidney Int 2024;105:684-701)",
   url: "https://pubmed.ncbi.nlm.nih.gov/38519239/",
+  year: 2024,
+  pmid: "38519239",
+  doi: "10.1016/j.kint.2023.10.016",
 };
 const PRATI_2002: RangeSource = {
   label:
     "Updated definitions of healthy ranges for serum ALT (Prati et al., Ann Intern Med 2002;137:1-10)",
   url: "https://pubmed.ncbi.nlm.nih.gov/12093239/",
+  year: 2002,
+  pmid: "12093239",
+  doi: "10.7326/0003-4819-137-1-200207020-00006",
 };
 const HOLICK_2011: RangeSource = {
   label:
     "Endocrine Society vitamin D guideline (Holick et al., J Clin Endocrinol Metab 2011;96:1911-1930)",
   url: "https://pubmed.ncbi.nlm.nih.gov/21646368/",
+  year: 2011,
+  pmid: "21646368",
+  doi: "10.1210/jc.2011-0385",
 };
 const WHO_FERRITIN_2020: RangeSource = {
   label:
     "WHO guideline on ferritin concentrations to assess iron status (2020)",
   url: "https://www.who.int/publications/i/item/9789240000124",
+  year: 2020,
 };
 const WHO_WAIST_2011: RangeSource = {
   label:
     "Waist circumference and waist-hip ratio: report of a WHO expert consultation (2011)",
   url: "https://www.who.int/publications/i/item/9789241501491",
+  year: 2011,
 };
 const WHO_HAEMOGLOBIN_2024: RangeSource = {
   label: "WHO guideline on haemoglobin cutoffs to define anaemia (2024)",
   url: "https://www.who.int/publications/i/item/9789240088542",
+  year: 2024,
 };
 const NORIP_2004: RangeSource = {
   label:
     "Nordic Reference Interval Project 2000, 25 biochemical properties in about 3000 healthy adults (Rustad et al., Scand J Clin Lab Invest 2004;64:271-284)",
   url: "https://pubmed.ncbi.nlm.nih.gov/15223694/",
+  year: 2004,
+  pmid: "15223694",
+  doi: "10.1080/00365510410006324",
 };
 const NORDIN_2004: RangeSource = {
   label:
     "Nordic reference intervals for the blood count in 1826 healthy adults (Nordin et al., Scand J Clin Lab Invest 2004;64:385-398)",
   url: "https://pubmed.ncbi.nlm.nih.gov/15223702/",
+  year: 2004,
+  pmid: "15223702",
+  doi: "10.1080/00365510410002797",
 };
 const PARK_2016: RangeSource = {
   label:
     "Reference ranges in 280 healthy Korean adults on the Sysmex XN-2000 (Park et al., Ann Lab Med 2016;36:244-249)",
   url: "https://pubmed.ncbi.nlm.nih.gov/26915613/",
+  year: 2016,
+  pmid: "26915613",
+  doi: "10.3343/alm.2016.36.3.244",
 };
 const GARBER_2012: RangeSource = {
   label:
     "AACE/ATA clinical practice guidelines for hypothyroidism in adults (Garber et al., Thyroid 2012;22:1200-1235)",
   url: "https://pubmed.ncbi.nlm.nih.gov/22954017/",
+  year: 2012,
+  pmid: "22954017",
+  doi: "10.1089/thy.2012.0205",
 };
 const ESC_HF_2021: RangeSource = {
   label:
     "ESC 2021 guidelines for acute and chronic heart failure (McDonagh et al., Eur Heart J 2021;42:3599-3726)",
   url: "https://pubmed.ncbi.nlm.nih.gov/34447992/",
+  year: 2021,
+  pmid: "34447992",
+  doi: "10.1093/eurheartj/ehab368",
 };
 const EAS_EFLM_2016: RangeSource = {
   label:
     "EAS/EFLM joint consensus on non-fasting lipid profiles and flagging cut-points (Nordestgaard et al., Eur Heart J 2016;37:1944-1958)",
   url: "https://pubmed.ncbi.nlm.nih.gov/27122601/",
+  year: 2016,
+  pmid: "27122601",
+  doi: "10.1093/eurheartj/ehw152",
 };
 const MCLAUGHLIN_2003: RangeSource = {
   label:
     "Triglyceride to HDL ratio as a marker of insulin resistance in 258 overweight adults (McLaughlin et al., Ann Intern Med 2003;139:802-809)",
   url: "https://pubmed.ncbi.nlm.nih.gov/14623617/",
+  year: 2003,
+  pmid: "14623617",
+  doi: "10.7326/0003-4819-139-10-200311180-00007",
 };
 const ACR_GOUT_2020: RangeSource = {
   label:
     "ACR 2020 guideline for the management of gout (FitzGerald et al., Arthritis Rheumatol 2020;72:879-895)",
   url: "https://pubmed.ncbi.nlm.nih.gov/32390306/",
+  year: 2020,
+  pmid: "32390306",
+  doi: "10.1002/art.41247",
 };
 const NICE_NG239: RangeSource = {
   label: "NICE guideline NG239, vitamin B12 deficiency in over 16s (2024)",
   url: "https://www.nice.org.uk/guidance/ng239",
+  year: 2024,
 };
 const BCSH_2014: RangeSource = {
   label:
     "BCSH guideline on cobalamin and folate disorders (Devalia et al., Br J Haematol 2014;166:496-513)",
   url: "https://pubmed.ncbi.nlm.nih.gov/24942828/",
+  year: 2014,
+  pmid: "24942828",
+  doi: "10.1111/bjh.12959",
 };
 const BSG_2021: RangeSource = {
   label:
     "BSG guideline on iron deficiency anaemia in adults (Snook et al., Gut 2021;70:2030-2051)",
   url: "https://pubmed.ncbi.nlm.nih.gov/34497146/",
+  year: 2021,
+  pmid: "34497146",
+  doi: "10.1136/gutjnl-2021-325210",
 };
 const NICE_NG8: RangeSource = {
   label:
     "NICE guideline NG8, chronic kidney disease: managing anaemia (2015, updated 2021)",
   url: "https://www.nice.org.uk/guidance/ng8",
+  year: 2021,
 };
 const ROTTERDAM_IG_2021: RangeSource = {
   label:
     "Serum immunoglobulins in 8768 adults of the Rotterdam Study (Khan et al., J Clin Immunol 2021;41:1902-1914)",
   url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8604889/",
+  year: 2021,
+  pmid: "34505230",
+  doi: "10.1007/s10875-021-01120-5",
 };
 const LABCORP_AMINO: RangeSource = {
   label:
@@ -218,11 +299,17 @@ const GALLAGHER_2000: RangeSource = {
   label:
     "Healthy percentage body fat ranges linked to BMI, 1626 adults measured by DXA and four-compartment model (Gallagher et al., Am J Clin Nutr 2000;72:694-701)",
   url: "https://pubmed.ncbi.nlm.nih.gov/10966886/",
+  year: 2000,
+  pmid: "10966886",
+  doi: "10.1093/ajcn/72.3.694",
 };
 const JASSO_2002: RangeSource = {
   label:
     "New criteria for obesity disease in Japan, 1193 adults with CT (Examination Committee, Circ J 2002;66:987-992)",
   url: "https://pubmed.ncbi.nlm.nih.gov/12419927/",
+  year: 2002,
+  pmid: "12419927",
+  doi: "10.1253/circj.66.987",
 };
 
 /**
@@ -348,6 +435,17 @@ export const REFERENCE_RANGES: readonly ReferenceRange[] = [
     optimalHigh: 65,
     basis: "guideline",
     summary: `Targets: below 100 at low or moderate risk, 80 at high and 65 at very high risk. ${LIPID_TIERS}`,
+    source: ESC_2019,
+  },
+  {
+    analyteKey: "apolipoprotein-b",
+    ucum: "g/L",
+    group: "cardiovascular",
+    sex: "any",
+    guidelineHigh: 1.0,
+    optimalHigh: 0.65,
+    basis: "guideline",
+    summary: `Targets: below 1.0 at low or moderate risk, 0.8 at high and 0.65 at very high risk. ${LIPID_TIERS}`,
     source: ESC_2019,
   },
   {
@@ -689,6 +787,9 @@ export const REFERENCE_RANGES: readonly ReferenceRange[] = [
     summary:
       "Deficiency below 20 ng/mL, insufficiency 21 to 29, sufficiency 30 or above. The guideline does not recommend exceeding 50.",
     source: HOLICK_2011,
+    validUntil: "2024-06-03",
+    supersededBy:
+      "Endocrine Society 2024 guideline (Demay et al., J Clin Endocrinol Metab 2024;109:1907-1947, PMID 38828931): no 25(OH)D threshold for the general population, and no routine testing advised.",
   },
   {
     analyteKey: "vitamin-d",
@@ -702,6 +803,9 @@ export const REFERENCE_RANGES: readonly ReferenceRange[] = [
     summary:
       "Deficiency below 50 nmol/L, insufficiency 52 to 72, sufficiency 75 or above. The guideline does not recommend exceeding 125.",
     source: HOLICK_2011,
+    validUntil: "2024-06-03",
+    supersededBy:
+      "Endocrine Society 2024 guideline (Demay et al., J Clin Endocrinol Metab 2024;109:1907-1947, PMID 38828931): no 25(OH)D threshold for the general population, and no routine testing advised.",
   },
 
   // ---- Cardiovascular, continued ----
@@ -1764,15 +1868,41 @@ export function rangesForAnalyte(analyteKey: string): ReferenceRange[] {
   return REFERENCE_RANGES.filter((r) => r.analyteKey === analyteKey);
 }
 
-/** The range for one analyte in one unit, for a sex when the source gives one. */
+/** First day a range applies: its own date, else 1 January of its source's year. */
+export function validFrom(range: ReferenceRange): string | undefined {
+  return (
+    range.validFrom ??
+    (range.source.year ? `${range.source.year}-01-01` : undefined)
+  );
+}
+
+/** Whether a range applied on an ISO date (a range with no dates always applies). */
+export function appliesOn(range: ReferenceRange, date: string): boolean {
+  const day = date.slice(0, 10);
+  const from = validFrom(range);
+  return (
+    (!from || from <= day) && (!range.validUntil || day < range.validUntil)
+  );
+}
+
+/**
+ * The range for one analyte in one unit, for a sex when the source gives one.
+ * Without `on` this is today's view and still returns a superseded range when
+ * nothing replaced it (callers show `supersededBy`); with `on` (the date the
+ * value was measured) only the edition that applied then.
+ */
 export function rangeFor(
   analyteKey: string,
   ucum: string,
   sex: Sex = "any",
+  on?: string,
 ): ReferenceRange | null {
   const candidates = REFERENCE_RANGES.filter(
-    (r) => r.analyteKey === analyteKey && r.ucum === ucum,
-  );
+    (r) =>
+      r.analyteKey === analyteKey &&
+      r.ucum === ucum &&
+      (!on || appliesOn(r, on)),
+  ).sort((a, b) => Number(!!a.validUntil) - Number(!!b.validUntil));
   return (
     candidates.find((r) => r.sex === sex) ??
     candidates.find((r) => r.sex === "any") ??
