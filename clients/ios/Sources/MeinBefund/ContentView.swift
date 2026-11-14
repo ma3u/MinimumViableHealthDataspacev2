@@ -1277,6 +1277,7 @@ struct ContentView: View {
     .modifier(ReportActions(model: model, path: $path, scanning: $scanning))
     .modifier(ConnectSheet(model: model, connection: connection))
     .modifier(LocalRelateSheet(model: model, export: localRelate))
+    .onChange(of: model.profile, initial: true) { _, profile in localRelate.person = profile }
     #if DEBUG
       .task { localRelate.startUSBSelfTest() }
     #endif

@@ -12,7 +12,7 @@ enum AppDriver {
   /// way there and breaking when a menu moves.
   enum Screen: String {
     case detail, scan, consent, settings, privacy, trends, reference, history, profile, consents, connect
-    case programmes, graph
+    case programmes, graph, relatePaired
   }
 
   static func launch(_ screen: Screen? = nil) -> XCUIApplication {

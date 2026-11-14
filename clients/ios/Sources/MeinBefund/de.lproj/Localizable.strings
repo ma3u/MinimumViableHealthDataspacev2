@@ -662,6 +662,7 @@
 "Lab values" = "Laborwerte";
 "Kinds of test (LOINC)" = "Arten von Tests (LOINC)";
 "Values without a code" = "Werte ohne Code";
+"Also in another report, counted once" = "Auch in einem anderen Befund, einmal gezählt";
 "Apple Health weekly values" = "Wochenwerte aus Apple Health";
 "OMOP measurements" = "OMOP-Messungen";
 "Rebuild now" = "Jetzt neu aufbauen";
@@ -696,3 +697,5 @@
 "LOINC license" = "LOINC-Lizenz";
 "UCUM license" = "UCUM-Lizenz";
 "By default the model on this iPhone answers, so your question never reaches a network at all. You may instead choose your own Azure resource or Anthropic key, in which case your phone talks to your service directly and neither your key nor your values reach the app provider at all. Whichever is in use is named on the screen before you send.\n\nNo model vendor uses your values for training." = "Standardmäßig antwortet das Modell auf diesem iPhone, Ihre Frage erreicht also gar kein Netz. Sie können stattdessen Ihre eigene Azure-Ressource oder Ihren Anthropic-Schlüssel wählen. Dann spricht Ihr iPhone direkt mit Ihrem Dienst, und weder Ihr Schlüssel noch Ihre Werte erreichen den Anbieter dieser App. Was gerade verwendet wird, steht vor dem Senden auf dem Bildschirm.\n\nKein Modellanbieter nutzt Ihre Werte für Training.";
+"Send year of birth and sex" = "Geburtsjahr und Geschlecht senden";
+"From your Profile, to this Mac only, so it can work out scores that depend on age and sex. Only the year is sent, never the day. Nothing about you goes to the EHDS hub or into a report for your doctor." = "Aus Ihrem Profil, nur an diesen Mac, damit er Werte berechnen kann, die von Alter und Geschlecht abhängen. Gesendet wird nur das Jahr, nie der Tag. Nichts über Sie geht an den EHDS-Hub oder in einen Befund für Ihre Praxis.";

@@ -19,7 +19,7 @@ settings:
     MARKETING_VERSION: "1.0"
     # Rises with every upload: App Store Connect refuses a build number it has
     # already seen, and it refuses it after the upload, having spent minutes.
-    CURRENT_PROJECT_VERSION: "16"
+    CURRENT_PROJECT_VERSION: "17"
 
 packages:
   # Health graph on this iPhone: Relate (Neo4j's embedded graph database,
@@ -28,7 +28,8 @@ packages:
   # what a TestFlight build contains.
   HealthGraph:
     url: https://github.com/ma3u/relate-hackathon-team
-    revision: a2553d018a1c089500ec33c2673735ee6b9993ef
+    # 2f3b111: a value counts once (ba77396), and Patient takes year of birth and sex when sent.
+    revision: 2f3b1118525b7216de7b0092d730a5c67334c624
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile

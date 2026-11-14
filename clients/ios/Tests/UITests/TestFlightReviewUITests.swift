@@ -47,4 +47,16 @@ final class TestFlightReviewUITests: XCTestCase {
     let ucum = AppDriver.scrollTo(app.staticTexts["legal-ucum"], in: app)
     XCTAssertTrue(ucum.label.contains("UCUM License"), ucum.label)
   }
+
+  /// Build 17: Export to my Mac can send the year of birth and sex, for the
+  /// Mac's age-dependent scores (SCORE2, eGFR, FIB-4). Off until the person
+  /// switches it on: the profile otherwise stays on the phone (ADR-034).
+  func testExportToMyMacOffersYearOfBirthAndSexSwitchedOff() {
+    let app = AppDriver.launch(.relatePaired)
+    let toggle = AppDriver.scrollTo(app.switches["relate-sends-person"], in: app)
+    XCTAssertEqual(toggle.value as? String, "0", "off until the person switches it on")
+    XCTAssertTrue(
+      AppDriver.text(containing: "Only the year is sent", in: app).exists,
+      "the footer says that only the year leaves the phone")
+  }
 }

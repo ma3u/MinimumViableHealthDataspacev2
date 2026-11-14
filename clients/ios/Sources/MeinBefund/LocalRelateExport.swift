@@ -24,6 +24,11 @@ final class LocalRelateExport: ObservableObject {
   /// The person's decisions, apart from EHDS: reports, and device trends.
   @Published private(set) var sendsReports = false
   @Published private(set) var sendsWearables = false
+  /// Year of birth and sex from the profile, for risk scores on the Mac. Off
+  /// unless the person switches it on; see `LocalGraphExport.withPerson`.
+  @Published private(set) var sendsPerson = false
+  /// The profile, kept current by the app; read only when `sendsPerson` is on.
+  var person: Profile = .empty
   /// Send over USB cable: where it stands.
   @Published private(set) var usb: USBTransfer = .off
   private var usbListeners: [NWListener] = []
@@ -54,6 +59,7 @@ final class LocalRelateExport: ObservableObject {
   private static var sentTag: String { "red.mabu.meinbefund.relate.sent" + demo }
   private static var reportsTag: String { "red.mabu.meinbefund.relate.sendsReports" + demo }
   private static var wearablesTag: String { "red.mabu.meinbefund.relate.sendsWearables" + demo }
+  private static var personTag: String { "red.mabu.meinbefund.relate.sendsPerson" + demo }
 
   init() {
     if let data = Keychain.get(Self.linkTag),
@@ -63,6 +69,7 @@ final class LocalRelateExport: ObservableObject {
     }
     sendsReports = UserDefaults.standard.bool(forKey: Self.reportsTag)
     sendsWearables = UserDefaults.standard.bool(forKey: Self.wearablesTag)
+    sendsPerson = UserDefaults.standard.bool(forKey: Self.personTag)
   }
 
   var isPaired: Bool { link != nil }
@@ -128,6 +135,26 @@ final class LocalRelateExport: ObservableObject {
     UserDefaults.standard.set(on, forKey: Self.wearablesTag)
   }
 
+  func setSendsPerson(_ on: Bool) {
+    sendsPerson = on
+    UserDefaults.standard.set(on, forKey: Self.personTag)
+  }
+
+  /// The year of birth and sex that go with each report, or nothing.
+  private var personSent: (year: Int?, sex: RangeSex)? {
+    guard sendsPerson else { return nil }
+    let year = person.birthDate.map { Calendar(identifier: .gregorian).component(.year, from: $0) }
+    return year == nil && person.sex == .any ? nil : (year, person.sex)
+  }
+
+  /// One report as the Mac receives it, over Wi-Fi or the cable.
+  private func body(_ report: LabReport) -> Data {
+    let bundle = LocalGraphExport.bundle(
+      fhirJSON: Data(ReportExport.fhirJSON(report).utf8), unmapped: report.extraction.unmapped)
+    guard let personSent else { return bundle }
+    return LocalGraphExport.withPerson(bundle, birthYear: personSent.year, sex: personSent.sex)
+  }
+
   // MARK: - Export
 
   /// Sends each report whose values changed since it was last sent to this
@@ -151,15 +178,17 @@ final class LocalRelateExport: ObservableObject {
     for report in reports
     where !(report.extraction.coded.isEmpty && report.extraction.unmapped.isEmpty) {
       let key = report.id.uuidString.lowercased()
-      let print = LocalGraphExport.fingerprint(
-        coded: EHDSConnection.fingerprint(report), unmapped: report.extraction.unmapped)
+      // Switching year of birth and sex on (or changing them) sends each
+      // report again, so the Mac gets them without a separate request.
+      let print =
+        LocalGraphExport.fingerprint(
+          coded: EHDSConnection.fingerprint(report), unmapped: report.extraction.unmapped)
+        + (personSent.map { "|person:\($0.year ?? 0)-\($0.sex.rawValue)" } ?? "")
       guard all || sent[key] != print else { continue }
       do {
         let (status, body) = try await request(
           "POST", link.recordEndpoint, link: link,
-          body: LocalGraphExport.bundle(
-            fhirJSON: Data(ReportExport.fhirJSON(report).utf8),
-            unmapped: report.extraction.unmapped),
+          body: body(report),
           headers: ["X-Klarbefund-Report": key])
         guard status == 201 else { throw ReceiverError(status: status, body: body) }
         let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
@@ -241,8 +270,7 @@ final class LocalRelateExport: ObservableObject {
       var frames: [Data] = []
       for report in reports
       where !(report.extraction.coded.isEmpty && report.extraction.unmapped.isEmpty) {
-        let bundle = LocalGraphExport.bundle(
-          fhirJSON: Data(ReportExport.fhirJSON(report).utf8), unmapped: report.extraction.unmapped)
+        let bundle = self.body(report)
         let key = report.id.uuidString.lowercased()
         frames.append(Data(#"{"type":"record","report":"\#(key)","bundle":"#.utf8) + bundle + Data("}".utf8))
       }
