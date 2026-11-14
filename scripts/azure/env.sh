@@ -162,6 +162,13 @@ export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
 # jad-* images of EDC 0.18 and the April build, and the 2026-03 CFM's, were
 # deleted from ACR on 2026-11-10 (#927).
 export EDC1_TAG="${EDC1_TAG:-}"
+# The suffix of the EDC databases the launchers run on: <name><suffix> for the
+# control plane, IdentityHub and IssuerService. An EDC release candidate ships
+# no schema migration from the one before it (Connector #6186 dropped the
+# column migrations in RC6), so each RC the hub moves to starts on fresh
+# databases next to the previous ones, which stay as the rollback (#930).
+# _v1 is RC5's, _v1rc6 RC6's. siglet keeps siglet_v1: it is not EDC.
+export EDC_DB_SUFFIX="${EDC_DB_SUFFIX:-_v1rc6}"
 export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}"
 export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}"
 export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}"

@@ -10,7 +10,7 @@ status: draft
 # Runbook: keeping the CFM fork in step with eclipse-cfm (#973)
 
 The hub's `cfm` compose profile runs [eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm)
-with six fixes that make it work on EDC 1.0 runtimes outside Kubernetes
+with seven fixes that make it work on EDC 1.0 runtimes outside Kubernetes
 ([ADR-085](../../ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md); the
 fixes, why each is needed and how they were measured:
 [spike note, round 4](../../planning/current/issue-973-cfm-0-0-7-spike.md)).
@@ -121,7 +121,7 @@ fork can be archived.
 
 ## Azure
 
-Deployed 2026-11-11 (ADR-085 step 4). Three Container Apps, as in compose:
+Deployed 2026-11-11 (ADR-085 step 4), on `v0.0.8-mvhd.1` since 2026-11-12. Three Container Apps, as in compose:
 `mvhd-cfm-tmanager` and `mvhd-cfm-pmanager` (internal ingress) and
 `mvhd-cfm-agents` (six containers, ports 8081 to 8086 because they share one
 network namespace). The definitions are in
@@ -134,15 +134,31 @@ scripts/azure/20-cfm-fork.sh render /tmp/cfm --offline  # review the definitions
 scripts/azure/20-cfm-fork.sh images                   # docker buildx linux/amd64 of fork.tag, pushed to ACR
 CFM_AZURE_GO="mvhd-cfm-tmanager" scripts/azure/20-cfm-fork.sh apps
 scripts/azure/20-cfm-fork.sh seed                     # definitions, cell, profile, from a one-shot job
+scripts/azure/20-cfm-fork.sh check-onboarding         # onboard and dispose a throwaway participant (10 checks)
 ```
 
-`images`, `apps` and `seed` change Azure. Each needs Matthias's go, per app,
+`check-onboarding` is the Azure counterpart of `check-cfm-onboarding.sh`: a
+one-shot job runs `scripts/azure/cfm/check-in-env.py` inside the environment,
+deploys `cfm-check-<hex>` through the Tenant Manager, checks what the agents
+created, disposes it and checks it is gone. Run it after every `apps`.
+
+`seed` asks the issuer for the MembershipCredential definition's format and
+replaces a dataspace profile that asks for another one. On 2026-11-12 Azure
+moved to EDC 1.0.0-RC6, whose issuer issues `VC2_0_JOSE`; the profile seeded on
+RC5 asked for `VC1_0_JWT`, and every onboarding waited on a `REQUESTED`
+credential until the reseed.
+
+`images`, `apps`, `seed` and `check-onboarding` change Azure. Each needs Matthias's go, per app,
 and an `az login` first. Before `apps`:
 
 - the `cfm-agents` Keycloak client in the Azure realm, with its secret in Key
   Vault as `cfm-agents-client-secret` (as `scripts/seed-cfm.sh` creates it
   locally, against `https://auth.ehds.mabu.red` with the admin password from
-  the `mvhd-keycloak` secret `keycloak-admin-password`);
+  the `mvhd-keycloak` secret `keycloak-admin-password`). Since eclipse-cfm
+  v0.0.8 (eclipse-cfm#234) the client also needs `issuer-admin-api:holders:write`,
+  `issuer-admin-api:credentials:read` and `issuer-admin-api:credentials:write`
+  as default client scopes; added to the Azure realm on 2026-11-12. A scope a
+  release starts asking for goes into the realm before that release's `apps`;
 - the database `cfm` cleared of the old CFM's tables
   (`.github/workflows/edc-retire-v018-azure.yml`, which refuses once any
   `mvhd-cfm-*` app exists).

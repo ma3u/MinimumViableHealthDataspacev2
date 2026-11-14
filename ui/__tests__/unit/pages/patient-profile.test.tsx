@@ -234,4 +234,63 @@ describe("PatientProfilePage", () => {
     expect(screen.getByText("Health Records")).toBeInTheDocument();
     expect(screen.getByText("Research Programs")).toBeInTheDocument();
   });
+
+  // Before, a failed list left an empty page and a failed profile was stored
+  // as the profile, so the page crashed reading its patient's name.
+  describe("a refusal or an error is not an empty or broken page", () => {
+    function errorResponse(status: number) {
+      return Promise.resolve({
+        ok: false,
+        status,
+        json: () => Promise.resolve({ error: "Forbidden" }),
+      });
+    }
+
+    it("a 403 on the list says the profile is not the patient's to see", async () => {
+      mockFetchApi.mockReturnValueOnce(errorResponse(403));
+      render(<PatientProfilePage />);
+      expect(await screen.findByTestId("profile-load-error")).toHaveTextContent(
+        "You may not see this health profile",
+      );
+      expect(screen.queryByRole("combobox")).toBeNull();
+      expect(mockFetchApi).toHaveBeenCalledTimes(1);
+    });
+
+    it("a 500 on the profile says so with the status, and the next patient loads", async () => {
+      const user = userEvent.setup();
+      const PROFILE_P2 = {
+        ...PROFILE,
+        patient: { ...PROFILE.patient, id: "P2", name: "Jan de Vries" },
+      };
+      mockFetchApi
+        .mockReturnValueOnce(mockResponse(PATIENT_LIST))
+        .mockReturnValueOnce(errorResponse(500))
+        .mockReturnValueOnce(mockResponse(PROFILE_P2));
+      render(<PatientProfilePage />);
+      expect(await screen.findByTestId("profile-load-error")).toHaveTextContent(
+        "The health profile could not be loaded (HTTP 500).",
+      );
+      expect(screen.queryByText("Health Risk Assessment")).toBeNull();
+
+      await user.selectOptions(screen.getByRole("combobox"), "P2");
+      expect(
+        await screen.findByText("Health Risk Assessment"),
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId("profile-load-error")).toBeNull();
+    });
+
+    it("a network error says loading failed, without a status", async () => {
+      mockFetchApi
+        .mockReturnValueOnce(mockResponse(PATIENT_LIST))
+        .mockImplementationOnce(() =>
+          Promise.reject(new TypeError("Failed to fetch")),
+        );
+      render(<PatientProfilePage />);
+      const alert = await screen.findByTestId("profile-load-error");
+      expect(alert).toHaveTextContent(
+        "The health profile could not be loaded. Please try again later.",
+      );
+      expect(alert).not.toHaveTextContent("HTTP");
+    });
+  });
 });

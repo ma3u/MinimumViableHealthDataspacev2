@@ -932,7 +932,7 @@ Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3
 
 Services that start only with `--profile <name>`:
 
-- `cfm`: CFM 0.0.7, built from our fork's tag `v0.0.7-mvhd.3` of [eclipse-cfm v0.0.7](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7) by `scripts/build-cfm-fork-images.sh` ([ADR-088](docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md), superseding part of [ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)): its Tenant Manager (:18181), Provision Manager (:18182), six agents and own NATS (`cfm7-*`), seeded by `scripts/seed-cfm.sh`. On the default stack the hub provisions participants itself.
+- `cfm`: CFM 0.0.8, built from our fork's tag `v0.0.8-mvhd.1` of [eclipse-cfm v0.0.8](https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.8) by `scripts/build-cfm-fork-images.sh` ([ADR-088](docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md), superseding part of [ADR-085](docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md)): its Tenant Manager (:18181), Provision Manager (:18182), six agents and own NATS (`cfm7-*`), seeded by `scripts/seed-cfm.sh`. On the default stack the hub provisions participants itself.
 - `wellbeing`: `wellbeing-ga-issuer` (:10053), the Governance Authority of the second data space (#934).
 - `simpl`: `simpl-issuer` (:10043) and `simpl-vault`, Simpl-Open's own issuer (#934 step 0a).
 - `trust-check`: `rogue-issuer` (:10033), the untrusted issuer the identity checks must refuse.

@@ -29,7 +29,10 @@ fi
 device="${DEVICE_ID:-}"
 if [[ -z "$device" ]]; then
   device="$(xcrun devicectl list devices 2>/dev/null |
-    awk '/available \(paired\)/ && /iPhone/ {print $3; exit}')"
+    awk '/available \(paired\)/ && /iPhone/ {
+      # The identifier is the column before "(UDID)"; device names can have any number of words.
+      for (i = 1; i < NF; i++) if ($(i + 1) == "(UDID)") { print $i; exit }
+    }')"
 fi
 
 # Built for a generic device rather than for this one.

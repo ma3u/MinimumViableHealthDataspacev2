@@ -22,10 +22,10 @@ log "Phase 4: EDC-V core services"
 # goes in through JAVA_TOOL_OPTIONS because EDC maps env names `_` -> `.` and
 # no env name can spell `pool.connections.max-total`; commons-pool's default
 # of 8 per service would want 40 of B1ms's 35 user connections. The control
-# plane alone gets 8: with 3, its state machines held every connection and a
-# management request waited for one while Postgres sat idle (the contracts
-# run of 2026-11-12, docs/developer/edc-sizing-under-load.md). The most the
-# server held in that run was 24, so five more stay under 35.
+# plane alone gets 8. With nothing else running, the contracts run passed at
+# 3 and at 8 alike (2026-11-12, docs/developer/edc-sizing-under-load.md); 8
+# may shorten the slowest writes and costs three connections at the peak
+# (25 of 35 in that run).
 EDC_DB_PW="$(pg_admin_password)"
 [ -n "$EDC_DB_PW" ] || { err "no Flexible Server password; run 13-postgres-flexible-server.sh 1 and 2 first"; exit 1; }
 # The services' Vault token as an ACA secret, never a plain env value (#359):
@@ -82,7 +82,7 @@ az containerapp create \
   --ingress internal --target-port 8080 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane_v1?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane${EDC_DB_SUFFIX}?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_CP_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
@@ -158,7 +158,7 @@ az containerapp create \
   --ingress internal --target-port 7081 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub_v1?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub${EDC_DB_SUFFIX}?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \
@@ -199,7 +199,7 @@ az containerapp create \
   --ingress internal --target-port 10013 \
   --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice_v1?sslmode=${PG_SSLMODE}" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice${EDC_DB_SUFFIX}?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS} ${EDC_JVM_HEAP_OPTS}" \

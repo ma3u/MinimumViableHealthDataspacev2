@@ -1381,6 +1381,12 @@
       "file": "ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md",
       "title": "The connector admits only an attested bonus payout purpose",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-092",
+      "file": "ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md",
+      "title": "The deploy hold reads signals the deploy job can read",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1452,7 +1458,11 @@
       "Summary"
     ],
     "pr-gate.yml": ["PR Gate"],
-    "deploy-azure.yml": ["build-and-deploy", "E2E Tests (Azure)"]
+    "deploy-azure.yml": [
+      "load-test-hold-check",
+      "build-and-deploy",
+      "E2E Tests (Azure)"
+    ]
   },
   "coverageThresholds": {
     "statements": 78,
@@ -1470,12 +1480,12 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
-    "/docs/developer": "2026-11-11",
-    "/docs/developer/quality-gates": "2026-11-11",
+    "/docs/developer": "2026-11-13",
+    "/docs/developer/quality-gates": "2026-11-12",
     "/docs/developer/api": "2026-11-11",
     "/docs/developer/reference": "2026-11-11",
     "/docs/developer/[slug]": "2026-11-12",
-    "/docs/architecture": "2026-11-11",
+    "/docs/architecture": "2026-11-12",
     "/docs/security": "2026-11-12",
     "/docs/security/[slug]": "2026-11-12",
     "/docs/klarbefund": "2026-11-12",

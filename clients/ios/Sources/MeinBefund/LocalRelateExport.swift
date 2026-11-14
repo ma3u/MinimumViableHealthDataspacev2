@@ -27,6 +27,8 @@ final class LocalRelateExport: ObservableObject {
   /// Send over USB cable: where it stands.
   @Published private(set) var usb: USBTransfer = .off
   private var usbListeners: [NWListener] = []
+  /// A screenshot's fictional Mac: nothing is ever sent, checked or listened for.
+  private var fictional = false
   /// Background time while waiting or sending, so switching to another app
   /// (or the screen locking) right after tapping does not end the transfer.
   private var usbBackground: UIBackgroundTaskIdentifier = .invalid
@@ -131,7 +133,7 @@ final class LocalRelateExport: ObservableObject {
   /// Sends each report whose values changed since it was last sent to this
   /// Mac; `all` sends every report again (safe: the receiver replaces).
   func export(_ reports: [LabReport], all: Bool = false) async {
-    guard let link, sendsReports || all else { return }
+    guard let link, sendsReports || all, !fictional else { return }
     busy = true
     defer { busy = false }
     // One quick look first: off the Mac's Wi-Fi, every report would wait for
@@ -182,7 +184,7 @@ final class LocalRelateExport: ObservableObject {
 
   /// The same weekly means the Trends screen draws, as the EHDS sync sends them.
   func exportWearables(reportDates: [Date], force: Bool = false) async {
-    guard let link, sendsWearables || force else { return }
+    guard let link, sendsWearables || force, !fictional else { return }
     guard await reachable(link) else { return }
     busy = true
     defer { busy = false }
@@ -210,7 +212,7 @@ final class LocalRelateExport: ObservableObject {
   }
 
   func refreshStatus() async {
-    guard let link else { return }
+    guard let link, !fictional else { return }
     if let (status, body) = try? await request("GET", link.statusEndpoint, link: link), status == 200,
       let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any]
     {
@@ -230,7 +232,7 @@ final class LocalRelateExport: ObservableObject {
   /// sends. One Mac, one transfer, then the port closes.
   func startUSB(_ reports: [LabReport]) async {
     usbLog("USB: start (paired: \(link != nil), listening: \(!usbListeners.isEmpty))")
-    guard let link, usbListeners.isEmpty else { return }
+    guard let link, usbListeners.isEmpty, !fictional else { return }
     // Listen at once and gather the data meanwhile: reading a year of Apple
     // Health takes a while on a real phone, and the screen should say
     // "Waiting for the Mac" from the tap on, not look dead.
@@ -276,6 +278,28 @@ final class LocalRelateExport: ObservableObject {
     /// so `health-graph usb --test-token` can check the cable path on a real
     /// phone without a person's values or a tap.
     static let usbSelfTestToken = "usb-self-test-token-0000000000000000"
+
+    /// Screenshots only (`-MBShot relatePaired|relateUSB|relateUSBDone`): a
+    /// fictional Mac on a TEST-NET address (RFC 5737, never routed), held in
+    /// memory and never stored. Nothing is sent, checked or listened for.
+    func showFictionalPairing(_ screen: DemoSeed.Screen) {
+      guard DemoSeed.isRequested else { return }
+      fictional = true
+      link = LocalRelateLink(
+        url: URL(string: "https://192.0.2.10:8787")!, token: "fictional-screenshot-token",
+        fingerprint: String(repeating: "0", count: 64), name: "Demo-Mac", store: "health.rl")
+      macObservations = 52
+      sendsReports = true
+      switch screen {
+      case .relateUSB:
+        usb = .waiting
+      case .relateUSBDone:
+        let (stored, sent, weekly, name) = (52, 7, 120, "Demo-Mac")
+        usb = .done(String(localized: "Sent \(stored) values from \(sent) reports and \(weekly) weekly values over USB to \(name)."))
+      default:
+        break
+      }
+    }
     func startUSBSelfTest() {
       guard ProcessInfo.processInfo.arguments.contains("-MBUSBSelfTest"), usbListeners.isEmpty else { return }
       usbLog("USB self-test: listening")
@@ -414,7 +438,7 @@ final class LocalRelateExport: ObservableObject {
   static func explain(_ error: Error) -> String {
     switch error {
     case LocalRelateLink.Problem.notARelateLink:
-      return String(localized: "That is not a Relate pairing code. On the Mac, run the receiver and scan the code it shows.")
+      return String(localized: "That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows.")
     case LocalRelateLink.Problem.notHTTPS:
       return String(localized: "The code asks for an unencrypted connection. Klarbefund only sends over HTTPS.")
     case let LocalRelateLink.Problem.notLocal(host):

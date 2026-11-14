@@ -611,7 +611,6 @@
 "Keep a connected copy of your values in a Relate graph on your own Mac: your reports with their LOINC codes and where each value came from, and your Apple Health weekly means. It goes over your Wi-Fi, encrypted, to that Mac only. No cloud is involved." = "Behalten Sie eine verknüpfte Kopie Ihrer Werte in einem Relate-Graphen auf Ihrem eigenen Mac: Ihre Befunde mit LOINC-Codes und der Herkunft jedes Werts sowie Ihre Wochenmittel aus Apple Health. Die Übertragung läuft verschlüsselt über Ihr WLAN, nur an diesen Mac. Keine Cloud ist beteiligt.";
 "On the Mac" = "Auf dem Mac";
 "On this phone" = "Auf diesem Telefon";
-"Run the receiver from the relate-hackathon-team repository:" = "Starten Sie den Empfänger aus dem Repository relate-hackathon-team:";
 "Scan the Mac's QR code" = "QR-Code des Macs scannen";
 "Or paste the klarbefund://relate link" = "Oder den klarbefund://relate-Link einfügen";
 "Pair" = "Verbinden";
@@ -628,7 +627,6 @@
 "Paired with %@. Your values go to %@ on that Mac only." = "Mit %1$@ verbunden. Ihre Werte gehen nur an %2$@ auf diesem Mac.";
 "Sent %lld values from %lld reports to %@." = "%1$lld Werte aus %2$lld Befunden an %3$@ gesendet.";
 "Sent %lld weekly values from %lld device trends to %@." = "%1$lld Wochenwerte aus %2$lld Geräte-Trends an %3$@ gesendet.";
-"That is not a Relate pairing code. On the Mac, run the receiver and scan the code it shows." = "Das ist kein Relate-Kopplungscode. Starten Sie auf dem Mac den Empfänger und scannen Sie den Code, den er zeigt.";
 "The code asks for an unencrypted connection. Klarbefund only sends over HTTPS." = "Der Code verlangt eine unverschlüsselte Verbindung. Klarbefund sendet nur über HTTPS.";
 "%@ is not on your own network. Klarbefund only exports to a Mac on your Wi-Fi." = "%@ ist nicht in Ihrem eigenen Netzwerk. Klarbefund exportiert nur an einen Mac in Ihrem WLAN.";
 "The code is incomplete. Show it again on the Mac and scan once more." = "Der Code ist unvollständig. Zeigen Sie ihn auf dem Mac erneut an und scannen Sie noch einmal.";
@@ -678,9 +676,17 @@
 "Waiting for the Mac…" = "Warte auf den Mac…";
 "On the Mac, run:" = "Auf dem Mac ausführen:";
 "Sending over USB…" = "Wird über USB gesendet…";
-"No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac. Only the paired Mac receives anything. Keep this screen open until it is done." = "Kein gemeinsames WLAN nötig: Verbinden Sie dieses iPhone per Kabel mit dem Mac, tippen Sie auf „Über USB-Kabel senden“ und führen Sie dann den Befehl auf dem Mac aus. Nur der gekoppelte Mac erhält etwas. Lassen Sie diese Ansicht geöffnet, bis es fertig ist.";
 "Sent %lld values from %lld reports and %lld weekly values over USB to %@." = "%1$lld Werte aus %2$lld Befunden und %3$lld Wochenwerte über USB an %4$@ gesendet.";
 "USB transfer failed: %@" = "USB-Übertragung fehlgeschlagen: %@";
 "The Mac on the cable is not the paired one, so nothing was sent." = "Der Mac am Kabel ist nicht der gekoppelte, daher wurde nichts gesendet.";
 "Paired with %@. It cannot be reached over Wi-Fi right now; you can send over a USB cable instead." = "Mit %@ verbunden. Er ist gerade nicht über WLAN erreichbar; Sie können stattdessen über ein USB-Kabel senden.";
 "%@ cannot be reached over Wi-Fi right now. Nothing was sent; you can send over a USB cable instead." = "%@ ist gerade nicht über WLAN erreichbar. Es wurde nichts gesendet; Sie können stattdessen über ein USB-Kabel senden.";
+
+/* Klarbefund for Mac */
+"Open Klarbefund for Mac and scan the QR code it shows. It comes from TestFlight, the same beta as this app." = "Öffnen Sie Klarbefund für Mac und scannen Sie den QR-Code, den es zeigt. Sie erhalten es über TestFlight, in derselben Beta wie diese App.";
+"Klarbefund for Mac on TestFlight" = "Klarbefund für Mac auf TestFlight";
+"Command-line receiver" = "Empfänger für die Kommandozeile";
+"Pair with another Mac" = "Mit einem anderen Mac koppeln";
+"For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac." = "Zum Beispiel Klarbefund für Mac: Scannen Sie den Code, den es zeigt. Dieses iPhone sendet dann alles an diesen Mac.";
+"No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done." = "Kein gemeinsames WLAN nötig: Verbinden Sie dieses iPhone per Kabel mit dem Mac, tippen Sie auf Über USB-Kabel senden und führen Sie dann den Befehl auf dem Mac aus (der Empfänger für die Kommandozeile; Klarbefund für Mac empfängt über WLAN). Nur der gekoppelte Mac erhält etwas. Lassen Sie diesen Bildschirm offen, bis es fertig ist.";
+"That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows." = "Das ist kein Relate-Kopplungscode. Öffnen Sie auf dem Mac Klarbefund für Mac und scannen Sie den Code, den es zeigt.";

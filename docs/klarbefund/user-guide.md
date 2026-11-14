@@ -359,6 +359,7 @@ only when you say so.
 | Export for research (OMOP) | an analytics team                                                                                                                                      | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
 | Export all my data         | you, under GDPR [Art. 15](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_15) and [20](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_20) | every report, page, value, profile field and consent, in one archive                                                                                                                                                                                                            |
 | Delete all my data         | you, [GDPR Art. 17](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_17)                                                                          | the store is wiped for good; the account the app made on the hub, with its record, values and consents, goes too; the app says so before it does it                                                                                                                             |
+| Export to my Mac (Relate)  | you, on your own Mac                                                                                                                                   | a Relate graph of every report and value, and your Apple Health weekly means, sent over your Wi-Fi or a USB cable ([below](#a-copy-on-your-own-mac-relate))                                                                                                                     |
 | Export diagnostics         | the developers                                                                                                                                         | the recognised text and both recogniser passes, to fix a misread line                                                                                                                                                                                                           |
 
 The FHIR bundle carries every value with its LOINC code, its [UCUM](https://ucum.org/ucum) unit, the
@@ -371,6 +372,108 @@ Everything goes through the system share sheet: to the ePA app, Files,
 AirDrop, or mail. There is deliberately no upload of its own, because there is
 no API into the ePA for an app like this, and the citizen is the integration
 point.
+
+## Your health graph on this iPhone
+
+<img src="img/graph-menu.png" width="300" alt="The ⋯ menu, section Privacy and sharing, with Health graph on this iPhone and Export to my Mac (Relate)"> <img src="img/graph.png" width="300" alt="Health graph on this iPhone: switched on, with the number of reports, values, LOINC codes and values without a code in the graph">
+
+The app can keep your values as a connected graph, on the phone and nowhere
+else: every value linked to its report, its [LOINC](https://loinc.org/) code
+and where it was read. The graph is [Relate](https://github.com/relatedb/relate),
+an embedded graph database that answers [Cypher](https://opencypher.org/)
+queries, and it runs inside the app.
+
+1. Open the **⋯** menu and, under **Privacy and sharing**, tap **Health graph on this iPhone**.
+2. Switch it on. The app builds the graph from your reports; it takes a few seconds.
+3. Read the counts: reports, values, LOINC codes, and values that have no code yet.
+4. Tap a test under **Your tests over time** to see its values in date order,
+   each with where it came from and whether it was read from a photograph or
+   from the laboratory's own file.
+5. Tap **Values without a code** to see what the dictionary does not know yet.
+
+<img src="img/graph-trend.png" width="300" alt="One test over time, LDL cholesterol: each value with its date, its source and how it was read, answered by a Cypher query on the phone">
+
+The graph follows your reports: scanning, correcting or deleting one updates
+it. It is encrypted by iOS while the phone is locked, left out of every
+backup and never sent anywhere. Switching it off deletes it; your reports stay.
+
+## A copy on your own Mac (Relate)
+
+**Export to my Mac (Relate)** keeps the same graph on a Mac you own, so you can
+query it there, or let [Claude Desktop](https://claude.ai/download) answer
+questions about it. Nothing goes through a cloud: the phone sends to that Mac
+only, either over your Wi-Fi or over a USB cable.
+
+<img src="img/klarbefund-relate-claude.gif" width="640" alt="Animation: the receiver starts on the Mac and shows a QR code; in Klarbefund, Menu, Export to my Mac (Relate); after pairing, Send everything now sends 34 reports with 240 values while the Mac logs each one; the Mac's graph counts its nodes; Claude Desktop asks the local MCP server about LDL cholesterol and gets five rows back">
+
+The animations show the whole way with the fictional development dataset: Klarbefund in the Simulator, a scratch receiver and graph on the Mac, and the real MCP exchange Claude Desktop uses.
+
+### On the Mac, once
+
+1. Get the receiver: clone
+   [ma3u/relate-hackathon-team](https://github.com/ma3u/relate-hackathon-team)
+   and follow its [install guide](https://github.com/ma3u/relate-hackathon-team/blob/main/docs/INSTALL.md).
+2. Create the encrypted vault the graph lives in:
+   `scripts/health_vault.sh create`. It is an AES-256 disk image; its
+   password is kept in your Keychain.
+
+### Pair the phone with the Mac
+
+<img src="img/relate.png" width="300" alt="Export to my Mac, not paired yet: what it does, the command to run on the Mac, and the field for the pairing link (on an iPhone, Scan the Mac's QR code sits above it)"> <img src="img/relatePaired.png" width="300" alt="Export to my Mac, paired with a Mac called Demo-Mac: the number of values on the Mac, the two switches, Send everything now and Send over USB cable">
+
+1. On the Mac, run `scripts/health_vault.sh receive`. It unlocks the vault and prints a QR code.
+2. On the phone, open the **⋯** menu, **Privacy and sharing**, **Export to my Mac (Relate)**.
+3. Tap **Scan the Mac's QR code** and scan it. Allow **Local Network** when iOS asks.
+4. The screen now shows the Mac's name and how many values its graph holds.
+
+The QR code carries the Mac's address, a secret token and the fingerprint of
+its certificate. The app sends only to the Mac that shows that certificate,
+only over TLS, and only to an address on your own network.
+
+### Send over Wi-Fi
+
+Phone and Mac on the same Wi-Fi, with `scripts/health_vault.sh receive` running:
+
+1. Switch on **Send my reports**. Every report goes to the Mac now, and each
+   report you scan or correct later follows on its own.
+2. Switch on **Send Apple Health weekly means** to add your weekly resting
+   heart rate, heart rate variability, steps and weight.
+3. **Send everything now** sends all of it again, for example after the Mac's graph was rebuilt.
+
+### Send over a USB cable
+
+<img src="img/relateUSB.png" width="300" alt="Send over USB cable, waiting for the Mac, with the command to run on the Mac and Cancel"> <img src="img/relateUSBDone.png" width="300" alt="Send over USB cable, done: how many values, reports and weekly values went to Demo-Mac">
+
+<img src="img/klarbefund-usb.gif" width="640" alt="Animation: on the Mac, scripts/health_vault.sh usb waits for the iPhone; in Klarbefund, Send over USB cable; the Mac logs each report as it arrives and ends with 240 values from 34 reports">
+
+When the phone and the Mac are not on the same Wi-Fi (a hotspot, a guest
+network, an office network that keeps devices apart), use the cable:
+
+1. Connect the iPhone to the Mac with a USB cable and unlock the phone. If the
+   phone asks whether to trust this computer, tap **Trust**.
+2. In **Export to my Mac (Relate)**, tap **Send over USB cable**. The app waits for the Mac.
+3. On the Mac, run `scripts/health_vault.sh usb`.
+4. Keep the screen open. When it is done, the app says how many values,
+   reports and weekly values went to the Mac.
+
+The Mac proves it is the paired one with the token from the QR code before
+the phone sends anything, so the phone has to be paired once first. The phone
+listens only on its own loopback address, which nothing on a network can
+reach: the cable is the only way in.
+
+### Ask Claude about your graph (optional)
+
+[Claude Desktop](https://claude.ai/download) can read the graph on your Mac
+through [MCP](https://modelcontextprotocol.io/), read-only. Step by step:
+[Klarbefund → Relate → Claude](https://github.com/ma3u/relate-hackathon-team/blob/main/docs/KLARBEFUND.md#3-ask-claude-about-your-graph).
+The server runs on your Mac, but the rows a question returns go to Claude as
+part of the conversation, so ask about trends and counts rather than
+pasting a whole record.
+
+### Stop and forget
+
+- **Forget this Mac** removes the pairing from the phone. The Mac keeps what it has.
+- On the Mac, `scripts/health_vault.sh unmount` locks the vault again.
 
 ## Privacy and safety
 
@@ -432,10 +535,14 @@ dataset:
 ```bash
 cd clients/ios
 SEED=-MBDevData OUT=/tmp/shots \
-  SCREENS="list detail scan trends reference history profile consent settings privacy consents connect" \
+  SCREENS="list detail scan trends reference history profile consent settings privacy consents connect graph relate relatePaired relateUSB relateUSBDone" \
   Scripts/capture-screenshots.sh
 for f in /tmp/shots/*.png; do sips --resampleWidth 660 "$f" --out "../../docs/klarbefund/img/$(basename "$f")"; done
 ```
+
+Two images need a tap, which a launch argument cannot give: `graph-menu.png`
+is the **⋯** menu opened on the list, and `graph-trend.png` is LDL cholesterol
+opened from `-MBShot graph`. Both are taken the same way, with `-MBDevData`.
 
 The dataset is built in code, in memory, and is compiled out of a release
 build. Every laboratory and practice in it is invented and every value made
