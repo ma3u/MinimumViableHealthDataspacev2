@@ -90,7 +90,7 @@ xcodebuild archive \
   -archivePath "$ARCHIVE" \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   CODE_SIGN_STYLE=Automatic \
-  -allowProvisioningUpdates "${AUTH[@]}"
+  -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"}
 
 # Export needs a **distribution** profile, and automatic signing only creates
 # one by asking App Store Connect, which needs credentials the archive step
@@ -158,7 +158,7 @@ xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" \
   -exportOptionsPlist "$BUILD_DIR/ExportOptions.plist" \
   -exportPath "$IPA_DIR" \
-  -allowProvisioningUpdates "${AUTH[@]}"
+  -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"}
 
 fi  # end of the build half
 

@@ -4,3 +4,12 @@
    is intentionally empty of overrides. It exists so the bundle advertises
    English as a supported localisation; without it a German device would be
    offered German and an English one would fall back rather than match. */
+
+/* Klarbefund for Mac */
+"Open Klarbefund for Mac and scan the QR code it shows. It comes from TestFlight, the same beta as this app." = "Open Klarbefund for Mac and scan the QR code it shows. It comes from TestFlight, the same beta as this app.";
+"Klarbefund for Mac on TestFlight" = "Klarbefund for Mac on TestFlight";
+"Command-line receiver" = "Command-line receiver";
+"Pair with another Mac" = "Pair with another Mac";
+"For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac." = "For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac.";
+"No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done." = "No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done.";
+"That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows." = "That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows.";

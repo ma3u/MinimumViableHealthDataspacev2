@@ -232,3 +232,52 @@ FIELD_SOURCE = {
     "betaDescription": "BETA_DESCRIPTION",
     "whatToTest": "WHAT_TO_TEST",
 }
+
+
+# ── macOS: Klarbefund for Mac (same record, universal purchase) ──────────────
+MAC_PROMO = {
+    "en-GB": (
+        "Your lab reports and Apple Watch data in one health graph on your own Mac, sealed while "
+        "the app is closed. Ask Claude about it, read-only."
+    ),
+    "de-DE": (
+        "Ihre Laborbefunde und Apple-Watch-Daten in einem Gesundheitsgraphen auf Ihrem eigenen Mac, "
+        "versiegelt, solange die App geschlossen ist. Fragen Sie Claude, nur lesend."
+    ),
+}
+
+MAC_KEYWORDS = {
+    "en-GB": "lab,blood,results,health graph,Neo4j,Relate,Claude,MCP,LOINC,FHIR,privacy,offline",
+    "de-DE": "Labor,Blutwerte,Befund,Gesundheit,Graph,Neo4j,Relate,Claude,LOINC,FHIR,Datenschutz",
+}
+
+MAC_DESCRIPTION = {
+    "en-GB": """Klarbefund for Mac keeps a connected copy of your health data on hardware you own.
+
+Pair it with Klarbefund on your iPhone by scanning a QR code. Your scanned lab reports, every value with its LOINC code and the page and line it came from, and your Apple Health weekly means arrive over your own Wi-Fi, encrypted and pinned to this Mac. No cloud is involved.
+
+On the Mac they become one health graph in Neo4j Relate, an embedded graph database: your reports and values, their codes, official and optimal reference ranges, and the health risks each measure is a marker of, every link with its source.
+
+Your graph stays private:
+• One file inside the app's sandbox, sealed with AES-256 while the app is closed. The key stays in this Mac's keychain.
+• Nothing is uploaded. The iPhone talks only to the paired Mac.
+
+Ask Claude, with one click:
+"Connect Claude Desktop" installs a read-only connector. Then ask, for example, "What is in my health graph?", "Which of my values are outside the guideline range?" or "Prepare my next doctor's visit." Claude reads your graph only while Klarbefund for Mac is open, and only the rows it asks for go into your conversation.
+
+Klarbefund is not a medical device. It helps you understand your data and prepare questions for your doctor; it does not diagnose or advise on treatment.""",
+    "de-DE": """Klarbefund für Mac bewahrt eine verknüpfte Kopie Ihrer Gesundheitsdaten auf Ihrem eigenen Gerät auf.
+
+Koppeln Sie es mit Klarbefund auf Ihrem iPhone, indem Sie einen QR-Code scannen. Ihre gescannten Laborbefunde, jeder Wert mit seinem LOINC-Code und der Seite und Zeile, aus der er stammt, und Ihre Apple-Health-Wochenmittel kommen über Ihr eigenes WLAN, verschlüsselt und an diesen Mac gebunden. Keine Cloud ist beteiligt.
+
+Auf dem Mac werden sie zu einem Gesundheitsgraphen in Neo4j Relate, einer eingebetteten Graphdatenbank: Ihre Befunde und Werte, ihre Codes, offizielle und optimale Referenzbereiche und die Gesundheitsrisiken, für die ein Wert ein Marker ist, jede Verbindung mit ihrer Quelle.
+
+Ihr Graph bleibt privat:
+• Eine Datei in der Sandbox der App, mit AES-256 versiegelt, solange die App geschlossen ist. Der Schlüssel bleibt im Schlüsselbund dieses Macs.
+• Nichts wird hochgeladen. Das iPhone spricht nur mit dem gekoppelten Mac.
+
+Fragen Sie Claude, mit einem Klick:
+„Claude Desktop verbinden" installiert einen Konnektor, der nur liest. Fragen Sie dann zum Beispiel „Was ist in meinem Gesundheitsgraphen?", „Welche meiner Werte liegen außerhalb des Leitlinienbereichs?" oder „Bereite meinen nächsten Arzttermin vor." Claude liest Ihren Graphen nur, solange Klarbefund für Mac geöffnet ist, und nur die Zeilen, die es abfragt, gelangen in Ihr Gespräch.
+
+Klarbefund ist kein Medizinprodukt. Es hilft Ihnen, Ihre Daten zu verstehen und Fragen für Ihre Ärztin oder Ihren Arzt vorzubereiten; es stellt keine Diagnose und gibt keine Therapieempfehlung.""",
+}
