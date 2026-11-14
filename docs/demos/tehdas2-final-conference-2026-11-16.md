@@ -59,7 +59,9 @@ uses it.
 Switching persona on the live hub means signing out and in again, which costs
 more than a step. Sign in before the session, one browser profile per persona
 (`researcher`, `regulator`, `edcadmin`, `patient1`) and one private window
-signed out for steps 11 and 12, and switch windows instead.
+signed out for steps 11 and 12, and switch windows instead. Who signs in for
+which step, and with which password on each site, is on the journey pages
+under `/docs/ehds` (#1117).
 
 ### What each step shows, from the rehearsal of 14 November
 
@@ -120,10 +122,19 @@ are partial, so say "in part" for them.
 - [ ] A recorded run of the ten-minute version, for step 7 and for a dead network. [`ui/scripts/record-tehdas2-demo.ts`](../../ui/scripts/record-tehdas2-demo.ts) records it against the live hub on Monday morning, about 11 minutes, with a caption per step:
 
   ```bash
-  # zsh: asks for each persona's password without echoing it
   cd ui
-  for u in RESEARCHER REGULATOR EDCADMIN PATIENT1; do read -rs "RECORD_PASS_$u?Password for ${(L)u}: "; echo; export "RECORD_PASS_$u"; done
   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red npx tsx scripts/record-tehdas2-demo.ts
+  ```
+
+  `researcher`, `regulator` and `patient1` sign in with their published
+  password, the username, which the script uses when no `RECORD_PASS_<USER>`
+  is set. `edcadmin` (steps 6 and 8) does too until
+  `scripts/azure/secure-accounts.sh` has run for it; after that its password
+  is the Key Vault secret `keycloak-user-edcadmin-password`, read without
+  printing it:
+
+  ```bash
+  export RECORD_PASS_EDCADMIN="$(az keyvault secret show --vault-name kv-mvhd-b53a0449 --name keycloak-user-edcadmin-password --query value -o tsv)"
   ```
 
   It only reads (no form is submitted) and writes `tehdas2-demo-10min.mp4` to a folder in the system temp directory.
