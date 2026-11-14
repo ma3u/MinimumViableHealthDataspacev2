@@ -7,9 +7,21 @@
  * the demo user to sign in as, and the step's page on the static demo and on
  * the live app. The arrow keys walk the steps; ?flow= and ?step= keep the
  * place, so a step can be linked.
+ *
+ * A picked step opens an animated preview of it as an overlay: the hub page,
+ * or the Klarbefund screens, beside the picked box and never on it, as large
+ * as the side of the box allows (src/lib/stage-layout.ts). A click anywhere
+ * else, or Escape, closes it. On a narrow screen the preview opens in the
+ * step's description instead.
  */
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,9 +36,13 @@ import {
   FlowDiagram,
   STATUS_MARK,
 } from "@/components/JourneyFlows";
+import { StepPreview } from "@/components/StepPreview";
 import { IS_STATIC } from "@/lib/static-export";
+import { nearest, overlayLayout, type Rect } from "@/lib/stage-layout";
 import { useT } from "@/lib/i18n/translate";
 import {
+  BOX,
+  FLOW_VIEWBOX,
   JOURNEY_FLOWS,
   type FlowId,
   type FlowNode,
@@ -125,10 +141,13 @@ function StepPanel({
   flow,
   index,
   t,
+  inlinePreview,
 }: {
   flow: JourneyFlow;
   index: number;
   t: (s: string, vars?: Record<string, string | number>) => string;
+  /** Show the preview here, when the drawing has no room for it. */
+  inlinePreview: boolean;
 }) {
   const node = flow.nodes[index];
   const info = stepInfo(flow.id, node);
@@ -143,6 +162,17 @@ function StepPanel({
       <h2 className="mt-1 text-2xl font-bold leading-tight">
         {stepLabel(node, t)}
       </h2>
+      {inlinePreview && info && (
+        <StepPreview
+          key={`${flow.id}-${index}`}
+          preview={info.preview}
+          label={t(node.title)}
+          className="mx-auto my-4"
+          style={
+            info.preview.kind === "app" ? { width: 200 } : { width: "100%" }
+          }
+        />
+      )}
       <p className="mt-1 text-[#aab4bf]">{t(node.sub)}</p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
@@ -238,13 +268,78 @@ function StepPanel({
   );
 }
 
+/** Whether the screen is wide enough for the diagram and the preview side by side. */
+function useWide(): boolean {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setWide(mq.matches);
+    const on = () => setWide(mq.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
+  return wide;
+}
+
 export function JourneysFullscreen() {
   const t = useT("home");
   const [flowId, setFlowId] = useState<FlowId>("primary");
   const [index, setIndex] = useState(0);
   const [full, setFull] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(true);
+  const [overlay, setOverlay] = useState<{
+    rect: Rect;
+    target: Rect;
+    area: { w: number; h: number };
+  } | null>(null);
+  const wide = useWide();
   const flow = JOURNEY_FLOWS.find((f) => f.id === flowId)!;
+  const node = flow.nodes[index];
+  const info = stepInfo(flow.id, node);
+
+  // Lay the overlay out from where the diagram draws the picked box, again
+  // whenever the step, the journey or the window's size changes.
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content || !wide || !open || !info || !node) {
+      setOverlay(null);
+      return;
+    }
+    const run = () => {
+      const svg = content.querySelector<SVGSVGElement>("svg.journey-flow");
+      if (!svg) return;
+      const C = content.getBoundingClientRect();
+      const V = svg.getBoundingClientRect();
+      if (V.width === 0) return;
+      const k = V.width / FLOW_VIEWBOX.width;
+      const target = {
+        x: V.left - C.left + node.x * k,
+        y: V.top - C.top + node.y * k,
+        w: BOX.width * k,
+        h: BOX.height * k,
+      };
+      const area = { w: C.width, h: C.height };
+      setOverlay({
+        rect: overlayLayout(area, info.preview.kind, target),
+        target,
+        area,
+      });
+    };
+    run();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(run);
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, [wide, open, info, node]);
+
+  /** Picks a step and opens its preview. */
+  const pickStep = useCallback((i: number) => {
+    setIndex(i);
+    setOpen(true);
+  }, []);
 
   useEffect(() => {
     const place = placeFromUrl(window.location.search);
@@ -270,8 +365,10 @@ export function JourneysFullscreen() {
   }, []);
 
   const go = useCallback(
-    (delta: number) =>
-      setIndex((i) => Math.min(flow.nodes.length - 1, Math.max(0, i + delta))),
+    (delta: number) => {
+      setIndex((i) => Math.min(flow.nodes.length - 1, Math.max(0, i + delta)));
+      setOpen(true);
+    },
     [flow.nodes.length],
   );
 
@@ -286,6 +383,8 @@ export function JourneysFullscreen() {
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
         go(-1);
+      } else if (e.key === "Escape" && !document.fullscreenElement) {
+        setOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -368,21 +467,34 @@ export function JourneysFullscreen() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+      <div
+        ref={contentRef}
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden"
+        onClick={(e) => {
+          // A click anywhere but on a box, a link or a button closes the
+          // preview; the box picks a step, the others do what they say.
+          const el = e.target as Element;
+          if (!el.closest('[data-testid="journey-flow-step"], a, button')) {
+            setOpen(false);
+          }
+        }}
+      >
         <section
-          className="flex shrink-0 flex-col p-3 sm:p-5 lg:min-h-0 lg:flex-1 lg:shrink lg:overflow-auto"
+          className="relative flex shrink-0 flex-col p-3 sm:p-5 lg:min-h-0 lg:flex-1 lg:shrink lg:overflow-hidden"
           style={{ background: flow.background }}
           aria-label={t(flow.title)}
         >
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.18em] sm:text-xs"
-            style={{ color: flow.accent }}
-          >
-            {t(flow.eyebrow)}
-          </p>
-          <p className="mb-3 text-base font-semibold sm:text-xl">
-            {t(flow.title)}
-          </p>
+          <div className="self-start">
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.18em] sm:text-xs"
+              style={{ color: flow.accent }}
+            >
+              {t(flow.eyebrow)}
+            </p>
+            <p className="mb-3 text-base font-semibold sm:text-xl">
+              {t(flow.title)}
+            </p>
+          </div>
           <div className="my-auto overflow-x-auto py-2">
             <div className="min-w-[880px]">
               <FlowDiagram
@@ -391,11 +503,11 @@ export function JourneysFullscreen() {
                 play
                 site={THIS_SITE}
                 selected={index}
-                onSelect={setIndex}
+                onSelect={pickStep}
               />
             </div>
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#aab4bf]">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 self-start text-xs text-[#aab4bf]">
             <span>{t("Status of each step:")}</span>
             {Object.values(STATUS_MARK).map((m) => (
               <span key={m.label} className="inline-flex items-center gap-1">
@@ -421,6 +533,9 @@ export function JourneysFullscreen() {
             <span>
               {t("Pick a box, or walk the steps with the arrow keys.")}
             </span>
+            {wide && (
+              <span>{t("Click anywhere else to close the preview.")}</span>
+            )}
             <Link
               href={flow.details}
               className="inline-flex items-center gap-1 font-semibold text-[#fbfbf8] underline underline-offset-2"
@@ -435,7 +550,7 @@ export function JourneysFullscreen() {
           className="shrink-0 border-t lg:min-h-0 lg:shrink lg:overflow-y-auto border-white/10 p-4 sm:p-6 lg:w-[440px] lg:border-l lg:border-t-0"
           aria-live="polite"
         >
-          <StepPanel flow={flow} index={index} t={t} />
+          <StepPanel flow={flow} index={index} t={t} inlinePreview={!wide} />
           <div className="mt-6 flex items-center justify-between gap-2">
             <button
               type="button"
@@ -459,6 +574,52 @@ export function JourneysFullscreen() {
             </button>
           </div>
         </aside>
+
+        {overlay && info && node && (
+          <>
+            <svg
+              className="pointer-events-none absolute left-0 top-0 z-30"
+              width={overlay.area.w}
+              height={overlay.area.h}
+              aria-hidden="true"
+            >
+              {(() => {
+                const { rect: r, target } = overlay;
+                const [px, py] = nearest(
+                  r,
+                  target.x + target.w / 2,
+                  target.y + target.h / 2,
+                );
+                const [tx, ty] = nearest(target, r.x + r.w / 2, r.y + r.h / 2);
+                return (
+                  <line
+                    key={`${flow.id}-${index}`}
+                    className="jp-pop"
+                    x1={px}
+                    y1={py}
+                    x2={tx}
+                    y2={ty}
+                    stroke="rgba(251,251,248,0.7)"
+                    strokeWidth={1.5}
+                    strokeDasharray="5 4"
+                  />
+                );
+              })()}
+            </svg>
+            <StepPreview
+              key={`${flow.id}-${index}`}
+              preview={info.preview}
+              label={t(node.title)}
+              className="absolute z-40 cursor-pointer"
+              style={{
+                left: overlay.rect.x,
+                top: overlay.rect.y,
+                width: overlay.rect.w,
+                height: overlay.rect.h,
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );
