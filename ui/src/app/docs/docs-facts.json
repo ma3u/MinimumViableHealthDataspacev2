@@ -1388,6 +1388,12 @@
       "file": "ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md",
       "title": "The deploy hold reads signals the deploy job can read",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-094",
+      "file": "ADR-094-national-health-data-stays-at-the-source.md",
+      "title": "National health data stays at the source; the hub takes descriptions, aggregates and counts",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1486,7 +1492,7 @@
     "/docs/developer/api": "2026-11-11",
     "/docs/developer/reference": "2026-11-11",
     "/docs/developer/[slug]": "2026-11-15",
-    "/docs/architecture": "2026-11-14",
+    "/docs/architecture": "2026-11-15",
     "/docs/security": "2026-11-15",
     "/docs/security/[slug]": "2026-11-15",
     "/docs/klarbefund": "2026-11-15",
