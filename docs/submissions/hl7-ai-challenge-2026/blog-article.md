@@ -48,7 +48,7 @@ ICD-10, so they are next for the app.
 
 ## Primary use: the person's own copy
 
-![A tour through Klarbefund: the reports, a report value by value with its LOINC code and the page it was read from, the original scan, trends, reference values, the profile. Every value is invented.](img/klarbefund-tour.gif)
+![A tour through Klarbefund: the reports, a report value by value with its LOINC code and the page it was read from, the original scan, trends, reference values, the health graph on the phone, export to the person's own Mac, connecting to the EHDS record, consents, privacy. Every value is invented.](img/klarbefund-tour.gif)
 
 [Klarbefund](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/klarbefund/klarbefund-user-guide)
 is an iPhone app. Point the camera at a lab sheet, or import the laboratory's PDF. The table
@@ -71,6 +71,26 @@ ID or the passcode. Nothing leaves the phone unless the person sends it.
 The payoff is the timeline: results from the study centre, the family doctor and a gym scale
 on one chart per measurement. What the app never does is interpret. It names the test, with a
 source, and leaves the reading of a value to a doctor. That is the medical-device line.
+
+## My graph at home, and Claude reads it
+
+![Klarbefund in the Simulator sends 34 fictional reports over TLS to a receiver on a Mac, which writes them into an encrypted graph; Claude Desktop then asks the local MCP server how LDL cholesterol developed and gets five rows back, each with its printed range and source.](img/klarbefund-relate-claude.gif)
+
+The coded values do not have to stay a list. On the phone they form a health graph:
+every value is `CODED_BY` its LOINC code, sits under its report, and is linked to the
+same value seen in another report, in [Relate](https://github.com/relatedb/relate), an
+embedded graph database. **Export to my Mac** keeps that graph on a Mac the person owns,
+inside an AES-256 encrypted disk image whose password stays in the Mac's Keychain. The
+phone sends only to the Mac whose certificate it paired with, over TLS, on the person's
+own Wi-Fi or a USB cable; no cloud is involved.
+
+On that Mac, [Claude Desktop](https://claude.ai/download) can use the graph as a
+memory of the person's own results, through a local MCP server that is read-only. Asked
+how LDL cholesterol developed, Claude writes a Cypher query over the LOINC code and
+answers with five values, each with the range the laboratory printed and where it was
+read. The codes are what make that answer exact: the question is about LOINC 2089-1,
+not about a word on five differently printed sheets
+([user guide](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/klarbefund/klarbefund-user-guide)).
 
 ## FHIR: what leaves the phone
 
