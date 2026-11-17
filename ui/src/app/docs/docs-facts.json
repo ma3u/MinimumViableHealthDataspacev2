@@ -1400,6 +1400,12 @@
       "file": "ADR-093-a-professional-reads-what-the-person-has-not-restricted.md",
       "title": "A health professional reads what the person has not restricted, and every read is logged",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-094",
+      "file": "ADR-094-national-health-data-stays-at-the-source.md",
+      "title": "National health data stays at the source; the hub takes descriptions, aggregates and counts",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
