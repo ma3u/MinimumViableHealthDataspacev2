@@ -65,6 +65,12 @@ DOCS = [
     ("ehds", "tehdas2-mapping", "docs/ehds/tehdas2-mapping.md",
      "The 21 TEHDAS2 guidelines and specifications against the hub, after a requirement-by-requirement "
      "check: what it implements, where it stops on purpose, and the issue that closes each gap."),
+    ("ehds", "person-journey", "docs/ehds/person-journey.md",
+     "The person's journey, step by step: a paper result read into Klarbefund and brought into the EHDS "
+     "record, with what is implemented, what is planned with its issue, and what is not planned."),
+    ("ehds", "researcher-journey", "docs/ehds/researcher-journey.md",
+     "The researcher's journey, step by step: registration, catalogue, application, permit, secure "
+     "processing and results, with what is implemented, what is planned with its issue, and what is not planned."),
     ("klarbefund", "klarbefund-user-guide", "docs/klarbefund/user-guide.md",
      "The app as a person uses it, screen by screen with screenshots: getting a report in, checking a "
      "value against the paper, trends, consents, connecting to the EHDS, exports and your data rights."),
@@ -97,6 +103,10 @@ DOCS = [
      "A glossary of the stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, the "
      "proxy, the catalogue services) and how it fits together; prerequisites, the two local stacks, "
      "seed phases, ports, environment variables, the iPhone app and the day-one gotchas."),
+    ("developer", "edc-sizing-under-load", "docs/developer/edc-sizing-under-load.md",
+     "Whether the EDC control plane, IdentityHub and IssuerService still negotiate under load at the "
+     "ADR-089 sizes: the k6 contracts run of 2026-11-11 with its latencies, each app's CPU and memory "
+     "against its new size, the two runs before it that measured nothing and why, and the Grafana links."),
     ("developer", "secure-processing-environment", "docs/developer/secure-processing-environment.md",
      "How the hub builds the secure processing environment of Art. 73 from confidential containers: "
      "the two SPE workspaces on ACI with AMD SEV-SNP, the Trustee the access body runs, how a "

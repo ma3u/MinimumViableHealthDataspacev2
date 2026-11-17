@@ -3,14 +3,14 @@
   "repos": [
     {
       "repo": "eclipse-edc/Connector",
-      "known": "v1.0.0-RC5",
+      "known": "v1.0.0-RC6",
       "prerelease": true,
       "where": "runtimes/edc/gradle/libs.versions.toml",
       "issue": 930
     },
     {
       "repo": "eclipse-edc/IdentityHub",
-      "known": "v1.0.0-RC5",
+      "known": "v1.0.0-RC6",
       "prerelease": true,
       "where": "runtimes/edc/gradle/libs.versions.toml",
       "issue": 930
@@ -66,15 +66,15 @@
     },
     {
       "repo": "eclipse-cfm/cfm",
-      "known": "v0.0.7",
+      "known": "v0.0.8",
       "prerelease": false,
       "where": "docker-compose.jad.yml (profile cfm), built from the fork below",
       "issue": 973,
       "fork": {
         "repo": "ma3u/cfm",
-        "base": "v0.0.7",
+        "base": "v0.0.8",
         "integration": "mvhd/integration",
-        "tag": "v0.0.7-mvhd.3",
+        "tag": "v0.0.8-mvhd.1",
         "runbook": "docs/knowledge/runbooks/cfm-fork.md",
         "patches": [
           {
@@ -106,6 +106,12 @@
             "fix": "f",
             "drop_when": "the registration agent no longer keys the issuer holder by the DID (agent/orchestration/registration)",
             "issue": 1047
+          },
+          {
+            "branch": "fix/revoke-accepts-204",
+            "fix": "g",
+            "drop_when": "the IssuerService client accepts 204 on a credential revocation (agent/common/issuerservice/issuer.go, RevokeCredential)",
+            "issue": 1105
           }
         ],
         "adr": "docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md"

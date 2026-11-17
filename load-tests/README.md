@@ -24,6 +24,15 @@ The Grafana dashboard is `observability/grafana/dashboards/load-stress-test.json
 | `neo4j-endurance.js` | Older: ten minutes against the proxy's FHIR and OMOP routes, no session needed                         |
 | `results/`           | k6 summaries and the Azure metric exports, per `testid` (git-ignored)                                  |
 
+## Per endpoint
+
+`K6_JSON=1 load-tests/run.sh contracts local` also writes every sample to
+`results/<testid>.ndjson`. The p95 per endpoint, without Prometheus:
+
+```bash
+load-tests/p95-by-name.py load-tests/results/<testid>.ndjson
+```
+
 `STACKIT-COST-MODEL.md` is the cost model of March 2026. The readiness
 assessment of that month is archived as
 [`docs/loadtest/2026-03-production-readiness.md`](../docs/loadtest/2026-03-production-readiness.md);

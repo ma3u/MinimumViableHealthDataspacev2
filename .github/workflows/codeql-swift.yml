@@ -54,6 +54,15 @@ jobs:
       - name: Install xcodegen
         run: brew install xcodegen
 
+      # Swift packages (HealthGraph, Relate) are fetched before CodeQL starts
+      # tracing, so the traced build below only compiles; `clean` keeps the
+      # checkouts in DerivedData/SourcePackages.
+      - name: Resolve Swift packages
+        run: |
+          xcodegen generate
+          xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
+            -derivedDataPath "$RUNNER_TEMP/dd" -resolvePackageDependencies -quiet
+
       - uses: github/codeql-action/init@v4
         with:
           languages: swift

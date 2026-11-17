@@ -190,7 +190,7 @@ MERGE (d)-[:HAS_VARIABLES]->(tg);
 UNWIND [
   {id: 'dataset:geriatric-falls-de-2024', holder: 'did:web:alpha-klinik.de:participant'},
   {id: 'dataset:diabetes-retinopathy-uk', holder: 'did:web:lmc.nl:clinic'},
-  {id: 'dataset:pharmacovigilance-ema',   holder: 'did:web:lmc.nl:clinic'}
+  {id: 'dataset:pharmacovigilance-eu',   holder: 'did:web:lmc.nl:clinic'}
 ] AS row
 MATCH (d:HealthDataset {datasetId: row.id})
 WHERE NOT EXISTS { MATCH (d)-[:PUBLISHED_BY]->() }
@@ -200,21 +200,21 @@ MERGE (d)-[:PUBLISHED_BY]->(p);
 // 6b. Stated: the population, the period, the ages and the codes of each
 // synthetic dataset whose patients are not in the graph. Codes are ICD-10.
 UNWIND [
-  {id: 'dataset:antimicrobial-resist-ecdc', pop: 'Synthetic hospital patients with a bacterial isolate tested for antimicrobial susceptibility, EU/EEA', minAge: 0, maxAge: 100, people: 61000, start: '2020-01-01', end: '2025-12-31', codes: ['ICD-10:A41', 'ICD-10:J15', 'ICD-10:N39.0']},
+  {id: 'dataset:antimicrobial-resist-eu-2025', pop: 'Synthetic hospital patients with a bacterial isolate tested for antimicrobial susceptibility, EU/EEA', minAge: 0, maxAge: 100, people: 61000, start: '2020-01-01', end: '2025-12-31', codes: ['ICD-10:A41', 'ICD-10:J15', 'ICD-10:N39.0']},
   {id: 'dataset:cardiac-outcomes-eu-2025', pop: 'Synthetic adults after an acute coronary syndrome or a heart failure admission, EU', minAge: 18, maxAge: 95, people: 31000, start: '2018-01-01', end: '2025-06-30', codes: ['ICD-10:I21', 'ICD-10:I25', 'ICD-10:I50']},
   {id: 'dataset:covid-long-haulers-be', pop: 'Synthetic adults with symptoms twelve weeks or more after COVID-19, Belgium', minAge: 18, maxAge: 90, people: 8400, start: '2020-03-01', end: '2024-12-31', codes: ['ICD-10:U07.1', 'ICD-10:U09.9']},
-  {id: 'dataset:dental-health-who-euro', pop: 'Synthetic survey respondents aged 5 to 74, European region', minAge: 5, maxAge: 74, people: 63000, start: '2023-01-01', end: '2025-06-30', codes: ['ICD-10:K02', 'ICD-10:K05']},
+  {id: 'dataset:dental-health-eu-2025', pop: 'Synthetic survey respondents aged 5 to 74, European region', minAge: 5, maxAge: 74, people: 63000, start: '2023-01-01', end: '2025-06-30', codes: ['ICD-10:K02', 'ICD-10:K05']},
   {id: 'dataset:diabetes-retinopathy-uk', pop: 'Synthetic people with diabetes aged 12 and over, invited to retinal screening', minAge: 12, maxAge: 95, people: 28000, start: '2019-01-01', end: '2025-03-31', codes: ['ICD-10:E11.3', 'ICD-10:H36.0']},
-  {id: 'dataset:genomics-1m-genomes', pop: 'Synthetic reference cohort of whole genomes, mixed ancestry', minAge: 0, maxAge: 100, people: 105000, start: '2021-01-01', end: '2025-12-31', codes: []},
+  {id: 'dataset:genomics-reference-cohort', pop: 'Synthetic reference cohort of whole genomes, mixed ancestry', minAge: 0, maxAge: 100, people: 105000, start: '2021-01-01', end: '2025-12-31', codes: []},
   {id: 'dataset:geriatric-falls-de-2024', pop: 'Synthetic community-dwelling adults aged 65 and over, Germany', minAge: 65, maxAge: 100, people: 4900, start: '2022-01-01', end: '2024-12-31', codes: ['ICD-10:W19', 'ICD-10:R29.6', 'ICD-10:S72']},
   {id: 'dataset:lung-cancer-screening-nl', pop: 'Synthetic current and former smokers aged 50 to 74 in a screening trial, Netherlands', minAge: 50, maxAge: 74, people: 15000, start: '2019-01-01', end: '2025-06-30', codes: ['ICD-10:C34', 'ICD-10:Z12.2']},
-  {id: 'dataset:maternal-health-who-afro', pop: 'Synthetic pregnant women and their newborns, African region', minAge: 0, maxAge: 49, people: 98000, start: '2020-01-01', end: '2025-12-31', codes: ['ICD-10:O14', 'ICD-10:O80', 'ICD-10:P07']},
+  {id: 'dataset:maternal-health-africa', pop: 'Synthetic pregnant women and their newborns, African region', minAge: 0, maxAge: 49, people: 98000, start: '2020-01-01', end: '2025-12-31', codes: ['ICD-10:O14', 'ICD-10:O80', 'ICD-10:P07']},
   {id: 'dataset:mental-health-eu-pilot', pop: 'Synthetic adults in contact with mental health services, EU', minAge: 18, maxAge: 90, people: 14500, start: '2021-01-01', end: '2025-06-30', codes: ['ICD-10:F20', 'ICD-10:F32', 'ICD-10:F41']},
   {id: 'dataset:occupational-health-eu', pop: 'Synthetic workers aged 16 to 70 under occupational health surveillance, EU', minAge: 16, maxAge: 70, people: 38000, start: '2018-01-01', end: '2025-12-31', codes: ['ICD-10:H83.3', 'ICD-10:J45', 'ICD-10:L24']},
-  {id: 'dataset:organ-transplant-eurotx', pop: 'Synthetic organ donors and recipients', minAge: 0, maxAge: 80, people: 3100, start: '2015-01-01', end: '2025-12-31', codes: ['ICD-10:T86', 'ICD-10:Z94']},
+  {id: 'dataset:organ-transplant-eu', pop: 'Synthetic organ donors and recipients', minAge: 0, maxAge: 80, people: 3100, start: '2015-01-01', end: '2025-12-31', codes: ['ICD-10:T86', 'ICD-10:Z94']},
   {id: 'dataset:paediatric-asthma-scand', pop: 'Synthetic children aged 2 to 17 with asthma, Nordic countries', minAge: 2, maxAge: 17, people: 9200, start: '2017-01-01', end: '2025-06-30', codes: ['ICD-10:J45', 'ICD-10:J46']},
-  {id: 'dataset:pharmacovigilance-ema', pop: 'Synthetic individual case safety reports, EU/EEA', minAge: 0, maxAge: 100, people: 240000, start: '2015-01-01', end: '2025-12-31', codes: ['ICD-10:T88.7', 'ICD-10:Y57']},
-  {id: 'dataset:rare-disease-erdera-2026', pop: 'Synthetic people living with a rare disease, EU', minAge: 0, maxAge: 90, people: 2900, start: '2016-01-01', end: '2026-03-31', codes: ['ICD-10:E84', 'ICD-10:G71.0', 'ICD-10:Q87.4']},
+  {id: 'dataset:pharmacovigilance-eu', pop: 'Synthetic individual case safety reports, EU/EEA', minAge: 0, maxAge: 100, people: 240000, start: '2015-01-01', end: '2025-12-31', codes: ['ICD-10:T88.7', 'ICD-10:Y57']},
+  {id: 'dataset:rare-disease-compendium-2026', pop: 'Synthetic people living with a rare disease, EU', minAge: 0, maxAge: 90, people: 2900, start: '2016-01-01', end: '2026-03-31', codes: ['ICD-10:E84', 'ICD-10:G71.0', 'ICD-10:Q87.4']},
   {id: 'dataset:stroke-rehab-fr-2025', pop: 'Synthetic adults in rehabilitation after a stroke, France', minAge: 18, maxAge: 100, people: 5600, start: '2020-01-01', end: '2025-06-30', codes: ['ICD-10:I63', 'ICD-10:I69']},
   // The federated datasets the catalogue enricher writes from the participants'
   // DSP catalogues (ui/src/app/api/mock-dsp); figures as their descriptions give them.

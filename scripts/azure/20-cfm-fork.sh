@@ -12,8 +12,10 @@ set -euo pipefail
 #   CFM_AZURE_GO="mvhd-cfm-tmanager mvhd-cfm-pmanager mvhd-cfm-agents" 20-cfm-fork.sh apps
 #                                      create or update the apps CFM_AZURE_GO names
 #   20-cfm-fork.sh seed                seed definitions, cell and profile from a one-shot job
+#   20-cfm-fork.sh check-onboarding    onboard and dispose one throwaway participant through
+#                                      the Tenant Manager, from a one-shot job
 #
-# First deployed 2026-11-11. `images`, `apps` and `seed` change Azure:
+# First deployed 2026-11-11. `images`, `apps`, `seed` and `check-onboarding` change Azure:
 # Matthias's go per app and an `az login` first (CLAUDE.md, gotcha 6 for
 # image caching).
 #
@@ -285,32 +287,52 @@ case "$MODE" in
       ok "${app}"
     done
     ;;
-  seed)
-    # Idempotent: what exists is kept. The client secret reaches the job as an
-    # ACA secret, never a command line or a log; the job is deleted afterwards.
-    job=mvhd-cfm-seed
+  seed | check-onboarding)
+    # A one-shot job inside the environment (the managers and the EDC admin
+    # APIs have internal ingress only). Idempotent for seed: what exists is
+    # kept. check-onboarding onboards one throwaway participant through the
+    # Tenant Manager and disposes it again (scripts/azure/cfm/check-in-env.py).
+    # The client secret reaches the job as an ACA secret, never a command line
+    # or a log; the job is deleted afterwards.
+    if [ "$MODE" = seed ]; then
+      job=mvhd-cfm-seed
+      script="$SCRIPT_DIR/cfm/seed-in-env.py"
+    else
+      job=mvhd-cfm-check
+      script="$SCRIPT_DIR/cfm/check-in-env.py"
+    fi
     ENV_ID=$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" --query id -o tsv)
     domain=$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" --query properties.defaultDomain -o tsv)
-    issuer_did=$(az containerapp show --name "$UI_APP" --resource-group "$RG" \
-      --query "properties.template.containers[0].env[?name=='EDC_ISSUER_DID'].value | [0]" -o tsv)
-    [ -n "$issuer_did" ] || { err "no EDC_ISSUER_DID on ${UI_APP}"; exit 1; }
+    ui_env=$(az containerapp show --name "$UI_APP" --resource-group "$RG" \
+      --query "properties.template.containers[0].env" -o json)
     work=$(umask 077 && mktemp -d)
     trap 'rm -rf "$work"' EXIT
     CFM_CLIENT_SECRET=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$CLIENT_SECRET_NAME" --query value -o tsv)
-    SEED_B64=$(base64 <"$SCRIPT_DIR/cfm/seed-in-env.py" | tr -d '\n')
-    export ENV_ID CFM_CLIENT_SECRET SEED_B64
-    LOCATION="$LOCATION" DOMAIN="$domain" ISSUER_DID="$issuer_did" KC_APP="$KEYCLOAK_APP" \
+    SCRIPT_B64=$(base64 <"$script" | tr -d '\n')
+    export ENV_ID CFM_CLIENT_SECRET SCRIPT_B64
+    MODE="$MODE" LOCATION="$LOCATION" DOMAIN="$domain" KC_APP="$KEYCLOAK_APP" UI_ENV_JSON="$ui_env" \
       python3 -I - "$work/job.json" <<'JOB'
 import json, os, sys
 e = os.environ
+ui = {v["name"]: v.get("value", "") for v in json.loads(e["UI_ENV_JSON"])}
 env = {"KC_TOKEN_URL": f"https://{e['KC_APP']}.internal.{e['DOMAIN']}/realms/edcv/protocol/openid-connect/token",
        "TM_URL": "http://mvhd-cfm-tmanager", "PM_URL": "http://mvhd-cfm-pmanager",
-       "ISSUER_DID": e["ISSUER_DID"], "SEED_B64": e["SEED_B64"]}
+       "ISSUER_DID": ui.get("EDC_ISSUER_DID", ""), "ISSUER_URL": ui.get("EDC_ISSUER_URL", ""),
+       "SEED_B64": e["SCRIPT_B64"]}
+if e["MODE"] == "check-onboarding":
+    did_base = ui.get("EDC_DID_BASE", "")
+    env.update({"MGMT_URL": ui.get("EDC_MANAGEMENT_URL", ""), "IDENTITY_URL": ui.get("EDC_IDENTITY_URL", ""),
+                "DID_BASE": did_base,
+                # did:web:mvhd-identityhub%3A7083 -> mvhd-identityhub:7083, where the DID documents are served
+                "DID_PORT_HOST": did_base.removeprefix("did:web:").replace("%3A", ":")})
+missing = [k for k, v in env.items() if not v]
+if missing:
+    sys.exit("missing on the running apps: " + ", ".join(missing))
 doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
-  "configuration": {"triggerType": "Manual", "replicaTimeout": 600, "replicaRetryLimit": 0,
+  "configuration": {"triggerType": "Manual", "replicaTimeout": 900, "replicaRetryLimit": 0,
     "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1},
     "secrets": [{"name": "client-secret", "value": e["CFM_CLIENT_SECRET"]}]},
-  "template": {"containers": [{"name": "seed", "image": "docker.io/library/python:3.12-alpine",
+  "template": {"containers": [{"name": "run", "image": "docker.io/library/python:3.12-alpine",
     "command": ["python3", "-c", "import base64,os;exec(base64.b64decode(os.environ['SEED_B64']))"],
     "resources": {"cpu": 0.25, "memory": "0.5Gi"},
     "env": [{"name": k, "value": v} for k, v in env.items()]
@@ -323,9 +345,9 @@ JOB
     fi
     az containerapp job create --name "$job" --resource-group "$RG" --yaml "$work/job.json" -o none
     exe=$(az containerapp job start --name "$job" --resource-group "$RG" --query name -o tsv)
-    log "seed job ${exe}"
+    log "${MODE} job ${exe}"
     status=Pending
-    for _ in $(seq 1 50); do
+    for _ in $(seq 1 80); do
       status=$(az containerapp job execution show --name "$job" --resource-group "$RG" \
         --job-execution-name "$exe" --query properties.status -o tsv 2>/dev/null || echo Pending)
       case "$status" in Succeeded | Failed | Stopped) break ;; esac
@@ -338,8 +360,8 @@ JOB
       "ContainerAppConsoleLogs_CL | where ContainerGroupName_s startswith '${exe}' | order by TimeGenerated asc | project Log_s" \
       -o tsv 2>/dev/null | sed 's/\tPrimaryResult$//' || true
     az containerapp job delete --name "$job" --resource-group "$RG" --yes -o none 2>/dev/null || true
-    [ "$status" = Succeeded ] || { err "seed job ${exe}: ${status}"; exit 1; }
-    ok "CFM seeded"
+    [ "$status" = Succeeded ] || { err "${MODE} job ${exe}: ${status}"; exit 1; }
+    ok "${MODE}: ${status}"
     ;;
   *)
     err "unknown mode ${MODE}"

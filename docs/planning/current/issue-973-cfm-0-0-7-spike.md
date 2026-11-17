@@ -2,7 +2,7 @@
 title: "CFM spike (#973, ADR-085 step 1): onboarding and dispose through CFM work on our stack, with six fixes in Matthias's fork of eclipse-cfm"
 status: current
 owner: ma3u
-updated: 2026-11-10
+updated: 2026-11-12
 issue: https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973
 ---
 
@@ -23,6 +23,39 @@ four rounds on 2026-11-09 and 2026-11-10:
    fork"), CFM runs on our stack with no proxy and no agent of our own:
    onboarding through `/onboarding`, the DSP catalogue, and dispose through
    the Tenant Manager all work (below, "Round 4").
+
+## eclipse-cfm v0.0.8, 2026-11-12: the fork moves to `v0.0.8-mvhd.1`
+
+v0.0.8 (2026-11-11) no longer merged into `v0.0.7-mvhd.3`, and the "CFM
+fork" workflow went red. The routine of the
+[runbook](../../knowledge/runbooks/cfm-fork.md):
+
+- **Drop-check: nothing dropped.** v0.0.8 is three commits:
+  [#232](https://github.com/eclipse-cfm/cfm/pull/232) (the failing
+  activity's error in the profile),
+  [#233](https://github.com/eclipse-cfm/cfm/pull/233) (dispose revokes the
+  participant's credentials, queried by the holder's DID) and
+  [#234](https://github.com/eclipse-cfm/cfm/pull/234) (the agents ask the
+  IssuerService for `issuer-admin-api:holders:write`, `credentials:read` and
+  `credentials:write` under the issuer's context, no longer
+  `issuer-admin-api:admin`). None does what a patch's `drop_when` asks.
+- **Rebase.** Only `fix/holder-id-for-did-with-port` conflicted, with #234's
+  IssuerService signatures; its comment now says the onboarding agent queries
+  credentials by the DID.
+- **A seventh fix, g** ([#1105](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1105)):
+  #233's revocation reaches the IssuerService, which answers `204`; the
+  client wanted `200`, so every dispose ended in error although the
+  credential was revoked.
+- **Two hub changes.** `scripts/seed-cfm.sh` creates the three IssuerService
+  scopes of #234 for `cfm-agents`, and gives the dataspace profile the
+  MembershipCredential format the issuer's definition has. On EDC
+  1.0.0-RC6 (#1094) that is `VC2_0_JOSE`; a profile asking for `VC1_0_JWT`
+  left the credential request `REQUESTED` until the onboarding agent gave up.
+
+Tag [`v0.0.8-mvhd.1`](https://github.com/ma3u/cfm/tree/v0.0.8-mvhd.1)
+(`90b7ef1`). On the compose stack (RC6), `check-cfm-onboarding.sh`: 12 of 12,
+deploy in 7 s, dispose in 4 s; the revoked credentials are in state 600 at
+the IssuerService. Without fix g 11 of 12; with the old format 8 of 12.
 
 ## Round 4, 2026-11-10: the fork
 

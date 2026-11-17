@@ -776,6 +776,13 @@ struct HubError: LocalizedError {
   let body: Data
   var errorDescription: String? {
     let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+    // Outside its hours the demo hub is stopped and every data route answers
+    // 503 with a link to the static site (ADR-053). That is not a refusal and
+    // nothing the person did wrong: say when to come back, in their language,
+    // instead of quoting the hub's English sentence after "refused".
+    if status == 503, json["staticSite"] != nil {
+      return String(localized: "The EHDS demo hub is offline right now. It runs on weekdays, about 07:00 to 19:00 Berlin time. Try again then; everything else in Klarbefund works without it.")
+    }
     let reason = json["reason"] as? String ?? json["error"] as? String ?? ""
     return String(localized: "The hub refused (\(status)): \(reason)")
   }

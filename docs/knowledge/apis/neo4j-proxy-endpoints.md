@@ -15,6 +15,14 @@ Core (from `.claude/rules/api-conventions.md` + startup log):
 `GET /nlq/templates` · `POST /federated/query` · `GET /federated/stats` ·
 `POST /trust-center/resolve` (HDAB only) · `GET /tck`.
 
+`POST /trust-center/resolve`, `DELETE /trust-center/revoke/:rpsn` and `GET /trust-center/audit` take a Keycloak
+access token (`Authorization: Bearer`) whose `realm_access.roles` holds `HDAB_AUTHORITY`
+or `TRUST_CENTER_OPERATOR`: 401 `{error: "Unauthorized"}` without a valid one, 403
+`{error: "Forbidden"}` with another role (#1029, `services/neo4j-proxy/src/realm-auth.ts`,
+keys from `KEYCLOAK_ISSUER`, issuer `KEYCLOAK_PUBLIC_URL` or `KEYCLOAK_ISSUER`). An
+unhandled error answers 500 `{error: "Internal Server Error"}`, and an SPE that fails a
+`/federated/query` shows as `_error: "SPE query failed"`; the messages go to the log only.
+
 `/federated/query` response contract (Phase 26e): `{results, sources, totalRows,
 filtered, speCount, minKApplied, aggregateSuppressed, suppressionReason}` —
 suppression rules in `docs/architecture/federation.md`. `/nlq` adds

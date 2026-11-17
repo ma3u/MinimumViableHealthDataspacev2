@@ -3164,6 +3164,13 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
           <div className="space-y-3">
             {[
               {
+                version: "v2.2.0",
+                date: "2026-11-13",
+                highlights: t(
+                  "EDC 1.0 (RC6) on Azure, in CI and on the local stack; a second data space with Klarbefund bonus programmes; an interactive roadmap and site search",
+                ),
+              },
+              {
                 version: "v2.1.0",
                 date: "2026-11-04",
                 highlights: t(

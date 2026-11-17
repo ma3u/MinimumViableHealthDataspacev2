@@ -100,13 +100,14 @@ Every launch argument below exists only in a Debug build. The checks are
 `#if DEBUG`, not a flag alone: a flag can be discovered, code that is not
 compiled cannot.
 
-| Argument               | What it does                                                                                                                                          |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `-MBDemoSeed`          | Two fictional reports, in memory only. Enough for a screenshot; what every UI test launches with.                                                     |
-| `-MBDevData`           | Seven fictional reports across three years and four sources, built in code: a trend has shape, the unmatched list has rows, every report has pages.   |
-| `-MBShot <screen>`     | Opens a screen directly once the reports are loaded: `list detail scan trends reference history profile consent settings privacy consents connect`.   |
-| `-MBSelfTest`          | Drives one synthetic report through the whole pipeline in the app target and logs 27 checks (see [The self-test](#the-self-test)).                    |
-| `-MBExportDiagnostics` | Builds the diagnostics archive into the app's temporary directory for [`Scripts/pull-diagnostics.sh`](../../clients/ios/Scripts/pull-diagnostics.sh). |
+| Argument               | What it does                                                                                                                                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-MBDemoSeed`          | Two fictional reports, in memory only. Enough for a screenshot; what every UI test launches with.                                                                                                                |
+| `-MBDevData`           | Seven fictional reports across three years and four sources, built in code: a trend has shape, the unmatched list has rows, every report has pages.                                                              |
+| `-MBShot <screen>`     | Opens a screen directly once the reports are loaded: `list detail scan trends reference history profile consent settings privacy consents connect programmes graph relate relatePaired relateUSB relateUSBDone`. |
+| `-MBSelfTest`          | Drives one synthetic report through the whole pipeline in the app target and logs 27 checks (see [The self-test](#the-self-test)).                                                                               |
+| `-MBUSBSelfTest`       | Listens for the Mac over the USB cable with a fixed test token and sends only the end frame ([Relate](#relate-the-graph-on-the-phone-and-on-the-mac)).                                                           |
+| `-MBExportDiagnostics` | Builds the diagnostics archive into the app's temporary directory for [`Scripts/pull-diagnostics.sh`](../../clients/ios/Scripts/pull-diagnostics.sh).                                                            |
 
 The dev dataset is **built, not stored**. A row states the label, the value,
 the unit and the range the laboratory printed, and [`Analytes.lookup`](../../clients/ios/Sources/Shared/Analytes.generated.swift#L2775) codes it
@@ -355,6 +356,125 @@ a phone, and inventing an id would put a wrong identifier on a real
 measurement. The printed range is kept verbatim in [`RawLabValue.referenceText`](../../clients/ios/Sources/Shared/Provenance.swift#L67)
 and travels as [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text); a range with no number in it survives
 only there, and FHIR's [obs-3](https://hl7.org/fhir/R4/observation.html#invs) allows that: a reference range needs at least a low, a high or a text.
+
+## Relate: the graph on the phone and on the Mac
+
+<img src="img/graph.png" width="300" alt="Health graph on this iPhone, built from the fictional development dataset: the counts of reports, values, LOINC codes and uncoded values"> <img src="img/relatePaired.png" width="300" alt="Export to my Mac, paired with the fictional Demo-Mac that screenshots use">
+
+Two features put the person's values into a [Relate](https://github.com/relatedb/relate)
+graph (an embedded openCypher database): one on the phone, one on the
+person's own Mac. Both go through the same library, `HealthGraph`, from
+[ma3u/relate-hackathon-team](https://github.com/ma3u/relate-hackathon-team),
+so a report becomes the same nodes on the phone, on the Mac, and in that
+repository's Python reference. The user's side is in the
+[user guide](user-guide.md#your-health-graph-on-this-iphone).
+
+| Piece                   | Where                                                                                                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The library             | `HealthGraph` in [`project.yml`](../../clients/ios/project.yml), pinned to a commit; it brings Relate's `RelateFFI.xcframework` (iOS 16+, macOS 13+)                                                                       |
+| Graph on this iPhone    | [`OnDeviceGraph`](../../clients/ios/Sources/MeinBefund/OnDeviceGraph.swift), [`OnDeviceGraphView`](../../clients/ios/Sources/MeinBefund/OnDeviceGraphView.swift)                                                           |
+| Export to my Mac        | [`LocalRelateExport`](../../clients/ios/Sources/MeinBefund/LocalRelateExport.swift), [`LocalRelateView`](../../clients/ios/Sources/MeinBefund/LocalRelateView.swift)                                                       |
+| The pairing link        | [`LocalRelateLink`](../../clients/ios/Sources/Shared/LocalRelateLink.swift): `klarbefund://relate?url=…&token=…&fp=…&name=…&store=…`                                                                                       |
+| The receiver on the Mac | [`swift/mac`](https://github.com/ma3u/relate-hackathon-team/tree/main/swift/mac) and [`scripts/health_vault.sh`](https://github.com/ma3u/relate-hackathon-team/blob/main/scripts/health_vault.sh) in relate-hackathon-team |
+
+<img src="img/klarbefund-relate-claude.gif" width="640" alt="Animation of the whole way: Klarbefund pairs with the receiver, sends 34 fictional reports, the Mac's Relate graph holds them, and Claude Desktop reads it over MCP">
+
+The animations in this section and in the user guide are made by
+[`scripts/flow_gifs.py`](https://github.com/ma3u/relate-hackathon-team/blob/main/scripts/flow_gifs.py)
+from a Simulator recording with `-MBDevData` and a scratch receiver started with
+`--config <scratch folder> --name Demo-Mac`, so neither the vault nor the real
+pairing is ever involved; the docstring there lists the steps.
+
+### The graph on the phone
+
+[`OnDeviceGraph`](../../clients/ios/Sources/MeinBefund/OnDeviceGraph.swift) is
+a projection, never a source: it is rebuilt from scratch from the same FHIR
+bundles the Mac export sends, whenever the reports change, and switching it
+off deletes it. The store sits in Application Support under `HealthGraph`
+(`HealthGraphDemo` for a demo launch, so fictional data never meets a real
+graph), with `FileProtectionType.complete` and excluded from backup. Every
+list on the screen is a named Cypher query from the library, run on a
+read-only handle. Relate allows one handle per store per process, so the
+writer is closed before the reader opens.
+
+### Export over Wi-Fi
+
+1. The Mac's receiver (`health-graph receive`) makes a P-256 certificate and
+   a 256-bit token once and prints them as a QR code: the pairing link.
+2. The app accepts the link only with `https`, a private, loopback or `.local`
+   address and a 64-hex fingerprint, and keeps it in the Keychain.
+3. Each request pins the receiver certificate's SHA-256 and sends the token as
+   a bearer. `GET /v1/status` answers the count of values; `POST /v1/record`
+   takes one report's FHIR bundle (the report id in `X-Klarbefund-Report`, so
+   sending again replaces it); `POST /v1/wearables` takes the Apple Health weekly means.
+4. Before a batch, one 4-second status call checks that the Mac is reachable,
+   so a phone off the Mac's Wi-Fi does not wait out one timeout per report.
+
+### Export over a USB cable
+
+```
+Mac: health-graph usb ──usbmuxd──▶ iPhone 127.0.0.1:8788 / ::1:8788 (Klarbefund, while waiting)
+  Mac   → phone   {"token": "…"}                          the pairing token, first
+  phone → Mac     {"type": "record", "report": "…", "bundle": {…}}   one per report
+  phone → Mac     {"type": "wearables", "bundle": {…}}    if the person sends them
+  phone → Mac     {"type": "end"}
+  Mac   → phone   {"stored": n, "reports": n, "weekly": n, "skipped": n}
+```
+
+Every frame is a 4-byte big-endian length and a JSON object. The phone listens
+only after **Send over USB cable**, only on its loopback addresses (which no
+network can reach; [usbmuxd](https://github.com/libimobiledevice/usbmuxd)
+tunnels the cable to them), compares the token in constant time before it
+sends anything, serves one Mac, and closes the port. It starts listening
+before it gathers a year of Apple Health data, and it holds a background task,
+so switching apps does not end the transfer.
+
+### Try it, step by step
+
+In the Simulator, with fictional data and a scratch graph:
+
+1. In relate-hackathon-team: `swift test` (the library) and `swift test --package-path swift/mac` (the receiver).
+2. Start a receiver on a scratch store, never the vault (add `--port 8799` when the real one is running):
+   ```bash
+   swift run --package-path swift/mac health-graph receive --db /tmp/dev-graph/health.rl --config /tmp/dev-graph/identity \
+     --name Demo-Mac --host 127.0.0.1 --print-link
+   ```
+3. Launch the app in the Simulator with `-MBDevData` and paste the printed
+   link into **Export to my Mac (Relate)**. A demo launch keeps
+   its pairing under its own Keychain key, so it can never send to a real pairing.
+4. Send over Wi-Fi with **Send everything now**, then check the scratch graph:
+   ```bash
+   swift run --package-path swift/mac health-graph query --db /tmp/dev-graph/health.rl reports
+   ```
+5. For the USB path in the Simulator (its loopback is the Mac's): tap
+   **Send over USB cable**, then
+   `swift run --package-path swift/mac health-graph usb --simulator --config /tmp/dev-graph/identity --db /tmp/dev-graph/health.rl`.
+
+On a real iPhone over the cable, without a person's values or a tap: a Debug
+build launched with `-MBUSBSelfTest` listens with a fixed test token and sends
+only the end frame.
+
+```bash
+xcrun devicectl device process launch --device <udid> --console red.mabu.meinbefund -- -MBUSBSelfTest
+swift run --package-path swift/mac health-graph usb --db /tmp/dev-graph/health.rl \
+  --test-token usb-self-test-token-0000000000000000
+```
+
+### Updating the library
+
+The `HealthGraph` package is pinned to a `revision` in
+[`project.yml`](../../clients/ios/project.yml). After a change lands in
+relate-hackathon-team, put its commit there, run `xcodegen generate`, and build
+once in Xcode so SwiftPM resolves it. The Relate binary is a 311 MB zip that
+SwiftPM downloads once into its cache; CI fetches it in the
+"Resolve Swift packages" step before CodeQL traces the build.
+
+### Screenshots of these screens
+
+`graph`, `relate`, `relatePaired`, `relateUSB` and `relateUSBDone` are
+`-MBShot` screens. The paired ones use a fictional Mac called Demo-Mac on a
+[TEST-NET](https://www.rfc-editor.org/rfc/rfc5737) address, in memory only:
+with it nothing is sent, nothing is checked, nothing listens.
 
 ## Languages
 

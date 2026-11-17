@@ -1006,6 +1006,10 @@ test("captures the MembershipCredential definition id", function () {
   const def = defs.find((d) => (d.credentialType || "") === "MembershipCredential") || defs[0];
   expect(def, "the issuer has no credential definition to request").to.not.equal(undefined);
   bru.setVar("membershipDefinitionId", def.id);
+  // the request names the definition's format: from IdentityHub 1.0.0-RC6 it is the issuer's DCP
+  // profile's (VC2_0_JOSE by default, IdentityHub #1248), and the holder refuses a delivery whose
+  // format differs from its request
+  bru.setVar("membershipDefinitionFormat", def.format || "VC1_0_JWT");
 });
 """,
     docs="The issuer resolves a request by definition id, not by type; the type alone answers 400 'Credential definition ID null does not exist'.")
@@ -1025,7 +1029,7 @@ req(f, "40 DCP the provider requests a MembershipCredential", "post",
     persona="anon", bearer="edcToken",
     body={"issuerDid": "{{issuerDid}}",
           "credentials": [{"id": "{{membershipDefinitionId}}", "type": "MembershipCredential",
-                           "format": "VC1_0_JWT"}]},
+                           "format": "{{membershipDefinitionFormat}}"}]},
     asserts=["res.status: gte 200", "res.status: lt 300"],
     docs="""The holder's IdentityHub sends a CredentialRequestMessage; the issuer approves it and delivers
 to the CredentialService endpoint in the holder's DID document. Without that endpoint the process
@@ -1079,6 +1083,35 @@ req(f, "05 NLQ templates", "get", "{{proxyUrl}}/nlq/templates", persona="anon",
     asserts=["res.status: eq 200", "res.body: isJson"])
 req(f, "06 Trust centre status", "get", "{{proxyUrl}}/trust-center/status", persona="anon",
     asserts=["res.status: eq 200", "res.body: isJson"])
+# The pseudonym routes act for an access body (EHDS Art. 66, 73; #1029): a realm
+# token with HDAB_AUTHORITY or TRUST_CENTER_OPERATOR, 401 without one, 403 with
+# another. The runner forges sessions, not realm tokens, so this folder asserts
+# the refusals; the unit suite (trust-center-auth.test.ts) covers the answer.
+TC_RESOLVE = {"studyId": "study-001", "trustCenterName": "bruno-probe",
+              "providerPseudonyms": [{"psnId": "psn-bruno", "providerId": "bruno"}]}
+req(f, "07 A token without an access body role", "post",
+    "{{keycloakUrl}}/realms/edcv/protocol/openid-connect/token", persona="anon",
+    form={"grant_type": "client_credentials", "client_id": "{{edcClientId}}",
+          "client_secret": "{{edcClientSecret}}"},
+    asserts=["res.status: eq 200", "res.body.access_token: isString", "res.body.token_type: eq Bearer"],
+    tests="""
+test("stores a realm token that holds no access body role", function () {
+  bru.setVar("noRoleToken", res.getBody().access_token);
+});
+""",
+    docs="The connector's service account: a valid realm token, signed by Keycloak, without HDAB_AUTHORITY or TRUST_CENTER_OPERATOR.")
+req(f, "08 Resolve a pseudonym, no token (401)", "post", "{{proxyUrl}}/trust-center/resolve",
+    persona="anon", body=TC_RESOLVE,
+    asserts=["res.status: eq 401", "res.body.error: eq Unauthorized"])
+req(f, "09 Resolve a pseudonym, no access body role (403)", "post", "{{proxyUrl}}/trust-center/resolve",
+    persona="anon", bearer="noRoleToken", body=TC_RESOLVE,
+    asserts=["res.status: eq 403", "res.body.error: eq Forbidden"])
+req(f, "10 Revoke a pseudonym, no token (401)", "delete", "{{proxyUrl}}/trust-center/revoke/rpsn-bruno-probe",
+    persona="anon",
+    asserts=["res.status: eq 401", "res.body.error: eq Unauthorized"])
+req(f, "11 Revoke a pseudonym, no access body role (403)", "delete",
+    "{{proxyUrl}}/trust-center/revoke/rpsn-bruno-probe", persona="anon", bearer="noRoleToken",
+    asserts=["res.status: eq 403", "res.body.error: eq Forbidden"])
 
 # ===========================================================================
 f = folder("12 EUDI wallet", "Sign-in with an EUDI wallet (optional stack)",

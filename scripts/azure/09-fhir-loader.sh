@@ -82,7 +82,6 @@ if az containerapp job show --name "$FHIR_LOADER_JOB" --resource-group "$RG" -o 
     --set-env-vars \
       "NEO4J_URI=${NEO4J_URI}" \
       "NEO4J_USER=${NEO4J_USER}" \
-      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     -o none
   ok "FHIR loader job updated"
 else
@@ -97,10 +96,11 @@ else
     --env-vars \
       "NEO4J_URI=${NEO4J_URI}" \
       "NEO4J_USER=${NEO4J_USER}" \
-      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     -o none
   ok "FHIR loader job created"
 fi
+# The graph password as an ACA secret, never a plain value (#359).
+wire_neo4j_password job "$FHIR_LOADER_JOB"
 
 # ── Start the job ────────────────────────────────────────────────────────────
 log "Starting FHIR loader job..."

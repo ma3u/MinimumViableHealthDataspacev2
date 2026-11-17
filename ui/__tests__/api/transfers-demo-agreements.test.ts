@@ -52,6 +52,7 @@ vi.mock("@/lib/permit-gate", () => ({
 
 import { edcClient } from "@/lib/edc";
 import { __resetDemoRecordsForTests } from "@/lib/demo-records";
+import { __resetCacheForTests } from "@/lib/server-cache";
 import { GET, POST } from "@/app/api/transfers/route";
 
 const mockManagement = vi.mocked(edcClient.management);
@@ -104,6 +105,7 @@ function list(participantId = PARTICIPANT) {
 describe("/api/transfers demo agreements", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetCacheForTests();
     __resetDemoRecordsForTests();
     fixtures();
   });

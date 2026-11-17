@@ -78,7 +78,6 @@ CYPHER="MATCH (n) WHERE n.source = 'local-registry' OR (n:OdrlPolicy AND n.creat
 ENV_VARS=(
   "NEO4J_ADDRESS=bolt://${NEO4J_APP}:7687"
   "NEO4J_USERNAME=${NEO4J_USER}"
-  "NEO4J_PASSWORD=${NEO4J_PASSWORD}"
 )
 
 if az containerapp job show --name "$JOB" --resource-group "$RG" -o none 2>/dev/null; then
@@ -106,6 +105,9 @@ else
     --command "/usr/local/bin/cypher-shell" --args "$CYPHER" \
     --env-vars "${ENV_VARS[@]}" \
     -o none
+  # The graph password as an ACA secret, never a plain value (#359). An
+  # existing job already has it; rotate-neo4j-password.sh keeps it current.
+  wire_neo4j_password job "$JOB" >&2
 fi
 
 EXECUTION=$(az containerapp job start --name "$JOB" --resource-group "$RG" \

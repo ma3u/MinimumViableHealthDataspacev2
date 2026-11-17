@@ -5,9 +5,11 @@
     "scripts/generate-overview-fixture.ts",
     "scripts/record-deck-preview.ts",
     "scripts/record-patient-journey.ts",
-    "scripts/record-researcher-journey.ts"
+    "scripts/record-researcher-journey.ts",
+    "scripts/record-tehdas2-demo.ts"
   ],
   "ignore": ["public/**"],
+  "ignoreBinaries": ["ffmpeg"],
   "ignoreDependencies": [
     "swagger-ui-dist",
     "@typescript-eslint/typescript-estree",

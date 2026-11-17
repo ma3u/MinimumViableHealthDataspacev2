@@ -262,23 +262,24 @@ CONDITION_PROFILES = [
 ]
 
 # ── Dataset specifications ──────────────────────────────────────────────────
+# Titles and descriptions name no real agency, registry or programme.
 EXTRA_DATASETS = [
-    ("dataset:cardiac-outcomes-eu-2025",   "EU Cardiac Outcomes Registry 2025",         "Federated cardiac events registry, EuroHeart + EHDS pilot.",           "Cardiology",           "CC-BY-SA-4.0",   45200,  "RegistryData"),
-    ("dataset:lung-cancer-screening-nl",   "NL Lung Cancer Screening Cohort",           "Low-dose CT screening cohort (NELSON follow-up), FHIR R4.",           "Oncology",             "CC-BY-NC-4.0",   18700,  "ClinicalTrial"),
+    ("dataset:cardiac-outcomes-eu-2025",   "EU Cardiac Outcomes Registry 2025",         "Federated cardiac events registry, EHDS pilot.",           "Cardiology",           "CC-BY-SA-4.0",   45200,  "RegistryData"),
+    ("dataset:lung-cancer-screening-nl",   "NL Lung Cancer Screening Cohort",           "Low-dose CT screening cohort with follow-up, FHIR R4.",           "Oncology",             "CC-BY-NC-4.0",   18700,  "ClinicalTrial"),
     ("dataset:geriatric-falls-de-2024",    "Geriatric Falls Prevention Study DE",       "Multicentre fall-risk assessment dataset in FHIR R4.",                 "Geriatrics",           "CC-BY-SA-4.0",   9800,   "ObservationalStudy"),
-    ("dataset:rare-disease-erdera-2026",   "ERDERA Rare Disease Compendium",            "EU Reference Network rare disease phenotype data.",                   "Rare Diseases",        "CC-BY-NC-ND-4.0",3400,   "RegistryData"),
+    ("dataset:rare-disease-compendium-2026",   "EU Rare Disease Compendium",                "Rare disease phenotype data from European reference centres.",                   "Rare Diseases",        "CC-BY-NC-ND-4.0",3400,   "RegistryData"),
     ("dataset:mental-health-eu-pilot",     "EU Mental Health Secondary Use Pilot",      "EHDS Art. 53 mental-health cohort across 5 Member States.",           "Psychiatry",           "CC-BY-SA-4.0",   22100,  "SecondaryUse"),
-    ("dataset:antimicrobial-resist-ecdc",  "ECDC Antimicrobial Resistance 2025",        "EU-wide AMR surveillance data, EARS-Net FHIR export.",                "Infectious Disease",   "CC-BY-4.0",      87000,  "SurveillanceData"),
-    ("dataset:maternal-health-who-afro",   "WHO AFRO Maternal Health Dataset",          "Maternal-neonatal outcomes from 12 African countries.",                "Maternal Health",      "CC-BY-4.0",      134000, "ResourceData"),
-    ("dataset:diabetes-retinopathy-uk",    "UK Diabetic Retinopathy Screening",         "Retinal image + FHIR Observation data from NHS screening.",           "Ophthalmology",        "OGL-UK-3.0",     56000,  "ImagingData"),
+    ("dataset:antimicrobial-resist-eu-2025",  "EU Antimicrobial Resistance 2025",          "EU-wide AMR surveillance data, FHIR export.",                "Infectious Disease",   "CC-BY-4.0",      87000,  "SurveillanceData"),
+    ("dataset:maternal-health-africa",   "African Maternal Health Dataset",           "Maternal-neonatal outcomes from 12 African countries.",                "Maternal Health",      "CC-BY-4.0",      134000, "ResourceData"),
+    ("dataset:diabetes-retinopathy-uk",    "UK Diabetic Retinopathy Screening",         "Retinal image + FHIR Observation data from national screening.",           "Ophthalmology",        "OGL-UK-3.0",     56000,  "ImagingData"),
     ("dataset:covid-long-haulers-be",      "Belgian Long COVID Registry",               "Post-COVID symptom tracking, 18-month follow-up, FHIR R4.",          "Infectious Disease",   "CC-BY-SA-4.0",   11200,  "CohortStudy"),
     ("dataset:paediatric-asthma-scand",    "Scandinavian Paediatric Asthma Cohort",     "Birth-cohort study of childhood asthma in DK/SE/NO.",                 "Paediatrics",          "CC-BY-4.0",      27500,  "CohortStudy"),
     ("dataset:stroke-rehab-fr-2025",       "French Stroke Rehabilitation Outcomes",     "Post-stroke motor-recovery trajectories, FHIR + ICF.",               "Neurology",            "CC-BY-NC-4.0",   7600,   "OutcomeStudy"),
-    ("dataset:organ-transplant-eurotx",    "EuroTransplant Organ Allocation Dataset",   "Post-transplant outcome data across 8 countries.",                    "Transplant Medicine",  "CC-BY-NC-ND-4.0",4200,   "RegistryData"),
-    ("dataset:pharmacovigilance-ema",      "EMA Pharmacovigilance Signal Data",         "Adverse drug reaction signal data from EudraVigilance.",              "Pharmacovigilance",    "EU-ODP-1.0",     290000, "SafetyData"),
-    ("dataset:genomics-1m-genomes",        "1M Genomes Reference Cohort",               "Genomic variants + phenotype from the EU 1+Million Genomes.",         "Genomics",             "CC-BY-NC-4.0",   105000, "GenomicData"),
+    ("dataset:organ-transplant-eu",    "European Organ Allocation Dataset",         "Post-transplant outcome data across 8 countries.",                    "Transplant Medicine",  "CC-BY-NC-ND-4.0",4200,   "RegistryData"),
+    ("dataset:pharmacovigilance-eu",      "EU Pharmacovigilance Signal Data",          "Adverse drug reaction signal data from case safety reports.",              "Pharmacovigilance",    "EU-ODP-1.0",     290000, "SafetyData"),
+    ("dataset:genomics-reference-cohort",        "Genomic Reference Cohort",                  "Genomic variants + phenotype, European reference cohort.",         "Genomics",             "CC-BY-NC-4.0",   105000, "GenomicData"),
     ("dataset:occupational-health-eu",     "EU Occupational Health Registry",           "Workplace exposure and health outcome data, FHIR + OMOP.",            "Occupational Health",  "CC-BY-SA-4.0",   41000,  "SurveillanceData"),
-    ("dataset:dental-health-who-euro",     "WHO EURO Oral Health Survey 2025",          "Oral health examination data from 20 European countries.",            "Dentistry",            "CC-BY-4.0",      63000,  "SurveyData"),
+    ("dataset:dental-health-eu-2025",     "European Oral Health Survey 2025",          "Oral health examination data from 20 European countries.",            "Dentistry",            "CC-BY-4.0",      63000,  "SurveyData"),
 ]
 
 # ── Extra EEHRxF profiles ───────────────────────────────────────────────────
@@ -674,40 +675,40 @@ for ds_id, title, desc, theme, lic, records, ds_type in EXTRA_DATASETS:
 
 emit("// ═══ PUBLISHED_BY + GOVERNS for extra datasets ═══")
 _DS_HOLDER_MAP = {
-    "dataset:cardiac-outcomes-eu-2025":   "did:web:hus.fi:clinic",
+    "dataset:cardiac-outcomes-eu-2025":   "did:web:betaklinik.fi:clinic",
     "dataset:lung-cancer-screening-nl":   "did:web:lmc.nl:clinic",
     "dataset:geriatric-falls-de-2024":    "did:web:alpha-klinik.de:participant",
-    "dataset:rare-disease-erdera-2026":   "did:web:chlisboa.pt:clinic",
-    "dataset:mental-health-eu-pilot":     "did:web:pcz.pl:clinic",
-    "dataset:antimicrobial-resist-ecdc":  "did:web:hus.fi:clinic",
-    "dataset:maternal-health-who-afro":   "did:web:chlisboa.pt:clinic",
+    "dataset:rare-disease-compendium-2026":   "did:web:gammaklinik.pt:clinic",
+    "dataset:mental-health-eu-pilot":     "did:web:deltaklinik.pl:clinic",
+    "dataset:antimicrobial-resist-eu-2025":  "did:web:betaklinik.fi:clinic",
+    "dataset:maternal-health-africa":   "did:web:gammaklinik.pt:clinic",
     "dataset:diabetes-retinopathy-uk":    "did:web:alpha-klinik.de:participant",
     "dataset:covid-long-haulers-be":      "did:web:lmc.nl:clinic",
-    "dataset:paediatric-asthma-scand":    "did:web:hus.fi:clinic",
-    "dataset:stroke-rehab-fr-2025":       "did:web:chlisboa.pt:clinic",
-    "dataset:organ-transplant-eurotx":    "did:web:pcz.pl:clinic",
-    "dataset:pharmacovigilance-ema":      "did:web:alpha-klinik.de:participant",
-    "dataset:genomics-1m-genomes":        "did:web:hus.fi:clinic",
-    "dataset:occupational-health-eu":     "did:web:pcz.pl:clinic",
-    "dataset:dental-health-who-euro":     "did:web:lmc.nl:clinic",
+    "dataset:paediatric-asthma-scand":    "did:web:betaklinik.fi:clinic",
+    "dataset:stroke-rehab-fr-2025":       "did:web:gammaklinik.pt:clinic",
+    "dataset:organ-transplant-eu":    "did:web:deltaklinik.pl:clinic",
+    "dataset:pharmacovigilance-eu":      "did:web:alpha-klinik.de:participant",
+    "dataset:genomics-reference-cohort":        "did:web:betaklinik.fi:clinic",
+    "dataset:occupational-health-eu":     "did:web:deltaklinik.pl:clinic",
+    "dataset:dental-health-eu-2025":     "did:web:lmc.nl:clinic",
 }
 _DS_HDAB_MAP = {
-    "dataset:cardiac-outcomes-eu-2025":   "did:web:ema.europa.eu:authority",
+    "dataset:cardiac-outcomes-eu-2025":   "did:web:medreg.eu:authority",
     "dataset:lung-cancer-screening-nl":   "did:web:medreg.de:hdab",
     "dataset:geriatric-falls-de-2024":    "did:web:medreg.de:hdab",
-    "dataset:rare-disease-erdera-2026":   "did:web:ema.europa.eu:authority",
+    "dataset:rare-disease-compendium-2026":   "did:web:medreg.eu:authority",
     "dataset:mental-health-eu-pilot":     "did:web:irs.fr:hdab",
-    "dataset:antimicrobial-resist-ecdc":  "did:web:ecdc.europa.eu:hdab",
-    "dataset:maternal-health-who-afro":   "did:web:ema.europa.eu:authority",
+    "dataset:antimicrobial-resist-eu-2025":  "did:web:medreg.se:hdab",
+    "dataset:maternal-health-africa":   "did:web:medreg.eu:authority",
     "dataset:diabetes-retinopathy-uk":    "did:web:medreg.de:hdab",
     "dataset:covid-long-haulers-be":      "did:web:irs.fr:hdab",
-    "dataset:paediatric-asthma-scand":    "did:web:ecdc.europa.eu:hdab",
+    "dataset:paediatric-asthma-scand":    "did:web:medreg.se:hdab",
     "dataset:stroke-rehab-fr-2025":       "did:web:irs.fr:hdab",
-    "dataset:organ-transplant-eurotx":    "did:web:ema.europa.eu:authority",
-    "dataset:pharmacovigilance-ema":      "did:web:ema.europa.eu:authority",
-    "dataset:genomics-1m-genomes":        "did:web:ecdc.europa.eu:hdab",
+    "dataset:organ-transplant-eu":    "did:web:medreg.eu:authority",
+    "dataset:pharmacovigilance-eu":      "did:web:medreg.eu:authority",
+    "dataset:genomics-reference-cohort":        "did:web:medreg.se:hdab",
     "dataset:occupational-health-eu":     "did:web:medreg.de:hdab",
-    "dataset:dental-health-who-euro":     "did:web:ecdc.europa.eu:hdab",
+    "dataset:dental-health-eu-2025":     "did:web:medreg.se:hdab",
 }
 for ds_id, _, _, _, _, _, _ in EXTRA_DATASETS:
     holder = _DS_HOLDER_MAP[ds_id]
@@ -764,13 +765,17 @@ for pf_name, cat_name in PROFILE_CATEGORY_MAP:
 
 emit("// ═══ LARGE-SCALE SEED: Extra marketplace nodes ═══")
 
+# Fictional organisations only (.claude/rules/code-style.md). Until 2026-11 this
+# list held six real ones; neo4j/migrate-fictional-organisations.cypher renames
+# them in a graph an earlier run loaded. ui/__tests__/unit/lib/
+# fictional-organisations.test.ts fails on a real name in this file.
 EXTRA_PARTICIPANTS = [
-    ("Helsinki University Hospital", "did:web:hus.fi:clinic",          "DATA_HOLDER"),
-    ("Karolinska Institutet",        "did:web:ki.se:research",         "DATA_USER"),
-    ("Centro Hospitalar Lisboa",     "did:web:chlisboa.pt:clinic",     "DATA_HOLDER"),
-    ("Polskie Centrum Zdrowia",      "did:web:pcz.pl:clinic",          "DATA_HOLDER"),
-    ("European Medicines Agency",    "did:web:ema.europa.eu:authority", "HDAB"),
-    ("ECDC Stockholm",               "did:web:ecdc.europa.eu:hdab",    "HDAB"),
+    ("BetaKlinik Helsinki",          "did:web:betaklinik.fi:clinic",   "DATA_HOLDER"),
+    ("OmegaLab Research AB",         "did:web:omegalab.se:research",   "DATA_USER"),
+    ("GammaKlinik Lisboa",           "did:web:gammaklinik.pt:clinic",  "DATA_HOLDER"),
+    ("DeltaKlinik Warszawa",         "did:web:deltaklinik.pl:clinic",  "DATA_HOLDER"),
+    ("MedReg EU",                    "did:web:medreg.eu:authority",    "HDAB"),
+    ("MedReg SE",                    "did:web:medreg.se:hdab",         "HDAB"),
 ]
 
 for pname, pdid, prole in EXTRA_PARTICIPANTS:
@@ -840,7 +845,7 @@ for ds_id, _, _, _, _, _, _ in EXTRA_DATASETS:
     # Pick a consumer that is different from the holder
     consumer = random.choice([
         "did:web:pharmaco.de:research",
-        "did:web:ki.se:research",
+        "did:web:omegalab.se:research",
     ])
     emit(f"""
         MATCH (dp:DataProduct {{productId: '{prod_id}'}})
@@ -861,7 +866,7 @@ for idx, (ds_id, title, _, _, _, _, _) in enumerate(EXTRA_DATASETS):
     holder = _DS_HOLDER_MAP[ds_id]
     consumer = random.choice([
         "did:web:pharmaco.de:research",
-        "did:web:ki.se:research",
+        "did:web:omegalab.se:research",
     ])
     status = random.choice(["FINALIZED", "AGREED", "REQUESTED"])
     emit(f"""

@@ -61,6 +61,31 @@ const RISK_COLORS = {
   high: "text-red-800 dark:text-red-300 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800",
 };
 
+/** Why the profile did not load: refused (401, 403) or failed (anything else). */
+type LoadError =
+  | { kind: "refused" }
+  | { kind: "failed"; status: number | null };
+
+/** The answer's body, or why there is none. A network error is a failure. */
+async function readJson<T>(
+  request: Promise<Response>,
+): Promise<{ data: T } | { error: LoadError }> {
+  try {
+    const r = await request;
+    if (!r.ok) {
+      return {
+        error:
+          r.status === 401 || r.status === 403
+            ? { kind: "refused" }
+            : { kind: "failed", status: r.status },
+      };
+    }
+    return { data: (await r.json()) as T };
+  } catch {
+    return { error: { kind: "failed", status: null } };
+  }
+}
+
 const RISK_ICONS = {
   low: CheckCircle2,
   moderate: AlertTriangle,
@@ -98,6 +123,7 @@ export default function PatientProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [loadError, setLoadError] = useState<LoadError | null>(null);
   // Only the patient names their own interests; the route refuses others.
   const { data: session } = useSession();
   const roles = (session as { roles?: string[] } | null)?.roles ?? [];
@@ -112,12 +138,20 @@ export default function PatientProfilePage() {
   const subject = useOwnRecord();
   const ownId = subject.kind === "own" ? subject.patientId : null;
 
+  // A refusal or an error is no profile, and the page says which. Before, the
+  // list's failure left an empty page and the profile's error body was stored
+  // as the profile, which the page then crashed on.
   useEffect(() => {
     if (subject.kind === "pending") return;
-    fetchApi("/api/patient/profile")
-      .then((r) => r.json())
-      .then((d) => {
-        const all: PatientItem[] = d.patients ?? [];
+    let cancelled = false;
+    readJson<{ patients?: PatientItem[] }>(fetchApi("/api/patient/profile"))
+      .then((res) => {
+        if (cancelled) return;
+        if ("error" in res) {
+          setLoadError(res.error);
+          return;
+        }
+        const all = res.data.patients ?? [];
         const list =
           IS_STATIC && subject.kind === "own"
             ? all.filter((p) => p.id === ownId)
@@ -125,16 +159,39 @@ export default function PatientProfilePage() {
         setPatients(list);
         if (list.length > 0) setSelectedId(list[0].id);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [subject.kind, ownId]);
 
   useEffect(() => {
     if (!selectedId) return;
+    let cancelled = false;
     setProfileLoading(true);
-    fetchApi(`/api/patient/profile?patientId=${encodeURIComponent(selectedId)}`)
-      .then((r) => r.json())
-      .then((d) => setProfile(d))
-      .finally(() => setProfileLoading(false));
+    readJson<Profile>(
+      fetchApi(
+        `/api/patient/profile?patientId=${encodeURIComponent(selectedId)}`,
+      ),
+    )
+      .then((res) => {
+        if (cancelled) return;
+        if ("error" in res) {
+          setProfile(null);
+          setLoadError(res.error);
+          return;
+        }
+        setProfile(res.data);
+        setLoadError(null);
+      })
+      .finally(() => {
+        if (!cancelled) setProfileLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedId]);
 
   return (
@@ -230,6 +287,27 @@ export default function PatientProfilePage() {
         {profileLoading && (
           <div className="text-(--text-secondary) text-sm">
             {t("Loading health profile…")}
+          </div>
+        )}
+
+        {loadError && !profileLoading && (
+          <div
+            role="alert"
+            data-testid="profile-load-error"
+            className="mb-6 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-200"
+          >
+            {loadError.kind === "refused"
+              ? t(
+                  "You may not see this health profile: a patient sees their own record only. If your session has ended, sign in again.",
+                )
+              : loadError.status
+                ? t(
+                    "The health profile could not be loaded (HTTP {status}). Please try again later.",
+                    { status: loadError.status },
+                  )
+                : t(
+                    "The health profile could not be loaded. Please try again later.",
+                  )}
           </div>
         )}
 

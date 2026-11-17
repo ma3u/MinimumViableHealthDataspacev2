@@ -36,6 +36,17 @@ docker tag "neo4j:${NEO4J_VERSION}" "${NEO4J_IMAGE}"
 docker push "${NEO4J_IMAGE}"
 ok "Neo4j image in ACR"
 
+# ── Neo4j password (#359) ──────────────────────────────────────────────────
+# Key Vault holds it; a first deploy generates it. NEO4J_AUTH sets it only
+# when the store is empty, which it is the first time the share is mounted.
+NEO4J_PW=$(neo4j_password quiet)
+if [ -z "$NEO4J_PW" ]; then
+  NEO4J_PW=$(openssl rand -hex 24)
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$NEO4J_PASSWORD_SECRET" \
+    --value "$NEO4J_PW" -o none
+  ok "Generated ${NEO4J_PASSWORD_SECRET} in ${KEY_VAULT_NAME} (not displayed)"
+fi
+
 # ── Neo4j container app (step 1: create with CLI flags) ────────────────────
 log "Creating Neo4j container app ${NEO4J_APP} (no volumes yet)..."
 az containerapp create \
@@ -47,8 +58,9 @@ az containerapp create \
   --cpu "$NEO4J_CPU" --memory "$NEO4J_MEMORY" \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 7687 --exposed-port 7687 --transport tcp \
+  --secrets "neo4j-auth=${NEO4J_USER}/${NEO4J_PW}" \
   --env-vars \
-    "NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}" \
+    "NEO4J_AUTH=secretref:neo4j-auth" \
     "NEO4J_PLUGINS=[\"apoc\"]" \
     "NEO4J_dbms_security_procedures_unrestricted=apoc.*" \
     "NEO4J_server_default__listen__address=0.0.0.0" \
@@ -57,6 +69,7 @@ az containerapp create \
     "NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE}" \
     "NEO4J_server_jvm_additional=-XX:MaxDirectMemorySize=${NEO4J_DIRECT_MEMORY}" \
   -o none
+unset NEO4J_PW
 ok "Neo4j container app created (${NEO4J_CPU} vCPU, ${NEO4J_MEMORY}, ADR-056)"
 
 # ── Neo4j (step 2: patch YAML to add Azure Files volumes) ──────────────────

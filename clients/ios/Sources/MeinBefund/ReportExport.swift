@@ -73,6 +73,9 @@ enum ReportExport {
     // `discard` takes it away again when the sheet closes.
     let stamp = ISO8601DateFormatter()
     stamp.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
+    // The report's day as the person saw it, not the UTC day: the default GMT
+    // turned a report dated at local midnight in Berlin into the day before.
+    stamp.timeZone = .current
     let day = stamp.string(from: report.effectiveDate)
     let base = "Laborbefund-\(day)"
     let dir = FileManager.default.temporaryDirectory
@@ -108,6 +111,9 @@ enum ReportExport {
   static func fhirJSON(_ report: LabReport) -> String {
     let date = ISO8601DateFormatter()
     date.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
+    // Local day, not UTC (see the stamp above): FHIR `effectiveDateTime` as a
+    // date carries no zone, so it must be the day printed on the report.
+    date.timeZone = .current
     let bundle = FhirWriter.buildBundle(
       values: report.extraction.coded,
       meta: FhirWriter.ReportMeta(

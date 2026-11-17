@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 #
-# Onboards one participant through CFM 0.0.7 and disposes it again (ADR-085
+# Onboards one participant through CFM 0.0.8 and disposes it again (ADR-085
 # step 1, #973). Checks what the agents created on the EDC 1.0 stack, the
 # same things ui/src/lib/edc/provision.ts creates, and that dispose removes
 # them. Exit 0 when both directions pass.

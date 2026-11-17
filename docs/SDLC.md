@@ -370,7 +370,8 @@ Every push to `main` runs [`deploy-azure.yml`](../.github/workflows/deploy-azure
    trusts this repository's `main` branch);
 2. build the UI and the Neo4j proxy images, push them to the registry
    `acrmvhdehds`;
-3. wait while a load test runs (the `LOAD_TEST_RUNNING` variable), so a merge
+3. wait while a load test runs (a running `mvhd-load-test` execution or an open
+   `load-test` deployment, [ADR-092](ADRs/ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md)), so a merge
    does not redeploy under [k6](https://grafana.com/docs/k6/latest/);
 4. deploy both to Container Apps in `rg-mvhd-dev` as a new revision (ACA
    caches [`:latest`](../CLAUDE.md#L75), so a restart alone would not pick up the image);

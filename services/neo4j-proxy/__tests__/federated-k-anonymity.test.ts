@@ -131,3 +131,19 @@ describe("POST /federated/query — caller-side ODRL", () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe("POST /federated/query — an SPE that fails (#1029)", () => {
+  it("says which SPE failed but not why", async () => {
+    mockRun.mockRejectedValue(
+      new Error(
+        "Neo.ClientError.Statement.SyntaxError: Invalid input at bolt://spe-internal:7687 MATCH (p:Patient {name: 'Erika'})",
+      ),
+    );
+    const res = await request
+      .post("/federated/query")
+      .send({ cypher: "MATCH (p:Patient) RETURN count(p) AS cohort" });
+    expect(res.text).not.toContain("Neo.ClientError");
+    expect(res.text).not.toContain("spe-internal");
+    expect(res.text).not.toContain("Erika");
+  });
+});

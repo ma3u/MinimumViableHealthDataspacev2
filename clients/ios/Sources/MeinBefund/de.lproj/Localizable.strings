@@ -402,6 +402,8 @@
 "The code shown on the website must read the same. If it does not, cancel." = "Der Code auf der Website muss genauso lauten. Wenn nicht, brechen Sie ab.";
 "The connection was declined on the consent page." = "Die Verbindung wurde auf der Einwilligungsseite abgelehnt.";
 "The hub refused (%lld): %@" = "Der Hub hat abgelehnt (%1$lld): %2$@";
+"The EHDS demo hub is offline right now. It runs on weekdays, about 07:00 to 19:00 Berlin time. Try again then; everything else in Klarbefund works without it." = "Der EHDS-Demo-Hub ist gerade offline. Er läuft werktags etwa von 7 bis 19 Uhr (Berliner Zeit). Versuchen Sie es dann noch einmal; alles andere in Klarbefund funktioniert ohne ihn.";
+"The EHDS demo hub runs on weekdays, about 07:00 to 19:00 Berlin time. Outside those hours, creating an account, signing in and sending wait until it is back." = "Der EHDS-Demo-Hub läuft werktags etwa von 7 bis 19 Uhr (Berliner Zeit). Außerhalb dieser Zeiten warten Konto anlegen, Anmelden und Senden, bis er wieder da ist.";
 "This device cannot scan codes with its camera. Paste the link instead, or use the iPhone camera app, which opens Klarbefund from the code." = "Dieses Gerät kann keine Codes mit der Kamera scannen. Fügen Sie stattdessen den Link ein, oder nutzen Sie die Kamera-App des iPhones, die Klarbefund aus dem Code öffnet.";
 "This is my account" = "Das ist mein Konto";
 "This is not a Klarbefund connection code." = "Das ist kein Verbindungscode von Klarbefund.";
@@ -604,3 +606,96 @@
 "%@ is not over. The hub works out your result from %@; nothing can be sent before." = "%1$@ ist nicht vorbei. Der Hub ermittelt Ihr Ergebnis ab dem %2$@; vorher kann nichts gesendet werden.";
 "Working out your result…" = "Ihr Ergebnis wird ermittelt…";
 "Your result could not be worked out (HTTP %lld)." = "Ihr Ergebnis konnte nicht ermittelt werden (HTTP %lld).";
+
+/* Export to my Mac (Relate) */
+"Export to my Mac (Relate)" = "An meinen Mac exportieren (Relate)";
+"Export to my Mac" = "An meinen Mac exportieren";
+"Keep a connected copy of your values in a Relate graph on your own Mac: your reports with their LOINC codes and where each value came from, and your Apple Health weekly means. It goes over your Wi-Fi, encrypted, to that Mac only. No cloud is involved." = "Behalten Sie eine verknüpfte Kopie Ihrer Werte in einem Relate-Graphen auf Ihrem eigenen Mac: Ihre Befunde mit LOINC-Codes und der Herkunft jedes Werts sowie Ihre Wochenmittel aus Apple Health. Die Übertragung läuft verschlüsselt über Ihr WLAN, nur an diesen Mac. Keine Cloud ist beteiligt.";
+"On the Mac" = "Auf dem Mac";
+"On this phone" = "Auf diesem Telefon";
+"Scan the Mac's QR code" = "QR-Code des Macs scannen";
+"Or paste the klarbefund://relate link" = "Oder den klarbefund://relate-Link einfügen";
+"Pair" = "Verbinden";
+"Paired" = "Verbunden";
+"Values on the Mac" = "Werte auf dem Mac";
+"Send my reports" = "Meine Befunde senden";
+"Send Apple Health weekly means" = "Wochenmittel aus Apple Health senden";
+"While on, each report you scan or correct goes to the Mac. Device trends are the weekly means of resting heart rate, heart rate variability, steps and weight that Trends shows. Switching off stops further sending; the Mac keeps what it has." = "Solange eingeschaltet, geht jeder Befund, den Sie scannen oder korrigieren, an den Mac. Geräte-Trends sind die Wochenmittel von Ruhepuls, Herzfrequenzvariabilität, Schritten und Gewicht, die Trends zeigt. Ausschalten beendet weiteres Senden; der Mac behält, was er hat.";
+"Send everything now" = "Jetzt alles senden";
+"Forget this Mac" = "Diesen Mac vergessen";
+"Forget %@?" = "%@ vergessen?";
+"Forget" = "Vergessen";
+"This phone stops sending. The graph on the Mac stays as it is; delete health.rl there to remove it." = "Dieses Telefon sendet nicht mehr. Der Graph auf dem Mac bleibt, wie er ist; löschen Sie dort health.rl, um ihn zu entfernen.";
+"Paired with %@. Your values go to %@ on that Mac only." = "Mit %1$@ verbunden. Ihre Werte gehen nur an %2$@ auf diesem Mac.";
+"Sent %lld values from %lld reports to %@." = "%1$lld Werte aus %2$lld Befunden an %3$@ gesendet.";
+"Sent %lld weekly values from %lld device trends to %@." = "%1$lld Wochenwerte aus %2$lld Geräte-Trends an %3$@ gesendet.";
+"The code asks for an unencrypted connection. Klarbefund only sends over HTTPS." = "Der Code verlangt eine unverschlüsselte Verbindung. Klarbefund sendet nur über HTTPS.";
+"%@ is not on your own network. Klarbefund only exports to a Mac on your Wi-Fi." = "%@ ist nicht in Ihrem eigenen Netzwerk. Klarbefund exportiert nur an einen Mac in Ihrem WLAN.";
+"The code is incomplete. Show it again on the Mac and scan once more." = "Der Code ist unvollständig. Zeigen Sie ihn auf dem Mac erneut an und scannen Sie noch einmal.";
+"The Mac no longer knows this phone. Scan its code again." = "Der Mac kennt dieses Telefon nicht mehr. Scannen Sie seinen Code erneut.";
+"The Mac answered %lld." = "Der Mac antwortete %lld.";
+"The Mac's certificate is not the one in the code, so nothing was sent." = "Das Zertifikat des Macs ist nicht das aus dem Code, daher wurde nichts gesendet.";
+"The Mac cannot be reached (%lld). Is the receiver running, and is the phone on the same Wi-Fi?" = "Der Mac ist nicht erreichbar (%lld). Läuft der Empfänger, und ist das Telefon im selben WLAN?";
+
+/* More Apple Health metrics for the local graph (Relate, Nov 2026). */
+"Cardio fitness (VO2 max)" = "Cardiofitness (VO2max)";
+"Respiratory rate" = "Atemfrequenz";
+"Blood oxygen" = "Blutsauerstoff";
+"Active energy" = "Aktivitätsenergie";
+"Sleep" = "Schlaf";
+"Deep sleep" = "Tiefschlaf";
+"REM sleep" = "REM-Schlaf";
+"Core sleep" = "Kernschlaf";
+"breaths/min" = "Atemzüge/min";
+"kcal per day" = "kcal pro Tag";
+"hours per night" = "Stunden pro Nacht";
+"minutes per night" = "Minuten pro Nacht";
+
+/* Health graph on this iPhone (Relate on the device, Nov 2026). */
+"Health graph on this iPhone" = "Gesundheitsgraph auf diesem iPhone";
+"Health graph" = "Gesundheitsgraph";
+"Keep a connected graph of your values on this iPhone, in Relate, Neo4j's embedded graph database: every value linked to its report, its LOINC code and where it came from. It is built here from your reports, encrypted by iOS while the phone is locked, never backed up and never sent anywhere." = "Behalten Sie einen verknüpften Graphen Ihrer Werte auf diesem iPhone, in Relate, der eingebetteten Graphdatenbank von Neo4j: jeder Wert verbunden mit seinem Befund, seinem LOINC-Code und seiner Herkunft. Er wird hier aus Ihren Befunden erstellt, von iOS verschlüsselt, solange das Telefon gesperrt ist, nie gesichert und nie irgendwohin gesendet.";
+"Keep a graph on this iPhone" = "Graph auf diesem iPhone führen";
+"Include Apple Health weekly means" = "Wochenmittel aus Apple Health einbeziehen";
+"The graph follows your reports: scanning, correcting or deleting one updates it. Switching off deletes the graph; your reports stay." = "Der Graph folgt Ihren Befunden: Scannen, Korrigieren oder Löschen eines Befunds aktualisiert ihn. Ausschalten löscht den Graphen; Ihre Befunde bleiben.";
+"In the graph" = "Im Graphen";
+"Lab values" = "Laborwerte";
+"Kinds of test (LOINC)" = "Arten von Tests (LOINC)";
+"Values without a code" = "Werte ohne Code";
+"Also in another report, counted once" = "Auch in einem anderen Befund, einmal gezählt";
+"Apple Health weekly values" = "Wochenwerte aus Apple Health";
+"OMOP measurements" = "OMOP-Messungen";
+"Rebuild now" = "Jetzt neu aufbauen";
+"Your tests over time" = "Ihre Tests im Zeitverlauf";
+"Each list is a Cypher query answered by the graph on this iPhone." = "Jede Liste ist eine Cypher-Abfrage, die der Graph auf diesem iPhone beantwortet.";
+"Delete the graph" = "Graphen löschen";
+"Delete the graph on this iPhone?" = "Den Graphen auf diesem iPhone löschen?";
+"Your reports stay. You can build the graph again at any time." = "Ihre Befunde bleiben. Sie können den Graphen jederzeit neu aufbauen.";
+"Weekly mean from a device, not a lab value" = "Wochenmittel von einem Gerät, kein Laborwert";
+"The graph could not be built: %@" = "Der Graph konnte nicht erstellt werden: %@";
+
+/* Send over USB cable (Export to my Mac, Nov 2026). */
+"Send over USB cable" = "Über USB-Kabel senden";
+"Waiting for the Mac…" = "Warte auf den Mac…";
+"On the Mac, run:" = "Auf dem Mac ausführen:";
+"Sending over USB…" = "Wird über USB gesendet…";
+"Sent %lld values from %lld reports and %lld weekly values over USB to %@." = "%1$lld Werte aus %2$lld Befunden und %3$lld Wochenwerte über USB an %4$@ gesendet.";
+"USB transfer failed: %@" = "USB-Übertragung fehlgeschlagen: %@";
+"The Mac on the cable is not the paired one, so nothing was sent." = "Der Mac am Kabel ist nicht der gekoppelte, daher wurde nichts gesendet.";
+"Paired with %@. It cannot be reached over Wi-Fi right now; you can send over a USB cable instead." = "Mit %@ verbunden. Er ist gerade nicht über WLAN erreichbar; Sie können stattdessen über ein USB-Kabel senden.";
+"%@ cannot be reached over Wi-Fi right now. Nothing was sent; you can send over a USB cable instead." = "%@ ist gerade nicht über WLAN erreichbar. Es wurde nichts gesendet; Sie können stattdessen über ein USB-Kabel senden.";
+
+/* Klarbefund for Mac */
+"Open Klarbefund for Mac and scan the QR code it shows. It comes from TestFlight, the same beta as this app." = "Öffnen Sie Klarbefund für Mac und scannen Sie den QR-Code, den es zeigt. Sie erhalten es über TestFlight, in derselben Beta wie diese App.";
+"Klarbefund for Mac on TestFlight" = "Klarbefund für Mac auf TestFlight";
+"Command-line receiver" = "Empfänger für die Kommandozeile";
+"Pair with another Mac" = "Mit einem anderen Mac koppeln";
+"For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac." = "Zum Beispiel Klarbefund für Mac: Scannen Sie den Code, den es zeigt. Dieses iPhone sendet dann alles an diesen Mac.";
+"No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done." = "Kein gemeinsames WLAN nötig: Verbinden Sie dieses iPhone per Kabel mit dem Mac, tippen Sie auf Über USB-Kabel senden und führen Sie dann den Befehl auf dem Mac aus (der Empfänger für die Kommandozeile; Klarbefund für Mac empfängt über WLAN). Nur der gekoppelte Mac erhält etwas. Lassen Sie diesen Bildschirm offen, bis es fertig ist.";
+"That is not a Relate pairing code. On the Mac, open Klarbefund for Mac and scan the code it shows." = "Das ist kein Relate-Kopplungscode. Öffnen Sie auf dem Mac Klarbefund für Mac und scannen Sie den Code, den es zeigt.";
+"Codes and units" = "Codes und Einheiten";
+"LOINC license" = "LOINC-Lizenz";
+"UCUM license" = "UCUM-Lizenz";
+"By default the model on this iPhone answers, so your question never reaches a network at all. You may instead choose your own Azure resource or Anthropic key, in which case your phone talks to your service directly and neither your key nor your values reach the app provider at all. Whichever is in use is named on the screen before you send.\n\nNo model vendor uses your values for training." = "Standardmäßig antwortet das Modell auf diesem iPhone, Ihre Frage erreicht also gar kein Netz. Sie können stattdessen Ihre eigene Azure-Ressource oder Ihren Anthropic-Schlüssel wählen. Dann spricht Ihr iPhone direkt mit Ihrem Dienst, und weder Ihr Schlüssel noch Ihre Werte erreichen den Anbieter dieser App. Was gerade verwendet wird, steht vor dem Senden auf dem Bildschirm.\n\nKein Modellanbieter nutzt Ihre Werte für Training.";
+"Send year of birth and sex" = "Geburtsjahr und Geschlecht senden";
+"From your Profile, to this Mac only, so it can work out scores that depend on age and sex. Only the year is sent, never the day. Nothing about you goes to the EHDS hub or into a report for your doctor." = "Aus Ihrem Profil, nur an diesen Mac, damit er Werte berechnen kann, die von Alter und Geschlecht abhängen. Gesendet wird nur das Jahr, nie der Tag. Nichts über Sie geht an den EHDS-Hub oder in einen Befund für Ihre Praxis.";

@@ -20,8 +20,11 @@ core, is what saturates from 200 users on.
   Values in `scripts/azure/env.sh`, applied by `scripts/azure/size-ui.sh`,
   kept by `offhours.sh` on the morning start. The ADR carries the cost per
   step, the cost per 1,000 requests and the scalability of every component.
-- Deploys wait while a load test runs: the repository variable
-  `LOAD_TEST_RUNNING`, set by both run scripts, read by `deploy-azure.yml`.
+- Deploys wait while a load test runs. The repository variable
+  `LOAD_TEST_RUNNING` of the first version was never readable by the
+  workflow token, so the hold never held; since 2026-11-12 the deploy reads a
+  running `mvhd-load-test` execution or an open `load-test` deployment
+  ([ADR-092](../../ADRs/ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md)).
 - `/api/tasks` says who answered (`source`: the connector or the hub's store)
   and answers 502 when both fail; it serves no fixtures any more. The local
   task table belongs to its user (`jad/init-postgres.sql`).

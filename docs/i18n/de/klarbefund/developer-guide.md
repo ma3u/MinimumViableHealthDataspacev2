@@ -1,6 +1,6 @@
 ---
 source: docs/klarbefund/developer-guide.md
-sourceHash: 6789a3d05981809fb20a7746a513b48f8afc847a07723a7603fabad1c480dd7f
+sourceHash: f0d7769fce7fc6456f496107240e536fdaaf9613f960c0c227a902737249f275
 language: de
 summary: "Die App bauen, starten und testen: die Pipeline von der Kamera bis zum versiegelten Speicher, das gemeinsame Wörterbuch, der Aufbau des Speichers, der Entwicklungsdatensatz, die beiden Testsuiten, Diagnose und TestFlight."
 ---
@@ -107,13 +107,14 @@ Jedes der folgenden Startargumente existiert nur in einem Debug-Build. Die Prüf
 `#if DEBUG`, nicht nur ein Flag: Ein Flag kann entdeckt werden, Code, der nicht
 kompiliert ist, nicht.
 
-| Argument               | Was es bewirkt                                                                                                                                                                      |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `-MBDemoSeed`          | Zwei fiktive Befunde, nur im Arbeitsspeicher. Genug für einen Screenshot; damit startet jeder UI-Test.                                                                              |
-| `-MBDevData`           | Sieben fiktive Befunde über drei Jahre und vier Quellen, im Code erzeugt: Ein Verlauf hat eine Form, die Liste der nicht zugeordneten Zeilen hat Einträge, jeder Befund hat Seiten. |
-| `-MBShot <screen>`     | Öffnet einen Bildschirm direkt, sobald die Befunde geladen sind: `list detail scan trends reference history profile consent settings privacy consents connect`.                     |
-| `-MBSelfTest`          | Führt einen synthetischen Befund durch die gesamte Pipeline im App-Target und protokolliert 27 Prüfungen (siehe [Der Selbsttest](#the-self-test)).                                  |
-| `-MBExportDiagnostics` | Erstellt das Diagnosearchiv im temporären Verzeichnis der App für [`Scripts/pull-diagnostics.sh`](../../clients/ios/Scripts/pull-diagnostics.sh).                                   |
+| Argument               | Was es bewirkt                                                                                                                                                                                                               |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-MBDemoSeed`          | Zwei fiktive Befunde, nur im Arbeitsspeicher. Genug für einen Screenshot; damit startet jeder UI-Test.                                                                                                                       |
+| `-MBDevData`           | Sieben fiktive Befunde über drei Jahre und vier Quellen, im Code erzeugt: Ein Verlauf hat eine Form, die Liste der nicht zugeordneten Zeilen hat Einträge, jeder Befund hat Seiten.                                          |
+| `-MBShot <screen>`     | Öffnet einen Bildschirm direkt, sobald die Befunde geladen sind: `list detail scan trends reference history profile consent settings privacy consents connect programmes graph relate relatePaired relateUSB relateUSBDone`. |
+| `-MBSelfTest`          | Führt einen synthetischen Befund durch die gesamte Pipeline im App-Target und protokolliert 27 Prüfungen (siehe [Der Selbsttest](#the-self-test)).                                                                           |
+| `-MBUSBSelfTest`       | Wartet über das USB-Kabel mit einem festen Testtoken auf den Mac und sendet nur den Endrahmen ([Relate](#relate-der-graph-auf-dem-telefon-und-auf-dem-mac)).                                                                 |
+| `-MBExportDiagnostics` | Erstellt das Diagnosearchiv im temporären Verzeichnis der App für [`Scripts/pull-diagnostics.sh`](../../clients/ios/Scripts/pull-diagnostics.sh).                                                                            |
 
 Der Entwicklungsdatensatz wird **erzeugt, nicht gespeichert**. Eine Zeile gibt die Bezeichnung, den Wert,
 die Einheit und den vom Labor gedruckten Bereich an, und [`Analytes.lookup`](../../clients/ios/Sources/Shared/Analytes.generated.swift#L2775) codiert sie
@@ -361,6 +362,131 @@ einem Telefon liegt, und eine erfundene ID würde einen falschen Bezeichner an e
 Messwert hängen. Der gedruckte Bereich wird wörtlich in [`RawLabValue.referenceText`](../../clients/ios/Sources/Shared/Provenance.swift#L67) aufbewahrt
 und reist als [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text); ein Bereich ohne Zahl darin überlebt
 nur dort, und [obs-3](https://hl7.org/fhir/R4/observation.html#invs) von FHIR erlaubt das: Ein Referenzbereich braucht mindestens einen unteren Wert, einen oberen Wert oder einen Text.
+
+## Relate: der Graph auf dem Telefon und auf dem Mac
+
+<img src="img/graph.png" width="300" alt="Gesundheitsgraph auf diesem iPhone, gebaut aus dem fiktiven Entwicklungsdatensatz: die Zahl der Befunde, Werte, LOINC-Codes und Werte ohne Code"> <img src="img/relatePaired.png" width="300" alt="An meinen Mac exportieren, gekoppelt mit dem fiktiven Demo-Mac, den die Screenshots verwenden">
+
+Zwei Funktionen bringen die Werte einer Person in einen
+[Relate](https://github.com/relatedb/relate)-Graphen (eine eingebettete
+openCypher-Datenbank): einen auf dem Telefon, einen auf ihrem eigenen Mac.
+Beide laufen über dieselbe Bibliothek, `HealthGraph`, aus
+[ma3u/relate-hackathon-team](https://github.com/ma3u/relate-hackathon-team),
+sodass ein Befund auf dem Telefon, auf dem Mac und in der Python-Referenz
+dieses Repositorys zu denselben Knoten wird. Die Seite der Nutzerin oder des
+Nutzers steht im [Benutzerhandbuch](user-guide.md#ihr-gesundheitsgraph-auf-diesem-iphone).
+
+| Teil                      | Wo                                                                                                                                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Die Bibliothek            | `HealthGraph` in [`project.yml`](../../clients/ios/project.yml), auf einen Commit festgelegt; sie bringt Relates `RelateFFI.xcframework` mit (iOS 16+, macOS 13+)                                                          |
+| Graph auf diesem iPhone   | [`OnDeviceGraph`](../../clients/ios/Sources/MeinBefund/OnDeviceGraph.swift), [`OnDeviceGraphView`](../../clients/ios/Sources/MeinBefund/OnDeviceGraphView.swift)                                                           |
+| An meinen Mac exportieren | [`LocalRelateExport`](../../clients/ios/Sources/MeinBefund/LocalRelateExport.swift), [`LocalRelateView`](../../clients/ios/Sources/MeinBefund/LocalRelateView.swift)                                                       |
+| Der Kopplungslink         | [`LocalRelateLink`](../../clients/ios/Sources/Shared/LocalRelateLink.swift): `klarbefund://relate?url=…&token=…&fp=…&name=…&store=…`                                                                                       |
+| Der Empfänger auf dem Mac | [`swift/mac`](https://github.com/ma3u/relate-hackathon-team/tree/main/swift/mac) und [`scripts/health_vault.sh`](https://github.com/ma3u/relate-hackathon-team/blob/main/scripts/health_vault.sh) in relate-hackathon-team |
+
+<img src="img/klarbefund-relate-claude.gif" width="640" alt="Animation des ganzen Wegs: Klarbefund koppelt mit dem Empfänger, sendet 34 fiktive Befunde, der Relate-Graph auf dem Mac hält sie, und Claude Desktop liest ihn über MCP">
+
+Die Animationen in diesem Abschnitt und im Benutzerhandbuch erzeugt
+[`scripts/flow_gifs.py`](https://github.com/ma3u/relate-hackathon-team/blob/main/scripts/flow_gifs.py)
+aus einer Simulator-Aufnahme mit `-MBDevData` und einem Wegwerf-Empfänger, gestartet mit
+`--config <Wegwerf-Ordner> --name Demo-Mac`, sodass weder der Tresor noch die echte
+Kopplung je beteiligt ist; der Docstring dort nennt die Schritte.
+
+### Der Graph auf dem Telefon
+
+[`OnDeviceGraph`](../../clients/ios/Sources/MeinBefund/OnDeviceGraph.swift) ist
+eine Projektion, nie eine Quelle: Er wird bei jeder Änderung der Befunde von
+Grund auf aus denselben FHIR-Bundles gebaut, die der Mac-Export sendet, und
+Ausschalten löscht ihn. Der Speicher liegt in Application Support unter
+`HealthGraph` (`HealthGraphDemo` bei einem Demostart, damit fiktive Daten nie
+auf einen echten Graphen treffen), mit `FileProtectionType.complete` und von
+der Sicherung ausgenommen. Jede Liste auf dem Bildschirm ist eine benannte
+Cypher-Abfrage aus der Bibliothek, ausgeführt über einen nur lesenden Zugriff.
+Relate erlaubt einen Zugriff pro Speicher und Prozess, deshalb wird der
+schreibende geschlossen, bevor der lesende öffnet.
+
+### Export über WLAN
+
+1. Der Empfänger auf dem Mac (`health-graph receive`) erzeugt einmal ein
+   P-256-Zertifikat und ein 256-Bit-Token und zeigt beides als QR-Code: den Kopplungslink.
+2. Die App nimmt den Link nur mit `https`, einer privaten, Loopback- oder
+   `.local`-Adresse und einem 64-stelligen Hex-Fingerabdruck an und legt ihn im Schlüsselbund ab.
+3. Jede Anfrage prüft den SHA-256 des Empfängerzertifikats und sendet das
+   Token als Bearer. `GET /v1/status` antwortet mit der Zahl der Werte;
+   `POST /v1/record` nimmt das FHIR-Bundle eines Befunds (die Befund-ID in
+   `X-Klarbefund-Report`, sodass erneutes Senden ihn ersetzt);
+   `POST /v1/wearables` nimmt die Wochenmittel aus Apple Health.
+4. Vor einem Stapel prüft ein Statusaufruf von 4 Sekunden, ob der Mac
+   erreichbar ist, damit ein Telefon außerhalb des Mac-WLANs nicht für jeden
+   Befund ein eigenes Zeitlimit abwartet.
+
+### Export über ein USB-Kabel
+
+```
+Mac: health-graph usb ──usbmuxd──▶ iPhone 127.0.0.1:8788 / ::1:8788 (Klarbefund, während es wartet)
+  Mac     → Telefon  {"token": "…"}                          zuerst das Kopplungstoken
+  Telefon → Mac      {"type": "record", "report": "…", "bundle": {…}}   eines pro Befund
+  Telefon → Mac      {"type": "wearables", "bundle": {…}}    wenn die Person sie sendet
+  Telefon → Mac      {"type": "end"}
+  Mac     → Telefon  {"stored": n, "reports": n, "weekly": n, "skipped": n}
+```
+
+Jeder Rahmen ist eine 4-Byte-Länge (Big Endian) und ein JSON-Objekt. Das
+Telefon wartet erst nach **Über USB-Kabel senden**, nur auf seinen
+Loopback-Adressen (die kein Netzwerk erreicht;
+[usbmuxd](https://github.com/libimobiledevice/usbmuxd) tunnelt das Kabel
+dorthin), vergleicht das Token in konstanter Zeit, bevor es etwas sendet,
+bedient einen Mac und schließt den Port. Es beginnt zu warten, bevor es ein
+Jahr Apple-Health-Daten sammelt, und hält eine Hintergrundaufgabe, damit ein
+App-Wechsel die Übertragung nicht beendet.
+
+### Ausprobieren, Schritt für Schritt
+
+Im Simulator, mit fiktiven Daten und einem Wegwerf-Graphen:
+
+1. In relate-hackathon-team: `swift test` (die Bibliothek) und `swift test --package-path swift/mac` (der Empfänger).
+2. Starten Sie einen Empfänger auf einem Wegwerf-Speicher, nie auf dem Tresor (mit `--port 8799`, wenn der echte läuft):
+   ```bash
+   swift run --package-path swift/mac health-graph receive --db /tmp/dev-graph/health.rl --config /tmp/dev-graph/identity \
+     --name Demo-Mac --host 127.0.0.1 --print-link
+   ```
+3. Starten Sie die App im Simulator mit `-MBDevData` und fügen Sie den
+   ausgegebenen Link in **An meinen Mac exportieren (Relate)** ein. Ein
+   Demostart hält seine Kopplung unter einem eigenen Schlüsselbund-Schlüssel
+   und kann so nie an eine echte Kopplung senden.
+4. Senden Sie über WLAN mit **Jetzt alles senden** und prüfen Sie dann den Wegwerf-Graphen:
+   ```bash
+   swift run --package-path swift/mac health-graph query --db /tmp/dev-graph/health.rl reports
+   ```
+5. Für den USB-Weg im Simulator (sein Loopback ist der des Macs): Tippen Sie
+   auf **Über USB-Kabel senden**, dann
+   `swift run --package-path swift/mac health-graph usb --simulator --config /tmp/dev-graph/identity --db /tmp/dev-graph/health.rl`.
+
+Auf einem echten iPhone über das Kabel, ohne die Werte einer Person und ohne
+Tippen: Ein Debug-Build, gestartet mit `-MBUSBSelfTest`, wartet mit einem
+festen Testtoken und sendet nur den Endrahmen.
+
+```bash
+xcrun devicectl device process launch --device <udid> --console red.mabu.meinbefund -- -MBUSBSelfTest
+swift run --package-path swift/mac health-graph usb --db /tmp/dev-graph/health.rl \
+  --test-token usb-self-test-token-0000000000000000
+```
+
+### Die Bibliothek aktualisieren
+
+Das Paket `HealthGraph` ist in [`project.yml`](../../clients/ios/project.yml)
+auf eine `revision` festgelegt. Nachdem eine Änderung in relate-hackathon-team
+gelandet ist, tragen Sie dort deren Commit ein, führen `xcodegen generate` aus
+und bauen einmal in Xcode, damit SwiftPM sie auflöst. Das Relate-Binary ist
+ein 311-MB-Zip, das SwiftPM einmal in seinen Cache lädt; die CI holt es im
+Schritt "Resolve Swift packages", bevor CodeQL den Build verfolgt.
+
+### Screenshots dieser Bildschirme
+
+`graph`, `relate`, `relatePaired`, `relateUSB` und `relateUSBDone` sind
+`-MBShot`-Bildschirme. Die gekoppelten verwenden einen fiktiven Mac namens
+Demo-Mac auf einer [TEST-NET](https://www.rfc-editor.org/rfc/rfc5737)-Adresse,
+nur im Speicher: Mit ihm wird nichts gesendet, nichts geprüft, nichts wartet.
 
 ## Sprachen
 

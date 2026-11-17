@@ -10,12 +10,10 @@ import org.eclipse.edc.iam.verifiablecredentials.spi.model.CredentialSubject;
 import org.eclipse.edc.iam.verifiablecredentials.spi.model.Issuer;
 import org.eclipse.edc.iam.verifiablecredentials.spi.model.VerifiableCredential;
 import org.eclipse.edc.participant.spi.ParticipantAgent;
-import org.eclipse.edc.policy.context.request.spi.RequestContractNegotiationPolicyContext;
 import org.eclipse.edc.policy.model.Operator;
 import org.eclipse.edc.policy.model.Permission;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.protocol.spi.RequestContext;
-import org.eclipse.edc.spi.iam.RequestScope;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -120,10 +118,8 @@ class AttestedPurposeFunctionTest {
         assertTrue(function.validate(Operator.EQ, BONUS, rule).succeeded());
     }
 
-    private static RequestContractNegotiationPolicyContext sending(ProtocolRemoteMessage message) {
-        return new RequestContractNegotiationPolicyContext(
-                RequestContext.Builder.newInstance().message(message).direction(RequestContext.Direction.Egress).build(),
-                RequestScope.Builder.newInstance());
+    private static RequestContext sending(ProtocolRemoteMessage message) {
+        return RequestContext.Builder.newInstance().message(message).direction(RequestContext.Direction.Egress).build();
     }
 
     @Test
@@ -134,8 +130,8 @@ class AttestedPurposeFunctionTest {
                         .policy(Policy.Builder.newInstance().build()).build())
                 .build());
         assertEquals(Set.of("org.eclipse.dspace.dcp.vc.type:DataProcessingPurposeCredential:read"),
-                extractor.extractScopes(EhdsAttestedPurposeExtension.ATTESTED_PURPOSE, Operator.EQ, BONUS, request));
-        assertEquals(Set.of(), extractor.extractScopes("https://w3id.org/ehds/purpose", Operator.EQ, BONUS, request));
+                extractor.extractScopes(EhdsAttestedPurposeExtension.ATTESTED_PURPOSE, Operator.EQ, BONUS, request).getContent());
+        assertEquals(Set.of(), extractor.extractScopes("https://w3id.org/ehds/purpose", Operator.EQ, BONUS, request).getContent());
     }
 
     @Test
@@ -147,6 +143,6 @@ class AttestedPurposeFunctionTest {
                         .policy(Policy.Builder.newInstance().build()).build())
                 .build());
         assertEquals(Set.of(), new AttestedPurposeScopeExtractor()
-                .extractScopes(EhdsAttestedPurposeExtension.ATTESTED_PURPOSE, Operator.EQ, BONUS, agreement));
+                .extractScopes(EhdsAttestedPurposeExtension.ATTESTED_PURPOSE, Operator.EQ, BONUS, agreement).getContent());
     }
 }

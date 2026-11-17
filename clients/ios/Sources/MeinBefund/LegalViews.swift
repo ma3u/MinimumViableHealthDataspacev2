@@ -57,33 +57,53 @@ struct PrivacySummary: View {
               """)
           }
 
-          Group {
-            Text("Where the explanation comes from")
-              .font(.headline)
-            Text(
-              """
-              By default the model on this iPhone answers, so your question \
-              never reaches a network at all. You may instead choose the \
-              Klarbefund service, which processes in the EU, or your own Azure \
-              resource or Anthropic key, in which case your phone talks to \
-              your service directly and neither your key nor your values reach \
-              the app provider at all. Whichever is in use is named on the \
-              screen before you send.
+          // The Klarbefund service is described only where the build offers
+          // it; TestFlight builds do not (BringYourOwnProvider.offeredKinds).
+          if BringYourOwnProvider.hostedIsConfigured {
+            Group {
+              Text("Where the explanation comes from")
+                .font(.headline)
+              Text(
+                """
+                By default the model on this iPhone answers, so your question \
+                never reaches a network at all. You may instead choose the \
+                Klarbefund service, which processes in the EU, or your own Azure \
+                resource or Anthropic key, in which case your phone talks to \
+                your service directly and neither your key nor your values reach \
+                the app provider at all. Whichever is in use is named on the \
+                screen before you send.
 
-              No model vendor uses your values for training.
-              """)
-          }
+                No model vendor uses your values for training.
+                """)
+            }
 
-          Group {
-            Text("Why signing in is sometimes asked for")
-              .font(.headline)
-            Text(
-              """
-              Only the default service asks you to sign in, and only so the \
-              limit of 20 explanations a day can be counted per person. The \
-              counter stores a one-way hash and a number, not your name. With \
-              your own provider there is no sign-in and no limit.
-              """)
+            Group {
+              Text("Why signing in is sometimes asked for")
+                .font(.headline)
+              Text(
+                """
+                Only the default service asks you to sign in, and only so the \
+                limit of 20 explanations a day can be counted per person. The \
+                counter stores a one-way hash and a number, not your name. With \
+                your own provider there is no sign-in and no limit.
+                """)
+            }
+          } else {
+            Group {
+              Text("Where the explanation comes from")
+                .font(.headline)
+              Text(
+                """
+                By default the model on this iPhone answers, so your question \
+                never reaches a network at all. You may instead choose your own \
+                Azure resource or Anthropic key, in which case your phone talks \
+                to your service directly and neither your key nor your values \
+                reach the app provider at all. Whichever is in use is named on \
+                the screen before you send.
+
+                No model vendor uses your values for training.
+                """)
+            }
           }
 
           Divider()
@@ -102,6 +122,32 @@ struct PrivacySummary: View {
               Always consult a doctor before making any decision about your \
               health.
               """)
+          }
+
+          Divider()
+
+          // The LOINC and UCUM licenses ask for their notice wherever the
+          // content ships; every coded value in this app carries both. Kept
+          // verbatim (not localised): it is the licensors' wording.
+          Group {
+            Label("Codes and units", systemImage: "text.book.closed")
+              .font(.headline)
+            Text(
+              verbatim:
+                "This material contains content from LOINC (http://loinc.org). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc."
+            )
+            .font(.footnote)
+            .accessibilityIdentifier("legal-loinc")
+            Text(
+              verbatim:
+                "Units follow UCUM. UCUM is copyright © 1999-2024 Regenstrief Institute, Inc. All rights reserved. Used under the UCUM License, Version 1.1 (https://unitsofmeasure.org/license), provided \"AS IS\", without warranties or conditions of any kind."
+            )
+            .font(.footnote)
+            .accessibilityIdentifier("legal-ucum")
+            Link("LOINC license", destination: URL(string: "https://loinc.org/license/")!)
+              .font(.footnote)
+            Link("UCUM license", destination: URL(string: "https://unitsofmeasure.org/license")!)
+              .font(.footnote)
           }
 
           Link(

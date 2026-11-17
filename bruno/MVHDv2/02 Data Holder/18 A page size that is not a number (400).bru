@@ -1,0 +1,20 @@
+meta {
+  name: 18 A page size that is not a number (400)
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/negotiations?participantId={{uiParticipantId}}&limit=all
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains limit
+}

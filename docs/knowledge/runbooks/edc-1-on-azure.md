@@ -119,6 +119,22 @@ A script that changes `mvhd-nats` (`04-edc-services.sh`) restarts the control pl
 
 The check stays: EDC declined it upstream on 2026-11-10 ([eclipse-edc/Connector#6211](https://github.com/eclipse-edc/Connector/pull/6211)), so ADR-084's decision 6 will not remove it. It assumes the control plane creates the streams (`EDC_NATS_CN_SUBSCRIBER_AUTOCREATE=true` and the `TP` one, set by `04-edc-services.sh`). If the streams are ever provisioned outside EDC, as EDC recommends for production, turn the check off, or a lost stream restarts the control plane in a loop (`docs/gotchas.md`, 2026-11-09, "Upstream").
 
+## Moving to the next release candidate (RC5 to RC6, #930)
+
+An EDC release candidate ships no schema migration from the one before it: RC6 changed seven Connector and seven IdentityHub schemas and dropped the column migrations ([Connector #6186](https://github.com/eclipse-edc/Connector/pull/6186)). So each RC starts on fresh databases next to the previous set, which stays as the rollback. The set is named by `EDC_DB_SUFFIX` in `scripts/azure/env.sh` (`_v1` RC5, `_v1rc6` RC6); siglet keeps `siglet_v1`.
+
+1. Window, `az login`, `scripts/azure/check-keycloak-health.sh` as in step 0; no load test.
+2. `migrate-edc-to-v1.sh backup`: the saved definitions name the previous images and the previous database set.
+3. `push-edc1-images.sh build`, then `push` (`EDC_VERSION` defaults to the RC in `runtimes/edc`). Gate: `check` lists the new tag.
+4. The workflow **EDC 1.0 databases** creates the new set. Gate: its summary lists them.
+5. `EDC1_TAG=<tag> migrate-edc-to-v1.sh app controlplane`, `identityhub`, `issuerservice`, one at a time, then `set-edc-log-level.sh` and `migrate-edc-to-v1.sh diff`. Gate per app as in step 4 above.
+6. The seeds of step 7, in order: issuer identity, the identity layer, the data assets. Participants onboarded through the hub or CFM are onboarded again.
+7. The compliance job (`target=azure`) and Demo Smoke at their floors.
+
+Rollback: `migrate-edc-to-v1.sh rollback <app>`, newest first. The previous database set and its keys in Vault are untouched.
+
+8. After the first off-hours stop and start on the new RC (Demo Smoke green after the morning start), drop the previous set: the workflow **EDC databases of a previous release candidate** (`edc-drop-rc-databases.yml`), `plan` with the old suffix, then `drop` on Matthias's go. It refuses the set the apps run on. From then on there is no rollback to the previous RC. RC5's `_v1` set: checked 2026-11-13, it held only the five demo participants, all re-seeded on RC6.
+
 ## Rollback
 
 The way back to 0.18 is closed since 2026-11-09 (#927): the CFM apps and the 0.18 data planes are deleted, and `edc-retire-v018-azure.yml` (#927 step 6, PR #1048) drops the `_v018` databases. What follows is the record of the cutover's rollback, not a step to take.

@@ -169,42 +169,45 @@ BETA_DESCRIPTION = {
 # being asked to look at, not a changelog.
 WHAT_TO_TEST = {
     "en-GB": (
-        "Build 11. New: Delete all my data now deletes everywhere. If the app "
-        "made your EHDS account for you, the button deletes that account and "
-        "everything you sent to the hub as well: your values, your trends and "
-        "your research consents. Then it deletes the reports on this phone. The "
-        "dialog says what will go before you confirm. If the hub cannot be "
-        "reached, the phone is still cleared and the app keeps only the "
-        "account's password, so you can delete the account later under My "
-        "EHDS record.\n\n"
-        "Worth trying, in this order:\n\n"
-        "1. Open Delete all my data and read the dialog: does it say clearly "
-        "what will go? Cancel if you want to keep your data.\n"
-        "2. Only with test data, or after Export all my data: confirm, then sign "
-        "in on the website with the old login. It should no longer work.\n"
-        "3. Everything from build 10 is still in: the tidier menu and My EHDS "
-        "record at the top of the list.\n\n"
-        "There is no undo. Export first if you want a copy."
+        "Build 17. Two things to try:\n\n"
+        "1. Export to my Mac has a new switch, Send year of birth and sex, off "
+        "until you turn it on. It sends the year (never the day) and the sex from "
+        "your Profile to your paired Mac only, so Klarbefund for Mac can work out "
+        "SCORE2, eGFR and FIB-4. Set them under More, Profile first.\n"
+        "2. The health graph on this iPhone counts a value once, also when it is "
+        "printed twice on one report or the same sheet was scanned twice.\n\n"
+        "Since build 16: Analysis provider offers only what this build can "
+        "reach; My EHDS record says when the EHDS demo hub runs (weekdays, about "
+        "07:00 to 19:00 Berlin time) and says so when it is offline; Privacy and "
+        "safety carries the LOINC and UCUM license notices.\n\n"
+        "Since build 15: Export to my Mac pairs with Klarbefund for Mac, from "
+        "this same TestFlight link, with no scripts. Open Klarbefund for Mac, "
+        "then in this app: More, Export to my Mac (Relate), scan the QR code the "
+        "Mac shows, and send.\n\n"
+        "No account is needed. To try the app without a paper report, import "
+        "a PDF from your laboratory with Add report, Import a PDF or photo."
     ),
     "de-DE": (
-        "Build 11. Neu: Alle meine Daten löschen löscht jetzt überall. Hat die "
-        "App Ihr EHDS-Konto für Sie angelegt, löscht die Taste auch dieses Konto "
-        "und alles, was Sie an den Hub gesendet haben: Ihre Werte, Ihren Verlauf "
-        "und Ihre Forschungseinwilligungen. Danach löscht sie die Befunde auf "
-        "diesem Telefon. Der Dialog sagt vor der Bestätigung, was verschwindet. "
-        "Ist der Hub nicht erreichbar, wird das Telefon trotzdem geleert und die "
-        "App behält nur das Passwort des Kontos, damit Sie es später unter Meine "
-        "EHDS-Akte löschen können.\n\n"
-        "Lohnt sich in dieser Reihenfolge:\n\n"
-        "1. Alle meine Daten löschen öffnen und den Dialog lesen: Sagt er klar, "
-        "was verschwindet? Abbrechen, wenn Sie Ihre Daten behalten wollen.\n"
-        "2. Nur mit Testdaten oder nach Alle meine Daten exportieren: bestätigen "
-        "und sich danach mit der alten Anmeldung auf der Website anmelden. Das "
-        "sollte nicht mehr gehen.\n"
-        "3. Alles aus Build 10 ist weiter da: das aufgeräumte Menü und Meine "
-        "EHDS-Akte oben in der Liste.\n\n"
-        "Es gibt kein Rückgängig. Exportieren Sie vorher, wenn Sie eine Kopie "
-        "wollen."
+        "Build 17. Zwei Dinge zum Ausprobieren:\n\n"
+        "1. An meinen Mac exportieren hat einen neuen Schalter, Geburtsjahr und "
+        "Geschlecht senden, aus, bis Sie ihn einschalten. Er sendet das Jahr (nie "
+        "den Tag) und das Geschlecht aus Ihrem Profil nur an Ihren gekoppelten Mac, "
+        "damit Klarbefund für Mac SCORE2, eGFR und FIB-4 berechnen kann. Vorher "
+        "unter Mehr, Profil eintragen.\n"
+        "2. Der Gesundheitsgraph auf diesem iPhone zählt einen Wert einmal, auch "
+        "wenn er zweimal auf einem Befund steht oder dasselbe Blatt zweimal "
+        "gescannt wurde.\n\n"
+        "Seit Build 16: Analyse-Anbieter bietet nur an, was dieser Build "
+        "erreicht; Meine EHDS-Akte sagt, wann der EHDS-Demo-Hub läuft (werktags "
+        "etwa von 7 bis 19 Uhr Berliner Zeit), und zeigt an, wenn er offline ist; "
+        "Datenschutz und Sicherheit enthält die Lizenzhinweise zu LOINC und "
+        "UCUM.\n\n"
+        "Seit Build 15: An meinen Mac exportieren koppelt mit Klarbefund für Mac, "
+        "über denselben TestFlight-Link, ohne Skripte. Klarbefund für Mac öffnen, "
+        "dann in dieser App: Mehr, An meinen Mac exportieren (Relate), den "
+        "QR-Code des Macs scannen und senden.\n\n"
+        "Ein Konto ist nicht nötig. Ohne Befund auf Papier: ein PDF Ihres "
+        "Labors über Befund hinzufügen, PDF oder Foto importieren laden."
     ),
 }
 
@@ -231,4 +234,53 @@ FIELD_SOURCE = {
     "whatsNew": "WHATS_NEW",
     "betaDescription": "BETA_DESCRIPTION",
     "whatToTest": "WHAT_TO_TEST",
+}
+
+
+# ── macOS: Klarbefund for Mac (same record, universal purchase) ──────────────
+MAC_PROMO = {
+    "en-GB": (
+        "Your lab reports and Apple Watch data in one health graph on your own Mac, sealed while "
+        "the app is closed. Ask Claude about it, read-only."
+    ),
+    "de-DE": (
+        "Ihre Laborbefunde und Apple-Watch-Daten in einem Gesundheitsgraphen auf Ihrem eigenen Mac, "
+        "versiegelt, solange die App geschlossen ist. Fragen Sie Claude, nur lesend."
+    ),
+}
+
+MAC_KEYWORDS = {
+    "en-GB": "lab,blood,results,health graph,Neo4j,Relate,Claude,MCP,LOINC,FHIR,privacy,offline",
+    "de-DE": "Labor,Blutwerte,Befund,Gesundheit,Graph,Neo4j,Relate,Claude,LOINC,FHIR,Datenschutz",
+}
+
+MAC_DESCRIPTION = {
+    "en-GB": """Klarbefund for Mac keeps a connected copy of your health data on hardware you own.
+
+Pair it with Klarbefund on your iPhone by scanning a QR code. Your scanned lab reports, every value with its LOINC code and the page and line it came from, and your Apple Health weekly means arrive over your own Wi-Fi, encrypted and pinned to this Mac. No cloud is involved.
+
+On the Mac they become one health graph in Neo4j Relate, an embedded graph database: your reports and values, their codes, official and optimal reference ranges, and the health risks each measure is a marker of, every link with its source.
+
+Your graph stays private:
+• One file inside the app's sandbox, sealed with AES-256 while the app is closed. The key stays in this Mac's keychain.
+• Nothing is uploaded. The iPhone talks only to the paired Mac.
+
+Ask Claude, with one click:
+"Connect Claude Desktop" installs a read-only connector. Then ask, for example, "What is in my health graph?", "Which of my values are outside the guideline range?" or "Prepare my next doctor's visit." Claude reads your graph only while Klarbefund for Mac is open, and only the rows it asks for go into your conversation.
+
+Klarbefund is not a medical device. It helps you understand your data and prepare questions for your doctor; it does not diagnose or advise on treatment.""",
+    "de-DE": """Klarbefund für Mac bewahrt eine verknüpfte Kopie Ihrer Gesundheitsdaten auf Ihrem eigenen Gerät auf.
+
+Koppeln Sie es mit Klarbefund auf Ihrem iPhone, indem Sie einen QR-Code scannen. Ihre gescannten Laborbefunde, jeder Wert mit seinem LOINC-Code und der Seite und Zeile, aus der er stammt, und Ihre Apple-Health-Wochenmittel kommen über Ihr eigenes WLAN, verschlüsselt und an diesen Mac gebunden. Keine Cloud ist beteiligt.
+
+Auf dem Mac werden sie zu einem Gesundheitsgraphen in Neo4j Relate, einer eingebetteten Graphdatenbank: Ihre Befunde und Werte, ihre Codes, offizielle und optimale Referenzbereiche und die Gesundheitsrisiken, für die ein Wert ein Marker ist, jede Verbindung mit ihrer Quelle.
+
+Ihr Graph bleibt privat:
+• Eine Datei in der Sandbox der App, mit AES-256 versiegelt, solange die App geschlossen ist. Der Schlüssel bleibt im Schlüsselbund dieses Macs.
+• Nichts wird hochgeladen. Das iPhone spricht nur mit dem gekoppelten Mac.
+
+Fragen Sie Claude, mit einem Klick:
+„Claude Desktop verbinden" installiert einen Konnektor, der nur liest. Fragen Sie dann zum Beispiel „Was ist in meinem Gesundheitsgraphen?", „Welche meiner Werte liegen außerhalb des Leitlinienbereichs?" oder „Bereite meinen nächsten Arzttermin vor." Claude liest Ihren Graphen nur, solange Klarbefund für Mac geöffnet ist, und nur die Zeilen, die es abfragt, gelangen in Ihr Gespräch.
+
+Klarbefund ist kein Medizinprodukt. Es hilft Ihnen, Ihre Daten zu verstehen und Fragen für Ihre Ärztin oder Ihren Arzt vorzubereiten; es stellt keine Diagnose und gibt keine Therapieempfehlung.""",
 }

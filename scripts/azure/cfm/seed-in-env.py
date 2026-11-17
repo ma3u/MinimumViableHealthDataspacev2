@@ -1,6 +1,13 @@
-"""Seeds CFM 0.0.7 on Azure, steps 3 and 4 of scripts/seed-cfm.sh, from inside
-the environment (the managers have internal ingress only). Env: KC_TOKEN_URL,
-CLIENT_SECRET, TM_URL, PM_URL, ISSUER_DID. Prints no secret."""
+"""Seeds CFM on Azure, steps 3 and 4 of scripts/seed-cfm.sh, from inside the
+environment (the managers have internal ingress only). Env: KC_TOKEN_URL,
+CLIENT_SECRET, TM_URL, PM_URL, ISSUER_DID, ISSUER_URL. Prints no secret.
+
+The dataspace profile asks for the MembershipCredential in the format of the
+issuer's definition: from IdentityHub 1.0.0-RC6 that is the issuer's DCP
+profile's (VC2_0_JOSE), and the holder refuses a delivery in another format,
+so the onboarding agent waits on a request that stays REQUESTED (#1094). A
+profile seeded for another format is replaced; the Tenant Manager refuses
+that while a participant profile still uses it."""
 import base64, json, os, sys, time, urllib.error, urllib.parse, urllib.request
 
 e = os.environ
@@ -111,17 +118,40 @@ else:
     cell = b["id"]
 print("4. cell " + cell, flush=True)
 
+definition, fmt = "membership-credential-def", "VC1_0_JWT"
+if e.get("ISSUER_URL"):
+    s, defs = req("POST", e["ISSUER_URL"].rstrip("/") + "/v1/participants/issuer/credentialdefinitions/query",
+                  token=TOKEN, body={})
+    hit = [d for d in (defs if isinstance(defs, list) else [])
+           if isinstance(d, dict) and d.get("credentialType") == "MembershipCredential" and d.get("id")]
+    if hit:
+        definition, fmt = hit[0]["id"], hit[0].get("format") or fmt
+    else:
+        print(f"4. no MembershipCredential definition from the issuer (HTTP {s}); assuming {fmt}", flush=True)
+print(f"4. MembershipCredential: {definition}, {fmt}", flush=True)
+
 s, profiles = req("GET", TM + "/api/v1alpha1/dataspace-profiles", token=TOKEN)
 if s != 200:
     die(f"dataspace profiles: HTTP {s} {profiles}")
+if profiles:
+    seeded = {c.get("format") for c in (profiles[0].get("dataspaceSpec") or {}).get("credentialSpecs", [])
+              if c.get("type") == "MembershipCredential"}
+    if seeded and seeded != {fmt}:
+        old = profiles[0]["id"]
+        s, b = req("DELETE", f"{TM}/api/v1alpha1/dataspace-profiles/{old}", token=TOKEN)
+        if s >= 300:
+            die(f"dataspace profile {old} asks for {sorted(seeded)}, the issuer issues {fmt}, "
+                f"and it cannot be replaced: HTTP {s} {b}")
+        print(f"4. dataspace profile {old} asked for {sorted(seeded)}: replaced", flush=True)
+        profiles = []
 if profiles:
     ds = profiles[0]["id"]
 else:
     s, b = req("POST", TM + "/api/v1alpha1/dataspace-profiles", token=TOKEN, body={
         "artifacts": [], "properties": {"name": "ehds"},
         "dataspaceSpec": {"protocolStack": ["dsp-2025-1", "dcp-2025-1"],
-                          "credentialSpecs": [{"id": "membership-credential-def", "type": "MembershipCredential",
-                                               "issuer": e["ISSUER_DID"], "format": "VC1_0_JWT"}]}})
+                          "credentialSpecs": [{"id": definition, "type": "MembershipCredential",
+                                               "issuer": e["ISSUER_DID"], "format": fmt}]}})
     if s >= 300:
         die(f"dataspace profile: HTTP {s} {b}")
     ds = b["id"]

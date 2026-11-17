@@ -112,6 +112,12 @@ describe("provisionParticipant", () => {
       "@type": "AssociateDataspaceProfile",
       profiles: ["http-dsp-profile-2025-1"],
     });
+    // RC6 reads profiles, RC5 transferTypes (Connector #6196): both are sent.
+    const dataplane = mgmt.mock.calls.find((c) => c[0].endsWith("/dataplanes"));
+    expect(dataplane?.[2]).toMatchObject({
+      profiles: ["HttpData-PULL"],
+      transferTypes: ["HttpData-PULL"],
+    });
     const config = mgmt.mock.calls.find((c) => c[0].endsWith("/config"));
     expect(config?.[2]).toMatchObject({
       entries: {
@@ -147,6 +153,22 @@ describe("provisionParticipant", () => {
           format: "VC1_0_JWT",
         },
       ],
+    });
+  });
+
+  it("requests the format the definition issues in (IdentityHub RC6 #1248)", async () => {
+    happyPath();
+    issuer.mockImplementation(async (path: string) =>
+      path.endsWith("/credentialdefinitions/query")
+        ? [{ ...DEFS[0], format: "VC2_0_JOSE" }]
+        : undefined,
+    );
+    await provisionParticipant(REG);
+    const req = identity.mock.calls.find((c) =>
+      c[0].endsWith("/credentials/request"),
+    );
+    expect(req?.[2]).toMatchObject({
+      credentials: [{ id: "membership-credential-def", format: "VC2_0_JOSE" }],
     });
   });
 
