@@ -2,8 +2,8 @@
 # only on a spike branch; main runs a released version.
 [versions]
 edc = "1.0.0-RC6"
-bouncyCastle = "1.86"
-opentelemetry = "1.67.0"
+bouncyCastle = "1.87"
+opentelemetry = "1.68.0"
 shadow = "9.6.1"
 # what EDC's NATS subscribers bring at runtime (negotiation-tasks-subscriber-nats
 # 1.0.0-RC6); the liveness check compiles against it, so keep them equal
