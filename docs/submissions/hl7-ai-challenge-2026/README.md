@@ -50,12 +50,35 @@ python3 scripts/frames-to-gif.py /tmp/patient public/presentations/hl7-showcase-
 ```
 
 The frames are screenshots taken at chosen moments, so loading time never ends up in the
-animation; about 57 frames, 22 seconds, under 2 MB. `img/klarbefund-tour.gif` is built
-from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset). The deck shows
-the start page's newer tour instead (#578), with the Connect to EHDS and Consents screens,
-as its own copy `img/klarbefund-tour.webp`: off hours the hub answers `/klarbefund/` with the
-offline page (ADR-053), and only `presentations/` is served regardless. Copy it again when
-`ui/public/klarbefund/klarbefund-tour.webp` is re-shot.
+animation; about 57 frames, 22 seconds, under 2 MB. The 16 November 2026 recordings were made on the static demo instead of the live hub:
+it needs no password, and it shows only the mock fixtures, so no end-to-end leftovers and
+no organisation that is not fictional reach the animation. Set `RECORD_PERSONA` and point
+the base URL at the Pages site:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspacev2 RECORD_PERSONA=researcher OUT=/tmp/researcher npx tsx scripts/record-researcher-journey.ts
+PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspacev2 RECORD_PERSONA=patient1 OUT=/tmp/patient npx tsx scripts/record-patient-journey.ts
+```
+
+`img/klarbefund-tour.gif` (article) and the deck's `img/klarbefund-tour.webp` are ten app
+screens from the current build with the fictional development dataset, 2.2 s each with a
+short crossfade: reports, a report, the original scan, trends, reference values, the health
+graph, export to my Mac, connect to EHDS, consents, privacy. Shoot them from
+`clients/ios` with
+
+```bash
+NAME=MB-Blog-Tour DEVICE=com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro SEED=-MBDevData OUT=/tmp/tour SCREENS="list detail scan trends reference relatePaired connect consents privacy" Scripts/capture-screenshots.sh
+```
+
+and take the health graph from `docs/klarbefund/img/graph.png` (`-MBShot graph` opens the
+list with the development dataset). The deck keeps its own copy because off hours the hub
+answers `/klarbefund/` with the offline page (ADR-053), and only `presentations/` is served
+regardless. The start page's video tour (`ui/public/klarbefund/klarbefund-tour.mp4`, #578)
+is a separate screen recording and was not re-shot.
+
+`img/klarbefund-relate-claude.gif` is the copy of `docs/klarbefund/img/klarbefund-relate-claude.gif`
+(#1101): the phone sends to the person's encrypted graph on their Mac, and Claude Desktop
+reads it over a read-only MCP server.
 
 ## Regenerate the deck's preview card and animation
 

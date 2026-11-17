@@ -8,6 +8,12 @@
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red npx tsx scripts/record-patient-journey.ts
  *
+ * Or on the static demo, which needs no password and shows only the mock
+ * fixtures (no end-to-end leftovers, fictional organisations only):
+ *
+ *   PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspacev2 \
+ *     RECORD_PERSONA=patient1 npx tsx scripts/record-patient-journey.ts
+ *
  * Writes frame-NNN.png and frames.json (one duration in ms per frame) to OUT
  * (default ./recordings/patient); scripts/frames-to-gif.py assembles the
  * GIF. The patient is fictional (Maria Schmidt, the patient1 login).
@@ -20,6 +26,8 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3003";
 const OUT = process.env.OUT ?? join(process.cwd(), "recordings", "patient");
 const USER = process.env.RECORD_USER ?? "patient1";
 const PASS = process.env.RECORD_PASS ?? USER;
+/** On the static demo the persona is picked in storage, not signed in. */
+const PERSONA = process.env.RECORD_PERSONA;
 const SIZE = { width: 1100, height: 690 };
 
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -93,8 +101,14 @@ async function main() {
   await ctx.addInitScript(() => {
     sessionStorage.setItem("demo-password-banner-dismissed", "true");
   });
+  if (PERSONA) {
+    await ctx.addInitScript((who) => {
+      localStorage.setItem("demo-persona", who);
+      sessionStorage.setItem("demo-persona", who);
+    }, PERSONA);
+  }
   const page = await ctx.newPage();
-  await login(page);
+  if (!PERSONA) await login(page);
   const rec = new Recorder(page);
 
   // 1. Where the login lands: my health in one view
