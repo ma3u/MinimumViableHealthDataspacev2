@@ -29,6 +29,7 @@ import { edcClient } from "@/lib/edc";
 import { checkPermit } from "@/lib/permit-gate";
 import { recordDspEvent, recordDspEventAfter } from "@/lib/dsp-audit";
 import { __resetDemoRecordsForTests } from "@/lib/demo-records";
+import { __resetCacheForTests } from "@/lib/server-cache";
 import { POST as negotiate } from "@/app/api/negotiations/route";
 import { POST as transfer } from "@/app/api/transfers/route";
 
@@ -37,7 +38,7 @@ const mockManagement = vi.mocked(edcClient.management);
 // The transfer route reads the participant contexts to learn whose permit to
 // check (an operator acting as PharmaCo). That read sends nothing; what must
 // wait for the gate and the audit record is the transfer request itself.
-const PARTICIPANTS = "/v5alpha/participants";
+const PARTICIPANTS = "/v5/participants";
 const transferRequests = () =>
   mockManagement.mock.calls.filter((c) => c[0] !== PARTICIPANTS);
 const mockCheckPermit = vi.mocked(checkPermit);
@@ -84,6 +85,7 @@ const TRANSFER = {
 
 beforeEach(() => {
   __resetDemoRecordsForTests();
+  __resetCacheForTests();
   mockManagement.mockReset();
   mockCheckPermit.mockReset();
   mockRecord.mockReset().mockResolvedValue(undefined);

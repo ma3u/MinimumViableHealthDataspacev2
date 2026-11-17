@@ -31,7 +31,7 @@ struct ProviderSettings: View {
         }
         Section("Provider") {
           Picker("Provider", selection: $configuration.kind) {
-            ForEach(BringYourOwnProvider.Kind.allCases, id: \.self) { kind in
+            ForEach(BringYourOwnProvider.offeredKinds, id: \.self) { kind in
               Text(kind.label).tag(kind)
             }
           }

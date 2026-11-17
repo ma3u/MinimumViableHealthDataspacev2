@@ -1,6 +1,6 @@
 ---
 source: docs/klarbefund/user-guide.md
-sourceHash: 3278a2f8f333e765cf1f68b22430ff3027cb9b6dc36789f2ecf94d4457a48188
+sourceHash: d77cd491daa85c6a45713ac736362a23058fdb2f76c49b6a4d85ac95b87e51fc
 language: de
 summary: "Die App, wie eine Person sie nutzt, Bildschirm für Bildschirm mit Screenshots: einen Befund erfassen, einen Wert mit dem Papier abgleichen, Verläufe, Einwilligungen, die Verbindung zum EHDS, Exporte und Ihre Rechte an Ihren Daten."
 ---
@@ -365,6 +365,7 @@ nur, wenn Sie es sagen.
 | Für die Forschung exportieren (OMOP) | ein Analyseteam                                                                                                                                        | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
 | Alle meine Daten exportieren         | Sie, nach [Art. 15](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_15) und [20](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_20) DSGVO | jeden Befund, jede Seite, jeden Wert, jedes Profilfeld und jede Einwilligung, in einem Archiv                                                                                                                                                                                   |
 | Alle meine Daten löschen             | Sie, [Art. 17 DSGVO](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_17)                                                                         | der Speicher wird endgültig gelöscht; das Konto, das die App auf dem Hub angelegt hat, mit seiner Akte, seinen Werten und Einwilligungen, wird ebenfalls gelöscht; die App sagt das, bevor sie es tut                                                                           |
+| An meinen Mac exportieren (Relate)   | Sie, auf Ihrem eigenen Mac                                                                                                                             | einen Relate-Graphen aller Befunde und Werte und Ihre Wochenmittel aus Apple Health, über Ihr WLAN oder ein USB-Kabel gesendet ([unten](#eine-kopie-auf-ihrem-eigenen-mac-relate))                                                                                              |
 | Diagnosedaten exportieren            | die Entwickler                                                                                                                                         | den erkannten Text und beide Durchläufe der Texterkennung, um eine falsch gelesene Zeile zu beheben                                                                                                                                                                             |
 
 Das FHIR Bundle enthält jeden Wert mit seinem LOINC-Code, seiner [UCUM](https://ucum.org/ucum)-Einheit, dem
@@ -377,6 +378,113 @@ Alles läuft über das Teilen-Menü des Systems: an die ePA-App, Dateien,
 AirDrop oder Mail. Es gibt bewusst keinen eigenen Upload, weil es
 keine API in die ePA für eine App wie diese gibt, und die Bürgerin oder der Bürger ist der
 Integrationspunkt.
+
+## Ihr Gesundheitsgraph auf diesem iPhone
+
+<img src="img/graph-menu.png" width="300" alt="Das Menü ⋯, Abschnitt Datenschutz und Weitergabe, mit Gesundheitsgraph auf diesem iPhone und An meinen Mac exportieren (Relate)"> <img src="img/graph.png" width="300" alt="Gesundheitsgraph auf diesem iPhone: eingeschaltet, mit der Zahl der Befunde, Werte, LOINC-Codes und Werte ohne Code im Graphen">
+
+Die App kann Ihre Werte als verbundenen Graphen halten, auf dem Telefon und
+nirgends sonst: jeder Wert verknüpft mit seinem Befund, seinem
+[LOINC](https://loinc.org/)-Code und der Stelle, an der er gelesen wurde. Der
+Graph ist [Relate](https://github.com/relatedb/relate), eine eingebettete
+Graphdatenbank, die [Cypher](https://opencypher.org/)-Abfragen beantwortet,
+und sie läuft in der App.
+
+1. Öffnen Sie das Menü **⋯** und tippen Sie unter **Datenschutz und Weitergabe** auf **Gesundheitsgraph auf diesem iPhone**.
+2. Schalten Sie ihn ein. Die App baut den Graphen aus Ihren Befunden; das dauert einige Sekunden.
+3. Lesen Sie die Zahlen: Befunde, Werte, LOINC-Codes und Werte, die noch keinen Code haben.
+4. Tippen Sie unter **Ihre Tests im Zeitverlauf** auf einen Test, um seine
+   Werte nach Datum zu sehen, jeweils mit ihrer Herkunft und ob der Wert von
+   einem Foto gelesen wurde oder aus der Datei des Labors stammt.
+5. Tippen Sie auf **Werte ohne Code**, um zu sehen, was das Wörterbuch noch nicht kennt.
+
+<img src="img/graph-trend.png" width="300" alt="Ein Test im Zeitverlauf, LDL-Cholesterin: jeder Wert mit Datum, Quelle und wie er gelesen wurde, beantwortet von einer Cypher-Abfrage auf dem Telefon">
+
+Der Graph folgt Ihren Befunden: Scannen, Korrigieren oder Löschen eines
+Befunds aktualisiert ihn. iOS verschlüsselt ihn, solange das Telefon gesperrt
+ist; er ist von jeder Sicherung ausgenommen und wird nirgendwohin gesendet.
+Ausschalten löscht ihn; Ihre Befunde bleiben.
+
+## Eine Kopie auf Ihrem eigenen Mac (Relate)
+
+**An meinen Mac exportieren (Relate)** hält denselben Graphen auf einem Mac,
+der Ihnen gehört, damit Sie ihn dort abfragen oder
+[Claude Desktop](https://claude.ai/download) Fragen dazu beantworten lassen
+können. Nichts geht über eine Cloud: Das Telefon sendet nur an diesen Mac,
+entweder über Ihr WLAN oder über ein USB-Kabel.
+
+<img src="img/klarbefund-relate-claude.gif" width="640" alt="Animation: Der Empfänger startet auf dem Mac und zeigt einen QR-Code; in Klarbefund Menü, An meinen Mac exportieren (Relate); nach dem Koppeln sendet Jetzt alles senden 34 Befunde mit 240 Werten, während der Mac jeden protokolliert; der Graph auf dem Mac zählt seine Knoten; Claude Desktop fragt den lokalen MCP-Server nach LDL-Cholesterin und erhält fünf Zeilen zurück">
+
+Die Animationen zeigen den ganzen Weg mit dem fiktiven Entwicklungsdatensatz: Klarbefund im Simulator, ein Wegwerf-Empfänger und -Graph auf dem Mac und der echte MCP-Austausch, den Claude Desktop verwendet.
+
+### Auf dem Mac, einmalig
+
+1. Holen Sie den Empfänger: Klonen Sie
+   [ma3u/relate-hackathon-team](https://github.com/ma3u/relate-hackathon-team)
+   und folgen Sie seiner [Installationsanleitung](https://github.com/ma3u/relate-hackathon-team/blob/main/docs/INSTALL.md).
+2. Legen Sie den verschlüsselten Tresor an, in dem der Graph liegt:
+   `scripts/health_vault.sh create`. Es ist ein AES-256-Disk-Image; sein
+   Passwort liegt in Ihrem Schlüsselbund.
+
+### Das Telefon mit dem Mac koppeln
+
+<img src="img/relate.png" width="300" alt="An meinen Mac exportieren, noch nicht gekoppelt: was es tut, der Befehl für den Mac und das Feld für den Kopplungslink (auf einem iPhone steht QR-Code des Macs scannen darüber)"> <img src="img/relatePaired.png" width="300" alt="An meinen Mac exportieren, gekoppelt mit einem Mac namens Demo-Mac: die Zahl der Werte auf dem Mac, die beiden Schalter, Jetzt alles senden und Über USB-Kabel senden">
+
+1. Führen Sie auf dem Mac `scripts/health_vault.sh receive` aus. Es entsperrt den Tresor und zeigt einen QR-Code.
+2. Öffnen Sie auf dem Telefon das Menü **⋯**, **Datenschutz und Weitergabe**, **An meinen Mac exportieren (Relate)**.
+3. Tippen Sie auf **QR-Code des Macs scannen** und scannen Sie ihn. Erlauben Sie **Lokales Netzwerk**, wenn iOS fragt.
+4. Der Bildschirm zeigt nun den Namen des Macs und wie viele Werte sein Graph enthält.
+
+Der QR-Code enthält die Adresse des Macs, ein geheimes Token und den
+Fingerabdruck seines Zertifikats. Die App sendet nur an den Mac, der genau
+dieses Zertifikat zeigt, nur über TLS und nur an eine Adresse in Ihrem eigenen
+Netzwerk.
+
+### Über WLAN senden
+
+Telefon und Mac im selben WLAN, `scripts/health_vault.sh receive` läuft:
+
+1. Schalten Sie **Meine Befunde senden** ein. Jeder Befund geht jetzt an den
+   Mac, und jeder Befund, den Sie später scannen oder korrigieren, folgt von selbst.
+2. Schalten Sie **Wochenmittel aus Apple Health senden** ein, um Ruhepuls,
+   Herzfrequenzvariabilität, Schritte und Gewicht als Wochenmittel hinzuzufügen.
+3. **Jetzt alles senden** sendet alles erneut, etwa nachdem der Graph auf dem Mac neu aufgebaut wurde.
+
+### Über ein USB-Kabel senden
+
+<img src="img/relateUSB.png" width="300" alt="Über USB-Kabel senden, wartet auf den Mac, mit dem Befehl für den Mac und Abbrechen"> <img src="img/relateUSBDone.png" width="300" alt="Über USB-Kabel senden, fertig: wie viele Werte, Befunde und Wochenwerte an Demo-Mac gingen">
+
+<img src="img/klarbefund-usb.gif" width="640" alt="Animation: Auf dem Mac wartet scripts/health_vault.sh usb auf das iPhone; in Klarbefund Über USB-Kabel senden; der Mac protokolliert jeden ankommenden Befund und endet mit 240 Werten aus 34 Befunden">
+
+Wenn Telefon und Mac nicht im selben WLAN sind (ein Hotspot, ein Gastnetz,
+ein Firmennetz, das Geräte voneinander trennt), nehmen Sie das Kabel:
+
+1. Verbinden Sie das iPhone per USB-Kabel mit dem Mac und entsperren Sie das
+   Telefon. Fragt es, ob Sie diesem Computer vertrauen, tippen Sie auf **Vertrauen**.
+2. Tippen Sie in **An meinen Mac exportieren (Relate)** auf **Über USB-Kabel senden**. Die App wartet auf den Mac.
+3. Führen Sie auf dem Mac `scripts/health_vault.sh usb` aus.
+4. Lassen Sie den Bildschirm offen. Am Ende sagt die App, wie viele Werte,
+   Befunde und Wochenwerte an den Mac gingen.
+
+Der Mac weist mit dem Token aus dem QR-Code nach, dass er der gekoppelte ist,
+bevor das Telefon irgendetwas sendet; das Telefon muss also einmal gekoppelt
+sein. Das Telefon wartet nur auf seiner eigenen Loopback-Adresse, die aus
+keinem Netzwerk erreichbar ist: Das Kabel ist der einzige Weg hinein.
+
+### Claude zu Ihrem Graphen fragen (optional)
+
+[Claude Desktop](https://claude.ai/download) kann den Graphen auf Ihrem Mac
+über [MCP](https://modelcontextprotocol.io/) lesen, nur lesend. Schritt für
+Schritt:
+[Klarbefund → Relate → Claude](https://github.com/ma3u/relate-hackathon-team/blob/main/docs/KLARBEFUND.md#3-ask-claude-about-your-graph).
+Der Server läuft auf Ihrem Mac, aber die Zeilen, die eine Frage zurückgibt,
+gehen als Teil des Gesprächs an Claude; fragen Sie also eher nach Verläufen
+und Anzahlen, als eine ganze Akte einzufügen.
+
+### Beenden und vergessen
+
+- **Diesen Mac vergessen** entfernt die Kopplung vom Telefon. Der Mac behält, was er hat.
+- Auf dem Mac sperrt `scripts/health_vault.sh unmount` den Tresor wieder.
 
 ## Datenschutz und Sicherheit
 
@@ -438,10 +546,14 @@ startet:
 ```bash
 cd clients/ios
 SEED=-MBDevData OUT=/tmp/shots \
-  SCREENS="list detail scan trends reference history profile consent settings privacy consents connect" \
+  SCREENS="list detail scan trends reference history profile consent settings privacy consents connect graph relate relatePaired relateUSB relateUSBDone" \
   Scripts/capture-screenshots.sh
 for f in /tmp/shots/*.png; do sips --resampleWidth 660 "$f" --out "../../docs/klarbefund/img/$(basename "$f")"; done
 ```
+
+Zwei Bilder brauchen ein Tippen, das kein Startargument ersetzt: `graph-menu.png`
+ist das Menü **⋯**, über der Liste geöffnet, und `graph-trend.png` ist
+LDL-Cholesterin, geöffnet aus `-MBShot graph`. Beide entstehen ebenso mit `-MBDevData`.
 
 Der Datensatz wird im Code erzeugt, im Arbeitsspeicher, und ist in einem Release-Build
 nicht enthalten. Jedes Labor und jede Praxis darin ist erfunden und jeder Wert

@@ -72,3 +72,31 @@ struct LocalGraphExportTests {
     #expect(LocalGraphExport.bundle(fhirJSON: input, unmapped: []) == input)
   }
 }
+
+/// Year of birth and sex for the person's own Mac (opt-in, ADR-034's one exception).
+@Suite("Year of birth and sex to the Mac")
+struct LocalGraphPersonTests {
+  let bundle = Data(#"{"resourceType":"Bundle","entry":[{"resource":{"resourceType":"Patient","id":"p1"}},{"resource":{"resourceType":"Observation","id":"o1"}}]}"#.utf8)
+
+  func patient(_ data: Data) throws -> [String: Any] {
+    let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+    let entries = json?["entry"] as? [[String: Any]] ?? []
+    return entries.compactMap { $0["resource"] as? [String: Any] }.first { $0["resourceType"] as? String == "Patient" } ?? [:]
+  }
+
+  @Test func onlyTheYearAndTheSexAreAdded() throws {
+    let p = try patient(LocalGraphExport.withPerson(bundle, birthYear: 1971, sex: .male))
+    #expect(p["birthDate"] as? String == "1971")
+    #expect(p["gender"] as? String == "male")
+    #expect(Set(p.keys) == ["resourceType", "id", "birthDate", "gender"])
+  }
+
+  @Test func nothingSetLeavesTheBundleAsItWas() {
+    #expect(LocalGraphExport.withPerson(bundle, birthYear: nil, sex: .any) == bundle)
+  }
+
+  @Test func sexWithoutAYearSendsOnlyTheSex() throws {
+    let p = try patient(LocalGraphExport.withPerson(bundle, birthYear: nil, sex: .female))
+    #expect(p["birthDate"] == nil && p["gender"] as? String == "female")
+  }
+}

@@ -62,6 +62,21 @@ enum BringYourOwnProvider {
     }
   }
 
+  /// The kinds this build can offer.
+  ///
+  /// The Klarbefund service needs an OIDC issuer and a service address in the
+  /// build (`MB_OIDC_ISSUER`, `MB_FEDERATION_BASE_URL`). TestFlight and App
+  /// Store builds ship without them, and offering the choice there gave a
+  /// tester an option that could only fail ("explanations unavailable").
+  static var offeredKinds: [Kind] {
+    Kind.allCases.filter { $0 != .hosted || hostedIsConfigured }
+  }
+
+  static var hostedIsConfigured: Bool {
+    OIDCSession.Configuration.fromBundle() != nil
+      && CloudClient.Configuration.fromBundle() != nil
+  }
+
   struct Configuration: Codable, Equatable, Sendable {
     var kind: Kind
     /// Azure only: `https://<resource>.openai.azure.com`.
@@ -162,7 +177,10 @@ enum BringYourOwnProvider {
 
   static func configuration() -> Configuration {
     guard let data = UserDefaults.standard.data(forKey: configKey),
-      let decoded = try? JSONDecoder().decode(Configuration.self, from: data)
+      let decoded = try? JSONDecoder().decode(Configuration.self, from: data),
+      // A choice stored by a build that offered the service falls back to the
+      // phone in one that does not, instead of leaving explanations off.
+      offeredKinds.contains(decoded.kind)
     else { return .onDevice }
     return decoded
   }

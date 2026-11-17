@@ -32,6 +32,7 @@ vi.mock("@/lib/auth-guard", () => ({
 
 import { edcClient } from "@/lib/edc";
 import { __resetDemoRecordsForTests } from "@/lib/demo-records";
+import { __resetCacheForTests } from "@/lib/server-cache";
 import { GET, POST } from "@/app/api/negotiations/route";
 
 const mockManagement = vi.mocked(edcClient.management);
@@ -68,6 +69,7 @@ function catalogRequest(did: string) {
 describe("/api/negotiations catalog fallback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetCacheForTests();
     readFile.mockResolvedValue(ASSETS);
   });
 
@@ -149,6 +151,7 @@ describe("/api/negotiations catalog fallback", () => {
 describe("/api/negotiations demo offers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetCacheForTests();
     __resetDemoRecordsForTests();
     readFile.mockResolvedValue(ASSETS);
   });

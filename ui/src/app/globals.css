@@ -932,6 +932,53 @@
     opacity: 1;
   }
 }
+
+/* ── A step's preview on the full-screen journeys page (StepPreview.tsx) ─────
+   It pops in beside the picked box; a page's screenshot pans slowly, the
+   app's screens drift. Without motion they stand still. */
+.jp-pop {
+  animation: jp-pop 0.35s ease-out both;
+}
+.jp-pan {
+  transform-origin: 30% 0;
+  animation: jp-pan 9s ease-in-out infinite alternate;
+}
+.jp-drift {
+  animation: jp-drift 7s ease-in-out infinite alternate;
+}
+@keyframes jp-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes jp-pan {
+  from {
+    transform: scale(1.02) translate(0, 0);
+  }
+  to {
+    transform: scale(1.18) translate(-6%, -7%);
+  }
+}
+@keyframes jp-drift {
+  from {
+    transform: scale(1.01) translateY(0);
+  }
+  to {
+    transform: scale(1.06) translateY(-3%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jp-pop,
+  .jp-pan,
+  .jp-drift {
+    animation: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .journey-flow .jf-n,
   .journey-flow .jf-e,

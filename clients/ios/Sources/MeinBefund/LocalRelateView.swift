@@ -42,6 +42,49 @@ struct LocalRelateView: View {
         }
       }
       .task { await export.refreshStatus() }
+      .onDisappear { export.stopUSB() }
+    }
+  }
+
+  /// Send over USB cable: for a Mac that is not on the same Wi-Fi.
+  private var usbSection: some View {
+    Section {
+      switch export.usb {
+      case .off, .done, .failed:
+        if case .done(let message) = export.usb {
+          Label(message, systemImage: "checkmark.circle")
+            .accessibilityIdentifier("relate-usb-result")
+        }
+        if case .failed(let message) = export.usb {
+          Label(message, systemImage: "exclamationmark.triangle")
+            .accessibilityIdentifier("relate-usb-result")
+        }
+        Button {
+          Task { await export.startUSB(reports()) }
+        } label: {
+          Label("Send over USB cable", systemImage: "cable.connector")
+        }
+        .accessibilityIdentifier("relate-usb")
+      case .waiting:
+        HStack(spacing: 10) {
+          ProgressView()
+          Text("Waiting for the Mac…")
+        }
+        Text("On the Mac, run:")
+        // A command line, not prose: never translated.
+        Text(verbatim: "scripts/health_vault.sh usb")
+          .font(.system(.footnote, design: .monospaced))
+          .textSelection(.enabled)
+        Button("Cancel", role: .cancel) { export.stopUSB() }
+          .accessibilityIdentifier("relate-usb-cancel")
+      case .sending:
+        HStack(spacing: 10) {
+          ProgressView()
+          Text("Sending over USB…")
+        }
+      }
+    } footer: {
+      Text("No shared Wi-Fi needed: connect this iPhone to the Mac with a cable, tap Send over USB cable, then run the command on the Mac (the command-line receiver; Klarbefund for Mac receives over Wi-Fi). Only the paired Mac receives anything. Keep this screen open until it is done.")
     }
   }
 
@@ -51,11 +94,17 @@ struct LocalRelateView: View {
         Text("Keep a connected copy of your values in a Relate graph on your own Mac: your reports with their LOINC codes and where each value came from, and your Apple Health weekly means. It goes over your Wi-Fi, encrypted, to that Mac only. No cloud is involved.")
       }
       Section("On the Mac") {
-        Text("Run the receiver from the relate-hackathon-team repository:")
-        // A command line, not prose: never translated.
-        Text(verbatim: "python -m health_graph receive --db health.rl")
-          .font(.system(.footnote, design: .monospaced))
-          .textSelection(.enabled)
+        Text("Open Klarbefund for Mac and scan the QR code it shows. It comes from TestFlight, the same beta as this app.")
+        Link(destination: URL(string: "https://testflight.apple.com/join/ssADSXX6")!) {
+          Label("Klarbefund for Mac on TestFlight", systemImage: "desktopcomputer")
+        }
+        .accessibilityIdentifier("relate-mac-app")
+        DisclosureGroup("Command-line receiver") {
+          // A command line, not prose: never translated.
+          Text(verbatim: "scripts/health_vault.sh receive")
+            .font(.system(.footnote, design: .monospaced))
+            .textSelection(.enabled)
+        }
       }
       Section("On this phone") {
         if QRScanner.isAvailable {
@@ -107,6 +156,15 @@ struct LocalRelateView: View {
         Text("While on, each report you scan or correct goes to the Mac. Device trends are the weekly means of resting heart rate, heart rate variability, steps and weight that Trends shows. Switching off stops further sending; the Mac keeps what it has.")
       }
       Section {
+        Toggle(
+          "Send year of birth and sex",
+          isOn: Binding(get: { export.sendsPerson }, set: { export.setSendsPerson($0) })
+        )
+        .accessibilityIdentifier("relate-sends-person")
+      } footer: {
+        Text("From your Profile, to this Mac only, so it can work out scores that depend on age and sex. Only the year is sent, never the day. Nothing about you goes to the EHDS hub or into a report for your doctor.")
+      }
+      Section {
         Button {
           Task {
             await export.export(reports(), all: true)
@@ -123,6 +181,19 @@ struct LocalRelateView: View {
           Text(result)
             .font(.footnote)
             .accessibilityIdentifier("relate-result")
+        }
+      }
+      usbSection
+      if QRScanner.isAvailable {
+        Section {
+          Button {
+            scanning = true
+          } label: {
+            Label("Pair with another Mac", systemImage: "qrcode.viewfinder")
+          }
+          .accessibilityIdentifier("relate-rescan")
+        } footer: {
+          Text("For example Klarbefund for Mac: scan the code it shows. This phone then sends everything to that Mac.")
         }
       }
       Section {

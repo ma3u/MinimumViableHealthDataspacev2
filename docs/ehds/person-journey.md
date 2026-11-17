@@ -1,0 +1,109 @@
+# The person's journey: Klarbefund and the EHDS record
+
+A person gets a laboratory result on paper, reads it into the Klarbefund app on
+the iPhone, and brings it into their own record in the European Health Data
+Space. The Regulation ([EU 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng))
+calls this primary use: [Chapter II](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#cpt_II),
+the person's rights over their own electronic health data, and the opt-out
+from secondary use in [Art. 71](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_71).
+This page walks the journey step by step, as the first diagram on the
+[start page](https://ma3u.github.io/MinimumViableHealthDataspacev2/) draws it, and says for each step
+what is implemented, what is planned and what is not planned.
+
+[Full screen, every step described](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=primary): the diagram with a panel per step, its user and its page on the static demo and the live app.
+
+The hub holds synthetic records of fictional people only. The app reads a
+person's own reports and keeps them on their iPhone; it sends them to the
+demo hub only when the person connects it and decides so.
+
+**Status**, checked on 14 November 2026 against
+[the article table](regulation-implementation.md) (checked against the code on
+27 October, [#694](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/694)),
+the [Klarbefund user guide](../klarbefund/user-guide.md) and the open issues:
+
+- **Implemented**: it works end to end and a test shows it.
+- **Partial**: part of it works; the next column says what is missing.
+- **Planned**: not there yet; the issue says when, by its priority.
+- **Not planned**: decided against or out of scope, with the reason.
+
+## Signing in
+
+The column "Sign in as" names the demo user for the step:
+
+- **Static demo** (GitHub Pages): no password; pick the user in the persona
+  menu.
+- **Local stack** (`http://localhost:3003`): the password is the username.
+- **Live hub** (`https://ehds.mabu.red`): the demo users of the realm keep
+  their published password, the username. `edcadmin` is meant to be the
+  exception, because the administrator reads every record: once
+  `scripts/azure/secure-accounts.sh` has run for it, its password is
+  generated and kept in Key Vault, and the operator hands it out (see the
+  [realm runbook](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/keycloak-realm-drift.md)).
+- **Klarbefund**: the app creates its own account (`kb-…`) with a password
+  it generates, or connects to `patient1` by the QR code on the patient screen.
+
+## The journey
+
+The numbers are the diagram's.
+
+| #   | Step                  | Sign in as                  | What the EHDS asks                                                                                                         | Where it happens                                                                                                                                                                                                                                                                                                                      | Status                                                                                                                                                                                                                               |
+| --- | --------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | A result on paper     | (none)                      | Laboratory results are a priority category ([Art. 14](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_14))           | The person's own report, on paper or as a PDF, with no interface to read it                                                                                                                                                                                                                                                           | The starting point                                                                                                                                                                                                                   |
+| 2   | Scan or import        | (the app)                   | Access services for the person ([Art. 4](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_4))                         | Klarbefund reads the camera picture or the PDF on the iPhone; nothing leaves the device                                                                                                                                                                                                                                               | **Implemented**                                                                                                                                                                                                                      |
+| 3   | Coded and checkable   | (the app)                   | The European exchange format codes values ([Art. 15](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_15))            | Each value gets its LOINC code and UCUM unit, with the page and line it came from, so the person checks it against the paper                                                                                                                                                                                                          | **Implemented**. Rows the reader still misses: **Planned**, [#513](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/513)                                                                                                |
+| 4   | Trend and band        | (the app)                   | (none; it helps the person read their data)                                                                                | Trends over earlier reports, and the published reference range with its source                                                                                                                                                                                                                                                        | **Implemented**                                                                                                                                                                                                                      |
+| 5   | Export                | (the app)                   | Portability ([Art. 7](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_7))                                            | The app exports a FHIR R4 bundle and a PDF; the hub returns the whole record as a FHIR R4 bundle                                                                                                                                                                                                                                      | **Implemented** in the app; **Partial** in the hub (the EU FHIR guides are registered, not validated: [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698))                                                     |
+| 6   | To the ePA, to the GP | (the app)                   | Insert into one's record ([Art. 5](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_5))                               | The person shares the PDF and the bundle from the phone. Into the real German ePA it needs a statutory insurer as partner                                                                                                                                                                                                             | **Partial**: sharing works; the ePA is **Planned**, [#478](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/478)                                                                                                        |
+| 7   | Sign in with d-you    | signed out, with the wallet | Identification with the EUDI wallet ([Art. 16](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_16))                  | [The QR sign-in](https://ma3u.github.io/MinimumViableHealthDataspacev2/auth/eudi-qr): the wallet presents the PID over OpenID4VP and opens the record in that name                                                                                                                                                                    | **Partial**: Implementing Regulation 2026/2099 (SD-JWT VC, encrypted responses, the PID bound to one record) is **Planned**, [#708](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/708), P1                           |
+| 8   | Consent or opt out    | `patient1`                  | Opt-out from secondary use ([Art. 71](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_71)); study consent under GDPR | [Research programmes](https://ma3u.github.io/MinimumViableHealthDataspacev2/patient/research): the opt-out is a record and a label, and every secondary-use query leaves the person out ([ADR-062](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)) | **Implemented**. The opt-out from primary use ([Art. 10](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_10)) is **Planned**, [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698), P2                    |
+| 9   | My EHDS record        | `patient1`                  | Access to one's own data ([Art. 3](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_3))                               | The patient pages and the app's **Show my EHDS record**; a patient reads their own record only                                                                                                                                                                                                                                        | **Implemented**. Of the six priority categories the demo record covers three ([ADR-081](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-081-the-record-covers-three-of-the-six-art-14-categories.md)) |
+| 10  | What came back        | `patient1`                  | Information on the use of the data ([Art. 58](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_58))                   | [Insights](https://ma3u.github.io/MinimumViableHealthDataspacev2/patient/insights): what research produced, as aggregates of five or more people                                                                                                                                                                                      | **Implemented**                                                                                                                                                                                                                      |
+
+## Between the steps, and after them
+
+| Step                          | Sign in as                     | What the EHDS asks                                                                           | Where it happens                                                                                                                                                                                                                                                                                                                                                                                                                | Status                                                                                                                                            |
+| ----------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Connect the app to the record | (the app), or `patient1` by QR | Access services ([Art. 4](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_4))          | A new account, which Apple App Attest confirms comes from the genuine app ([ADR-054](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)), an existing one, or a QR code from the patient screen ([ADR-049](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-049-klarbefund-connects-by-device-grant.md)) | **Implemented**                                                                                                                                   |
+| Add my values to the record   | (the app)                      | Insert into one's record ([Art. 5](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_5)) | The app sends its lab values and Apple Health weekly means to the record                                                                                                                                                                                                                                                                                                                                                        | **Partial**: shown in the patient journey, **Planned**, [#760](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/760)                 |
+| Who used my data              | `patient1`                     | Information on access ([Art. 9](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_9))    | The access log in the patient's [overview](https://ma3u.github.io/MinimumViableHealthDataspacev2/overview)                                                                                                                                                                                                                                                                                                                      | **Partial**                                                                                                                                       |
+| Restrict who sees what        | (none yet)                     | Restriction of access ([Art. 8](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_8))    | Nothing yet                                                                                                                                                                                                                                                                                                                                                                                                                     | **Planned**, [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698), P2                                                        |
+| Correct my data               | `patient1`                     | Rectification ([Art. 6](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_6))            | The person's health interests only                                                                                                                                                                                                                                                                                                                                                                                              | **Partial**, [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698)                                                            |
+| A bonus programme             | (the app, connected)           | (a second data space: secondary use with the person's consent)                               | The person joins AlphaKasse DE's bonus programme in the app, answers and withdraws; the insurer receives a yes or no, never the data ([ADR-080](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md), [the data flow](bonus-programme-data-flow.md))                                                                                    | **Implemented**, [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934)                                                        |
+| My graph at home              | (the app)                      | (none; the person's own copy)                                                                | The health graph lives on the iPhone; the app sends it to the person's own Mac over Wi-Fi or a USB cable, paired with Klarbefund for Mac ([#1113](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1113))                                                                                                                                                                                                            | **Implemented**                                                                                                                                   |
+| Evidence for a pilot          | (none)                         | (none; what an operator and an insurer need)                                                 | Accuracy benchmark and self-assessment in [the evidence](../klarbefund/evidence.md)                                                                                                                                                                                                                                                                                                                                             | **Partial**: independent pentest, pilot and an MDR opinion **Planned**, [#655](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/655) |
+
+## Not planned
+
+- **MyHealth@EU** ([Art. 23](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_23), Implementing Regulation 2026/2083): the central
+  cross-border services belong to the member states' contact points. The hub
+  is not one.
+- **Certification of EHR systems** ([Chapter III](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#cpt_III)): out of scope; it applies to
+  systems in service from 26 March 2031.
+- **A diagnosis.** Klarbefund explains values and their published ranges; it
+  is not a medical device and says so in the app.
+- **Real people's data on the hub.** The demo hub holds synthetic records and
+  the accounts the app creates; the person's real reports stay on their
+  devices unless they send them.
+
+## Planned, in order of priority
+
+| Issue                                                                     | What                                                                | Priority |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------- |
+| [#708](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/708) | EUDI wallet sign-in to Implementing Regulation 2026/2099            | P1       |
+| [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698) | The Chapter II rights as adopted (Art. 5 to 10), the EU FHIR guides | P2       |
+| [#760](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/760) | The app's lab values and Apple Health trends in the patient journey | P2       |
+| [#513](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/513) | Scan rows still unread                                              | P2       |
+| [#655](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/655) | Evidence for a pilot: pentest, pilot, MDR opinion                   | P2       |
+| [#712](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/712) | Health professionals sign in with a wallet                          | P2       |
+| [#478](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/478) | Klarbefund into the real ePA, with a statutory insurer              | P3       |
+
+The epics are [#964](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/964) (Klarbefund and the
+patient's own record) and [#959](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/959) (identity and wallets); the
+dates are on the [roadmap](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/roadmap).
+
+## Keeping this page true
+
+A status here follows the [article table](regulation-implementation.md) and the
+app's [user guide](../klarbefund/user-guide.md). When a change moves a step,
+change its row here and in the article table in the same pull request. The
+other journey is [the researcher's](researcher-journey.md).

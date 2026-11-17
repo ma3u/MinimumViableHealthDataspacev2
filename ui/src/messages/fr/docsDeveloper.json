@@ -449,5 +449,6 @@
   "Route summary table": "Tableau récapitulatif des routes",
   "Loading Swagger UI and the specification": "Chargement de Swagger UI et de la spécification",
   "Swagger UI failed to load": "Échec du chargement de Swagger UI",
-  "Check your network connection or the browser console, or download the specification with the button above and open it in a local Swagger Editor.": "Vérifiez votre connexion réseau ou la console du navigateur, ou téléchargez la spécification avec le bouton ci-dessus et ouvrez-la dans un Swagger Editor local."
+  "Check your network connection or the browser console, or download the specification with the button above and open it in a local Swagger Editor.": "Vérifiez votre connexion réseau ou la console du navigateur, ou téléchargez la spécification avec le bouton ci-dessus et ouvrez-la dans un Swagger Editor local.",
+  "EDC 1.0 (RC6) on Azure, in CI and on the local stack; a second data space with Klarbefund bonus programmes; an interactive roadmap and site search": "EDC 1.0 (RC6) sur Azure, dans la CI et sur la pile locale ; un second espace de données avec les programmes de bonus de Klarbefund ; une feuille de route interactive et la recherche sur le site"
 }

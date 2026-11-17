@@ -15,10 +15,15 @@
 # Variables: TESTID (default <date>-<scenario>-<target>), TIME_SCALE (0.05
 # shortens every stage for a dry run), ABORT_ON=failures (stress, spike, soak:
 # abort on failed requests only, not on latency), KC_USER/KC_PASSWORD (signin), YES=1
-# (skip the confirmation for a stress, spike or soak run against azure).
+# (skip the confirmation for a stress, spike or soak run against azure),
+# AGREEMENT_TIMEOUT_S (contracts: how long a negotiation may take to agree, 60).
+# K6_JSON=1 also writes every sample to results/<testid>.ndjson, for the p95
+# per endpoint without Prometheus (load-tests/README.md, "Per endpoint").
 #
-# A run against azure sets the repository variable LOAD_TEST_RUNNING for its
-# duration, and deploy-azure.yml waits for it to clear (#571).
+# A run against azure opens a deployment to the GitHub environment "load-test"
+# for its duration, and deploy-azure.yml waits while it is open (#571, ADR-092;
+# scripts/azure/hold-deploys.sh). It refuses to start while a deploy is past
+# its hold step (DEPLOY_CHECK=skip starts anyway).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HERE="$ROOT/load-tests"
@@ -82,13 +87,31 @@ else
   echo "no Prometheus at $RW; metrics stay in the summary only"
 fi
 
+if [ "${K6_JSON:-}" = 1 ]; then
+  out+=(-o "json=$RESULTS/$TESTID.ndjson")
+  echo "samples → $RESULTS/$TESTID.ndjson"
+fi
+
 if [ "$TARGET" = azure ]; then
-  # Deploys wait on this variable (deploy-azure.yml); cleared when k6 exits.
-  if (cd "$ROOT" && gh variable set LOAD_TEST_RUNNING --body "$TESTID $(date -u +%Y-%m-%dT%H:%M:%SZ)" 2>/dev/null); then
-    trap '(cd "$ROOT" && gh variable delete LOAD_TEST_RUNNING 2>/dev/null) || echo "clear the hold: gh variable delete LOAD_TEST_RUNNING" >&2' EXIT
-    echo "deploys wait: LOAD_TEST_RUNNING=$TESTID"
+  # Deploys wait while this deployment is open (deploy-azure.yml); closed when k6 exits.
+  if HOLD_ID="$(cd "$ROOT" && scripts/azure/hold-deploys.sh start "$TESTID" 2>/dev/null)"; then
+    trap '(cd "$ROOT" && scripts/azure/hold-deploys.sh end "$HOLD_ID" 2>/dev/null) || echo "release the deploys: scripts/azure/hold-deploys.sh end $HOLD_ID" >&2' EXIT
+    echo "deploys wait: load-test deployment $HOLD_ID ($TESTID)"
+    # The hold is open, so a deploy not yet past its hold step waits; one that
+    # is past it replaces the UI and the proxy now (hold-deploys.sh deploying).
+    if [ "${DEPLOY_CHECK:-on}" != skip ]; then
+      rc=0; deploying="$(cd "$ROOT" && scripts/azure/hold-deploys.sh deploying)" || rc=$?
+      if [ "$rc" -eq 3 ]; then
+        echo "a deploy is replacing the UI and the proxy; start the run when it has finished:" >&2
+        echo "$deploying" >&2
+        exit 1
+      elif [ "$rc" -ne 0 ]; then
+        echo "could not check for a deploy in progress; DEPLOY_CHECK=skip starts anyway" >&2
+        exit 1
+      fi
+    fi
   else
-    echo "could not set LOAD_TEST_RUNNING (gh signed in?): a merge to main would redeploy during the run" >&2
+    echo "could not open the deploy hold (gh signed in?): a merge to main would redeploy during the run" >&2
   fi
 fi
 
@@ -97,6 +120,7 @@ k6 run ${out[@]+"${out[@]}"} --tag "testid=$TESTID" \
   -e "SCENARIO=$SCENARIO" -e "BASE_URL=$BASE_URL" -e "PROXY_URL=$PROXY_URL" \
   -e "TESTID=$TESTID" -e "SESSIONS=$SESSIONS" -e "TIME_SCALE=${TIME_SCALE:-1}" \
   -e "ABORT_ON=${ABORT_ON:-}" -e "DSP_ADDRESS=${DSP_ADDRESS:-}" \
+  -e "AGREEMENT_TIMEOUT_S=${AGREEMENT_TIMEOUT_S:-60}" \
   -e "KC_USER=${KC_USER:-researcher}" -e "KC_PASSWORD=${KC_PASSWORD:-${KC_USER:-researcher}}" \
   -e "SUMMARY_PATH=$RESULTS/$TESTID.json" \
   "$HERE/platform.js"

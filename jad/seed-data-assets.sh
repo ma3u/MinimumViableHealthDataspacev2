@@ -538,12 +538,15 @@ SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"   # Az
 
 register_dataplane() {
   local ctx_id="$1" label="$2"
-  # A plain registration, not JSON-LD: v5beta has no "url" field and answered
+  # A plain registration, not JSON-LD. RC6 renamed transferTypes to profiles
+  # (Connector #6196); both are sent, EDC ignores the one it does not know.
+  # v5beta had no "url" field and answered
   # this body with 500 (#542). The id is global, so it carries the context id;
   # one shared id left the data plane with the last participant registered.
   local payload="{
     \"dataplaneId\": \"dataplane-fhir-$ctx_id\",
     \"endpoint\": \"$SIGLET_SIGNALING_URL/$ctx_id/dataflows\",
+    \"profiles\": [\"HttpData-PULL\"],
     \"transferTypes\": [\"HttpData-PULL\"]
   }"
   local token

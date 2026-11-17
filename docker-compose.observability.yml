@@ -14,7 +14,7 @@ name: mvhd-observability
 
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.165.0-386
+    image: otel/opentelemetry-collector-contrib:0.165.0
     container_name: mvhd-otel-collector
     command: ["--config=/etc/otelcol/config.yaml"]
     # Root, to read the Docker socket and the containers' json-file logs.

@@ -1006,6 +1006,10 @@ test("captures the MembershipCredential definition id", function () {
   const def = defs.find((d) => (d.credentialType || "") === "MembershipCredential") || defs[0];
   expect(def, "the issuer has no credential definition to request").to.not.equal(undefined);
   bru.setVar("membershipDefinitionId", def.id);
+  // the request names the definition's format: from IdentityHub 1.0.0-RC6 it is the issuer's DCP
+  // profile's (VC2_0_JOSE by default, IdentityHub #1248), and the holder refuses a delivery whose
+  // format differs from its request
+  bru.setVar("membershipDefinitionFormat", def.format || "VC1_0_JWT");
 });
 """,
     docs="The issuer resolves a request by definition id, not by type; the type alone answers 400 'Credential definition ID null does not exist'.")
@@ -1025,7 +1029,7 @@ req(f, "40 DCP the provider requests a MembershipCredential", "post",
     persona="anon", bearer="edcToken",
     body={"issuerDid": "{{issuerDid}}",
           "credentials": [{"id": "{{membershipDefinitionId}}", "type": "MembershipCredential",
-                           "format": "VC1_0_JWT"}]},
+                           "format": "{{membershipDefinitionFormat}}"}]},
     asserts=["res.status: gte 200", "res.status: lt 300"],
     docs="""The holder's IdentityHub sends a CredentialRequestMessage; the issuer approves it and delivers
 to the CredentialService endpoint in the holder's DID document. Without that endpoint the process
