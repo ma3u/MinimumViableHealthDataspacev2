@@ -140,6 +140,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/seed-persona-overview.cypher "persona overview (discussion #265)"
   run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
   run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
+  run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
@@ -187,6 +188,10 @@ run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vac
 # CREATE, so a graph seeded before keeps the proposal-era labels; this
 # migration corrects them. Idempotent: it matches only the old values.
 run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
+# scripts/generate-graph-seed.py once wrote real organisations; a graph it
+# loaded still holds them. Renames them in place, before the two files below
+# match datasets by id. Idempotent, and a no-op on a graph it never loaded.
+run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
 run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
 run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
