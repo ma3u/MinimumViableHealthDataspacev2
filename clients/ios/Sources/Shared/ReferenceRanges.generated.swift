@@ -136,6 +136,16 @@ public enum ReferenceRanges {
         label: "ESC/EAS 2019 dyslipidaemia guidelines (Mach et al., Eur Heart J 2020;41:111-188)",
         url: "https://pubmed.ncbi.nlm.nih.gov/31504418/")),
     ReferenceRange(
+      analyteKey: "apolipoprotein-b", ucum: "g/L",
+      group: .cardiovascular, sex: .any,
+      guidelineLow: nil, guidelineHigh: 1,
+      optimalLow: nil, optimalHigh: 0.65,
+      basis: .guideline,
+      summary: "Targets: below 1.0 at low or moderate risk, 0.8 at high and 0.65 at very high risk. ESC/EAS states targets by cardiovascular risk, not one number for everyone. Which tier applies to you is a clinical decision.",
+      source: RangeSource(
+        label: "ESC/EAS 2019 dyslipidaemia guidelines (Mach et al., Eur Heart J 2020;41:111-188)",
+        url: "https://pubmed.ncbi.nlm.nih.gov/31504418/")),
+    ReferenceRange(
       analyteKey: "cholesterol-hdl", ucum: "mg/dL",
       group: .cardiovascular, sex: .male,
       guidelineLow: 40, guidelineHigh: nil,
