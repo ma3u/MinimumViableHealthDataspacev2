@@ -1384,9 +1384,21 @@
       "status": "Proposed"
     },
     {
+      "id": "ADR-091",
+      "file": "ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md",
+      "title": "The insurer collects the yes or no, under a reference the hub issues",
+      "status": "Proposed"
+    },
+    {
       "id": "ADR-092",
       "file": "ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md",
       "title": "The deploy hold reads signals the deploy job can read",
+      "status": "Proposed"
+    },
+    {
+      "id": "ADR-093",
+      "file": "ADR-093-a-professional-reads-what-the-person-has-not-restricted.md",
+      "title": "A health professional reads what the person has not restricted, and every read is logged",
       "status": "Proposed"
     }
   ],
@@ -1481,21 +1493,21 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
-    "/docs/developer": "2026-11-14",
+    "/docs/developer": "2026-11-17",
     "/docs/developer/quality-gates": "2026-11-17",
     "/docs/developer/api": "2026-11-11",
     "/docs/developer/reference": "2026-11-11",
-    "/docs/developer/[slug]": "2026-11-15",
-    "/docs/architecture": "2026-11-14",
-    "/docs/security": "2026-11-15",
-    "/docs/security/[slug]": "2026-11-15",
-    "/docs/klarbefund": "2026-11-15",
-    "/docs/ehds": "2026-11-15",
+    "/docs/developer/[slug]": "2026-11-17",
+    "/docs/architecture": "2026-11-17",
+    "/docs/security": "2026-11-17",
+    "/docs/security/[slug]": "2026-11-17",
+    "/docs/klarbefund": "2026-11-17",
+    "/docs/ehds": "2026-11-17",
     "/docs/ehds/glossary": "2026-11-08",
-    "/docs/ehds/[slug]": "2026-11-15",
+    "/docs/ehds/[slug]": "2026-11-17",
     "/docs/roadmap": "2026-11-10",
-    "/docs/operations": "2026-11-15",
-    "/docs/operations/[slug]": "2026-11-15",
-    "/docs/klarbefund/[slug]": "2026-11-15"
+    "/docs/operations": "2026-11-17",
+    "/docs/operations/[slug]": "2026-11-17",
+    "/docs/klarbefund/[slug]": "2026-11-17"
   }
 }

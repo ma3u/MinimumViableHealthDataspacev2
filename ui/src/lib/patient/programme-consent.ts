@@ -19,6 +19,7 @@ import type {
   BonusProgramme,
   ProgrammeConsent,
 } from "@/lib/patient/bonus-programme";
+import { memberReference } from "@/lib/patient/member-reference";
 import { ownRecordId, refuseForeignRecord } from "@/lib/patient/own-record";
 import {
   evaluateYear,
@@ -67,11 +68,24 @@ export const WITHDRAW_PROGRAMME_CYPHER = `MATCH (c:ProgrammeConsent {patientId: 
    RETURN c.consentId AS consentId, c.programmeId AS programmeId,
           toString(c.joinedAt) AS joinedAt, toString(c.withdrawnAt) AS withdrawnAt`;
 
-/** Every consent of the person to any program, newest first. */
+/**
+ * Every consent of the person to any program, newest first, with the date
+ * the insurer last collected an answer under it (step 8, ADR-091): the
+ * neo4j-proxy stamps deliveredAt on the transfer it hands over.
+ */
 export const PROGRAMME_CONSENTS_CYPHER = `MATCH (c:ProgrammeConsent {patientId: $patientId})
+   OPTIONAL MATCH (t:ProgrammeTransfer)-[:UNDER_CONSENT]->(c)
+     WHERE t.deliveredAt IS NOT NULL
+   WITH c, max(t.deliveredAt) AS collectedAt
    RETURN c.consentId AS consentId, c.programmeId AS programmeId,
-          toString(c.joinedAt) AS joinedAt, toString(c.withdrawnAt) AS withdrawnAt
+          toString(c.joinedAt) AS joinedAt, toString(c.withdrawnAt) AS withdrawnAt,
+          toString(collectedAt) AS collectedAt
    ORDER BY c.joinedAt DESC`;
+
+/** A consent as the member reads it: with the reference its answers carry. */
+function withReference(row: ProgrammeConsentRow): ProgrammeConsentRow {
+  return { ...row, memberReference: memberReference(row.consentId) };
+}
 
 /** The open consent, if any: what the transfer gate reads. */
 export const OPEN_PROGRAMME_CONSENT_CYPHER = `MATCH (c:ProgrammeConsent {patientId: $patientId, programmeId: $programmeId})
@@ -83,8 +97,10 @@ export const OPEN_PROGRAMME_CONSENT_CYPHER = `MATCH (c:ProgrammeConsent {patient
  * A transfer the person asked for (ADR-080, decision 4, second path). What it
  * carries is the program, the year and goal met, nothing else: the hub has
  * evaluated the ended year inside the record (step 6, ADR-087), and the
- * breakdown behind the answer is not stored with it. Delivery to the
- * program's connector is step 8; until then the status says it is ready.
+ * breakdown behind the answer is not stored with it. The insurer collects
+ * it over its agreement with the hub (step 8, ADR-091): the neo4j-proxy's
+ * /programmes/answers hands it over with the member's reference and sets
+ * the status to delivered. Until then the status says it is ready.
  */
 export const RECORD_TRANSFER_CYPHER = `MATCH (c:ProgrammeConsent {consentId: $consentId})
    MERGE (t:ProgrammeTransfer {transferId: $transferId})
@@ -215,9 +231,11 @@ export const BONUS_PROGRAMMES_CYPHER = `MATCH (s:DataService:BonusProgramme)
 export async function listProgrammes(patientId: string | null) {
   const programmes = await runQuery<BonusProgramme>(BONUS_PROGRAMMES_CYPHER);
   const consents = patientId
-    ? await runQuery<ProgrammeConsentRow>(PROGRAMME_CONSENTS_CYPHER, {
-        patientId,
-      })
+    ? (
+        await runQuery<ProgrammeConsentRow>(PROGRAMME_CONSENTS_CYPHER, {
+          patientId,
+        })
+      ).map(withReference)
     : [];
   return {
     programmes,
@@ -248,7 +266,7 @@ export async function joinProgramme(
     );
   }
   return NextResponse.json(
-    { consent, legalBasis: PROGRAMME_CONSENT_BASIS },
+    { consent: withReference(consent), legalBasis: PROGRAMME_CONSENT_BASIS },
     { status: 201 },
   );
 }

@@ -10,13 +10,15 @@ the plan is [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues
 
 ## In short
 
-- **Today (steps 3, 4 and 6 of #934), no data about the member reaches
-  AlphaKasse.** The hub reads AlphaKasse's catalogue, the member joins in the
-  patient portal or in the Klarbefund app, sees their own result for the ended
-  year, and "Send my answer" records the year and goal met inside the hub. It
-  is delivered in step 8, or through the member's wallet.
-- **When it is delivered, AlphaKasse receives three things:** the programme, the
-  year, and "goal met: yes" or "no".
+- **Nothing reaches AlphaKasse until the member says so.** The hub reads
+  AlphaKasse's catalogue, the member joins in the patient portal or in the
+  Klarbefund app, sees their own result for the ended year, and "Send my
+  answer" records the year and goal met inside the hub.
+- **AlphaKasse then collects it over its agreement with the hub** (step 8,
+  [ADR-091](../ADRs/ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md)). It
+  receives four things: the programme, the year, "goal met: yes" or "no", and
+  a reference the member gives it. On compose AlphaKasse is a stand-in on the
+  hub's connector; on the live hub no insurer collects yet.
 - **It never receives** steps, minutes of activity, heart rate, diagnoses, visit
   details, or any date finer than the year (ADR-080, decision 2).
 
@@ -59,7 +61,7 @@ sequenceDiagram
     H->>G: consent closed, withdrawal date set
     M->>H: POST /transfer again
     H-->>M: 403, nothing recorded
-    Note over H,AK: Step 8: the yes or no goes to AlphaKasse over a DSP agreement,<br/>or the member presents it from the EUDI Wallet.
+    Note over H,AK: Before the withdrawal: AlphaKasse collects over its DSP agreement<br/>(steps 10 and 11 below). Or the member presents the answer from the EUDI Wallet.
 ```
 
 1. **AlphaKasse publishes the programme.** Its catalogue is DCAT-AP 3.0.1, not
@@ -119,6 +121,22 @@ sequenceDiagram
    ([transfer route](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/a1c78c3e/ui/src/app/api/patient/programmes/transfer/route.ts#L59)).
    Every later delivery path, the DSP agreement and the wallet alike, has to
    pass the same gate.
+10. **AlphaKasse collects** (step 8, [ADR-091](../ADRs/ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md)).
+    Under its bonus agreement it starts a pull transfer and reads the offer
+    `bonus-programme-answer` at the hub's `/dataspace/data` with the access
+    token of that transfer. The hub hands over, for the programmes AlphaKasse
+    published and the members whose consent is open, the programme, the year,
+    goal met and the member's reference
+    ([`routes/programmes.ts`](../../services/neo4j-proxy/src/routes/programmes.ts)).
+    It marks the transfer `delivered`, with the date and AlphaKasse's DID, and
+    the member's page says "AlphaKasse DE collected your answer on" that date.
+    A call without the agreement's transfer is refused with 403.
+11. **The member gives AlphaKasse the reference.** It is on the member's
+    programme page ("Your reference for AlphaKasse DE"), twelve characters
+    such as `K9XZ-Z669-AZTN`, one per join. The hub sends no name and no
+    insurance number, so the reference is how AlphaKasse knows whose bonus it
+    is. After a withdrawal the member's answer is no longer in what AlphaKasse
+    collects, also on a transfer it started before.
 
 **The agreement AlphaKasse has to reach first (step 5).** AlphaKlinik offers
 the answer under the policy `mvhd-bonus-programme`
@@ -130,16 +148,17 @@ connector decides one of its terms itself, `ehds:attestedPurpose`: AlphaKasse
 reaches the agreement only when its `DataProcessingPurposeCredential`, issued
 by the insurance and wellbeing authority, attests the purpose `bonus-payout`.
 A credential that attests "premium-setting" is refused with 400, "Policy in
-scope contract.negotiation not fulfilled". Step 8 delivers the yes or no over
-that agreement, or the member presents it from the EUDI Wallet.
+scope contract.negotiation not fulfilled". The purpose is checked again each
+time a transfer starts. The yes or no is collected over that agreement, or the
+member presents it from the EUDI Wallet.
 
 ## What is stored, and where
 
-| Record                          | Fields                                                                                                                  | Written when                                 | Read by                                                                                     |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `(:DataService:BonusProgramme)` | programme id, title, description, publisher, endpoint, themes, keywords, rule title, rule text, rule version, last seen | Each crawl                                   | Patients and operators (`/api/patient/programmes`), the app (`/api/patient/app/programmes`) |
-| `(:ProgrammeConsent)`           | consent id, patient id, programme id, joined at, withdrawn at, source                                                   | Join, withdraw                               | The member, and an operator who names the record                                            |
-| `(:ProgrammeTransfer)`          | transfer id, patient id, programme id, year, goal met, status `evaluated`, requested at                                 | "Send my answer", only under an open consent | The member, and an operator who names the record                                            |
+| Record                          | Fields                                                                                                                               | Written when                                                                                | Read by                                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `(:DataService:BonusProgramme)` | programme id, title, description, publisher, endpoint, themes, keywords, rule title, rule text, rule version, last seen              | Each crawl                                                                                  | Patients and operators (`/api/patient/programmes`), the app (`/api/patient/app/programmes`)   |
+| `(:ProgrammeConsent)`           | consent id, patient id, programme id, joined at, withdrawn at, source                                                                | Join, withdraw                                                                              | The member, and an operator who names the record                                              |
+| `(:ProgrammeTransfer)`          | transfer id, patient id, programme id, year, goal met, status `evaluated` then `delivered`, requested at, delivered at, delivered to | "Send my answer", only under an open consent; the delivery fields when the insurer collects | The member, an operator who names the record, and the insurer's pull (year and goal met only) |
 
 A patient reads and changes only their own record; naming another record is
 refused with 403 (`refuseForeignRecord`). `source` is `patient-portal`,
@@ -209,6 +228,12 @@ rules apply to it (in Germany § 65a SGB V), and the design needs a legal review
   offer with the bonus payout purpose (agreed), without a purpose (refused),
   with "premium-setting" (refused by `ehds:attestedPurpose`) and with the bonus
   payout purpose again (agreed).
+- **The delivery (compose, JAD stack seeded):** the same two commands;
+  DELIVER-8.1 to 8.6 have AlphaKasse agree, start a transfer and pull. They
+  check that each answer has four fields and no id, that the hub records the
+  collection, that a withdrawn member is left out, that a direct call is
+  refused, and that a "premium-setting" credential starts no transfer. The
+  two members are throwaway records the checks write and remove.
 - **The catalogue against DCAT-AP:**
   `python3 scripts/healthdcat-ap/validate.py ui/src/content/catalogues/alphakasse-dcat-ap.json --dcat-ap`.
 - **The records in the graph:**
@@ -216,7 +241,8 @@ rules apply to it (in Germany § 65a SGB V), and the design needs a legal review
 ```cypher
 MATCH (p:Patient)-[:GAVE_PROGRAMME_CONSENT]->(c:ProgrammeConsent)-[:FOR_PROGRAMME]->(b:BonusProgramme)
 OPTIONAL MATCH (t:ProgrammeTransfer)-[:UNDER_CONSENT]->(c)
-RETURN b.title, c.joinedAt, c.withdrawnAt, c.source, collect(t {.year, .goalMet, .status})
+RETURN b.title, c.joinedAt, c.withdrawnAt, c.source,
+       collect(t {.year, .goalMet, .status, .deliveredAt, .deliveredTo})
 ```
 
 ## Done
@@ -231,10 +257,14 @@ RETURN b.title, c.joinedAt, c.withdrawnAt, c.source, collect(t {.year, .goalMet,
 - Step 5: the bonus programme policy, its purpose decided by the hub's
   connector against the insurer's purpose credential
   ([ADR-090](../ADRs/ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md)).
+- Step 8, the hub's half: AlphaKasse collects the yes or no over its
+  agreement, tied to the member's reference
+  ([ADR-091](../ADRs/ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md)).
 
 ## Open
 
 - The achievement attestation for the EUDI Wallet (ADR-080, decision 4,
   after #708).
-- Step 8: delivery to AlphaKasse's connector, which needs a `simpl-edc` with
-  DCP. The member reference AlphaKasse ties the answer to is designed there.
+- Steps 7 and 8 against Simpl's own connector, which needs a `simpl-edc` with
+  DCP. Until then AlphaKasse is a stand-in on the hub's connector.
+- Klarbefund shows the member's reference; today it is on the portal's page.

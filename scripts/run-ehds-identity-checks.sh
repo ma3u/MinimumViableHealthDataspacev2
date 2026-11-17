@@ -958,6 +958,9 @@ for x in ds:
   id=$(curl -s --max-time 30 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$body" \
     "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations" 2>/dev/null | jq -r '."@id" // empty' 2>/dev/null)
   [ -n "$id" ] || { printf 'NOT-STARTED the contract request was not accepted'; return; }
+  # For a caller that goes on to a transfer (Category 8): this runs in a
+  # subshell, so the negotiation's id leaves through a file.
+  if [ -n "${PURPOSE_NEGOTIATION_FILE:-}" ]; then printf '%s' "$id" > "$PURPOSE_NEGOTIATION_FILE"; fi
   for i in $(seq 1 30); do
     state=$(curl -s --max-time 15 -H "$(auth_header)" \
       "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations/${id}" 2>/dev/null | jq -r '.state // empty' 2>/dev/null)
@@ -1085,6 +1088,263 @@ run_purpose_tests() {
 }
 
 # ---------------------------------------------------------------------------
+# Category 8: The bonus programme's answer, collected over the agreement
+# (#934 step 8, ADR-091)
+# ---------------------------------------------------------------------------
+# AlphaKasse agrees to the offer, starts a pull transfer and reads it at the
+# neo4j-proxy with siglet's token. What it receives is the programme, the
+# year, goal met and the member's reference, for members with an open consent.
+# The members here are two throwaway records this category writes into the
+# graph and removes again (source 'identity-checks'); no real record is read
+# into the checks or changed by them. Needs what Category 7 needs, the graph's
+# HTTP port and siglet.
+DELIVER_PROGRAMME="urn:mvhd:programme:alphakasse:identity-checks"
+DELIVER_NEO4J_URL="${NEO4J_HTTP_URL:-http://localhost:7474}"
+DELIVER_NEO4J_AUTH="${NEO4J_USER:-neo4j}:${NEO4J_PASSWORD:-healthdataspace}"
+DELIVER_PROXY_URL="${NEO4J_PROXY_PUBLIC_URL:-http://localhost:9090}"
+DELIVER_KEYS='["goalMet","memberReference","programme","year"]'
+
+# Runs one Cypher statement with parameters. Prints the rows as JSON arrays;
+# fails when the graph does not answer or reports an error.
+deliver_cypher() {
+  local body resp params="${2:-}"
+  [ -n "$params" ] || params='{}'
+  body=$(jq -nc --arg q "$1" --argjson p "$params" '{statements:[{statement:$q,parameters:$p}]}') || return 1
+  resp=$(curl -s --max-time 20 -u "$DELIVER_NEO4J_AUTH" -H "Content-Type: application/json" \
+    -d "$body" "${DELIVER_NEO4J_URL}/db/neo4j/tx/commit" 2>/dev/null) || return 1
+  [ "$(printf '%s' "$resp" | jq -r '(.errors // [{}]) | length' 2>/dev/null)" = "0" ] || return 1
+  printf '%s' "$resp" | jq -c '[.results[0].data[]?.row]'
+}
+
+deliver_fixture() {
+  deliver_cypher 'MERGE (s:DataService {serviceId: $programme})
+      ON CREATE SET s.source = "identity-checks"
+    SET s:BonusProgramme, s.title = "Identity checks: a bonus programme",
+        s.publisherDid = "did:web:alphakasse.de:insurer", s.publisherName = "AlphaKasse DE", s.ruleVersion = "2025.1"
+    WITH s
+    UNWIND [{c: "identity-checks-consent-1", t: "identity-checks-transfer-1", m: "identity-checks-member-1", g: true},
+            {c: "identity-checks-consent-2", t: "identity-checks-transfer-2", m: "identity-checks-member-2", g: false}] AS x
+    MERGE (c:ProgrammeConsent {consentId: x.c})
+    SET c.programmeId = $programme, c.patientId = x.m, c.joinedAt = datetime(), c.withdrawnAt = null, c.source = "identity-checks"
+    MERGE (t:ProgrammeTransfer {transferId: x.t})
+    SET t.programmeId = $programme, t.patientId = x.m, t.year = 2025, t.goalMet = x.g, t.status = "evaluated",
+        t.requestedAt = datetime(), t.source = "identity-checks"
+    REMOVE t.deliveredAt, t.deliveredTo
+    MERGE (t)-[:UNDER_CONSENT]->(c)
+    RETURN count(*)' "{\"programme\":\"${DELIVER_PROGRAMME}\"}" >/dev/null
+}
+
+# Only what deliver_fixture wrote: every node carries source 'identity-checks'.
+deliver_cleanup() {
+  deliver_cypher 'MATCH (n) WHERE n.source = "identity-checks"
+      AND (n:ProgrammeConsent OR n:ProgrammeTransfer OR n:BonusProgramme)
+    DETACH DELETE n RETURN count(*)' >/dev/null || true
+}
+
+# Starts a pull transfer of the bonus offer under an agreement. Prints the
+# transfer's id, its final state and the reason the consumer recorded.
+deliver_transfer() {
+  local consumer_ctx="$1" agreement="$2" provider_ctx dsp id state="" detail="" i
+  provider_ctx=$(trust_ctx "$TRUST_PROVIDER_SLUG")
+  dsp="${DSP_INTERNAL_URL:-http://controlplane:8082/api/dsp}/${provider_ctx}/${DSP_PROTOCOL:-http-dsp-profile-2025-1}"
+  id=$(curl -s --max-time 30 -X POST -H "$(auth_header)" -H "Content-Type: application/json" \
+    -d "{\"@context\":[\"https://w3id.org/edc/connector/management/v2\"],\"@type\":\"TransferRequest\",\"counterPartyAddress\":\"${dsp}\",\"protocol\":\"${DSP_PROTOCOL:-http-dsp-profile-2025-1}\",\"contractId\":\"${agreement}\",\"assetId\":\"${PURPOSE_ASSET}\",\"transferType\":\"HttpData-PULL\",\"callbackAddresses\":[],\"dataDestination\":{\"@type\":\"DataAddress\",\"type\":\"HttpProxy\"}}" \
+    "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/transferprocesses" 2>/dev/null | jq -r '."@id" // empty' 2>/dev/null)
+  [ -n "$id" ] || { printf 'none NOT-STARTED the transfer request was not accepted'; return; }
+  for i in $(seq 1 30); do
+    state=$(curl -s --max-time 15 -H "$(auth_header)" \
+      "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/transferprocesses/${id}" 2>/dev/null | jq -r '.state // empty' 2>/dev/null)
+    case "$state" in STARTED|TERMINATED) break ;; esac
+    sleep 2
+  done
+  detail=$(curl -s --max-time 15 -H "$(auth_header)" \
+    "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/transferprocesses/${id}" 2>/dev/null | jq -r '.errorDetail // empty' 2>/dev/null)
+  printf '%s %s %s' "$id" "${state:-UNKNOWN}" "$detail"
+}
+
+# The access token siglet holds for a consumer's transfer. siglet's token API
+# answers inside the stack only, so it is asked from the proxy's container
+# unless SIGLET_TOKEN_URL names an address this shell reaches.
+deliver_token() {
+  if [ -n "${SIGLET_TOKEN_URL:-}" ]; then
+    curl -s --max-time 15 "${SIGLET_TOKEN_URL}/tokens/$1/$2" 2>/dev/null | jq -r '.token // empty' 2>/dev/null
+  else
+    docker exec health-dataspace-neo4j-proxy node -e \
+      "fetch('http://siglet:8080/tokens/$1/$2').then(r=>r.json()).then(b=>console.log(b.token||'')).catch(()=>{})" 2>/dev/null
+  fi
+}
+
+# One pull with a token: the HTTP status, a space, and the body.
+deliver_pull() {
+  local tmp code
+  tmp=$(mktemp)
+  code=$(curl -s --max-time 30 -o "$tmp" -w '%{http_code}' -H "Authorization: Bearer $1" \
+    "${DELIVER_PROXY_URL}/dataspace/data" 2>/dev/null) || code="000"
+  printf '%s %s' "$code" "$(cat "$tmp")"
+  rm -f "$tmp"
+}
+
+run_delivery_tests() {
+  log "Category 8: The bonus programme's answer, collected over the agreement (#934 step 8, ADR-091)"
+  local test_id ak_ctx ak_did control_ctx provider_ctx provider_did res reason="" agreement="" neg_id tid state token body mine status
+  local all="DELIVER-8.1 DELIVER-8.2 DELIVER-8.3 DELIVER-8.4 DELIVER-8.5 DELIVER-8.6"
+  ak_ctx=$(trust_ctx "$TRUST_WELLBEING_SLUG")
+  ak_did="did:web:identityhub%3A7083:${TRUST_WELLBEING_SLUG}"
+  control_ctx=$(trust_ctx pharmaco)
+  provider_ctx=$(trust_ctx "$TRUST_PROVIDER_SLUG")
+  provider_did="did:web:identityhub%3A7083:${TRUST_PROVIDER_SLUG}"
+  if ! docker inspect health-dataspace-wellbeing-ga-issuer >/dev/null 2>&1; then
+    reason="no insurance and wellbeing authority on this stack (not a local stack, or scripts/seed-second-data-space.sh not run)"
+  elif [ -z "$ak_ctx" ]; then
+    reason="no ${TRUST_WELLBEING_SLUG} context (run scripts/seed-second-data-space.sh)"
+  else
+    res=$(trust_catalog "${control_ctx:-none}" "${provider_ctx:-none}" "$provider_did")
+    if [ "${res#* }" != "Catalog" ]; then
+      reason="the DSP path does not work here (pharmaco's catalogue answered ${res})"
+    elif ! deliver_cypher 'RETURN 1' >/dev/null; then
+      reason="the graph does not answer at ${DELIVER_NEO4J_URL}, so the two throwaway members cannot be written"
+    elif [ -z "${SIGLET_TOKEN_URL:-}" ] && ! docker inspect health-dataspace-neo4j-proxy >/dev/null 2>&1; then
+      reason="siglet's token API is not reachable: set SIGLET_TOKEN_URL, or run on the compose stack"
+    fi
+  fi
+  if [ -n "$reason" ]; then
+    for test_id in $all; do
+      skip "$test_id: $reason"
+      record_result "$test_id" "delivery" "skipped" "$reason"
+    done
+    return
+  fi
+
+  if ! deliver_fixture; then
+    for test_id in $all; do
+      fail "$test_id: the two throwaway members could not be written into the graph"
+      record_result "$test_id" "delivery" "failed" "fixture"
+    done
+    return
+  fi
+
+  # 8.1: AlphaKasse agrees, starts a transfer and collects the answers
+  test_id="DELIVER-8.1"
+  PURPOSE_NEGOTIATION_FILE=$(mktemp)
+  export PURPOSE_NEGOTIATION_FILE
+  res=$(purpose_negotiate "$ak_ctx")
+  neg_id=$(cat "$PURPOSE_NEGOTIATION_FILE" 2>/dev/null)
+  rm -f "$PURPOSE_NEGOTIATION_FILE"
+  unset PURPOSE_NEGOTIATION_FILE
+  if [ "${res%% *}" = "FINALIZED" ] && [ -n "$neg_id" ]; then
+    agreement=$(curl -s --max-time 15 -H "$(auth_header)" \
+      "${MGMT_API}/${MGMT_V}/participants/${ak_ctx}/contractnegotiations/${neg_id}" 2>/dev/null | jq -r '.contractAgreementId // empty' 2>/dev/null)
+  fi
+  res=""; tid=""; state="NO-AGREEMENT"; token=""; body=""; status="000"; mine="[]"
+  if [ -n "$agreement" ]; then
+    res=$(deliver_transfer "$ak_ctx" "$agreement")
+    tid="${res%% *}"; res="${res#* }"; state="${res%% *}"
+    if [ "$state" = "STARTED" ]; then token=$(deliver_token "$ak_ctx" "$tid"); fi
+  fi
+  if [ -n "$token" ]; then
+    res=$(deliver_pull "$token"); status="${res%% *}"; body="${res#* }"
+    mine=$(printf '%s' "$body" | jq -c --arg p "$DELIVER_PROGRAMME" '[.answers[]? | select(.programme == $p)]' 2>/dev/null || echo "[]")
+  fi
+  if [ "$status" = "200" ] && [ "$(printf '%s' "$mine" | jq -c '[.[].goalMet] | sort')" = "[false,true]" ] \
+    && [ "$(printf '%s' "$body" | jq -r '.recipient // empty')" = "$ak_did" ]; then
+    pass "$test_id: ${TRUST_WELLBEING_SLUG} agrees to ${PURPOSE_ASSET}, its transfer starts, and the pull returns both members' answers for 2025 (one yes, one no)"
+    record_result "$test_id" "delivery" "passed"
+  else
+    fail "$test_id: transfer ${state}, pull HTTP ${status}, answers for the check's programme: ${mine} (${res:0:160})"
+    record_result "$test_id" "delivery" "failed" "answers not collected"
+  fi
+
+  # 8.2: Nothing but the yes or no leaves: four fields per answer, no id of
+  # the record or the consent, and a reference in the agreed form
+  test_id="DELIVER-8.2"
+  if [ "$status" = "200" ] \
+    && [ "$(printf '%s' "$body" | jq -c 'keys')" = '["answers","recipient"]' ] \
+    && [ "$(printf '%s' "$body" | jq -c '[.answers[] | keys] | unique')" = "[${DELIVER_KEYS}]" ] \
+    && [ "$(printf '%s' "$mine" | jq -r '[.[].memberReference | test("^[0-9A-HJKMNP-TV-Z]{4}(-[0-9A-HJKMNP-TV-Z]{4}){2}$")] | all')" = "true" ] \
+    && ! printf '%s' "$body" | grep -q 'identity-checks-'; then
+    pass "$test_id: each answer carries programme, year, goalMet and memberReference only; no record id, no consent id, no value behind the answer"
+    record_result "$test_id" "delivery" "passed"
+  else
+    fail "$test_id: the pull's body is not the yes or no alone: $(printf '%s' "$body" | head -c 240)"
+    record_result "$test_id" "delivery" "failed" "more than the yes or no"
+  fi
+
+  # 8.3: The hub records who collected an answer
+  test_id="DELIVER-8.3"
+  res=$(deliver_cypher 'MATCH (t:ProgrammeTransfer {transferId: "identity-checks-transfer-1"})
+    RETURN t.status, t.deliveredTo, t.deliveredAt IS NOT NULL' || echo "[]")
+  if [ "$res" = "[[\"delivered\",\"${ak_did}\",true]]" ]; then
+    pass "$test_id: the transfer is recorded as delivered to ${ak_did}, with the date"
+    record_result "$test_id" "delivery" "passed"
+  else
+    fail "$test_id: the collected transfer reads ${res}; want delivered, to ${ak_did}, with a date"
+    record_result "$test_id" "delivery" "failed" "collection not recorded"
+  fi
+
+  # 8.4: After a withdrawal the member's answer is no longer handed over
+  test_id="DELIVER-8.4"
+  deliver_cypher 'MATCH (c:ProgrammeConsent {consentId: "identity-checks-consent-2"}) SET c.withdrawnAt = datetime() RETURN 1' >/dev/null || true
+  status="000"; mine="[]"
+  if [ -n "$token" ]; then
+    res=$(deliver_pull "$token"); status="${res%% *}"
+    mine=$(printf '%s' "${res#* }" | jq -c --arg p "$DELIVER_PROGRAMME" '[.answers[]? | select(.programme == $p) | .goalMet]' 2>/dev/null || echo "[]")
+  fi
+  if [ "$status" = "200" ] && [ "$mine" = "[true]" ]; then
+    pass "$test_id: after the second member withdraws, the same transfer returns the first member's answer only"
+    record_result "$test_id" "delivery" "passed"
+  else
+    fail "$test_id: after a withdrawal the pull answered HTTP ${status} with goalMet ${mine}; want the remaining member's [true]"
+    record_result "$test_id" "delivery" "failed" "withdrawn member still delivered"
+  fi
+
+  # 8.5: The answers are not read without the agreement's transfer
+  test_id="DELIVER-8.5"
+  status=$(curl -s -o /dev/null --max-time 15 -w '%{http_code}' -H "X-Participant: ${ak_did}" \
+    "${DELIVER_PROXY_URL}/programmes/answers" 2>/dev/null) || status="000"
+  res=$(curl -s -o /dev/null --max-time 15 -w '%{http_code}' -H "Authorization: Bearer not-a-token" \
+    "${DELIVER_PROXY_URL}/dataspace/data" 2>/dev/null) || res="000"
+  if [ "$status" = "403" ] && [ "$res" = "401" ]; then
+    pass "$test_id: a direct call naming ${TRUST_WELLBEING_SLUG} is refused (403), and a pull without siglet's token is refused (401)"
+    record_result "$test_id" "delivery" "passed"
+  else
+    fail "$test_id: a direct call answered ${status} (want 403) and a pull with a made-up token ${res} (want 401)"
+    record_result "$test_id" "delivery" "failed" "answers readable without a transfer"
+  fi
+
+  # 8.6: The purpose is checked again when a transfer starts: under the same
+  # agreement, a credential that now attests premium-setting starts none
+  test_id="DELIVER-8.6"
+  if [ -z "$agreement" ]; then
+    fail "$test_id: no agreement to start a transfer under"
+    record_result "$test_id" "delivery" "failed" "no agreement"
+  else
+    purpose_drop_all "$ak_ctx"
+    if ! purpose_issue "$TRUST_WELLBEING_SLUG" premium-setting-purpose-credential-def; then
+      fail "$test_id: could not have the authority attest premium-setting to ${TRUST_WELLBEING_SLUG}"
+      record_result "$test_id" "delivery" "failed" "premium setting credential setup"
+    else
+      res=$(deliver_transfer "$ak_ctx" "$agreement")
+      res="${res#* }"
+      # EDC answers a transfer whose policy fails in the transfer scope with
+      # 409 "agreement not found or not valid"; the agreement itself started a
+      # transfer in 8.1, so what changed is the purpose.
+      if [ "${res%% *}" = "TERMINATED" ] && [[ "$res" == *"agreement not found or not valid"* ]]; then
+        pass "$test_id: with a purpose credential attesting premium-setting, a transfer under the agreement that served 8.1 is refused (409, agreement not valid for this consumer now)"
+        record_result "$test_id" "delivery" "passed"
+      else
+        fail "$test_id: with premium-setting attested, a transfer under the existing agreement ended ${res:0:300}; want TERMINATED, agreement not valid"
+        record_result "$test_id" "delivery" "failed" "transfer started on another purpose"
+      fi
+    fi
+    purpose_drop_all "$ak_ctx"
+    purpose_issue "$TRUST_WELLBEING_SLUG" bonus-payout-purpose-credential-def ||
+      echo -e "  ${YELLOW}!${NC} ${TRUST_WELLBEING_SLUG}'s bonus-payout purpose was not restored: run scripts/seed-second-data-space.sh"
+  fi
+
+  deliver_cleanup
+}
+
+# ---------------------------------------------------------------------------
 # Generate JSON report
 # ---------------------------------------------------------------------------
 write_report() {
@@ -1140,6 +1400,8 @@ main() {
   run_trust_tests
   echo ""
   run_purpose_tests
+  echo ""
+  run_delivery_tests
 
   echo ""
   echo "═══════════════════════════════════════════════════════════════"
