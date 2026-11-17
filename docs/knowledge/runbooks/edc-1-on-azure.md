@@ -119,9 +119,9 @@ A script that changes `mvhd-nats` (`04-edc-services.sh`) restarts the control pl
 
 The check stays: EDC declined it upstream on 2026-11-10 ([eclipse-edc/Connector#6211](https://github.com/eclipse-edc/Connector/pull/6211)), so ADR-084's decision 6 will not remove it. It assumes the control plane creates the streams (`EDC_NATS_CN_SUBSCRIBER_AUTOCREATE=true` and the `TP` one, set by `04-edc-services.sh`). If the streams are ever provisioned outside EDC, as EDC recommends for production, turn the check off, or a lost stream restarts the control plane in a loop (`docs/gotchas.md`, 2026-11-09, "Upstream").
 
-## Moving to the next release candidate (RC5 to RC6, #930)
+## Moving to the next release candidate (RC5 to RC6, RC6 to RC7, #930)
 
-An EDC release candidate ships no schema migration from the one before it: RC6 changed seven Connector and seven IdentityHub schemas and dropped the column migrations ([Connector #6186](https://github.com/eclipse-edc/Connector/pull/6186)). So each RC starts on fresh databases next to the previous set, which stays as the rollback. The set is named by `EDC_DB_SUFFIX` in `scripts/azure/env.sh` (`_v1` RC5, `_v1rc6` RC6); siglet keeps `siglet_v1`.
+An EDC release candidate ships no schema migration from the one before it: RC6 changed seven Connector and seven IdentityHub schemas and dropped the column migrations ([Connector #6186](https://github.com/eclipse-edc/Connector/pull/6186)). So each RC starts on fresh databases next to the previous set, which stays as the rollback. The set is named by `EDC_DB_SUFFIX` in `scripts/azure/env.sh` (`_v1` RC5, `_v1rc6` RC6, `_v1rc7` RC7); siglet keeps `siglet_v1`. RC7 changed one Connector schema, the federated catalog's `edc_target_node_directory` (a `counter_party_id` column, [Connector #6209](https://github.com/eclipse-edc/Connector/pull/6209)), and no IdentityHub schema; the rule holds anyway, since a table created on RC6 never gets the column.
 
 1. Window, `az login`, `scripts/azure/check-keycloak-health.sh` as in step 0; no load test.
 2. `migrate-edc-to-v1.sh backup`: the saved definitions name the previous images and the previous database set.
