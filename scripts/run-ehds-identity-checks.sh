@@ -392,10 +392,12 @@ run_keypair_tests() {
     local alias enc missing=0 checked=0
     while IFS= read -r alias; do
       [ -n "$alias" ] || continue
-      # EDC percent-encodes the alias once more for the vault path: ':' -> %3A,
-      # an existing '%' -> %25, '#' -> %23, '@' -> %40 (observed:
+      # The secret's name depends on the EDC version. From 1.0.0-RC7 it is the
+      # alias itself (Connector #6213). Up to RC6 EDC percent-encoded the
+      # alias once more for the vault path: ':' -> %3A, an existing '%' ->
+      # %25, '#' -> %23, '@' -> %40 (observed:
       # did%3Aweb%3Aidentityhub%253A7083%3Almc%23key1, and on 1.0 the seeds'
-      # ...%23key1%40<context id>, #881 finding 18).
+      # ...%23key1%40<context id>, #881 finding 18). Either name holds it.
       enc=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$alias")
       checked=$((checked + 1))
       # Where IdentityHub put it depends on the participant's Vault config:
@@ -404,7 +406,8 @@ run_keypair_tests() {
       # created through the Identity API without it lands under the hub's
       # global vault, i.e. secret/<alias>. Either location is the property.
       local found=0 path
-      for path in "participants/${PROVIDER_CTX}/identityhub/${enc}" "secret/${enc}"; do
+      for path in "participants/${PROVIDER_CTX}/identityhub/${alias}" "secret/${alias}" \
+                  "participants/${PROVIDER_CTX}/identityhub/${enc}" "secret/${enc}"; do
         if docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -e VAULT_TOKEN="${VAULT_TOKEN:-root}" "$vault_c" \
              vault kv get -field=content "$path" >/dev/null 2>&1; then found=1; break; fi
       done
