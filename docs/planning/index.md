@@ -24,6 +24,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 - [longevity-community-data-sharing](future/longevity-community-data-sharing.md) — no CVD Fox Insight exists; the behaviour lives in longevity communities. S3 journey deferred here
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers
 - [issue-26-healthdcat-ap-validation](future/issue-26-healthdcat-ap-validation.md) — SHACL validation + DQV source-level quality for the catalog
+- [eehrxf-epics-2026-11](future/eehrxf-epics-2026-11.md): seven EHRxF epics from the xShare procurement guidance; E1 is #1144, E7 is #1145, the rest wait on discussion [#1143](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1143)
 
 - [simpl-live-and-ehds-partners-2026-11](future/simpl-live-and-ehds-partners-2026-11.md): Simpl-Live wave 1 is procured, not applied to; EU4Health EHDS Readiness Package (Q4 2026); calls, tenders and partner analysis; discussion [#895](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/895)
 
