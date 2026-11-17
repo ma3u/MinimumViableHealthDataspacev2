@@ -1473,7 +1473,7 @@
   },
   "toolVersions": {
     "vitest": "5.0.2",
-    "playwright": "1.65.0",
+    "playwright": "1.65.1",
     "next": "15.5.29",
     "gitleaks": "8.27.2",
     "trivy": "0.69.3"
@@ -1482,7 +1482,7 @@
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
     "/docs/developer": "2026-11-14",
-    "/docs/developer/quality-gates": "2026-11-12",
+    "/docs/developer/quality-gates": "2026-11-17",
     "/docs/developer/api": "2026-11-11",
     "/docs/developer/reference": "2026-11-11",
     "/docs/developer/[slug]": "2026-11-15",
