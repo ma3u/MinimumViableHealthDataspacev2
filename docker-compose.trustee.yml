@@ -58,7 +58,7 @@ services:
 
   trustee:
     # Trustee v0.22.0 (CoCo v0.23.0), KBS with the built-in AS
-    image: ghcr.io/confidential-containers/key-broker-service:built-in-as-v0.22.0@sha256:c1960cb4df0b1bdc0e4309f97dc65b0a1a777a92dabb2211acb45542f906c625
+    image: ghcr.io/confidential-containers/key-broker-service:built-in-as-v0.23.0@sha256:ea2548fb54e5e997d05b2b3d0ddbd554afd56ec4038dc28f3767f24cbffe44bc
     platform: linux/amd64
     container_name: health-dataspace-trustee
     command: ["/usr/local/bin/kbs", "--config-file", "/etc/kbs/kbs-config.toml"]
@@ -124,7 +124,7 @@ services:
         condition: service_completed_successfully
 
   neo4j-spe1:
-    image: neo4j:5.26.32-community
+    image: neo4j:5.26.33-community
     container_name: health-dataspace-neo4j-spe1
     ports:
       - "7476:7474"

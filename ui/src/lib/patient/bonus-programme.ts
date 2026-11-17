@@ -23,6 +23,13 @@ export interface ProgrammeConsent {
   programmeId: string;
   joinedAt: string;
   withdrawnAt: string | null;
+  /**
+   * What the program's answer is tied to (step 8, ADR-091): the member gives
+   * it to the insurer. Absent in the static build, which keeps no record.
+   */
+  memberReference?: string;
+  /** When the insurer last collected an answer under this consent, if it has. */
+  collectedAt?: string | null;
 }
 
 /**

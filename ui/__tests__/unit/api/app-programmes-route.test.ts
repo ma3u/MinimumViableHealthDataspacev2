@@ -100,7 +100,9 @@ describe("bonus programs for the Klarbefund app", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.programmes).toHaveLength(1);
-    expect(body.consents).toEqual([OPEN]);
+    expect(body.consents).toEqual([
+      { ...OPEN, memberReference: "6G3S-4K9A-J3FY" },
+    ]);
     expect(body.legalBasis).toMatch(/Art\. 9\(2\)\(a\)/);
     expect(mockRunQuery.mock.calls[0][0]).toBe(BONUS_PROGRAMMES_CYPHER);
     expect(mockRunQuery.mock.calls[1]).toEqual([
@@ -120,7 +122,10 @@ describe("bonus programs for the Klarbefund app", () => {
       }),
     );
     expect(res.status).toBe(201);
-    expect((await res.json()).consent).toEqual(OPEN);
+    expect((await res.json()).consent).toEqual({
+      ...OPEN,
+      memberReference: "6G3S-4K9A-J3FY",
+    });
     const [query, params] = mockRunQuery.mock.calls[0];
     expect(query).toBe(JOIN_PROGRAMME_CYPHER);
     expect(params).toMatchObject({
