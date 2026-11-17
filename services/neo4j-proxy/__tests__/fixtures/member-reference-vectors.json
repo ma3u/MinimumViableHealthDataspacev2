@@ -1,0 +1,25 @@
+{
+  "note": "The member reference of a consent id (ADR-091). Both copies of the derivation run these: services/neo4j-proxy/src/member-reference.ts and ui/src/lib/patient/member-reference.ts.",
+  "vectors": [
+    {
+      "consentId": "3f2c9a1e-7b54-4d0e-9c1a-5e8f2b6d7a90",
+      "memberReference": "K9XZ-Z669-AZTN"
+    },
+    {
+      "consentId": "00000000-0000-4000-8000-000000000000",
+      "memberReference": "B5DX-N3W5-RJGM"
+    },
+    {
+      "consentId": "consent-demo-patient1-active-year-2025",
+      "memberReference": "4MDN-KW5F-6D1C"
+    },
+    {
+      "consentId": "b774dee8-ae28-4a44-bcc1-b08b26b1ab76",
+      "memberReference": "NY83-XA5H-C3GP"
+    },
+    {
+      "consentId": "c-1",
+      "memberReference": "6G3S-4K9A-J3FY"
+    }
+  ]
+}

@@ -105,6 +105,10 @@ test.describe("Bonus programs from another data space", () => {
     await expect(card.getByTestId("bonus-programme-joined")).toContainText(
       "You joined on",
     );
+    // Step 8: the reference the insurer's answer is tied to (ADR-091).
+    await expect(card.getByTestId("bonus-programme-reference")).toContainText(
+      /Your reference for .+: [0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}\./,
+    );
     // Step 6: the result shows before anything is sent (ADR-087).
     await expect(card.getByTestId("bonus-programme-goal")).toBeVisible({
       timeout: 15_000,
