@@ -87,8 +87,15 @@ describe("/api/patient/programmes", () => {
     };
     mockRunQuery.mockResolvedValueOnce([ROW]).mockResolvedValueOnce([consent]);
     const res = await GET("?patientId=P1");
-    expect((await res.json()).consents).toEqual([consent]);
+    // Each with the reference its answers carry (step 8, ADR-091).
+    expect((await res.json()).consents).toEqual([
+      { ...consent, memberReference: "6G3S-4K9A-J3FY" },
+    ]);
     expect(mockRunQuery.mock.calls[1][1]).toEqual({ patientId: "P1" });
+    // And the date the insurer collected, from the transfers under it.
+    expect(mockRunQuery.mock.calls[1][0]).toContain(
+      "max(t.deliveredAt) AS collectedAt",
+    );
   });
 
   it("the static mock has the live response's shape", () => {
