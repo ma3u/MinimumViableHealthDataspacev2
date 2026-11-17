@@ -163,12 +163,15 @@ step "8/8 AlphaKasse's data plane, so it can collect the answer (ADR-091)"
 # consumer's own transfer ends TERMINATED "No dataplane found" before the
 # provider hears of it. jad/seed-contract-negotiation.sh registers the five
 # CFM participants; AlphaKasse is created here, so its registration is too.
-# The id is global, one per participant (#542).
+# The id is global, one per participant (#542). The transfer types go as
+# `profiles` (Connector #6196, from RC6) and as `transferTypes` (RC5): a
+# control plane silently ignores the name it does not read, which leaves the
+# data plane unselectable.
 SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"
 DP_STATUS=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X PUT "${EDC_MANAGEMENT_URL}/v5/participants/${AK_CTX}/dataplanes" \
   -H "Authorization: Bearer ${ATOKEN}" -H "Content-Type: application/json" \
   -d "$(jq -nc --arg id "dataplane-fhir-${AK_CTX}" --arg e "${SIGLET_SIGNALING_URL}/${AK_CTX}/dataflows" \
-    '{dataplaneId:$id,endpoint:$e,transferTypes:["HttpData-PULL"]}')" 2>/dev/null) || DP_STATUS="000"
+    '{dataplaneId:$id,endpoint:$e,profiles:["HttpData-PULL"],transferTypes:["HttpData-PULL"]}')" 2>/dev/null) || DP_STATUS="000"
 case "$DP_STATUS" in 2??) ;; *) fail "step 8, AlphaKasse's data plane: HTTP ${DP_STATUS}" ;; esac
 echo -e "${GREEN}OK${NC}: ${HOLDER} has a data plane for HttpData-PULL"
 
