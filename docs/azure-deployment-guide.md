@@ -1,19 +1,16 @@
-# Azure Deployment Guide — EHDS Integration Hub
+# Azure Deployment Guide: EHDS Integration Hub
 
-> **Last updated:** 2026-04-11
+> **Last updated:** 2026-11-12
 > **Target platform:** Azure Container Apps (Consumption plan)
-> **Region:** West Europe (PostgreSQL in North Europe)
-> **Services:** 13 container apps + 3 ACA jobs + PostgreSQL Flexible Server
+> **Region:** West Europe (a new Flexible Server may need North Europe, section 4.5)
+> **Services:** EDC 1.0 (ADR-078), siglet, CFM from the fork (ADR-088), PostgreSQL Flexible Server
 >
-> **Out of date for the EDC services.** This guide describes the April 2026
-> deployment on EDC 0.18 with the 2026-03 CFM build. Since 2026-11-06 Azure
-> runs EDC 1.0 and the hub provisions participants itself
-> ([ADR-078](ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)); #927
-> deleted the CFM apps, the data planes `mvhd-dp-fhir` and `mvhd-dp-omop`
-> and their scripts (`05-cfm-*.sh` among them) on 2026-11-09. For the EDC
-> services see [edc-1-on-azure](knowledge/runbooks/edc-1-on-azure.md); the
-> tables below that name a data plane, the tenant manager or the `cfm`
-> databases are a record of April.
+> **Section 4 is current**: the order that built the estate from an empty
+> resource group on EDC 1.0, rehearsed end to end on 2026-11-11 (#927). So are
+> the database and image tables in section 3 and the script table in section 5. The diagram in section 2 and the internal endpoint table in section 3
+> still show the April 2026 deployment on EDC 0.18, with its two data planes
+> and the 2026-03 CFM managers, which #927 deleted on 2026-11-09; for the EDC
+> services on 1.0 see [edc-1-on-azure](knowledge/runbooks/edc-1-on-azure.md).
 
 ---
 
@@ -109,7 +106,7 @@ cd MinimumViableHealthDataspacev2
 
 | Resource      | Type                    | Location     | SKU             |
 | ------------- | ----------------------- | ------------ | --------------- |
-| `rg-mvhd-dev` | Resource Group          | West Europe  | —               |
+| `rg-mvhd-dev` | Resource Group          | West Europe  | n/a             |
 | `acrmvhddev`  | Container Registry      | West Europe  | Basic           |
 | `mvhd-env`    | ACA Environment         | West Europe  | Consumption     |
 | `pg-mvhd-dev` | PostgreSQL Flex Server  | North Europe | B_Standard_B1ms |
@@ -123,7 +120,7 @@ cd MinimumViableHealthDataspacev2
 
 | Service            | URL                                                                                                                      | Purpose                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
-| **UI**             | https://ehds.mabu.red                                                                                                    | Next.js 14 application — main entry point  |
+| **UI**             | https://ehds.mabu.red                                                                                                    | Next.js application, the main entry point  |
 | **Keycloak**       | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io                                              | OIDC provider, realm: `edcv`               |
 | **Keycloak Admin** | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io/admin/                                       | Admin console (user: `admin`, pw: `admin`) |
 | **Keycloak OIDC**  | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io/realms/edcv/.well-known/openid-configuration | OIDC discovery document                    |
@@ -133,7 +130,7 @@ cd MinimumViableHealthDataspacev2
 
 | Service               | Internal FQDN                                                                       | Port  | Protocol |
 | --------------------- | ----------------------------------------------------------------------------------- | ----- | -------- |
-| **Neo4j** (Bolt)      | `mvhd-neo4j` (short app name — see note)                                            | 7687  | TCP      |
+| **Neo4j** (Bolt)      | `mvhd-neo4j` (short app name, see note)                                             | 7687  | TCP      |
 | **Neo4j Proxy**       | `mvhd-neo4j-proxy.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`   | 9090  | HTTP     |
 | **Vault**             | `mvhd-vault.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`         | 8200  | HTTP     |
 | **NATS**              | `mvhd-nats.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`          | 4222  | TCP      |
@@ -147,7 +144,7 @@ cd MinimumViableHealthDataspacev2
 
 Neo4j is the exception in that table: it has TCP ingress with `targetPort` and
 `exposedPort` 7687 and no `additionalPortMappings`, so there is no HTTP endpoint
-on 7474 — a row for one stood here and cost issue #205. (An
+on 7474; a row for one stood here and cost issue #205. (An
 `additionalPortMappings: [7474]` experiment was tried and reverted on
 2026-04-13; ADR-017 is about what that revert destroyed.) ACA routes
 environment-local TCP by short app name only, so `bolt://mvhd-neo4j:7687` is the
@@ -156,26 +153,40 @@ on TCP. `scripts/azure/env.sh` exports it as `NEO4J_BOLT_URI`.
 
 ### Database endpoints (private)
 
-| Service        | Host                                      | Port | Databases                                                                                        |
-| -------------- | ----------------------------------------- | ---- | ------------------------------------------------------------------------------------------------ |
-| **PostgreSQL** | `pg-mvhd-dev.postgres.database.azure.com` | 5432 | `keycloak`, `controlplane`, `dataplane`, `dataplane_omop`, `identityhub`, `issuerservice`, `cfm` |
+The hub's Flexible Server, `mvhd-pg-b53a0449.postgres.database.azure.com`,
+port 5432, TLS (ADR-041). Its databases, and the step that creates each
+(`PG_DATABASES` in `env.sh`):
+
+| Database                                                             | Created by                         | Used by                       |
+| -------------------------------------------------------------------- | ---------------------------------- | ----------------------------- |
+| `keycloak`, `cfm`                                                    | `13-postgres-flexible-server.sh 2` | Keycloak; CFM from the fork   |
+| `vault`                                                              | `14-vault-on-postgres.sh 1`        | Vault's storage (ADR-046)     |
+| `controlplane_v1`, `identityhub_v1`, `issuerservice_v1`, `siglet_v1` | `create-edc-v1-databases.sh`       | the EDC 1.0 launchers, siglet |
+| `taskdb`                                                             | `wire-task-store.sh`               | the proxy's task store        |
+
+The EDC 0.18 databases (`controlplane`, `dataplane`, `dataplane_omop`,
+`identityhub`, `issuerservice` and their `_v018` successors) were dropped with
+#594 and #927.
 
 ### Container images (ACR)
 
-| Image                                            | Source                              | Build                 |
-| ------------------------------------------------ | ----------------------------------- | --------------------- |
-| `acrmvhddev.azurecr.io/mvhd-ui:latest`           | `./ui/Dockerfile`                   | CI/CD on push to main |
-| `acrmvhddev.azurecr.io/mvhd-neo4j-proxy:latest`  | `./services/neo4j-proxy/Dockerfile` | CI/CD on push to main |
-| `acrmvhddev.azurecr.io/jad-controlplane:latest`  | `ma3u/jad` — Gradle shadow JAR      | Manual build          |
-| `acrmvhddev.azurecr.io/jad-dataplane:latest`     | `ma3u/jad` — Gradle shadow JAR      | Manual build          |
-| `acrmvhddev.azurecr.io/jad-identity-hub:latest`  | `ma3u/jad` — Gradle shadow JAR      | Manual build          |
-| `acrmvhddev.azurecr.io/jad-issuerservice:latest` | `ma3u/jad` — Gradle shadow JAR      | Manual build          |
-| `acrmvhddev.azurecr.io/cfm-tmanager:latest`      | `Metaform/cfm-fulcrum` — Go         | Manual build          |
-| `acrmvhddev.azurecr.io/cfm-pmanager:latest`      | `Metaform/cfm-fulcrum` — Go         | Manual build          |
-| `acrmvhddev.azurecr.io/keycloak:latest`          | `quay.io/keycloak/keycloak`         | Pulled amd64          |
-| `acrmvhddev.azurecr.io/vault:latest`             | `hashicorp/vault`                   | Pulled amd64          |
-| `acrmvhddev.azurecr.io/neo4j:5-community`        | `neo4j:5-community`                 | Pulled amd64          |
-| `acrmvhddev.azurecr.io/nats:alpine`              | `nats:alpine`                       | Pulled amd64          |
+In `acrmvhdehds` (`ACR_NAME`). Third-party images are pinned (ADR-029).
+
+| Image                                                                    | Source                                          | Pushed by                                     |
+| ------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------- |
+| `mvhd-ui:<sha>`, `:latest`                                               | `ui/Dockerfile`                                 | `deploy-azure.yml` on every merge to main     |
+| `mvhd-neo4j-proxy:<sha>`, `:latest`                                      | `services/neo4j-proxy/Dockerfile`               | `deploy-azure.yml`                            |
+| `mvhd-edc-controlplane`, `-identity-hub`, `-issuerservice` `:<EDC1_TAG>` | `runtimes/edc` (ADR-076)                        | `push-edc1-images.sh build`, `push`           |
+| `siglet:sha-<digest>`                                                    | the digest `docker-compose.jad.yml` pins        | `17-siglet.sh` (`az acr import`)              |
+| `cfm/<manager or agent>:<fork version>` (eight)                          | the fork tag in `.github/upstream.json`         | `20-cfm-fork.sh images`                       |
+| `keycloak:26.8.0`; `keycloak-ehds:<version>-<sha>`                       | `quay.io/keycloak/keycloak`; with the theme     | `03-identity.sh`; `wire-keycloak-theme.sh`    |
+| `vault:2.0`; `mvhd-vault-unseal:<sha>`                                   | `hashicorp/vault`; `scripts/azure/vault-unseal` | `03-identity.sh`; `14-vault-on-postgres.sh 2` |
+| `neo4j:5.26.28-community`                                                | Docker Hub                                      | `02-data-layer.sh`                            |
+| `nats:2.14.3-alpine`                                                     | Docker Hub                                      | `04-edc-services.sh`                          |
+| `mvhd-neo4j-seed`, `mvhd-vault-bootstrap`                                | `neo4j/`; generated by `06-post-deploy.sh`      | `06-post-deploy.sh`                           |
+
+The `jad-*` images of EDC 0.18 and the 2026-03 CFM's were deleted from the
+registry on 2026-11-10 (#927).
 
 ### ACA Jobs
 
@@ -189,35 +200,121 @@ on TCP. `scripts/azure/env.sh` exports it as `NEO4J_BOLT_URI`.
 
 ## 4. Fresh Deployment (from scratch)
 
-Use the deployment scripts in `scripts/azure/`. Each phase builds on the previous one.
+The order below built the estate from an empty resource group on EDC 1.0 and
+passed end to end: a rebuild rehearsal in `rg-mvhd-rehearsal` on 2026-11-11
+(evidence on [#927](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/927)).
+Every script is in `scripts/azure/` and reads `env.sh`. A step names what has
+to be true before the next one starts.
+
+### 4.1 Before you start
+
+- **Rights.** PIM `rol-ssg-prd-project_owner` active
+  (`~/.claude/scripts/az-pim-activate.sh`): 01 and 05 assign roles, and the
+  seeds run Container Apps jobs. Contributor alone cannot assign roles.
+- **Logins.** `az login` lasts an hour (conditional access). Log in again
+  before each block below, never inside one; the rehearsal needed three.
+- **Tools.** `az` with the `containerapp` extension (1.3.0b5), Docker with
+  buildx (`DOCKER_CONTEXT=orbstack`), `python3` with PyYAML, `jq`, `bru` for
+  the checks.
+- **A second resource group** (a rehearsal, a disaster-recovery copy) sets its
+  own globally unique names before anything runs. `env.sh` refuses to start
+  while one of them still names the hub's, so nothing reaches the hub's Key
+  Vault, registry, Flexible Server or domain:
+
+  ```bash
+  export RG=rg-mvhd-rehearsal KEY_VAULT_NAME=kv-mvhd-r<sfx> ACR_NAME=acrmvhdr<sfx> \
+    PG_FLEX_NAME=mvhd-pg-r<sfx> SPE_DNS_SUFFIX=r<sfx> CUSTOM_DOMAIN=
+  ```
+
+  Its Keycloak then answers on its Container Apps address, which `env.sh`
+  finds once 01 has made the environment, and the laptop keeps its rollback
+  copies in `~/.mvhd/rg/<RG>/`, apart from the hub's.
+
+### 4.2 The order
+
+| #   | Step                                                                                                                                                                                           | Time   | Gate                                                                                                   |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| 1   | `01-foundation.sh`: resource group, Key Vault (purge protection, RBAC), `id-mvhd-claude-federation` with Key Vault Secrets User, Log Analytics, registry, storage and shares, environment      | 16 min | exits 0; the environment alone takes 15 minutes                                                        |
+| 2   | Images, once the registry exists: `push-edc1-images.sh build`, then `push` (prints `EDC1_TAG`); `build-images.sh` for the UI and the proxy                                                     | 3 min  | `push-edc1-images.sh check` lists the tag                                                              |
+| 3   | `02-data-layer.sh`: Flexible Server and its password (13 phases 1 and 2), Neo4j and `neo4j-password`                                                                                           | 11 min | 13 phase 1 ends with the server `Ready`                                                                |
+| 4   | `03-identity.sh`: Keycloak with `keycloak-admin-password` generated into Key Vault, Vault on Postgres (14)                                                                                     | 7 min  | the sidecar logs `[vault-init] ready`                                                                  |
+| 5   | `create-edc-v1-databases.sh` (on the hub: the workflow `edc-v1-databases.yml`)                                                                                                                 | 1 min  | four databases present                                                                                 |
+| 6   | `04-edc-services.sh`: NATS, the three EDC apps on base settings, the proxy                                                                                                                     | 3 min  | NATS and the proxy Healthy; the EDC apps fail until step 8 (no `edc.events.nats.url` yet), as expected |
+| 7   | `06-post-deploy.sh`: the `edcv` realm, then the Neo4j seed job and the Vault bootstrap job. Can run beside step 6                                                                              | 5 min  | both job executions `Succeeded` (the seed takes 5 minutes after the script ends)                       |
+| 8   | `migrate-edc-to-v1.sh backup`, then `app controlplane`, `app identityhub`, `app issuerservice`, then `set-edc-log-level.sh`                                                                    | 3 min  | each revision Healthy                                                                                  |
+| 9   | `wire-keycloak-edc1-scopes.sh`, then `--check`                                                                                                                                                 | 1 min  | the three `:admin` scopes on admin and provisioner, the issuer's `sub` mapper                          |
+| 10  | `17-siglet.sh`, then `--check` (directly: `migrate-edc-to-v1.sh siglet` wants a siglet backup, which a new build cannot have)                                                                  | 4 min  | Healthy, ports 8081 to 8083                                                                            |
+| 11  | `05-ui.sh`, then `rotate-keycloak-ui-client-secret.sh --rotate`, `rotate-edc-admin-client-secret.sh --rotate`, `wire-ui-client-scope.sh`                                                       | 5 min  | both secrets come from Key Vault, the public defaults are refused                                      |
+| 12  | `migrate-edc-to-v1.sh backup` (now with siglet and the UI), then `proxy`, `ui`, `diff`                                                                                                         | 3 min  | `diff` exits 0                                                                                         |
+| 13  | `seed-issuer-identity-azure.sh seed`, then `verify`                                                                                                                                            | 5 min  | `issuer identity: OK`                                                                                  |
+| 14  | `run-seed-job.sh reseed plan`, then `apply` (on the hub also the workflow `edc-reseed-identity-layer.yml`)                                                                                     | 10 min | "the five demo participants carry ... DIDs and hold a credential"                                      |
+| 15  | `run-seed-job.sh data-assets apply` (on the hub also `edc-seed-data-assets.yml`)                                                                                                               | 4 min  | assets and contract definitions per context                                                            |
+| 16  | CFM from the fork (ADR-088): `wire-cfm-agents-client.sh`, `20-cfm-fork.sh images`, `CFM_AZURE_GO="mvhd-cfm-tmanager mvhd-cfm-pmanager mvhd-cfm-agents" 20-cfm-fork.sh apps`, `seed`, `--check` | 13 min | three apps Healthy, cell and dataspace profile seeded                                                  |
+
+Steps 1 to 16 took about two hours of script time; the rehearsal took three
+with its fixes. The seeds and both CFM steps are idempotent; so are 01 to 06
+when what they create already exists.
+
+### 4.3 Proving it
 
 ```bash
-# Authenticate
-az login
-
-# Phase 0: Foundation — resource group, ACR, Log Analytics, ACA environment
-./scripts/azure/01-foundation.sh
-
-# Phase 1: Data layer — PostgreSQL, Neo4j
-./scripts/azure/02-data-layer.sh
-
-# Phase 2: Identity — Keycloak, Vault
-./scripts/azure/03-identity.sh
-
-# Phase 3: EDC-V core services — controlplane, dataplanes, identity hub, issuer
-./scripts/azure/04-edc-services.sh
-
-# Phase 4: 05-cfm-ui.sh created the CFM managers and mvhd-ui; it is gone
-# with EDC 0.18 (#927). deploy-azure.yml updates mvhd-ui on every push to main.
-
-# Phase 5: Post-deployment — seed Neo4j, bootstrap Vault, import Keycloak realm
-./scripts/azure/06-post-deploy.sh
-
-# Phase 6: Observability — diagnostic settings, alerts, dashboard
-./scripts/azure/07-observability.sh
+scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv
+NEXTAUTH_SECRET=<the UI's> BRUNO_BASE_URL=<the UI's address> BRUNO_KEYCLOAK_URL="$KEYCLOAK_PUBLIC_URL" \
+  scripts/run-api-tests.sh Azure-Dev "03 Data User"
 ```
 
-Total deployment time: ~20 minutes (excluding image builds).
+On the rehearsal: Keycloak served `edcv` from its database; Bruno `03 Data
+User` passed 25 of 26 with the live DSP flow (catalogue from the connector,
+negotiation `FINALIZED`, transfer `STARTED`, the data from the provider's data
+plane); the one failure is `09`, which wants GraphRAG on Azure OpenAI
+(`07-ai-foundry.sh`, not part of this order). A new participant onboarded
+through `POST /api/participants` answered 201 with seven steps, the
+MembershipCredential request among them. All thirteen apps were still Healthy
+the next morning. Setting by setting, the rebuilt apps match the hub's names
+except where a step in 4.4 adds its own.
+
+### 4.4 After the core
+
+Each of these is independent of the others and was not part of the
+rehearsal. On the hub they are what the live apps carry beyond 4.2:
+
+- Security: `rotate-vault-token.sh apply`, then `revoke-root` (#359);
+  `guard-keycloak-console.sh`; `secure-accounts.sh`.
+- Keycloak: `wire-keycloak-theme.sh`, `wire-keycloak-events.sh`.
+- The UI's extras: `wire-dsp-catalog-token.sh --create`,
+  `wire-pid-fingerprint-key.sh --create`, `wire-task-store.sh`,
+  `15-communication-email.sh`, `19-eudi-verifier.sh` (deploy-azure.yml sets
+  the EUDI settings on every merge), `wire-klarbefund-*.sh`,
+  `12-meinbefund-identity.sh`, `11-claude-federation.sh provision`.
+- Analytics and operations: `07-ai-foundry.sh` and the workflow
+  `graphrag-deploy.yml`, `07-observability.sh`, `16-observability-app.sh`,
+  `08-compliance-runner.sh`, `09-fhir-loader.sh`, `10-catalog-crawler.sh`,
+  `18-offhours-jobs.sh`, the `size-*.sh` scripts.
+- The SPE workspaces and Trustee: `21-aci-confidential-spe.sh` (ADR-068,
+  ADR-069).
+- Custom domains, on the hub only: `06-post-deploy.sh` with `CUSTOM_DOMAIN`
+  set binds `ehds.mabu.red` (DNS records at the registrar), and the
+  keycloak-custom-domain workflow `auth.ehds.mabu.red`.
+
+### 4.5 What the rehearsal met
+
+- **Key Vault.** The tenant's policy "Key vaults should have deletion
+  protection enabled" refuses a vault without purge protection. A deleted
+  vault therefore keeps its name for its seven days of soft delete; pick a
+  new suffix for the next rehearsal.
+- **Postgres capacity.** West Europe refused a new `Standard_B1ms` with
+  `SkuNotAvailable` in every zone although `list-skus` offers it; North Europe
+  took it. Set `PG_FLEX_LOCATION=northeurope`, with a new `PG_FLEX_NAME`: for
+  a while after a failed create the old name stays bound to West Europe.
+- **Images.** The UI under amd64 emulation builds slowly on Apple Silicon.
+  The rehearsal copied the images CI had built on `main` (`az acr import`);
+  on the hub, `deploy-azure.yml` builds them on every merge but only updates
+  an existing `mvhd-ui`, so step 11 must have run once.
+- **Costs.** About $0.3 an hour idle for everything in 4.2 (Container Apps,
+  West Europe, 2026-11-11 prices), Postgres B1ms $0.02 an hour.
+
+Delete a rehearsal with `az group delete --name <RG> --yes`, never
+`teardown.sh` without `RG` set: it deletes `rg-mvhd-dev` by default.
 
 ---
 
@@ -225,20 +322,30 @@ Total deployment time: ~20 minutes (excluding image builds).
 
 All scripts live in `scripts/azure/` and share common variables from `scripts/azure/env.sh`.
 
-| Script                | Purpose                                                  | Duration |
-| --------------------- | -------------------------------------------------------- | -------- |
-| `env.sh`              | Shared environment variables (source, do not execute)    | —        |
-| `01-foundation.sh`    | Resource group, ACR, Log Analytics, ACA environment      | ~5 min   |
-| `02-data-layer.sh`    | PostgreSQL Flex + Neo4j container app                    | ~5 min   |
-| `03-identity.sh`      | Keycloak + Vault container apps                          | ~3 min   |
-| `04-edc-services.sh`  | Control plane, data planes, identity hub, issuer service | ~3 min   |
-| `06-post-deploy.sh`   | Seed Neo4j, bootstrap Vault, import Keycloak realm       | ~5 min   |
-| `07-observability.sh` | Diagnostic settings, alerts, dashboard                   | ~2 min   |
-| `teardown.sh`         | Delete entire resource group                             | ~5 min   |
-| `build-images.sh`     | Build all custom images for amd64 and push to ACR        | ~15 min  |
-| `status.sh`           | Show status of all services and endpoints                | instant  |
-
----
+| Script                                                                                                | Purpose                                                                                                 | Section 4.2 |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------- |
+| `env.sh`                                                                                              | Shared names and helpers (source, do not execute); refuses a second resource group that names the hub's | 4.1         |
+| `01-foundation.sh`                                                                                    | Resource group, Key Vault and its reader identity, Log Analytics, ACR, storage, environment             | 1           |
+| `push-edc1-images.sh`                                                                                 | Build and push the EDC 1.0 launchers                                                                    | 2           |
+| `build-images.sh`                                                                                     | Build the UI and the proxy, push the third-party images                                                 | 2           |
+| `02-data-layer.sh`                                                                                    | Flexible Server (through 13) and Neo4j                                                                  | 3           |
+| `13-postgres-flexible-server.sh`                                                                      | The server (1), `keycloak` and `cfm` (2); `PG_FLEX_LOCATION`, `PG_FLEX_ZONE`                            | 3           |
+| `03-identity.sh`                                                                                      | Keycloak and Vault (through 14)                                                                         | 4           |
+| `14-vault-on-postgres.sh`                                                                             | Vault's storage on Postgres and the unseal sidecar                                                      | 4           |
+| `create-edc-v1-databases.sh`                                                                          | The four EDC 1.0 databases                                                                              | 5           |
+| `04-edc-services.sh`                                                                                  | NATS, the EDC apps on base settings, the proxy                                                          | 6           |
+| `06-post-deploy.sh`                                                                                   | Realm, Neo4j seed job, Vault bootstrap job; the custom domain on the hub                                | 7           |
+| `migrate-edc-to-v1.sh`                                                                                | The EDC apps' full 1.0 settings, the proxy's and the UI's; `diff`, `backup`, `rollback`                 | 8, 12       |
+| `set-edc-log-level.sh`                                                                                | The EDC apps at INFO without colour                                                                     | 8           |
+| `wire-keycloak-edc1-scopes.sh`                                                                        | The realm's 1.0 scopes                                                                                  | 9           |
+| `17-siglet.sh`                                                                                        | siglet, the data plane                                                                                  | 10          |
+| `05-ui.sh`                                                                                            | Creates `mvhd-ui`                                                                                       | 11          |
+| `rotate-keycloak-ui-client-secret.sh`, `rotate-edc-admin-client-secret.sh`, `wire-ui-client-scope.sh` | The UI's and the admin client's secrets by Key Vault reference, the UI's scope                          | 11          |
+| `seed-issuer-identity-azure.sh`                                                                       | The issuer's key, context and credential definitions                                                    | 13          |
+| `run-seed-job.sh`                                                                                     | The identity layer and the data assets, as the two seed workflows                                       | 14, 15      |
+| `wire-cfm-agents-client.sh`, `20-cfm-fork.sh`                                                         | CFM from the fork: its Keycloak client, images, apps and seed                                           | 16          |
+| `status.sh`                                                                                           | Status of the services and databases                                                                    |             |
+| `teardown.sh`                                                                                         | Deletes the resource group `RG` names (`rg-mvhd-dev` by default) after a typed confirmation             |             |
 
 ## 6. Post-Deployment Setup
 
@@ -347,7 +454,7 @@ gh secret set AZURE_SUBSCRIPTION_ID -b "<SUB_ID>"
 
 - **Workspace:** `mvhd-logs` (ID: `6c5814cc-e63f-4f4c-b996-83c6686b048e`)
 - **Retention:** 30 days
-- **Diagnostic settings:** `mvhd-diagnostics` — all ACA logs + metrics
+- **Diagnostic settings:** `mvhd-diagnostics`: all ACA logs + metrics
 
 ### Saved KQL queries
 
@@ -424,7 +531,7 @@ This deletes all container apps, PostgreSQL, ACR, Log Analytics, alerts, and das
 | Neo4j Bolt timeout from ACA jobs    | ACA Envoy proxy doesn't support raw TCP well               | Use Neo4j HTTP transactional API (`/db/neo4j/tx/commit`) instead             |
 | PostgreSQL creation fails in region | Regional capacity restriction                              | Try `northeurope` or `germanywestcentral`                                    |
 | `OAuthCallback` error after login   | Missing PKCE `code_challenge_method`                       | Ensure NextAuth checks include `["pkce", "state"]`                           |
-| Graph API returns "Unauthorized"    | Expected — API routes require authentication session       | Sign in via Keycloak first                                                   |
+| Graph API returns "Unauthorized"    | Expected: API routes require authentication session        | Sign in via Keycloak first                                                   |
 | UI shows mock data instead of live  | `NEXT_PUBLIC_STATIC_EXPORT=true`                           | Set to `false` for Azure deployment                                          |
 
 ### Checking service health

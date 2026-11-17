@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# Phase 1: Foundation — resource group, ACR, Storage Account + shares, ACA env.
+# Phase 1: Foundation: resource group, ACR, Key Vault and the identity that
+# reads it, Log Analytics, storage account + shares, ACA environment.
 #
-# Workaround B (ADR-018): this subscription cannot register Microsoft.OperationalInsights,
-# so Log Analytics is skipped and the ACA environment is created with
-# --logs-destination none. Azure Files shares for Neo4j, Vault, and Postgres
-# persistent data are provisioned here and attached to the ACA environment.
+# Workaround B (ADR-018) is over: the environment logs to Log Analytics (the
+# seed workflows and 07-observability.sh read mvhd-logs), and Postgres is the
+# Flexible Server (02). Azure Files shares for Neo4j and Vault are provisioned
+# here and attached to the ACA environment.
+#
+# Needs the PIM role rol-ssg-prd-project_owner: role assignments and the Key
+# Vault are outside Container Apps Contributor.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
@@ -15,6 +19,56 @@ log "Phase 1: Foundation"
 log "Creating resource group ${RG} in ${LOCATION}..."
 az group create --name "$RG" --location "$LOCATION" -o none
 ok "Resource group ${RG}"
+
+# ── Key Vault (ADR-036) ─────────────────────────────────────────────────────
+# Every generated secret goes here first (02 the Neo4j password, 03 the
+# Keycloak admin password, 13 the Flexible Server password), and the apps read
+# it by keyvaultref. RBAC mode; whoever runs this gets Key Vault Secrets
+# Officer, because creating a vault grants no access to its secrets.
+# Purge protection is not a choice: the tenant's policy "Key vaults should have
+# deletion protection enabled" (ass-ssg-prd-cloud-inf_stg-restrictions) denies
+# a vault without it. So a deleted vault keeps its name for the 7 days of
+# soft delete and cannot be purged sooner (rebuild rehearsal, #927).
+if az keyvault show --name "$KEY_VAULT_NAME" -o none 2>/dev/null; then
+  ok "Key Vault ${KEY_VAULT_NAME} exists"
+else
+  log "Creating Key Vault ${KEY_VAULT_NAME}..."
+  az keyvault create --name "$KEY_VAULT_NAME" --resource-group "$RG" --location "$LOCATION" \
+    --enable-rbac-authorization true --retention-days 7 --enable-purge-protection true -o none
+  ok "Key Vault ${KEY_VAULT_NAME}"
+fi
+KV_ID=$(az keyvault show --name "$KEY_VAULT_NAME" --query id -o tsv)
+ME=$(az ad signed-in-user show --query id -o tsv)
+az role assignment create --assignee-object-id "$ME" --assignee-principal-type User \
+  --role "Key Vault Secrets Officer" --scope "$KV_ID" -o none
+# The identity of every keyvaultref (17-siglet.sh, rotate-*-client-secret.sh,
+# wire-*.sh). Created here, before any app needs it; 11-claude-federation.sh
+# finds it and goes on.
+az identity create --name "$KV_READER_IDENTITY" --resource-group "$RG" --location "$LOCATION" -o none
+KV_READER_PRINCIPAL=$(az identity show --name "$KV_READER_IDENTITY" --resource-group "$RG" \
+  --query principalId -o tsv)
+az role assignment create --assignee-object-id "$KV_READER_PRINCIPAL" \
+  --assignee-principal-type ServicePrincipal \
+  --role "Key Vault Secrets User" --scope "$KV_ID" -o none
+# A role assignment takes a while to reach the data plane; 02 writes first.
+for i in $(seq 1 30); do
+  az keyvault secret list --vault-name "$KEY_VAULT_NAME" -o none 2>/dev/null && break
+  [ "$i" -eq 30 ] && { err "no access to ${KEY_VAULT_NAME}'s secrets after 5 min"; exit 1; }
+  sleep 10
+done
+ok "Key Vault Secrets Officer for you, Secrets User for ${KV_READER_IDENTITY}"
+
+# ── Log Analytics ────────────────────────────────────────────────────────────
+log "Creating Log Analytics workspace ${LAW_NAME}..."
+az monitor log-analytics workspace create --resource-group "$RG" \
+  --workspace-name "$LAW_NAME" --location "$LOCATION" --retention-time 30 -o none
+LAW_CUSTOMER_ID=$(az monitor log-analytics workspace show --resource-group "$RG" \
+  --workspace-name "$LAW_NAME" --query customerId -o tsv)
+# The environment takes the workspace key only as --logs-workspace-key, so it
+# is on that one command line and in no file or output.
+LAW_KEY=$(az monitor log-analytics workspace get-shared-keys --resource-group "$RG" \
+  --workspace-name "$LAW_NAME" --query primarySharedKey -o tsv)
+ok "Log Analytics ${LAW_NAME}"
 
 # ── Container registry ───────────────────────────────────────────────────────
 log "Creating container registry ${ACR_NAME}..."
@@ -54,12 +108,14 @@ create_share "$SHARE_NEO4J_DATA" "$QUOTA_NEO4J_DATA"
 create_share "$SHARE_NEO4J_LOGS" "$QUOTA_NEO4J_LOGS"
 create_share "$SHARE_VAULT_DATA" "$QUOTA_VAULT_DATA"
 
-# ── ACA environment (no Log Analytics — Workaround B) ──────────────────────
-log "Creating ACA environment ${ACA_ENV} (logs-destination=none)..."
+# ── ACA environment (logs to Log Analytics) ────────────────────────────────
+log "Creating ACA environment ${ACA_ENV} (logs to ${LAW_NAME})..."
 az containerapp env create \
   --name "$ACA_ENV" --resource-group "$RG" --location "$LOCATION" \
-  --logs-destination none \
+  --logs-destination log-analytics \
+  --logs-workspace-id "$LAW_CUSTOMER_ID" --logs-workspace-key "$LAW_KEY" \
   -o none
+unset LAW_KEY
 ok "ACA environment ${ACA_ENV}"
 
 # ── Attach shares to the ACA environment ────────────────────────────────────
@@ -89,7 +145,8 @@ ACA_DOMAIN=$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" \
 log "Foundation complete"
 echo "  Resource group:  ${RG}"
 echo "  ACR:             ${ACR_LOGIN_SERVER}"
+echo "  Key Vault:       ${KEY_VAULT_NAME} (reader identity ${KV_READER_IDENTITY})"
 echo "  Storage account: ${STORAGE_ACCOUNT}"
 echo "  ACA environment: ${ACA_ENV}"
 echo "  ACA domain:      ${ACA_DOMAIN}"
-echo "  Log Analytics:   DISABLED (Workaround B — ADR-018)"
+echo "  Log Analytics:   ${LAW_NAME}"

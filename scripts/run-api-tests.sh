@@ -20,6 +20,9 @@
 #                       (catalogue, negotiation, transfer, data) on this stack too;
 #                       Azure-Dev has them on by its environment (#876)
 #   BRUNO_BIN           bru binary (default: npx --yes @usebruno/cli)
+#   BRUNO_BASE_URL      another deployment's UI for Azure-Dev, such as a
+#   BRUNO_KEYCLOAK_URL  rebuild in a second resource group, and its Keycloak
+#                       (docs/azure-deployment-guide.md, section 4)
 #
 # Exit status is bru's: non-zero when any request fails an assertion or a test.
 set -euo pipefail
@@ -69,11 +72,13 @@ if [ "$ENV_NAME" != "Static-mock" ]; then
   done
   echo "[bruno] forged 5 persona sessions for $ENV_NAME (cookie $COOKIE_NAME, 8h)"
   [ "${BRUNO_DSP_LIVE:-0}" = "1" ] && ENV_VARS+=(--env-var "dspLiveFlow=true")
+  [ -n "${BRUNO_BASE_URL:-}" ] && ENV_VARS+=(--env-var "baseUrl=${BRUNO_BASE_URL}")
+  [ -n "${BRUNO_KEYCLOAK_URL:-}" ] && ENV_VARS+=(--env-var "keycloakUrl=${BRUNO_KEYCLOAK_URL}")
 
   # One request with the operator's session before the collection runs. A
   # refused session turns every gated request into a 401, and a hundred 401s
   # hide the one cause (#839): say it once and stop.
-  BASE_URL="$(sed -n 's/^[[:space:]]*baseUrl:[[:space:]]*//p' "$COLLECTION/environments/$ENV_NAME.bru" | head -1)"
+  BASE_URL="${BRUNO_BASE_URL:-$(sed -n 's/^[[:space:]]*baseUrl:[[:space:]]*//p' "$COLLECTION/environments/$ENV_NAME.bru" | head -1)}"
   admin="${ENV_VARS[1]#sessionToken=}"
   probe="$(curl -s -o /dev/null -w '%{http_code}' -m 30 \
     -H "Cookie: $COOKIE_NAME=$admin" "$BASE_URL/api/participants/me" || true)"

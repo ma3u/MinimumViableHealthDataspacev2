@@ -32,7 +32,7 @@ if [[ -n "${KEYCLOAK_URL:-}" && -n "${KC_ADMIN_PASSWORD:-}" ]]; then
 else
   # shellcheck source=env.sh
   source "${SCRIPT_DIR}/env.sh"
-  KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
+  KEYCLOAK_URL="${KEYCLOAK_BASE_URL:?no Keycloak address (env.sh)}"
 fi
 REALM="${REALM:-edcv}"
 REALM_FILE="${REPO_ROOT}/jad/keycloak-realm.json"

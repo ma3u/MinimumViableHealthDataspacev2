@@ -37,7 +37,13 @@ case "$EDC_LINE" in v1|v018) ;; *) err "EDC_LINE is v1 or v018, not '${EDC_LINE}
 # the issuer's database: on 1.0 the set EDC_DB_SUFFIX names (env.sh)
 if [ "$EDC_LINE" = v018 ]; then PG_DB=issuerservice_v018; else PG_DB="issuerservice${EDC_DB_SUFFIX}"; fi
 JOB="mvhd-issuer-identity"
-KC_URL="https://${KEYCLOAK_PUBLIC_HOSTNAME_OVERRIDE:-auth.ehds.mabu.red}"
+# The hub's Keycloak by its custom domain; a second resource group's by the
+# address env.sh derives (it has no custom domain).
+if [ "$RG" = "$HUB_RG" ]; then
+  KC_URL="https://${KEYCLOAK_PUBLIC_HOSTNAME_OVERRIDE:-auth.ehds.mabu.red}"
+else
+  KC_URL="${KEYCLOAK_PUBLIC_URL:?no Keycloak address for ${RG}}"
+fi
 COMPOSE_X="I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
 
 # ── Secrets, never printed ──────────────────────────────────────────────────

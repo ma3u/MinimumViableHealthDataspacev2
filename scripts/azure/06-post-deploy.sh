@@ -19,6 +19,105 @@ ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].v
 "${SCRIPT_DIR}/13-postgres-flexible-server.sh" 2
 ok "Postgres databases ensured on ${PG_FLEX_NAME}"
 
+# ── Import Keycloak realm via Admin REST API ─────────────────────────────────
+# The realm comes first: the Vault bootstrap below binds the provisioner
+# role to the edcv realm's issuer, which only an imported realm has. Run
+# after it, a fresh deploy stopped at "Keycloak's edcv discovery did not
+# answer" (rebuild rehearsal, #927).
+REALM_FILE="${REPO_ROOT}/jad/keycloak-realm.json"
+if [[ -f "$REALM_FILE" ]]; then
+  log "Importing Keycloak realm..."
+
+  # Get admin token
+  KC_TOKEN=$(curl -sf -X POST "${KEYCLOAK_PUBLIC_URL}/realms/master/protocol/openid-connect/token" \
+    -d "client_id=admin-cli" \
+    -d "username=${KC_ADMIN_USER}" \
+    -d "password=$(kc_admin_password)" \
+    -d "grant_type=password" | jq -r '.access_token') || KC_TOKEN=""
+
+  if [[ -n "$KC_TOKEN" && "$KC_TOKEN" != "null" ]]; then
+    # Import realm
+    # No -f: a re-run answers 409, which -f turns into exit 22 and set -e ends here.
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+      "${KEYCLOAK_PUBLIC_URL}/admin/realms" \
+      -H "Authorization: Bearer ${KC_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "@${REALM_FILE}")
+
+    if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "409" ]]; then
+      ok "Keycloak realm imported (${HTTP_CODE})"
+    else
+      err "Keycloak realm import returned HTTP ${HTTP_CODE}"
+      exit 1
+    fi
+
+    # Update client redirect URIs for Azure.
+    # This PUT REPLACES the client's whole redirectUris list, so it must be a
+    # superset of what jad/keycloak-realm.json ships (localhost + ACA URL +
+    # custom domain). Dropping a host here breaks its logins with Keycloak's
+    # "Invalid parameter: redirect_uri" page (incident 2026-07-15).
+    log "Updating client redirect URIs..."
+    CLIENT_ID_INTERNAL=$(curl -sf \
+      "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients?clientId=health-dataspace-ui" \
+      -H "Authorization: Bearer ${KC_TOKEN}" | jq -r '.[0].id // empty')
+
+    if [[ -n "$CLIENT_ID_INTERNAL" ]]; then
+      REDIRECT_URIS=$(jq -n --arg ui "$UI_PUBLIC_URL" --arg cd "${CUSTOM_DOMAIN:-}" '
+        [
+          "http://localhost:3000/api/auth/callback/keycloak",
+          "http://localhost:3000/*",
+          "http://localhost:3003/api/auth/callback/keycloak",
+          "http://localhost:3003/*",
+          ($ui + "/api/auth/callback/keycloak"),
+          ($ui + "/*")
+        ]
+        + (if $cd != "" then [
+            ("https://" + $cd + "/api/auth/callback/keycloak"),
+            ("https://" + $cd + "/*")
+          ] else [] end)')
+      WEB_ORIGINS=$(jq -n --arg ui "$UI_PUBLIC_URL" --arg cd "${CUSTOM_DOMAIN:-}" '
+        ["http://localhost:3000", "http://localhost:3003", $ui, "+"]
+        + (if $cd != "" then [("https://" + $cd)] else [] end)')
+
+      HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+        "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients/${CLIENT_ID_INTERNAL}" \
+        -H "Authorization: Bearer ${KC_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"redirectUris\": ${REDIRECT_URIS}, \"webOrigins\": ${WEB_ORIGINS}}")
+      if [[ "$HTTP_CODE" != "204" ]]; then
+        echo "ERROR: Keycloak client update failed (HTTP ${HTTP_CODE})" >&2
+        exit 1
+      fi
+
+      # Verify: read the client back and require the NextAuth callback for
+      # every public host. A silent mismatch here is exactly the failure mode
+      # that took production login down.
+      LIVE_URIS=$(curl -sf \
+        "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients/${CLIENT_ID_INTERNAL}" \
+        -H "Authorization: Bearer ${KC_TOKEN}" | jq -r '.redirectUris[]')
+      REQUIRED_URIS=("${UI_PUBLIC_URL}/api/auth/callback/keycloak")
+      [[ -n "${CUSTOM_DOMAIN:-}" ]] && \
+        REQUIRED_URIS+=("https://${CUSTOM_DOMAIN}/api/auth/callback/keycloak")
+      for uri in "${REQUIRED_URIS[@]}"; do
+        if ! grep -qxF "$uri" <<< "$LIVE_URIS"; then
+          echo "ERROR: redirect URI missing after update: ${uri}" >&2
+          echo "       Logins on that host will fail with 'Invalid parameter: redirect_uri'." >&2
+          exit 1
+        fi
+      done
+      ok "Client redirect URIs updated & verified ($(wc -l <<< "$LIVE_URIS" | tr -d ' ') URIs)"
+    else
+      echo "ERROR: client health-dataspace-ui not found after realm import" >&2
+      exit 1
+    fi
+  else
+    err "no Keycloak admin token from ${KEYCLOAK_PUBLIC_URL}; the Vault bootstrap needs the realm"
+    exit 1
+  fi
+else
+  warn "Realm file not found at ${REALM_FILE} — skipping Keycloak import"
+fi
+
 # ── Build and run Neo4j seed job ─────────────────────────────────────────────
 log "Building Neo4j seed image..."
 SEED_DIR=$(mktemp -d)
@@ -327,98 +426,6 @@ fi
 log "Starting Vault bootstrap job..."
 az containerapp job start --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" -o none
 ok "Vault bootstrap job started"
-
-# ── Import Keycloak realm via Admin REST API ─────────────────────────────────
-REALM_FILE="${REPO_ROOT}/jad/keycloak-realm.json"
-if [[ -f "$REALM_FILE" ]]; then
-  log "Importing Keycloak realm..."
-
-  # Get admin token
-  KC_TOKEN=$(curl -sf -X POST "${KEYCLOAK_PUBLIC_URL}/realms/master/protocol/openid-connect/token" \
-    -d "client_id=admin-cli" \
-    -d "username=${KC_ADMIN_USER}" \
-    -d "password=$(kc_admin_password)" \
-    -d "grant_type=password" | jq -r '.access_token')
-
-  if [[ -n "$KC_TOKEN" && "$KC_TOKEN" != "null" ]]; then
-    # Import realm
-    HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" -X POST \
-      "${KEYCLOAK_PUBLIC_URL}/admin/realms" \
-      -H "Authorization: Bearer ${KC_TOKEN}" \
-      -H "Content-Type: application/json" \
-      -d "@${REALM_FILE}")
-
-    if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "409" ]]; then
-      ok "Keycloak realm imported (${HTTP_CODE})"
-    else
-      warn "Keycloak realm import returned HTTP ${HTTP_CODE}"
-    fi
-
-    # Update client redirect URIs for Azure.
-    # This PUT REPLACES the client's whole redirectUris list, so it must be a
-    # superset of what jad/keycloak-realm.json ships (localhost + ACA URL +
-    # custom domain). Dropping a host here breaks its logins with Keycloak's
-    # "Invalid parameter: redirect_uri" page (incident 2026-07-15).
-    log "Updating client redirect URIs..."
-    CLIENT_ID_INTERNAL=$(curl -sf \
-      "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients?clientId=health-dataspace-ui" \
-      -H "Authorization: Bearer ${KC_TOKEN}" | jq -r '.[0].id // empty')
-
-    if [[ -n "$CLIENT_ID_INTERNAL" ]]; then
-      REDIRECT_URIS=$(jq -n --arg ui "$UI_PUBLIC_URL" --arg cd "${CUSTOM_DOMAIN:-}" '
-        [
-          "http://localhost:3000/api/auth/callback/keycloak",
-          "http://localhost:3000/*",
-          "http://localhost:3003/api/auth/callback/keycloak",
-          "http://localhost:3003/*",
-          ($ui + "/api/auth/callback/keycloak"),
-          ($ui + "/*")
-        ]
-        + (if $cd != "" then [
-            ("https://" + $cd + "/api/auth/callback/keycloak"),
-            ("https://" + $cd + "/*")
-          ] else [] end)')
-      WEB_ORIGINS=$(jq -n --arg ui "$UI_PUBLIC_URL" --arg cd "${CUSTOM_DOMAIN:-}" '
-        ["http://localhost:3000", "http://localhost:3003", $ui, "+"]
-        + (if $cd != "" then [("https://" + $cd)] else [] end)')
-
-      HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
-        "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients/${CLIENT_ID_INTERNAL}" \
-        -H "Authorization: Bearer ${KC_TOKEN}" \
-        -H "Content-Type: application/json" \
-        -d "{\"redirectUris\": ${REDIRECT_URIS}, \"webOrigins\": ${WEB_ORIGINS}}")
-      if [[ "$HTTP_CODE" != "204" ]]; then
-        echo "ERROR: Keycloak client update failed (HTTP ${HTTP_CODE})" >&2
-        exit 1
-      fi
-
-      # Verify: read the client back and require the NextAuth callback for
-      # every public host. A silent mismatch here is exactly the failure mode
-      # that took production login down.
-      LIVE_URIS=$(curl -sf \
-        "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients/${CLIENT_ID_INTERNAL}" \
-        -H "Authorization: Bearer ${KC_TOKEN}" | jq -r '.redirectUris[]')
-      REQUIRED_URIS=("${UI_PUBLIC_URL}/api/auth/callback/keycloak")
-      [[ -n "${CUSTOM_DOMAIN:-}" ]] && \
-        REQUIRED_URIS+=("https://${CUSTOM_DOMAIN}/api/auth/callback/keycloak")
-      for uri in "${REQUIRED_URIS[@]}"; do
-        if ! grep -qxF "$uri" <<< "$LIVE_URIS"; then
-          echo "ERROR: redirect URI missing after update: ${uri}" >&2
-          echo "       Logins on that host will fail with 'Invalid parameter: redirect_uri'." >&2
-          exit 1
-        fi
-      done
-      ok "Client redirect URIs updated & verified ($(wc -l <<< "$LIVE_URIS" | tr -d ' ') URIs)"
-    else
-      echo "ERROR: client health-dataspace-ui not found after realm import" >&2
-      exit 1
-    fi
-  else
-    warn "Could not get Keycloak admin token — realm import skipped"
-  fi
-else
-  warn "Realm file not found at ${REALM_FILE} — skipping Keycloak import"
-fi
 
 # ── Custom domain binding (ADR-018: ehds.mabu.red) ──────────────────────────
 if [[ -n "${CUSTOM_DOMAIN:-}" ]]; then

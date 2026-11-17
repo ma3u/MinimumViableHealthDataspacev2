@@ -48,6 +48,12 @@ PG_FLEX_SKU="${PG_FLEX_SKU:-Standard_B1ms}"
 PG_FLEX_TIER="${PG_FLEX_TIER:-Burstable}"
 PG_FLEX_STORAGE_GB="${PG_FLEX_STORAGE_GB:-32}"
 PG_FLEX_VERSION="${PG_FLEX_VERSION:-17}"
+# Where the server goes. West Europe answered SkuNotAvailable for a new
+# B1ms on 2026-11-11 although list-skus offered it (rebuild rehearsal, #927);
+# the hub's server, made 2026-10-02, is in zone 2. Set PG_FLEX_ZONE, or
+# PG_FLEX_LOCATION to a neighbouring region, when that happens.
+PG_FLEX_LOCATION="${PG_FLEX_LOCATION:-$LOCATION}"
+PG_FLEX_ZONE="${PG_FLEX_ZONE:-}"
 PG_FLEX_FQDN="${PG_FLEX_NAME}.postgres.database.azure.com"
 PG_SECRET_NAME="postgres-admin-password"
 
@@ -125,6 +131,12 @@ phase_check() {
 }
 
 # ── 1: the server ───────────────────────────────────────────────────────────
+# The server's state, empty when there is none.
+server_state() {
+  az postgres flexible-server show --name "$PG_FLEX_NAME" --resource-group "$RG" \
+    --query state -o tsv 2>/dev/null || true
+}
+
 phase_1() {
   say "Phase 1: create ${PG_FLEX_NAME} (${PG_FLEX_SKU}, ${PG_FLEX_STORAGE_GB} GiB, PG ${PG_FLEX_VERSION})"
 
@@ -134,9 +146,22 @@ phase_1() {
   [ "$state" = "Registered" ] ||
     die "Microsoft.DBforPostgreSQL is '${state}'. Run 'az provider register -n Microsoft.DBforPostgreSQL' and wait for Registered."
 
-  if az postgres flexible-server show --name "$PG_FLEX_NAME" --resource-group "$RG" \
-       -o none 2>/dev/null; then
-    say "${PG_FLEX_NAME} already exists, skipping create"
+  # A create Azure refused leaves the server behind as Dropping for a few
+  # minutes, and "exists" is not "usable" (rebuild rehearsal, #927): wait for
+  # a dropping server to go, and require Ready at the end.
+  local current i
+  current=$(server_state)
+  if [ "$current" = "Dropping" ]; then
+    say "${PG_FLEX_NAME} is Dropping after a failed create; waiting for it to go"
+    for i in $(seq 1 60); do
+      current=$(server_state)
+      [ -z "$current" ] && break
+      [ "$i" -eq 60 ] && die "${PG_FLEX_NAME} still ${current} after 10 min"
+      sleep 10
+    done
+  fi
+  if [ -n "$current" ]; then
+    say "${PG_FLEX_NAME} already exists (${current}), skipping create"
   else
     # Generated here and written straight to Key Vault (ADR-036). It is never
     # printed, and nothing else in this repo holds a copy.
@@ -152,8 +177,11 @@ phase_1() {
     # no stable egress IP (outboundIpAddresses is null on mvhd-env), so an
     # IP-scoped rule cannot be written reliably. ADR-041 records this as the
     # weaker fallback it is; revisit if the environment ever gets a VNet.
+    local zone_args=()
+    [ -n "$PG_FLEX_ZONE" ] && zone_args=(--zone "$PG_FLEX_ZONE")
     az postgres flexible-server create \
-      --name "$PG_FLEX_NAME" --resource-group "$RG" --location "$LOCATION" \
+      --name "$PG_FLEX_NAME" --resource-group "$RG" --location "$PG_FLEX_LOCATION" \
+      ${zone_args[@]+"${zone_args[@]}"} \
       --tier "$PG_FLEX_TIER" --sku-name "$PG_FLEX_SKU" \
       --storage-size "$PG_FLEX_STORAGE_GB" --version "$PG_FLEX_VERSION" \
       --admin-user "$PG_FLEX_ADMIN" --admin-password "$pw" \
@@ -165,6 +193,7 @@ phase_1() {
   az postgres flexible-server show --name "$PG_FLEX_NAME" --resource-group "$RG" \
     --query "{name:name,state:state,sku:sku.name,storage:storage.storageSizeGb,version:version}" \
     -o table
+  [ "$(server_state)" = "Ready" ] || die "${PG_FLEX_NAME} is '$(server_state)', not Ready"
 
   # B1ms allows 50 connections, 35 of them to users, and PgBouncer is not
   # offered on Burstable. Keycloak's default Agroal pool alone is 100, so the

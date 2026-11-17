@@ -44,7 +44,7 @@ PROM_PORT=9090
 # Azure Files share for /data (Prometheus, Loki, Tempo, Grafana).
 OBS_SHARE="observability-data"
 API_VERSION="2024-03-01"
-KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
+KEYCLOAK_URL="${KEYCLOAK_BASE_URL:?no Keycloak address (env.sh)}"
 GRAFANA_HOST="grafana.${CUSTOM_DOMAIN}"
 ENV_DOMAIN="$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" \
   --query properties.defaultDomain -o tsv)"

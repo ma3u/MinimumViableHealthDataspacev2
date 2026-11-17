@@ -85,7 +85,7 @@ else
   # shellcheck source=env.sh
   source ./env.sh
   eval "$(get_aca_fqdns)"
-  KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
+  KEYCLOAK_URL="${KEYCLOAK_BASE_URL:?no Keycloak address (env.sh)}"
   echo "==> Reading the admin password from Key Vault"
   KC_PASSWORD="$(kc_admin_password)"
   [[ -n "$KC_PASSWORD" ]] || { echo "could not read keycloak-admin-password" >&2; exit 1; }

@@ -22,7 +22,7 @@ source "${SCRIPT_DIR}/env.sh"
 MODE="${1:-apply}"
 case "$MODE" in apply | --check) ;; *) sed -n '5,6p' "$0"; exit 64 ;; esac
 
-KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
+KEYCLOAK_URL="${KEYCLOAK_BASE_URL:?no Keycloak address (env.sh)}"
 REALM_FILE="${REPO_ROOT}/jad/keycloak-realm.json"
 CLIENT_ID="health-dataspace-ui"
 ADMIN="${KEYCLOAK_URL}/admin/realms/edcv"

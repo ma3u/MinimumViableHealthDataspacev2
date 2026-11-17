@@ -3,6 +3,9 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
+# KEYCLOAK_PUBLIC_HOSTNAME for KC_HOSTNAME: auth.ehds.mabu.red on the hub when
+# set in the shell, otherwise the app's own Container Apps address.
+eval "$(get_aca_fqdns)"
 
 log "Phase 3: Identity services"
 
@@ -12,6 +15,18 @@ log "Phase 3: Identity services"
 PG_JDBC="jdbc:postgresql://${PG_HOST}:${PG_PORT}/${KC_DB_NAME}?sslmode=${PG_SSLMODE}"
 KC_DB_PW="$(pg_admin_password)"
 [ -n "$KC_DB_PW" ] || { err "no Flexible Server password; run 13-postgres-flexible-server.sh 1 and 2 first"; exit 1; }
+
+# The master realm's admin password (ADR-036): Key Vault first, generated there
+# on a first deploy, as 02 does for Neo4j. It reaches Keycloak as the ACA
+# secret keycloak-admin-password, which kc_admin_password, the seed workflows
+# and reset-demo.yml read back; never as a plain env value.
+KC_ADMIN_PW="$(kc_admin_password 2>/dev/null)"
+if [ -z "$KC_ADMIN_PW" ]; then
+  KC_ADMIN_PW="$(openssl rand -base64 30 | tr -d '/+=' | cut -c1-28)"
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name keycloak-admin-password \
+    --value "$KC_ADMIN_PW" -o none
+  ok "Generated keycloak-admin-password in ${KEY_VAULT_NAME} (not displayed)"
+fi
 
 # ── Push Keycloak image ─────────────────────────────────────────────────────
 log "Pulling and pushing Keycloak image..."
@@ -35,7 +50,7 @@ az containerapp create \
   --min-replicas 1 --max-replicas 1 \
   --ingress external --target-port 8080 \
   --command "/opt/keycloak/bin/kc.sh" --args "start" \
-  --secrets "kc-db-password=${KC_DB_PW}" \
+  --secrets "kc-db-password=${KC_DB_PW}" "keycloak-admin-password=${KC_ADMIN_PW}" \
   --env-vars \
     "KC_DB=postgres" \
     "KC_DB_URL=${PG_JDBC}" \
@@ -48,10 +63,10 @@ az containerapp create \
     "KC_PROXY_HEADERS=xforwarded" \
     "KC_HTTP_ENABLED=true" \
     "KC_CACHE=local" \
-    "KEYCLOAK_ADMIN=${KC_ADMIN_USER}" \
-    "KEYCLOAK_ADMIN_PASSWORD=$(kc_admin_password)" \
+    "KC_BOOTSTRAP_ADMIN_USERNAME=${KC_ADMIN_USER}" \
+    "KC_BOOTSTRAP_ADMIN_PASSWORD=secretref:keycloak-admin-password" \
   -o none
-unset KC_DB_PW
+unset KC_DB_PW KC_ADMIN_PW
 ok "Keycloak container app ${KEYCLOAK_APP}"
 
 # ── Push Vault image ────────────────────────────────────────────────────────
