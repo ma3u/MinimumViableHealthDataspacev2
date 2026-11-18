@@ -17,7 +17,7 @@ It follows the 0.18 move ([edc-v018-on-azure](edc-v018-on-azure.md)): fresh data
 
 Matthias approves every step that changes Azure. Nothing runs during a live demo or a load test, and nothing merges to `main` while a live job runs. Pin the Docker engine for every local command (`DOCKER_CONTEXT=orbstack`).
 
-Azure runs 1.0.0-RC5 until the final 1.0.0 is tagged (Matthias, 2026-11-05: "start with Azure"). The final is the same procedure with a new `EDC1_TAG`.
+Azure runs 1.0.0-RC7 since 2026-11-18 (RC5 from 2026-11-06, RC6 from 2026-11-12, #930) until the final 1.0.0 is tagged (Matthias, 2026-11-05: "start with Azure"). The final is the same procedure with a new `EDC1_TAG`.
 
 ## What happens to the data
 
@@ -132,6 +132,8 @@ An EDC release candidate ships no schema migration from the one before it: RC6 c
 7. The compliance job (`target=azure`) and Demo Smoke at their floors.
 
 Rollback: `migrate-edc-to-v1.sh rollback <app>`, newest first. The previous database set and its keys in Vault are untouched.
+
+RC7, done 2026-11-18 (#930): images `1.0.0-RC7-69a2f1c4df35`, revision 0000210 of each EDC app, backup `~/.mvhd/edc-v1-rollback/20261118T065732Z` (RC6 on `_v1rc6`). The compliance job on Azure: dataspace 30/0/3, identity 18/0/23, health domain 28/0/2; Demo Smoke green; CFM `check-onboarding` 10/0. `_v1rc6` stays until step 8.
 
 8. After the first off-hours stop and start on the new RC (Demo Smoke green after the morning start), drop the previous set: the workflow **EDC databases of a previous release candidate** (`edc-drop-rc-databases.yml`), `plan` with the old suffix, then `drop` on Matthias's go. It refuses the set the apps run on. From then on there is no rollback to the previous RC. RC5's `_v1` set: checked 2026-11-13, it held only the five demo participants, all re-seeded on RC6.
 

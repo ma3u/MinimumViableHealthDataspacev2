@@ -121,7 +121,7 @@ fork can be archived.
 
 ## Azure
 
-Deployed 2026-11-11 (ADR-085 step 4), on `v0.0.8-mvhd.1` since 2026-11-12. Three Container Apps, as in compose:
+Deployed 2026-11-11 (ADR-085 step 4), on `v0.0.9-mvhd.1` since 2026-11-18 (`v0.0.8-mvhd.1` from 2026-11-12). Three Container Apps, as in compose:
 `mvhd-cfm-tmanager` and `mvhd-cfm-pmanager` (internal ingress) and
 `mvhd-cfm-agents` (six containers, ports 8081 to 8086 because they share one
 network namespace). The definitions are in
