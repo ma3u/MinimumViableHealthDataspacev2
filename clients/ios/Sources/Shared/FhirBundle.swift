@@ -396,17 +396,13 @@ public enum FhirWriter {
       "timestamp": .string(now),
       "entry": .array(
         // A urn:uuid must be a UUID (#1144). Named by the report it comes from
-        // and the resource's place in it, so the same report gives the same
-        // bundle, and the same UUID as services/epa-ingest. The patient id
-        // stays out of the name, as there: no identifier goes into SHA-1.
-        resources.map { resource in
-          let type = resource["resourceType"]?.stringValue ?? ""
-          let id = resource["id"]?.stringValue ?? ""
-          return [
+        // (timestamp, source document) and the entry's position, so the same
+        // report gives the same bundle, and the same UUID as
+        // services/epa-ingest. No patient or resource id goes into SHA-1.
+        resources.enumerated().map { index, resource in
+          [
             "fullUrl": .string(
-              "urn:uuid:"
-                + uuidV5(
-                  "\(now)|\(source.sourceDocument)|\(type)/\(id)")),
+              "urn:uuid:" + uuidV5("\(now)|\(source.sourceDocument)|entry/\(index)")),
             "resource": resource,
           ]
         }),
