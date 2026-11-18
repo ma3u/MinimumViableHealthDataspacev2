@@ -36,3 +36,8 @@
   `dcat:DataService`, the person's consent to it, and the transfer gate that
   answers 403 after a withdrawal. The process is published at
   `docs/ehds/bonus-programme-data-flow.md`.
+- 2026-11-18 · `runbooks/edc-1-on-azure.md`: "What the RC moves taught us" (#930),
+  from the RC6 and RC7 moves: read the delta for what our scripts write by hand
+  (Vault aliases, credential formats, data plane registration), write both forms
+  during the overlap, find a stalled issuance by its state at debug level, gate
+  locally from empty volumes with all five suites.
