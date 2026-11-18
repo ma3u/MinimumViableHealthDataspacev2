@@ -31,6 +31,15 @@ const LMC = "did:web:lmc.nl:clinic";
 const IRS = "did:web:irs.fr:hdab";
 
 /**
+ * The months the seed's access events fall in (neo4j/seed-persona-overview.cypher,
+ * 2025-10-02 to 2026-09-25). The audit route returns the newest events first,
+ * and every run of the suite records more of them, dated today: read without
+ * this window, the newest 200 held fewer and fewer seeded months, and none
+ * at all on a graph that had seen enough runs (#1154).
+ */
+const SEED_WINDOW = "&dateFrom=2025-10-01&dateTo=2026-09-30";
+
+/**
  * Skip when the persona overview seed has not been applied to this graph.
  * Probes the patient list, which needs a session since ADR-044 (#404): call
  * it after the login. Under a patient login the list holds only their own
@@ -85,7 +94,7 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
     await skipIfSeedMissing(page);
     const data = await apiGet(
       page,
-      "/api/admin/audit?type=accesslogs&limit=200",
+      `/api/admin/audit?type=accesslogs&limit=200${SEED_WINDOW}`,
     );
     const logs: {
       id: string;
@@ -108,7 +117,7 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
     await skipIfSeedMissing(page);
     const data = await apiGet(
       page,
-      `/api/admin/audit?type=accesslogs&limit=200&consumerDid=${encodeURIComponent(
+      `/api/admin/audit?type=accesslogs&limit=200${SEED_WINDOW}&consumerDid=${encodeURIComponent(
         IRS,
       )}`,
     );
