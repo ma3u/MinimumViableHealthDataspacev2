@@ -32,6 +32,30 @@ unset $(git rev-parse --local-env-vars)
 command -v codeql >/dev/null || { echo "codeql not found: brew install --cask codeql"; exit 2; }
 command -v xcodegen >/dev/null || { echo "xcodegen not found: brew install xcodegen"; exit 2; }
 
+# CodeQL cannot trace a build on macOS 27 or with Swift 6.4 (Xcode 27.2):
+# macOS 27 dropped the x86_64 slice of system tools its tracer runs under
+# Rosetta (/usr/bin/sandbox-exec among 85 of /usr/bin), and CodeQL does not
+# support Swift 6.4 yet (https://github.blog/changelog/2026-10-19-codeql-changes-for-macos-27-xcode-27-and-swift-6-4).
+# Skip with the reason rather than fail every push; codeql-swift.yml still
+# runs the analysis on GitHub's macos-26 runner. CODEQL_SWIFT_TRY=1 runs it
+# anyway, to find out whether a newer CodeQL has caught up.
+macos_major="$(sw_vers -productVersion 2>/dev/null | cut -d. -f1)"
+swift_ver="$(xcrun swift --version 2>/dev/null | sed -n 's/.*Swift version \([0-9]*\.[0-9]*\).*/\1/p' | head -1)"
+swift_major="${swift_ver%%.*}"
+swift_minor="${swift_ver#*.}"
+if [ "${CODEQL_SWIFT_TRY:-}" != "1" ]; then
+  reason=""
+  if [ "${macos_major:-0}" -ge 27 ]; then
+    reason="macOS ${macos_major} has no x86_64 slice for the tools CodeQL's tracer runs"
+  elif [ -n "$swift_ver" ] && { [ "$swift_major" -gt 6 ] || { [ "$swift_major" -eq 6 ] && [ "$swift_minor" -ge 4 ]; }; }; then
+    reason="CodeQL does not support Swift ${swift_ver} yet"
+  fi
+  if [ -n "$reason" ]; then
+    echo "[WARN] codeql-swift skipped: ${reason}. GitHub runs it in codeql-swift.yml (macos-26). CODEQL_SWIFT_TRY=1 runs it anyway."
+    exit 0
+  fi
+fi
+
 work="$(mktemp -d "${TMPDIR:-/tmp}/codeql-swift.XXXXXX")"
 db="$work/db"
 sarif="${SARIF_OUT:-$work/swift.sarif}"
