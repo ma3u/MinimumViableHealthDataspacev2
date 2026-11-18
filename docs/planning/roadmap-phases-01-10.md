@@ -347,6 +347,8 @@ Synthea generates ~43 Procedure resources per patient (96% SNOMED CT, 4% ADA CDT
 
 ### Phase 3h: EEHRxF FHIR Profile Alignment ✅
 
+> **Superseded in part by #1144 (2026-11-17).** The tables below are the plan as written. What was built counted graph nodes and called that coverage; nothing validated a resource, and the `PROFILES_RESOURCE` mapping and the field-level gap analysis below were never built. Since #1144 the categories are the six of Art. 14(1) (eDispensation on its own, rare-disease registries removed), the profiles are pinned to the current HL7 Europe releases, and coverage is the HL7 FHIR Validator's result over the Klarbefund and epa-ingest writer and a seeded Synthea sample. Source of truth: `scripts/eehrxf/profiles.json`; how it works: `scripts/eehrxf/validate.py`.
+
 The **European Electronic Health Record Exchange Format (EEHRxF)** was established by [Commission Recommendation C(2019)800](https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format) of 6 February 2019. The [EHDS Regulation](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) (entered into force 26 March 2025) elevates EEHRxF as the standard exchange format for 6 priority categories of electronic health data, with phased rollout:
 
 | #   | Priority Category              | EHDS Deadline | Group |
@@ -381,7 +383,7 @@ The **European Electronic Health Record Exchange Format (EEHRxF)** was establish
 **Cypher Script (`neo4j/register-eehrxf-profiles.cypher`):**
 
 - Creates 6 EEHRxFCategory nodes (one per EHDS priority)
-- Creates EEHRxFProfile nodes for the 14 key HL7 Europe profiles across all published IGs
+- Creates EEHRxFProfile nodes for the 14 key HL7 Europe profiles across all published IGs (built: 12; 16 since #1144)
 - Maps profiles to existing FHIR resource types via `PROFILES_RESOURCE` relationships
 - Calculates coverage status per category based on available FHIR data
 
@@ -819,7 +821,7 @@ Custom test suite verifying health-specific requirements not covered by generic 
    - DCAT mandatory properties present (title, description, publisher, theme)
    - Health-specific extensions present (healthCategory, healthTheme, legalBasis)
    - EHDS data quality label annotations present
-3. **EEHRxF Conformance** — Verify FHIR data transferred via DCore conforms to EEHRxF profiles
+3. **EEHRxF Conformance** — Verify FHIR data transferred via DCore conforms to EEHRxF profiles (validation of what the hub ingests is built in #1144; data transferred via DCore is not validated yet)
    - Patient Summary resources validate against `hl7.fhir.eu.base` profiles
    - Laboratory resources validate against `hl7.fhir.eu.laboratory` profiles
    - Coverage gap report generated per EEHRxF priority category

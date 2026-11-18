@@ -11,3 +11,7 @@ ui/public/published-docs/i18n/
 
 # Localized image manifest (ADR-071), written by scripts/gen-localized-images.py and byte-compared by --check
 ui/src/content/localized-images.json
+
+# EEHRxF validation (#1144), written by scripts/eehrxf/validate.py and sample_synthea.py and byte-compared in CI
+scripts/eehrxf/validation-report.json
+scripts/eehrxf/samples/

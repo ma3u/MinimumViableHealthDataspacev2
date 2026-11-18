@@ -1,0 +1,414 @@
+{
+  "$comment": "Written by scripts/eehrxf/validate.py; do not edit. build.py reads it.",
+  "validator": {
+    "version": "7.0.5",
+    "terminology": "not checked: run with -tx n/a, so codes are checked for shape, not against SNOMED CT, LOINC or the IG value sets",
+    "passRule": "a resource passes when the validator reports no error or fatal issue",
+    "maxPerSource": 20,
+    "allowedExtensionDomains": [
+      "https://ehds.mabu.red/fhir/",
+      "http://synthetichealth.github.io/synthea/"
+    ],
+    "ignoredIssues": [
+      {
+        "contains": "conditional references are only valid inside a transaction Bundle",
+        "sources": [
+          "synthea"
+        ],
+        "reason": "Synthea writes conditional references to practitioners and organisations inside its transaction Bundle. The sample lifts resources out of that Bundle, so the rule cannot hold there; scripts/load_fhir_neo4j.py reads them inside it."
+      }
+    ]
+  },
+  "igs": {
+    "base": "hl7.fhir.eu.base#2.0.1",
+    "eps": "hl7.fhir.eu.eps#1.0.0-ballot",
+    "hdr": "hl7.fhir.eu.hdr#1.0.0",
+    "imaging": "hl7.fhir.eu.imaging#1.0.0-ballot",
+    "laboratory": "hl7.fhir.eu.laboratory#2.1.0",
+    "mpd": "hl7.fhir.eu.mpd#1.0.0"
+  },
+  "sources": {
+    "klarbefund": {
+      "description": "Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
+      "files": [
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-cgm.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-cpet.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-dxa.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-ecg.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-exercise.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-holter.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-lactate.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-spirometry.json",
+        "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle.json"
+      ],
+      "resources": 75
+    },
+    "synthea": {
+      "description": "Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads",
+      "files": [
+        "scripts/eehrxf/samples/synthea-sample.json"
+      ],
+      "resources": 183
+    }
+  },
+  "inputsDigest": "a402e4c9b47542db",
+  "profiles": {
+    "patient-eu-core": {
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+      "ig": "hl7.fhir.eu.base#2.0.1",
+      "tested": 21,
+      "passed": 11,
+      "failed": 10,
+      "bySource": {
+        "klarbefund": {
+          "tested": 9,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 12,
+          "passed": 11
+        }
+      },
+      "topIssues": [
+        {
+          "issue": "Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
+          "resources": 9
+        },
+        {
+          "issue": "Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
+          "resources": 9
+        },
+        {
+          "issue": "Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here",
+          "resources": 1
+        }
+      ]
+    },
+    "practitioner-eu-core": {
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core",
+      "ig": "hl7.fhir.eu.base#2.0.1",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "organization-eu-core": {
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/organization-eu-core",
+      "ig": "hl7.fhir.eu.base#2.0.1",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "practitioner-role-eu-core": {
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitionerRole-eu-core",
+      "ig": "hl7.fhir.eu.base#2.0.1",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "condition-eu-core": {
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core",
+      "ig": "hl7.fhir.eu.base#2.0.1",
+      "tested": 20,
+      "passed": 20,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 20,
+          "passed": 20
+        }
+      },
+      "topIssues": []
+    },
+    "composition-eps-eu": {
+      "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps",
+      "ig": "hl7.fhir.eu.eps#1.0.0-ballot",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "bundle-eps-eu": {
+      "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/bundle-eu-eps",
+      "ig": "hl7.fhir.eu.eps#1.0.0-ballot",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "medication-request-eu": {
+      "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+      "ig": "hl7.fhir.eu.mpd#1.0.0",
+      "tested": 20,
+      "passed": 20,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 20,
+          "passed": 20
+        }
+      },
+      "topIssues": []
+    },
+    "medication-dispense-eu": {
+      "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationDispense-eu-mpd",
+      "ig": "hl7.fhir.eu.mpd#1.0.0",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "imaging-study-eu": {
+      "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/ImagingStudyEuImaging",
+      "ig": "hl7.fhir.eu.imaging#1.0.0-ballot",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "diagnostic-report-imaging-eu": {
+      "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
+      "ig": "hl7.fhir.eu.imaging#1.0.0-ballot",
+      "tested": 1,
+      "passed": 0,
+      "failed": 1,
+      "bySource": {
+        "klarbefund": {
+          "tested": 1,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": [
+        {
+          "issue": "DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+          "resources": 1
+        },
+        {
+          "issue": "DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+          "resources": 1
+        },
+        {
+          "issue": "DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+          "resources": 1
+        },
+        {
+          "issue": "DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t",
+          "resources": 1
+        },
+        {
+          "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice",
+          "resources": 1
+        }
+      ]
+    },
+    "diagnostic-report-lab-eu": {
+      "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
+      "ig": "hl7.fhir.eu.laboratory#2.1.0",
+      "tested": 2,
+      "passed": 0,
+      "failed": 2,
+      "bySource": {
+        "klarbefund": {
+          "tested": 2,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": [
+        {
+          "issue": "DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)",
+          "resources": 2
+        },
+        {
+          "issue": "DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0). Note that other slices are allowed in addition to this re",
+          "resources": 2
+        }
+      ]
+    },
+    "observation-results-lab-eu": {
+      "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
+      "ig": "hl7.fhir.eu.laboratory#2.1.0",
+      "tested": 31,
+      "passed": 0,
+      "failed": 31,
+      "bySource": {
+        "klarbefund": {
+          "tested": 11,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 20,
+          "passed": 0
+        }
+      },
+      "topIssues": [
+        {
+          "issue": "Observation: Observation.performer: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab|2.1.0)",
+          "resources": 31
+        }
+      ]
+    },
+    "bundle-lab-report-eu": {
+      "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
+      "ig": "hl7.fhir.eu.laboratory#2.1.0",
+      "tested": 9,
+      "passed": 0,
+      "failed": 9,
+      "bySource": {
+        "klarbefund": {
+          "tested": 9,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": [
+        {
+          "issue": "Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (DiagnosticReport-report-1)",
+          "resources": 9
+        },
+        {
+          "issue": "Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (DocumentReference-source-document)",
+          "resources": 9
+        },
+        {
+          "issue": "Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (Observation-obs-1)",
+          "resources": 9
+        },
+        {
+          "issue": "Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (Observation-obs-2)",
+          "resources": 9
+        },
+        {
+          "issue": "Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (Patient-example-patient)",
+          "resources": 9
+        }
+      ]
+    },
+    "composition-hdr-eu": {
+      "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/composition-eu-hdr",
+      "ig": "hl7.fhir.eu.hdr#1.0.0",
+      "tested": 0,
+      "passed": 0,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 0,
+          "passed": 0
+        }
+      },
+      "topIssues": []
+    },
+    "encounter-hdr-eu": {
+      "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr",
+      "ig": "hl7.fhir.eu.hdr#1.0.0",
+      "tested": 20,
+      "passed": 20,
+      "failed": 0,
+      "bySource": {
+        "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "synthea": {
+          "tested": 20,
+          "passed": 20
+        }
+      },
+      "topIssues": []
+    }
+  }
+}

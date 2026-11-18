@@ -17,6 +17,9 @@ import PageIntro from "@/components/PageIntro";
 import { SignInRequired } from "@/components/SignInRequired";
 import { useT } from "@/lib/i18n/translate";
 
+// coverage is a validation result from scripts/eehrxf (#1144): full = every
+// tested resource passes, partial = some do, none = none do, untested = the
+// hub ingests nothing of that type.
 interface EEHRxFProfile {
   profileId: string;
   name: string;
@@ -24,22 +27,29 @@ interface EEHRxFProfile {
   igPackage: string;
   fhirVersion: string;
   status: string;
+  canonical: string;
   url: string;
   baseResource: string;
-  description: string;
   coverage: string;
+  tested: number;
+  passed: number;
+  failed: number;
+  topIssues: string[];
   resourceCount: number;
 }
 
 interface EEHRxFCategory {
   categoryId: string;
   name: string;
+  article: string;
   description: string;
   ehdsDeadline: string;
   ehdsGroup: number;
   status: string;
   totalResources: number;
   profileCount: number;
+  tested: number;
+  passed: number;
   profiles: EEHRxFProfile[];
 }
 
@@ -48,10 +58,22 @@ interface EEHRxFData {
   summary: {
     totalCategories: number;
     totalProfiles: number;
-    coveredProfiles: number;
-    coveragePercent: number;
+    testedProfiles: number;
+    passingProfiles: number;
+    resourcesTested: number;
+    resourcesPassed: number;
+    passRatePercent: number;
     resourceCounts: Record<string, number>;
   };
+  validation: {
+    validatorVersion: string;
+    maxPerSource: number;
+    igs: string[];
+  } | null;
+}
+
+function percent(passed: number, tested: number): number {
+  return tested > 0 ? Math.round((passed / tested) * 100) : 0;
 }
 
 // Shown through t(); __tests__/unit/lib/i18n-holder.test.ts lists the labels.
@@ -93,6 +115,13 @@ function StatusBadge({ status }: { status: string }) {
           {t("Partial")}
         </span>
       );
+    case "untested":
+      return (
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-(--surface-2) text-(--text-secondary) border border-(--border)">
+          <Clock size={12} />
+          {t("Not tested")}
+        </span>
+      );
     case "none":
     default:
       return (
@@ -131,40 +160,62 @@ function CoverageMeter({ percent }: { percent: number }) {
 function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
   const t = useT("holder");
   return (
-    <div className="flex items-center gap-3 py-2 px-3 rounded-sm hover:bg-(--surface-2)/50 transition-colors">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-(--text-primary) truncate">
-            {profile.name}
-          </span>
-          <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
-            {profile.fhirVersion}
-          </span>
-          <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
-            {profile.status}
-          </span>
+    <div className="py-2 px-3 rounded-sm hover:bg-(--surface-2)/50 transition-colors">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-(--text-primary) truncate">
+              {profile.name}
+            </span>
+            <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
+              {profile.fhirVersion}
+            </span>
+            <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
+              {profile.status}
+            </span>
+          </div>
+          <div className="text-xs text-(--text-secondary) mt-0.5 truncate">
+            {profile.baseResource} — {profile.igName}
+          </div>
         </div>
-        <div className="text-xs text-(--text-secondary) mt-0.5 truncate">
-          {profile.baseResource} — {profile.igName}
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-xs text-(--text-secondary) tabular-nums">
+            {t("{n} in graph", { n: profile.resourceCount.toLocaleString() })}
+          </span>
+          {profile.tested > 0 && (
+            <span className="text-xs text-(--text-primary) tabular-nums">
+              {t("{passed}/{tested} pass", {
+                passed: profile.passed,
+                tested: profile.tested,
+              })}
+            </span>
+          )}
+          <StatusBadge status={profile.coverage} />
+          {profile.url && (
+            <a
+              href={profile.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
+              title={t("View IG specification")}
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
         </div>
       </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs text-(--text-secondary) tabular-nums">
-          {t("{n} resources", { n: profile.resourceCount.toLocaleString() })}
-        </span>
-        <StatusBadge status={profile.coverage} />
-        {profile.url && (
-          <a
-            href={profile.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
-            title={t("View IG specification")}
-          >
-            <ExternalLink size={14} />
-          </a>
-        )}
-      </div>
+      {profile.topIssues.length > 0 && (
+        <details className="mt-1">
+          <summary className="text-xs text-(--text-secondary) cursor-pointer">
+            {t("Why resources fail")}
+          </summary>
+          <ul className="mt-1 ml-4 list-disc text-[11px] text-(--text-secondary) break-words">
+            {profile.topIssues.map((issue) => (
+              <li key={issue}>{issue}</li>
+            ))}
+          </ul>
+        </details>
+      )}
     </div>
   );
 }
@@ -173,12 +224,7 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
   const t = useT("holder");
   const [expanded, setExpanded] = useState(category.status !== "none");
 
-  const profileCovered = category.profiles.filter(
-    (p) => p.coverage === "full" || p.coverage === "partial",
-  ).length;
-  const profileTotal = category.profiles.length;
-  const coverPct =
-    profileTotal > 0 ? Math.round((profileCovered / profileTotal) * 100) : 0;
+  const coverPct = percent(category.passed, category.tested);
 
   const groupColors: Record<number, string> = {
     1: "border-layer1",
@@ -212,6 +258,7 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
             <StatusBadge status={category.status} />
           </div>
           <p className="text-xs text-(--text-secondary) line-clamp-1">
+            {category.article ? `${category.article}: ` : ""}
             {category.description}
           </p>
         </div>
@@ -241,9 +288,9 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
           <div className="pt-3 pb-2">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-(--text-secondary)">
-                {t("Profile Coverage: {covered}/{total} profiles", {
-                  covered: profileCovered,
-                  total: profileTotal,
+                {t("Validation: {passed}/{tested} resources pass", {
+                  passed: category.passed,
+                  tested: category.tested,
                 })}
               </span>
             </div>
@@ -294,16 +341,16 @@ export default function EEHRxFPage() {
           title={t("EEHRxF Profile Alignment")}
           icon={Layers}
           description={t(
-            "European Electronic Health Record Exchange Format: HL7 Europe FHIR R4 Implementation Guides mapped to current graph data. Verify how well your FHIR resources conform to the mandatory EEHRxF profiles required by the EHDS regulation.",
+            "HL7 Europe FHIR R4 profiles for the EHDS priority categories, checked with the HL7 FHIR Validator against the FHIR resources the hub takes in.",
           )}
           prevStep={{ href: "/query", label: th("Natural Language Query") }}
           nextStep={{ href: "/compliance", label: t("EHDS Compliance") }}
           infoText={t(
-            "EEHRxF defines 10 priority categories of electronic health data that must be interoperable across EU member states. Each profile is matched against FHIR resources in your graph to show alignment status.",
+            "The EHDS names six priority categories (Art. 14(1)). For each, the hub tracks the HL7 Europe profiles and validates a sample of its own resources against them. A pass is readiness evidence against the guides, not EHDS conformity, which needs the Art. 40 testing and an EU declaration of conformity (Art. 39).",
           )}
           docLink={{
-            href: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
-            label: t("EEHRxF Recommendation C(2019)800"),
+            href: "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_14",
+            label: t("EHDS Regulation, Art. 14"),
             external: true,
           }}
         />
@@ -351,22 +398,53 @@ export default function EEHRxFPage() {
               <div className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1">
                 <CheckCircle size={16} className="text-(--success-text)" />
                 <span className="text-2xl font-bold">
-                  {loading ? "—" : data?.summary.coveredProfiles ?? 0}
+                  {loading ? "—" : data?.summary.passingProfiles ?? 0}
                 </span>
                 <span className="text-xs text-(--text-secondary)">
-                  {t("Profiles with Data")}
+                  {t("Profiles Passing")}
                 </span>
               </div>
               <div className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1">
                 <AlertTriangle size={16} className="text-(--warning-text)" />
                 <span className="text-2xl font-bold">
-                  {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
+                  {loading ? "—" : `${data?.summary.passRatePercent ?? 0}%`}
                 </span>
                 <span className="text-xs text-(--text-secondary)">
-                  {t("Overall Coverage")}
+                  {t("Resources Passing")}
                 </span>
               </div>
             </div>
+
+            {/* How the numbers are made */}
+            {data?.validation && (
+              <div className="bg-(--surface) border border-(--border) rounded-xl p-5 mb-8 text-xs text-(--text-secondary) flex flex-col gap-1.5">
+                <h2 className="font-semibold text-sm text-(--text-primary)">
+                  {t("How this is checked")}
+                </h2>
+                <p>
+                  {t(
+                    "HL7 FHIR Validator {version}, at most {n} resources per profile and source. A resource passes when the validator reports no error.",
+                    {
+                      version: data.validation.validatorVersion,
+                      n: data.validation.maxPerSource,
+                    },
+                  )}
+                </p>
+                <p>
+                  {t(
+                    "Terminology is not checked: codes are checked for shape, not against SNOMED CT, LOINC or the value sets of the guides.",
+                  )}
+                </p>
+                <p>
+                  {t(
+                    "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.",
+                  )}
+                </p>
+                <p className="font-mono text-[11px] break-words">
+                  {data.validation.igs.join(" · ")}
+                </p>
+              </div>
+            )}
 
             {/* EHDS Timeline */}
             <div className="bg-(--surface) border border-(--border) rounded-xl p-5 mb-8">
@@ -435,9 +513,8 @@ export default function EEHRxFPage() {
                 url: "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en",
               },
               {
-                label: t("EEHRxF Recommendation C(2019)800"),
-
-                url: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
+                label: t("EHDS Regulation, Art. 14"),
+                url: "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_14",
               },
               {
                 label: "HL7 Europe FHIR IGs",
@@ -450,6 +527,18 @@ export default function EEHRxFPage() {
               {
                 label: "HL7 EU Laboratory Report",
                 url: "https://hl7.eu/fhir/laboratory/",
+              },
+              {
+                label: "HL7 EU Hospital Discharge Report",
+                url: "https://hl7.eu/fhir/hdr/",
+              },
+              {
+                label: "HL7 FHIR Validator",
+                url: "https://github.com/hapifhir/org.hl7.fhir.core",
+              },
+              {
+                label: "xShare D7.4: EEHRxF in procurements",
+                url: "https://xshare-project.eu/wp-content/uploads/2026/11/Guidance-for-Using-EHRxF-in-Procurements-in-the-Digital-Health-Ecosystem.pdf",
               },
               {
                 label: "Xt-EHR Joint Action",

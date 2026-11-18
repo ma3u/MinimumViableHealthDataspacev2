@@ -474,22 +474,29 @@ run_eehrxf_tests() {
     record_result "$test_id" "eehrxf" "failed"
   fi
 
-  # 3.4 — FHIR resources mapped to EEHRxF profiles
+  # 3.4 — Every profile carries a validation result (#1144)
+  # The coverage on /eehrxf comes from the HL7 FHIR Validator
+  # (scripts/eehrxf/validate.py), written into the graph by the generated
+  # register-eehrxf-profiles.cypher. A profile without `tested` means the
+  # seed predates #1144 and the page would show no result for it.
   local test_id="EEHR-3.4"
-  resp=$(neo4j_query "MATCH (p:EEHRxFProfile)-[:MAPS_RESOURCE]->(r) RETURN count(*) AS cnt") || resp=""
+  resp=$(neo4j_query "MATCH (p:EEHRxFProfile) WHERE p.profileId IS NOT NULL RETURN count(p) AS profiles, count(p.tested) AS withResult, sum(coalesce(p.tested, 0)) AS tested, sum(coalesce(p.passed, 0)) AS passed") || resp=""
 
   if [ -n "$resp" ]; then
-    local count
-    count=$(echo "$resp" | jq '.results[0].data[0].row[0] // 0') || count=0
-    if [ "$count" -gt 0 ]; then
-      pass "$test_id: ${count} profile→resource mappings"
-      record_result "$test_id" "eehrxf" "passed" "${count} mappings"
+    local profiles with_result tested passed
+    profiles=$(echo "$resp" | jq '.results[0].data[0].row[0] // 0') || profiles=0
+    with_result=$(echo "$resp" | jq '.results[0].data[0].row[1] // 0') || with_result=0
+    tested=$(echo "$resp" | jq '.results[0].data[0].row[2] // 0') || tested=0
+    passed=$(echo "$resp" | jq '.results[0].data[0].row[3] // 0') || passed=0
+    if [ "$profiles" -gt 0 ] && [ "$with_result" -eq "$profiles" ] && [ "$tested" -gt 0 ]; then
+      pass "$test_id: ${profiles} profiles validated, ${passed} of ${tested} resources pass"
+      record_result "$test_id" "eehrxf" "passed" "${passed}/${tested} resources pass"
     else
-      skip "$test_id: No direct profile→resource mappings"
-      record_result "$test_id" "eehrxf" "skipped"
+      fail "$test_id: ${with_result} of ${profiles} profiles carry a validation result (${tested} resources tested)"
+      record_result "$test_id" "eehrxf" "failed"
     fi
   else
-    fail "$test_id: Cannot query resource mappings"
+    fail "$test_id: Cannot query validation results"
     record_result "$test_id" "eehrxf" "failed"
   fi
 }

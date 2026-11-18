@@ -178,5 +178,19 @@
   "Diagnostic Reports": "Comptes rendus diagnostiques",
   "Allergies": "Allergies",
   "Care Plans": "Plans de soins",
-  "Resources": "Ressources"
+  "Resources": "Ressources",
+  "HL7 Europe FHIR R4 profiles for the EHDS priority categories, checked with the HL7 FHIR Validator against the FHIR resources the hub takes in.": "Profils FHIR R4 de HL7 Europe pour les catégories prioritaires de l’EEDS, vérifiés avec le HL7 FHIR Validator sur les ressources FHIR que le hub reçoit.",
+  "The EHDS names six priority categories (Art. 14(1)). For each, the hub tracks the HL7 Europe profiles and validates a sample of its own resources against them. A pass is readiness evidence against the guides, not EHDS conformity, which needs the Art. 40 testing and an EU declaration of conformity (Art. 39).": "L’EEDS désigne six catégories prioritaires (art. 14, par. 1). Pour chacune, le hub suit les profils HL7 Europe et valide un échantillon de ses propres ressources. Une réussite prouve la préparation au regard des guides, pas la conformité à l’EEDS, qui exige les essais de l’art. 40 et une déclaration UE de conformité (art. 39).",
+  "EHDS Regulation, Art. 14": "Règlement EEDS, art. 14",
+  "Profiles Passing": "Profils réussis",
+  "Resources Passing": "Ressources réussies",
+  "Not tested": "Non testé",
+  "{passed}/{tested} pass": "{passed}/{tested} réussis",
+  "{n} in graph": "{n} dans le graphe",
+  "Why resources fail": "Pourquoi des ressources échouent",
+  "Validation: {passed}/{tested} resources pass": "Validation : {passed}/{tested} ressources réussies",
+  "How this is checked": "Comment c’est vérifié",
+  "HL7 FHIR Validator {version}, at most {n} resources per profile and source. A resource passes when the validator reports no error.": "HL7 FHIR Validator {version}, au plus {n} ressources par profil et par source. Une ressource réussit quand le validateur ne signale aucune erreur.",
+  "Terminology is not checked: codes are checked for shape, not against SNOMED CT, LOINC or the value sets of the guides.": "La terminologie n’est pas vérifiée : les codes sont contrôlés sur leur forme, pas par rapport à SNOMED CT, LOINC ou aux jeux de valeurs des guides.",
+  "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.": "Sources : le générateur FHIR de Klarbefund et d’epa-ingest, et un échantillon Synthea à graine fixe de ce que le hub charge."
 }

@@ -17,11 +17,23 @@ headers {
 assert {
   res.status: eq 200
   res.body.categories: isArray
-  res.body.summary: isDefined
+  res.body.summary.passRatePercent: isNumber
+  res.body.validation.validatorVersion: isString
 }
 
 tests {
   test("categories is not empty", function () {
     expect(res.getBody().categories).to.not.be.empty;
+  });
+
+  // Coverage is a validation result since #1144: every profile says how many
+  // resources were tested and how many passed.
+  test("every profile carries a validation result", function () {
+    for (const c of res.getBody().categories) {
+      for (const p of c.profiles) {
+        expect(p.passed + p.failed).to.equal(p.tested);
+        expect(["full", "partial", "none", "untested"]).to.include(p.coverage);
+      }
+    }
   });
 }

@@ -17,7 +17,8 @@ headers {
 assert {
   res.status: eq 200
   res.body.categories: isArray
-  res.body.summary: isDefined
+  res.body.summary.passRatePercent: isNumber
+  res.body.validation.validatorVersion: isString
 }
 
 docs {
