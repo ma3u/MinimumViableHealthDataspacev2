@@ -1,4 +1,4 @@
-# The secure processing environment and its confidential containers
+# The secure processing environment (SPE) and its confidential containers
 
 A data user never receives the patients' rows. They ask a question, the
 question runs inside a **secure processing environment** (SPE) next to the

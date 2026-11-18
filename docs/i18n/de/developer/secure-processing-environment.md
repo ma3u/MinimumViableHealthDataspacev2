@@ -1,11 +1,11 @@
 ---
 source: docs/developer/secure-processing-environment.md
-sourceHash: 8a16f3ca6fa46d92f0edf447deef7cc3e5dcecba032c0317bb0b299141734a75
+sourceHash: 020b301ff84877b0f0703a826cd4ecc68cd8f2a52dd49a2b284cf87c5b9ff02c
 language: de
 summary: "Wie der Hub die sichere Verarbeitungsumgebung nach Art. 73 aus Confidential Containers aufbaut: die beiden SPE-Workspaces auf ACI mit AMD SEV-SNP, der Trustee, den die Zugangsstelle betreibt, wie ein Workspace seinen Schlüssel erhält, was eine föderierte Abfrage durchläuft, wie Sie alles auf einem Laptop ausführen und was noch fehlt."
 ---
 
-# Die sichere Verarbeitungsumgebung und ihre Confidential Containers
+# Die sichere Verarbeitungsumgebung (SPE) und ihre Confidential Containers
 
 Ein Gesundheitsdatennutzer erhält nie die Zeilen der Patientinnen und Patienten. Er stellt eine Frage, die
 Frage läuft in einer **sicheren Verarbeitungsumgebung** (SPE) direkt bei den

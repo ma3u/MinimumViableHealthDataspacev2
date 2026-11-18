@@ -1,11 +1,11 @@
 ---
 source: docs/developer/secure-processing-environment.md
-sourceHash: 8a16f3ca6fa46d92f0edf447deef7cc3e5dcecba032c0317bb0b299141734a75
+sourceHash: 020b301ff84877b0f0703a826cd4ecc68cd8f2a52dd49a2b284cf87c5b9ff02c
 language: fr
 summary: "Comment le hub construit l’environnement de traitement sécurisé de l’art. 73 à partir de conteneurs confidentiels : les deux espaces de travail SPE sur ACI avec AMD SEV-SNP, le Trustee que gère l’organisme d’accès, la manière dont un espace de travail obtient sa clé, ce que traverse une requête fédérée, comment l’exécuter sur un ordinateur portable et ce qui reste à faire."
 ---
 
-# L’environnement de traitement sécurisé et ses conteneurs confidentiels
+# L’environnement de traitement sécurisé (SPE) et ses conteneurs confidentiels
 
 Un utilisateur de données ne reçoit jamais les lignes des patients. Il pose une question, la
 question s’exécute dans un **environnement de traitement sécurisé** (SPE) à côté des
