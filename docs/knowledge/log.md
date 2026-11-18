@@ -41,3 +41,6 @@
   (Vault aliases, credential formats, data plane registration), write both forms
   during the overlap, find a stalled issuance by its state at debug level, gate
   locally from empty volumes with all five suites.
+- 2026-11-18 · `runbooks/edc-1-on-azure.md` and `runbooks/cfm-fork.md`: Azure runs
+  EDC 1.0.0-RC7 and CFM `v0.0.9-mvhd.1` (#930), with the cutover's images,
+  backup and gate results.
