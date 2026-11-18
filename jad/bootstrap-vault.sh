@@ -115,11 +115,16 @@ EOF
 # ---------------------------------------------------------------------------
 # The IssuerService runtime resolves private keys from the per-participant
 # vault (participants/ mount) using its participant_context_id ("issuer")
-# as the key path prefix. The EDC Vault client URL-encodes the key alias
-# before making HTTP requests, so the alias
+# as the key path prefix. Which name the secret has depends on the EDC
+# version, for the alias
 #   did:web:issuerservice%3A10016:issuer#key-1
-# becomes the vault path:
-#   participants/data/issuer/did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1
+# - EDC 1.0.0-RC7 and later encode the alias once, so Vault looks it up as
+#   the alias itself: participants/issuer/did:web:issuerservice%3A10016:issuer#key-1
+# - up to RC6 the alias was encoded twice (Connector #6212, fixed by #6213),
+#   so Vault looked up the encoded alias as a name:
+#   participants/issuer/did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1
+# The key is written under both, so a rollback to RC6 still signs. The vault
+# CLI stores a path's last segment as given, '#' and '%' included.
 #
 # The matching public key is published in the DID document
 # at did:web:issuerservice%3A10016:issuer#key-1.
@@ -131,9 +136,11 @@ echo "=== Provisioning IssuerService signing key ==="
 
 ISSUER_KEY_JWK='{"kty":"OKP","d":"6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y","crv":"Ed25519","kid":"did:web:issuerservice%3A10016:issuer#key-1","x":"I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"}'
 
-vault kv put 'participants/issuer/did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1' \
-  content="$ISSUER_KEY_JWK" \
-  || { echo "Failed to store issuer EdDSA key in participants/ mount"; exit 1; }
+for name in 'did:web:issuerservice%3A10016:issuer#key-1' \
+            'did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1'; do
+  vault kv put "participants/issuer/${name}" content="$ISSUER_KEY_JWK" \
+    || { echo "Failed to store issuer EdDSA key in participants/ mount as ${name}"; exit 1; }
+done
 
 echo "✓ IssuerService EdDSA signing key stored in participants/ mount (path: issuer/<url-encoded-alias>)"
 

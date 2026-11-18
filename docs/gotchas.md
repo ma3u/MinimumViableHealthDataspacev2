@@ -3,6 +3,31 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-17: on EDC RC7 the issuer could not sign, because its key has a new name in Vault
+
+After the move to EDC 1.0.0-RC7 (#930) every MembershipCredential request
+was accepted and none arrived. The issuance processes stayed `APPROVED`
+(100) and retried, and at the default log level nothing said why. At
+`--log-level=debug` the IssuerService said: `Attempt #8 failed to Record
+Credentials. Cause: JWSSigner cannot be generated for private key
+'did:web:issuerservice%3A10016:issuer#key-1': ... not found in Config`.
+
+RC7 fixed a double encoding in EDC's Vault client ([Connector
+#6213](https://github.com/eclipse-edc/Connector/pull/6213), issue #6212).
+Up to RC6 the alias was encoded twice, so Vault looked up the encoded alias
+as a name, `did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1`; from RC7 it
+looks up the alias itself, `did:web:issuerservice%3A10016:issuer#key-1`. Keys
+IdentityHub creates are written and read by the same code and move with it.
+Only a key a script writes under the old name is lost: the issuer's signing
+key, from `jad/bootstrap-vault.sh` locally and `scripts/azure/issuer-identity-job.sh`
+on Azure. Both now write it under both names, so a rollback to RC6 still
+signs. The vault CLI stores a path's last segment as given, `#` and `%`
+included; over curl the plain alias is the alias encoded once.
+
+Rule: before moving to a new EDC release, read the changes to
+`extensions/common/vault`. A silent issuance stall is found at debug level,
+not at info.
+
 ## 2026-11-12: on EDC RC6 no credential arrived, and nothing said why
 
 After the move to EDC 1.0.0-RC6 (#1094) every MembershipCredential request

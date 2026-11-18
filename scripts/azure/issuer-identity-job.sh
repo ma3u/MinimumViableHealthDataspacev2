@@ -48,13 +48,14 @@ trap finish EXIT
 DID="did:web:${ISSUER_HOST}%3A10016:issuer"
 KID="${DID}#key-1"
 ENC=$(jq -rn --arg s "$KID" '$s|@uri')
-# The name EDC reads is the URL-encoded alias itself: its Vault client encodes
-# the alias, and its HTTP client then encodes the '%' again, so Vault stores
-# and looks up the literal "did%3Aweb%3A...%23key-1" (jad/bootstrap-vault.sh
-# writes it with the CLI, which does the same). Over curl the path has to be
-# encoded twice to arrive as that name; once was the first version of this job,
-# which stored the plain alias, and the IssuerService could not find its key
-# to sign with ("Private key ... not found", #503, 2026-10-06).
+# Up to EDC 1.0.0-RC6 the name EDC reads was the URL-encoded alias itself: its
+# Vault client encoded the alias, and its HTTP client then encoded the '%'
+# again, so Vault stored and looked up the literal "did%3Aweb%3A...%23key-1".
+# Over curl the path has to be encoded twice to arrive as that name; once was
+# the first version of this job, which stored the plain alias, and the RC6
+# IssuerService could not find its key ("Private key ... not found", #503,
+# 2026-10-06). RC7 encodes once (Connector #6213), so it reads the plain alias:
+# the key is written under both names below.
 ENC2=$(jq -rn --arg s "$ENC" '$s|@uri')
 ISS="http://${ISSUER_HOST}"
 
@@ -89,9 +90,15 @@ else
 fi
 X=$(printf '%s' "$JWK" | jq -r .x)
 jq -n --arg c "$JWK" '{data:{content:$c}}' > /tmp/body.json
+# Under both names: EDC 1.0.0-RC7 and later encode the alias once and look up
+# the plain alias (${ENC} over curl); up to RC6 it was encoded twice (Connector
+# #6212, fixed by #6213) and looked up the encoded alias (${ENC2}). Both, so a
+# rollback to RC6 still signs.
 for mount in participants/data/issuer secret/data; do
-  code=$(vault POST "/${mount}/${ENC2}" /tmp/body.json) || code=000
-  case "$code" in 2??) echo "  ok    ${mount}/<kid>" ;; *) fail "${mount}/<kid> (HTTP ${code}) $(head -c 200 /tmp/v.json)" ;; esac
+  for name in "$ENC" "$ENC2"; do
+    code=$(vault POST "/${mount}/${name}" /tmp/body.json) || code=000
+    case "$code" in 2??) echo "  ok    ${mount}/${name}" ;; *) fail "${mount}/${name} (HTTP ${code}) $(head -c 200 /tmp/v.json)" ;; esac
+  done
 done
 rm -f /tmp/body.json
 echo "  public x: ${X}"
