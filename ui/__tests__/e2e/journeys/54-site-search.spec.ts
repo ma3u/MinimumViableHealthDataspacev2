@@ -90,9 +90,17 @@ test.describe("Site search", () => {
     await page.goto(`${BP}/docs`);
     const button = page.getByTestId("site-search-button");
     await button.click();
+    // The menu bar may still fill in after the click; the panel follows the
+    // icon, so the edges meet once it has settled.
+    await expect
+      .poll(async () => {
+        const b = (await button.boundingBox())!;
+        const d = (await page.getByTestId("site-search").boundingBox())!;
+        return Math.abs(d.x + d.width - (b.x + b.width));
+      })
+      .toBeLessThan(2);
     const b = (await button.boundingBox())!;
     const d = (await page.getByTestId("site-search").boundingBox())!;
-    expect(Math.abs(d.x + d.width - (b.x + b.width))).toBeLessThan(2);
     expect(d.y).toBeGreaterThanOrEqual(b.y + b.height);
     // Just under the menu bar, which is a little taller than the button.
     expect(d.y - (b.y + b.height)).toBeLessThan(32);

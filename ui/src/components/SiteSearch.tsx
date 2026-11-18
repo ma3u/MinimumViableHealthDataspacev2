@@ -112,16 +112,28 @@ export default function SiteSearch() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Measured before paint, and again when the window changes size.
+  // Measured before paint, then every frame while open: the magnifier moves
+  // without the window changing size when the menu bar fills in after the
+  // page loads (the session, the language), and a panel placed once stayed
+  // where the icon had been. Only a changed position renders again.
   useLayoutEffect(() => {
     if (!open) return;
+    let frame = 0;
+    let last = "";
     const place = () => {
       const r = buttonRef.current?.getBoundingClientRect();
-      if (r) setPos(panelPosition(r, window.innerWidth));
+      if (r) {
+        const p = panelPosition(r, window.innerWidth);
+        const key = `${p.left},${p.top},${p.width}`;
+        if (key !== last) {
+          last = key;
+          setPos(p);
+        }
+      }
+      frame = requestAnimationFrame(place);
     };
     place();
-    window.addEventListener("resize", place);
-    return () => window.removeEventListener("resize", place);
+    return () => cancelAnimationFrame(frame);
   }, [open]);
 
   // A click outside the search closes it, as a menu does.

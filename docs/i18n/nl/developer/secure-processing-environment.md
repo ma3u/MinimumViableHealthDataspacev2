@@ -1,11 +1,11 @@
 ---
 source: docs/developer/secure-processing-environment.md
-sourceHash: 8a16f3ca6fa46d92f0edf447deef7cc3e5dcecba032c0317bb0b299141734a75
+sourceHash: 020b301ff84877b0f0703a826cd4ecc68cd8f2a52dd49a2b284cf87c5b9ff02c
 language: nl
 summary: "Hoe de hub de beveiligde verwerkingsomgeving van art. 73 bouwt uit confidential containers: de twee SPE-werkruimten op ACI met AMD SEV-SNP, de Trustee die de instantie voor toegang tot gezondheidsgegevens draait, hoe een werkruimte haar sleutel verdient, wat een gefedereerde query doorloopt, hoe u het op een laptop draait en wat nog niet klaar is."
 ---
 
-# De beveiligde verwerkingsomgeving en haar confidential containers
+# De beveiligde verwerkingsomgeving (SPE) en haar confidential containers
 
 Een gegevensgebruiker krijgt nooit de rijen van de patiënten. Hij stelt een
 vraag, die vraag draait in een **beveiligde verwerkingsomgeving** (SPE) naast
