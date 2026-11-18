@@ -110,7 +110,19 @@ def model(cfg: dict, report: dict) -> dict:
         "sources": [f"{sid}: {s['description']}" for sid, s in report["sources"].items()],
         "inputsDigest": report["inputsDigest"],
     }
-    return {"profiles": profiles, "categories": categories, "run": run}
+    planned = [
+        {
+            "guideId": g["guideId"],
+            "name": g["name"],
+            "igPackage": f"{g['package']}#{g['version']}",
+            "status": g["status"],
+            "url": g["home"],
+            "issue": g.get("issue"),
+            "scope": g["scope"],
+        }
+        for g in cfg.get("planned", [])
+    ]
+    return {"profiles": profiles, "categories": categories, "run": run, "planned": planned}
 
 
 def cypher(m: dict) -> str:
@@ -191,6 +203,21 @@ def cypher(m: dict) -> str:
         "MATCH (p:EEHRxFProfile), (dep:EEHRxFProfile {profileId: 'patient-eu-core'})",
         f"WHERE p.profileId IN {ids} AND p.profileId <> 'patient-eu-core' AND p.baseResource <> 'Bundle'",
         "MERGE (p)-[:DEPENDS_ON]->(dep);",
+        "",
+        "// Guides the hub plans to track that are not (yet) validated: new HL7 Europe drafts",
+        f"MATCH (g:EEHRxFPlannedGuide) WHERE NOT g.guideId IN {q([g['guideId'] for g in m['planned']])} DETACH DELETE g;",
+    ]
+    for g in m["planned"]:
+        out += [
+            f"MERGE (g:EEHRxFPlannedGuide {{guideId: {q(g['guideId'])}}})",
+            f"SET g.name = {q(g['name'])},",
+            f"    g.igPackage = {q(g['igPackage'])},",
+            f"    g.status = {q(g['status'])},",
+            f"    g.url = {q(g['url'])},",
+            f"    g.issue = {q(g['issue']) if g['issue'] is not None else 'null'},",
+            f"    g.scope = {q(g['scope'])};",
+        ]
+    out += [
         "",
         "// The validation run the results above come from",
         "MERGE (v:EEHRxFValidationRun {runId: 'current'})",
@@ -284,6 +311,7 @@ def mock(m: dict, previous: dict | None) -> dict:
             "resourceCounts": {k: counts[k] for k in sorted(counts) if k},
         },
         "validation": m["run"],
+        "planned": m["planned"],
     }
 
 

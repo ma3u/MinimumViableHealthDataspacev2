@@ -49,6 +49,16 @@ interface EEHRxFCategory {
   profiles: EEHRxFProfile[];
 }
 
+interface PlannedGuide {
+  guideId: string;
+  name: string;
+  igPackage: string;
+  status: string;
+  url: string;
+  issue: number | null;
+  scope: string;
+}
+
 interface ValidationRun {
   validatorVersion: string;
   terminology: string;
@@ -63,9 +73,10 @@ export async function GET() {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
 
-  const [categories, profiles, runs, resourceCounts] = await Promise.all([
-    runQuery<Omit<EEHRxFCategory, "profiles">>(
-      `MATCH (c:EEHRxFCategory) WHERE c.categoryId IS NOT NULL
+  const [categories, profiles, runs, planned, resourceCounts] =
+    await Promise.all([
+      runQuery<Omit<EEHRxFCategory, "profiles">>(
+        `MATCH (c:EEHRxFCategory) WHERE c.categoryId IS NOT NULL
        RETURN c.categoryId AS categoryId,
               c.name AS name,
               coalesce(c.article, '') AS article,
@@ -78,10 +89,10 @@ export async function GET() {
               coalesce(c.tested, 0) AS tested,
               coalesce(c.passed, 0) AS passed
        ORDER BY c.ehdsGroup, c.categoryId`,
-    ),
+      ),
 
-    runQuery<EEHRxFProfile & { categoryId: string }>(
-      `MATCH (p:EEHRxFProfile)-[:PART_OF_CATEGORY]->(c:EEHRxFCategory)
+      runQuery<EEHRxFProfile & { categoryId: string }>(
+        `MATCH (p:EEHRxFProfile)-[:PART_OF_CATEGORY]->(c:EEHRxFCategory)
        WHERE p.profileId IS NOT NULL
        RETURN p.profileId AS profileId,
               p.name AS name,
@@ -100,10 +111,10 @@ export async function GET() {
               coalesce(p.resourceCount, 0) AS resourceCount,
               c.categoryId AS categoryId
        ORDER BY c.ehdsGroup, c.categoryId, p.profileId`,
-    ),
+      ),
 
-    runQuery<ValidationRun>(
-      `MATCH (v:EEHRxFValidationRun {runId: 'current'})
+      runQuery<ValidationRun>(
+        `MATCH (v:EEHRxFValidationRun {runId: 'current'})
        RETURN v.validatorVersion AS validatorVersion,
               v.terminology AS terminology,
               v.passRule AS passRule,
@@ -111,10 +122,23 @@ export async function GET() {
               v.igs AS igs,
               v.sources AS sources,
               v.inputsDigest AS inputsDigest`,
-    ),
+      ),
 
-    runQuery<{ label: string; count: number }>(
-      `MATCH (p:Patient) WITH 'Patient' AS label, count(p) AS count RETURN label, count
+      // HL7 Europe drafts the hub plans to track, not validated yet (#1145).
+      runQuery<PlannedGuide>(
+        `MATCH (g:EEHRxFPlannedGuide)
+       RETURN g.guideId AS guideId,
+              g.name AS name,
+              g.igPackage AS igPackage,
+              g.status AS status,
+              g.url AS url,
+              g.issue AS issue,
+              g.scope AS scope
+       ORDER BY g.guideId`,
+      ),
+
+      runQuery<{ label: string; count: number }>(
+        `MATCH (p:Patient) WITH 'Patient' AS label, count(p) AS count RETURN label, count
        UNION ALL
        MATCH (e:Encounter) WITH 'Encounter' AS label, count(e) AS count RETURN label, count
        UNION ALL
@@ -125,8 +149,8 @@ export async function GET() {
        MATCH (pr:Procedure) WITH 'Procedure' AS label, count(pr) AS count RETURN label, count
        UNION ALL
        MATCH (c:Condition) WITH 'Condition' AS label, count(c) AS count RETURN label, count`,
-    ),
-  ]);
+      ),
+    ]);
 
   const countMap: Record<string, number> = {};
   for (const rc of resourceCounts) {
@@ -166,5 +190,6 @@ export async function GET() {
       resourceCounts: countMap,
     },
     validation: runs[0] ?? null,
+    planned,
   });
 }

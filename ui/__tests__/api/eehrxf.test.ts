@@ -84,6 +84,7 @@ describe("GET /api/eehrxf", () => {
         profile("condition-eu-core", "patient-summary", 6, 6, "full"),
       ])
       .mockResolvedValueOnce([run])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ label: "Patient", count: 5 }]);
 
     const response = await GET();
@@ -95,7 +96,7 @@ describe("GET /api/eehrxf", () => {
     expect(data.categories[0].profiles[0]).not.toHaveProperty("categoryId");
     expect(data.categories[0].profiles[0].topIssues).toHaveLength(1);
     expect(data.validation.validatorVersion).toBe("7.0.5");
-    expect(mockRunQuery).toHaveBeenCalledTimes(4);
+    expect(mockRunQuery).toHaveBeenCalledTimes(5);
   });
 
   it("counts a profile in several categories once", async () => {
@@ -108,6 +109,7 @@ describe("GET /api/eehrxf", () => {
         profile("composition-eps-eu", "patient-summary", 0, 0, "untested"),
       ])
       .mockResolvedValueOnce([run])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const data = await (await GET()).json();
@@ -127,6 +129,7 @@ describe("GET /api/eehrxf", () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const data = await (await GET()).json();
@@ -134,6 +137,7 @@ describe("GET /api/eehrxf", () => {
     expect(data.categories).toEqual([]);
     expect(data.summary.passRatePercent).toBe(0);
     expect(data.validation).toBeNull();
+    expect(data.planned).toEqual([]);
   });
 
   it("has a static mock with the same shape, built from the validation report", () => {
@@ -151,6 +155,10 @@ describe("GET /api/eehrxf", () => {
       "medical-imaging",
     ]);
     expect(mock.validation.validatorVersion).toMatch(/^\d+\.\d+\.\d+$/);
+    // The Cancer Model is planned, and not one of the six categories.
+    expect(mock.planned.map((g: { guideId: string }) => g.guideId)).toContain(
+      "cancer-common",
+    );
     for (const c of mock.categories) {
       for (const p of c.profiles) {
         expect(["full", "partial", "none", "untested"]).toContain(p.coverage);

@@ -469,5 +469,34 @@
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
     "inputsDigest": "a402e4c9b47542db"
-  }
+  },
+  "planned": [
+    {
+      "guideId": "cancer-common",
+      "name": "HL7 Europe Common Cancer Model",
+      "igPackage": "hl7.fhir.eu.cancer-common#1.0.0-ballot",
+      "status": "Ballot",
+      "url": "https://hl7.eu/fhir/cancer-common/1.0.0-ballot/",
+      "issue": 1145,
+      "scope": "A cancer journey from diagnosis to follow-up, mapped to both FHIR and OMOP. Not an EHDS priority category: secondary use."
+    },
+    {
+      "guideId": "health-data-api",
+      "name": "EU Health Data API",
+      "igPackage": "hl7.fhir.eu.health-data-api#1.0.0-ballot",
+      "status": "Ballot",
+      "url": "https://hl7.eu/fhir/health-data-api/1.0.0-ballot/en/",
+      "issue": null,
+      "scope": "How EHR systems provide and consume EEHRxF data: CapabilityStatement, search, Bulk export, SMART or IUA authorisation. Epic E2 of discussion #1143."
+    },
+    {
+      "guideId": "imaging-manifest",
+      "name": "EU Manifest-based Access to DICOM Objects (EU-MADO)",
+      "igPackage": "hl7.fhir.eu.imaging-manifest#1.0.0-ballot",
+      "status": "Ballot",
+      "url": "https://hl7.eu/fhir/imaging-manifest/1.0.0-ballot/en/",
+      "issue": null,
+      "scope": "Access to imaging studies for the Art. 14(1)(d) category. The hub holds no imaging data yet."
+    }
+  ]
 }

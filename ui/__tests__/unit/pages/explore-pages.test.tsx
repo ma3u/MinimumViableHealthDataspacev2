@@ -646,21 +646,29 @@ describe("EehrxfPage", () => {
             description: "Core patient summary data",
             ehdsDeadline: "2029",
             ehdsGroup: 1,
+            article: "Art. 14(1)(a)",
             status: "partial",
             totalResources: 100,
             profileCount: 1,
+            tested: 4,
+            passed: 3,
             profiles: [
               {
                 profileId: "p1",
-                name: "IPS Profile",
-                igName: "HL7 IPS",
-                igPackage: "hl7.fhir.uv.ips",
+                name: "Patient (EU core)",
+                igName: "HL7 Europe Base and Core",
+                igPackage: "hl7.fhir.eu.base#2.0.1",
                 fhirVersion: "R4",
-                status: "active",
+                status: "STU 2",
+                canonical:
+                  "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
                 url: "https://example.com",
                 baseResource: "Patient",
-                description: "Patient summary profile",
-                coverage: "full",
+                coverage: "partial",
+                tested: 4,
+                passed: 3,
+                failed: 1,
+                topIssues: ["1x Patient.name: minimum required = 1"],
                 resourceCount: 50,
               },
             ],
@@ -669,15 +677,65 @@ describe("EehrxfPage", () => {
         summary: {
           totalCategories: 1,
           totalProfiles: 1,
-          coveredProfiles: 1,
-          coveragePercent: 100,
+          testedProfiles: 1,
+          passingProfiles: 0,
+          resourcesTested: 4,
+          resourcesPassed: 3,
+          passRatePercent: 75,
           resourceCounts: {},
+        },
+        validation: {
+          validatorVersion: "7.0.5",
+          maxPerSource: 20,
+          igs: ["hl7.fhir.eu.base#2.0.1"],
         },
       }),
     );
     render(<EehrxfPage />);
     await waitFor(() => {
       expect(screen.getByText("Patient Summary")).toBeInTheDocument();
+    });
+    expect(screen.getByText("3/4 pass")).toBeInTheDocument();
+    // The summary card and the category's meter.
+    expect(screen.getAllByText("75%")).toHaveLength(2);
+    expect(screen.getByText(/HL7 FHIR Validator 7\.0\.5/)).toBeInTheDocument();
+  });
+
+  it("renders a profile seeded before #1144, without validation fields", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse({
+        categories: [
+          {
+            categoryId: "cat1",
+            name: "Patient Summary",
+            description: "",
+            ehdsDeadline: "2029",
+            ehdsGroup: 1,
+            status: "partial",
+            totalResources: 0,
+            profileCount: 1,
+            profiles: [
+              {
+                profileId: "p1",
+                name: "Old profile",
+                igName: "x",
+                igPackage: "x",
+                fhirVersion: "R4",
+                status: "STU",
+                url: "",
+                baseResource: "Patient",
+                coverage: "full",
+                resourceCount: 5,
+              },
+            ],
+          },
+        ],
+        summary: { totalCategories: 1, totalProfiles: 1, resourceCounts: {} },
+      }),
+    );
+    render(<EehrxfPage />);
+    await waitFor(() => {
+      expect(screen.getByText("Old profile")).toBeInTheDocument();
     });
   });
 });

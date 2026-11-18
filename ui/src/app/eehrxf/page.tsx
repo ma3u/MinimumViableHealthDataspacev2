@@ -70,7 +70,19 @@ interface EEHRxFData {
     maxPerSource: number;
     igs: string[];
   } | null;
+  // HL7 Europe drafts the hub plans to track, not validated yet (#1145)
+  planned?: {
+    guideId: string;
+    name: string;
+    igPackage: string;
+    status: string;
+    url: string;
+    issue: number | null;
+    scope: string;
+  }[];
 }
+
+const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 
 function percent(passed: number, tested: number): number {
   return tested > 0 ? Math.round((passed / tested) * 100) : 0;
@@ -204,7 +216,7 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
           )}
         </div>
       </div>
-      {profile.topIssues.length > 0 && (
+      {(profile.topIssues ?? []).length > 0 && (
         <details className="mt-1">
           <summary className="text-xs text-(--text-secondary) cursor-pointer">
             {t("Why resources fail")}
@@ -497,6 +509,73 @@ export default function EEHRxFPage() {
                   <CategoryCard key={cat.categoryId} category={cat} />
                 ))}
               </div>
+            )}
+
+            {/* Planned guides: tracked, not validated yet */}
+            {!loading && (data?.planned ?? []).length > 0 && (
+              <section className="mt-8" aria-labelledby="eehrxf-planned">
+                <h2
+                  id="eehrxf-planned"
+                  className="font-semibold text-sm text-(--text-primary) mb-1"
+                >
+                  {t("Planned: new HL7 Europe drafts")}
+                </h2>
+                <p className="text-xs text-(--text-secondary) mb-3">
+                  {t(
+                    "Not validated yet. Each becomes a validated profile when its issue is done. The Cancer Model is not one of the six priority categories.",
+                  )}
+                </p>
+                <div className="flex flex-col gap-3">
+                  {data?.planned?.map((g) => (
+                    <div
+                      key={g.guideId}
+                      className="bg-(--surface) border border-dashed border-(--border) rounded-xl p-4"
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm text-(--text-primary)">
+                          {g.name}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-(--surface-2) text-(--text-secondary) border border-(--border)">
+                          <Clock size={12} />
+                          {t("Planned")}
+                        </span>
+                        <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm font-mono">
+                          {g.igPackage}
+                        </span>
+                      </div>
+                      <p className="text-xs text-(--text-secondary) mt-1">
+                        {g.scope}
+                      </p>
+                      <div className="flex gap-4 mt-2 text-xs">
+                        <a
+                          href={g.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300"
+                        >
+                          <ExternalLink size={12} />
+                          {t("Implementation guide")}
+                        </a>
+                        <a
+                          href={
+                            g.issue
+                              ? `${REPO}/issues/${g.issue}`
+                              : `${REPO}/discussions/1143`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300"
+                        >
+                          <ExternalLink size={12} />
+                          {g.issue
+                            ? t("Issue #{n}", { n: g.issue })
+                            : t("Discussion #{n}", { n: 1143 })}
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
           </>
         )}

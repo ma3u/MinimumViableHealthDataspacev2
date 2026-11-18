@@ -2869,6 +2869,19 @@ paths:
                       igs: { type: array, items: { type: string } }
                       sources: { type: array, items: { type: string } }
                       inputsDigest: { type: string }
+                  planned:
+                    description: HL7 Europe drafts the hub plans to track, not validated yet
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        guideId: { type: string }
+                        name: { type: string }
+                        igPackage: { type: string }
+                        status: { type: string }
+                        url: { type: string }
+                        issue: { type: integer, nullable: true }
+                        scope: { type: string }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/analytics:

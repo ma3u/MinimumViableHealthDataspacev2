@@ -371,6 +371,30 @@ MATCH (p:EEHRxFProfile), (dep:EEHRxFProfile {profileId: 'patient-eu-core'})
 WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] AND p.profileId <> 'patient-eu-core' AND p.baseResource <> 'Bundle'
 MERGE (p)-[:DEPENDS_ON]->(dep);
 
+// Guides the hub plans to track that are not (yet) validated: new HL7 Europe drafts
+MATCH (g:EEHRxFPlannedGuide) WHERE NOT g.guideId IN ['cancer-common', 'health-data-api', 'imaging-manifest'] DETACH DELETE g;
+MERGE (g:EEHRxFPlannedGuide {guideId: 'cancer-common'})
+SET g.name = 'HL7 Europe Common Cancer Model',
+    g.igPackage = 'hl7.fhir.eu.cancer-common#1.0.0-ballot',
+    g.status = 'Ballot',
+    g.url = 'https://hl7.eu/fhir/cancer-common/1.0.0-ballot/',
+    g.issue = 1145,
+    g.scope = 'A cancer journey from diagnosis to follow-up, mapped to both FHIR and OMOP. Not an EHDS priority category: secondary use.';
+MERGE (g:EEHRxFPlannedGuide {guideId: 'health-data-api'})
+SET g.name = 'EU Health Data API',
+    g.igPackage = 'hl7.fhir.eu.health-data-api#1.0.0-ballot',
+    g.status = 'Ballot',
+    g.url = 'https://hl7.eu/fhir/health-data-api/1.0.0-ballot/en/',
+    g.issue = null,
+    g.scope = 'How EHR systems provide and consume EEHRxF data: CapabilityStatement, search, Bulk export, SMART or IUA authorisation. Epic E2 of discussion #1143.';
+MERGE (g:EEHRxFPlannedGuide {guideId: 'imaging-manifest'})
+SET g.name = 'EU Manifest-based Access to DICOM Objects (EU-MADO)',
+    g.igPackage = 'hl7.fhir.eu.imaging-manifest#1.0.0-ballot',
+    g.status = 'Ballot',
+    g.url = 'https://hl7.eu/fhir/imaging-manifest/1.0.0-ballot/en/',
+    g.issue = null,
+    g.scope = 'Access to imaging studies for the Art. 14(1)(d) category. The hub holds no imaging data yet.';
+
 // The validation run the results above come from
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],

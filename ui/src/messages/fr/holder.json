@@ -192,5 +192,11 @@
   "How this is checked": "Comment c’est vérifié",
   "HL7 FHIR Validator {version}, at most {n} resources per profile and source. A resource passes when the validator reports no error.": "HL7 FHIR Validator {version}, au plus {n} ressources par profil et par source. Une ressource réussit quand le validateur ne signale aucune erreur.",
   "Terminology is not checked: codes are checked for shape, not against SNOMED CT, LOINC or the value sets of the guides.": "La terminologie n’est pas vérifiée : les codes sont contrôlés sur leur forme, pas par rapport à SNOMED CT, LOINC ou aux jeux de valeurs des guides.",
-  "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.": "Sources : le générateur FHIR de Klarbefund et d’epa-ingest, et un échantillon Synthea à graine fixe de ce que le hub charge."
+  "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.": "Sources : le générateur FHIR de Klarbefund et d’epa-ingest, et un échantillon Synthea à graine fixe de ce que le hub charge.",
+  "Planned: new HL7 Europe drafts": "Prévu : nouveaux projets de HL7 Europe",
+  "Not validated yet. Each becomes a validated profile when its issue is done. The Cancer Model is not one of the six priority categories.": "Pas encore validés. Chaque projet devient un profil validé une fois son ticket terminé. Le modèle sur le cancer ne fait pas partie des six catégories prioritaires.",
+  "Planned": "Prévu",
+  "Implementation guide": "Guide d’implémentation",
+  "Issue #{n}": "Ticket #{n}",
+  "Discussion #{n}": "Discussion #{n}"
 }

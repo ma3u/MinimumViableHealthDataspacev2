@@ -192,5 +192,11 @@
   "How this is checked": "How this is checked",
   "HL7 FHIR Validator {version}, at most {n} resources per profile and source. A resource passes when the validator reports no error.": "HL7 FHIR Validator {version}, at most {n} resources per profile and source. A resource passes when the validator reports no error.",
   "Terminology is not checked: codes are checked for shape, not against SNOMED CT, LOINC or the value sets of the guides.": "Terminology is not checked: codes are checked for shape, not against SNOMED CT, LOINC or the value sets of the guides.",
-  "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.": "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads."
+  "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.": "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.",
+  "Planned: new HL7 Europe drafts": "Planned: new HL7 Europe drafts",
+  "Not validated yet. Each becomes a validated profile when its issue is done. The Cancer Model is not one of the six priority categories.": "Not validated yet. Each becomes a validated profile when its issue is done. The Cancer Model is not one of the six priority categories.",
+  "Planned": "Planned",
+  "Implementation guide": "Implementation guide",
+  "Issue #{n}": "Issue #{n}",
+  "Discussion #{n}": "Discussion #{n}"
 }

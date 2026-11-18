@@ -620,12 +620,17 @@ An HL7 Europe FHIR profile implementing part of the EEHRxF specification.
 
 The validator run the profile results come from, one node with `runId: 'current'`: `validatorVersion`, `terminology` (not checked), `passRule`, `maxPerSource`, `igs`, `sources`, `inputsDigest`.
 
+#### `EEHRxFPlannedGuide`
+
+An HL7 Europe draft the hub plans to track but does not validate yet, such as the Common Cancer Model (#1145): `guideId`, `name`, `igPackage`, `status`, `url`, `issue`, `scope`. Not linked to a category: the Cancer Model is not an Art. 14 priority category.
+
 **Indexes:**
 
 ```cypher
 CREATE CONSTRAINT eehrxf_profile_id IF NOT EXISTS FOR (p:EEHRxFProfile) REQUIRE p.profileId IS UNIQUE;
 CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseResource);
 CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidationRun) REQUIRE v.runId IS UNIQUE;
+CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
 ```
 
 #### EEHRxF Relationships
