@@ -3,6 +3,22 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-18: CodeQL for Swift cannot run on macOS 27, Rosetta or not
+
+On macOS 27.2 the pre-push hook `codeql-swift` failed every push with "Bad
+CPU type in executable", and installing Rosetta did not help. CodeQL's build
+tracer runs some system tools as x86_64 under Rosetta, and macOS 27 ships 85
+of the 672 binaries in `/usr/bin` without an x86_64 slice
+(`lipo -archs /usr/bin/sandbox-exec` prints `arm64e arm64e.x1`). Separately,
+CodeQL does not support Swift 6.4 (Xcode 27.2) on any platform yet
+([GitHub changelog, 2026-10-19](https://github.blog/changelog/2026-10-19-codeql-changes-for-macos-27-xcode-27-and-swift-6-4)).
+GitHub's `codeql-swift.yml` runs on `macos-26` with an older Xcode and passes.
+
+Fix: `clients/ios/Scripts/codeql-swift.sh` skips with a warning on macOS 27
+or Swift 6.4 and later; `CODEQL_SWIFT_TRY=1` runs it anyway. Rule: when the
+hook skips, the analysis of record is the workflow's; read its result on the
+pull request before merging an iPhone change.
+
 ## 2026-11-17: on EDC RC7 the issuer could not sign, because its key has a new name in Vault
 
 After the move to EDC 1.0.0-RC7 (#930) every MembershipCredential request

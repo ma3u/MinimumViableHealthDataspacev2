@@ -112,7 +112,8 @@ repos:
   # for the batch) rather than per commit, and only when the Swift sources,
   # Package.swift, project.yml or the accepted list change. It skips with a
   # warning where it cannot run (no macOS, Xcode or codeql: the PR Gate runs
-  # on Linux), and `SKIP=codeql-swift git push` bypasses it once. GitHub runs
+  # on Linux; macOS 27 or Swift 6.4, which CodeQL cannot trace yet, see the
+  # script), and `SKIP=codeql-swift git push` bypasses it once. GitHub runs
   # the same analysis in codeql-swift.yml.
   - repo: local
     hooks:
