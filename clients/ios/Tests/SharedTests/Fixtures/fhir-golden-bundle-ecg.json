@@ -66,14 +66,14 @@
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
       {
-        "fullUrl": "urn:uuid:Patient-example-patient",
+        "fullUrl": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57",
         "resource": {
           "resourceType": "Patient",
           "id": "example-patient"
         }
       },
       {
-        "fullUrl": "urn:uuid:DocumentReference-source-document",
+        "fullUrl": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53",
         "resource": {
           "resourceType": "DocumentReference",
           "id": "source-document",
@@ -94,7 +94,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:DiagnosticReport-report-1",
+        "fullUrl": "urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f",
         "resource": {
           "resourceType": "DiagnosticReport",
           "id": "report-1",
@@ -105,7 +105,7 @@
                 {
                   "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
                   "code": "EC",
-                  "display": "Electrocardiac (e.g., EKG, EEC, Holter)"
+                  "display": "Electrocardiac (e.g., EKG,  EEC, Holter)"
                 }
               ]
             }
@@ -149,7 +149,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-1",
+        "fullUrl": "urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-1",
@@ -197,6 +197,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 62,
             "unit": "/min",
@@ -206,7 +211,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-2",
+        "fullUrl": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-2",
@@ -250,6 +255,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 398,
             "unit": "ms",
@@ -259,7 +269,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-3",
+        "fullUrl": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-3",
@@ -303,6 +313,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": -12,
             "unit": "deg",
@@ -312,7 +327,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Provenance-provenance-1",
+        "fullUrl": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430",
         "resource": {
           "resourceType": "Provenance",
           "id": "provenance-1",
@@ -335,8 +350,8 @@
             "coding": [
               {
                 "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
-                "code": "DERIVE",
-                "display": "derive"
+                "code": "CREATE",
+                "display": "create"
               }
             ],
             "text": "Values transcribed from a scanned document by OCR"

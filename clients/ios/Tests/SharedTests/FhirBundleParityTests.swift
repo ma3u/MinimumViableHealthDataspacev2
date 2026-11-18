@@ -228,4 +228,12 @@ struct FhirBundleParityTests {
       FhirWriter.format(SourceRegion(page: 2, x: 0.070_600_4, y: 0, width: 1, height: 1))
         == "2@0.0706,0,1,1")
   }
+
+  /// RFC 9562's version 5 example, so the Swift UUIDs are the same as the
+  /// TypeScript ones for the same name (#1144).
+  @Test func uuidV5MatchesTheRFCExample() {
+    #expect(
+      FhirWriter.uuidV5("www.example.com", namespace: "6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+        == "2ed6657d-e927-568b-95e1-2665a8aea6a2")
+  }
 }
