@@ -107,6 +107,8 @@ def model(cfg: dict, report: dict) -> dict:
         "passRule": report["validator"]["passRule"],
         "maxPerSource": report["validator"]["maxPerSource"],
         "igs": [report["igs"][k] for k in sorted(report["igs"])],
+        "igUrls": [cfg["igs"][k]["home"] for k in sorted(report["igs"])],
+        "validatorUrl": cfg["validator"]["url"].split("/download/")[0] + "/tag/" + report["validator"]["version"],
         "sources": [f"{sid}: {s['description']}" for sid, s in report["sources"].items()],
         "inputsDigest": report["inputsDigest"],
     }

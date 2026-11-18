@@ -67,8 +67,10 @@ interface EEHRxFData {
   };
   validation: {
     validatorVersion: string;
+    validatorUrl?: string;
     maxPerSource: number;
     igs: string[];
+    igUrls?: string[];
   } | null;
   // HL7 Europe drafts the hub plans to track, not validated yet (#1145)
   planned?: {
@@ -83,6 +85,32 @@ interface EEHRxFData {
 }
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
+const BLOB = `${REPO}/blob/main`;
+
+// Where each part of the check lives, so a reader can open it (#1144).
+const CHECK_LINKS = [
+  {
+    label: "Full report",
+    href: `${BLOB}/scripts/eehrxf/validation-report.json`,
+  },
+  { label: "How it is run", href: `${BLOB}/scripts/eehrxf/validate.py` },
+  {
+    label: "Profiles and guides",
+    href: `${BLOB}/scripts/eehrxf/profiles.json`,
+  },
+  {
+    label: "FHIR writer (TypeScript)",
+    href: `${BLOB}/services/epa-ingest/src/to-fhir.ts`,
+  },
+  {
+    label: "FHIR writer (Swift)",
+    href: `${BLOB}/clients/ios/Sources/Shared/FhirBundle.swift`,
+  },
+  {
+    label: "Synthea sample",
+    href: `${BLOB}/scripts/eehrxf/samples/synthea-sample.json`,
+  },
+];
 
 function percent(passed: number, tested: number): number {
   return tested > 0 ? Math.round((passed / tested) * 100) : 0;
@@ -452,8 +480,49 @@ export default function EEHRxFPage() {
                     "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.",
                   )}
                 </p>
-                <p className="font-mono text-[11px] break-words">
-                  {data.validation.igs.join(" · ")}
+                <p className="font-mono text-[11px] break-words flex flex-wrap gap-x-3 gap-y-1">
+                  {data.validation.igs.map((ig, i) => {
+                    const href = data.validation?.igUrls?.[i];
+                    return href ? (
+                      <a
+                        key={ig}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 underline decoration-dotted hover:text-teal-800 dark:hover:text-teal-300"
+                      >
+                        {ig}
+                        <ExternalLink size={10} />
+                      </a>
+                    ) : (
+                      <span key={ig}>{ig}</span>
+                    );
+                  })}
+                </p>
+                <p className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+                  {data.validation.validatorUrl && (
+                    <a
+                      href={data.validation.validatorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 hover:text-teal-800 dark:hover:text-teal-300"
+                    >
+                      <ExternalLink size={12} />
+                      {t("Validator release")}
+                    </a>
+                  )}
+                  {CHECK_LINKS.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 hover:text-teal-800 dark:hover:text-teal-300"
+                    >
+                      <ExternalLink size={12} />
+                      {t(l.label)}
+                    </a>
+                  ))}
                 </p>
               </div>
             )}

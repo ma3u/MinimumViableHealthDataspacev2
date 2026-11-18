@@ -198,5 +198,12 @@
   "Planned": "Gepland",
   "Implementation guide": "Implementatiegids",
   "Issue #{n}": "Issue #{n}",
-  "Discussion #{n}": "Discussie #{n}"
+  "Discussion #{n}": "Discussie #{n}",
+  "Validator release": "Validatorrelease",
+  "Full report": "Volledig rapport",
+  "How it is run": "Hoe het draait",
+  "Profiles and guides": "Profielen en gidsen",
+  "FHIR writer (TypeScript)": "FHIR-writer (TypeScript)",
+  "FHIR writer (Swift)": "FHIR-writer (Swift)",
+  "Synthea sample": "Synthea-steekproef"
 }

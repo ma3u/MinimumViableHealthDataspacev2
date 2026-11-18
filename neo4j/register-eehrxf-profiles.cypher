@@ -397,12 +397,14 @@ SET g.name = 'EU Manifest-based Access to DICOM Objects (EU-MADO)',
 
 // The validation run the results above come from
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
-SET v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
+SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
+    v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
     v.inputsDigest = 'a402e4c9b47542db',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
     v.sources = ['klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],
     v.terminology = 'not checked: run with -tx n/a, so codes are checked for shape, not against SNOMED CT, LOINC or the IG value sets',
+    v.validatorUrl = 'https://github.com/hapifhir/org.hl7.fhir.core/releases/tag/7.0.5',
     v.validatorVersion = '7.0.5';
 
 // Graph nodes per base type, for context (not coverage)

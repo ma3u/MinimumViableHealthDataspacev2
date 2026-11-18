@@ -198,5 +198,12 @@
   "Planned": "Prévu",
   "Implementation guide": "Guide d’implémentation",
   "Issue #{n}": "Ticket #{n}",
-  "Discussion #{n}": "Discussion #{n}"
+  "Discussion #{n}": "Discussion #{n}",
+  "Validator release": "Version du validateur",
+  "Full report": "Rapport complet",
+  "How it is run": "Comment il est exécuté",
+  "Profiles and guides": "Profils et guides",
+  "FHIR writer (TypeScript)": "Générateur FHIR (TypeScript)",
+  "FHIR writer (Swift)": "Générateur FHIR (Swift)",
+  "Synthea sample": "Échantillon Synthea"
 }

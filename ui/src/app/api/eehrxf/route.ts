@@ -65,6 +65,8 @@ interface ValidationRun {
   passRule: string;
   maxPerSource: number;
   igs: string[];
+  igUrls: string[];
+  validatorUrl: string;
   sources: string[];
   inputsDigest: string;
 }
@@ -120,6 +122,8 @@ export async function GET() {
               v.passRule AS passRule,
               v.maxPerSource AS maxPerSource,
               v.igs AS igs,
+              coalesce(v.igUrls, []) AS igUrls,
+              coalesce(v.validatorUrl, '') AS validatorUrl,
               v.sources AS sources,
               v.inputsDigest AS inputsDigest`,
       ),

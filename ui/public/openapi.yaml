@@ -2867,6 +2867,8 @@ paths:
                       passRule: { type: string }
                       maxPerSource: { type: integer }
                       igs: { type: array, items: { type: string } }
+                      igUrls: { type: array, items: { type: string } }
+                      validatorUrl: { type: string }
                       sources: { type: array, items: { type: string } }
                       inputsDigest: { type: string }
                   planned:
