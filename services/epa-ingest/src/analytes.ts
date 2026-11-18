@@ -5084,7 +5084,8 @@ export const REPORT_KINDS: readonly ReportKind[] = [
   {
     kind: "exercise-stress-test",
     section: "EC",
-    sectionDisplay: "Electrocardiac (e.g., EKG, EEC, Holter)",
+    // As v2-0074 has it, two spaces included (#1144).
+    sectionDisplay: "Electrocardiac (e.g., EKG,  EEC, Holter)",
     loinc: "18752-6",
     display: "Exercise stress test study",
     triggers: ["93342-4", "pwc-130", "pwc-150", "pwc-170"],

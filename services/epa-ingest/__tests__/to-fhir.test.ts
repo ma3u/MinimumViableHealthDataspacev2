@@ -14,6 +14,7 @@ import {
   reportKind,
   observationCategory,
   statusForSource,
+  uuidV5,
 } from "../src/to-fhir.js";
 import { lookupAnalyte } from "../src/analytes.js";
 import {
@@ -396,5 +397,32 @@ describe("the kind of report", () => {
     expect(reportKind([...GOLDEN_VALUES, fvc])).toBeUndefined();
     expect(reportKind(GOLDEN_VALUES)).toBeUndefined();
     expect(reportKind([])).toBeUndefined();
+  });
+});
+
+describe("bundle entry fullUrls (#1144)", () => {
+  it("computes RFC 9562's version 5 example", () => {
+    expect(
+      uuidV5("www.example.com", "6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+    ).toBe("2ed6657d-e927-568b-95e1-2665a8aea6a2");
+  });
+
+  it("gives every entry a distinct, valid urn:uuid, the same for the same report", () => {
+    const golden = JSON.parse(
+      readFileSync(
+        join(
+          __dirname,
+          "../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle.json",
+        ),
+        "utf8",
+      ),
+    ) as { bundle: { entry: { fullUrl: string }[] } };
+    const urls = golden.bundle.entry.map((e) => e.fullUrl);
+    for (const u of urls) {
+      expect(u).toMatch(
+        /^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      );
+    }
+    expect(new Set(urls).size).toBe(urls.length);
   });
 });

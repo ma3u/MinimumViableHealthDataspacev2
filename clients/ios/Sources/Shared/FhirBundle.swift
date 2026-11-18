@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 /// FHIR R4 writer, the Swift side of `services/epa-ingest/src/to-fhir.ts`.
@@ -227,6 +228,13 @@ public enum FhirWriter {
         "valueQuantity": quantity(
           value.raw.value, ucum: value.coding.ucum, comparator: value.raw.comparator?.rawValue),
       ]
+      // Who reported the value: the laboratory or practice that printed the
+      // report, as printed. The HL7 Europe Laboratory Report profile requires
+      // a performer on every result (#1144); a report with no performer line
+      // leaves it out rather than inventing one.
+      if let performer = meta.performer {
+        observation["performer"] = .array([["display": .string(performer)]])
+      }
 
       // FHIR's rng-2: a range needs a low, a high or a text. The text is the
       // range as printed, so a range with no number in it still travels, and
@@ -295,7 +303,9 @@ public enum FhirWriter {
               ? [
                 "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
                 "code": "EC",
-                "display": "Electrocardiac (e.g., EKG, EEC, Holter)",
+                // Exactly as the code system has it, two spaces included: the
+                // validator rejects any other whitespace (#1144).
+                "display": "Electrocardiac (e.g., EKG,  EEC, Holter)",
               ]
               : [
                 "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
@@ -348,9 +358,11 @@ public enum FhirWriter {
       "activity": [
         "coding": .array([
           [
+            // v3-DataOperation has no DERIVE; reading values off a document
+            // creates them (#1144).
             "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
-            "code": "DERIVE",
-            "display": "derive",
+            "code": "CREATE",
+            "display": "create",
           ]
         ]),
         "text": .string(
@@ -383,15 +395,44 @@ public enum FhirWriter {
       "type": "collection",
       "timestamp": .string(now),
       "entry": .array(
+        // A urn:uuid must be a UUID (#1144). Named by the report it comes from
+        // and the resource's place in it, so the same report gives the same
+        // bundle, and the same UUID as services/epa-ingest.
         resources.map { resource in
-          [
+          let type = resource["resourceType"]?.stringValue ?? ""
+          let id = resource["id"]?.stringValue ?? ""
+          return [
             "fullUrl": .string(
-              "urn:uuid:\(resource["resourceType"]?.stringValue ?? "")-\(resource["id"]?.stringValue ?? "")"
-            ),
+              "urn:uuid:"
+                + uuidV5(
+                  "\(now)|\(source.sourceDocument)|\(meta.patientId)|\(type)/\(id)")),
             "resource": resource,
           ]
         }),
     ]
+  }
+
+  /// Namespace of the bundle entries' `fullUrl`s, the same constant as
+  /// `FULL_URL_NAMESPACE` in services/epa-ingest: uuid5(NAMESPACE_URL,
+  /// "https://ehds.mabu.red/fhir/epa-ingest/bundle-entry").
+  static let fullUrlNamespace = "5179b1c4-0bef-5af9-9fcb-83b0e631f212"
+
+  /// A name-based UUID, version 5 (RFC 9562, section 5.5): SHA-1 over the
+  /// namespace and the name, with the version and variant bits set.
+  static func uuidV5(_ name: String, namespace: String = fullUrlNamespace) -> String {
+    let hex = Array(namespace.replacingOccurrences(of: "-", with: "").utf8)
+    var ns = [UInt8]()
+    var i = 0
+    while i + 1 < hex.count {
+      ns.append(UInt8(String(decoding: hex[i...i + 1], as: UTF8.self), radix: 16) ?? 0)
+      i += 2
+    }
+    var digest = Array(Insecure.SHA1.hash(data: ns + Array(name.utf8)).prefix(16))
+    digest[6] = (digest[6] & 0x0f) | 0x50
+    digest[8] = (digest[8] & 0x3f) | 0x80
+    let h = digest.map { String(format: "%02x", $0) }.joined()
+    let c = Array(h)
+    return "\(String(c[0..<8]))-\(String(c[8..<12]))-\(String(c[12..<16]))-\(String(c[16..<20]))-\(String(c[20..<32]))"
   }
 
   /// `Observation.code`, with a LOINC coding when one exists.

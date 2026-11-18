@@ -10,6 +10,7 @@
  * have not validated would be worse than not claiming it. The resource shapes
  * here are chosen so that step is additive; see README.
  */
+import { createHash } from "node:crypto";
 import type {
   CodedLabValue,
   ReportMeta,
@@ -25,6 +26,33 @@ import {
 } from "./analytes.js";
 
 const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
+
+/**
+ * Namespace of the bundle entries' `fullUrl`s: uuid5(NAMESPACE_URL,
+ * "https://ehds.mabu.red/fhir/epa-ingest/bundle-entry"). The Swift writer
+ * carries the same constant.
+ */
+export const FULL_URL_NAMESPACE = "5179b1c4-0bef-5af9-9fcb-83b0e631f212";
+
+/**
+ * A name-based UUID, version 5 (RFC 9562, section 5.5): SHA-1 over the
+ * namespace and the name, with the version and variant bits set. The same name
+ * always gives the same UUID, so a fixed input still yields a fixed bundle.
+ */
+export function uuidV5(name: string, namespace = FULL_URL_NAMESPACE): string {
+  const ns = Buffer.from(namespace.replace(/-/g, ""), "hex");
+  const hash = createHash("sha1")
+    .update(Buffer.concat([ns, Buffer.from(name, "utf8")]))
+    .digest();
+  const b = hash.subarray(0, 16);
+  b[6] = (b[6] & 0x0f) | 0x50;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = b.toString("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(
+    16,
+    20,
+  )}-${h.slice(20)}`;
+}
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
 export const EXT_OCR_CONFIDENCE = `${EXT_BASE}/epa-ingest-ocr-confidence`;
 export const EXT_SOURCE_LINE = `${EXT_BASE}/epa-ingest-source-line`;
@@ -320,6 +348,11 @@ export function buildBundle(
     },
     subject,
     effectiveDateTime: meta.effectiveDateTime,
+    // Who reported the value: the laboratory or practice that printed the
+    // report, as printed. The HL7 Europe Laboratory Report profile requires a
+    // performer on every result (#1144); a report with no performer line
+    // leaves it out rather than inventing one.
+    ...(meta.performer ? { performer: [{ display: meta.performer }] } : {}),
     valueQuantity: quantity(v.value, v.coding.ucum, v.comparator),
     // The organism, where the quantity is the relative abundance of one. The
     // test has no LOINC code and says so above; the organism is a different
@@ -382,7 +415,9 @@ export function buildBundle(
             ? {
                 system: "http://terminology.hl7.org/CodeSystem/v2-0074",
                 code: "EC",
-                display: "Electrocardiac (e.g., EKG, EEC, Holter)",
+                // Exactly as the code system has it, two spaces included: the
+                // validator rejects any other whitespace (#1144).
+                display: "Electrocardiac (e.g., EKG,  EEC, Holter)",
               }
             : {
                 system: "http://terminology.hl7.org/CodeSystem/v2-0074",
@@ -431,9 +466,11 @@ export function buildBundle(
     activity: {
       coding: [
         {
+          // v3-DataOperation has no DERIVE; reading values off a document
+          // creates them (#1144).
           system: "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
-          code: "DERIVE",
-          display: "derive",
+          code: "CREATE",
+          display: "create",
         } satisfies Coding,
       ],
       text:
@@ -465,8 +502,12 @@ export function buildBundle(
     resourceType: "Bundle",
     type: "collection",
     timestamp: now,
+    // A urn:uuid must be a UUID (#1144). Named by the report it comes from and
+    // the resource's place in it, so the same report gives the same bundle.
     entry: resources.map((resource) => ({
-      fullUrl: `urn:uuid:${resource.resourceType}-${resource.id}`,
+      fullUrl: `urn:uuid:${uuidV5(
+        `${now}|${source.sourceDocument}|${meta.patientId}|${resource.resourceType}/${resource.id}`,
+      )}`,
       resource,
     })),
   };

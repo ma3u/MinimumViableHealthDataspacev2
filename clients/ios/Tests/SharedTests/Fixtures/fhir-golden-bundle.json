@@ -158,14 +158,14 @@
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
       {
-        "fullUrl": "urn:uuid:Patient-example-patient",
+        "fullUrl": "urn:uuid:75610805-af64-5780-956d-46e22a9b6047",
         "resource": {
           "resourceType": "Patient",
           "id": "example-patient"
         }
       },
       {
-        "fullUrl": "urn:uuid:DocumentReference-source-document",
+        "fullUrl": "urn:uuid:92a169c7-5333-58da-8443-47888921c529",
         "resource": {
           "resourceType": "DocumentReference",
           "id": "source-document",
@@ -186,7 +186,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:DiagnosticReport-report-1",
+        "fullUrl": "urn:uuid:4f56953a-459c-52d4-b1b0-a4bce8820fce",
         "resource": {
           "resourceType": "DiagnosticReport",
           "id": "report-1",
@@ -253,7 +253,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-1",
+        "fullUrl": "urn:uuid:95942a9d-f031-528e-949d-34f2ad7ff099",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-1",
@@ -301,6 +301,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 141,
             "unit": "mg/dL",
@@ -321,7 +326,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-2",
+        "fullUrl": "urn:uuid:066eb4c0-30d5-52e1-acb4-0c49e00791dc",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-2",
@@ -373,6 +378,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 5.4,
             "unit": "%",
@@ -399,7 +409,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-3",
+        "fullUrl": "urn:uuid:cd88eac4-7a3d-5131-b4eb-1a45b342908b",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-3",
@@ -447,6 +457,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 1240,
             "unit": "pg/mL",
@@ -466,7 +481,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-4",
+        "fullUrl": "urn:uuid:8f7f31f6-7950-51c0-b0b6-94ce34ea127d",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-4",
@@ -510,6 +525,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 10,
             "comparator": "<",
@@ -530,7 +550,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-5",
+        "fullUrl": "urn:uuid:57890bb2-904c-5b8e-9b6b-5f931c9aba6a",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-5",
@@ -574,6 +594,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 0.31,
             "unit": "mg/dL",
@@ -588,7 +613,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-6",
+        "fullUrl": "urn:uuid:c7d57c2f-8a02-5e8d-98fa-9c8259fd164b",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-6",
@@ -639,6 +664,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 3.2,
             "unit": "%",
@@ -671,7 +701,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Observation-obs-7",
+        "fullUrl": "urn:uuid:0e092582-e134-5ab4-9ab3-c3b2e33808d2",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-7",
@@ -723,6 +753,11 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
           "valueQuantity": {
             "value": 80,
             "unit": "kg",
@@ -732,7 +767,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:Provenance-provenance-1",
+        "fullUrl": "urn:uuid:48154894-021b-5536-ac19-4c32b1dc5c05",
         "resource": {
           "resourceType": "Provenance",
           "id": "provenance-1",
@@ -767,8 +802,8 @@
             "coding": [
               {
                 "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
-                "code": "DERIVE",
-                "display": "derive"
+                "code": "CREATE",
+                "display": "create"
               }
             ],
             "text": "Values transcribed from a scanned document by OCR"

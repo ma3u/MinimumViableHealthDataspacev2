@@ -2629,7 +2629,7 @@ public enum Analytes {
       members: ["19868-9", "20150-9", "19926-5", "19927-3", "33452-4"]),
     ReportKind(
       kind: "exercise-stress-test", section: "EC",
-      sectionDisplay: "Electrocardiac (e.g., EKG, EEC, Holter)",
+      sectionDisplay: "Electrocardiac (e.g., EKG,  EEC, Holter)",
       loinc: "18752-6", display: "Exercise stress test study",
       triggers: ["93342-4", "pwc-130", "pwc-150", "pwc-170"],
       members: ["93342-4", "55411-3", "40443-4", "55422-0", "87739-9", "87740-7", "76126-2", "exercise-met-max", "pwc-130", "pwc-150", "pwc-170"]),

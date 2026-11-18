@@ -283,7 +283,7 @@
       "totalResources": 37880,
       "profileCount": 4,
       "tested": 63,
-      "passed": 11,
+      "passed": 22,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -300,11 +300,11 @@
           "passed": 0,
           "failed": 9,
           "topIssues": [
-            "9x Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (DiagnosticReport-report-1)",
-            "9x Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (DocumentReference-source-document)",
-            "9x Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (Observation-obs-1)",
-            "9x Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (Observation-obs-2)",
-            "9x Bundle.entry[n].fullUrl: UUIDs must be valid and lowercase (Patient-example-patient)"
+            "9x Bundle.type: Value is 'collection' but is fixed to 'document' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type",
+            "9x Bundle: Bundle.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0)",
+            "9x Bundle: Constraint failed: dr-comp-type: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
+            "9x Bundle: Constraint failed: one-comp: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
+            "9x Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice"
           ],
           "resourceCount": 0
         },
@@ -338,12 +338,12 @@
           "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Observation-resultslab-eu-lab.html",
           "baseResource": "Observation",
-          "coverage": "none",
+          "coverage": "partial",
           "tested": 31,
-          "passed": 0,
-          "failed": 31,
+          "passed": 11,
+          "failed": 20,
           "topIssues": [
-            "31x Observation: Observation.performer: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab|2.1.0)"
+            "20x Observation: Observation.performer: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab|2.1.0)"
           ],
           "resourceCount": 37713
         },
@@ -432,8 +432,8 @@
     "testedProfiles": 8,
     "passingProfiles": 3,
     "resourcesTested": 124,
-    "resourcesPassed": 71,
-    "passRatePercent": 57,
+    "resourcesPassed": 82,
+    "passRatePercent": 66,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -477,7 +477,7 @@
       "klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "a402e4c9b47542db"
+    "inputsDigest": "d9f3a463ba74b578"
   },
   "planned": [
     {
