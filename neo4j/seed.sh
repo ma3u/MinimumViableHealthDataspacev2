@@ -132,6 +132,9 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   echo ""
   echo "=== SEED_PHASE=demo-only — running the governance and audit seeds ==="
   run_file "$SEED_DIR"/init-schema.cypher "schema (idempotent)"
+  # Generated from the validator's report (#1144); a few hundred statements,
+  # so a change to /eehrxf reaches Azure without the full pipeline.
+  run_file "$SEED_DIR"/register-eehrxf-profiles.cypher "EEHRxF categories, profiles and validation results (#1144)"
   run_file "$SEED_DIR"/seed-audit-provenance.cypher "audit provenance"
   run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"
   run_file "$SEED_DIR"/seed-trust-center.cypher "trust center"
