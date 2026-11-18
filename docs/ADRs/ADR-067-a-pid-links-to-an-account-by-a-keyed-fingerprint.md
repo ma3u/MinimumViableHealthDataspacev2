@@ -1,7 +1,7 @@
 # ADR-067: A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date
 
 **Status:** Accepted (2026-10-28)
-**Date:** 2026-10-28
+**Date:** 2026-10-28 (original) · Amended 2026-11-18 (German legal basis, #182)
 **Supersedes:** decision 4 of [ADR-065](ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md) ("a PID opens one record or none", by name, for the two demo personas only)
 **Relates to:** [ADR-054](ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md), [ADR-066](ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), #708, #182, #475
 
@@ -49,12 +49,61 @@ date.**
     first link.
   - Art. 11a(2): identity matching needs "a high level of protection of
     personal data" and must "prevent the profiling of users".
+  - Art. 5f(1): a public sector body that requires electronic identification
+    for an online service "shall also accept" EUDI Wallets. Art. 5f(2): a
+    private relying party that Union or national law or a contract requires to
+    use strong user authentication, "including in the areas of ... health",
+    shall accept them "no later than 36 months from the date of entry into
+    force of the implementing acts referred to in Article 5a(23) and Article
+    5c(6)" (December 2027), "only upon the voluntary request of the user".
+    Micro and small enterprises are exempt. So a health service accepts every
+    certified wallet, not one national app; the hub tests with d-you and
+    writes nothing d-you-specific.
 - **GDPR:** a fingerprint computed with a secret key is _pseudonymised_ data
   (Art. 4(5)): personal data still (Recital 26), but it reveals neither name
   nor birth date to anyone without the key, which Art. 4(5) requires to be
   kept separately. Data protection by design (Art. 25), minimisation and
   storage limitation (Art. 5(1)(c) and (e)), and erasure (Art. 17) apply. The
   record behind the link is health data (Art. 9); the fingerprint is not.
+
+### German law: the patient ID is the KVNR, the wallet is a key to it
+
+Added 2026-11-18. In force, read in the text of SGB V on
+[gesetze-im-internet.de](https://www.gesetze-im-internet.de/sgb_5/):
+
+- **§ 290 SGB V, Krankenversichertennummer (KVNR):** the insurer uses one
+  number per insured person, with "an unchangeable part to identify the
+  insured person" and a changeable part for the insurer. The pension insurance
+  number may not be used as the KVNR. The unchangeable part is Germany's
+  patient identifier, for people with statutory insurance only.
+- **§ 291(8) SGB V, digital identity for healthcare (GesundheitsID):** the
+  insurers provide it on request, in addition to the eGK. "From 1 January
+  2027" it serves "in the same way as the electronic health card" to
+  authenticate the insured person in healthcare and as proof of insurance.
+  gematik sets its security and interoperability requirements. According to
+  [gematik](https://Gematik.DE/media/gematik/Medien/Telematikinfrastruktur/Dokumente/gematik_Kurz_erklaert_eID_web.pdf)
+  it carries the KVNR, name and birth date. Private insurers are not bound by
+  it.
+
+Drafts, not adopted (as reported, not read in a Bundestag print):
+
+- **GeDIG:** the EUDI Wallet as a secure means of identification from
+  1 January 2027, where the technical preconditions are met; from
+  1 December 2028 equal to the eGK for authentication and proof of insurance
+  ([heise](https://www.heise.de/en/news/GeDIG-draft-law-ePA-to-become-digital-entry-point-to-healthcare-system-11245347.html)).
+- **DIdG:** the national framework for d-you; Bundestag hearing on
+  6 October 2026.
+
+Planned for 2027 ([heise](https://www.heise.de/news/EUDI-Wallet-Gesundheitswesen-plant-mit-doch-zentrale-Fragen-sind-offen-11482406.html)):
+the person identifies with d-you at their insurer or sets up the GesundheitsID
+with it; ePA and e-prescription open through the GesundheitsID. The ministry
+calls this a "transitional architecture". gematik's specification for the
+insurers' identity providers asks for the PID from a _certified_ EUDI Wallet;
+whether d-you is certified at launch is open.
+
+So in Germany the wallet answers "who is this person", and the KVNR, held by
+the insurer and carried by the GesundheitsID, answers "whose data is this".
+The PID carries no KVNR.
 
 ### What the German PID offers to link on
 
@@ -145,7 +194,8 @@ storing anything that identifies a person in clear.
   second one to link is refused and told why.
 - This is not the cross-border identity matching of EHDS Art. 16(1) or eIDAS
   Art. 11a, which belongs to Member States. A national deployment would match
-  on the national patient index; the hub has none.
+  on the national patient index; the hub has none. In Germany that key is the
+  KVNR (§ 290 SGB V), which only the insurer can vouch for.
 
 ## Alternatives rejected
 
@@ -160,6 +210,13 @@ storing anything that identifies a person in clear.
   whether d-you offers pseudonyms to relying parties is not known yet.
   Revisit when it does: a pseudonym bound at link time would let later
   sign-ins skip the PID.
+- **Link on the KVNR.** The stable, unique key German law provides (§ 290
+  SGB V), but the PID does not carry it, the hub cannot verify it, and no
+  insurer issues it as a wallet attestation yet. A typed-in KVNR would be a
+  claim, not an identification. Revisit when an insurer issues a KVNR
+  attestation (healthcare attributes under Implementing Regulation (EU)
+  2026/2099): a link on it would survive a name change, which the
+  fingerprint does not.
 - **Issue the account to the wallet as an attestation (EAA).** Nothing stored
   on the hub at all, but it makes the hub an attestation issuer with its own
   registration and rulebook. Out of scope for a sandbox.
