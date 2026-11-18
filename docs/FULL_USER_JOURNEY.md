@@ -505,7 +505,7 @@ sequenceDiagram
 | J68  | Patient page describes FHIR R4                   | ✅     |
 | J71  | Analytics references OMOP CDM & Synthea          | ✅     |
 | J72  | EEHRxF Priority Categories & EU Profiles         | ✅     |
-| J73  | EEHRxF Overall Coverage stat                     | ✅     |
+| J73  | EEHRxF Resources Passing stat                    | ✅     |
 | J74  | EEHRxF EHDS Implementation Timeline              | ✅     |
 | J75  | EEHRxF Available/Partial/Gap badges              | ✅     |
 | J76  | EEHRxF References section                        | ✅     |

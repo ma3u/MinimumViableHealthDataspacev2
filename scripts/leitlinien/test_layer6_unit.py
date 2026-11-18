@@ -152,10 +152,10 @@ def test_chunk_id_extends_section_id():
         ["medical-imaging"],
     ),
     (
-        "Mukoviszidose im Kindesalter",
-        "Cystische Fibrose",
-        "Seltene Erkrankung, Diagnostik und Therapie",
-        ["rare-disease"],
+        "Abgabe von Arzneimitteln in der Apotheke",
+        "Apotheke, Abgabe",
+        "Dispensierung nach elektronischer Verordnung",
+        ["edispensation", "eprescription"],
     ),
 ])
 def test_map_to_categories_picks_dominant_category_first(name, keywords, desc, expected):
@@ -164,6 +164,20 @@ def test_map_to_categories_picks_dominant_category_first(name, keywords, desc, e
     assert out[0] == expected[0], f"expected {expected[0]} as top match for '{name}', got {out}"
     for cat in expected:
         assert cat in out, f"expected {cat} in {out}"
+
+
+def test_category_ids_are_the_six_eehrxf_categories_the_graph_registers():
+    # The ids must exist as EEHRxFCategory nodes: load_layer6.py MATCHes them,
+    # so an id the seed does not create links nothing, silently (#1144).
+    import json
+    from pathlib import Path
+
+    from category_mapper import EEHRXF_CATEGORY_IDS, KEYWORDS
+
+    config = Path(__file__).resolve().parents[1] / "eehrxf" / "profiles.json"
+    declared = {c["categoryId"] for c in json.loads(config.read_text())["categories"]}
+    assert set(EEHRXF_CATEGORY_IDS) == declared
+    assert set(KEYWORDS) == declared
 
 
 def test_map_to_categories_falls_back_to_patient_summary_on_empty_input():

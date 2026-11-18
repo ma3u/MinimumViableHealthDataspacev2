@@ -36,15 +36,15 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
     }
   });
 
-  /* ── J73: EEHRxF page shows Overall Coverage percentage ── */
-  test("J73 — EEHRxF page shows Overall Coverage stat", async ({ page }) => {
+  /* ── J73: EEHRxF page shows the share of resources that pass validation (#1144) ── */
+  test("J73 — EEHRxF page shows Resources Passing stat", async ({ page }) => {
     // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
     await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
 
-    await expect(page.getByText("Overall Coverage").first()).toBeVisible({
+    await expect(page.getByText("Resources Passing").first()).toBeVisible({
       timeout: T,
     });
   });
@@ -84,12 +84,12 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
       timeout: T,
     });
 
-    // At least one Available, Partial or Gap badge. The categories load after
+    // At least one Available, Partial, Gap or Not tested badge. The categories load after
     // the stat cards ("Loading EEHRxF profiles…" has no spinner, so
     // waitForDataLoad does not wait for it); reading the body text at once
     // raced that load and failed whenever the server was busy.
     await expect(
-      page.getByText(/^(Available|Partial|Gap)$/).first(),
+      page.getByText(/^(Available|Partial|Gap|Not tested)$/).first(),
     ).toBeVisible({ timeout: T });
   });
 
@@ -161,15 +161,15 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
     ).toBeVisible({ timeout: T });
   });
 
-  /* ── J81: EEHRxF Profiles with Data stat card ─────────── */
-  test("J81 — EEHRxF page shows Profiles with Data stat", async ({ page }) => {
+  /* ── J81: EEHRxF Profiles Passing stat card (#1144) ───── */
+  test("J81 — EEHRxF page shows Profiles Passing stat", async ({ page }) => {
     // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
     await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
 
-    await expect(page.getByText("Profiles with Data").first()).toBeVisible({
+    await expect(page.getByText("Profiles Passing").first()).toBeVisible({
       timeout: T,
     });
   });

@@ -15,14 +15,17 @@ from __future__ import annotations
 import re
 from typing import Iterable
 
-# EEHRxFCategory ids registered in neo4j/register-eehrxf-profiles.cypher
+# EEHRxFCategory ids: the six priority categories of EHDS Art. 14(1), as
+# scripts/eehrxf/profiles.json declares them and the generated
+# neo4j/register-eehrxf-profiles.cypher registers them (#1144). A test keeps
+# the two lists equal.
 EEHRXF_CATEGORY_IDS = (
     "patient-summary",
     "eprescription",
+    "edispensation",
     "laboratory-results",
     "hospital-discharge",
     "medical-imaging",
-    "rare-disease",
 )
 
 # German + English keywords per category. Lowercased; matched as
@@ -48,9 +51,9 @@ KEYWORDS: dict[str, tuple[str, ...]] = {
         "ultraschall", "szintigraphie", "pet",
         "imaging", "radiology", "ultrasound", "x-ray",
     ),
-    "rare-disease": (
-        "selten", "seltene erkrank", "rare", "orphan",
-        "achondroplasie", "phenylketonurie", "mukoviszidose",
+    "edispensation": (
+        "apotheke", "abgabe", "dispensierung",
+        "pharmacy", "dispensing", "dispensation",
     ),
     # patient-summary is the catch-all — assigned when nothing else matches,
     # or when the guideline is broad / cross-cutting (multiple categories).

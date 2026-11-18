@@ -1,0 +1,288 @@
+{
+  "$comment": "The one place that says which EEHRxF guides and profiles the hub tracks (#1144). validate.py validates against these, build.py writes neo4j/register-eehrxf-profiles.cypher and ui/public/mock/eehrxf.json from them. Versions checked against each guide's package-list.json on 2026-11-17.",
+  "validator": {
+    "name": "HL7 FHIR Validator",
+    "version": "7.0.5",
+    "url": "https://github.com/hapifhir/org.hl7.fhir.core/releases/download/7.0.5/validator_cli.jar",
+    "fhirVersion": "4.0.1",
+    "terminology": "not checked: run with -tx n/a, so codes are checked for shape, not against SNOMED CT, LOINC or the IG value sets",
+    "allowedExtensionDomains": [
+      "https://ehds.mabu.red/fhir/",
+      "http://synthetichealth.github.io/synthea/"
+    ],
+    "allowedExtensionReason": "Our own extensions and Synthea's are defined by their authors but published nowhere the validator can load, so they are allowed by domain. Every other unknown extension (US Core, for example) stays an error.",
+    "ignoredIssues": [
+      {
+        "contains": "conditional references are only valid inside a transaction Bundle",
+        "sources": ["synthea"],
+        "reason": "Synthea writes conditional references to practitioners and organisations inside its transaction Bundle. The sample lifts resources out of that Bundle, so the rule cannot hold there; scripts/load_fhir_neo4j.py reads them inside it."
+      }
+    ]
+  },
+  "igs": {
+    "base": {
+      "name": "HL7 Europe Base and Core",
+      "package": "hl7.fhir.eu.base",
+      "version": "2.0.1",
+      "status": "STU 2",
+      "home": "https://hl7.eu/fhir/base/"
+    },
+    "eps": {
+      "name": "HL7 Europe Patient Summary",
+      "package": "hl7.fhir.eu.eps",
+      "version": "1.0.0-ballot",
+      "status": "Ballot",
+      "home": "https://hl7.eu/fhir/eps/1.0.0-ballot/"
+    },
+    "laboratory": {
+      "name": "HL7 Europe Laboratory Report",
+      "package": "hl7.fhir.eu.laboratory",
+      "version": "2.1.0",
+      "status": "STU 2",
+      "home": "https://hl7.eu/fhir/laboratory/"
+    },
+    "hdr": {
+      "name": "HL7 Europe Hospital Discharge Report",
+      "package": "hl7.fhir.eu.hdr",
+      "version": "1.0.0",
+      "status": "STU 1",
+      "home": "https://hl7.eu/fhir/hdr/"
+    },
+    "mpd": {
+      "name": "HL7 Europe Medication Prescription and Dispense",
+      "package": "hl7.fhir.eu.mpd",
+      "version": "1.0.0",
+      "status": "STU 1",
+      "home": "https://hl7.eu/fhir/mpd/"
+    },
+    "imaging": {
+      "name": "HL7 Europe Imaging Report",
+      "package": "hl7.fhir.eu.imaging",
+      "version": "1.0.0-ballot",
+      "status": "Ballot",
+      "home": "https://hl7.eu/fhir/imaging/1.0.0-ballot/en/"
+    }
+  },
+  "categories": [
+    {
+      "categoryId": "patient-summary",
+      "name": "Patient Summaries",
+      "article": "Art. 14(1)(a)",
+      "description": "Essential clinical information: problems, allergies, medications, immunisations, procedures",
+      "ehdsDeadline": "2029-03",
+      "ehdsGroup": 1
+    },
+    {
+      "categoryId": "eprescription",
+      "name": "ePrescriptions",
+      "article": "Art. 14(1)(b)",
+      "description": "Electronic prescriptions of medicinal products",
+      "ehdsDeadline": "2029-03",
+      "ehdsGroup": 1
+    },
+    {
+      "categoryId": "edispensation",
+      "name": "eDispensations",
+      "article": "Art. 14(1)(c)",
+      "description": "Records of medicinal products dispensed against an electronic prescription",
+      "ehdsDeadline": "2029-03",
+      "ehdsGroup": 1
+    },
+    {
+      "categoryId": "medical-imaging",
+      "name": "Medical Imaging Studies and Reports",
+      "article": "Art. 14(1)(d)",
+      "description": "Imaging studies and the related imaging reports",
+      "ehdsDeadline": "2031-03",
+      "ehdsGroup": 2
+    },
+    {
+      "categoryId": "laboratory-results",
+      "name": "Medical Test Results",
+      "article": "Art. 14(1)(e)",
+      "description": "Laboratory and other diagnostic results and the related reports",
+      "ehdsDeadline": "2031-03",
+      "ehdsGroup": 2
+    },
+    {
+      "categoryId": "hospital-discharge",
+      "name": "Discharge Reports",
+      "article": "Art. 14(1)(f)",
+      "description": "Summary of an inpatient stay: diagnoses, procedures, medication, follow-up",
+      "ehdsDeadline": "2031-03",
+      "ehdsGroup": 2
+    }
+  ],
+  "profiles": [
+    {
+      "profileId": "patient-eu-core",
+      "name": "Patient (EU core)",
+      "ig": "base",
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+      "baseResource": "Patient",
+      "categories": [
+        "patient-summary",
+        "laboratory-results",
+        "hospital-discharge"
+      ]
+    },
+    {
+      "profileId": "practitioner-eu-core",
+      "name": "Practitioner (EU core)",
+      "ig": "base",
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core",
+      "baseResource": "Practitioner",
+      "categories": ["patient-summary"]
+    },
+    {
+      "profileId": "organization-eu-core",
+      "name": "Organization (EU core)",
+      "ig": "base",
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/organization-eu-core",
+      "baseResource": "Organization",
+      "categories": ["patient-summary"]
+    },
+    {
+      "profileId": "practitioner-role-eu-core",
+      "name": "PractitionerRole (EU core)",
+      "ig": "base",
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitionerRole-eu-core",
+      "baseResource": "PractitionerRole",
+      "categories": ["patient-summary"]
+    },
+    {
+      "profileId": "condition-eu-core",
+      "name": "Condition (EU core)",
+      "ig": "base",
+      "canonical": "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core",
+      "baseResource": "Condition",
+      "categories": ["patient-summary"]
+    },
+    {
+      "profileId": "composition-eps-eu",
+      "name": "Composition (EU Patient Summary)",
+      "ig": "eps",
+      "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps",
+      "baseResource": "Composition",
+      "categories": ["patient-summary"],
+      "sourceFilter": "patient-summary"
+    },
+    {
+      "profileId": "bundle-eps-eu",
+      "name": "Bundle (EU Patient Summary)",
+      "ig": "eps",
+      "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/bundle-eu-eps",
+      "baseResource": "Bundle",
+      "categories": ["patient-summary"],
+      "sourceFilter": "patient-summary-document"
+    },
+    {
+      "profileId": "medication-request-eu",
+      "name": "MedicationRequest (EU MPD)",
+      "ig": "mpd",
+      "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+      "baseResource": "MedicationRequest",
+      "categories": ["eprescription"]
+    },
+    {
+      "profileId": "medication-dispense-eu",
+      "name": "MedicationDispense (EU MPD)",
+      "ig": "mpd",
+      "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationDispense-eu-mpd",
+      "baseResource": "MedicationDispense",
+      "categories": ["edispensation"]
+    },
+    {
+      "profileId": "imaging-study-eu",
+      "name": "ImagingStudy (EU Imaging)",
+      "ig": "imaging",
+      "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/ImagingStudyEuImaging",
+      "baseResource": "ImagingStudy",
+      "categories": ["medical-imaging"]
+    },
+    {
+      "profileId": "diagnostic-report-imaging-eu",
+      "name": "DiagnosticReport (EU Imaging)",
+      "ig": "imaging",
+      "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
+      "baseResource": "DiagnosticReport",
+      "categories": ["medical-imaging"],
+      "sourceFilter": "imaging"
+    },
+    {
+      "profileId": "diagnostic-report-lab-eu",
+      "name": "DiagnosticReport (EU Lab)",
+      "ig": "laboratory",
+      "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
+      "baseResource": "DiagnosticReport",
+      "categories": ["laboratory-results"],
+      "sourceFilter": "laboratory"
+    },
+    {
+      "profileId": "observation-results-lab-eu",
+      "name": "Observation results (EU Lab)",
+      "ig": "laboratory",
+      "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
+      "baseResource": "Observation",
+      "categories": ["laboratory-results"],
+      "sourceFilter": "laboratory"
+    },
+    {
+      "profileId": "bundle-lab-report-eu",
+      "name": "Bundle (EU Lab Report)",
+      "ig": "laboratory",
+      "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
+      "baseResource": "Bundle",
+      "categories": ["laboratory-results"]
+    },
+    {
+      "profileId": "composition-hdr-eu",
+      "name": "Composition (EU HDR)",
+      "ig": "hdr",
+      "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/composition-eu-hdr",
+      "baseResource": "Composition",
+      "categories": ["hospital-discharge"],
+      "sourceFilter": "discharge-report"
+    },
+    {
+      "profileId": "encounter-hdr-eu",
+      "name": "Encounter (EU HDR)",
+      "ig": "hdr",
+      "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr",
+      "baseResource": "Encounter",
+      "categories": ["hospital-discharge"]
+    }
+  ],
+  "planned": [
+    {
+      "guideId": "cancer-common",
+      "name": "HL7 Europe Common Cancer Model",
+      "package": "hl7.fhir.eu.cancer-common",
+      "version": "1.0.0-ballot",
+      "status": "Ballot",
+      "home": "https://hl7.eu/fhir/cancer-common/1.0.0-ballot/",
+      "issue": 1145,
+      "scope": "A cancer journey from diagnosis to follow-up, mapped to both FHIR and OMOP. Not an EHDS priority category: secondary use."
+    },
+    {
+      "guideId": "health-data-api",
+      "name": "EU Health Data API",
+      "package": "hl7.fhir.eu.health-data-api",
+      "version": "1.0.0-ballot",
+      "status": "Ballot",
+      "home": "https://hl7.eu/fhir/health-data-api/1.0.0-ballot/en/",
+      "issue": null,
+      "scope": "How EHR systems provide and consume EEHRxF data: CapabilityStatement, search, Bulk export, SMART or IUA authorisation. Epic E2 of discussion #1143."
+    },
+    {
+      "guideId": "imaging-manifest",
+      "name": "EU Manifest-based Access to DICOM Objects (EU-MADO)",
+      "package": "hl7.fhir.eu.imaging-manifest",
+      "version": "1.0.0-ballot",
+      "status": "Ballot",
+      "home": "https://hl7.eu/fhir/imaging-manifest/1.0.0-ballot/en/",
+      "issue": null,
+      "scope": "Access to imaging studies for the Art. 14(1)(d) category. The hub holds no imaging data yet."
+    }
+  ]
+}

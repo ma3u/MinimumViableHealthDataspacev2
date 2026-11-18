@@ -276,7 +276,8 @@ test("captures a dataset to work with", function () {
 });
 """)
 req(f, "02 The EEHRxF profiles the datasets conform to", "get", f"{B}/api/eehrxf", persona="researcher", mock=True,
-    asserts=["res.status: eq 200", "res.body.categories: isArray", "res.body.summary: isDefined"])
+    asserts=["res.status: eq 200", "res.body.categories: isArray", "res.body.summary.passRatePercent: isNumber",
+             "res.body.validation.validatorVersion: isString"])
 req(f, "03 What I am permitted today (ODRL)", "get", f"{B}/api/odrl/scope", persona="researcher", mock=True,
     asserts=["res.status: eq 200", "res.body.permissions: isArray", "res.body.prohibitions: isArray",
              "res.body.participantId: isDefined"])

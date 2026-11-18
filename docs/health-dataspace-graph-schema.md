@@ -570,7 +570,9 @@ CREATE CONSTRAINT programme_transfer_id IF NOT EXISTS FOR (t:ProgrammeTransfer) 
 
 ### 3.3 EEHRxF Profile Metadata
 
-The [European Electronic Health Record Exchange Format (EEHRxF)](https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format) defines 6 priority categories for cross-border health data exchange under the [EHDS Regulation](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en). [HL7 Europe](https://hl7.eu/fhir/) publishes FHIR R4 Implementation Guides implementing these categories.
+The [EHDS Regulation, Art. 14(1)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_14) names six priority categories for the European electronic health record exchange format (EEHRxF). [HL7 Europe](https://hl7.eu/fhir/) publishes the FHIR R4 Implementation Guides for them.
+
+All three node types below are generated: `scripts/eehrxf/build.py` writes `neo4j/register-eehrxf-profiles.cypher` from `scripts/eehrxf/profiles.json` and the HL7 FHIR Validator's report `scripts/eehrxf/validation-report.json` (#1144). Do not edit the Cypher by hand.
 
 #### `EEHRxFCategory`
 
@@ -578,12 +580,15 @@ An EHDS priority category for electronic health data exchange.
 
 **Properties:**
 
-- `categoryId: String!` — Kebab-case identifier (e.g., `patient-summary`)
-- `name: String!` — Human-readable name
-- `description: String` — Category scope
-- `ehdsDeadline: String` — EHDS implementation deadline (e.g., `2029-03`)
-- `ehdsGroup: Integer` — Rollout group (1 = 2029, 2 = 2031, 3 = TBD)
-- `status: String` — Current status (`available`, `partial`, `gap`)
+- `categoryId: String!`: Kebab-case identifier (e.g., `patient-summary`)
+- `name: String!`: Human-readable name
+- `description: String`: Category scope
+- `ehdsDeadline: String`: EHDS implementation deadline (e.g., `2029-03`)
+- `article: String`: The point of Art. 14(1) (e.g., `Art. 14(1)(a)`)
+- `ehdsGroup: Integer`: Rollout group (1 = 2029, 2 = 2031)
+- `status: String`: From the profile results: `available` (every profile `full`), `partial`, `none`, `untested`
+- `tested: Integer`, `passed: Integer`: Resources validated and passing, summed over the category's profiles
+- `profileCount: Integer`, `totalResources: Integer`: Profiles linked; graph nodes of their base types
 
 **Indexes:**
 
@@ -597,35 +602,48 @@ An HL7 Europe FHIR profile implementing part of the EEHRxF specification.
 
 **Properties:**
 
-- `profileId: String!` — Kebab-case identifier (e.g., `patient-eu-core`)
-- `name: String!` — Profile display name (e.g., `Patient (EU core)`)
-- `igName: String!` — Parent IG name (e.g., `HL7 Europe Base and Core`)
-- `igPackage: String` — FHIR package ID (e.g., `hl7.fhir.eu.base#0.1.0`)
-- `fhirVersion: String` — Target FHIR version (`R4` or `R5`)
-- `status: String` — Maturity status (`STU`, `Ballot`, `Draft`)
-- `url: String` — Canonical URL of the StructureDefinition
-- `baseResource: String` — FHIR resource type this profile constrains (e.g., `Patient`)
-- `description: String` — Profile purpose
-- `coverage: String` — Current data coverage status (`full`, `partial`, `none`)
+- `profileId: String!`: Kebab-case identifier (e.g., `patient-eu-core`)
+- `name: String!`: Profile display name (e.g., `Patient (EU core)`)
+- `igName: String!`: Parent IG name (e.g., `HL7 Europe Base and Core`)
+- `igPackage: String`: FHIR package ID and version (e.g., `hl7.fhir.eu.base#2.0.1`)
+- `fhirVersion: String`: Target FHIR version (`R4`)
+- `status: String`: Maturity of the IG (`STU 2`, `Ballot`)
+- `canonical: String`: Canonical URL of the StructureDefinition
+- `url: String`: The profile's page in the published IG
+- `baseResource: String`: FHIR resource type this profile constrains (e.g., `Patient`)
+- `tested: Integer`, `passed: Integer`, `failed: Integer`: Resources the validator checked against this profile, and the outcome
+- `topIssues: [String]`: The most frequent validator errors, with how many resources each affects
+- `coverage: String`: `full` (all tested pass), `partial`, `none`, `untested` (the hub ingests nothing of that type)
+- `resourceCount: Integer`: Graph nodes of the base type, for context; not coverage
+
+#### `EEHRxFValidationRun`
+
+The validator run the profile results come from, one node with `runId: 'current'`: `validatorVersion`, `terminology` (not checked), `passRule`, `maxPerSource`, `igs`, `sources`, `inputsDigest`.
+
+#### `EEHRxFPlannedGuide`
+
+An HL7 Europe draft the hub plans to track but does not validate yet, such as the Common Cancer Model (#1145): `guideId`, `name`, `igPackage`, `status`, `url`, `issue`, `scope`. Not linked to a category: the Cancer Model is not an Art. 14 priority category.
 
 **Indexes:**
 
 ```cypher
 CREATE CONSTRAINT eehrxf_profile_id IF NOT EXISTS FOR (p:EEHRxFProfile) REQUIRE p.profileId IS UNIQUE;
 CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseResource);
+CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidationRun) REQUIRE v.runId IS UNIQUE;
+CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
 ```
 
 #### EEHRxF Relationships
 
 ```cypher
 (:EEHRxFProfile)-[:PART_OF_CATEGORY]->(:EEHRxFCategory)
-(:EEHRxFProfile)-[:PROFILES_RESOURCE {count: Integer, coverage: String}]->(fhirNode)
 (:EEHRxFProfile)-[:DEPENDS_ON]->(:EEHRxFProfile)
 ```
 
-- `PART_OF_CATEGORY` — Links a profile to its EHDS priority category
-- `PROFILES_RESOURCE` — Links a profile to a representative FHIR node of the matching resource type; `count` holds the number of matching resources, `coverage` indicates `full`/`partial`/`none`
-- `DEPENDS_ON` — Inter-profile dependency (e.g., Lab Report depends on Base Patient)
+- `PART_OF_CATEGORY`: Links a profile to its EHDS priority category
+- `DEPENDS_ON`: Every profile except Bundles builds on the EU core Patient
+
+No relationship links a profile to FHIR nodes: the `PROFILES_RESOURCE` this section used to describe was never created. Coverage comes from validation (#1144).
 
 ---
 

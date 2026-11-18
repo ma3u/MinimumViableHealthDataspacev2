@@ -2,7 +2,7 @@
 
 - **Discussion:** [#1143](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1143), should the roadmap get EHRxF epics, and which ones
 - **Source:** xShare D7.4, [Guidance for Using EHRxF in Procurements in the Digital Health Ecosystem](https://xshare-project.eu/wp-content/uploads/2026/11/Guidance-for-Using-EHRxF-in-Procurements-in-the-Digital-Health-Ecosystem.pdf) (dated October 2026, published November 2026)
-- **Status:** E1 and E7 are issues; E2 to E6 wait on the discussion
+- **Status:** E1 (#1144) in progress since 2026-11-17; E7 is #1145; E2 to E6 wait on the discussion
 
 ## What the guidance asks, in one paragraph
 
@@ -26,4 +26,4 @@ Order: E1 first, every other epic needs its validator.
 
 From each guide's `package-list.json` on [hl7.eu/fhir](https://hl7.eu/fhir/): Base and Core 2.0.1, Laboratory Report 2.1.0, Hospital Discharge Report 1.0.0 (first STU, 2026-10-16), Medication Prescription and Dispense 1.0.0, European Patient Summary 1.0.0-ballot, Imaging Report 1.0.0-ballot (R4 and R5), EU-MADO 1.0.0-ballot, EU Health Data API 1.0.0-ballot, Common Cancer Model 1.0.0-ballot. The guidance predates the October releases for Laboratory and HDR.
 
-Move to `current/` when #1144 starts; to `done/` when the discussion has settled E2 to E6 into issues or dropped them.
+Moved to `current/` when #1144 started; to `done/` when the discussion has settled E2 to E6 into issues or dropped them.

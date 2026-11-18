@@ -2795,9 +2795,95 @@ paths:
   /api/eehrxf:
     get:
       tags: [EEHRxF]
-      summary: EEHRxF profile catalog (Layer 2b)
+      summary: EEHRxF priority categories, HL7 Europe profiles and their validation results
+      description: >
+        The six priority categories of EHDS Art. 14(1), the HL7 Europe FHIR
+        profiles the hub tracks for each, and how the hub's FHIR resources
+        fare against them in the HL7 FHIR Validator (#1144). `coverage` per
+        profile is full, partial, none or untested; it is readiness evidence
+        against the guides, not EHDS conformity. Terminology is not checked.
       responses:
-        "200": { description: Profile list }
+        "200":
+          description: Categories with their profiles, totals and the validation run
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        categoryId: { type: string }
+                        article: { type: string, example: "Art. 14(1)(a)" }
+                        status:
+                          type: string
+                          enum: [available, partial, none, untested]
+                        tested: { type: integer }
+                        passed: { type: integer }
+                        profiles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              profileId: { type: string }
+                              canonical: { type: string }
+                              igPackage:
+                                {
+                                  type: string,
+                                  example: "hl7.fhir.eu.base#2.0.1",
+                                }
+                              coverage:
+                                type: string
+                                enum: [full, partial, none, untested]
+                              tested: { type: integer }
+                              passed: { type: integer }
+                              failed: { type: integer }
+                              topIssues:
+                                { type: array, items: { type: string } }
+                              resourceCount: { type: integer }
+                  summary:
+                    type: object
+                    properties:
+                      totalCategories: { type: integer }
+                      totalProfiles: { type: integer }
+                      testedProfiles: { type: integer }
+                      passingProfiles: { type: integer }
+                      resourcesTested: { type: integer }
+                      resourcesPassed: { type: integer }
+                      passRatePercent: { type: integer }
+                      resourceCounts:
+                        {
+                          type: object,
+                          additionalProperties: { type: integer },
+                        }
+                  validation:
+                    type: object
+                    nullable: true
+                    properties:
+                      validatorVersion: { type: string }
+                      terminology: { type: string }
+                      passRule: { type: string }
+                      maxPerSource: { type: integer }
+                      igs: { type: array, items: { type: string } }
+                      igUrls: { type: array, items: { type: string } }
+                      validatorUrl: { type: string }
+                      sources: { type: array, items: { type: string } }
+                      inputsDigest: { type: string }
+                  planned:
+                    description: HL7 Europe drafts the hub plans to track, not validated yet
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        guideId: { type: string }
+                        name: { type: string }
+                        igPackage: { type: string }
+                        status: { type: string }
+                        url: { type: string }
+                        issue: { type: integer, nullable: true }
+                        scope: { type: string }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/analytics:
