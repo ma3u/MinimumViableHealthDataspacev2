@@ -135,6 +135,24 @@ Rollback: `migrate-edc-to-v1.sh rollback <app>`, newest first. The previous data
 
 8. After the first off-hours stop and start on the new RC (Demo Smoke green after the morning start), drop the previous set: the workflow **EDC databases of a previous release candidate** (`edc-drop-rc-databases.yml`), `plan` with the old suffix, then `drop` on Matthias's go. It refuses the set the apps run on. From then on there is no rollback to the previous RC. RC5's `_v1` set: checked 2026-11-13, it held only the five demo participants, all re-seeded on RC6.
 
+### What the RC moves taught us (RC6 2026-11-12, RC7 2026-11-17)
+
+Both moves broke the same way: EDC changed a contract that our scripts fill in by hand, and the suites failed with no error at the default log level. State that EDC writes and reads itself moved with it every time.
+
+- **Read the delta for what our scripts write, before building.** `gh api repos/eclipse-edc/Connector/compare/v1.0.0-RC6...v1.0.0-RC7 --jq '.total_commits, [.files[].filename]'` (and the same for IdentityHub). Look for `extensions/common/vault`, `*.sql`, DCP credential formats and the data plane registration body. Each break so far was one of these:
+
+  | RC  | Change                                                                                                                           | What of ours it broke                                                                                         |
+  | --- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+  | RC6 | IdentityHub [#1248](https://github.com/eclipse-edc/IdentityHub/pull/1248): a credential's format comes from the issuer's profile | the credential requests asked for `VC1_0_JWT`; the holder refused the `VC2_0_JOSE` delivery                   |
+  | RC6 | Connector [#6196](https://github.com/eclipse-edc/Connector/pull/6196): a data plane registers `profiles`, not `transferTypes`    | `seed-second-data-space.sh` (surfaced on RC7): AlphaKasse's transfers ended "No dataplane found"              |
+  | RC7 | Connector [#6213](https://github.com/eclipse-edc/Connector/pull/6213): a Vault alias is encoded once, not twice                  | the issuer's signing key, written by `jad/bootstrap-vault.sh` and `issuer-identity-job.sh` under the old name |
+
+- **During the overlap, write both forms.** The issuer key goes under both Vault names and the data plane registration sends both field names, so a rollback to the previous RC still works. Drop the old form with the previous database set (step 8).
+- **A stalled issuance shows as a state number, not an error.** The issuance process sits in `APPROVED` (100) when the issuer cannot sign and in `DELIVERING` (150) when the holder refuses the delivery. Turn the issuer to debug (`set-edc-log-level.sh debug` on Azure; locally a compose override that adds `--log-level=debug` to the issuer's `java` command), and when the cause is still empty, capture the holder's credential port 7082 ([gotchas](../../gotchas.md), 2026-11-12 and 2026-11-17).
+- **Gate locally from empty volumes**, after backing up the previous RC's (`docker volume` copies named `mvhd_bak_<rc>_<date>_{postgres_data,vault_data,vault_keys,nats_data}`), and run all five: identity, dataspace, health domain, Bruno, and the CFM onboarding check. RC7's numbers: 41/0/0, 32/0/1, 27/0/3, 226/0, 12/0. The second data space's checks (DELIVER-8, TRUST-6, PURPOSE-7) were the only ones to find the data plane break.
+- **Compose, when the stack runs from a worktree:** set `COMPOSE_PROJECT_NAME=minimumviablehealthdataspacev2` or a second project starts beside the running one; leave `cfm` out of `COMPOSE_PROFILES` for `bootstrap-jad.sh`, whose pull step fails on the local-only CFM images, and start the `cfm` profile after it; start the wellbeing issuer only after `seed-test-issuer.sh` has created its database, or restart it.
+- **CFM moves on its own clock.** Its release can carry the same rename (eclipse-cfm/cfm#243 for `profiles`); move it in the same branch when it does ([cfm-fork](cfm-fork.md)). The fork workflow's "Patches on upstream main" check warns ahead of a release: on 2026-11-17 upstream's removal of the Certo agent ([eclipse-cfm/cfm#245](https://github.com/eclipse-cfm/cfm/pull/245)) conflicts with our patch in `agent/orchestration/certo/launcher/launcher.go`, which does not affect `v0.0.9-mvhd.1`.
+
 ## Rollback
 
 The way back to 0.18 is closed since 2026-11-09 (#927): the CFM apps and the 0.18 data planes are deleted, and `edc-retire-v018-azure.yml` (#927 step 6, PR #1048) drops the `_v018` databases. What follows is the record of the cutover's rollback, not a step to take.
