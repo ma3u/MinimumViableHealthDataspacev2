@@ -28,8 +28,11 @@ packages:
   # what a TestFlight build contains.
   HealthGraph:
     url: https://github.com/ma3u/relate-hackathon-team
-    # 2f3b111: a value counts once (ba77396), and Patient takes year of birth and sex when sent.
-    revision: 2f3b1118525b7216de7b0092d730a5c67334c624
+    # 659a5e5: builds against Relate 1.1.0 (records are `Record`, read via
+    # `.dictionary`) and holds Relate to 1.1.x, so a new minor no longer breaks
+    # a fresh resolve. Also brings the anamnesis, protocols and 3D graph code
+    # added on main since 2f3b111.
+    revision: 659a5e593ee8f5e48ce6106119e6b009294a5044
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
