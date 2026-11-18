@@ -504,9 +504,12 @@ export function buildBundle(
     timestamp: now,
     // A urn:uuid must be a UUID (#1144). Named by the report it comes from and
     // the resource's place in it, so the same report gives the same bundle.
+    // The patient id stays out of the name: the timestamp and the source
+    // document already tell reports apart, and no identifier should go into
+    // SHA-1 (CodeQL js/weak-cryptographic-algorithm).
     entry: resources.map((resource) => ({
       fullUrl: `urn:uuid:${uuidV5(
-        `${now}|${source.sourceDocument}|${meta.patientId}|${resource.resourceType}/${resource.id}`,
+        `${now}|${source.sourceDocument}|${resource.resourceType}/${resource.id}`,
       )}`,
       resource,
     })),
