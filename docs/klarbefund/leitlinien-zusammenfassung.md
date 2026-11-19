@@ -6,14 +6,14 @@ Keine medizinische Beratung. Eine Leitlinie beschreibt, was Ärztinnen und Ärzt
 
 ## 1. Was gelesen wurde
 
-| Leitlinie                                                             | Register | Fassung             | Beschlossen | Gültig bis                                         | Literatur | davon mit PubMed-Nummer |
-| --------------------------------------------------------------------- | -------- | ------------------- | ----------- | -------------------------------------------------- | --------- | ----------------------- |
-| NVL Hypertonie                                                        | nvl-009  | 1.0                 | 29.06.2023  | 29.06.2028                                         | 201       | 161                     |
-| NVL Typ-2-Diabetes                                                    | nvl-001  | 3.0                 | 15.05.2023  | 15.05.2028                                         | 238       | 123                     |
-| NVL Chronische KHK                                                    | nvl-004  | 7.0                 | 15.08.2024  | 14.08.2029                                         | 408       | 331                     |
-| NVL Chronische Herzinsuffizienz                                       | nvl-006  | 4.0                 | 12.12.2023  | 12.12.2028, die meisten Kapitel nur bis 22.10.2024 | 648       | 534                     |
-| DEGAM S3 Hausärztliche Risikoberatung zur kardiovaskulären Prävention | 053-024  | 2.3 (November 2024) | 11/2024     | 11/2029                                            | 301       | noch nicht aufgelöst    |
-| DEGAM S3 Chronische Nierenkrankheit in der Hausarztpraxis             | 053-048  | 2.0 (Juni 2024)     | 06/2024     | 06/2029                                            | etwa 277  | noch nicht aufgelöst    |
+| Leitlinie                                                             | Register | Fassung                   | Beschlossen            | Gültig bis                                         | Literatur | davon mit PubMed-Nummer     |
+| --------------------------------------------------------------------- | -------- | ------------------------- | ---------------------- | -------------------------------------------------- | --------- | --------------------------- |
+| NVL Hypertonie                                                        | nvl-009  | 1.0                       | 29.06.2023             | 29.06.2028                                         | 201       | 161                         |
+| NVL Typ-2-Diabetes                                                    | nvl-001  | 3.0                       | 15.05.2023             | 15.05.2028                                         | 238       | 123                         |
+| NVL Chronische KHK                                                    | nvl-004  | 7.0                       | 15.08.2024             | 14.08.2029                                         | 408       | 331                         |
+| NVL Chronische Herzinsuffizienz                                       | nvl-006  | 4.0                       | 12.12.2023             | 12.12.2028, die meisten Kapitel nur bis 22.10.2024 | 648       | 534                         |
+| DEGAM S3 Hausärztliche Risikoberatung zur kardiovaskulären Prävention | 053-024  | 2.3 (Stand November 2024) | veröffentlicht 08/2025 | 11/2029                                            | 301       | 189, nachträglich aufgelöst |
+| DEGAM S3 Chronische Nierenkrankheit in der Hausarztpraxis             | 053-048  | 2.0 (Stand Juni 2024)     | veröffentlicht 11/2024 | 06/2029                                            | 277       | 197, nachträglich aufgelöst |
 
 Quellen: [leitlinien.de](https://www.leitlinien.de/themen) für die Nationalen VersorgungsLeitlinien (NVL), [degam.de](https://www.degam.de/leitlinien/fuer-aerzte/leitlinienuebersicht) für die beiden DEGAM-Leitlinien. Beide Seiten erlauben den automatischen Abruf.
 
@@ -23,18 +23,20 @@ Quellen: [leitlinien.de](https://www.leitlinien.de/themen) für die Nationalen V
 
 ## 2. Wie aktuell sind die Leitlinien gegenüber den Studien?
 
-Gemessen an den vier NVL: Alter jeder zitierten Arbeit mit PubMed-Nummer im Jahr des Beschlusses (unsere Rechnung aus den Literaturverzeichnissen).
+Alter jeder zitierten Arbeit mit PubMed-Nummer im Jahr des Beschlusses, bei den DEGAM-Leitlinien im Jahr des Redaktionsstands (unsere Rechnung aus den Literaturverzeichnissen). Die NVL drucken die PubMed-Nummer hinter den Eintrag; für die DEGAM-Leitlinien hat `resolve_pmids.py` sie über DOI oder Zeitschrift, Jahr, Band und Seite bei PubMed nachgeschlagen und nur eindeutige Treffer übernommen.
 
-| Leitlinie            | Beschluss | Arbeiten | Alter im Median | mittlere Hälfte | höchstens 2 Jahre alt | älter als 10 Jahre | jüngste Arbeit |
-| -------------------- | --------- | -------- | --------------- | --------------- | --------------------- | ------------------ | -------------- |
-| NVL Typ-2-Diabetes   | 2023      | 123      | 5 Jahre         | 3 bis 13        | 16 %                  | 27 %               | 2022           |
-| NVL Hypertonie       | 2023      | 160      | 6,5 Jahre       | 4 bis 9         | 12 %                  | 21 %               | 2022           |
-| NVL Herzinsuffizienz | 2023      | 532      | 9 Jahre         | 7 bis 17        | 8 %                   | 42 %               | 2023           |
-| NVL Chronische KHK   | 2024      | 330      | 11 Jahre        | 8 bis 16        | 7 %                   | 57 %               | 2023           |
+| Leitlinie             | Beschluss  | Arbeiten | Alter im Median | mittlere Hälfte | höchstens 2 Jahre alt | älter als 10 Jahre | jüngste Arbeit |
+| --------------------- | ---------- | -------- | --------------- | --------------- | --------------------- | ------------------ | -------------- |
+| NVL Typ-2-Diabetes    | 2023       | 123      | 5 Jahre         | 3 bis 13        | 16 %                  | 27 %               | 2022           |
+| NVL Hypertonie        | 2023       | 160      | 6,5 Jahre       | 4 bis 9         | 12 %                  | 21 %               | 2022           |
+| NVL Herzinsuffizienz  | 2023       | 532      | 9 Jahre         | 7 bis 17        | 8 %                   | 42 %               | 2023           |
+| NVL Chronische KHK    | 2024       | 330      | 11 Jahre        | 8 bis 16        | 7 %                   | 57 %               | 2023           |
+| DEGAM Risikoberatung  | Stand 2024 | 189      | 6 Jahre         | 3 bis 11        | 24 %                  | 28 %               | 2024           |
+| DEGAM Nierenkrankheit | Stand 2024 | 197      | 7 Jahre         | 3 bis 11,5      | 15 %                  | 28 %               | 2024           |
 
-Lesart: Am Tag des Beschlusses ist die Hälfte der Belege fünf bis elf Jahre alt, und die jüngste zitierte Studie liegt ein Jahr zurück. Danach gilt die Leitlinie bis zu fünf Jahre. Eine Studie von heute kann also ein bis sechs Jahre brauchen, bis sie in einer dieser Leitlinien steht. Neue Fassungen überarbeiten oft nur einzelne Kapitel: Bei der Herzinsuffizienz ist allein das Kapitel zur medikamentösen Therapie von 2023, alle anderen stammen von 2019 und sind seit dem 22.10.2024 abgelaufen. Nur 22 der 1.122 Arbeiten werden von zwei oder mehr der vier Leitlinien zitiert, und die am häufigsten geteilten sind Methodenarbeiten (GRADE, Entscheidungshilfen), keine klinischen Studien.
+Lesart: Am Tag des Beschlusses ist die Hälfte der Belege fünf bis elf Jahre alt, und die jüngste zitierte Studie liegt bei den NVL ein Jahr zurück. Bei den DEGAM-Leitlinien vergehen zwischen Redaktionsstand und Veröffentlichung noch einmal fünf beziehungsweise neun Monate. Danach gilt die Leitlinie bis zu fünf Jahre. Eine Studie von heute kann also ein bis sechs Jahre brauchen, bis sie in einer dieser Leitlinien steht. Neue Fassungen überarbeiten oft nur einzelne Kapitel: Bei der Herzinsuffizienz ist allein das Kapitel zur medikamentösen Therapie von 2023, alle anderen stammen von 2019 und sind seit dem 22.10.2024 abgelaufen. Nur 35 der 1.496 Arbeiten werden von zwei oder mehr der sechs Leitlinien zitiert, und die am häufigsten geteilten sind Methodenarbeiten (GRADE, Entscheidungshilfen), keine klinischen Studien.
 
-Überschneidung mit dem Klarbefund-Graph heute: Der Graph führt 21 Studien und 21 Quellen von Referenzbereichen mit PubMed-Nummer; die vier NVL zitieren davon eine einzige (PMID 34447992). Der Graph stützt sich auf internationale Leitlinien und Metaanalysen, die NVL auf Therapiestudien.
+Überschneidung mit dem Klarbefund-Graph heute: Der Graph führt 21 Studien und 21 Quellen von Referenzbereichen mit PubMed-Nummer; die sechs Leitlinien zitieren davon sechs (PMID 28444290, 36272764, 37247330 bei den Studien; 31504418, 34447992, 36036785 bei den Referenzbereichen). Die SCORE2-Arbeit (PMID 34120177) zitieren beide DEGAM-Leitlinien. Der Graph stützt sich auf internationale Leitlinien und Metaanalysen, die NVL auf Therapiestudien.
 
 ## 3. Herz-Kreislauf-Risiko insgesamt
 
@@ -188,7 +190,7 @@ Für einen Laien ist das die wichtigste Liste, weil hier „die Leitlinie" keine
 ## 11. Was daraus für den Graph folgt
 
 - **Leitlinien als eigene Knoten.** `(:Guideline {awmfId, version, releaseDate, validUntilDate, earliestValidUntilDate, active, status})`. Eine abgelaufene Leitlinie bleibt mit `active: false` im Graph.
-- **Zitierte Studien.** `(:Guideline)-[:CITES {referenceNumber}]->(:Study {id: 'pmid-…'})`, dieselbe Kennung, die der Klarbefund-Graph für die Quellen seiner Referenzbereiche nutzt. Aus den vier NVL sind das 1.149 Verweise auf 1.122 Arbeiten. Die DEGAM-Verzeichnisse nennen keine PubMed-Nummern; sie müssen erst über PubMed oder Crossref aufgelöst werden.
+- **Zitierte Studien.** `(:Guideline)-[:CITES {referenceNumber}]->(:Study {id: 'pmid-…'})`, dieselbe Kennung, die der Klarbefund-Graph für die Quellen seiner Referenzbereiche nutzt. Aus den sechs Leitlinien sind das 1.539 Verweise auf 1.496 Arbeiten. `CITES.pmidSource` hält fest, ob die PubMed-Nummer in der Leitlinie gedruckt steht oder nachgeschlagen wurde. 534 der 2.073 Literaturangaben bleiben ohne Nummer: Bücher, Berichte, Webseiten und Zeitschriftenartikel ohne eindeutigen Treffer.
 - **Zwei Bereiche statt einem.** Wo deutsche und internationale Leitlinie abweichen (LDL ohne Vorerkrankung, Nüchternglukose, Blutdruck aus Heimmessung), sollten beide als `ReferenceRange` mit Quelle stehen.
 - **Gültigkeit je Kapitel.** `earliestValidUntilDate` hält fest, wenn Teile einer gültigen Leitlinie schon abgelaufen sind.
 

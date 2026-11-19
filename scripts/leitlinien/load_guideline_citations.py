@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Load guidelines and the studies they cite into Neo4j (Layer 6).
 
-Reads data/nvl-manifest.json, written by nvl_pipeline.py, and writes
+Reads data/guidelines-manifest.json, written by guideline_pipeline.py, and writes
 
   (:Guideline {awmfId})            one node per guideline, the current version
   (:Study {id: 'pmid-<pmid>'})     one node per cited work that has a PubMed id
@@ -9,7 +9,8 @@ Reads data/nvl-manifest.json, written by nvl_pipeline.py, and writes
 
 `Study.id` is `pmid-<pmid>`, the form the Klarbefund health graph already uses
 for the sources of its reference ranges, so the two graphs name the same paper
-the same way.
+the same way. `CITES.pmidSource` says where the id came from: printed in the
+guideline ("reference list") or found by resolve_pmids.py ("doi", "citation match").
 
 A guideline whose validity has passed, or that the source no longer offers, is
 set `active: false` with its `status`; it is never deleted, and neither are its
@@ -44,7 +45,7 @@ SET g.previousVersions = CASE
       THEN g.previousVersions + g.version ELSE coalesce(g.previousVersions, []) END,
     g.name = $title,
     g.version = $version,
-    g.guidelineClass = 'NVL',
+    g.guidelineClass = $guidelineClass,
     g.publisher = $publisher,
     g.releaseDate = $adoptedDate,
     g.validUntilDate = $validUntilDate,
@@ -74,6 +75,7 @@ ON CREATE SET s.pmid = row.pmid,
 MERGE (g)-[c:CITES]->(s)
 SET c.referenceNumber = row.number,
     c.guidelineVersion = $version,
+    c.pmidSource = row.pmidSource,
     c.source = 'reference list of the guideline'
 """
 
@@ -100,7 +102,8 @@ def guideline_params(g: dict, checked_at: str) -> dict:
     refs = g.get("references", [])
     return {
         "awmfId": g["awmfId"], "title": g["title"], "version": g["version"],
-        "publisher": g.get("publisher"), "adoptedDate": g.get("adoptedDate"),
+        "publisher": g.get("publisher"), "guidelineClass": g.get("guidelineClass", "NVL"),
+        "adoptedDate": g.get("adoptedDate"),
         "validUntilDate": g.get("validUntilDate"),
         "earliestValidUntilDate": g.get("earliestValidUntilDate"),
         "active": g["active"], "status": g["status"], "doi": g.get("doi"),
@@ -119,13 +122,14 @@ def citation_rows(g: dict) -> list[dict]:
         rows.setdefault(r["pmid"], {
             "id": f"pmid-{r['pmid']}", "pmid": r["pmid"], "number": r["number"],
             "citation": r["citation"][:600], "year": r.get("year"), "doi": r.get("doi"),
+            "pmidSource": r.get("pmidSource", "reference list"),
         })
     return list(rows.values())
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--manifest", type=Path, default=HERE / "data" / "nvl-manifest.json")
+    ap.add_argument("--manifest", type=Path, default=HERE / "data" / "guidelines-manifest.json")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--neo4j-uri", default=os.environ.get("NEO4J_URI", "bolt://localhost:7687"))
     ap.add_argument("--neo4j-user", default=os.environ.get("NEO4J_USER", "neo4j"))
@@ -133,7 +137,7 @@ def main() -> int:
     args = ap.parse_args()
 
     if not args.manifest.exists():
-        print(f"{args.manifest} not found. Run nvl_pipeline.py first.", file=sys.stderr)
+        print(f"{args.manifest} not found. Run guideline_pipeline.py first.", file=sys.stderr)
         return 2
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     guidelines = current_guidelines(manifest)

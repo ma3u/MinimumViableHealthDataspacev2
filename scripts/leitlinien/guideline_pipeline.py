@@ -1,37 +1,40 @@
 #!/usr/bin/env python3
-"""Nationale VersorgungsLeitlinien (NVL): fetch, convert to Markdown, extract references.
+"""German clinical guidelines from open sources: fetch, convert to Markdown, extract references.
 
 The AWMF register refuses automated retrieval (robots.txt: "Block other automated
-retrieval", plus a bot check), so this pipeline reads the open source instead:
-www.leitlinien.de, whose robots.txt allows every user agent. It
+retrieval", plus a bot check), so this pipeline reads the publishers that allow
+it: www.leitlinien.de (Nationale VersorgungsLeitlinien) and www.degam.de (the
+guidelines of the DEGAM). Both robots.txt files allow every user agent. It
 
-  1. reads the topic pages listed in nvl-sources.json and finds the current
+  1. reads the pages listed in guideline-sources.json and finds the current
      long and short version PDFs,
-  2. downloads a PDF only when its URL is new (a new version has a new file name),
+  2. downloads a PDF only when it is not on disk yet,
   3. converts each PDF to page-wise Markdown with `pdftotext` (poppler),
   4. extracts the numbered reference list of each long version, with PubMed id
-     and DOI where the entry carries one,
-  5. writes data/nvl-manifest.json: one record per guideline with version,
-     dates, status and its references,
+     and DOI where the entry carries one (resolve_pmids.py looks up the rest),
+  5. writes data/guidelines-manifest.json: one record per guideline with
+     version, dates, status and its references,
   6. marks a guideline `active: false` when its validity date has passed, when a
-     newer version replaced it, or when the topic page no longer offers it.
+     newer version replaced it, or when the page no longer offers it.
      Nothing is deleted.
 
-The guideline texts are copyrighted by the ÄZQ ("Verwertung ... nur mit
-schriftlicher Zustimmung", the imprint of every NVL). Everything under data/ is
-git-ignored and stays on the machine that ran this. What may be committed is
-nvl-state.json: titles, versions, dates, status and counts, no guideline text.
+The guideline texts are copyrighted (ÄZQ, DEGAM: "Verwertung ... nur mit
+schriftlicher Zustimmung"). Everything under data/ is git-ignored and stays on
+the machine that ran this. What may be committed is guidelines-state.json:
+titles, versions, dates, status and counts, no guideline text.
 
 Usage:
-  python3 nvl_pipeline.py                 # fetch, convert, extract, write manifest
-  python3 nvl_pipeline.py --offline       # only convert and extract what is on disk
-  python3 nvl_pipeline.py --check         # exit 1 when the state file would change
+  python3 guideline_pipeline.py              # fetch, convert, extract, write manifest
+  python3 guideline_pipeline.py --offline    # only convert and extract what is on disk
+  python3 guideline_pipeline.py --check      # exit 1 when the state file would change
 """
 from __future__ import annotations
 
 import argparse
+import calendar
 import datetime as dt
 import hashlib
+import html as html_lib
 import json
 import re
 import shutil
@@ -77,6 +80,47 @@ def find_pdf_links(html: str, topic: str) -> dict[str, str]:
     return out
 
 
+def find_labelled_links(page: str, base_url: str, patterns: dict[str, str]) -> dict[str, str]:
+    """PDF links chosen by their link text, for a page whose file names say nothing.
+
+    `patterns` maps "long" and "short" to a regular expression on the link text;
+    the first matching link of each kind wins.
+    """
+    out: dict[str, str] = {}
+    for href, label in re.findall(r'<a[^>]+href="([^"]+\.pdf[^"]*)"[^>]*>(.*?)</a>', page, flags=re.S):
+        text = re.sub(r"\s+", " ", html_lib.unescape(re.sub(r"<[^>]+>", "", label))).strip()
+        for kind, pattern in patterns.items():
+            if kind not in out and re.match(pattern, text):
+                href = html_lib.unescape(href)
+                out[kind] = href if href.startswith("http") else base_url.rstrip("/") + "/" + href.lstrip("/")
+    return out
+
+
+def find_page_validity(page: str) -> dict[str, str | None]:
+    """`publiziert: 08/2025, gültig bis: 11/2029` on a DEGAM guideline page.
+
+    The page gives months. A guideline is valid through the last day of the
+    month named, and counts as published on the first.
+    """
+    text = re.sub(r"\s+", " ", html_lib.unescape(re.sub(r"<[^>]+>", " ", page)))
+    published = re.search(r"publiziert\s*:\s*(\d{2})/(\d{4})", text)
+    until = re.search(r"gültig bis\s*:\s*(\d{2})/(\d{4})", text)
+    out: dict[str, str | None] = {}
+    if published:
+        out["adoptedDate"] = f"{published.group(2)}-{published.group(1)}-01"
+    if until:
+        year, month = int(until.group(2)), int(until.group(1))
+        last = calendar.monthrange(year, month)[1]
+        out["validUntilDate"] = out["earliestValidUntilDate"] = f"{year:04d}-{month:02d}-{last:02d}"
+    return out
+
+
+def find_text_version(markdown: str) -> str | None:
+    """`Version 2.3` on the title pages of a guideline without a version in its file name."""
+    m = re.search(r"Version\s+(\d+\.\d+)", markdown[:6000])
+    return m.group(1) if m else None
+
+
 def parse_version(file_name: str) -> str | None:
     """`khk-vers7-0.pdf` -> `7.0`, `hypertonie-vers-1-0-kurz.pdf` -> `1.0`."""
     m = re.search(r"vers-?(\d+)-(\d+)", file_name.lower())
@@ -86,7 +130,7 @@ def parse_version(file_name: str) -> str | None:
 # ── PDF to Markdown ──────────────────────────────────────────────────────────
 
 
-def pdf_to_markdown(pdf: Path, source_url: str, fetched: str) -> str:
+def pdf_to_markdown(pdf: Path, source_url: str, fetched: str, rights: str = "ÄZQ") -> str:
     """Page-wise Markdown, one `## Seite N` heading per page.
 
     `pdftotext -raw` keeps the reading order of the reference lists. The form
@@ -107,7 +151,7 @@ def pdf_to_markdown(pdf: Path, source_url: str, fetched: str) -> str:
         f"# {title}",
         "",
         f"Quelle: {source_url} ({len(pages)} Seiten), abgerufen am {fetched}. "
-        "Text aus dem PDF extrahiert, nicht redigiert. Urheberrecht: ÄZQ; nur zum lokalen Gebrauch.",
+        f"Text aus dem PDF extrahiert, nicht redigiert. Urheberrecht: {rights}; nur zum lokalen Gebrauch.",
     ]
     for n, page in enumerate(pages, 1):
         parts += ["", f"## Seite {n}", "", page.strip("\n")]
@@ -153,22 +197,28 @@ def find_validity(markdown: str) -> dict[str, str | None]:
     }
 
 
-def extract_references(markdown: str) -> list[dict]:
+NVL_FURNITURE = r"NVL .*|.*fassung – Version .*|© NVL-Programm \d{4}\s+Seite \d+"
+
+
+def extract_references(markdown: str, heading: str = r"Literaturverzeichnis|Literatur",
+                       furniture: str = NVL_FURNITURE) -> list[dict]:
     """The numbered reference list at the end of a long version.
 
     Entries are numbered 1., 2., 3. ... without gaps, so a number only starts an
     entry when it is the next one expected. A "12." inside a citation is text.
     """
-    starts = [m.start() for m in re.finditer(r"(?m)^(?:Literaturverzeichnis|Literatur)\s*$", markdown)]
+    starts = [m.start() for m in re.finditer(rf"(?m)^(?:{heading})\s*$", markdown)]
     if not starts:
         return []
     body = markdown[starts[-1] :]
     # page furniture: headings we added and the running header/footer lines
     body = re.sub(r"(?m)^## Seite \d+\s*$", "", body)
-    body = re.sub(r"(?m)^(?:NVL .*|.*fassung – Version .*|© NVL-Programm \d{4}\s+Seite \d+)\s*$", "", body)
+    body = re.sub(rf"(?m)^(?:{furniture})\s*$", "", body)
+    body = re.sub(r"(?m)^\d{1,3}\s*$", "", body)  # a page number on a line of its own
     refs: list[dict] = []
     expected, pos, current_start = 1, 0, None
-    for m in re.finditer(r"(?m)^(\d{1,4})\.\s*", body):
+    # "15. Mancia G" and "209.Cosmi B" start an entry; "15.12.2023]" at a line start is a date
+    for m in re.finditer(r"(?m)^(\d{1,4})\.(?:\s+|(?=[^\W\d]))", body):
         if int(m.group(1)) != expected:
             continue
         if current_start is not None:
@@ -183,14 +233,14 @@ def _reference(number: int, text: str) -> dict:
     flat = re.sub(r"-\n(?=[a-zäöü])", "", text)  # a word split at a line end
     flat = re.sub(r"\s+", " ", flat).strip()
     pmid = re.search(r"ncbi\.nlm\.nih\.gov/pubmed/(\d{5,9})|PMID:?\s*(\d{5,9})", flat)
-    doi = re.search(r"DOI:\s*(10\.\d{4,9}/\S+)", flat)
+    doi = re.search(r"(?:DOI|doi):\s*(10\.\d{4,9}/\S+)|doi\.org/(10\.\d{4,9}/\S+)", flat)
     years = [int(y) for y in re.findall(r"(?<![\d/.:-])((?:19|20)\d{2})(?=\s*;|\s*\(\d|\s*\[cited|\s+[A-Z][a-z]{2}\b|\.\s|\.$)", flat)]
     years = [y for y in years if y <= dt.date.today().year]
     return {
         "number": number,
         "citation": flat,
         "pmid": next((g for g in pmid.groups() if g), None) if pmid else None,
-        "doi": doi.group(1).rstrip(".") if doi else None,
+        "doi": next(g for g in doi.groups() if g).rstrip(".") if doi else None,
         "year": years[0] if years else None,
     }
 
@@ -213,8 +263,8 @@ def status_of(record: dict, today: dt.date) -> tuple[bool, str]:
     return True, "active"
 
 
-def guideline_id(topic: str, version: str | None) -> str:
-    return f"nvl-{topic}-v{version or 'unknown'}"
+def guideline_id(store: str, topic: str, version: str | None) -> str:
+    return f"{store}-{topic}-v{version or 'unknown'}"
 
 
 # ── run ──────────────────────────────────────────────────────────────────────
@@ -227,38 +277,43 @@ def http_get(url: str) -> bytes:
 
 
 def build(data: Path, sources: list[dict], offline: bool, today: dt.date) -> dict:
-    pdf_dir, md_dir = data / "nvl-pdf", data / "nvl-markdown"
-    pdf_dir.mkdir(parents=True, exist_ok=True)
-    md_dir.mkdir(parents=True, exist_ok=True)
-    manifest_path = data / "nvl-manifest.json"
+    manifest_path = data / "guidelines-manifest.json"
     previous = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {"guidelines": []}
     known = {g["id"]: g for g in previous["guidelines"]}
     fetched = today.isoformat()
     current_ids: dict[str, str] = {}
 
     for src in sources:
-        topic = src["topic"]
+        topic, store = src["topic"], src.get("store", "nvl")
+        pdf_dir, md_dir = data / f"{store}-pdf", data / f"{store}-markdown"
+        pdf_dir.mkdir(parents=True, exist_ok=True)
+        md_dir.mkdir(parents=True, exist_ok=True)
+        page_url = src.get("pageUrl") or f"{BASE}/themen/{src.get('page', topic)}"
+        source_page = src.get("pageUrl") or f"{BASE}/themen/{topic}"
+        page_facts: dict[str, str | None] = {}
         if offline:
             links = {
-                ("short" if "kurz" in p.name else "long"): f"{BASE}/themen/{topic}/{p.name}"
+                ("short" if "kurz" in p.name else "long"): f"{source_page}#{p.name}"
                 for p in sorted(pdf_dir.glob("*.pdf")) if p.name.startswith(tuple(src["filePrefixes"]))
             }
         else:
-            html = http_get(f"{BASE}/themen/{src.get('page', topic)}").decode("utf-8", errors="replace")
+            page = http_get(page_url).decode("utf-8", errors="replace")
             time.sleep(PAUSE_SECONDS)
-            links = find_pdf_links(html, topic)
+            if "linkPatterns" in src:
+                links = find_labelled_links(page, src["linkBase"], src["linkPatterns"])
+                page_facts = find_page_validity(page)
+            else:
+                links = find_pdf_links(page, topic)
         if "long" not in links:
             print(f"{topic}: no long version offered", file=sys.stderr)
             continue
-        version = parse_version(links["long"].rsplit("/", 1)[1])
-        gid = guideline_id(topic, version)
-        current_ids[topic] = gid
-        record = known.get(gid, {"id": gid, "topic": topic, "firstSeen": fetched})
-        record.update({"title": src["title"], "version": version, "publisher": "ÄZQ (BÄK, KBV, AWMF)",
-                       "awmfId": src.get("awmfId"), "sourcePage": f"{BASE}/themen/{topic}",
-                       "offered": True, "supersededBy": None, "lastSeen": fetched, "files": {}})
+
+        texts: dict[str, str] = {}
+        files: dict[str, dict] = {}
         for kind, url in links.items():
-            name = url.rsplit("/", 1)[1]
+            # A page that names its files by label gets a stable local name.
+            name = f"{src['filePrefixes'][0]}{'kurzfassung' if kind == 'short' else 'langfassung'}.pdf" \
+                if "linkPatterns" in src else url.rsplit("/", 1)[1].split("#")[-1]
             pdf = pdf_dir / name
             if not pdf.exists():
                 if offline:
@@ -267,14 +322,37 @@ def build(data: Path, sources: list[dict], offline: bool, today: dt.date) -> dic
                 time.sleep(PAUSE_SECONDS)
                 print(f"{topic}: downloaded {name}")
             md = md_dir / (pdf.stem + ".md")
-            text = pdf_to_markdown(pdf, url, fetched)
-            if not md.exists() or md.read_text(encoding="utf-8").split("\n", 3)[-1] != text.split("\n", 3)[-1]:
-                md.write_text(text, encoding="utf-8")
-            record["files"][kind] = {"url": url, "pdf": name, "markdown": md.name,
-                                     "sha256": hashlib.sha256(pdf.read_bytes()).hexdigest()}
-            if kind == "long":
-                record.update(find_validity(text))
-                record["references"] = extract_references(text)
+            texts[kind] = pdf_to_markdown(pdf, url, fetched, src.get("rights", "ÄZQ"))
+            if not md.exists() or md.read_text(encoding="utf-8").split("\n", 3)[-1] != texts[kind].split("\n", 3)[-1]:
+                md.write_text(texts[kind], encoding="utf-8")
+            files[kind] = {"url": url, "pdf": name, "markdown": md.name,
+                           "sha256": hashlib.sha256(pdf.read_bytes()).hexdigest()}
+        if "long" not in texts:
+            print(f"{topic}: long version not on disk", file=sys.stderr)
+            continue
+
+        version = parse_version(files["long"]["pdf"]) or find_text_version(texts["long"])
+        gid = guideline_id(store, topic, version)
+        current_ids[topic] = gid
+        record = known.get(gid, {"id": gid, "topic": topic, "firstSeen": fetched})
+        resolved = {r["number"]: r for r in record.get("references", []) if r.get("pmidSource")}
+        record.update({"title": src["title"], "version": version, "publisher": src.get("publisher", "ÄZQ (BÄK, KBV, AWMF)"),
+                       "guidelineClass": src.get("guidelineClass", "NVL"),
+                       "awmfId": src.get("awmfId"), "sourcePage": source_page,
+                       "offered": True, "supersededBy": None, "lastSeen": fetched, "files": files})
+        facts = {k: v for k, v in find_validity(texts["long"]).items() if v}
+        facts.update({k: v for k, v in page_facts.items() if v})  # the page is newer than the PDF
+        for key in ("adoptedDate", "validUntilDate", "earliestValidUntilDate", "doi"):
+            record[key] = facts.get(key, record.get(key))
+        refs = extract_references(texts["long"], src.get("referenceHeading", r"Literaturverzeichnis|Literatur"),
+                                  src.get("furniture", NVL_FURNITURE))
+        for r in refs:  # keep what resolve_pmids.py found for the same entry
+            old = resolved.get(r["number"])
+            if not r["pmid"] and old and old["citation"] == r["citation"]:
+                r["pmid"], r["pmidSource"] = old["pmid"], old["pmidSource"]
+            elif r["pmid"]:
+                r["pmidSource"] = "reference list"
+        record["references"] = refs
         known[gid] = record
 
     # an older version of a topic that now has a newer one, or a topic no longer offered
@@ -286,7 +364,8 @@ def build(data: Path, sources: list[dict], offline: bool, today: dt.date) -> dic
             g["offered"] = False
         g["active"], g["status"] = status_of(g, today)
 
-    manifest = {"source": BASE, "generated": fetched, "guidelines": sorted(known.values(), key=lambda g: g["id"])}
+    manifest = {"sources": sorted({g["sourcePage"].split("/")[2] for g in known.values()}), "generated": fetched,
+                "guidelines": sorted(known.values(), key=lambda g: g["id"])}
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return manifest
 
@@ -298,20 +377,22 @@ def state_of(manifest: dict) -> dict:
         refs = g.get("references", [])
         rows.append({
             "id": g["id"], "title": g["title"], "version": g["version"], "awmfId": g.get("awmfId"),
+            "guidelineClass": g.get("guidelineClass"),
             "adoptedDate": g.get("adoptedDate"), "validUntilDate": g.get("validUntilDate"),
             "earliestValidUntilDate": g.get("earliestValidUntilDate"),
             "active": g["active"], "status": g["status"], "supersededBy": g.get("supersededBy"),
             "sourcePage": g["sourcePage"], "references": len(refs),
-            "referencesWithPmid": sum(1 for r in refs if r["pmid"]),
+            # Ids printed in the guideline: what a run without resolve_pmids.py also finds.
+            "referencesWithPmid": sum(1 for r in refs if r["pmid"] and r.get("pmidSource", "reference list") == "reference list"),
         })
-    return {"source": manifest["source"], "guidelines": rows}
+    return {"sources": manifest["sources"], "guidelines": rows}
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data-dir", type=Path, default=HERE / "data")
-    ap.add_argument("--sources", type=Path, default=HERE / "nvl-sources.json")
-    ap.add_argument("--state", type=Path, default=HERE / "nvl-state.json")
+    ap.add_argument("--sources", type=Path, default=HERE / "guideline-sources.json")
+    ap.add_argument("--state", type=Path, default=HERE / "guidelines-state.json")
     ap.add_argument("--offline", action="store_true", help="use the PDFs already on disk, fetch nothing")
     ap.add_argument("--check", action="store_true", help="exit 1 when the state file would change")
     ap.add_argument("--today", type=dt.date.fromisoformat, default=dt.date.today(), help=argparse.SUPPRESS)
@@ -323,7 +404,7 @@ def main() -> int:
     old_state = args.state.read_text(encoding="utf-8") if args.state.exists() else ""
     for g in state_of(manifest)["guidelines"]:
         print(f"{g['id']:34} {g['status']:10} valid until {g['validUntilDate']}  "
-              f"{g['references']} references, {g['referencesWithPmid']} with a PubMed id")
+              f"{g['references']} references, {g['referencesWithPmid']} with a printed PubMed id")
     if new_state == old_state:
         print("state unchanged")
         return 0

@@ -183,57 +183,66 @@ integration tests are deferred to a separate PR (require docker-compose Neo4j).
 - **S2k / S2e / S1 ingestion.** Same pipeline, flip the `AWMFGuidelineClass`
   filter in `download_s3_pdfs.py`. Trivial after Phase 2 lands.
 
-## Open sources: Nationale VersorgungsLeitlinien, cited studies, weekly watch
+## Open sources: NVL and DEGAM, cited studies, weekly watch
 
 The AWMF register's `robots.txt` now reads "Block other automated retrieval"
 (`User-agent: *`, `Disallow: /`) and the register and its API answer a script
 with a bot check (seen 2026-11-19). `fetch_index.py` and `download_s3_pdfs.py`
 above therefore need the AWMF's consent before they run again, on a laptop or
-in CI. What follows reads `www.leitlinien.de` instead, whose `robots.txt`
-allows every agent.
+in CI. What follows reads the publishers whose `robots.txt` allows every
+agent: `www.leitlinien.de` (Nationale VersorgungsLeitlinien) and `www.degam.de`.
 
 ```bash
 cd scripts/leitlinien
-python3 nvl_pipeline.py              # fetch new versions, convert, extract references
-python3 nvl_pipeline.py --offline    # only convert what is on disk
+python3 guideline_pipeline.py              # fetch new versions, convert, extract references
+python3 guideline_pipeline.py --offline    # only convert what is on disk
+python3 resolve_pmids.py                   # look up PubMed ids the guideline does not print
 NEO4J_PASSWORD=... python3 load_guideline_citations.py
-python3 -m pytest test_nvl_pipeline.py -q     # 17 tests, no network, no database
+python3 -m pytest -q                       # 56 tests, no network, no database
 ```
 
-`nvl_pipeline.py` needs `pdftotext` (poppler) and nothing else. It reads the
-topic pages in `nvl-sources.json`, downloads a PDF it has not seen, writes
-page-wise Markdown to `data/nvl-markdown/`, extracts the numbered reference
-list of each long version, and writes `data/nvl-manifest.json`. A guideline is
-set `active: false` when its validity has passed (`expired`), a newer version
-replaced it (`superseded`) or the page no longer offers it (`withdrawn`);
-`partly-expired` marks a current version whose unrevised chapters have run
-out. Nothing is deleted.
+`guideline_pipeline.py` needs `pdftotext` (poppler) and nothing else. It reads
+the pages in `guideline-sources.json`, downloads a PDF it has not seen, writes
+page-wise Markdown to `data/<store>-markdown/`, extracts the numbered reference
+list of each long version, and writes `data/guidelines-manifest.json`. A
+guideline is set `active: false` when its validity has passed (`expired`), a
+newer version replaced it (`superseded`) or the page no longer offers it
+(`withdrawn`); `partly-expired` marks a current version whose unrevised
+chapters have run out. Nothing is deleted.
 
-`nvl-state.json` is the committed record: titles, versions, dates, status and
-reference counts, no guideline text. `.github/workflows/guidelines-watch.yml`
-runs the pipeline every Monday and opens an issue with the diff when the state
-changed.
+`resolve_pmids.py` asks PubMed's E-utilities for the entries without a PubMed
+id: by DOI, else by journal, year, volume, first page and first author. It
+takes a match only when PubMed returns exactly one record, sends bibliographic
+data only, and caches every answer in `data/pmid-cache.json`. A sample of 12
+citation matches was checked by hand against author and year: 12 correct.
+
+`guidelines-state.json` is the committed record: titles, versions, dates,
+status and reference counts, no guideline text. It counts only the PubMed ids
+a guideline prints, so the weekly run, which does not resolve, reaches the
+same file. `.github/workflows/guidelines-watch.yml` runs the pipeline every
+Monday and opens an issue with the diff when the state changed.
 
 `load_guideline_citations.py` writes `(:Guideline)-[:CITES]->(:Study)`.
-`Study.id` is `pmid-<pmid>`, the form the Klarbefund health graph uses.
+`Study.id` is `pmid-<pmid>`, the form the Klarbefund health graph uses;
+`CITES.pmidSource` is `reference list`, `doi` or `citation match`.
 
-| Guideline                       | Version | Valid until                          | References | with PubMed id |
-| ------------------------------- | ------- | ------------------------------------ | ---------: | -------------: |
-| NVL Typ-2-Diabetes              | 3.0     | 2028-05-15                           |        238 |            123 |
-| NVL Chronische KHK              | 7.0     | 2029-08-14                           |        408 |            331 |
-| NVL Chronische Herzinsuffizienz | 4.0     | 2028-12-12, most chapters 2024-10-22 |        648 |            534 |
-| NVL Hypertonie                  | 1.0     | 2028-06-29                           |        201 |            161 |
+| Guideline                          | Version | Valid until                          | References | PubMed id printed | after resolving |
+| ---------------------------------- | ------- | ------------------------------------ | ---------: | ----------------: | --------------: |
+| NVL Typ-2-Diabetes                 | 3.0     | 2028-05-15                           |        238 |               123 |             124 |
+| NVL Chronische KHK                 | 7.0     | 2029-08-14                           |        408 |               331 |             332 |
+| NVL Chronische Herzinsuffizienz    | 4.0     | 2028-12-12, most chapters 2024-10-22 |        648 |               534 |             534 |
+| NVL Hypertonie                     | 1.0     | 2028-06-29                           |        201 |               161 |             163 |
+| DEGAM S3 Risikoberatung (053-024)  | 2.3     | 2029-11-30                           |        301 |                 0 |             189 |
+| DEGAM S3 Nierenkrankheit (053-048) | 2.0     | 2029-06-30                           |        277 |                 0 |             197 |
 
-Loaded on 2026-11-19 into the compose Neo4j: 4 guidelines, 1,122 studies,
-1,149 `CITES` relationships.
+Loaded on 2026-11-19 into the compose Neo4j: 6 guidelines, 1,496 studies,
+1,539 `CITES` relationships.
 
-The texts are copyrighted by the ÄZQ, and the imprint names storage in
+The texts are copyrighted (ÄZQ, DEGAM), and both imprints name storage in
 electronic systems as needing written consent. `data/` stays git-ignored;
 loading the full text into a graph that others use needs that consent.
 `docs/klarbefund/leitlinien-zusammenfassung.md` summarises, in its own words
-and with page numbers, what these four and two DEGAM guidelines say about the
-values Klarbefund shows.
+and with page numbers, what the six guidelines say about the values Klarbefund
+shows.
 
-Open: DEGAM guidelines (their reference lists carry no PubMed ids and need
-resolving through PubMed or Crossref), and a pull request instead of an issue
-from the weekly run.
+Open tasks are listed in issue #20.

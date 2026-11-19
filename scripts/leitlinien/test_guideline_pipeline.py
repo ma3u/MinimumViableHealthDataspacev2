@@ -1,8 +1,8 @@
-"""Unit tests for nvl_pipeline.py and load_guideline_citations.py. No network, no database, no PDF."""
+"""Unit tests for guideline_pipeline.py and load_guideline_citations.py. No network, no database, no PDF."""
 import datetime as dt
 
 import load_guideline_citations as loader
-import nvl_pipeline as nvl
+import guideline_pipeline as nvl
 
 TODAY = dt.date(2026, 11, 19)
 
@@ -147,7 +147,7 @@ def test_no_reference_list_gives_no_references():
 # ── what may be committed ────────────────────────────────────────────────────
 
 MANIFEST = {
-    "source": "https://www.leitlinien.de", "generated": "2026-11-19",
+    "sources": ["www.leitlinien.de"], "generated": "2026-11-19",
     "guidelines": [
         {"id": "nvl-khk-v6.0", "topic": "khk", "title": "NVL Chronische KHK", "version": "6.0", "awmfId": "nvl-004",
          "sourcePage": "https://www.leitlinien.de/themen/khk", "active": False, "status": "superseded",
@@ -173,6 +173,15 @@ def test_state_file_carries_counts_and_no_guideline_text():
     assert "citation" not in str(state)
 
 
+def test_state_counts_only_ids_the_guideline_prints():
+    # resolve_pmids.py runs on a laptop; the weekly run does not, and must reach the same state.
+    m = {"sources": [], "guidelines": [{**MANIFEST["guidelines"][1], "references": [
+        {"number": 1, "citation": "a", "pmid": "1", "doi": None, "year": 2020, "pmidSource": "reference list"},
+        {"number": 2, "citation": "b", "pmid": "2", "doi": None, "year": 2020, "pmidSource": "citation match"},
+    ]}]}
+    assert nvl.state_of(m)["guidelines"][0]["referencesWithPmid"] == 1
+
+
 # ── loader ───────────────────────────────────────────────────────────────────
 
 
@@ -183,7 +192,8 @@ def test_a_superseded_version_gets_no_node_of_its_own():
 def test_study_id_matches_the_health_graph_and_duplicates_collapse():
     rows = loader.citation_rows(MANIFEST["guidelines"][1])
     assert rows == [{"id": "pmid-36350160", "pmid": "36350160", "number": 2,
-                     "citation": "Porst M. Burden. 2022.", "year": 2022, "doi": "10.3238/x"}]
+                     "citation": "Porst M. Burden. 2022.", "year": 2022, "doi": "10.3238/x",
+                     "pmidSource": "reference list"}]
 
 
 def test_guideline_params_count_what_cannot_be_linked():
@@ -197,3 +207,41 @@ def test_cypher_never_deletes():
     for q in (loader.CYPHER_GUIDELINE, loader.CYPHER_CITES, loader.CYPHER_MARK_DROPPED):
         assert "DELETE" not in q.upper()
         assert "CREATE (" not in q.upper()
+
+
+def test_a_date_at_a_line_start_is_not_an_entry_number():
+    md = ("21 Literatur\n1. Ärztliches Zentrum. NVL Hypertonie [Stand:\n2.12.2023]. Verfügbar unter: https://example.org.\n"
+          "2. Mancia G, Kreutz R. 2023 ESH Guidelines. J Hypertens 2023; 41(12):1874–2071. doi: 10.1097/HJH.0000000000003480.\n"
+          "3.Fraser SDS. Where now. Br J Gen Pract 2016; 66(645):215–7.\n")
+    refs = nvl.extract_references(md, heading=r"(?:\d+ )?Literatur", furniture=r"DEGAM Leitlinie S3: .*")
+    assert [r["number"] for r in refs] == [1, 2, 3]
+    assert refs[0]["citation"].endswith("https://example.org.")
+    assert refs[1]["doi"] == "10.1097/HJH.0000000000003480"
+    assert refs[2]["citation"].startswith("Fraser")
+
+
+def test_an_entry_may_begin_with_a_year():
+    md = "Literatur\n1. Smith A. One. J 2020;1:1.\n2. 2021 ESC Guidelines on prevention. Eur Heart J. 2021;42(34):3227–337.\n"
+    assert [r["number"] for r in nvl.extract_references(md)] == [1, 2]
+
+
+# ── DEGAM pages ──────────────────────────────────────────────────────────────
+
+
+def test_links_chosen_by_their_text_and_made_absolute():
+    page = ('<a href="files/a%20b/lang.pdf">Langfassung,</a> <a href="files/kurz1.pdf">Kurzversion - Erstdiagnose</a>'
+            '<a href="files/kurz2.pdf">Kurzversion - etabliert</a> <a href="files/report.pdf">Leitlinienreport</a>')
+    links = nvl.find_labelled_links(page, "https://www.degam.de", {"long": "Lang", "short": "Kurz"})
+    assert links == {"long": "https://www.degam.de/files/a%20b/lang.pdf", "short": "https://www.degam.de/files/kurz1.pdf"}
+
+
+def test_month_validity_runs_to_the_end_of_the_month():
+    page = "<p>publiziert: 08/2025, gültig bis: 11/2029 DEGAM-Autor:innen</p>"
+    assert nvl.find_page_validity(page) == {
+        "adoptedDate": "2025-08-01", "validUntilDate": "2029-11-30", "earliestValidUntilDate": "2029-11-30"}
+    assert nvl.find_page_validity("<p>gültig bis : 02/2028</p>")["validUntilDate"] == "2028-02-29"
+
+
+def test_version_from_the_title_pages():
+    assert nvl.find_text_version("DEGAM Leitlinie\nAWMF-Register-Nr. 053-024\nVersion 2.3\nStand November 2024") == "2.3"
+    assert nvl.find_text_version("ohne Angabe") is None
