@@ -208,9 +208,9 @@ export EDC1_TAG="${EDC1_TAG:-}"
 # no schema migration from the one before it (Connector #6186 dropped the
 # column migrations in RC6), so each RC the hub moves to starts on fresh
 # databases next to the previous ones, which stay as the rollback (#930).
-# _v1 was RC5's (dropped 2026-11-13), _v1rc6 is RC6's, _v1rc7 RC7's. siglet
-# keeps siglet_v1: it is not EDC.
-export EDC_DB_SUFFIX="${EDC_DB_SUFFIX:-_v1rc7}"
+# _v1 was RC5's (dropped 2026-11-13), _v1rc6 is RC6's, _v1rc7 RC7's, _v1rc8
+# RC8's. siglet keeps siglet_v1: it is not EDC.
+export EDC_DB_SUFFIX="${EDC_DB_SUFFIX:-_v1rc8}"
 export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-controlplane:${EDC1_TAG}"
 export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-identity-hub:${EDC1_TAG}"
 export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-issuerservice:${EDC1_TAG}"
