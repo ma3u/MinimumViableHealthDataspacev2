@@ -185,22 +185,22 @@
     },
     "developer/sdlc": {
       "de": {
-        "status": "stale",
+        "status": "current",
         "title": "Software Development Life Cycle (SDLC)",
         "summary": "Wie eine Änderung den Live-Hub erreicht: Discussions und Issues, Branches und Pull Requests, jeder pre-commit- und pre-push-Hook mit seiner Behebung, das PR Gate und die übrigen Workflows, die Deployments nach Azure und auf GitHub Pages, Releases, wie Sie von außen beitragen und wie Sie einen SDLC für ein DevSecOps- und KI-Projekt festlegen, mit den Werkzeugen für jede Phase."
       },
       "fr": {
-        "status": "stale",
+        "status": "current",
         "title": "Cycle de vie du développement logiciel (SDLC)",
         "summary": "Comment une modification atteint le hub en production : discussions et tickets, branches et pull requests, chaque hook pre-commit et pre-push avec sa correction, le PR Gate et les autres workflows, les déploiements vers Azure et GitHub Pages, les versions publiées, la manière de contribuer de l’extérieur, et comment définir un SDLC pour un projet DevSecOps et IA, avec les outils de chaque étape."
       },
       "nl": {
-        "status": "stale",
+        "status": "current",
         "title": "Software Development Life Cycle (SDLC)",
         "summary": "Hoe een wijziging de live hub bereikt: discussies en issues, branches en pull requests, elke pre-commit- en pre-push-hook met de oplossing ervan, de PR Gate en de andere workflows, de deploys naar Azure en GitHub Pages, releases, hoe u van buitenaf bijdraagt, en hoe u een SDLC definieert voor een DevSecOps- en AI-project, met de tools voor elke fase."
       },
       "es": {
-        "status": "stale",
+        "status": "current",
         "title": "Ciclo de vida del desarrollo de software (SDLC)",
         "summary": "Cómo llega un cambio al hub en vivo: debates e incidencias, ramas y pull requests, cada hook de pre-commit y pre-push con su solución, el PR Gate y los demás flujos de trabajo, los despliegues en Azure y GitHub Pages, las versiones, cómo contribuir desde fuera y cómo definir un SDLC para un proyecto de DevSecOps e IA, con las herramientas de cada etapa."
       }
