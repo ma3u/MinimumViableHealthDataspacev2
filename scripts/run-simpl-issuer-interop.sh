@@ -244,6 +244,9 @@ since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 res=$(catalog)
 ih_log=$(docker logs --since "$since" health-dataspace-identityhub 2>&1 || true)
 cp_log=$(docker logs --since "$since" health-dataspace-controlplane 2>&1 || true)
+# Kept beside the summary: when no pattern below matches, the reason is in here.
+printf '%s\n' "$ih_log" >"${OUT_DIR}/identityhub.log"
+printf '%s\n' "$cp_log" >"${OUT_DIR}/controlplane.log"
 accepted=0
 if [ "${res#* }" = "Catalog" ]; then
   accepted=1
@@ -252,8 +255,13 @@ else
   reason="refused (${res%% *}); the reason is not logged, rerun with --diagnose"
   if [[ "$ih_log" == *"problem encountered loading a remote context"* ]]; then
     reason="the IdentityHub cannot load the credential's JSON-LD context ${CONTEXT_URI}: EDC's document loader refuses the https scheme (edc.jsonld.https.enabled is false), so no presentation is built"
+  elif [[ "$cp_log" == *"No verifier could handle the input data"* ]]; then
+    # From EDC 1.0.0-RC8 a Linked Data presentation meets no verifier at all:
+    # LDP is opt-in (Connector #6242), and the hub's launcher does not add it.
+    reason="the control plane has no verifier for a Linked Data presentation (${proof}): from EDC 1.0.0-RC8 only JWT credentials are verified unless the launcher adds decentralized-claims-ldp (Connector #6242)"
   elif [[ "$cp_log" == *"No SignatureSuite found"* ]]; then
-    reason="the control plane has no signature suite for ${proof}: DcpCoreExtension registers JsonWebSignature2020 only"
+    # Up to RC7, and on RC8 with decentralized-claims-ldp added.
+    reason="the control plane has no signature suite for ${proof}: the Linked Data verifier registers JsonWebSignature2020 only"
   elif [[ "$cp_log" == *"not supported for issuer '${SIMPL_DID}'"* ]]; then
     reason="the issuer ${SIMPL_DID} is not trusted for MembershipCredential"
   elif [[ "$cp_log" == *"did:key"* ]]; then

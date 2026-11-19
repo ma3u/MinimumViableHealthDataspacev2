@@ -3,14 +3,14 @@
   "repos": [
     {
       "repo": "eclipse-edc/Connector",
-      "known": "v1.0.0-RC7",
+      "known": "v1.0.0-RC8",
       "prerelease": true,
       "where": "runtimes/edc/gradle/libs.versions.toml",
       "issue": 930
     },
     {
       "repo": "eclipse-edc/IdentityHub",
-      "known": "v1.0.0-RC7",
+      "known": "v1.0.0-RC8",
       "prerelease": true,
       "where": "runtimes/edc/gradle/libs.versions.toml",
       "issue": 930
@@ -74,7 +74,7 @@
         "repo": "ma3u/cfm",
         "base": "v0.0.9",
         "integration": "mvhd/integration",
-        "tag": "v0.0.9-mvhd.1",
+        "tag": "v0.0.9-mvhd.2",
         "runbook": "docs/knowledge/runbooks/cfm-fork.md",
         "patches": [
           {

@@ -213,6 +213,19 @@ No public Simpl-Open repository implements DCP. Two consequences:
   ([Connector #6150](https://github.com/eclipse-edc/Connector/pull/6150)), so
   an untrusted issuer now fails at barrier 4 before barriers 1 to 3 are reached.
 
+  Checked again on EDC 1.0.0-RC8 (19 November 2026, local stack): barrier 2 is
+  wider. Linked Data credentials are opt-in from RC8
+  ([Connector #6242](https://github.com/eclipse-edc/Connector/pull/6242)): the
+  DCP feature set verifies JWT credentials only, and the Linked Data verifier
+  with its `JsonWebSignature2020` suite moved to the extension
+  `decentralized-claims-ldp`, which the hub's launcher does not add. The
+  control plane now refuses the presentation with `Unauthorized: No verifier
+could handle the input data`, at debug level, before any proof type is
+  looked at; the management API answers 502. Adding the extension would bring
+  back the RC7 state, not acceptance: `Ed25519Signature2020` still has no
+  suite. The hub's request to the programme is unchanged, JWT credentials
+  under `did:web`.
+
 ### The hub on EDC 1.0
 
 The hub moved its connector from EDC 0.18 to EDC 1.0 in November 2026: to

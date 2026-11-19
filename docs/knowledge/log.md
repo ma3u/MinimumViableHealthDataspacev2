@@ -44,3 +44,7 @@
 - 2026-11-18 · `runbooks/edc-1-on-azure.md` and `runbooks/cfm-fork.md`: Azure runs
   EDC 1.0.0-RC7 and CFM `v0.0.9-mvhd.1` (#930), with the cutover's images,
   backup and gate results.
+- 2026-11-19 · `runbooks/edc-1-on-azure.md`: the RC8 row (#930). RC8 broke no
+  gate; Linked Data credentials became opt-in (Connector #6242), which changed
+  the refusal `run-simpl-issuer-interop.sh` reads. A rehearsal that keeps the
+  Neo4j volume needs the seed files `main` changed since.

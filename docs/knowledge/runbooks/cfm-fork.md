@@ -32,6 +32,14 @@ unnecessary is dropped.
 `<n>` counts changes to the patches on one base: `v0.0.7-mvhd.1`, `.2`, and
 on the next release `v0.0.8-mvhd.1`. A tag is never moved; a new one is made.
 
+`v0.0.9-mvhd.2` (2026-11-19) is such a change: the token exchange patch no
+longer adds its option to the Certo agent's launcher, which upstream removes
+([eclipse-cfm/cfm#245](https://github.com/eclipse-cfm/cfm/pull/245)) and no
+image of ours contains. The eight images are the same code as `.1`. It was
+cut because the "Patches on upstream main" check was red on that conflict;
+compose and CI use it, Azure stays on `.1` until `20-cfm-fork.sh images` and
+`apps` run next.
+
 ## Rules
 
 - Commits in the fork are Matthias's: `git config user.email
