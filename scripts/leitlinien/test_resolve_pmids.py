@@ -72,5 +72,8 @@ def test_second_run_asks_nothing():
 def test_only_bibliographic_data_leaves():
     m, calls = manifest(), []
     rp.resolve(m, {}, ask=fake_pubmed(calls), pause=0)
+    from urllib.parse import urlparse
+
+    assert calls and all(urlparse(u).hostname == "eutils.ncbi.nlm.nih.gov" for u, _ in calls)
     sent = " ".join(u + (d.decode() if d else "") for u, d in calls)
-    assert "eutils.ncbi.nlm.nih.gov" in sent and "email" not in sent
+    assert "email" not in sent
