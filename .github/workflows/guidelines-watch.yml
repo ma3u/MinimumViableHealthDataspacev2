@@ -1,0 +1,191 @@
+# ---------------------------------------------------------------------------
+# Guidelines watch: a new, expired or withdrawn guideline becomes an issue
+# ---------------------------------------------------------------------------
+# scripts/leitlinien/guideline_pipeline.py reads the Nationale VersorgungsLeitlinien
+# on www.leitlinien.de and the DEGAM guidelines on www.degam.de (both
+# robots.txt files allow every agent), downloads a version it
+# has not seen, converts it to Markdown, extracts the reference list, and marks
+# a guideline inactive when its validity has passed or a newer version replaced
+# it. scripts/leitlinien/guidelines-state.json is what the repository knows: titles,
+# versions, dates, status and reference counts.
+#
+# scripts/leitlinien/study_status.py then asks PubMed for every study the
+# guidelines cite: retracted, expression of concern, corrected and republished,
+# erratum, and the study type. It asks for one paper known to be retracted on
+# every run and fails when PubMed does not show it as such, so "nothing found"
+# means something. scripts/leitlinien/study-flags.json is what the repository
+# knows. A study that gains a notice changes that file and opens the issue.
+#
+# The AWMF register is not read here. Its robots.txt says "Block other
+# automated retrieval" and it answers scripts with a bot check; that needs the
+# AWMF's consent, not a workaround.
+#
+# The guideline texts are copyrighted. They are downloaded to the runner,
+# read, and thrown away with it: nothing is uploaded as an artifact and nothing
+# but the state file is ever proposed for the repository.
+#
+# On the schedule a difference between the fresh state and the committed one
+# opens or updates one issue ("Guidelines changed", label guidelines) that
+# carries the diff. Loading into Neo4j is a local step, see the README.
+# Weekly, Monday, after the upstream watch.
+# ---------------------------------------------------------------------------
+name: Guidelines watch
+
+on:
+  schedule:
+    - cron: "41 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      open_issue:
+        description: "Open or update the issue when the state changed (off: only report)"
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - "scripts/leitlinien/guideline_pipeline.py"
+      - "scripts/leitlinien/guideline-sources.json"
+      - "scripts/leitlinien/guidelines-state.json"
+      - "scripts/leitlinien/resolve_pmids.py"
+      - "scripts/leitlinien/study_status.py"
+      - "scripts/leitlinien/study-flags.json"
+      - ".github/workflows/guidelines-watch.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: guidelines-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    name: Guideline versions and validity
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts/leitlinien/guideline_pipeline.py
+            scripts/leitlinien/guideline-sources.json
+            scripts/leitlinien/guidelines-state.json
+            scripts/leitlinien/resolve_pmids.py
+            scripts/leitlinien/study_status.py
+            scripts/leitlinien/study-flags.json
+          sparse-checkout-cone-mode: false
+
+      - name: Install pdftotext
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          pdftotext -v 2>&1 | head -1
+
+      - name: Fetch, convert, compare
+        id: run
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/guidelines"
+          mkdir -p "$work"
+          python3 scripts/leitlinien/guideline_pipeline.py \
+            --data-dir "$work/data" --state "$work/guidelines-state.json" | tee "$work/report.txt"
+          # A run that read nothing must fail, not report "no change" (ADR-031).
+          count=$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["guidelines"]))' "$work/guidelines-state.json")
+          echo "guidelines read: $count"
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No guideline was read from the sources"
+            exit 1
+          fi
+          markdown=$(find "$work/data" -name '*.md' -size +10k | wc -l | tr -d ' ')
+          echo "markdown files written: $markdown"
+          if [ "$markdown" -lt "$count" ]; then
+            echo "::error::Fewer Markdown files ($markdown) than guidelines ($count)"
+            exit 1
+          fi
+          # Compared as data, key order and line breaks aside: Prettier reformats the committed files.
+          norm() { python3 -m json.tool --sort-keys "$1"; }
+          if diff -u <(norm scripts/leitlinien/guidelines-state.json) <(norm "$work/guidelines-state.json") > "$work/state.diff"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          # The studies: PubMed ids for the lists that print none, then status and type.
+          # study_status.py exits non-zero when its positive control is not seen as retracted.
+          python3 scripts/leitlinien/resolve_pmids.py \
+            --manifest "$work/data/guidelines-manifest.json" --cache "$work/data/pmid-cache.json" | tee -a "$work/report.txt"
+          python3 scripts/leitlinien/study_status.py \
+            --manifest "$work/data/guidelines-manifest.json" --out "$work/data/study-status.json" \
+            --flags "$work/study-flags.json" | tee -a "$work/report.txt"
+          if diff -u <(norm scripts/leitlinien/study-flags.json) <(norm "$work/study-flags.json") > "$work/flags.diff"; then
+            echo "flags_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "flags_changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo "### Guidelines"
+            echo '```'
+            cat "$work/report.txt"
+            echo '```'
+            if [ -s "$work/state.diff" ]; then
+              echo "### Difference to scripts/leitlinien/guidelines-state.json"
+              echo '```diff'
+              cat "$work/state.diff"
+              echo '```'
+            fi
+            if [ -s "$work/flags.diff" ]; then
+              echo "### Difference to scripts/leitlinien/study-flags.json"
+              echo '```diff'
+              head -c 20000 "$work/flags.diff"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open or update the issue
+        if: (steps.run.outputs.changed == 'true' || steps.run.outputs.flags_changed == 'true') && (github.event_name == 'schedule' || inputs.open_issue == true)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/guidelines"
+          {
+            echo "The weekly run read the guideline sources and found a state that differs from"
+            echo "\`scripts/leitlinien/guidelines-state.json\`: a new version, a validity that has passed,"
+            echo "or a guideline that is no longer offered."
+            echo
+            echo '```diff'
+            cat "$work/state.diff"
+            echo '```'
+            echo
+            echo "Studies the guidelines cite (\`scripts/leitlinien/study-flags.json\`): a notice in PubMed that the"
+            echo "repository does not know yet (retraction, expression of concern, correction), or a changed count."
+            echo
+            echo '```diff'
+            head -c 30000 "$work/flags.diff"
+            echo '```'
+            echo
+            echo "To take it over, on a machine with the local data folder:"
+            echo
+            echo '```bash'
+            echo "python3 scripts/leitlinien/guideline_pipeline.py"
+            echo "python3 scripts/leitlinien/resolve_pmids.py"
+            echo "python3 scripts/leitlinien/study_status.py"
+            echo "NEO4J_PASSWORD=... python3 scripts/leitlinien/load_guideline_citations.py"
+            echo '```'
+            echo
+            echo "Then commit \`scripts/leitlinien/guidelines-state.json\` and \`scripts/leitlinien/study-flags.json\`. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > "$work/body.md"
+          gh label create guidelines --color 1E8449 --description "Clinical guidelines layer" 2>/dev/null || true
+          number=$(gh issue list --state open --label guidelines --search "Guidelines changed in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body-file "$work/body.md"
+          else
+            gh issue create --title "Guidelines changed" --label guidelines --body-file "$work/body.md"
+          fi
+
+      - name: Fail a pull request whose state file is stale
+        if: github.event_name == 'pull_request' && steps.run.outputs.changed == 'true'
+        run: |
+          echo "::error::scripts/leitlinien/guidelines-state.json does not match what the pipeline reads today. Run guideline_pipeline.py and commit the file."
+          exit 1

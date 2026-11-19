@@ -11,15 +11,16 @@ The guides are published on the hub at
 on [GitHub Pages](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/klarbefund);
 these are their sources.
 
-| Document                                                    | For                    | What it covers                                                                                                                 |
-| ----------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| [User guide](user-guide.md)                                 | a person using the app | Every screen with a screenshot: getting a report in, checking a value, trends, consents, the EHDS connection, exports, privacy |
-| [Developer guide](developer-guide.md)                       | a developer            | Building, running and testing; the pipeline from camera to sealed store; the generated dictionary; demo data; diagnostics; CI  |
-| [Self-assessment](self-assessment.md)                       | a reviewer             | GDPR, BSI TR-03161 objective by objective, the EU AI Act label and the MDR status, each line pointing to code or a test        |
-| [Evidence](evidence.md)                                     | a reviewer             | The accuracy benchmark, the dictionary parity check, the run record, and what is still missing                                 |
-| [Report for health insurers](report-for-health-insurers.md) | a steering meeting     | The three questions an insurer asks, answered with the evidence, plus the white-label and consulting offer                     |
-| [Run the evidence on a Mac](run-on-mac.md)                  | anyone with Xcode      | How to reproduce every number in the evidence                                                                                  |
-| [Threat model](../security/threat-model-klarbefund.md)      | a security reviewer    | STRIDE analysis of the app; each mitigation names the code or test that shows it                                               |
+| Document                                                    | For                    | What it covers                                                                                                                  |
+| ----------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| [User guide](user-guide.md)                                 | a person using the app | Every screen with a screenshot: getting a report in, checking a value, trends, consents, the EHDS connection, exports, privacy  |
+| [Developer guide](developer-guide.md)                       | a developer            | Building, running and testing; the pipeline from camera to sealed store; the generated dictionary; demo data; diagnostics; CI   |
+| [Self-assessment](self-assessment.md)                       | a reviewer             | GDPR, BSI TR-03161 objective by objective, the EU AI Act label and the MDR status, each line pointing to code or a test         |
+| [Evidence](evidence.md)                                     | a reviewer             | The accuracy benchmark, the dictionary parity check, the run record, and what is still missing                                  |
+| [Report for health insurers](report-for-health-insurers.md) | a steering meeting     | The three questions an insurer asks, answered with the evidence, plus the white-label and consulting offer                      |
+| [Run the evidence on a Mac](run-on-mac.md)                  | anyone with Xcode      | How to reproduce every number in the evidence                                                                                   |
+| [Deutsche Leitlinien](leitlinien-zusammenfassung.md)        | anyone reading values  | In German: what six German guidelines say about the values Klarbefund shows, where they disagree, and how old their evidence is |
+| [Threat model](../security/threat-model-klarbefund.md)      | a security reviewer    | STRIDE analysis of the app; each mitigation names the code or test that shows it                                                |
 
 The source is in [`clients/ios/`](../../clients/ios/), with its own
 [README](../../clients/ios/README.md) as the command card. The beta is joined

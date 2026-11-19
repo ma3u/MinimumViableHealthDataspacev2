@@ -1,0 +1,1826 @@
+{
+  "source": "PubMed E-utilities (esummary)",
+  "positiveControl": "32450107",
+  "studies": 1496,
+  "notFound": [],
+  "countsByFlag": {
+    "retracted": 0,
+    "expression of concern": 1,
+    "corrected and republished": 1,
+    "erratum": 111
+  },
+  "typesByGuideline": {
+    "053-024": {
+      "case report": 2,
+      "comment": 1,
+      "guideline": 2,
+      "journal article": 74,
+      "meta-analysis": 59,
+      "observational study": 4,
+      "randomised trial": 9,
+      "review": 17,
+      "systematic review": 21
+    },
+    "053-048": {
+      "comment": 2,
+      "guideline": 12,
+      "journal article": 93,
+      "meta-analysis": 17,
+      "observational study": 11,
+      "randomised trial": 14,
+      "review": 34,
+      "systematic review": 14
+    },
+    "nvl-001": {
+      "comment": 3,
+      "guideline": 3,
+      "journal article": 51,
+      "meta-analysis": 22,
+      "observational study": 1,
+      "other clinical trial": 2,
+      "randomised trial": 22,
+      "review": 10,
+      "systematic review": 10
+    },
+    "nvl-004": {
+      "comment": 1,
+      "guideline": 27,
+      "journal article": 54,
+      "meta-analysis": 104,
+      "observational study": 7,
+      "other clinical trial": 2,
+      "randomised trial": 97,
+      "review": 24,
+      "systematic review": 16
+    },
+    "nvl-006": {
+      "case report": 4,
+      "comment": 3,
+      "guideline": 21,
+      "journal article": 146,
+      "meta-analysis": 83,
+      "observational study": 11,
+      "other clinical trial": 7,
+      "randomised trial": 195,
+      "review": 40,
+      "systematic review": 24
+    },
+    "nvl-009": {
+      "journal article": 33,
+      "meta-analysis": 69,
+      "observational study": 2,
+      "other clinical trial": 2,
+      "randomised trial": 33,
+      "review": 9,
+      "systematic review": 15
+    }
+  },
+  "flagged": [
+    {
+      "pmid": "31641769",
+      "flags": ["expression of concern"],
+      "type": "other clinical trial",
+      "year": 2020,
+      "journal": "Eur Heart J",
+      "title": "Bedtime hypertension treatment improves cardiovascular risk reduction: the Hygia Chronotherapy Trial.",
+      "notices": [
+        {
+          "type": "Expression of concern in",
+          "pmid": "32318736"
+        },
+        {
+          "type": "Expression of concern in",
+          "pmid": "33221841"
+        }
+      ],
+      "citedBy": ["nvl-009"]
+    },
+    {
+      "pmid": "29897866",
+      "flags": ["corrected and republished"],
+      "type": "journal article",
+      "year": 2018,
+      "journal": "N Engl J Med",
+      "title": "Primary Prevention of Cardiovascular Disease with a Mediterranean Diet Supplemented with Extra-Virgin Olive Oil or Nuts.",
+      "notices": [],
+      "citedBy": ["053-024", "053-048", "nvl-004"]
+    },
+    {
+      "pmid": "10601507",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 1999,
+      "journal": "N Engl J Med",
+      "title": "A randomized study of the prevention of sudden death in patients with coronary artery disease. Multicenter Unsustained Tachycardia Trial Investigators.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "11159762",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2001,
+      "journal": "Clin Chem",
+      "title": "Effects of hemoglobin variants and chemically modified derivatives on assays for glycohemoglobin.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "11786451",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2002,
+      "journal": "BMJ",
+      "title": "Collaborative meta-analysis of randomised trials of antiplatelet therapy for prevention of death, myocardial infarction, and stroke in high risk patients.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "11804985",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2002,
+      "journal": "Circulation",
+      "title": "Simple scoring scheme for calculating the risk of acute coronary events based on the 10-year follow-up of the prospective cardiovascular Münster (PROCAM) study.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "12106937",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2002,
+      "journal": "J Am Coll Cardiol",
+      "title": "Efficacy of angiotensin-converting enzyme inhibition in reducing progression from asymptomatic left ventricular dysfunction to symptomatic heart failure in black and white patients.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "12392846",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2002,
+      "journal": "J Am Coll Cardiol",
+      "title": "ACC/AHA 2002 guideline update for exercise testing: summary article. A report of the American College of Cardiology/American Heart Association Task Force on Practice Guidelines (Committee to Update the 1997 Exercise Testing Guidelines).",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "12668699",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2003,
+      "journal": "N Engl J Med",
+      "title": "Eplerenone, a selective aldosterone blocker, in patients with left ventricular dysfunction after myocardial infarction.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "12793472",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2003,
+      "journal": "Ir Med J",
+      "title": "Causes of sensitisation in patients awaiting renal transplantation in Ireland.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "14610160",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2003,
+      "journal": "N Engl J Med",
+      "title": "Valsartan, captopril, or both in myocardial infarction complicated by heart failure, left ventricular dysfunction, or both.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "1463530",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 1992,
+      "journal": "N Engl J Med",
+      "title": "Effect of enalapril on mortality and the development of heart failure in asymptomatic patients with reduced left ventricular ejection fractions.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "15385656",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2004,
+      "journal": "N Engl J Med",
+      "title": "Chronic kidney disease and the risks of death, cardiovascular events, and hospitalization.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "15520426",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2004,
+      "journal": "Ann Intern Med",
+      "title": "Meta-analysis: angiotensin-receptor blockers in chronic heart failure and high-risk acute myocardial infarction.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "15659722",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2005,
+      "journal": "N Engl J Med",
+      "title": "Amiodarone or an implantable cardioverter-defibrillator for congestive heart failure.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "16214597",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2005,
+      "journal": "Lancet",
+      "title": "Efficacy and safety of cholesterol-lowering treatment: prospective meta-analysis of data from 90,056 participants in 14 randomised trials of statins.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        },
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "18799522",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2008,
+      "journal": "Eur Heart J",
+      "title": "ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure 2008: the Task Force for the Diagnosis and Treatment of Acute and Chronic Heart Failure 2008 of the European Society of Cardiology. Developed in collaboration with the Heart Failure Association of the ESC (HFA) and endorsed by the European Society of Intensive Care Medicine (ESICM).",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        },
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "19130998",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2009,
+      "journal": "J Am Soc Echocardiogr",
+      "title": "Echocardiographic assessment of valve stenosis: EAE/ASE recommendations for clinical practice.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "36828707"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "19228612",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2009,
+      "journal": "N Engl J Med",
+      "title": "Percutaneous coronary intervention versus coronary-artery bypass grafting for severe coronary artery disease.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "19920051",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2009,
+      "journal": "N Engl J Med",
+      "title": "Advanced heart failure treated with continuous-flow left ventricular assist device.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30124260"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "20675674",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2010,
+      "journal": "Europace",
+      "title": "EHRA Expert Consensus Statement on the management of cardiovascular implantable electronic devices in patients nearing end of life or requesting withdrawal of therapy.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "20801500",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2010,
+      "journal": "Lancet",
+      "title": "Ivabradine and outcomes in chronic heart failure (SHIFT): a randomised placebo-controlled study.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "21150873",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2011,
+      "journal": "Kidney Int",
+      "title": "The definition, classification, and prognosis of chronic kidney disease: a KDIGO Controversies Conference report.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "30036909"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "21272743",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2011,
+      "journal": "J Am Coll Cardiol",
+      "title": "Randomized comparison of percutaneous coronary intervention with sirolimus-eluting stents versus coronary artery bypass grafting in unprotected left main stem stenosis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "21315216",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2011,
+      "journal": "Am Heart J",
+      "title": "A randomized controlled trial evaluating the safety and efficacy of cardiac contractility modulation in advanced heart failure.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "22426867",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2012,
+      "journal": "Rofo",
+      "title": "[Consensus recommendations of the German Radiology Society (DRG), the German Cardiac Society (DGK) and the German Society for Pediatric Cardiology (DGPK) on the use of cardiac imaging with computed tomography and magnetic resonance imaging].",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "22555213",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2012,
+      "journal": "Eur Heart J",
+      "title": "European Guidelines on cardiovascular disease prevention in clinical practice (version 2012). The Fifth Joint Task Force of the European Society of Cardiology and Other Societies on Cardiovascular Disease Prevention in Clinical Practice (constituted by representatives of nine societies and by invited experts).",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "22745687",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2012,
+      "journal": "PLoS One",
+      "title": "Posttraumatic stress disorder prevalence and risk of recurrence in acute coronary syndrome patients: a meta-analytic review.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30840686"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "22828712",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2012,
+      "journal": "Eur J Heart Fail",
+      "title": "ESC guidelines for the diagnosis and treatment of acute and chronic heart failure 2012: The Task Force for the Diagnosis and Treatment of Acute and Chronic Heart Failure 2012 of the European Society of Cardiology. Developed in collaboration with the Heart Failure Association (HFA) of the ESC.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "22910757",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2012,
+      "journal": "JAMA",
+      "title": "Common carotid intima-media thickness measurements in cardiovascular risk prediction: a meta-analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "23013600",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2012,
+      "journal": "Lancet",
+      "title": "Associations of kidney disease measures with mortality and end-stage renal disease in individuals with and without hypertension: a meta-analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-009"]
+    },
+    {
+      "pmid": "23067652",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2012,
+      "journal": "Am J Kidney Dis",
+      "title": "KDOQI Clinical Practice Guideline for Diabetes and CKD: 2012 Update.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "23247304",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2013,
+      "journal": "Circulation",
+      "title": "2013 ACCF/AHA guideline for the management of ST-elevation myocardial infarction: a report of the American College of Cardiology Foundation/American Heart Association Task Force on Practice Guidelines.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "23796131",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2013,
+      "journal": "N Engl J Med",
+      "title": "Cardiovascular effects of intensive lifestyle intervention in type 2 diabetes.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "23996286",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2013,
+      "journal": "Eur Heart J",
+      "title": "2013 ESC guidelines on the management of stable coronary artery disease: the Task Force on the management of stable coronary artery disease of the European Society of Cardiology.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "24222016",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2014,
+      "journal": "Circulation",
+      "title": "2013 ACC/AHA guideline on the treatment of blood cholesterol to reduce atherosclerotic cardiovascular risk in adults: a report of the American College of Cardiology/American Heart Association Task Force on Practice Guidelines.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "26667225"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "24733277",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2014,
+      "journal": "JAMA Intern Med",
+      "title": "Collaborative care for depression and anxiety disorders in patients with recent cardiac events: the Management of Sadness and Anxiety in Cardiology (MOSAIC) randomized clinical trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "25073782",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2014,
+      "journal": "BMJ",
+      "title": "Fruit and vegetable consumption and mortality from all causes, cardiovascular disease, and cancer: systematic review and dose-response meta-analysis of prospective cohort studies.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "25096693",
+      "flags": ["erratum"],
+      "type": "systematic review",
+      "year": 2014,
+      "journal": "JAMA",
+      "title": "Does this man with lower urinary tract symptoms have bladder outlet obstruction?: The Rational Clinical Examination: a systematic review.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "26836742"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "25176289",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2014,
+      "journal": "N Engl J Med",
+      "title": "Fractional flow reserve-guided PCI for stable coronary artery disease.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "25249585",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2014,
+      "journal": "Circulation",
+      "title": "2014 AHA/ACC guideline for the management of patients with non-ST-elevation acute coronary syndromes: a report of the American College of Cardiology/American Heart Association Task Force on Practice Guidelines.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "25671328",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2015,
+      "journal": "JAMA Psychiatry",
+      "title": "Mortality in mental disorders and global disease burden implications: a systematic review and meta-analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "26131738"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "26630085"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "25798575",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2015,
+      "journal": "JAMA Intern Med",
+      "title": "Safety and benefit of discontinuing statin therapy in the setting of advanced, life-limiting illness: a randomized clinical trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "25938325"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "30508017"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "26075604",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2015,
+      "journal": "PLoS One",
+      "title": "Prevalence and Cardiovascular Associations of Diabetic Retinopathy and Maculopathy: Results from the Gutenberg Health Study.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "26406582"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "26172894",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2015,
+      "journal": "JAMA",
+      "title": "Cost-effectiveness of 10-Year Risk Thresholds for Initiation of Statin Therapy for Primary Prevention of Cardiovascular Disease.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "26501548"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "26251094",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2015,
+      "journal": "JACC Heart Fail",
+      "title": "Effects of Beta-Blocker Withdrawal in Acute Decompensated Heart Failure: A Systematic Review and Meta-Analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "26551272",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2015,
+      "journal": "N Engl J Med",
+      "title": "A Randomized Trial of Intensive versus Standard Blood-Pressure Control.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29262284"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "26757465",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2016,
+      "journal": "JAMA",
+      "title": "Multinational Assessment of Accuracy of Equations for Predicting Risk of Kidney Failure: A Meta-analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "26903348"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "27046234",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2016,
+      "journal": "PLoS Med",
+      "title": "Why Are Some Population Interventions for Diet and Obesity More Equitable and Effective Than Others? The Role of Individual Agency.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "27218824"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "27206819",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2016,
+      "journal": "Eur Heart J",
+      "title": "2016 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure: The Task Force for the diagnosis and treatment of acute and chronic heart failure of the European Society of Cardiology (ESC)Developed with the special contribution of the Heart Failure Association (HFA) of the ESC.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "28039335"
+        }
+      ],
+      "citedBy": ["nvl-004", "nvl-006"]
+    },
+    {
+      "pmid": "27400984",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2016,
+      "journal": "Circulation",
+      "title": "Drugs That May Cause or Exacerbate Heart Failure: A Scientific Statement From the American Heart Association.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "27647303"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "27789571",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2017,
+      "journal": "Eur Heart J",
+      "title": "European Society of Cardiology/European Atherosclerosis Society Task Force consensus statement on proprotein convertase subtilisin/kexin type 9 inhibitors: practical guidance for use in patients at very high cardiovascular risk.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "28110294"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "27797291",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2016,
+      "journal": "N Engl J Med",
+      "title": "Everolimus-Eluting Stents or Bypass Surgery for Left Main Coronary Artery Disease.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "31671258"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "27810312",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2016,
+      "journal": "Lancet",
+      "title": "Percutaneous coronary angioplasty versus coronary artery bypass grafting in treatment of unprotected left main stenosis (NOBLE): a prospective, randomised, open-label, non-inferiority trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "27816194"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "27838722",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2016,
+      "journal": "JAMA",
+      "title": "Statins for Prevention of Cardiovascular Disease in Adults: Evidence Report and Systematic Review for the US Preventive Services Task Force.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "32068813"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "28510680",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2017,
+      "journal": "JAMA",
+      "title": "Effect of Oral Iron Repletion on Exercise Capacity in Patients With Heart Failure With Reduced Ejection Fraction and Iron Deficiency: The IRONOUT HF Randomized Clinical Trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "28542691"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "28910830",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2018,
+      "journal": "Pharmacopsychiatry",
+      "title": "Consensus Guidelines for Therapeutic Drug Monitoring in Neuropsychopharmacology: Update 2017.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29390205"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "29103656",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2018,
+      "journal": "Lancet",
+      "title": "Percutaneous coronary intervention in stable angina (ORBITA): a double-blind, randomised controlled trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29323656"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "29117146",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2017,
+      "journal": "Nutrients",
+      "title": "Transferability of the Mediterranean Diet to Non-Mediterranean Countries. What Is and What Is Not the Mediterranean Diet.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29949867"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "29133354",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2018,
+      "journal": "Hypertension",
+      "title": "2017 ACC/AHA/AAPA/ABC/ACPM/AGS/APhA/ASH/ASPC/NMA/PCNA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults: Executive Summary: A Report of the American College of Cardiology/American Heart Association Task Force on Clinical Practice Guidelines.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29743246"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "30354765"
+        }
+      ],
+      "citedBy": ["nvl-009"]
+    },
+    {
+      "pmid": "29176657",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2018,
+      "journal": "Nat Rev Nephrol",
+      "title": "Dyslipidaemia in nephrotic syndrome: mechanisms and treatment.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29234164"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "29324562",
+      "flags": ["erratum"],
+      "type": "systematic review",
+      "year": 2018,
+      "journal": "JBI Database System Rev Implement Rep",
+      "title": "Effectiveness of interventions to prevent pre-frailty and frailty progression in older adults: a systematic review.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29762317"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "29382337",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2018,
+      "journal": "BMC Med",
+      "title": "Built environmental characteristics and diabetes: a systematic review and meta-analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33676484"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "29478841",
+      "flags": ["erratum"],
+      "type": "systematic review",
+      "year": 2018,
+      "journal": "Lancet",
+      "title": "Mortality after coronary artery bypass grafting versus percutaneous coronary intervention with stenting for coronary artery disease: a pooled analysis of individual patient data.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30129463"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "29540415",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2018,
+      "journal": "BMJ Open",
+      "title": "Is exercise-based cardiac rehabilitation effective? A systematic review and meta-analysis to re-examine the evidence.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "29764896"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "29803590",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2018,
+      "journal": "Lancet",
+      "title": "Endovascular ultrasound renal denervation to treat hypertension (RADIANCE-HTN SOLO): a multicentre, international, single-blind, randomised, sham-controlled trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30215379"
+        }
+      ],
+      "citedBy": ["nvl-009"]
+    },
+    {
+      "pmid": "30146330",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2018,
+      "journal": "Lancet",
+      "title": "Alcohol use and burden for 195 countries and territories, 1990-2016: a systematic analysis for the Global Burden of Disease Study 2016.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30303082"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "31232380"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "30165516",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2018,
+      "journal": "Eur Heart J",
+      "title": "2018 ESC/ESH Guidelines for the management of arterial hypertension.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30339256"
+        }
+      ],
+      "citedBy": ["053-048", "nvl-009"]
+    },
+    {
+      "pmid": "30312372",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2019,
+      "journal": "Age Ageing",
+      "title": "Sarcopenia: revised European consensus on definition and diagnosis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "31081853"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "30415601",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2019,
+      "journal": "N Engl J Med",
+      "title": "Angiotensin-Neprilysin Inhibition in Acute Decompensated Heart Failure.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30767714"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "30424892",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2019,
+      "journal": "Lancet",
+      "title": "SGLT2 inhibitors for primary and secondary prevention of cardiovascular and renal outcomes in type 2 diabetes: a systematic review and meta-analysis of cardiovascular outcome trials.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "32146927"
+        }
+      ],
+      "citedBy": ["nvl-001", "nvl-006"]
+    },
+    {
+      "pmid": "30552272",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2018,
+      "journal": "BMJ Open",
+      "title": "Informed shared decision-making programme for patients with type 2 diabetes in primary care: cluster randomised controlled trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "30782765"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "30879355",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2019,
+      "journal": "Circulation",
+      "title": "2019 ACC/AHA Guideline on the Primary Prevention of Cardiovascular Disease: A Report of the American College of Cardiology/American Heart Association Task Force on Clinical Practice Guidelines.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "31498691"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "31986097"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "32310693"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "31422062",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2019,
+      "journal": "Lancet Diabetes Endocrinol",
+      "title": "Cardiovascular, mortality, and kidney outcomes with GLP-1 receptor agonists in patients with type 2 diabetes: a systematic review and meta-analysis of cardiovascular outcome trials.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "32085827"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "31488373",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2019,
+      "journal": "Lancet",
+      "title": "Percutaneous coronary intervention versus coronary artery bypass grafting in patients with three-vessel or left main coronary artery disease: 10-year follow-up of the multicentre randomised controlled SYNTAX trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "32171413"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "31504418",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2020,
+      "journal": "Eur Heart J",
+      "title": "2019 ESC/EAS Guidelines for the management of dyslipidaemias: lipid modification to reduce cardiovascular risk.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "31837134"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "31536101",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2019,
+      "journal": "JAMA",
+      "title": "Effect of Linagliptin vs Glimepiride on Major Adverse Cardiovascular Outcomes in Patients With Type 2 Diabetes: The CAROLINA Randomized Clinical Trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "31794610"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "31562798",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2019,
+      "journal": "N Engl J Med",
+      "title": "Five-Year Outcomes after PCI or CABG for Left Main Coronary Disease.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "32160683"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "31693662",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2019,
+      "journal": "PLoS Med",
+      "title": "The Kidney Failure Risk Equation for prediction of end stage renal disease in UK primary care: An external validation and clinical impact projection cohort study.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "32706776"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "32219386",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2020,
+      "journal": "JAMA",
+      "title": "Effect of Dapagliflozin on Worsening Heart Failure and Cardiovascular Death in Patients With Heart Failure With and Without Diabetes.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33821919"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "32377861",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2020,
+      "journal": "Schmerz",
+      "title": "[Recommendations of the second update of the LONTS guidelines : Long-term opioid therapy for chronic noncancer pain].",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33544262"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "32633800",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2020,
+      "journal": "JAMA",
+      "title": "Association of Statin Use With All-Cause and Cardiovascular Mortality in US Veterans 75 Years and Older.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33048140"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "32673497",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2020,
+      "journal": "Circulation",
+      "title": "Dapagliflozin and Diuretic Use in Patients With Heart Failure and Reduced Ejection Fraction in DAPA-HF.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33196314"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "32829751",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2020,
+      "journal": "Am J Kidney Dis",
+      "title": "KDOQI Clinical Practice Guideline for Nutrition in CKD: 2020 Update.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33229127"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "33081531",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2021,
+      "journal": "Circulation",
+      "title": "Effect of Empagliflozin on the Clinical Stability of Patients With Heart Failure and a Reduced Ejection Fraction: The EMPEROR-Reduced Trial.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33493036"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "33095032",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2021,
+      "journal": "Circulation",
+      "title": "Cardiac and Kidney Benefits of Empagliflozin in Heart Failure Across the Spectrum of Kidney Function: Insights From EMPEROR-Reduced.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33493037"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "33298413",
+      "flags": ["erratum"],
+      "type": "review",
+      "year": 2021,
+      "journal": "Diabetes Care",
+      "title": "2. Classification and Diagnosis of Diabetes: Standards of Medical Care in Diabetes-2021.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "34135016"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "33357531",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2020,
+      "journal": "JACC Cardiovasc Interv",
+      "title": "12-Month Results From the Unblinded Phase of the RADIANCE-HTN SOLO Trial of Ultrasound Renal Denervation.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "33663794"
+        }
+      ],
+      "citedBy": ["nvl-009"]
+    },
+    {
+      "pmid": "33441402",
+      "flags": ["erratum"],
+      "type": "systematic review",
+      "year": 2021,
+      "journal": "BMJ",
+      "title": "Sodium-glucose cotransporter protein-2 (SGLT-2) inhibitors and glucagon-like peptide-1 (GLP-1) receptor agonists for type 2 diabetes: systematic review and network meta-analysis of randomised controlled trials.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "35044930"
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "33983794",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2021,
+      "journal": "Circulation",
+      "title": "Effect of Neprilysin Inhibition on Left Ventricular Remodeling in Patients With Asymptomatic Left Ventricular Systolic Dysfunction Late After Myocardial Infarction.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "34424774"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "34447992",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2021,
+      "journal": "Eur Heart J",
+      "title": "2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "34649282"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "34450083",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2021,
+      "journal": "Lancet",
+      "title": "Worldwide trends in hypertension prevalence and progress in treatment and control from 1990 to 2019: a pooled analysis of 1201 population-representative studies with 104 million participants.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "35123692"
+        }
+      ],
+      "citedBy": ["nvl-009"]
+    },
+    {
+      "pmid": "34458905",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2021,
+      "journal": "Eur Heart J",
+      "title": "2021 ESC Guidelines on cardiovascular disease prevention in clinical practice.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "36083202"
+        }
+      ],
+      "citedBy": ["053-024", "nvl-004", "nvl-009"]
+    },
+    {
+      "pmid": "34758252",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 2021,
+      "journal": "N Engl J Med",
+      "title": "Angiotensin Receptor-Neprilysin Inhibition in Acute Myocardial Infarction.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "34965357"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "34854906",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2021,
+      "journal": "JAMA Netw Open",
+      "title": "Statin Discontinuation and Cardiovascular Events Among Older People in Denmark.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "35089357"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "35363499",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2022,
+      "journal": "Circulation",
+      "title": "2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure: A Report of the American College of Cardiology/American Heart Association Joint Committee on Clinical Practice Guidelines.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "35500054"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "36154623"
+        },
+        {
+          "type": "Erratum in",
+          "pmid": "37011077"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "35467692",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2022,
+      "journal": "JAMA Intern Med",
+      "title": "Evaluation of the Incremental Value of a Coronary Artery Calcium Score Beyond Traditional Cardiovascular Risk Assessment: A Systematic Review and Meta-analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "35913715"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "35471507",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2022,
+      "journal": "JAMA",
+      "title": "Aspirin Use to Prevent Cardiovascular Disease and Colorectal Cancer: Updated Evidence Report and Systematic Review for the US Preventive Services Task Force.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "35522266"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "36041474",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2022,
+      "journal": "Lancet",
+      "title": "SGLT-2 inhibitors in patients with heart failure: a comprehensive meta-analysis of five randomised controlled trials.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "36641196"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "36202739",
+      "flags": ["erratum"],
+      "type": "observational study",
+      "year": 2023,
+      "journal": "JACC Heart Fail",
+      "title": "Heart Failure Drug Treatment-Inertia, Titration, and Discontinuation: A Multinational Observational Study (EVOLUTION HF).",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "38056979"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "36343954",
+      "flags": ["erratum"],
+      "type": "guideline",
+      "year": 2022,
+      "journal": "CMAJ",
+      "title": "Canadian Cardiovascular Harmonized National Guideline Endeavour (C-CHANGE) guideline for the prevention and management of cardiovascular disease in primary care: 2022 update.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "36535685"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "37000449",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2023,
+      "journal": "JAMA Netw Open",
+      "title": "Association Between Daily Alcohol Intake and Risk of All-Cause Mortality: A Systematic Review and Meta-analyses.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "37159205"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "37345492",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2023,
+      "journal": "J Hypertens",
+      "title": "2023 ESH Guidelines for the management of arterial hypertension The Task Force for the management of arterial hypertension of the European Society of Hypertension: Endorsed by the International Society of Hypertension (ISH) and the European Renal Association (ERA).",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "38033262"
+        }
+      ],
+      "citedBy": ["053-048"]
+    },
+    {
+      "pmid": "37622654",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2023,
+      "journal": "Eur Heart J",
+      "title": "2023 ESC Guidelines for the management of acute coronary syndromes.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "38383069"
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "37622666",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2023,
+      "journal": "Eur Heart J",
+      "title": "2023 Focused Update of the 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "37995350"
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "37787795",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 2023,
+      "journal": "JAMA",
+      "title": "Estimated Glomerular Filtration Rate, Albuminuria, and Adverse Outcomes: An Individual-Participant Data Meta-Analysis.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "42646846"
+        }
+      ],
+      "citedBy": ["053-024", "053-048"]
+    },
+    {
+      "pmid": "38412394",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2024,
+      "journal": "Neurology",
+      "title": "Statin Use and All-Cause Mortality in Nursing Home Residents With and Without Dementia: A Retrospective Cohort Study Using Claims Data.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "39671545"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "38801776",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 2024,
+      "journal": "Ann Intern Med",
+      "title": "Benefits and Risks Associated With Statin Therapy for Primary Prevention in Old and Very Old Adults : Real-World Evidence From a Target Trial Emulation Study.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": "38914000"
+        }
+      ],
+      "citedBy": ["053-024"]
+    },
+    {
+      "pmid": "7654275",
+      "flags": ["erratum"],
+      "type": "meta-analysis",
+      "year": 1995,
+      "journal": "JAMA",
+      "title": "Overview of randomized trials of angiotensin-converting enzyme inhibitors on mortality and morbidity in patients with heart failure. Collaborative Group on ACE Inhibitor Trials.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "7914958",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 1994,
+      "journal": "Lancet",
+      "title": "Effect of coronary artery bypass graft surgery on survival: overview of 10-year results from randomised trials by the Coronary Artery Bypass Graft Surgery Trialists Collaboration.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-004"]
+    },
+    {
+      "pmid": "9107242",
+      "flags": ["erratum"],
+      "type": "journal article",
+      "year": 1997,
+      "journal": "Lancet",
+      "title": "Wasting as independent risk factor for mortality in chronic heart failure.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-006"]
+    },
+    {
+      "pmid": "9742976",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 1998,
+      "journal": "Lancet",
+      "title": "Intensive blood-glucose control with sulphonylureas or insulin compared with conventional treatment and risk of complications in patients with type 2 diabetes (UKPDS 33). UK Prospective Diabetes Study (UKPDS) Group.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    },
+    {
+      "pmid": "9742977",
+      "flags": ["erratum"],
+      "type": "randomised trial",
+      "year": 1998,
+      "journal": "Lancet",
+      "title": "Effect of intensive blood-glucose control with metformin on complications in overweight patients with type 2 diabetes (UKPDS 34). UK Prospective Diabetes Study (UKPDS) Group.",
+      "notices": [
+        {
+          "type": "Erratum in",
+          "pmid": ""
+        }
+      ],
+      "citedBy": ["nvl-001"]
+    }
+  ]
+}

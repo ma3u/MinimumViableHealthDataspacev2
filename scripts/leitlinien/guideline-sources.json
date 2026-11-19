@@ -1,0 +1,66 @@
+{
+  "comment": "Pages guideline_pipeline.py reads. NVL: topic pages on www.leitlinien.de; `page` is the page that links the current PDFs when it is not the topic page itself. DEGAM: `pageUrl` is the guideline's own page, `linkPatterns` picks the long and short version by link text. `filePrefixes` names the PDFs of a topic on disk.",
+  "topics": [
+    {
+      "topic": "khk",
+      "page": "khk/khk_version-7",
+      "title": "Nationale VersorgungsLeitlinie Chronische KHK",
+      "awmfId": "nvl-004",
+      "filePrefixes": ["khk-"]
+    },
+    {
+      "topic": "hypertonie",
+      "title": "Nationale VersorgungsLeitlinie Hypertonie",
+      "awmfId": "nvl-009",
+      "filePrefixes": ["hypertonie-"]
+    },
+    {
+      "topic": "diabetes",
+      "title": "Nationale VersorgungsLeitlinie Typ-2-Diabetes",
+      "awmfId": "nvl-001",
+      "filePrefixes": ["diabetes-", "dm-"]
+    },
+    {
+      "topic": "herzinsuffizienz",
+      "title": "Nationale VersorgungsLeitlinie Chronische Herzinsuffizienz",
+      "awmfId": "nvl-006",
+      "filePrefixes": ["herzinsuffizienz-"]
+    },
+    {
+      "topic": "risikoberatung",
+      "pageUrl": "https://www.degam.de/leitlinie-s3-053-024",
+      "title": "DEGAM S3-Leitlinie Hausärztliche Risikoberatung zur kardiovaskulären Prävention",
+      "awmfId": "053-024",
+      "filePrefixes": ["053-024-"],
+      "linkPatterns": {
+        "long": "Lang",
+        "short": "Kurz"
+      },
+      "store": "degam",
+      "publisher": "DEGAM",
+      "rights": "DEGAM",
+      "linkBase": "https://www.degam.de",
+      "referenceHeading": "(?:\\d+ )?Literatur",
+      "furniture": "DEGAM Leitlinie S3: .*|© DEGAM \\d{4}.*",
+      "guidelineClass": "S3"
+    },
+    {
+      "topic": "nierenkrankheit",
+      "pageUrl": "https://www.degam.de/leitlinie-s3-053-048",
+      "title": "DEGAM S3-Leitlinie Versorgung von Patient*innen mit chronischer, nicht-nierenersatztherapiepflichtiger Nierenkrankheit in der Hausarztpraxis",
+      "awmfId": "053-048",
+      "filePrefixes": ["053-048-"],
+      "linkPatterns": {
+        "long": "Lang",
+        "short": "Kurz"
+      },
+      "store": "degam",
+      "publisher": "DEGAM",
+      "rights": "DEGAM",
+      "linkBase": "https://www.degam.de",
+      "referenceHeading": "(?:\\d+ )?Literatur",
+      "furniture": "DEGAM Leitlinie S3: .*|© DEGAM \\d{4}.*",
+      "guidelineClass": "S3"
+    }
+  ]
+}
