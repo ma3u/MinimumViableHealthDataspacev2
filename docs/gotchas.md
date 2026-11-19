@@ -3,6 +3,61 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-19: on EDC RC8 a Linked Data credential meets no verifier, and the refusal has a new name
+
+The move to EDC 1.0.0-RC8 (#930) broke none of the five gates. One thing of
+ours read an RC7 log line: `scripts/run-simpl-issuer-interop.sh --diagnose`
+ended "the reason is not logged, rerun with --diagnose" although it had run
+with it. The script matched `No SignatureSuite found`, and RC8 no longer gets
+that far.
+
+From RC8 Linked Data credentials are opt-in ([Connector
+#6242](https://github.com/eclipse-edc/Connector/pull/6242)): the DCP feature
+set verifies JWT credentials (VCDM 1.1 JWT and VCDM 2.0 JOSE) only, and the
+Linked Data verifier with its `JsonWebSignature2020` suite moved to the
+extension `decentralized-claims-ldp`. Our launchers do not add it, so the
+control plane refuses a Linked Data presentation with `Unauthorized: No
+verifier could handle the input data`, at debug level only, and the
+management API answers 502. Every credential the hub issues is `VC2_0_JOSE`
+and is not affected.
+
+Fix: the script matches the new line and keeps the logs it captured in
+`test-results/simpl-issuer/`, so an unknown refusal can be read without a
+second run.
+
+The other RC8 changes named in discussion 1092, read against what our scripts
+write, and why they did not break:
+
+- **Vault key validation** ([#6249](https://github.com/eclipse-edc/Connector/pull/6249)):
+  it rejects a key with a path segment `.` or `..` and nothing else. The
+  encoding is RC7's. `did:web:issuerservice%3A10016:issuer#key-1` and the
+  `<did>#key1@<context id>` aliases pass.
+- **Unknown `credentialStatus` type** ([#6243](https://github.com/eclipse-edc/Connector/pull/6243)):
+  our issuers write `BitstringStatusListEntry`, which has a revocation
+  service. A credential from another issuer with another status type is now
+  refused; `edc.iam.credential.revocation.unknowntypes.ignore=true` brings
+  the old behaviour back, and we do not set it.
+
+Rule: a script that explains a refusal from a log line pins an upstream
+message. Keep the log it read, so the next wording is one `grep` away.
+
+## 2026-11-19: a rehearsal that keeps the Neo4j volume fails EEHR-3.4 and Bruno 03/02
+
+The RC8 rehearsal reset the four EDC volumes and kept `neo4j_data`, which
+holds work no seed restores. `bootstrap-jad.sh` loads the graph only into an
+empty Neo4j ("the graph is left as it is"), so the kept graph predated the
+EEHRxF validation results of #1144: the health domain suite failed EEHR-3.4
+("0 of 0 profiles carry a validation result") and Bruno `03 Data User/02`
+failed on an empty `categories`. Neither has anything to do with EDC.
+
+Fix, on the kept graph (idempotent, touches only the EEHRxF nodes):
+
+    docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace \
+      < neo4j/register-eehrxf-profiles.cypher
+
+Rule: when a gate fails after a rebuild that kept Neo4j, check first whether
+`main` changed a seed file since the graph was loaded.
+
 ## 2026-11-18: CodeQL for Swift cannot run on macOS 27, Rosetta or not
 
 On macOS 27.2 the pre-push hook `codeql-swift` failed every push with "Bad
