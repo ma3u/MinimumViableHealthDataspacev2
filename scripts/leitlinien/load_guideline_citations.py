@@ -88,6 +88,34 @@ SET c.droppedInVersion = $version
 """
 
 
+# Status and type from study_status.py. A study PubMed did not return keeps no status:
+# absent is "not checked", never "clean".
+CYPHER_STUDY_STATUS = """
+UNWIND $rows AS row
+MATCH (s:Study {id: row.id})
+SET s.title = row.title,
+    s.journal = row.journal,
+    s.year = coalesce(row.year, s.year),
+    s.publicationTypes = row.publicationTypes,
+    s.studyType = row.type,
+    s.publicationStatus = row.publicationStatus,
+    s.statusFlags = row.flags,
+    s.retracted = row.retracted,
+    s.statusSource = 'PubMed',
+    s.statusCheckedAt = $checkedAt
+"""
+
+
+def status_rows(status: dict) -> list[dict]:
+    """One row per study with the worst flag as `publicationStatus` ("ok" when PubMed lists none)."""
+    return [{
+        "id": f"pmid-{pmid}", "title": rec["title"], "journal": rec["journal"], "year": rec["year"],
+        "publicationTypes": rec["publicationTypes"], "type": rec["type"], "flags": rec["flags"],
+        "publicationStatus": rec["flags"][0] if rec["flags"] else "ok",
+        "retracted": "retracted" in rec["flags"],
+    } for pmid, rec in sorted(status.items())]
+
+
 def current_guidelines(manifest: dict) -> list[dict]:
     """The newest version per `awmfId`: superseded versions do not get a node of their own."""
     by_awmf: dict[str, dict] = {}
@@ -130,6 +158,7 @@ def citation_rows(g: dict) -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--manifest", type=Path, default=HERE / "data" / "guidelines-manifest.json")
+    ap.add_argument("--study-status", type=Path, default=HERE / "data" / "study-status.json")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--neo4j-uri", default=os.environ.get("NEO4J_URI", "bolt://localhost:7687"))
     ap.add_argument("--neo4j-user", default=os.environ.get("NEO4J_USER", "neo4j"))
@@ -145,6 +174,13 @@ def main() -> int:
     for g, params, rows in plan:
         print(f"{params['awmfId']:9} v{params['version']:5} {params['status']:15} "
               f"{len(rows)} cited studies, {params['referencesWithoutPmid']} references without a PubMed id")
+    status_file = json.loads(args.study_status.read_text(encoding="utf-8")) if args.study_status.exists() else None
+    rows_status = status_rows(status_file["studies"]) if status_file else []
+    if status_file:
+        flagged = sum(1 for r in rows_status if r["publicationStatus"] != "ok")
+        print(f"status and type for {len(rows_status)} studies, {flagged} with a notice (study_status.py)")
+    else:
+        print(f"no {args.study_status.name}: studies load without status or type. Run study_status.py.")
     if args.dry_run:
         print("dry run: nothing written")
         return 0
@@ -163,6 +199,9 @@ def main() -> int:
                             rows=rows[start : start + 500]).consume()
             session.run(CYPHER_MARK_DROPPED, awmfId=params["awmfId"], version=params["version"],
                         ids=[r["id"] for r in rows]).consume()
+        for start in range(0, len(rows_status), 500):
+            session.run(CYPHER_STUDY_STATUS, rows=rows_status[start : start + 500],
+                        checkedAt=status_file["generated"]).consume()
         counts = session.run(
             "MATCH (g:Guideline)-[c:CITES]->(s:Study) "
             "RETURN count(DISTINCT g) AS guidelines, count(DISTINCT s) AS studies, count(c) AS citations"

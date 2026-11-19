@@ -29,6 +29,7 @@ import re
 import sys
 import time
 import urllib.parse
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -88,9 +89,18 @@ def unresolved(manifest: dict) -> list[dict]:
 
 
 def http(url: str, data: bytes | None = None) -> str:
-    req = urllib.request.Request(url, data=data, headers={"User-Agent": TOOL})
-    with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 (fixed https host)
-        return resp.read().decode("utf-8", errors="replace")
+    """One request, tried up to four times: PubMed answers a 502 or 429 now and then."""
+    for attempt in range(4):
+        try:
+            req = urllib.request.Request(url, data=data, headers={"User-Agent": TOOL})
+            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 (fixed https host)
+                return resp.read().decode("utf-8", errors="replace")
+        except OSError as err:  # HTTPError, URLError and socket.timeout are all OSError
+            code = getattr(err, "code", None)
+            if attempt == 3 or (code is not None and code < 500 and code != 429):
+                raise
+            time.sleep(2 ** attempt * 2)
+    raise AssertionError("unreachable")
 
 
 def resolve(manifest: dict, cache: dict[str, str | None], ask=http, pause: float = PAUSE_SECONDS) -> dict[str, int]:

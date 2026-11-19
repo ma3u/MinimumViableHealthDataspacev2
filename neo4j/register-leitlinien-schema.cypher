@@ -81,6 +81,14 @@ CREATE INDEX study_pmid IF NOT EXISTS
 CREATE INDEX guideline_active IF NOT EXISTS
   FOR (g:Guideline) ON (g.active);
 
+// Study.publicationStatus: ok, erratum, corrected and republished, expression of
+// concern, retracted (scripts/leitlinien/study_status.py, from PubMed).
+CREATE INDEX study_publication_status IF NOT EXISTS
+  FOR (s:Study) ON (s.publicationStatus);
+
+CREATE INDEX study_type IF NOT EXISTS
+  FOR (s:Study) ON (s.studyType);
+
 // ────────────────────────────────────────────────────────────
 // Fulltext index — German clinical search
 // ────────────────────────────────────────────────────────────

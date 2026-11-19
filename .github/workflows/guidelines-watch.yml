@@ -9,6 +9,13 @@
 # it. scripts/leitlinien/guidelines-state.json is what the repository knows: titles,
 # versions, dates, status and reference counts.
 #
+# scripts/leitlinien/study_status.py then asks PubMed for every study the
+# guidelines cite: retracted, expression of concern, corrected and republished,
+# erratum, and the study type. It asks for one paper known to be retracted on
+# every run and fails when PubMed does not show it as such, so "nothing found"
+# means something. scripts/leitlinien/study-flags.json is what the repository
+# knows. A study that gains a notice changes that file and opens the issue.
+#
 # The AWMF register is not read here. Its robots.txt says "Block other
 # automated retrieval" and it answers scripts with a bot check; that needs the
 # AWMF's consent, not a workaround.
@@ -38,6 +45,9 @@ on:
       - "scripts/leitlinien/guideline_pipeline.py"
       - "scripts/leitlinien/guideline-sources.json"
       - "scripts/leitlinien/guidelines-state.json"
+      - "scripts/leitlinien/resolve_pmids.py"
+      - "scripts/leitlinien/study_status.py"
+      - "scripts/leitlinien/study-flags.json"
       - ".github/workflows/guidelines-watch.yml"
 
 permissions:
@@ -52,7 +62,7 @@ jobs:
   watch:
     name: Guideline versions and validity
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
@@ -60,6 +70,9 @@ jobs:
             scripts/leitlinien/guideline_pipeline.py
             scripts/leitlinien/guideline-sources.json
             scripts/leitlinien/guidelines-state.json
+            scripts/leitlinien/resolve_pmids.py
+            scripts/leitlinien/study_status.py
+            scripts/leitlinien/study-flags.json
           sparse-checkout-cone-mode: false
 
       - name: Install pdftotext
@@ -94,6 +107,19 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
+
+          # The studies: PubMed ids for the lists that print none, then status and type.
+          # study_status.py exits non-zero when its positive control is not seen as retracted.
+          python3 scripts/leitlinien/resolve_pmids.py \
+            --manifest "$work/data/guidelines-manifest.json" --cache "$work/data/pmid-cache.json" | tee -a "$work/report.txt"
+          python3 scripts/leitlinien/study_status.py \
+            --manifest "$work/data/guidelines-manifest.json" --out "$work/data/study-status.json" \
+            --flags "$work/study-flags.json" | tee -a "$work/report.txt"
+          if diff -u scripts/leitlinien/study-flags.json "$work/study-flags.json" > "$work/flags.diff"; then
+            echo "flags_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "flags_changed=true" >> "$GITHUB_OUTPUT"
+          fi
           {
             echo "### Guidelines"
             echo '```'
@@ -105,10 +131,16 @@ jobs:
               cat "$work/state.diff"
               echo '```'
             fi
+            if [ -s "$work/flags.diff" ]; then
+              echo "### Difference to scripts/leitlinien/study-flags.json"
+              echo '```diff'
+              head -c 20000 "$work/flags.diff"
+              echo '```'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open or update the issue
-        if: steps.run.outputs.changed == 'true' && (github.event_name == 'schedule' || inputs.open_issue == true)
+        if: (steps.run.outputs.changed == 'true' || steps.run.outputs.flags_changed == 'true') && (github.event_name == 'schedule' || inputs.open_issue == true)
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -124,15 +156,23 @@ jobs:
             cat "$work/state.diff"
             echo '```'
             echo
+            echo "Studies the guidelines cite (\`scripts/leitlinien/study-flags.json\`): a notice in PubMed that the"
+            echo "repository does not know yet (retraction, expression of concern, correction), or a changed count."
+            echo
+            echo '```diff'
+            head -c 30000 "$work/flags.diff"
+            echo '```'
+            echo
             echo "To take it over, on a machine with the local data folder:"
             echo
             echo '```bash'
             echo "python3 scripts/leitlinien/guideline_pipeline.py"
             echo "python3 scripts/leitlinien/resolve_pmids.py"
+            echo "python3 scripts/leitlinien/study_status.py"
             echo "NEO4J_PASSWORD=... python3 scripts/leitlinien/load_guideline_citations.py"
             echo '```'
             echo
-            echo "Then commit \`scripts/leitlinien/guidelines-state.json\`. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "Then commit \`scripts/leitlinien/guidelines-state.json\` and \`scripts/leitlinien/study-flags.json\`. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           } > "$work/body.md"
           gh label create guidelines --color 1E8449 --description "Clinical guidelines layer" 2>/dev/null || true
           number=$(gh issue list --state open --label guidelines --search "Guidelines changed in:title" --json number --jq '.[0].number // empty')

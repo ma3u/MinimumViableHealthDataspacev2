@@ -198,7 +198,7 @@ python3 guideline_pipeline.py              # fetch new versions, convert, extrac
 python3 guideline_pipeline.py --offline    # only convert what is on disk
 python3 resolve_pmids.py                   # look up PubMed ids the guideline does not print
 NEO4J_PASSWORD=... python3 load_guideline_citations.py
-python3 -m pytest -q                       # 56 tests, no network, no database
+python3 -m pytest -q                       # 67 tests, no network, no database
 ```
 
 `guideline_pipeline.py` needs `pdftotext` (poppler) and nothing else. It reads
@@ -244,5 +244,28 @@ loading the full text into a graph that others use needs that consent.
 `docs/klarbefund/leitlinien-zusammenfassung.md` summarises, in its own words
 and with page numbers, what the six guidelines say about the values Klarbefund
 shows.
+
+### Status and type of the cited studies
+
+```bash
+python3 study_status.py      # after resolve_pmids.py; then load_guideline_citations.py again
+```
+
+`study_status.py` asks PubMed (esummary) for every cited study and records
+its notices (retracted, expression of concern, corrected and republished,
+erratum) and its type (guideline, meta-analysis, systematic review,
+randomised trial, ...). Every run also asks for one paper known to be
+retracted and fails when PubMed does not show it as such, so "nothing found"
+is backed by a positive control. A study PubMed does not return is listed as
+not found, never as clean. `study-flags.json` is the committed record: the
+flagged studies with the guidelines that cite them, and the count of study
+types per guideline. The loader writes `publicationStatus`, `statusFlags`,
+`studyType` and `statusCheckedAt` on each `Study`; the weekly watch reports a
+study that gains a notice.
+
+On 2026-11-19, of 1,496 studies: none retracted, one with an expression of
+concern (the Hygia Chronotherapy Trial, cited by NVL Hypertonie, which draws
+no recommendation from it), one corrected and republished (PREDIMED, the
+2018 version), 111 with an erratum.
 
 Open tasks are listed in issue #20.

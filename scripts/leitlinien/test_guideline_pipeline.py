@@ -204,7 +204,7 @@ def test_guideline_params_count_what_cannot_be_linked():
 
 
 def test_cypher_never_deletes():
-    for q in (loader.CYPHER_GUIDELINE, loader.CYPHER_CITES, loader.CYPHER_MARK_DROPPED):
+    for q in (loader.CYPHER_GUIDELINE, loader.CYPHER_CITES, loader.CYPHER_MARK_DROPPED, loader.CYPHER_STUDY_STATUS):
         assert "DELETE" not in q.upper()
         assert "CREATE (" not in q.upper()
 
@@ -245,3 +245,14 @@ def test_month_validity_runs_to_the_end_of_the_month():
 def test_version_from_the_title_pages():
     assert nvl.find_text_version("DEGAM Leitlinie\nAWMF-Register-Nr. 053-024\nVersion 2.3\nStand November 2024") == "2.3"
     assert nvl.find_text_version("ohne Angabe") is None
+
+
+def test_status_rows_name_the_worst_flag_and_ok_only_when_pubmed_answered():
+    rows = loader.status_rows({
+        "2": {"title": "t", "journal": "j", "year": 2020, "publicationTypes": ["Randomized Controlled Trial"],
+              "type": "randomised trial", "flags": []},
+        "1": {"title": "t", "journal": "j", "year": 2019, "publicationTypes": ["Journal Article"],
+              "type": "journal article", "flags": ["expression of concern", "erratum"]},
+    })
+    assert [(r["id"], r["publicationStatus"], r["retracted"]) for r in rows] == [
+        ("pmid-1", "expression of concern", False), ("pmid-2", "ok", False)]

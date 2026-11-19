@@ -197,3 +197,36 @@ Für einen Laien ist das die wichtigste Liste, weil hier „die Leitlinie" keine
 ## 12. Rechte
 
 Die Texte der NVL und der DEGAM-Leitlinien sind urheberrechtlich geschützt. Beide Impressen nennen ausdrücklich auch die Einspeicherung in elektronische Systeme als zustimmungspflichtig; bei den NVL dürfen Abbildungen und Tabellen von Dritten frei genutzt werden. Deshalb liegen PDF und Markdown nur lokal unter `scripts/leitlinien/data/` (git-ignoriert). Wer die Volltexte in einen Graph laden will, den andere nutzen, braucht die Zustimmung des ÄZQ beziehungsweise der DEGAM. Zahlen, Fundstellen und Literaturangaben sind Tatsachen und hier wiedergegeben.
+
+## 13. Die zitierten Studien: Status und Art
+
+Für alle 1.496 Studien mit PubMed-Nummer hat `study_status.py` am 19.11.2026 bei PubMed nachgefragt. Jeder Lauf fragt zusätzlich eine bekannt zurückgezogene Arbeit ab und bricht ab, wenn PubMed sie nicht als zurückgezogen zeigt; ein „nichts gefunden" ist damit belegt. PubMed kannte alle 1.496.
+
+**Status.**
+
+| Vermerk bei PubMed                | Studien |
+| --------------------------------- | ------- |
+| Zurückgezogen                     | 0       |
+| Expression of Concern             | 1       |
+| Korrigiert und neu veröffentlicht | 1       |
+| Erratum                           | 111     |
+| Kein Vermerk                      | 1.383   |
+
+- **Expression of Concern:** die Hygia-Chronotherapie-Studie zur abendlichen Einnahme von Blutdruckmitteln (Eur Heart J 2020, [PMID 31641769](https://pubmed.ncbi.nlm.nih.gov/31641769/)). Die NVL Hypertonie führt sie als eine von 14 Arbeiten ihrer Recherche zu Einnahmezeitpunkten (Literatur Nr. 134, S. 59). Sie leitet daraus keine Empfehlung ab und nennt als Grund unter anderem Grenzen im Studiendesign (S. 69). Den Vermerk selbst erwähnt die Leitlinie nicht.
+- **Korrigiert und neu veröffentlicht:** die PREDIMED-Studie zur Mittelmeerkost ([PMID 29897866](https://pubmed.ncbi.nlm.nih.gov/29897866/)). Drei Leitlinien zitieren die neu veröffentlichte Fassung von 2018, nicht die zurückgezogene von 2013.
+- Ein unauffälliger Status heißt, dass die Arbeit nicht zurückgezogen wurde. Er sagt nichts über ihre Qualität.
+
+**Art der Studien**, nach den Publikationstypen von PubMed; je Arbeit zählt der stärkste genannte Typ.
+
+| Leitlinie             | Studien | Randomisierte Studien | Metaanalysen und systematische Übersichten | zusammen | Leitlinien | Übersichten | Sonstige Artikel |
+| --------------------- | ------- | --------------------- | ------------------------------------------ | -------- | ---------- | ----------- | ---------------- |
+| NVL Hypertonie        | 163     | 33                    | 84                                         | 72 %     | 0          | 9           | 33               |
+| NVL Chronische KHK    | 332     | 97                    | 120                                        | 65 %     | 27         | 24          | 54               |
+| NVL Herzinsuffizienz  | 534     | 195                   | 107                                        | 57 %     | 21         | 40          | 146              |
+| DEGAM Risikoberatung  | 189     | 9                     | 80                                         | 47 %     | 2          | 17          | 74               |
+| NVL Typ-2-Diabetes    | 124     | 22                    | 32                                         | 44 %     | 3          | 10          | 51               |
+| DEGAM Nierenkrankheit | 197     | 14                    | 31                                         | 23 %     | 12         | 34          | 93               |
+
+Lesart: Die Hypertonie-Leitlinie stützt sich zu fast drei Vierteln auf randomisierte Studien und deren Zusammenfassungen, die Nieren-Leitlinie zu knapp einem Viertel. „Sonstige Artikel" sind Arbeiten, denen PubMed keinen Studientyp zuweist, meist Kohorten- und Registerauswertungen; PubMed vergibt die Typen nicht lückenlos, die Anteile sind deshalb Untergrenzen. Die Zahlen sagen, was im Literaturverzeichnis steht, nicht, worauf eine einzelne Empfehlung beruht.
+
+Im Graph trägt jede Studie `publicationStatus`, `statusFlags`, `studyType` und das Prüfdatum. Der wöchentliche Lauf meldet eine Studie, die einen neuen Vermerk bekommt.
