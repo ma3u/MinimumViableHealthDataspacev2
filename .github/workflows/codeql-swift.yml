@@ -3,10 +3,15 @@
 # ---------------------------------------------------------------------------
 # CodeQL cannot read Swift from source; it watches a real build on a macOS
 # runner, which has taken up to the 90-minute limit (#765). So it runs weekly
-# and by hand, and on a pull request only when this workflow or the local
-# script changes, so a fix to the analysis shows on its own PR. A change to
-# the app itself is checked before it leaves the laptop: the pre-push hook
-# codeql-swift runs clients/ios/Scripts/codeql-swift.sh (#847).
+# and by hand, and on a pull request only when this workflow, the local
+# script or project.yml changes, so a fix to the analysis shows on its own PR.
+# A change to the app itself is checked before it leaves the laptop: the
+# pre-push hook codeql-swift runs clients/ios/Scripts/codeql-swift.sh (#847).
+#
+# project.yml is here because it pins the packages (HealthGraph, and through
+# it Relate), and no Package.resolved is committed: a pin bump changes what a
+# fresh resolve builds, and Relate 1.1.0 broke exactly that build (#1157). The
+# local hook cannot catch it on macOS 27 or Swift 6.4, where it skips (#1155).
 #
 # The build is the app scheme from project.yml (Sources/MeinBefund and
 # Sources/Shared). The default setup this
@@ -22,6 +27,7 @@ on:
     paths:
       - ".github/workflows/codeql-swift.yml"
       - "clients/ios/Scripts/codeql-swift.sh"
+      - "clients/ios/project.yml"
   schedule:
     - cron: "41 4 * * 1"
   workflow_dispatch:
