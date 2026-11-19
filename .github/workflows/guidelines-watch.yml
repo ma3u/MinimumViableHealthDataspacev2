@@ -102,7 +102,9 @@ jobs:
             echo "::error::Fewer Markdown files ($markdown) than guidelines ($count)"
             exit 1
           fi
-          if diff -u scripts/leitlinien/guidelines-state.json "$work/guidelines-state.json" > "$work/state.diff"; then
+          # Compared as data, key order and line breaks aside: Prettier reformats the committed files.
+          norm() { python3 -m json.tool --sort-keys "$1"; }
+          if diff -u <(norm scripts/leitlinien/guidelines-state.json) <(norm "$work/guidelines-state.json") > "$work/state.diff"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -115,7 +117,7 @@ jobs:
           python3 scripts/leitlinien/study_status.py \
             --manifest "$work/data/guidelines-manifest.json" --out "$work/data/study-status.json" \
             --flags "$work/study-flags.json" | tee -a "$work/report.txt"
-          if diff -u scripts/leitlinien/study-flags.json "$work/study-flags.json" > "$work/flags.diff"; then
+          if diff -u <(norm scripts/leitlinien/study-flags.json) <(norm "$work/study-flags.json") > "$work/flags.diff"; then
             echo "flags_changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "flags_changed=true" >> "$GITHUB_OUTPUT"

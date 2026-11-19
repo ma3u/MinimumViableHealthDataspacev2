@@ -401,11 +401,12 @@ def main() -> int:
     sources = json.loads(args.sources.read_text(encoding="utf-8"))["topics"]
     manifest = build(args.data_dir, sources, args.offline, args.today)
     new_state = json.dumps(state_of(manifest), ensure_ascii=False, indent=2) + "\n"
-    old_state = args.state.read_text(encoding="utf-8") if args.state.exists() else ""
+    # Compared as data: the committed file is reformatted by Prettier.
+    old_state = json.loads(args.state.read_text(encoding="utf-8")) if args.state.exists() else None
     for g in state_of(manifest)["guidelines"]:
         print(f"{g['id']:34} {g['status']:10} valid until {g['validUntilDate']}  "
               f"{g['references']} references, {g['referencesWithPmid']} with a printed PubMed id")
-    if new_state == old_state:
+    if old_state == state_of(manifest):
         print("state unchanged")
         return 0
     if args.check:

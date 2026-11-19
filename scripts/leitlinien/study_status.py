@@ -197,8 +197,9 @@ def main() -> int:
         if f["flags"][0] != "erratum":
             print(f"  ! PMID {f['pmid']} {', '.join(f['flags'])}: {f['title'][:70]} (cited by {', '.join(f['citedBy'])})")
     new = json.dumps(flags, ensure_ascii=False, indent=2) + "\n"
-    old = args.flags.read_text(encoding="utf-8") if args.flags.exists() else ""
-    if new == old:
+    # Compared as data: the committed file is reformatted by Prettier.
+    old = json.loads(args.flags.read_text(encoding="utf-8")) if args.flags.exists() else None
+    if old == flags:
         print("flags unchanged")
         return 0
     if args.check:
