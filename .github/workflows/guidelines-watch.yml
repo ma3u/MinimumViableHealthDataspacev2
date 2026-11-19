@@ -1,0 +1,147 @@
+# ---------------------------------------------------------------------------
+# Guidelines watch: a new, expired or withdrawn guideline becomes an issue
+# ---------------------------------------------------------------------------
+# scripts/leitlinien/nvl_pipeline.py reads the Nationale VersorgungsLeitlinien
+# on www.leitlinien.de (robots.txt allows every agent), downloads a version it
+# has not seen, converts it to Markdown, extracts the reference list, and marks
+# a guideline inactive when its validity has passed or a newer version replaced
+# it. scripts/leitlinien/nvl-state.json is what the repository knows: titles,
+# versions, dates, status and reference counts.
+#
+# The AWMF register is not read here. Its robots.txt says "Block other
+# automated retrieval" and it answers scripts with a bot check; that needs the
+# AWMF's consent, not a workaround.
+#
+# The guideline texts are copyrighted. They are downloaded to the runner,
+# read, and thrown away with it: nothing is uploaded as an artifact and nothing
+# but the state file is ever proposed for the repository.
+#
+# On the schedule a difference between the fresh state and the committed one
+# opens or updates one issue ("Guidelines changed", label guidelines) that
+# carries the diff. Loading into Neo4j is a local step, see the README.
+# Weekly, Monday, after the upstream watch.
+# ---------------------------------------------------------------------------
+name: Guidelines watch
+
+on:
+  schedule:
+    - cron: "41 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      open_issue:
+        description: "Open or update the issue when the state changed (off: only report)"
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - "scripts/leitlinien/nvl_pipeline.py"
+      - "scripts/leitlinien/nvl-sources.json"
+      - "scripts/leitlinien/nvl-state.json"
+      - ".github/workflows/guidelines-watch.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: guidelines-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    name: Guideline versions and validity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts/leitlinien/nvl_pipeline.py
+            scripts/leitlinien/nvl-sources.json
+            scripts/leitlinien/nvl-state.json
+          sparse-checkout-cone-mode: false
+
+      - name: Install pdftotext
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          pdftotext -v 2>&1 | head -1
+
+      - name: Fetch, convert, compare
+        id: run
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/guidelines"
+          mkdir -p "$work"
+          python3 scripts/leitlinien/nvl_pipeline.py \
+            --data-dir "$work/data" --state "$work/nvl-state.json" | tee "$work/report.txt"
+          # A run that read nothing must fail, not report "no change" (ADR-031).
+          count=$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["guidelines"]))' "$work/nvl-state.json")
+          echo "guidelines read: $count"
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No guideline was read from www.leitlinien.de"
+            exit 1
+          fi
+          markdown=$(find "$work/data/nvl-markdown" -name '*.md' -size +10k | wc -l | tr -d ' ')
+          echo "markdown files written: $markdown"
+          if [ "$markdown" -lt "$count" ]; then
+            echo "::error::Fewer Markdown files ($markdown) than guidelines ($count)"
+            exit 1
+          fi
+          if diff -u scripts/leitlinien/nvl-state.json "$work/nvl-state.json" > "$work/state.diff"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo "### Guidelines"
+            echo '```'
+            cat "$work/report.txt"
+            echo '```'
+            if [ -s "$work/state.diff" ]; then
+              echo "### Difference to scripts/leitlinien/nvl-state.json"
+              echo '```diff'
+              cat "$work/state.diff"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open or update the issue
+        if: steps.run.outputs.changed == 'true' && (github.event_name == 'schedule' || inputs.open_issue == true)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/guidelines"
+          {
+            echo "The weekly run read www.leitlinien.de and found a state that differs from"
+            echo "\`scripts/leitlinien/nvl-state.json\`: a new version, a validity that has passed,"
+            echo "or a guideline that is no longer offered."
+            echo
+            echo '```diff'
+            cat "$work/state.diff"
+            echo '```'
+            echo
+            echo "To take it over, on a machine with the local data folder:"
+            echo
+            echo '```bash'
+            echo "python3 scripts/leitlinien/nvl_pipeline.py"
+            echo "NEO4J_PASSWORD=... python3 scripts/leitlinien/load_guideline_citations.py"
+            echo '```'
+            echo
+            echo "Then commit \`scripts/leitlinien/nvl-state.json\`. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > "$work/body.md"
+          gh label create guidelines --color 1E8449 --description "Clinical guidelines layer" 2>/dev/null || true
+          number=$(gh issue list --state open --label guidelines --search "Guidelines changed in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body-file "$work/body.md"
+          else
+            gh issue create --title "Guidelines changed" --label guidelines --body-file "$work/body.md"
+          fi
+
+      - name: Fail a pull request whose state file is stale
+        if: github.event_name == 'pull_request' && steps.run.outputs.changed == 'true'
+        run: |
+          echo "::error::scripts/leitlinien/nvl-state.json does not match what the pipeline reads today. Run nvl_pipeline.py and commit the file."
+          exit 1

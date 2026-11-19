@@ -64,6 +64,24 @@ CREATE INDEX guideline_chunk_section IF NOT EXISTS
   FOR (c:GuidelineChunk) ON (c.sectionId);
 
 // ────────────────────────────────────────────────────────────
+// Cited studies (scripts/leitlinien/load_guideline_citations.py)
+//
+// (:Guideline)-[:CITES {referenceNumber, guidelineVersion}]->(:Study)
+// Study.id is 'pmid-<pmid>', the form the Klarbefund health graph uses for the
+// sources of its reference ranges. A guideline that has expired or was
+// withdrawn keeps its node and its CITES relationships with active = false.
+// ────────────────────────────────────────────────────────────
+
+CREATE CONSTRAINT study_id IF NOT EXISTS
+  FOR (s:Study) REQUIRE s.id IS UNIQUE;
+
+CREATE INDEX study_pmid IF NOT EXISTS
+  FOR (s:Study) ON (s.pmid);
+
+CREATE INDEX guideline_active IF NOT EXISTS
+  FOR (g:Guideline) ON (g.active);
+
+// ────────────────────────────────────────────────────────────
 // Fulltext index — German clinical search
 // ────────────────────────────────────────────────────────────
 
