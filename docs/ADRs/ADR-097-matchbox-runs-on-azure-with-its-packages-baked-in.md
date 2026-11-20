@@ -4,7 +4,7 @@ Date: 2026-11-20
 
 Merged as ADR-095 in #1180 and renumbered the same day: ADR-095 is the push data plane on the Dataplane SDK, accepted under that number, and ADR-096 is kept for its Kafka broker decision.
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-20)
 **Relates to:** [ADR-029](ADR-029-dependency-version-pinning.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-058](ADR-058-azure-triggers-the-off-hours-schedule.md)
 **Tracks:** [discussion #1169](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1169), [#1174](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1174), [#1173](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1173)
 
