@@ -1,0 +1,51 @@
+meta {
+  name: 31 I add a Bundle that is not a document (422)
+  type: http
+  seq: 31
+}
+
+post {
+  url: {{baseUrl}}/api/patient/documents?patientId={{patientId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/fhir+json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "resourceType": "Bundle",
+    "type": "collection",
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:7c1f3b52-6a3e-4c55-9d0e-8f1b2a7c4e19",
+        "resource": { "resourceType": "Observation", "id": "7c1f3b52-6a3e-4c55-9d0e-8f1b2a7c4e19", "status": "final" }
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 422
+  res.body.problems: isArray
+}
+
+tests {
+  // #1173: a document is checked before anything is read from it, and a
+  // collection is not a document. The refusal says what is wrong.
+  test("says the Bundle is not a document", () => {
+    expect(res.body.problems).to.include("Bundle.type is collection, not document");
+  });
+  test("and that it has no Composition first", () => {
+    expect(res.body.problems).to.include("the first entry is not a Composition");
+  });
+}
+
+docs {
+  EHDS Art. 15(4): the hub reads EEHRxF documents into a person's record. The
+  successful path needs a FHIR validator (FHIR_VALIDATOR_URL), which this stack
+  does not run yet, so the collection asserts the refusal every stack gives.
+}

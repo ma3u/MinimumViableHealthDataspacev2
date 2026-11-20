@@ -18,7 +18,10 @@ import {
   sampleText,
   type SampleSet,
 } from "@/lib/fhir-documents/samples";
-import { documentProblems } from "@/lib/fhir-documents/document-shape";
+import {
+  documentProblems,
+  unreachableEntries,
+} from "@/lib/fhir-documents/document-shape";
 import {
   buildLabReportDocument,
   groupLabReports,
@@ -117,6 +120,7 @@ describe("document shape", () => {
     (_file, sample) => {
       const doc = buildSample(sample, set.timestamp);
       expect(documentProblems(doc)).toEqual([]);
+      expect(unreachableEntries(doc)).toEqual([]);
       expect(doc.type).toBe("document");
       expect(doc.identifier.value).toMatch(/^urn:uuid:[0-9a-f-]{36}$/);
       expect(doc.timestamp).toBe(set.timestamp);
@@ -352,34 +356,47 @@ describe("Patient Summary", () => {
 
 describe("laboratory report", () => {
   it("groups values by their report node, their Klarbefund report, or the lab and day", () => {
-    const reports = groupLabReports([
-      labRow({ id: "a", reportNodeId: "dr-lab-1", reportTitle: "Lipid panel" }),
-      labRow({ id: "b", sourceReport: "1f0e" }),
-      labRow({ id: "c" }),
-      labRow({ id: "d", code: "2093-3" }),
-      labRow({ id: "e", effective: "2026-03-02" }),
-    ]);
+    const reports = groupLabReports(
+      [
+        labRow({
+          id: "a",
+          reportNodeId: "dr-lab-1",
+          reportTitle: "Lipid panel",
+        }),
+        labRow({ id: "b", sourceReport: "1f0e" }),
+        labRow({ id: "c" }),
+        labRow({ id: "d", code: "2093-3" }),
+        labRow({ id: "e", effective: "2026-03-02" }),
+      ],
+      "P9",
+    );
     expect(
       reports.map((r) => [r.reportId, r.results.map((x) => x.id)]),
     ).toEqual([
-      ["lab-2026-03-02-alphaklinik-berlin-zentrallabor-fictional", ["e"]],
+      ["lab-p9-2026-03-02-alphaklinik-berlin-zentrallabor-fictional", ["e"]],
       ["dr-lab-1", ["a"]],
       ["klarbefund-1f0e", ["b"]],
-      ["lab-2026-03-01-alphaklinik-berlin-zentrallabor-fictional", ["d", "c"]],
+      [
+        "lab-p9-2026-03-01-alphaklinik-berlin-zentrallabor-fictional",
+        ["d", "c"],
+      ],
     ]);
     expect(reports[1].title).toBe("Lipid panel");
   });
 
-  const [report] = groupLabReports([
-    labRow({
-      id: "kb-1",
-      status: "preliminary",
-      sourceKind: "ocr-transcribed",
-      sourceLine: "HbA1c 6,1 % 4,0 - 6,0",
-      sourceRegion: "1@0.1,0.4,0.8,0.02",
-      sourceReport: "1f0e",
-    }),
-  ]);
+  const [report] = groupLabReports(
+    [
+      labRow({
+        id: "kb-1",
+        status: "preliminary",
+        sourceKind: "ocr-transcribed",
+        sourceLine: "HbA1c 6,1 % 4,0 - 6,0",
+        sourceRegion: "1@0.1,0.4,0.8,0.02",
+        sourceReport: "1f0e",
+      }),
+    ],
+    "P9",
+  );
   const doc = buildLabReportDocument(PATIENT, report, {
     timestamp: T,
     identity: { kind: "identified" },

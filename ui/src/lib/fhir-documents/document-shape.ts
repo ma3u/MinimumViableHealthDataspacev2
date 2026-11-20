@@ -3,13 +3,13 @@
  * must keep and an import (#1173) checks before anything else: an
  * identifier and a timestamp, the Composition as the first entry, every
  * entry with a fullUrl, every reference inside the Bundle resolvable, and
- * every entry reachable from the Composition except a Provenance, which
- * points at the others rather than the other way round.
+ * every section holding text, entries or sub-sections (cmp-1) and an
+ * emptyReason only when it has no entries (cmp-2).
  *
  * This is not profile validation; the HL7 validator does that
- * (scripts/eehrxf/validate.py). It catches what a document builder or a
- * sender can get wrong in shape. Returns the problems, empty when there are
- * none.
+ * (scripts/eehrxf/validate.py, and `$validate` on import). It catches what a
+ * document builder or a sender can get wrong in shape. Returns the problems,
+ * empty when there are none.
  */
 
 type Json = Record<string, unknown>;
@@ -29,7 +29,7 @@ function referencesIn(value: unknown, out: string[] = []): string[] {
   return out;
 }
 
-/** The key an entry is found under: its fullUrl and `Type/id`. */
+/** The keys an entry is found under: its fullUrl and `Type/id`. */
 function keysOf(entry: Json): string[] {
   const r = obj(entry.resource);
   const keys: string[] = [];
@@ -38,6 +38,19 @@ function keysOf(entry: Json): string[] {
     keys.push(`${r.resourceType}/${r.id}`);
   }
   return keys;
+}
+
+function entriesOf(bundle: unknown): Json[] {
+  const b = obj(bundle);
+  return Array.isArray(b.entry) ? b.entry.map(obj) : [];
+}
+
+function indexOf(entries: Json[]): Map<string, Json> {
+  const byKey = new Map<string, Json>();
+  for (const e of entries) {
+    for (const key of keysOf(e)) byKey.set(key, obj(e.resource));
+  }
+  return byKey;
 }
 
 export function documentProblems(bundle: unknown): string[] {
@@ -54,21 +67,19 @@ export function documentProblems(bundle: unknown): string[] {
   if (typeof b.timestamp !== "string") {
     problems.push("Bundle.timestamp is missing");
   }
-  const entries = Array.isArray(b.entry) ? b.entry.map(obj) : [];
+  const entries = entriesOf(bundle);
   if (entries.length === 0) return [...problems, "the Bundle has no entries"];
   const composition = obj(entries[0].resource);
   if (composition.resourceType !== "Composition") {
     problems.push("the first entry is not a Composition");
   }
 
-  const byKey = new Map<string, Json>();
   entries.forEach((e, i) => {
     if (typeof e.fullUrl !== "string") {
       problems.push(`entry[${i}] has no fullUrl`);
     }
-    for (const key of keysOf(e)) byKey.set(key, obj(e.resource));
   });
-
+  const byKey = indexOf(entries);
   entries.forEach((e, i) => {
     for (const ref of referencesIn(e.resource)) {
       if (!byKey.has(ref)) {
@@ -85,16 +96,29 @@ export function documentProblems(bundle: unknown): string[] {
       ...sections(x.section),
     ]);
   for (const s of sections(composition.section)) {
-    const hasEntries = Array.isArray(s.entry) && s.entry.length > 0;
-    if (!hasEntries && !s.emptyReason) {
-      const title = typeof s.title === "string" ? s.title : "untitled";
-      problems.push(
-        `section "${title}" has neither entries nor an emptyReason`,
-      );
+    const title = typeof s.title === "string" ? s.title : "untitled";
+    const has = (k: string) =>
+      Array.isArray(s[k]) ? (s[k] as unknown[]).length > 0 : !!s[k];
+    if (!has("text") && !has("entry") && !has("section")) {
+      problems.push(`section "${title}" has no text, entries or sections`);
+    }
+    if (has("entry") && s.emptyReason) {
+      problems.push(`section "${title}" has entries and an emptyReason`);
     }
   }
+  return problems;
+}
 
-  // Reachable from the Composition by following references forwards.
+/**
+ * Entries no reference leads to from the Composition, a Provenance aside
+ * (it points at the others). FHIR only warns about these; the hub's own
+ * documents have none, and its tests hold it to that.
+ */
+export function unreachableEntries(bundle: unknown): string[] {
+  const entries = entriesOf(bundle);
+  if (entries.length === 0) return [];
+  const byKey = indexOf(entries);
+  const composition = obj(entries[0].resource);
   const reached = new Set<Json>([composition]);
   const queue: Json[] = [composition];
   while (queue.length) {
@@ -106,15 +130,8 @@ export function documentProblems(bundle: unknown): string[] {
       }
     }
   }
-  entries.forEach((e, i) => {
-    const r = obj(e.resource);
-    if (!reached.has(r) && r.resourceType !== "Provenance") {
-      problems.push(
-        `entry[${i}] (${String(
-          r.resourceType,
-        )}) is not reachable from the Composition`,
-      );
-    }
-  });
-  return problems;
+  return entries
+    .map((e, i) => ({ r: obj(e.resource), i }))
+    .filter(({ r }) => !reached.has(r) && r.resourceType !== "Provenance")
+    .map(({ r, i }) => `entry[${i}] (${String(r.resourceType)})`);
 }

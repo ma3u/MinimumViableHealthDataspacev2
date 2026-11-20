@@ -47,7 +47,10 @@ export const LAB_PROFILES = {
 const EXT_DR_COMPOSITION =
   "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition";
 /** The identifier system of a report in the hub. */
-const LAB_REPORT_SYSTEM = "https://ehds.mabu.red/fhir/sid/lab-report";
+export const LAB_REPORT_SYSTEM = "https://ehds.mabu.red/fhir/sid/lab-report";
+/** The Klarbefund report (its UUID) a value was read from. */
+export const KLARBEFUND_REPORT_SYSTEM =
+  "https://ehds.mabu.red/fhir/sid/klarbefund-report";
 const REPORT_TYPE = {
   system: LOINC,
   code: "11502-2",
@@ -313,7 +316,7 @@ export function buildLabReportDocument(
               role: "source",
               what: {
                 identifier: {
-                  system: "https://ehds.mabu.red/fhir/sid/klarbefund-report",
+                  system: KLARBEFUND_REPORT_SYSTEM,
                   value: report.sourceReport,
                 },
                 display: "The paper report scanned in the Klarbefund app",
@@ -373,9 +376,13 @@ function slug(text: string): string {
  * DiagnosticReport node it is a result of; failing that, to the Klarbefund
  * report it came from; failing that, to the values the same laboratory
  * reported on the same day, which is what the seeded records hold (one
- * report a visit). Newest first.
+ * report a visit). Such a report's id names the record, so a report node an
+ * import makes of it (#1173) is unique in the graph. Newest first.
  */
-export function groupLabReports(rows: LabObservationRow[]): LabReportInput[] {
+export function groupLabReports(
+  rows: LabObservationRow[],
+  patientId: string,
+): LabReportInput[] {
   const reports = new Map<string, LabReportInput>();
   for (const row of rows) {
     const day = datePart(row.effective) ?? "undated";
@@ -383,7 +390,7 @@ export function groupLabReports(rows: LabObservationRow[]): LabReportInput[] {
       ? row.reportNodeId
       : row.sourceReport
         ? `klarbefund-${row.sourceReport}`
-        : `lab-${day}-${slug(row.performer ?? "unknown")}`;
+        : `lab-${slug(patientId)}-${day}-${slug(row.performer ?? "unknown")}`;
     let report = reports.get(reportId);
     if (!report) {
       report = {

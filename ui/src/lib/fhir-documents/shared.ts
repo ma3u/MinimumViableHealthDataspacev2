@@ -23,9 +23,10 @@ const DATA_ABSENT_REASON =
  * came from this way, so an import (#1173) writes back to the same node
  * rather than a copy of it.
  */
-const GRAPH_NODE_SYSTEM = "https://ehds.mabu.red/fhir/sid/graph-node";
+export const GRAPH_NODE_SYSTEM = "https://ehds.mabu.red/fhir/sid/graph-node";
 /** The hub's patient record id (`P1`, `patient-2000`). */
-const PATIENT_RECORD_SYSTEM = "https://ehds.mabu.red/fhir/sid/patient-record";
+export const PATIENT_RECORD_SYSTEM =
+  "https://ehds.mabu.red/fhir/sid/patient-record";
 /** The author and custodian of a document the hub assembles. */
 export const HUB_ORGANIZATION_NAME = "EHDS Integration Hub (demo)";
 
@@ -36,6 +37,12 @@ export const EXT_SOURCE_LINE = `${EXT_BASE}/epa-ingest-source-line`;
 export const EXT_SOURCE_REGION = `${EXT_BASE}/epa-ingest-source-region`;
 
 export type Json = Record<string, unknown>;
+
+/** Runs one Cypher statement: `runQuery`, or a test's transaction. */
+export type Run = <T>(
+  cypher: string,
+  params: Record<string, unknown>,
+) => Promise<T[]>;
 
 export interface FhirResource {
   resourceType: string;

@@ -17,6 +17,11 @@ import {
 } from "../audit-chain.js";
 import { DSP_CHAIN } from "../dsp-audit.js";
 import { SPE_CHAIN } from "../spe-status.js";
+import {
+  RECORD_CHAIN,
+  appendRecordAudit,
+  recordAuditInput,
+} from "../record-audit.js";
 
 // ---- Contract and transfer audit (ADR-045 plane 2, #418) --------------------
 
@@ -121,9 +126,47 @@ app.post("/audit/dsp", auditLimiter, async (req: Request, res: Response) => {
   }
 });
 
+// ---- Writes to a person's record (ADR-045 plane 2, #1173) ------------------
+
+/**
+ * POST /audit/record
+ *
+ * The hub UI, before it writes a FHIR document into a person's record, or
+ * when it refuses one: {event: "document-import", outcome, patientId,
+ * actorId, actorRole, documentId?, documentType?, reason?}. 201 with the
+ * record's seq and hash once committed; 503 when it could not be written, and
+ * the hub then does not write (fail closed). Same token rule as /audit/dsp.
+ */
+app.post("/audit/record", auditLimiter, async (req: Request, res: Response) => {
+  if (!authorised(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const input = recordAuditInput((req.body ?? {}) as Record<string, unknown>);
+  if (!input) {
+    res.status(400).json({ error: "Not a record audit event" });
+    return;
+  }
+  try {
+    const event = await appendRecordAudit(input);
+    res
+      .status(201)
+      .json({ chain: event.chain, seq: event.seq, hash: event.hash });
+  } catch (err) {
+    logger.error(
+      { err, event: input.event, outcome: input.outcome },
+      "record audit write failed",
+    );
+    res.status(503).json({
+      error:
+        "The audit record could not be written. Every write to a person's record must be on the audit trail (ADR-045).",
+    });
+  }
+});
+
 // ---- Reading the trail (operators, Grafana) ---------------------------------
 
-const CHAINS = new Set([QUERY_CHAIN, DSP_CHAIN, SPE_CHAIN]);
+const CHAINS = new Set([QUERY_CHAIN, DSP_CHAIN, SPE_CHAIN, RECORD_CHAIN]);
 
 /**
  * GET /audit/chains/:chain/verify

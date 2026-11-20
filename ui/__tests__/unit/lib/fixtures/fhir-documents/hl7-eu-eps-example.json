@@ -1,0 +1,4631 @@
+{
+  "resourceType": "Bundle",
+  "id": "Instance-Bundle-1a24e60d-9b12-4109-a50a-07249a4f21c3",
+  "meta": {
+    "profile": ["http://hl7.eu/fhir/eps/StructureDefinition/bundle-eu-eps"]
+  },
+  "identifier": {
+    "system": "urn:ietf:rfc:9562",
+    "value": "350432b7-5d29-4949-89ea-f19efeb224ca",
+    "assigner": {
+      "display": "MedReg DE (fictional)"
+    }
+  },
+  "type": "document",
+  "timestamp": "2025-08-31T17:46:55Z",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:76279633-d5a6-439b-9e88-5880c531e241",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "76279633-d5a6-439b-9e88-5880c531e241",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Composition_76279633-d5a6-439b-9e88-5880c531e241\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Composition 76279633-d5a6-439b-9e88-5880c531e241</b></p><a name=\"76279633-d5a6-439b-9e88-5880c531e241\"> </a><a name=\"hc76279633-d5a6-439b-9e88-5880c531e241\"> </a><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\"/><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-composition-eu-eps.html\">Composition (EPS)</a></p></div><p><b>identifier</b>: <code>urn:ietf:rfc:9562</code>/166615c7-0536-4d24-b5d7-8d659a29ce3e</p><p><b>status</b>: Final</p><p><b>type</b>: <span title=\"Codes:{http://loinc.org 60591-5}\">Patient summary Document</span></p><p><b>date</b>: 2025-08-31 17:46:55+0000</p><p><b>author</b>: <a href=\"Bundle-Instance-Bundle-1a24e60d-9b12-4109-a50a-07249a4f21c3.html#urn-uuid-79bb6d9a-24fa-4479-a1a6-92e958200414\">PractitionerRole</a></p><p><b>title</b>: European Patient Summary</p><p><b>confidentiality</b>: normal</p><p><b>custodian</b>: <a href=\"Bundle-Instance-Bundle-1a24e60d-9b12-4109-a50a-07249a4f21c3.html#urn-uuid-ee1c1f62-cb27-4dc4-8d07-f9c58215f309\">Organization AlphaKlinik Berlin, Zentrallabor (fictional)</a></p></div>"
+        },
+        "identifier": {
+          "system": "urn:ietf:rfc:9562",
+          "value": "166615c7-0536-4d24-b5d7-8d659a29ce3e",
+          "assigner": {
+            "display": "MedReg DE (fictional)"
+          }
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "60591-5",
+              "display": "Patient summary Document"
+            }
+          ],
+          "text": "Patient summary Document"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "date": "2025-08-31T17:46:55Z",
+        "author": [
+          {
+            "reference": "urn:uuid:79bb6d9a-24fa-4479-a1a6-92e958200414"
+          }
+        ],
+        "title": "European Patient Summary",
+        "confidentiality": "N",
+        "custodian": {
+          "reference": "urn:uuid:ee1c1f62-cb27-4dc4-8d07-f9c58215f309"
+        },
+        "section": [
+          {
+            "title": "Problem list",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list - Reported"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Condition</th><th>Onset Date</th><th>Status</th></tr><tr><td>Hyperlipidemia</td><td><span class=\"nb\">2020-06-15</span></td><td>active</td></tr><tr><td>Emphysematous bronchitis</td><td><span class=\"nb\">2020-06-15</span></td><td>active</td></tr><tr><td>Ischemic heart disease</td><td><span class=\"nb\">2010-04-19</span></td><td>active</td></tr><tr><td>Chronic sinusitis</td><td><span class=\"nb\">1994-01-16</span></td><td>active</td></tr><tr><td>Anemia</td><td><span class=\"nb\">1993-02-22</span></td><td>active</td></tr><tr><td>Prediabetes</td><td><span class=\"nb\">1991-02-18</span></td><td>active</td></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:bc578ea8-f9ed-4cf2-a302-dfc36e4edbe5"
+              },
+              {
+                "reference": "urn:uuid:4b665d3a-ea82-4ea1-89e9-10cacc08c245"
+              },
+              {
+                "reference": "urn:uuid:f57cf09c-57a2-46ce-a08a-c134a96f725d"
+              },
+              {
+                "reference": "urn:uuid:c98328ca-3e16-4dd2-b1af-c93d5416a9ae"
+              },
+              {
+                "reference": "urn:uuid:634b05b7-c23f-4622-bf15-8987e3dfc0ed"
+              },
+              {
+                "reference": "urn:uuid:671c5ac6-0c08-487a-9204-caa8b626f38d"
+              }
+            ]
+          },
+          {
+            "title": "Medication list",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10160-0",
+                  "display": "History of Medication use Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Medication</th><th>Since</th><th>Form</th><th>Dosage</th><th>Reason</th></tr><tr><td>Simvastatin 10 mg oral tablet</td><td><span class=\"nb\">2025-07-15</span></td><td>Oral tablet</td><td>1 tablet (10 mg) by mouth once daily</td><td>Hyperlipidemia</td></tr><tr><td>Albuterol (as albuterol sulfate) 5 mg/mL solution for inhalation</td><td><span class=\"nb\">2025-07-14</span></td><td>Solution for inhalation</td><td>2.5 mg (0.5 mL of 5 mg/mL solution) via nebulizer every 4 to 6 hours as needed</td><td>Chronic obstructive bronchitis (disorder)</td></tr><tr><td>Acetaminophen 300 mg and hydrocodone bitartrate 5 mg oral tablet</td><td><span class=\"nb\">2025-07-14</span></td><td>Oral tablet</td><td>1 tablet (300 mg/5 mg) by mouth every 4 to 6 hours as needed for pain</td><td/></tr><tr><td>60 ACTUAT Fluticasone propionate 0.25 MG/ACTUAT / salmeterol 0.05 MG/ACTUAT Dry Powder Inhaler</td><td><span class=\"nb\">2025-07-14</span></td><td/><td>1 inhalation (0.25 mg/0.05 mg) twice daily</td><td>Chronic obstructive bronchitis (disorder)</td></tr><tr><td>Clopidogrel (as clopidogrel bisulfate) 75 mg oral tablet</td><td><span class=\"nb\">2010-04-26</span></td><td>Oral tablet</td><td>1 tablet (75 mg) by mouth once daily</td><td/></tr><tr><td>Simvastatin 20 mg oral tablet</td><td><span class=\"nb\">2010-04-26</span></td><td>Oral tablet</td><td>1 tablet (20 mg) by mouth once daily</td><td/></tr><tr><td>Nitroglycerin 400 microgram/actuation sublingual spray</td><td><span class=\"nb\">2010-04-26</span></td><td>Sublingual spray</td><td>400 micrograms (1 spray) sublingually as needed for chest pain, may repeat every 5 minutes as needed, up to 3 sprays in 15 minutes</td><td/></tr><tr><td>Metoprolol tartrate (as metoprolol succinate) 100 mg prolonged-release oral tablet</td><td><span class=\"nb\">2010-04-26</span></td><td>Prolonged-release oral tablet</td><td>1 tablet (100 mg) once daily</td><td/></tr><tr><td>doxycycline hyclate 100 MG</td><td><span class=\"nb\">2008-08-12</span></td><td/><td>100 mg twice daily</td><td>Viral sinusitis (disorder)</td></tr><tr><td>Astemizole 10 mg oral tablet</td><td><span class=\"nb\">1978-10-26</span></td><td>Oral tablet</td><td>1 tablet (10 mg) once daily</td><td/></tr><tr><td>Hydrocortisone 10 mg/g and urea 100 mg/g cutaneous cream</td><td><span class=\"nb\">1978-10-11</span></td><td>Cutaneous cream</td><td>Apply a thin layer (approximately 1 g) to the affected area twice daily</td><td>Contact dermatitis</td></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:635c4921-5fcb-4ce7-b6ef-d866b680ad01"
+              },
+              {
+                "reference": "urn:uuid:e334a872-4b98-4c8a-b4e7-81fa2658e6dd"
+              },
+              {
+                "reference": "urn:uuid:cd91412c-76d7-42ac-9525-9bdcb44f98fa"
+              },
+              {
+                "reference": "urn:uuid:51529516-879e-4bc6-9600-f11baf6e0533"
+              },
+              {
+                "reference": "urn:uuid:0de4eda6-7dba-435d-be08-c796176be6e8"
+              },
+              {
+                "reference": "urn:uuid:a70ed340-1085-4c58-932d-1385b0abe7fa"
+              },
+              {
+                "reference": "urn:uuid:6f621aa0-ab90-4cdb-8e01-a67cda36ea99"
+              },
+              {
+                "reference": "urn:uuid:dfac9869-6045-4b08-89d6-84888ba4a56b"
+              },
+              {
+                "reference": "urn:uuid:48c64631-f2b6-4cdf-81c1-4de1ca18e591"
+              },
+              {
+                "reference": "urn:uuid:5f0eebe8-0919-4861-b552-1e7e0d591ef4"
+              },
+              {
+                "reference": "urn:uuid:8cfdeca0-dc07-4f55-a987-bd8548fbbe34"
+              }
+            ]
+          },
+          {
+            "title": "Immunizations list",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11369-6",
+                  "display": "History of Immunization note"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Vaccine</th><th>Date</th></tr><tr><td>Influenza virus antigen only vaccine product</td><td><span class=\"nb\">2025-07-14</span></td></tr><tr><td>SARS-CoV-2 mRNA vaccine</td><td><span class=\"nb\">2021-03-01</span></td></tr><tr><td>Clostridium tetani toxoid antigen adsorbed only vaccine product</td><td><span class=\"nb\">2018-06-04</span></td></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:cfe36253-0c9c-49b6-8272-39d067952592"
+              },
+              {
+                "reference": "urn:uuid:6dfba8ba-2107-4e59-8b86-edcfda8bab98"
+              },
+              {
+                "reference": "urn:uuid:89ebeb22-4a66-42de-93c8-bd67c841514d"
+              }
+            ]
+          },
+          {
+            "title": "Allergies and Intolerances",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "48765-2",
+                  "display": "Allergies and adverse reactions Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Allergy/Intolerance</th><th>Onset Date</th><th>Status</th><th>Type</th><th>Reaction</th></tr><tr><td>Penicillin V</td><td><span class=\"nb\">1978-10-26</span></td><td>active</td><td>medication</td><td/></tr><tr><td>Allergy to substance</td><td><span class=\"nb\">1978-10-26</span></td><td>active</td><td>environment</td><td/></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:a989307f-3cf2-427a-9ea0-553fcb561480"
+              },
+              {
+                "reference": "urn:uuid:09a571d6-2e8c-4409-9dc0-947877066ba8"
+              }
+            ]
+          },
+          {
+            "title": "Care Plan",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "18776-5",
+                  "display": "Plan of care note"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Immunization Recommendation</th><th>Due Date</th><th>Reason</th></tr><tr><td>Vaccine product containing only Influenza virus antigen (medicinal product)</td><td><span class=\"nb\">2025-10-01</span></td><td>Annual seasonal influenza vaccination</td></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:646ea6ea-9efc-48da-86b8-a284557dad39"
+              },
+              {
+                "reference": "urn:uuid:8ee71405-460d-4615-8057-ae8f8fb84fdc"
+              },
+              {
+                "reference": "urn:uuid:720c2fce-976c-4f20-9838-dd8994e96e1a"
+              },
+              {
+                "reference": "urn:uuid:43f9f1a9-21d1-4533-b8a1-06d23aa0c171"
+              }
+            ]
+          },
+          {
+            "title": "History of Procedures",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "47519-4",
+                  "display": "History of Procedures Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><td>No known procedures</td></tr></table></div>"
+            },
+            "emptyReason": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/list-empty-reason",
+                  "code": "nilknown"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Vital Signs",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8716-3",
+                  "display": "Vital signs note"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Vital Signs</th><th>2025-07-14</th><th>2024-07-08</th></tr><tr><td>Body Height</td><td>158.3 cm</td><td>158.3 cm</td></tr><tr><td>Pain severity - 0-10 verbal numeric rating [Score] - Reported</td><td>3 {score}</td><td>2 {score}</td></tr><tr><td>Body Weight</td><td>73.3 kg</td><td>71.3 kg</td></tr><tr><td>Body mass index (BMI) [Ratio]</td><td>29.2 kg/m2</td><td>28.5 kg/m2</td></tr><tr><td>Diastolic Blood Pressure</td><td>55 mm[Hg]</td><td>62 mm[Hg]</td></tr><tr><td>Systolic Blood Pressure</td><td>113 mm[Hg]</td><td>104 mm[Hg]</td></tr><tr><td>Heart rate</td><td>80 /min</td><td>72 /min</td></tr><tr><td>Respiratory rate</td><td>13 /min</td><td>14 /min</td></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:c9be3179-d3d7-4d62-98e8-722a1037acb3"
+              },
+              {
+                "reference": "urn:uuid:47ac0bbe-89be-4c51-af57-1a62526498e0"
+              },
+              {
+                "reference": "urn:uuid:c5d48672-464e-4165-8d63-1320c5f6d1bd"
+              },
+              {
+                "reference": "urn:uuid:d7471903-d75e-4537-a6ce-a79d517cf685"
+              },
+              {
+                "reference": "urn:uuid:c70a509b-60e4-4cb5-b8ce-dcbf43753cbc"
+              },
+              {
+                "reference": "urn:uuid:02e1109c-cbf1-4586-83e5-4eabbefac521"
+              },
+              {
+                "reference": "urn:uuid:d11fd424-e9f8-44bd-a2ec-03b2dd1e5a62"
+              },
+              {
+                "reference": "urn:uuid:9a4297dd-50ec-4632-b916-c6a364cfde84"
+              },
+              {
+                "reference": "urn:uuid:78e73600-a5c2-48f8-a59b-7a09954332c3"
+              },
+              {
+                "reference": "urn:uuid:e6b94ffc-e27e-4e18-8c7d-8a26e959276a"
+              },
+              {
+                "reference": "urn:uuid:0a321a2d-6abb-4b3d-b189-992fcc040e89"
+              },
+              {
+                "reference": "urn:uuid:bb3b3ba1-43cf-486f-b7db-0178fb9f0f0f"
+              },
+              {
+                "reference": "urn:uuid:13686462-9b29-41c7-8645-2bf6b9d61e1a"
+              },
+              {
+                "reference": "urn:uuid:a89003d1-35dd-4f0c-ab3b-aed081ae887e"
+              }
+            ]
+          },
+          {
+            "title": "Relevant diagnostic tests/laboratory data",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "30954-2",
+                  "display": "Relevant diagnostic tests/laboratory data note"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><thead><tr><th>Recent Lab Observations</th><th>15 Jul 2024</th><th>Reference Range</th><th>Unit</th></tr></thead><tbody><tr><td>Glucose [Mass/volume] in Blood</td><td><strong>65.9 L</strong></td><td>70 - 99</td><td>mg/dL</td></tr><tr><td>Urea nitrogen [Mass/volume] in Blood</td><td>9.2</td><td>7 - 20</td><td>mg/dL</td></tr><tr><td>Creatinine [Mass/volume] in Blood</td><td><strong>2.7 H</strong></td><td>0.6 - 1.3</td><td>mg/dL</td></tr><tr><td>Calcium [Mass/volume] in Blood</td><td>8.7</td><td>8.5 - 10.3</td><td>mg/dL</td></tr><tr><td>Sodium [Moles/volume] in Blood</td><td>136.4</td><td>135 - 145</td><td>mmol/L</td></tr><tr><td>Potassium [Moles/volume] in Blood</td><td>4.4</td><td>3.5 - 5.1</td><td>mmol/L</td></tr><tr><td>Chloride [Moles/volume] in Blood</td><td>101.2</td><td>98 - 108</td><td>mmol/L</td></tr><tr><td>Carbon dioxide, total [Moles/volume] in Blood</td><td>28.5</td><td>22 - 32</td><td>mmol/L</td></tr><tr><td>Protein [Mass/volume] in Serum or Plasma</td><td>6.9</td><td>6 - 8.3</td><td>g/dL</td></tr><tr><td>Albumin [Mass/volume] in Serum or Plasma</td><td>4.0</td><td>3.5 - 5</td><td>g/dL</td></tr><tr><td>Globulin [Mass/volume] in Serum by calculation</td><td>2.9</td><td>2 - 3.5</td><td>g/L</td></tr><tr><td>Bilirubin.total [Mass/volume] in Serum or Plasma</td><td>0.8</td><td>0.3 - 1.2</td><td>mg/dL</td></tr><tr><td>Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma</td><td>87.0</td><td>35 - 117</td><td>U/L</td></tr><tr><td>Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma</td><td>45.0</td><td>7 - 46</td><td>U/L</td></tr><tr><td>Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma</td><td><strong>8.7 L</strong></td><td>10 - 40</td><td>U/L</td></tr><tr><td>Cholesterol [Mass/volume] in Serum or Plasma</td><td>193.2</td><td>125 - 200</td><td>mg/dL</td></tr><tr><td>Triglyceride [Mass/volume] in Serum or Plasma</td><td>149.3</td><td>0 - 199</td><td>mg/dL</td></tr><tr><td>Cholesterol in LDL [Mass/volume] in Serum or Plasma by Direct assay</td><td>129.5</td><td>0 - 159</td><td>mg/dL</td></tr><tr><td>Cholesterol in HDL [Mass/volume] in Serum or Plasma</td><td>62.7</td><td>50 - 100</td><td>mg/dL</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:81628dd7-a8bf-43b5-bae5-001c46f1a8f8"
+              },
+              {
+                "reference": "urn:uuid:fee31706-be91-4a20-b64d-a1ef32854125"
+              },
+              {
+                "reference": "urn:uuid:d6e99596-92d5-4e70-a8b5-4da00b26709a"
+              },
+              {
+                "reference": "urn:uuid:132273e6-ac2c-44ec-b416-a3a64bb6fc27"
+              },
+              {
+                "reference": "urn:uuid:3d3701ef-24c3-48f3-b1ec-6d101cf73af5"
+              },
+              {
+                "reference": "urn:uuid:d918fd0e-9ac5-44c5-81ec-01585d8db6cb"
+              },
+              {
+                "reference": "urn:uuid:886aef25-ecf8-4606-b5c5-880f00f9862f"
+              },
+              {
+                "reference": "urn:uuid:2bf0d074-d1f3-40eb-aa1a-1e83d1cde1a6"
+              },
+              {
+                "reference": "urn:uuid:a50c3d24-d302-41db-8bc6-4f77ffe37ba9"
+              },
+              {
+                "reference": "urn:uuid:4da22422-b9be-4eb8-839f-9829138660ae"
+              },
+              {
+                "reference": "urn:uuid:04c29e07-f621-4dbb-b7b8-8a4dc89ec44b"
+              },
+              {
+                "reference": "urn:uuid:ad120185-28f4-495b-b0fa-0e258e9e3ba7"
+              },
+              {
+                "reference": "urn:uuid:04cf6095-fbc1-41ee-aa84-881cf4753ab6"
+              },
+              {
+                "reference": "urn:uuid:bee93551-87cd-4484-8e92-609e8d1db8da"
+              },
+              {
+                "reference": "urn:uuid:072bc2ad-7ee7-4cce-9b4f-09a98df61971"
+              },
+              {
+                "reference": "urn:uuid:71c73db3-4d99-4594-b92e-cbb5cc09b517"
+              },
+              {
+                "reference": "urn:uuid:762d6f8f-ec3d-445c-8547-f26ce553eedf"
+              },
+              {
+                "reference": "urn:uuid:1e8a72c6-c4f4-4545-adcb-c5b542f86d7d"
+              },
+              {
+                "reference": "urn:uuid:a78303a0-a824-499d-a76a-76e131d9dcb7"
+              }
+            ]
+          },
+          {
+            "title": "Device Use",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "46264-8",
+                  "display": "History of medical device use"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hl7__ips\"><tr><th>Device</th><th>Date (since)</th></tr><tr><td>Home nebulizer (physical object)</td><td><span class=\"nb\">2021-06-21</span></td></tr><tr><td>Blood glucose meter (physical object)</td><td><span class=\"nb\">1991-02-18</span></td></tr></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:90641744-8919-4b70-8ef7-d181b1fce3cb"
+              },
+              {
+                "reference": "urn:uuid:4fe58eba-854d-48a6-add1-42846081f515"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "f51071b2-6c06-4d31-85ed-26a6b964ef98",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/patient-eu-eps"
+          ]
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "JHN"
+                }
+              ]
+            },
+            "system": "http://example.org/identifier-1",
+            "value": "5042-537688-1"
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
+                }
+              ]
+            },
+            "system": "http://example.org/identifier-2",
+            "value": "a707536c-14f2-3606-4ed4-7fd9991fd18e"
+          }
+        ],
+        "name": [
+          {
+            "text": "Petra Schwartz",
+            "family": "Schwartz",
+            "given": ["Petra"]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "+49 034223 68 59"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1950-04-19",
+        "address": [
+          {
+            "use": "home",
+            "type": "physical",
+            "line": ["Hoheluftchaussee 46"],
+            "city": "Dommitzsch",
+            "postalCode": "04878",
+            "country": "Germany"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:79bb6d9a-24fa-4479-a1a6-92e958200414",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "79bb6d9a-24fa-4479-a1a6-92e958200414",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/practitionerRole-eu"
+          ]
+        },
+        "practitioner": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e"
+        },
+        "organization": {
+          "reference": "urn:uuid:ee1c1f62-cb27-4dc4-8d07-f9c58215f309"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "398f1dee-39b2-4259-8293-7385d482d06e",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu"
+          ]
+        },
+        "name": [
+          {
+            "family": "Ping",
+            "given": ["Hel"],
+            "prefix": ["Dr."]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ee1c1f62-cb27-4dc4-8d07-f9c58215f309",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "ee1c1f62-cb27-4dc4-8d07-f9c58215f309",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/organization-eu"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:9562",
+            "value": "cd9d8d77-6da5-4eee-b973-cf8467686ffe",
+            "assigner": {
+              "display": "MedReg DE (fictional)"
+            }
+          }
+        ],
+        "name": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bc578ea8-f9ed-4cf2-a302-dfc36e4edbe5",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "bc578ea8-f9ed-4cf2-a302-dfc36e4edbe5",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "55822004",
+              "display": "Hyperlipidemia (disorder)"
+            }
+          ],
+          "text": "Hyperlipidemia"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2020-06-15",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4b665d3a-ea82-4ea1-89e9-10cacc08c245",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "4b665d3a-ea82-4ea1-89e9-10cacc08c245",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "185086009",
+              "display": "Chronic obstructive bronchitis (disorder)"
+            }
+          ],
+          "text": "Emphysematous bronchitis"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2020-06-15",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f57cf09c-57a2-46ce-a08a-c134a96f725d",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "f57cf09c-57a2-46ce-a08a-c134a96f725d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "414545008",
+              "display": "Ischemic heart disease (disorder)"
+            }
+          ],
+          "text": "Ischemic heart disease"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2010-04-19",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c98328ca-3e16-4dd2-b1af-c93d5416a9ae",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "c98328ca-3e16-4dd2-b1af-c93d5416a9ae",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "40055000",
+              "display": "Chronic sinusitis (disorder)"
+            }
+          ],
+          "text": "Chronic sinusitis"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "1994-01-16",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:634b05b7-c23f-4622-bf15-8987e3dfc0ed",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "634b05b7-c23f-4622-bf15-8987e3dfc0ed",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "271737000",
+              "display": "Anemia (disorder)"
+            }
+          ],
+          "text": "Anemia"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "1993-02-22",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:671c5ac6-0c08-487a-9204-caa8b626f38d",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "671c5ac6-0c08-487a-9204-caa8b626f38d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "714628002",
+              "display": "Prediabetes"
+            }
+          ],
+          "text": "Prediabetes"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "1991-02-18",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d6a8d5cf-29ed-4e55-a72e-215b67c133a3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "d6a8d5cf-29ed-4e55-a72e-215b67c133a3",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "65966004",
+              "display": "Fracture of forearm (disorder)"
+            }
+          ],
+          "text": "Fracture of forearm"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2023-12-28",
+        "abatementDateTime": "2024-03-30",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e0995b35-d9f0-4175-ad49-17244b016287",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e0995b35-d9f0-4175-ad49-17244b016287",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "125605004",
+              "display": "Fracture of bone (disorder)"
+            }
+          ],
+          "text": "Fracture of bone"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2023-12-28",
+        "abatementDateTime": "2024-03-30",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a21e85eb-d637-4714-a432-2f5f1f92c2cf",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "a21e85eb-d637-4714-a432-2f5f1f92c2cf",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "444814009",
+              "display": "Viral sinusitis (disorder)"
+            }
+          ],
+          "text": "Viral sinusitis"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2019-03-08",
+        "abatementDateTime": "2019-03-23",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b867c9ea-760d-4cab-8404-f3b69e5f97f5",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b867c9ea-760d-4cab-8404-f3b69e5f97f5",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "65966004",
+              "display": "Fracture of forearm (disorder)"
+            }
+          ],
+          "text": "Fracture of forearm"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2016-09-12",
+        "abatementDateTime": "2016-11-30",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d01d6c92-6548-4205-854f-35d6968809e6",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "d01d6c92-6548-4205-854f-35d6968809e6",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "125605004",
+              "display": "Fracture of bone (disorder)"
+            }
+          ],
+          "text": "Fracture of bone"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "2016-09-12",
+        "abatementDateTime": "2016-11-30",
+        "asserter": {
+          "reference": "urn:uuid:398f1dee-39b2-4259-8293-7385d482d06e",
+          "display": "Dr. Hel Ping"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ccd55d45-87b7-43e7-bad3-29771293c8cc",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "ccd55d45-87b7-43e7-bad3-29771293c8cc",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "314231",
+              "display": "simvastatin 10 MG Oral Tablet"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "319996000",
+              "display": "Product containing precisely simvastatin 10 milligram/1 each conventional release oral tablet (clinical drug)"
+            }
+          ],
+          "text": "Simvastatin 10 mg oral tablet"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "421026006",
+              "display": "Oral tablet"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "387584000",
+                  "display": "Simvastatin"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:635c4921-5fcb-4ce7-b6ef-d866b680ad01",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "635c4921-5fcb-4ce7-b6ef-d866b680ad01",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:ccd55d45-87b7-43e7-bad3-29771293c8cc",
+          "display": "Simvastatin 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2025-07-15"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "55822004",
+                "display": "Hyperlipidemia"
+              }
+            ]
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1 tablet (10 mg) by mouth once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{tbl}",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{tbl}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e6929ae1-7ef5-414a-a0a3-d7866af0cce7",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "e6929ae1-7ef5-414a-a0a3-d7866af0cce7",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "245314",
+              "display": "albuterol 5 MG/ML Inhalation Solution"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "1197460000",
+              "display": "Product containing precisely salbutamol (as salbutamol sulfate) 5 milligram/1 milliliter conventional release solution for inhalation (clinical drug)"
+            }
+          ],
+          "text": "Albuterol (as albuterol sulfate) 5 mg/mL solution for inhalation"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "420641004",
+              "display": "Solution for inhalation"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "48474002",
+                  "display": "Albuterol sulfate"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e334a872-4b98-4c8a-b4e7-81fa2658e6dd",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "e334a872-4b98-4c8a-b4e7-81fa2658e6dd",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:e6929ae1-7ef5-414a-a0a3-d7866af0cce7",
+          "display": "Albuterol (as albuterol sulfate) 5 mg/mL solution for inhalation"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2025-07-14"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185086009",
+                "display": "Chronic obstructive bronchitis (disorder)"
+              }
+            ]
+          }
+        ],
+        "dosage": [
+          {
+            "text": "2.5 mg (0.5 mL of 5 mg/mL solution) via nebulizer every 4 to 6 hours as needed",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 4,
+                "periodUnit": "h"
+              }
+            },
+            "asNeededBoolean": true,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 2.5,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0467eb4f-79e6-4ed5-b076-f7ea83050b81",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "0467eb4f-79e6-4ed5-b076-f7ea83050b81",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "856987",
+              "display": "acetaminophen 300 MG / hydrocodone bitartrate 5 MG Oral Tablet"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "420397007",
+              "display": "Product containing precisely hydrocodone bitartrate 5 milligram and paracetamol 300 milligram/1 each conventional release oral tablet (clinical drug)"
+            }
+          ],
+          "text": "Acetaminophen 300 mg and hydrocodone bitartrate 5 mg oral tablet"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "421026006",
+              "display": "Oral tablet"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "3874004",
+                  "display": "Hydrocodone bitartrate"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cd91412c-76d7-42ac-9525-9bdcb44f98fa",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "cd91412c-76d7-42ac-9525-9bdcb44f98fa",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:0467eb4f-79e6-4ed5-b076-f7ea83050b81",
+          "display": "Acetaminophen 300 mg and hydrocodone bitartrate 5 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2025-07-14"
+        },
+        "dosage": [
+          {
+            "text": "1 tablet (300 mg/5 mg) by mouth every 4 to 6 hours as needed for pain",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 4,
+                "periodUnit": "h"
+              }
+            },
+            "asNeededBoolean": true,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{tbl}",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{tbl}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6391cd91-896f-4730-abca-6f24edf18229",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "6391cd91-896f-4730-abca-6f24edf18229",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "896209",
+              "display": "60 ACTUAT Fluticasone propionate 0.25 MG/ACTUAT / salmeterol 0.05 MG/ACTUAT Dry Powder Inhaler"
+            }
+          ],
+          "text": "60 ACTUAT Fluticasone propionate 0.25 MG/ACTUAT / salmeterol 0.05 MG/ACTUAT Dry Powder Inhaler"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:51529516-879e-4bc6-9600-f11baf6e0533",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "51529516-879e-4bc6-9600-f11baf6e0533",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:6391cd91-896f-4730-abca-6f24edf18229",
+          "display": "60 ACTUAT Fluticasone propionate 0.25 MG/ACTUAT / salmeterol 0.05 MG/ACTUAT Dry Powder Inhaler"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2025-07-14"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185086009",
+                "display": "Chronic obstructive bronchitis (disorder)"
+              }
+            ]
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1 inhalation (0.25 mg/0.05 mg) twice daily",
+            "timing": {
+              "repeat": {
+                "frequency": 2,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{actuat}",
+                  "system": "http://unitsofmeasure.org"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a27b547a-e5c0-451f-bda8-10d2341e09d5",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "a27b547a-e5c0-451f-bda8-10d2341e09d5",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "309362",
+              "display": "clopidogrel 75 MG Oral Tablet"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "783586007",
+              "display": "Product containing precisely clopidogrel (as clopidogrel bisulfate) 75 milligram/1 each conventional release oral tablet (clinical drug)"
+            }
+          ],
+          "text": "Clopidogrel (as clopidogrel bisulfate) 75 mg oral tablet"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "421026006",
+              "display": "Oral tablet"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "412354008",
+                  "display": "Clopidogrel bisulfate"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0de4eda6-7dba-435d-be08-c796176be6e8",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "0de4eda6-7dba-435d-be08-c796176be6e8",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:a27b547a-e5c0-451f-bda8-10d2341e09d5",
+          "display": "Clopidogrel (as clopidogrel bisulfate) 75 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2010-04-26"
+        },
+        "dosage": [
+          {
+            "text": "1 tablet (75 mg) by mouth once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{tbl}",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{tbl}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b8a35f26-2d5d-4d04-bcb7-c314d6a29c2d",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "b8a35f26-2d5d-4d04-bcb7-c314d6a29c2d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "312961",
+              "display": "simvastatin 20 MG Oral Tablet"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "319997009",
+              "display": "Product containing precisely simvastatin 20 milligram/1 each conventional release oral tablet (clinical drug)"
+            }
+          ],
+          "text": "Simvastatin 20 mg oral tablet"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "421026006",
+              "display": "Oral tablet"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "387584000",
+                  "display": "Simvastatin"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a70ed340-1085-4c58-932d-1385b0abe7fa",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "a70ed340-1085-4c58-932d-1385b0abe7fa",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:b8a35f26-2d5d-4d04-bcb7-c314d6a29c2d",
+          "display": "Simvastatin 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2010-04-26"
+        },
+        "dosage": [
+          {
+            "text": "1 tablet (20 mg) by mouth once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{tbl}",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{tbl}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e87b3b43-9d7f-4b8a-9a61-c9c51886fa9c",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "e87b3b43-9d7f-4b8a-9a61-c9c51886fa9c",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "705129",
+              "display": "nitroglycerin 0.4 MG/ACTUAT Mucosal Spray"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "425176000",
+              "display": "Product containing precisely glyceryl trinitrate 400 microgram/1 actuation conventional release sublingual spray (clinical drug)"
+            }
+          ],
+          "text": "Nitroglycerin 400 microgram/actuation sublingual spray"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "385074009",
+              "display": "Sublingual spray"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "387404004",
+                  "display": "Glyceryl trinitrate"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6f621aa0-ab90-4cdb-8e01-a67cda36ea99",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "6f621aa0-ab90-4cdb-8e01-a67cda36ea99",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:e87b3b43-9d7f-4b8a-9a61-c9c51886fa9c",
+          "display": "Nitroglycerin 400 microgram/actuation sublingual spray"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2010-04-26"
+        },
+        "dosage": [
+          {
+            "text": "400 micrograms (1 spray) sublingually as needed for chest pain, may repeat every 5 minutes as needed, up to 3 sprays in 15 minutes",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 5,
+                "periodUnit": "min"
+              }
+            },
+            "asNeededBoolean": true,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 400,
+                  "unit": "microgram",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "ug"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3008cc5e-e349-44c1-bac1-0b4618174bda",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "3008cc5e-e349-44c1-bac1-0b4618174bda",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "866412",
+              "display": "24 HR metoprolol succinate 100 MG Extended Release Oral Tablet"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "879980009",
+              "display": "Product containing precisely metoprolol tartrate (as metoprolol succinate) 100 milligram/1 each prolonged-release oral tablet (clinical drug)"
+            }
+          ],
+          "text": "Metoprolol tartrate (as metoprolol succinate) 100 mg prolonged-release oral tablet"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "385060002",
+              "display": "Prolonged-release oral tablet"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "412432007",
+                  "display": "Metoprolol succinate"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:dfac9869-6045-4b08-89d6-84888ba4a56b",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "dfac9869-6045-4b08-89d6-84888ba4a56b",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:3008cc5e-e349-44c1-bac1-0b4618174bda",
+          "display": "Metoprolol tartrate (as metoprolol succinate) 100 mg prolonged-release oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2010-04-26"
+        },
+        "dosage": [
+          {
+            "text": "1 tablet (100 mg) once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{tbl}",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{tbl}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6629cc00-0c19-482a-b793-05a17ce1fb9d",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "6629cc00-0c19-482a-b793-05a17ce1fb9d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "1649987",
+              "display": "doxycycline hyclate 100 MG"
+            }
+          ],
+          "text": "doxycycline hyclate 100 MG"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:48c64631-f2b6-4cdf-81c1-4de1ca18e591",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "48c64631-f2b6-4cdf-81c1-4de1ca18e591",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:6629cc00-0c19-482a-b793-05a17ce1fb9d",
+          "display": "doxycycline hyclate 100 MG"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "2008-08-12"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "444814009",
+                "display": "Viral sinusitis (disorder)"
+              }
+            ]
+          }
+        ],
+        "dosage": [
+          {
+            "text": "100 mg twice daily",
+            "timing": {
+              "repeat": {
+                "frequency": 2,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 100,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c30f7139-87a0-4e6d-aabe-f45f226aa766",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "c30f7139-87a0-4e6d-aabe-f45f226aa766",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197378",
+              "display": "astemizole 10 MG Oral Tablet"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "427388006",
+              "display": "Product containing precisely astemizole 10 milligram/1 each conventional release oral tablet (clinical drug)"
+            }
+          ],
+          "text": "Astemizole 10 mg oral tablet"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "421026006",
+              "display": "Oral tablet"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "387333002",
+                  "display": "Astemizole"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5f0eebe8-0919-4861-b552-1e7e0d591ef4",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "5f0eebe8-0919-4861-b552-1e7e0d591ef4",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:c30f7139-87a0-4e6d-aabe-f45f226aa766",
+          "display": "Astemizole 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "1978-10-26"
+        },
+        "dosage": [
+          {
+            "text": "1 tablet (10 mg) once daily",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "{tbl}",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{tbl}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:08c33e59-a884-45cc-8d4c-f28165dd09ce",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "08c33e59-a884-45cc-8d4c-f28165dd09ce",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medication-eu-core"
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "106258",
+              "display": "hydrocortisone 10 MG/ML Topical Cream"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "331722005",
+              "display": "Product containing precisely hydrocortisone 10 milligram/1 gram and urea 100 milligram/1 gram conventional release cutaneous cream (clinical drug)"
+            }
+          ],
+          "text": "Hydrocortisone 10 mg/g and urea 100 mg/g cutaneous cream"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "421628006",
+              "display": "Cutaneous cream"
+            }
+          ]
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "387092000",
+                  "display": "Urea"
+                }
+              ]
+            },
+            "isActive": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8cfdeca0-dc07-4f55-a987-bd8548fbbe34",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "8cfdeca0-dc07-4f55-a987-bd8548fbbe34",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "medicationReference": {
+          "reference": "urn:uuid:08c33e59-a884-45cc-8d4c-f28165dd09ce",
+          "display": "Hydrocortisone 10 mg/g and urea 100 mg/g cutaneous cream"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectivePeriod": {
+          "start": "1978-10-11"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "40275004",
+                "display": "Contact dermatitis"
+              }
+            ]
+          }
+        ],
+        "dosage": [
+          {
+            "text": "Apply a thin layer (approximately 1 g) to the affected area twice daily",
+            "timing": {
+              "repeat": {
+                "frequency": 2,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "asNeededBoolean": false,
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 1,
+                  "unit": "g",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "g"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cfe36253-0c9c-49b6-8272-39d067952592",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "cfe36253-0c9c-49b6-8272-39d067952592",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/immunization-eu-core"
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "1181000221105",
+              "display": "Vaccine product containing only Influenza virus antigen (medicinal product)"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J07BB02",
+              "display": "influenza, inactivated, split virus or surface antigen"
+            }
+          ],
+          "text": "Influenza virus antigen only vaccine product"
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "occurrenceDateTime": "2025-07-14",
+        "lotNumber": "AE-d4oGKOZN1",
+        "expirationDate": "2026-03-01",
+        "site": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "244979005",
+              "display": "Entire muscle of upper arm"
+            }
+          ],
+          "text": "Entire muscle of upper arm"
+        },
+        "route": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "78421000",
+              "display": "Intramuscular route"
+            }
+          ],
+          "text": "Intramuscular route"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6dfba8ba-2107-4e59-8b86-edcfda8bab98",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "6dfba8ba-2107-4e59-8b86-edcfda8bab98",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/immunization-eu-core"
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "1119349007",
+              "display": "Vaccine product containing only severe acute respiratory syndrome coronavirus 2 messenger ribonucleic acid (medicinal product)"
+            }
+          ],
+          "text": "SARS-CoV-2 mRNA vaccine"
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "occurrenceDateTime": "2021-03-01",
+        "lotNumber": "OG-UhMDBy84",
+        "expirationDate": "2021-07-10",
+        "site": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "244979005",
+              "display": "Entire muscle of upper arm"
+            }
+          ],
+          "text": "Entire muscle of upper arm"
+        },
+        "route": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "78421000",
+              "display": "Intramuscular route"
+            }
+          ],
+          "text": "Intramuscular route"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:89ebeb22-4a66-42de-93c8-bd67c841514d",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "89ebeb22-4a66-42de-93c8-bd67c841514d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/immunization-eu-core"
+          ]
+        },
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "777725002",
+              "display": "Vaccine product containing only Clostridium tetani toxoid antigen adsorbed (medicinal product)"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J07AM51",
+              "display": "tetanus toxoid, combinations with diphtheria toxoid"
+            }
+          ],
+          "text": "Clostridium tetani toxoid antigen adsorbed only vaccine product"
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "occurrenceDateTime": "2018-06-04",
+        "lotNumber": "PS-E5jrOMsjo",
+        "expirationDate": "2018-11-05",
+        "site": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "244979005",
+              "display": "Entire muscle of upper arm"
+            }
+          ],
+          "text": "Entire muscle of upper arm"
+        },
+        "route": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "78421000",
+              "display": "Intramuscular route"
+            }
+          ],
+          "text": "Intramuscular route"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a989307f-3cf2-427a-9ea0-553fcb561480",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "a989307f-3cf2-427a-9ea0-553fcb561480",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/allergyIntolerance-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "type": "allergy",
+        "category": ["medication"],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "372725003",
+              "display": "Penicillin V"
+            }
+          ],
+          "text": "Penicillin V"
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "1978-10-26"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:09a571d6-2e8c-4409-9dc0-947877066ba8",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "09a571d6-2e8c-4409-9dc0-947877066ba8",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/allergyIntolerance-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "type": "allergy",
+        "category": ["environment"],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "609328004",
+              "display": "Allergic disposition"
+            }
+          ],
+          "text": "Allergic disposition"
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "onsetDateTime": "1978-10-26"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:646ea6ea-9efc-48da-86b8-a284557dad39",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "646ea6ea-9efc-48da-86b8-a284557dad39",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "period": {
+          "start": "2020-07-06"
+        },
+        "activity": [
+          {
+            "detail": {
+              "kind": "Appointment",
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "736285004",
+                    "display": "Hyperlipidemia clinical management plan (record artifact)"
+                  }
+                ]
+              },
+              "reasonCode": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://snomed.info/sct",
+                      "code": "55822004",
+                      "display": "Hyperlipidemia"
+                    }
+                  ]
+                }
+              ],
+              "status": "unknown",
+              "description": "Hyperlipidemia clinical management plan"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8ee71405-460d-4615-8057-ae8f8fb84fdc",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "8ee71405-460d-4615-8057-ae8f8fb84fdc",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "period": {
+          "start": "2020-06-15"
+        },
+        "activity": [
+          {
+            "detail": {
+              "kind": "Appointment",
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "736283006",
+                    "display": "Chronic obstructive pulmonary disease clinical management plan"
+                  }
+                ]
+              },
+              "reasonCode": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://snomed.info/sct",
+                      "code": "185086009",
+                      "display": "Chronic obstructive bronchitis (disorder)"
+                    }
+                  ]
+                }
+              ],
+              "status": "unknown",
+              "description": "Chronic obstructive pulmonary disease clinical management plan"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:720c2fce-976c-4f20-9838-dd8994e96e1a",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "720c2fce-976c-4f20-9838-dd8994e96e1a",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "period": {
+          "start": "1991-02-18"
+        },
+        "activity": [
+          {
+            "detail": {
+              "kind": "Appointment",
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "735985000",
+                    "display": "Diabetes self management plan"
+                  }
+                ]
+              },
+              "reasonCode": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://snomed.info/sct",
+                      "code": "714628002",
+                      "display": "Prediabetes"
+                    }
+                  ]
+                }
+              ],
+              "status": "unknown",
+              "description": "Diabetes self management plan"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:43f9f1a9-21d1-4533-b8a1-06d23aa0c171",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "43f9f1a9-21d1-4533-b8a1-06d23aa0c171",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "period": {
+          "start": "1978-10-26"
+        },
+        "activity": [
+          {
+            "detail": {
+              "kind": "Appointment",
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "384758001",
+                    "display": "Self-care interventions (procedure)"
+                  }
+                ]
+              },
+              "status": "unknown",
+              "description": "Self-care interventions"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c9be3179-d3d7-4d62-98e8-722a1037acb3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "c9be3179-d3d7-4d62-98e8-722a1037acb3",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Body Height"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "valueQuantity": {
+          "value": 158.3,
+          "unit": "cm",
+          "system": "http://unitsofmeasure.org",
+          "code": "cm"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:47ac0bbe-89be-4c51-af57-1a62526498e0",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "47ac0bbe-89be-4c51-af57-1a62526498e0",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "72514-3",
+              "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "valueQuantity": {
+          "value": 3,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c5d48672-464e-4165-8d63-1320c5f6d1bd",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "c5d48672-464e-4165-8d63-1320c5f6d1bd",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body Weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "valueQuantity": {
+          "value": 73.3,
+          "unit": "kg",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d7471903-d75e-4537-a6ce-a79d517cf685",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "d7471903-d75e-4537-a6ce-a79d517cf685",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index (BMI) [Ratio]"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "valueQuantity": {
+          "value": 29.2,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c70a509b-60e4-4cb5-b8ce-dcbf43753cbc",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "c70a509b-60e4-4cb5-b8ce-dcbf43753cbc",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4",
+              "display": "Diastolic Blood Pressure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "valueQuantity": {
+          "value": 55,
+          "unit": "mm[Hg]",
+          "system": "http://unitsofmeasure.org",
+          "code": "mm[Hg]"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:02e1109c-cbf1-4586-83e5-4eabbefac521",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "02e1109c-cbf1-4586-83e5-4eabbefac521",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood Pressure panel with all children optional"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic Blood Pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 113,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic Blood Pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 55,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d11fd424-e9f8-44bd-a2ec-03b2dd1e5a62",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "d11fd424-e9f8-44bd-a2ec-03b2dd1e5a62",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "9279-1",
+              "display": "Respiratory rate"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2025-07-14",
+        "valueQuantity": {
+          "value": 13,
+          "unit": "/min",
+          "system": "http://unitsofmeasure.org",
+          "code": "/min"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9a4297dd-50ec-4632-b916-c6a364cfde84",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "9a4297dd-50ec-4632-b916-c6a364cfde84",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Body Height"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "valueQuantity": {
+          "value": 158.3,
+          "unit": "cm",
+          "system": "http://unitsofmeasure.org",
+          "code": "cm"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:78e73600-a5c2-48f8-a59b-7a09954332c3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "78e73600-a5c2-48f8-a59b-7a09954332c3",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "72514-3",
+              "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "valueQuantity": {
+          "value": 2,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e6b94ffc-e27e-4e18-8c7d-8a26e959276a",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "e6b94ffc-e27e-4e18-8c7d-8a26e959276a",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body Weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "valueQuantity": {
+          "value": 71.3,
+          "unit": "kg",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0a321a2d-6abb-4b3d-b189-992fcc040e89",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "0a321a2d-6abb-4b3d-b189-992fcc040e89",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index (BMI) [Ratio]"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "valueQuantity": {
+          "value": 28.5,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bb3b3ba1-43cf-486f-b7db-0178fb9f0f0f",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "bb3b3ba1-43cf-486f-b7db-0178fb9f0f0f",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood Pressure panel with all children optional"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic Blood Pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 104,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic Blood Pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 62,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:13686462-9b29-41c7-8645-2bf6b9d61e1a",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "13686462-9b29-41c7-8645-2bf6b9d61e1a",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8867-4",
+              "display": "Heart rate"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "valueQuantity": {
+          "value": 72,
+          "unit": "/min",
+          "system": "http://unitsofmeasure.org",
+          "code": "/min"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a89003d1-35dd-4f0c-ab3b-aed081ae887e",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "a89003d1-35dd-4f0c-ab3b-aed081ae887e",
+        "meta": {
+          "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "9279-1",
+              "display": "Respiratory rate"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "effectiveDateTime": "2024-07-08",
+        "valueQuantity": {
+          "value": 14,
+          "unit": "/min",
+          "system": "http://unitsofmeasure.org",
+          "code": "/min"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:81628dd7-a8bf-43b5-bae5-001c46f1a8f8",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "81628dd7-a8bf-43b5-bae5-001c46f1a8f8",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2339-0",
+              "display": "Glucose [Mass/volume] in Blood"
+            }
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 65.9,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "L",
+                "display": "Low"
+              }
+            ]
+          }
+        ],
+        "referenceRange": [
+          {
+            "low": {
+              "value": 70,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 99,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fee31706-be91-4a20-b64d-a1ef32854125",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "fee31706-be91-4a20-b64d-a1ef32854125",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "6299-2",
+              "display": "Urea nitrogen [Mass/volume] in Blood"
+            }
+          ],
+          "text": "Urea nitrogen [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 9.2,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 7,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 20,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d6e99596-92d5-4e70-a8b5-4da00b26709a",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "d6e99596-92d5-4e70-a8b5-4da00b26709a",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "38483-4",
+              "display": "Creatinine [Mass/volume] in Blood"
+            }
+          ],
+          "text": "Creatinine [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2.7,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "H",
+                "display": "High"
+              }
+            ]
+          }
+        ],
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.6,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 1.3,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:132273e6-ac2c-44ec-b416-a3a64bb6fc27",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "132273e6-ac2c-44ec-b416-a3a64bb6fc27",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "49765-1",
+              "display": "Calcium [Mass/volume] in Blood"
+            }
+          ],
+          "text": "Calcium [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 8.7,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 8.5,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 10.3,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3d3701ef-24c3-48f3-b1ec-6d101cf73af5",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "3d3701ef-24c3-48f3-b1ec-6d101cf73af5",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2947-0",
+              "display": "Sodium [Moles/volume] in Blood"
+            }
+          ],
+          "text": "Sodium [Moles/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 136.4,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 135,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          },
+          {
+            "high": {
+              "value": 145,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d918fd0e-9ac5-44c5-81ec-01585d8db6cb",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "d918fd0e-9ac5-44c5-81ec-01585d8db6cb",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "6298-4",
+              "display": "Potassium [Moles/volume] in Blood"
+            }
+          ],
+          "text": "Potassium [Moles/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 4.4,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 3.5,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          },
+          {
+            "high": {
+              "value": 5.1,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:886aef25-ecf8-4606-b5c5-880f00f9862f",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "886aef25-ecf8-4606-b5c5-880f00f9862f",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2069-3",
+              "display": "Chloride [Moles/volume] in Blood"
+            }
+          ],
+          "text": "Chloride [Moles/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 101.2,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 98,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          },
+          {
+            "high": {
+              "value": 108,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2bf0d074-d1f3-40eb-aa1a-1e83d1cde1a6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "2bf0d074-d1f3-40eb-aa1a-1e83d1cde1a6",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "20565-8",
+              "display": "Carbon dioxide, total [Moles/volume] in Blood"
+            }
+          ],
+          "text": "Carbon dioxide, total [Moles/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 28.5,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 22,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          },
+          {
+            "high": {
+              "value": 32,
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a50c3d24-d302-41db-8bc6-4f77ffe37ba9",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "a50c3d24-d302-41db-8bc6-4f77ffe37ba9",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2885-2",
+              "display": "Protein [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Protein [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 6.9,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 6,
+              "system": "http://unitsofmeasure.org",
+              "code": "g/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 8.3,
+              "system": "http://unitsofmeasure.org",
+              "code": "g/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4da22422-b9be-4eb8-839f-9829138660ae",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "4da22422-b9be-4eb8-839f-9829138660ae",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1751-7",
+              "display": "Albumin [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Albumin [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 4,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 3.5,
+              "system": "http://unitsofmeasure.org",
+              "code": "g/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 5,
+              "system": "http://unitsofmeasure.org",
+              "code": "g/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:04c29e07-f621-4dbb-b7b8-8a4dc89ec44b",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "04c29e07-f621-4dbb-b7b8-8a4dc89ec44b",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "10834-0",
+              "display": "Globulin [Mass/volume] in Serum by calculation"
+            }
+          ],
+          "text": "Globulin [Mass/volume] in Serum by calculation"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2.9,
+          "unit": "g/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 2,
+              "system": "http://unitsofmeasure.org",
+              "code": "g/L"
+            }
+          },
+          {
+            "high": {
+              "value": 3.5,
+              "system": "http://unitsofmeasure.org",
+              "code": "g/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ad120185-28f4-495b-b0fa-0e258e9e3ba7",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ad120185-28f4-495b-b0fa-0e258e9e3ba7",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1975-2",
+              "display": "Bilirubin.total [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Bilirubin.total [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.8,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.3,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 1.2,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:04cf6095-fbc1-41ee-aa84-881cf4753ab6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "04cf6095-fbc1-41ee-aa84-881cf4753ab6",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "6768-6",
+              "display": "Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 87,
+          "unit": "U/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "U/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 35,
+              "system": "http://unitsofmeasure.org",
+              "code": "U/L"
+            }
+          },
+          {
+            "high": {
+              "value": 117,
+              "system": "http://unitsofmeasure.org",
+              "code": "U/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bee93551-87cd-4484-8e92-609e8d1db8da",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "bee93551-87cd-4484-8e92-609e8d1db8da",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1742-6",
+              "display": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 45,
+          "unit": "U/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "U/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 7,
+              "system": "http://unitsofmeasure.org",
+              "code": "U/L"
+            }
+          },
+          {
+            "high": {
+              "value": 46,
+              "system": "http://unitsofmeasure.org",
+              "code": "U/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:072bc2ad-7ee7-4cce-9b4f-09a98df61971",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "072bc2ad-7ee7-4cce-9b4f-09a98df61971",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1920-8",
+              "display": "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 8.7,
+          "unit": "U/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "U/L"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "L",
+                "display": "Low"
+              }
+            ]
+          }
+        ],
+        "referenceRange": [
+          {
+            "low": {
+              "value": 10,
+              "system": "http://unitsofmeasure.org",
+              "code": "U/L"
+            }
+          },
+          {
+            "high": {
+              "value": 40,
+              "system": "http://unitsofmeasure.org",
+              "code": "U/L"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:71c73db3-4d99-4594-b92e-cbb5cc09b517",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "71c73db3-4d99-4594-b92e-cbb5cc09b517",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3",
+              "display": "Cholesterol [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 193.2,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 125,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 200,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:762d6f8f-ec3d-445c-8547-f26ce553eedf",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "762d6f8f-ec3d-445c-8547-f26ce553eedf",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2571-8",
+              "display": "Triglyceride [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Triglyceride [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 149.3,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 199,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1e8a72c6-c4f4-4545-adcb-c5b542f86d7d",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "1e8a72c6-c4f4-4545-adcb-c5b542f86d7d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18262-6",
+              "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by Direct assay"
+            }
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by Direct assay"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 129.5,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 159,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a78303a0-a824-499d-a76a-76e131d9dcb7",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "a78303a0-a824-499d-a76a-76e131d9dcb7",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/medicalTestResult-eu-core"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2085-9",
+              "display": "Cholesterol in HDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol in HDL [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98"
+        },
+        "effectiveDateTime": "2024-07-15",
+        "performer": [
+          {
+            "display": "The Central European Lab"
+          }
+        ],
+        "valueQuantity": {
+          "value": 62.7,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 50,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          },
+          {
+            "high": {
+              "value": 100,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:90641744-8919-4b70-8ef7-d181b1fce3cb",
+      "resource": {
+        "resourceType": "DeviceUseStatement",
+        "id": "90641744-8919-4b70-8ef7-d181b1fce3cb",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/deviceUseStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "timingPeriod": {
+          "start": "2021-06-21"
+        },
+        "device": {
+          "reference": "urn:uuid:b3c78022-b120-40c2-84e0-afe0e2d07c18",
+          "display": "Home nebulizer (physical object)"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b3c78022-b120-40c2-84e0-afe0e2d07c18",
+      "resource": {
+        "resourceType": "Device",
+        "id": "b3c78022-b120-40c2-84e0-afe0e2d07c18",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/device-eu-eps"
+          ]
+        },
+        "udiCarrier": [
+          {
+            "id": "(01)16823880124549(11)210531(17)460615(10)48877640253395325(21)109490485862"
+          }
+        ],
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "170615005",
+              "display": "Home nebulizer (physical object)"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4fe58eba-854d-48a6-add1-42846081f515",
+      "resource": {
+        "resourceType": "DeviceUseStatement",
+        "id": "4fe58eba-854d-48a6-add1-42846081f515",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/deviceUseStatement-eu-eps"
+          ]
+        },
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        },
+        "timingPeriod": {
+          "start": "1991-02-18"
+        },
+        "device": {
+          "reference": "urn:uuid:575520ac-c2ef-4f47-82bf-1b691f5e6466",
+          "display": "Blood glucose meter (physical object)"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:575520ac-c2ef-4f47-82bf-1b691f5e6466",
+      "resource": {
+        "resourceType": "Device",
+        "id": "575520ac-c2ef-4f47-82bf-1b691f5e6466",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/eps/StructureDefinition/device-eu-eps"
+          ]
+        },
+        "udiCarrier": [
+          {
+            "id": "(01)70551104053281(11)910128(17)160212(10)34976447(21)50912"
+          }
+        ],
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "337414009",
+              "display": "Blood glucose meter (physical object)"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "urn:uuid:f51071b2-6c06-4d31-85ed-26a6b964ef98",
+          "display": "Petra Schwartz"
+        }
+      }
+    }
+  ]
+}

@@ -48,7 +48,7 @@ export const EPS_PROFILES = {
     "http://hl7.eu/fhir/eps/StructureDefinition/organization-obl-eu-eps",
 } as const;
 
-const PATIENT_SUMMARY_TYPE = {
+export const PATIENT_SUMMARY_TYPE = {
   system: LOINC,
   code: "60591-5",
   display: "Patient summary Document",

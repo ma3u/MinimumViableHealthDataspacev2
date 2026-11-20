@@ -1672,6 +1672,96 @@ paths:
         "403": { description: A patient reads their own record only }
         "404": { description: Patient not found }
         "502": { description: Neo4j unavailable }
+    post:
+      tags: [Patient]
+      summary: Read a FHIR document into the record (EHDS Art. 15(4))
+      x-required-roles: [DATA_HOLDER, EDC_ADMIN, PATIENT]
+      description: >
+        Imports one HL7 Europe laboratory report or Patient Summary (a FHIR R4
+        `document` Bundle) into layer 3 of the graph, with a
+        DocumentReference and a Provenance (#1173). The document's shape is
+        checked, then the HL7 validator (`$validate` at FHIR_VALIDATOR_URL)
+        checks it against its profile; none configured is 503. A value the
+        record already holds is linked, never written twice; the same
+        document again writes nothing new. Every import, taken or refused,
+        is an event on the audit trail's record chain (ADR-045), and nothing
+        is written when that event cannot be. A PATIENT imports into their own
+        record, a DATA_HOLDER into a patient it treats, EDC_ADMIN into any.
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/fhir+json:
+            schema: { $ref: "#/components/schemas/FhirDocumentBundle" }
+      responses:
+        "201":
+          description: Imported
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    documentId,
+                    provenanceId,
+                    imports,
+                    created,
+                    linked,
+                    kind,
+                    profile,
+                    skipped,
+                  ]
+                properties:
+                  documentId: { type: string }
+                  provenanceId: { type: string }
+                  imports: { type: integer }
+                  created:
+                    { type: object, additionalProperties: { type: integer } }
+                  linked:
+                    { type: object, additionalProperties: { type: integer } }
+                  kind: { type: string, enum: [lab-report, patient-summary] }
+                  profile: { type: string }
+                  skipped:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entry: { type: string }
+                        resourceType: { type: string }
+                        reason: { type: string }
+        "400": { description: patientId is required, or the body is not JSON }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          {
+            description: Not the patient's own record,
+            or not a patient the holder treats,
+          }
+        "404": { description: Patient not found }
+        "409":
+          {
+            description: The document is about another record or names its entries,
+          }
+        "413": { description: Larger than 5 MB }
+        "415":
+          {
+            description: Not a document Bundle,
+            or neither a lab report nor a Patient Summary,
+          }
+        "422":
+          {
+            description: The document's shape is wrong,
+            or the validator refuses it (with its issues),
+          }
+        "502": { description: Neo4j unavailable }
+        "503":
+          {
+            description: No FHIR validator,
+            or the audit trail could not record the import,
+          }
   /api/patient/documents/patient-summary:
     get:
       tags: [Patient]

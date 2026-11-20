@@ -163,7 +163,7 @@ describe("FHIR documents of a record", () => {
     expect(doc.meta.profile).toEqual([
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
     ]);
-    const id = "lab-2024-09-12-alphaklinik-berlin-zentrallabor-fictional";
+    const id = "lab-p1-2024-09-12-alphaklinik-berlin-zentrallabor-fictional";
     const named = await labReport(
       req("/lab-report", `?patientId=P1&reportId=${id}`),
     );
@@ -184,7 +184,7 @@ describe("FHIR documents of a record", () => {
       "lab-report",
     ]);
     expect(body.documents[1].href).toBe(
-      "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2024-09-12-alphaklinik-berlin-zentrallabor-fictional",
+      "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2024-09-12-alphaklinik-berlin-zentrallabor-fictional",
     );
   });
 
