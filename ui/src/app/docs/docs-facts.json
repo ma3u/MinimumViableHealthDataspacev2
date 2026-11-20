@@ -1420,6 +1420,12 @@
       "status": "Proposed"
     },
     {
+      "id": "ADR-096",
+      "file": "ADR-096-the-kafka-broker-on-azure-is-event-hubs.md",
+      "title": "The Kafka broker on Azure is Event Hubs; Compose keeps Apache Kafka",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-097",
       "file": "ADR-097-matchbox-runs-on-azure-with-its-packages-baked-in.md",
       "title": "Matchbox runs on Azure as an internal Container App, with its IG packages baked into the image",
