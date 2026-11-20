@@ -124,6 +124,27 @@ class Config(unittest.TestCase):
         self.assertIn("      txServer: n/a\n", text)
         self.assertIn("      httpReadOnly: true\n", text)
 
+    def test_the_matchbox_image_bakes_exactly_the_pinned_igs(self):
+        # ADR-095: the image (services/matchbox) is built from the file build.py
+        # writes, and its bake step checks the IGs it reads from that file.
+        # Both must name FHIR R4 core and every IG of profiles.json, no more.
+        import subprocess
+
+        cfg = validate.load_config()
+        image_dir = build.ROOT / "services" / "matchbox"
+        self.assertEqual(build.MATCHBOX, image_dir / "application.yaml")
+        self.assertIn("COPY --chown=1000:1000 application.yaml /config/application.yaml",
+                      (image_dir / "Dockerfile").read_text(encoding="utf-8"))
+        listed = subprocess.run(
+            ["bash", str(image_dir / "bake.sh"), "--list"],
+            env={"MATCHBOX_CONFIG": str(build.MATCHBOX), "PATH": "/usr/bin:/bin"},
+            capture_output=True, text=True, check=True,
+        ).stdout.split()
+        want = [f"hl7.fhir.r4.core#{cfg['validator']['fhirVersion']}"] + [
+            f"{cfg['igs'][k]['package']}#{cfg['igs'][k]['version']}" for k in sorted(cfg["igs"])
+        ]
+        self.assertEqual(listed, want)
+
     def test_report_covers_every_configured_profile(self):
         cfg = validate.load_config()
         report = json.loads(validate.REPORT.read_text(encoding="utf-8"))

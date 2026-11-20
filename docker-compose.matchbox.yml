@@ -1,25 +1,30 @@
 # =============================================================================
-# Matchbox: the validator behind the FHIR facade's $validate (#1174)
+# Matchbox: the validator behind the FHIR facade's $validate (#1174, ADR-095)
 # =============================================================================
 # On top of the JAD stack (the neo4j-proxy is defined in docker-compose.jad.yml):
 #   docker compose -f docker-compose.yml -f docker-compose.jad.yml \
 #     -f docker-compose.matchbox.yml up -d matchbox neo4j-proxy
 #
 # What this overlay switches on:
-#   - matchbox: Matchbox v4.1.21 (ahdis, the HL7 Java validator as a FHIR
-#     server), configured by scripts/eehrxf/matchbox/application.yaml, which
-#     scripts/eehrxf/build.py writes from scripts/eehrxf/profiles.json: FHIR R4
-#     core and the HL7 Europe IG packages the CI validator uses (#1144), no
-#     terminology server, read-only. The packages are fetched from
-#     packages.fhir.org at the first start (a few minutes) and kept in the
-#     volume matchbox_db. http://localhost:8098/matchboxv3/ is its own UI.
+#   - matchbox: the image built from services/matchbox, Matchbox v4.1.21
+#     (ahdis, the HL7 Java validator as a FHIR server) with its IG packages
+#     baked in. Its configuration, services/matchbox/application.yaml, is
+#     written by scripts/eehrxf/build.py from scripts/eehrxf/profiles.json:
+#     FHIR R4 core and the HL7 Europe IG packages the CI validator uses
+#     (#1144), no terminology server, read-only. The first `up` builds the
+#     image, which fetches the packages from packages.fhir.org (about five
+#     minutes); every start after that is offline and takes well under a
+#     minute. http://localhost:8098/matchboxv3/ is its own UI.
 #   - neo4j-proxy: MATCHBOX_URL, so POST /fhir/$validate and
 #     POST /fhir/{type}/$validate are forwarded there and /fhir/metadata lists
 #     them. Without this overlay they answer 503 (OperationOutcome).
 #
-# Local only. Not deployed on Azure: it would have to stop off hours like
-# everything else there (ADR-053), and nothing on Azure calls $validate yet.
-# Matchbox wants about 4 GB; with the JAD stack that is more than its 8 GB.
+# The same image runs on Azure as the Container App mvhd-matchbox, stopped off
+# hours with everything else (ADR-053, scripts/azure/22-matchbox.sh).
+# Matchbox wants about 3.5 GB; with the JAD stack that is more than its 8 GB.
+#
+# A changed profiles.json is a new image: run build.py, then
+#   docker compose ... -f docker-compose.matchbox.yml build matchbox
 #
 # Try it:
 #   curl -s -X POST -H 'Content-Type: application/fhir+json' \
@@ -27,17 +32,17 @@
 #     'http://localhost:9090/fhir/Observation/$validate'
 #   -> 200, an OperationOutcome naming Observation.code as missing.
 #
-# Pinned by tag and digest (ADR-029); multi-arch (amd64, arm64).
+# The base image is pinned by tag and digest in services/matchbox/Dockerfile
+# (ADR-029); multi-arch (amd64, arm64).
 # =============================================================================
 
 services:
   matchbox:
-    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.1.21@sha256:d73b558b87ead55a63c35174b53bca655d48f77abdd22db3ca5f68032533f51a
+    build:
+      context: ./services/matchbox
+    image: mvhd/matchbox:local
     container_name: health-dataspace-matchbox
     mem_limit: 4g
-    volumes:
-      - ./scripts/eehrxf/matchbox:/config:ro
-      - matchbox_db:/database
     ports:
       - "8098:8080"
     restart: unless-stopped
@@ -45,6 +50,3 @@ services:
   neo4j-proxy:
     environment:
       MATCHBOX_URL: "http://health-dataspace-matchbox:8080/matchboxv3/fhir"
-
-volumes:
-  matchbox_db:

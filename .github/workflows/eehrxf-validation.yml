@@ -25,6 +25,8 @@ on:
   pull_request:
     paths:
       - "scripts/eehrxf/**"
+      # The Matchbox image: its config is generated here, its bake reads it (ADR-095).
+      - "services/matchbox/**"
       - "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
       - "neo4j/register-eehrxf-profiles.cypher"
       - "ui/public/mock/eehrxf.json"
@@ -38,6 +40,8 @@ on:
     branches: ["main"]
     paths:
       - "scripts/eehrxf/**"
+      # The Matchbox image: its config is generated here, its bake reads it (ADR-095).
+      - "services/matchbox/**"
       - "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
       - "neo4j/register-eehrxf-profiles.cypher"
       - "ui/public/mock/eehrxf.json"
