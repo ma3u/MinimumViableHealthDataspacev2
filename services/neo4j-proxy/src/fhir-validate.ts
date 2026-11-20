@@ -1,4 +1,5 @@
 import { MATCHBOX_TIMEOUT_MS, matchboxUrl } from "./config.js";
+import { ALLOWED_EXTENSION_DOMAINS } from "./fhir-extension-domains.js";
 import {
   FHIR_JSON,
   FhirError,
@@ -123,6 +124,22 @@ export interface ValidateResult {
 }
 
 /**
+ * Matchbox's $validate URL: the profile, and every extension domain the CI
+ * validator allows as an `extensions` parameter, so an unknown extension
+ * from our own or Synthea's domain is allowed and one from any other domain
+ * stays an error. Matchbox v4.1.21 reads the domains only from the request:
+ * the `extensions` of its application.yaml never reaches a $validate
+ * (ADR-095, scripts/eehrxf/build.py).
+ */
+export function matchboxValidateUrl(base: string, profile: string): string {
+  const query = [`profile=${encodeURIComponent(profile)}`];
+  for (const domain of ALLOWED_EXTENSION_DOMAINS) {
+    query.push(`extensions=${encodeURIComponent(domain)}`);
+  }
+  return `${base}/$validate?${query.join("&")}`;
+}
+
+/**
  * Sends the resource to Matchbox and returns its OperationOutcome. 503 when
  * no validator is configured or it does not answer, 502 when it answers with
  * something that is not an OperationOutcome.
@@ -141,7 +158,7 @@ export async function forwardValidate(
       ),
     };
   }
-  const url = `${base}/$validate?profile=${encodeURIComponent(input.profile)}`;
+  const url = matchboxValidateUrl(base, input.profile);
   let response: Response;
   try {
     response = await fetchImpl(url, {

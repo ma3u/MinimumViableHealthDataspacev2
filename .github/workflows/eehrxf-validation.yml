@@ -27,6 +27,8 @@ on:
       - "scripts/eehrxf/**"
       # The Matchbox image: its config is generated here, its bake reads it (ADR-095).
       - "services/matchbox/**"
+      # The proxy sends these with every $validate (generated, ADR-095).
+      - "services/neo4j-proxy/src/fhir-extension-domains.ts"
       - "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
       - "neo4j/register-eehrxf-profiles.cypher"
       - "ui/public/mock/eehrxf.json"
@@ -42,6 +44,8 @@ on:
       - "scripts/eehrxf/**"
       # The Matchbox image: its config is generated here, its bake reads it (ADR-095).
       - "services/matchbox/**"
+      # The proxy sends these with every $validate (generated, ADR-095).
+      - "services/neo4j-proxy/src/fhir-extension-domains.ts"
       - "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
       - "neo4j/register-eehrxf-profiles.cypher"
       - "ui/public/mock/eehrxf.json"

@@ -73,6 +73,14 @@ disagree.
   with the proxy (ADR-053), so `$validate` is 503 then, like everything else.
   `MATCHBOX_TIMEOUT_MS` (default 120000) bounds one validation.
 
+  Every call carries the CI validator's allowed extension domains
+  (`allowedExtensionDomains` in `profiles.json`) as Matchbox `extensions`
+  parameters, from `src/fhir-extension-domains.ts`, which `build.py`
+  generates. Matchbox v4.1.21 does not apply the `extensions` of its
+  `application.yaml` to a `$validate`, so without them our own
+  `https://ehds.mabu.red/fhir/` extensions were errors. An extension from
+  any other domain still is one.
+
 - **`meta.profile`** is not set on any served resource: they are rebuilt from
   graph nodes (the `code` of an Observation is a string, not a
   CodeableConcept) and do not validate against base R4 yet (#1144).
