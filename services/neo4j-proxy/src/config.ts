@@ -105,10 +105,11 @@ export const AZURE_OPENAI_GPT4O_URL = process.env.AZURE_OPENAI_GPT4O_URL;
 export const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
 
 // $validate on the FHIR facade (#1174) is forwarded to a validator, never
-// written here: Matchbox (docker-compose.matchbox.yml), its FHIR base URL,
-// e.g. http://matchbox:8080/matchboxv3/fhir. Read per request, so a test can
-// set it. Unset, $validate answers 503 and /fhir/metadata does not list it.
-// Local compose only; not deployed on Azure.
+// written here: Matchbox, its FHIR base URL. Locally docker-compose.matchbox.yml
+// (http://health-dataspace-matchbox:8080/matchboxv3/fhir), on Azure the
+// internal Container App mvhd-matchbox (http://mvhd-matchbox/matchboxv3/fhir,
+// set by scripts/azure/22-matchbox.sh, ADR-095). Read per request, so a test
+// can set it. Unset, $validate answers 503 and /fhir/metadata does not list it.
 export function matchboxUrl(): string {
   return (process.env.MATCHBOX_URL ?? "").replace(/\/+$/, "");
 }

@@ -23,13 +23,14 @@ Bridges DCore data planes to the Neo4j 5-layer health knowledge graph (ADR-2).
 
 ## Environment Variables
 
-| Variable         | Default                 | Description                        |
-| ---------------- | ----------------------- | ---------------------------------- |
-| `PORT`           | `9090`                  | HTTP listen port                   |
-| `NEO4J_URI`      | `bolt://localhost:7687` | Neo4j Bolt URI                     |
-| `NEO4J_USER`     | `neo4j`                 | Neo4j username                     |
-| `NEO4J_PASSWORD` | `healthdataspace`       | Neo4j password                     |
-| `MATCHBOX_URL`   | unset                   | Matchbox FHIR base for `$validate` |
+| Variable              | Default                 | Description                                                                         |
+| --------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| `PORT`                | `9090`                  | HTTP listen port                                                                    |
+| `NEO4J_URI`           | `bolt://localhost:7687` | Neo4j Bolt URI                                                                      |
+| `NEO4J_USER`          | `neo4j`                 | Neo4j username                                                                      |
+| `NEO4J_PASSWORD`      | `healthdataspace`       | Neo4j password                                                                      |
+| `MATCHBOX_URL`        | unset                   | Matchbox FHIR base for `$validate`; on Azure `http://mvhd-matchbox/matchboxv3/fhir` |
+| `MATCHBOX_TIMEOUT_MS` | `120000`                | How long one validation may take                                                    |
 
 ## The FHIR facade (#1174)
 
@@ -57,10 +58,29 @@ disagree.
   audit record (`logTransferEvent`); `/metadata` and `$validate` read no
   patient data and write none.
 - **Errors** under `/fhir` are `OperationOutcome`s.
-- **`$validate`** is forwarded to Matchbox (`MATCHBOX_URL`), started locally
-  with `docker-compose.matchbox.yml`; its IG packages come from
-  `scripts/eehrxf/profiles.json` through `scripts/eehrxf/build.py`. Not on
-  Azure. Without it, `$validate` is 503 and `/metadata` does not list it.
+- **`$validate`** is forwarded to Matchbox (`MATCHBOX_URL`), the image in
+  `services/matchbox` with its IG packages baked in (ADR-095). Its config
+  comes from `scripts/eehrxf/profiles.json` through `scripts/eehrxf/build.py`.
+  Without `MATCHBOX_URL`, `$validate` is 503 and `/metadata` does not list it.
+
+  | Where | Matchbox                                     | `MATCHBOX_URL`                                          |
+  | ----- | -------------------------------------------- | ------------------------------------------------------- |
+  | Local | `docker-compose.matchbox.yml`                | `http://health-dataspace-matchbox:8080/matchboxv3/fhir` |
+  | Azure | Container App `mvhd-matchbox`, internal only | `http://mvhd-matchbox/matchboxv3/fhir`                  |
+
+  On Azure `scripts/azure/22-matchbox.sh` (the workflow `matchbox.yml`)
+  creates the app and sets the proxy's `MATCHBOX_URL`; it stops off hours
+  with the proxy (ADR-053), so `$validate` is 503 then, like everything else.
+  `MATCHBOX_TIMEOUT_MS` (default 120000) bounds one validation.
+
+  Every call carries the CI validator's allowed extension domains
+  (`allowedExtensionDomains` in `profiles.json`) as Matchbox `extensions`
+  parameters, from `src/fhir-extension-domains.ts`, which `build.py`
+  generates. Matchbox v4.1.21 does not apply the `extensions` of its
+  `application.yaml` to a `$validate`, so without them our own
+  `https://ehds.mabu.red/fhir/` extensions were errors. An extension from
+  any other domain still is one.
+
 - **`meta.profile`** is not set on any served resource: they are rebuilt from
   graph nodes (the `code` of an Observation is a string, not a
   CodeableConcept) and do not validate against base R4 yet (#1144).

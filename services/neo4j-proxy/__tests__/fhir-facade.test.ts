@@ -6,6 +6,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import supertest from "supertest";
+import { readFileSync } from "node:fs";
+import { ALLOWED_EXTENSION_DOMAINS } from "../src/fhir-extension-domains.js";
 
 const mockRun = vi.fn();
 vi.mock("neo4j-driver", () => ({
@@ -331,11 +333,47 @@ describe("$validate", () => {
       "http://matchbox:8080/matchboxv3/fhir/$validate?profile=" +
         encodeURIComponent(
           "http://hl7.org/fhir/StructureDefinition/Observation",
-        ),
+        ) +
+        "&extensions=" +
+        encodeURIComponent("https://ehds.mabu.red/fhir/") +
+        "&extensions=" +
+        encodeURIComponent("http://synthetichealth.github.io/synthea/"),
     );
     expect(JSON.parse(init.body)).toEqual(invalid);
     // Nothing was read from the graph.
     expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it("allows the extension domains of profiles.json, and no other, on every call (ADR-095)", async () => {
+    // Matchbox v4.1.21 drops the extensions of its application.yaml from a
+    // $validate; only the request parameter sets them. The list is generated
+    // from the CI validator's allowedExtensionDomains by build.py.
+    const profiles = JSON.parse(
+      readFileSync(
+        new URL("../../../scripts/eehrxf/profiles.json", import.meta.url),
+        "utf8",
+      ),
+    ) as { validator: { allowedExtensionDomains: string[] } };
+    expect([...ALLOWED_EXTENSION_DOMAINS]).toEqual(
+      profiles.validator.allowedExtensionDomains,
+    );
+
+    vi.stubEnv("MATCHBOX_URL", "http://matchbox:8080/matchboxv3/fhir");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify(verdict)));
+    vi.stubGlobal("fetch", fetchMock);
+    await request
+      .post("/fhir/Observation/$validate")
+      .set("Content-Type", "application/fhir+json")
+      .send(JSON.stringify(invalid));
+    const sent = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(sent.searchParams.getAll("extensions")).toEqual(
+      profiles.validator.allowedExtensionDomains,
+    );
+    expect(sent.searchParams.get("profile")).toBe(
+      "http://hl7.org/fhir/StructureDefinition/Observation",
+    );
   });
 
   it("takes a Parameters body with a profile", async () => {

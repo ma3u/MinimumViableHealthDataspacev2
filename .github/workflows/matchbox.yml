@@ -1,0 +1,56 @@
+name: Matchbox (ADR-095)
+
+# Creates or updates mvhd-matchbox, the FHIR validator behind the proxy's
+# POST /fhir/$validate, and points mvhd-neo4j-proxy at it (MATCHBOX_URL). Runs
+# as the CI identity because creating the app reads the registry credentials,
+# which the maintainer's Container Apps Contributor role cannot. The work is
+# scripts/azure/22-matchbox.sh; running it again is an update.
+#
+# The image must already be in ACR: deploy-azure.yml builds
+# mvhd-matchbox:<tree hash of services/matchbox> on the merge that changes it.
+#
+# Manual trigger only. Run it in office hours: a new app runs until the next
+# evening stop (ADR-053). Runbook: docs/knowledge/runbooks/azure-deploy.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "apply creates or updates the app and wires the proxy; check only reports; unwire-proxy takes MATCHBOX_URL off the proxy"
+        type: choice
+        options: [apply, check, unwire-proxy]
+        default: apply
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  matchbox:
+    name: Matchbox (${{ inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run 22-matchbox.sh
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          case "$MODE" in
+            check) ./scripts/azure/22-matchbox.sh --check </dev/null | tee -a "$GITHUB_STEP_SUMMARY" ;;
+            unwire-proxy) ./scripts/azure/22-matchbox.sh --unwire-proxy </dev/null | tee -a "$GITHUB_STEP_SUMMARY" ;;
+            *) ./scripts/azure/22-matchbox.sh </dev/null | tee -a "$GITHUB_STEP_SUMMARY" ;;
+          esac

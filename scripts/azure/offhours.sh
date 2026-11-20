@@ -88,6 +88,11 @@ CFM_APPS=(mvhd-cfm-pmanager mvhd-cfm-tmanager mvhd-cfm-agents)
 # from the sealed extract: nothing row-level survives a stop, by design.
 SPE_GROUPS=(mvhd-spe-1 mvhd-spe-2)
 TRUSTEE_APP="${TRUSTEE_APP:-mvhd-trustee}"
+# The FHIR validator behind the proxy's $validate (ADR-095), from the moment
+# 22-matchbox.sh has created it; left out while it does not exist. It starts
+# first among the core apps, since its start is the longest of them and the
+# proxy calls it, and it stops after the proxy.
+MATCHBOX_APP="${MATCHBOX_APP:-mvhd-matchbox}"
 # ADR-072: off by default, started on demand; true restores the morning start.
 SPE_START_WITH_STACK="${SPE_START_WITH_STACK:-false}"
 SPE_IDLE_STOP_MINUTES="${SPE_IDLE_STOP_MINUTES:-30}"
@@ -116,6 +121,8 @@ cfm_apps() {  # the CFM apps that exist, in start order, one per line
 }
 trustee_present() { az containerapp show --name "$TRUSTEE_APP" --resource-group "$RESOURCE_GROUP" \
                       --query name -o tsv >/dev/null 2>&1; }
+matchbox_present() { az containerapp show --name "$MATCHBOX_APP" --resource-group "$RESOURCE_GROUP" \
+                       --query name -o tsv >/dev/null 2>&1; }
 spe_groups() {  # the SPE container groups that exist, one per line
   local g
   for g in "${SPE_GROUPS[@]}"; do
@@ -285,6 +292,8 @@ do_stop() {
   local cfm
   while read -r cfm; do [ -n "$cfm" ] && apps=("$cfm" ${apps[@]+"${apps[@]}"}); done < <(cfm_apps)
   apps+=("${BACKEND_APPS[@]}")
+  # After the proxy, which calls it (ADR-095).
+  if matchbox_present; then apps+=("$MATCHBOX_APP"); fi
   if trustee_present; then apps+=("$TRUSTEE_APP"); fi
   log "stopping ${#apps[@]} apps"
   "${SCRIPT_DIR}/set-app-power.sh" stop "${apps[@]}"
@@ -321,6 +330,8 @@ do_start() {
   # (ADR-072); SPE_START_WITH_STACK=true starts them here as before, and the
   # proxy, among the core apps, reconnects to them as they finish loading.
   local -a core=("${CORE_APPS[@]}")
+  # Matchbox before the proxy (ADR-095): its start is the longest of them.
+  if matchbox_present; then core=("$MATCHBOX_APP" "${core[@]}"); fi
   if trustee_present; then core=("$TRUSTEE_APP" "${core[@]}"); fi
   log "core apps"
   "${SCRIPT_DIR}/set-app-power.sh" start "${core[@]}" || warn "Not every core app reported running, see above"

@@ -112,6 +112,25 @@ jobs:
             --cache-to type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:buildcache,mode=max \
             --push ./services/neo4j-proxy
 
+      # Matchbox, the validator behind the proxy's $validate, with its IG
+      # packages baked in (ADR-095). Tagged with the git tree hash of
+      # services/matchbox, so it is built only on a merge that changes the
+      # Dockerfile, the bake script or the generated application.yaml: the
+      # bake fetches the packages from the FHIR package servers and takes
+      # about five minutes. No :latest (gotcha #6, ADR-029).
+      - name: Build & push Matchbox image (when services/matchbox changed)
+        id: matchbox
+        run: |
+          tag=$(git rev-parse --short=12 HEAD:services/matchbox)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if az acr repository show-tags --name ${{ env.ACR_NAME }} --repository mvhd-matchbox -o tsv 2>/dev/null | grep -qx "$tag"; then
+            echo "mvhd-matchbox:$tag is already in ACR"
+            exit 0
+          fi
+          docker buildx build --platform linux/amd64 \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-matchbox:$tag \
+            --push ./services/matchbox
+
       # A merge during a k6 run redeploys the UI and the proxy in the middle of
       # it (#559 on 2026-10-06, #571). The deploy waits while a run is on: an
       # execution of the Container Apps job mvhd-load-test (run-load-test.sh),
@@ -180,6 +199,28 @@ jobs:
             --name mvhd-neo4j-proxy \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:${{ github.sha }}
+
+      # Moves an existing mvhd-matchbox to the image above. Creating it and
+      # pointing the proxy at it is scripts/azure/22-matchbox.sh, run by the
+      # workflow matchbox.yml (ADR-095); until then the proxy's $validate
+      # answers 503 and the deploy goes on.
+      - name: Deploy Matchbox
+        env:
+          IMAGE: ${{ env.ACR_LOGIN_SERVER }}/mvhd-matchbox:${{ steps.matchbox.outputs.tag }}
+        run: |
+          if ! az containerapp show -n mvhd-matchbox -g ${{ env.RESOURCE_GROUP }} -o none 2>/dev/null; then
+            echo "::warning::mvhd-matchbox does not exist yet (workflow matchbox.yml, scripts/azure/22-matchbox.sh, ADR-095)"
+            exit 0
+          fi
+          current=$(az containerapp show -n mvhd-matchbox -g ${{ env.RESOURCE_GROUP }} \
+            --query "properties.template.containers[0].image" -o tsv)
+          if [ "$current" = "$IMAGE" ]; then
+            echo "mvhd-matchbox already runs $IMAGE"
+            exit 0
+          fi
+          az containerapp update --name mvhd-matchbox --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image "$IMAGE" -o none
+          echo "mvhd-matchbox: $current -> $IMAGE"
 
       # The off-hours jobs download scripts/azure/offhours.sh and the scripts
       # it calls at REPO_REF (ADR-058, #595), so they run the code just

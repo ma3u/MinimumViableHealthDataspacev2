@@ -54,6 +54,9 @@ case "$*" in
   *"containerapp show --name mvhd-trustee"*)
     if [ "$TRUSTEE_EXISTS" = 1 ]; then echo mvhd-trustee; exit 0; fi
     echo "ResourceNotFound" >&2; exit 3 ;;
+  *"containerapp show --name mvhd-matchbox"*)
+    if [ "$MATCHBOX_EXISTS" = 1 ]; then echo mvhd-matchbox; exit 0; fi
+    echo "ResourceNotFound" >&2; exit 3 ;;
   *"containerapp update --name mvhd-ui"*"LIVE_DEMO_OFFLINE=true"*) echo true > "$STATE/ui_flag" ;;
   *"containerapp update --name mvhd-ui"*"LIVE_DEMO_OFFLINE=false"*) echo false > "$STATE/ui_flag" ;;
   *LIVE_DEMO_OFFLINE*) cat "$STATE/ui_flag" ;;
@@ -78,6 +81,7 @@ function run(
     groups: string[];
     trustee: boolean;
     cfm?: string[];
+    matchbox?: boolean;
     env?: Record<string, string>;
   },
 ) {
@@ -91,6 +95,7 @@ function run(
       SPE_GROUPS_EXIST: opts.groups.join(" "),
       TRUSTEE_EXISTS: opts.trustee ? "1" : "0",
       CFM_APPS_EXIST: (opts.cfm ?? []).join(" "),
+      MATCHBOX_EXISTS: opts.matchbox ? "1" : "0",
       ...(opts.env ?? {}),
     },
     encoding: "utf8",
@@ -401,6 +406,44 @@ describe("offhours.sh and the CFM apps (ADR-088)", SLOW, () => {
       const { status, stderr, log } = run(action, NONE);
       expect(status, stderr).toBe(0);
       expect(log.filter((l) => /set-app-power.*mvhd-cfm-/.test(l))).toEqual([]);
+    }
+  });
+});
+
+/**
+ * Matchbox, the FHIR validator behind the proxy's $validate (ADR-095), stops
+ * and starts with the stack once 22-matchbox.sh has created it: it starts
+ * before the proxy that calls it and stops after it.
+ */
+describe("offhours.sh and Matchbox (ADR-095)", SLOW, () => {
+  it("starts Matchbox before the proxy, after Trustee", () => {
+    const { status, stderr, log } = run("start", { ...BOTH, matchbox: true });
+    expect(status, stderr).toBe(0);
+    const core = appsOf(log, "set-app-power.sh start");
+    expect(core[0]).toBe("mvhd-trustee");
+    expect(core[1]).toBe("mvhd-matchbox");
+    expect(core.indexOf("mvhd-matchbox")).toBeLessThan(
+      core.indexOf("mvhd-neo4j-proxy"),
+    );
+  });
+
+  it("stops Matchbox after the proxy", () => {
+    const { status, stderr, log } = run("stop", { ...NONE, matchbox: true });
+    expect(status, stderr).toBe(0);
+    const stopped = appsOf(log, "set-app-power.sh stop");
+    expect(stopped).toContain("mvhd-matchbox");
+    expect(stopped.indexOf("mvhd-matchbox")).toBeGreaterThan(
+      stopped.indexOf("mvhd-neo4j-proxy"),
+    );
+  });
+
+  it("leaves Matchbox out while it does not exist", () => {
+    for (const action of ["stop", "start"] as const) {
+      const { status, stderr, log } = run(action, NONE);
+      expect(status, stderr).toBe(0);
+      expect(log.filter((l) => /set-app-power.*mvhd-matchbox/.test(l))).toEqual(
+        [],
+      );
     }
   });
 });

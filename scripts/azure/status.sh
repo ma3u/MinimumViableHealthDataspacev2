@@ -28,7 +28,7 @@ printf "%-25s %-10s %-8s %s\n" "────" "──────" "────
 ALL_APPS=(
   "$NEO4J_APP" "$NEO4J_PROXY_APP" "$UI_APP" "$KEYCLOAK_APP"
   "$VAULT_APP" "$NATS_APP" "$CONTROLPLANE_APP" "$SIGLET_APP"
-  "$IDENTITYHUB_APP" "$ISSUER_APP"
+  "$IDENTITYHUB_APP" "$ISSUER_APP" "$MATCHBOX_APP"
 )
 
 for app in "${ALL_APPS[@]}"; do
