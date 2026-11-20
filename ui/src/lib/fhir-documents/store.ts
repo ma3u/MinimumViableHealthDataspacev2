@@ -65,7 +65,7 @@ const LABELS = [
  * to no record at all). A document naming one is refused: an import never
  * writes into another person's nodes.
  */
-export const FOREIGN_NODES_CYPHER = `
+const FOREIGN_NODES_CYPHER = `
 UNWIND $ids AS key
 MATCH (n)
 WHERE any(l IN labels(n) WHERE l IN $labels)

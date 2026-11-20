@@ -27,7 +27,7 @@ export interface ValidationResult {
 
 type Json = Record<string, unknown>;
 
-export function outcomeToResult(outcome: unknown): ValidationResult | null {
+function outcomeToResult(outcome: unknown): ValidationResult | null {
   const oo = (outcome ?? {}) as Json;
   if (oo.resourceType !== "OperationOutcome") return null;
   const issues = (Array.isArray(oo.issue) ? (oo.issue as Json[]) : [])
