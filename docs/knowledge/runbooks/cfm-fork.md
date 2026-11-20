@@ -37,8 +37,7 @@ longer adds its option to the Certo agent's launcher, which upstream removes
 ([eclipse-cfm/cfm#245](https://github.com/eclipse-cfm/cfm/pull/245)) and no
 image of ours contains. The eight images are the same code as `.1`. It was
 cut because the "Patches on upstream main" check was red on that conflict;
-compose and CI use it, Azure stays on `.1` until `20-cfm-fork.sh images` and
-`apps` run next.
+compose and CI use it, and Azure since 2026-11-20.
 
 ## Rules
 
@@ -129,7 +128,7 @@ fork can be archived.
 
 ## Azure
 
-Deployed 2026-11-11 (ADR-085 step 4), on `v0.0.9-mvhd.1` since 2026-11-18 (`v0.0.8-mvhd.1` from 2026-11-12). Three Container Apps, as in compose:
+Deployed 2026-11-11 (ADR-085 step 4), on `v0.0.9-mvhd.2` since 2026-11-20 (`v0.0.9-mvhd.1` from 2026-11-18, `v0.0.8-mvhd.1` from 2026-11-12). Three Container Apps, as in compose:
 `mvhd-cfm-tmanager` and `mvhd-cfm-pmanager` (internal ingress) and
 `mvhd-cfm-agents` (six containers, ports 8081 to 8086 because they share one
 network namespace). The definitions are in
