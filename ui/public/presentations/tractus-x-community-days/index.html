@@ -406,6 +406,60 @@
         font-size: 21px;
         margin-top: 4px;
       }
+      /* The close: links beside the speaker card */
+      .close {
+        display: flex;
+        gap: 56px;
+        margin-top: 44px;
+        align-items: flex-start;
+      }
+      .close .links {
+        flex: 1;
+        grid-template-columns: 1fr;
+        margin-top: 0;
+      }
+      .speaker {
+        width: 500px;
+        flex: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-radius: 24px;
+        padding: 32px 30px 28px;
+        text-align: center;
+      }
+      .speaker .portrait {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--accent);
+        margin: 0;
+      }
+      .speaker .name {
+        font: 700 32px "Sora", sans-serif;
+        margin-top: 8px !important;
+      }
+      .speaker .role {
+        font-size: 23px;
+        color: var(--body);
+      }
+      .speaker .qr img {
+        width: 200px;
+        height: 200px;
+        image-rendering: pixelated;
+        background: #fff;
+        padding: 10px;
+        border-radius: 14px;
+        margin: 12px 0 4px;
+        display: block;
+      }
+      .speaker .li {
+        font: 600 23px "JetBrains Mono", monospace;
+      }
     </style>
   </head>
   <body>
@@ -1034,6 +1088,7 @@
             What did your migration break that is not on these slides? Has anyone seen the go-final
             criteria for 1.0.0?
           </p>
+          <div class="close">
           <div class="links">
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092" target="_blank" rel="noopener"
               >Discussion #1092<span>EDC 0.18 to 1.0: the full record and fifteen learnings</span></a
@@ -1048,7 +1103,18 @@
               >Stack and environment<span>siglet and the request path</span></a
             >
           </div>
-          <aside class="notes">[open] Questions. The discussion is the place for follow-ups.</aside>
+          <div class="speaker">
+            <!-- The NODES deck's portrait and the EJIE deck's LinkedIn code, shared rather than copied. -->
+            <img class="portrait" src="../nodes-ai-2027/img/matthias.jpg" alt="Matthias Buchhorn-Roth" width="600" height="600" />
+            <p class="name">Matthias Buchhorn-Roth</p>
+            <p class="role">Cloud and AI Engineer, Berlin</p>
+            <a class="qr" href="https://www.linkedin.com/in/mbuchhorn/" target="_blank" rel="noopener">
+              <img src="../euskadi-ejie-2026/img/qr-linkedin.png" alt="QR code that opens linkedin.com/in/mbuchhorn" />
+            </a>
+            <a class="li" href="https://www.linkedin.com/in/mbuchhorn/" target="_blank" rel="noopener">linkedin.com/in/mbuchhorn</a>
+          </div>
+          </div>
+          <aside class="notes">[open] Questions, and the QR code for LinkedIn. The discussion is the place for follow-ups.</aside>
         </section>
       </div>
     </div>
