@@ -1,0 +1,3510 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/P1",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "P1",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Maria Schmidt"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1979-03-15",
+        "address": [
+          {
+            "city": "Berlin",
+            "country": "DE"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/checkup-p1-2025-03-14",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "checkup-p1-2025-03-14",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003"
+              }
+            ],
+            "text": "Encounter for check up"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "period": {
+          "start": "2025-03-14T09:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "AlphaKlinik Berlin"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/enc-p1-2024-09-12",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-p1-2024-09-12",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Laboratory visit, AlphaKlinik Berlin (fictional)"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "period": {
+          "start": "2024-09-12T08:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "AlphaKlinik Berlin"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-p1-195967001",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p1-195967001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "195967001"
+            }
+          ],
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "onsetDateTime": "2009-02-27"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-p1-271825005",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p1-271825005",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "271825005"
+            }
+          ],
+          "text": "Respiratory distress"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "onsetDateTime": "2021-03-08"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/act-p1-2025-01-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "act-p1-2025-01-05",
+        "extension": [
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+            "valueCode": "device-weekly-mean"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "activity",
+                "display": "Activity"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55411-3"
+            }
+          ],
+          "text": "Exercise duration"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectivePeriod": {
+          "start": "2024-12-30",
+          "end": "2025-01-05"
+        },
+        "performer": [
+          {
+            "display": "Fictional fitness tracker"
+          }
+        ],
+        "valueQuantity": {
+          "value": 18,
+          "unit": "min/d",
+          "system": "http://unitsofmeasure.org",
+          "code": "min/d"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/act-p1-2025-01-12",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "act-p1-2025-01-12",
+        "extension": [
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+            "valueCode": "device-weekly-mean"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "activity",
+                "display": "Activity"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55411-3"
+            }
+          ],
+          "text": "Exercise duration"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectivePeriod": {
+          "start": "2025-01-06",
+          "end": "2025-01-12"
+        },
+        "performer": [
+          {
+            "display": "Fictional fitness tracker"
+          }
+        ],
+        "valueQuantity": {
+          "value": 22,
+          "unit": "min/d",
+          "system": "http://unitsofmeasure.org",
+          "code": "min/d"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/dr-ecg-p1-2026-03-04-8625-6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "dr-ecg-p1-2026-03-04-8625-6",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "procedure",
+                "display": "Procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8625-6"
+            }
+          ],
+          "text": "P-R Interval"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-03-04T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 158,
+          "unit": "ms",
+          "system": "http://unitsofmeasure.org",
+          "code": "ms"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 120,
+              "unit": "ms",
+              "system": "http://unitsofmeasure.org",
+              "code": "ms"
+            },
+            "high": {
+              "value": 200,
+              "unit": "ms",
+              "system": "http://unitsofmeasure.org",
+              "code": "ms"
+            },
+            "text": "120 - 200 ms"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/dr-ecg-p1-2026-03-04-8632-2",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "dr-ecg-p1-2026-03-04-8632-2",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "procedure",
+                "display": "Procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8632-2"
+            }
+          ],
+          "text": "QRS axis"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-03-04T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 45,
+          "unit": "deg",
+          "system": "http://unitsofmeasure.org",
+          "code": "deg"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": -30,
+              "unit": "deg",
+              "system": "http://unitsofmeasure.org",
+              "code": "deg"
+            },
+            "high": {
+              "value": 90,
+              "unit": "deg",
+              "system": "http://unitsofmeasure.org",
+              "code": "deg"
+            },
+            "text": "-30 - 90 deg"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/dr-ecg-p1-2026-03-04-8867-4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "dr-ecg-p1-2026-03-04-8867-4",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8867-4"
+            }
+          ],
+          "text": "Heart rate"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-03-04T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 72,
+          "unit": "/min",
+          "system": "http://unitsofmeasure.org",
+          "code": "/min"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 60,
+              "unit": "/min",
+              "system": "http://unitsofmeasure.org",
+              "code": "/min"
+            },
+            "high": {
+              "value": 100,
+              "unit": "/min",
+              "system": "http://unitsofmeasure.org",
+              "code": "/min"
+            },
+            "text": "60 - 100 /min"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p1-2089-1-2024-09-12",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p1-2089-1-2024-09-12",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2089-1"
+            }
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2024-09-12T08:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 158,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 116,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "0 - 116 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p1-2089-1-2025-01-20",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p1-2089-1-2025-01-20",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2089-1"
+            }
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2025-01-20T08:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 149,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 116,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "0 - 116 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p1-39156-5-2024-09-12",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p1-39156-5-2024-09-12",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5"
+            }
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2024-09-12T08:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 30.4,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 18.5,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            },
+            "high": {
+              "value": 25,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            },
+            "text": "18.5 - 25.0 kg/m2 (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p1-197361",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-p1-197361",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197361"
+            }
+          ],
+          "text": "Lisinopril 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "authoredOn": "2015-11-02",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p1-209459",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-p1-209459",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "209459"
+            }
+          ],
+          "text": "Atorvastatin 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "authoredOn": "2024-09-12",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/DiagnosticReport/dr-ecg-p1-2026-03-04",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-ecg-p1-2026-03-04",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "EC"
+              }
+            ],
+            "text": "Electrocardiac (e.g., EKG, EEC, Holter)"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11524-6"
+            }
+          ],
+          "text": "EKG study"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-03-04",
+        "issued": "2026-03-04T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "conclusion": "Sinus rhythm, normal intervals, no repolarisation abnormality."
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/DiagnosticReport/dr-img-p1-2026-01-22",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-img-p1-2026-01-22",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD"
+              }
+            ],
+            "text": "Radiology"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "36643-5"
+            }
+          ],
+          "text": "XR Chest 2 Views"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-01-22",
+        "issued": "2026-01-22T15:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Radiologie (fictional)"
+          }
+        ],
+        "conclusion": "Lungs clear. Cardiomediastinal silhouette within normal limits. No pleural effusion, no pneumothorax."
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Immunization/imm-p1-2019-05-06-115",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-p1-2019-05-06-115",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "115"
+            }
+          ],
+          "text": "Tdap"
+        },
+        "patient": {
+          "reference": "Patient/P1"
+        },
+        "occurrenceDateTime": "2019-05-06",
+        "lotNumber": "TD19-2208",
+        "performer": [
+          {
+            "actor": {
+              "display": "Hausarztpraxis Musterstadt (fictional)"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Immunization/imm-p1-2024-11-05-216",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-p1-2024-11-05-216",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "216"
+            }
+          ],
+          "text": "Pneumococcal conjugate vaccine 20 valent"
+        },
+        "patient": {
+          "reference": "Patient/P1"
+        },
+        "occurrenceDateTime": "2024-11-05",
+        "lotNumber": "PCV20-4410",
+        "performer": [
+          {
+            "actor": {
+              "display": "Hausarztpraxis Musterstadt (fictional)"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationStatement/ms-p1-A10BA02",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-p1-A10BA02",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "A10BA02"
+            }
+          ],
+          "text": "Metformin 500 mg"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectivePeriod": {
+          "start": "2018-04-10"
+        },
+        "dateAsserted": "2026-08-21",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Diabetes mellitus type 2"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-1",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 500,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationStatement/ms-p1-C09AA03",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-p1-C09AA03",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA03"
+            }
+          ],
+          "text": "Lisinopril 10 mg"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectivePeriod": {
+          "start": "2015-11-02"
+        },
+        "dateAsserted": "2026-08-21",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 10,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/P2",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "P2",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Jan de Vries"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1965-06-02",
+        "address": [
+          {
+            "city": "Maastricht",
+            "country": "NL"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/checkup-p2-2025-10-07",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "checkup-p2-2025-10-07",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003"
+              }
+            ],
+            "text": "Encounter for check up"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "period": {
+          "start": "2025-10-07T09:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "Limburg Medical Centre"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/enc-p2-2025-03-04",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-p2-2025-03-04",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Laboratory visit, Limburg Medical Centre (fictional)"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "period": {
+          "start": "2025-03-04T08:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "Limburg Medical Centre"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-p2-13644009",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p2-13644009",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "13644009"
+            }
+          ],
+          "text": "Hypercholesterolaemia"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "onsetDateTime": "2014-07-09"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-p2-13645005",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p2-13645005",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "13645005"
+            }
+          ],
+          "text": "Chronic obstructive pulmonary disease"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "onsetDateTime": "2018-10-05"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/act-p2-2025-01-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "act-p2-2025-01-05",
+        "extension": [
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+            "valueCode": "device-weekly-mean"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "activity",
+                "display": "Activity"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55411-3"
+            }
+          ],
+          "text": "Exercise duration"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "effectivePeriod": {
+          "start": "2024-12-30",
+          "end": "2025-01-05"
+        },
+        "performer": [
+          {
+            "display": "Fictional fitness ring"
+          }
+        ],
+        "valueQuantity": {
+          "value": 9,
+          "unit": "min/d",
+          "system": "http://unitsofmeasure.org",
+          "code": "min/d"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/act-p2-2025-01-12",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "act-p2-2025-01-12",
+        "extension": [
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+            "valueCode": "device-weekly-mean"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "activity",
+                "display": "Activity"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55411-3"
+            }
+          ],
+          "text": "Exercise duration"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "effectivePeriod": {
+          "start": "2025-01-06",
+          "end": "2025-01-12"
+        },
+        "performer": [
+          {
+            "display": "Fictional fitness ring"
+          }
+        ],
+        "valueQuantity": {
+          "value": 12,
+          "unit": "min/d",
+          "system": "http://unitsofmeasure.org",
+          "code": "min/d"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p2-22748-8-2025-03-04",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p2-22748-8-2025-03-04",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "22748-8"
+            }
+          ],
+          "text": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "effectiveDateTime": "2025-03-04T08:30:00Z",
+        "performer": [
+          {
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 3.4,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mmol/L",
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            },
+            "high": {
+              "value": 3,
+              "unit": "mmol/L",
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            },
+            "text": "0 - 3.0 mmol/L (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p2-22748-8-2025-09-16",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p2-22748-8-2025-09-16",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "22748-8"
+            }
+          ],
+          "text": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "effectiveDateTime": "2025-09-16T08:30:00Z",
+        "performer": [
+          {
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2.6,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mmol/L",
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            },
+            "high": {
+              "value": 3,
+              "unit": "mmol/L",
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            },
+            "text": "0 - 3.0 mmol/L (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p2-39156-5-2025-03-04",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p2-39156-5-2025-03-04",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5"
+            }
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "effectiveDateTime": "2025-03-04T08:30:00Z",
+        "performer": [
+          {
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 34.6,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 18.5,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            },
+            "high": {
+              "value": 25,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            },
+            "text": "18.5 - 25.0 kg/m2 (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-p2-39156-5-2025-09-16",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-p2-39156-5-2025-09-16",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5"
+            }
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "effectiveDateTime": "2025-09-16T08:30:00Z",
+        "performer": [
+          {
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 34.1,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 18.5,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            },
+            "high": {
+              "value": 25,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            },
+            "text": "18.5 - 25.0 kg/m2 (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p2-313988",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-p2-313988",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "313988"
+            }
+          ],
+          "text": "Furosemide 40 mg oral tablet"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "authoredOn": "2023-02-14",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p2-314077",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-p2-314077",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "314077"
+            }
+          ],
+          "text": "Lisinopril 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "authoredOn": "2010-05-17",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/fhir-pat-1002",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "fhir-pat-1002",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Patient fhir-pat-1002"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1958-11-03"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/fhir-enc-2002",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "fhir-enc-2002",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Cardiology consultation"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "period": {
+          "start": "2023-09-12T11:00:00Z"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/fhir-cond-3002",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "fhir-cond-3002",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "38341003"
+            }
+          ],
+          "text": "Essential hypertension"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "onsetDateTime": "2023-09-12T11:30:00Z"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/dr-ecg-1002-2025-11-18-8625-6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "dr-ecg-1002-2025-11-18-8625-6",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "procedure",
+                "display": "Procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8625-6"
+            }
+          ],
+          "text": "P-R Interval"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 212,
+          "unit": "ms",
+          "system": "http://unitsofmeasure.org",
+          "code": "ms"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 120,
+              "unit": "ms",
+              "system": "http://unitsofmeasure.org",
+              "code": "ms"
+            },
+            "high": {
+              "value": 200,
+              "unit": "ms",
+              "system": "http://unitsofmeasure.org",
+              "code": "ms"
+            },
+            "text": "120 - 200 ms"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/dr-ecg-1002-2025-11-18-8632-2",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "dr-ecg-1002-2025-11-18-8632-2",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "procedure",
+                "display": "Procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8632-2"
+            }
+          ],
+          "text": "QRS axis"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": -10,
+          "unit": "deg",
+          "system": "http://unitsofmeasure.org",
+          "code": "deg"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": -30,
+              "unit": "deg",
+              "system": "http://unitsofmeasure.org",
+              "code": "deg"
+            },
+            "high": {
+              "value": 90,
+              "unit": "deg",
+              "system": "http://unitsofmeasure.org",
+              "code": "deg"
+            },
+            "text": "-30 - 90 deg"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/dr-ecg-1002-2025-11-18-8867-4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "dr-ecg-1002-2025-11-18-8867-4",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8867-4"
+            }
+          ],
+          "text": "Heart rate"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 54,
+          "unit": "/min",
+          "system": "http://unitsofmeasure.org",
+          "code": "/min"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 60,
+              "unit": "/min",
+              "system": "http://unitsofmeasure.org",
+              "code": "/min"
+            },
+            "high": {
+              "value": 100,
+              "unit": "/min",
+              "system": "http://unitsofmeasure.org",
+              "code": "/min"
+            },
+            "text": "60 - 100 /min"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/fhir-obs-4002",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "fhir-obs-4002",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55284-4"
+            },
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9"
+            }
+          ],
+          "text": "Blood pressure 145/92 mmHg"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2023-09-12T11:45:00Z",
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 145,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4"
+                }
+              ]
+            },
+            "dataAbsentReason": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+                  "code": "unknown"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/fhir-med-5002",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "fhir-med-5002",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "text": "Lisinopril 10mg"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "authoredOn": "2023-10-01T09:00:00Z",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/DiagnosticReport/dr-ecg-1002-2025-11-18",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-ecg-1002-2025-11-18",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "EC"
+              }
+            ],
+            "text": "Electrocardiac (e.g., EKG, EEC, Holter)"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11524-6"
+            }
+          ],
+          "text": "EKG study"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18",
+        "issued": "2025-11-18T10:00:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "conclusion": "Sinus bradycardia with first-degree AV block, no sign of acute ischaemia."
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/DiagnosticReport/dr-img-1002-2025-11-18",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-img-1002-2025-11-18",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD"
+              }
+            ],
+            "text": "Radiology"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34552-0"
+            }
+          ],
+          "text": "Cardiac 2D echo panel"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18",
+        "issued": "2025-11-18T15:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "conclusion": "Normal left ventricular size and systolic function. Mild concentric remodelling. No significant valvular disease."
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Immunization/imm-1002-2016-08-30-113",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-1002-2016-08-30-113",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "113"
+            }
+          ],
+          "text": "Td (adult), 5 Lf tetanus toxoid, preservative free, adsorbed"
+        },
+        "patient": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "occurrenceDateTime": "2016-08-30",
+        "lotNumber": "TD16-1190",
+        "performer": [
+          {
+            "actor": {
+              "display": "Hausarztpraxis Musterstadt (fictional)"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Immunization/imm-1002-2023-10-10-33",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-1002-2023-10-10-33",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "33"
+            }
+          ],
+          "text": "Pneumococcal polysaccharide vaccine, 23 valent"
+        },
+        "patient": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "occurrenceDateTime": "2023-10-10",
+        "lotNumber": "PPSV23-6615",
+        "performer": [
+          {
+            "actor": {
+              "display": "Hausarztpraxis Musterstadt (fictional)"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationStatement/ms-1002-B01AC06",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-1002-B01AC06",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "B01AC06"
+            }
+          ],
+          "text": "Acetylsalicylic acid 100 mg"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectivePeriod": {
+          "start": "2025-11-18"
+        },
+        "dateAsserted": "2025-12-01",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Cardiovascular prevention"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 100,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationStatement/ms-1002-C07AB07",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-1002-C07AB07",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C07AB07"
+            }
+          ],
+          "text": "Bisoprolol 2.5 mg"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectivePeriod": {
+          "start": "2025-11-18"
+        },
+        "dateAsserted": "2025-12-01",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 2.5,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/patient-2000",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-2000",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Hartmut Becker"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "2001-03-24"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/enc-2000-0",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2000-0",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "emergency"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "period": {
+          "start": "2025-12-03"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/enc-2000-1",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2000-1",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "period": {
+          "start": "2023-01-03"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-2000-40930008",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2000-40930008",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "40930008"
+            }
+          ],
+          "text": "Hypothyroidism"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "onsetDateTime": "2020-09-01"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2000-2093-3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2000-2093-3",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3"
+            }
+          ],
+          "text": "2093-3 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "effectiveDateTime": "2026-03-23",
+        "valueQuantity": {
+          "value": 4.3
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2000-3016-3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2000-3016-3",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "3016-3"
+            }
+          ],
+          "text": "3016-3 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "effectiveDateTime": "2021-05-26",
+        "valueQuantity": {
+          "value": 91.5
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2000-3026-2",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2000-3026-2",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "3026-2"
+            }
+          ],
+          "text": "3026-2 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "effectiveDateTime": "2023-03-07",
+        "valueQuantity": {
+          "value": 70
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Procedure/proc-2000-173160006",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-2000-173160006",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "173160006"
+            }
+          ],
+          "text": "Diabetic Eye Screening"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "performedDateTime": "2024-06-20"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/rx-2000-197381",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "rx-2000-197381",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197381"
+            }
+          ],
+          "text": "Levothyroxine 50 mcg Tab"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "_authoredOn": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/patient-2008",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-2008",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Patrick Fischer"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1993-06-25"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/enc-2008-0",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2008-0",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "period": {
+          "start": "2025-05-24"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/enc-2008-1",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2008-1",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "period": {
+          "start": "2024-12-18"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-2008-38341003",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2008-38341003",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "38341003"
+            }
+          ],
+          "text": "Essential Hypertension"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "onsetDateTime": "2019-02-01"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/cond-2008-73211009",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2008-73211009",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006"
+            }
+          ],
+          "text": "Type 2 Diabetes"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "onsetDateTime": "2023-09-01"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2008-2160-0",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2008-2160-0",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2160-0"
+            }
+          ],
+          "text": "2160-0 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "effectiveDateTime": "2021-06-26",
+        "valueQuantity": {
+          "value": 11.2
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2008-2345-7",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2008-2345-7",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2345-7"
+            }
+          ],
+          "text": "2345-7 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "effectiveDateTime": "2024-03-14",
+        "valueQuantity": {
+          "value": 195.3
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2008-4548-4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2008-4548-4",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4"
+            }
+          ],
+          "text": "4548-4 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "effectiveDateTime": "2023-06-26",
+        "valueQuantity": {
+          "value": 38.3
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2008-8462-4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2008-8462-4",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ],
+          "text": "8462-4 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "effectiveDateTime": "2024-03-14",
+        "valueQuantity": {
+          "value": 117.8,
+          "unit": "mm[Hg]",
+          "system": "http://unitsofmeasure.org",
+          "code": "mm[Hg]"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/obs-2008-8480-6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-2008-8480-6",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            },
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9"
+            }
+          ],
+          "text": "8480-6 result"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "effectiveDateTime": "2019-04-22",
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 180.1,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4"
+                }
+              ]
+            },
+            "dataAbsentReason": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+                  "code": "unknown"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Procedure/proc-2008-173160006",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-2008-173160006",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "173160006"
+            }
+          ],
+          "text": "Diabetic Eye Screening"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "performedDateTime": "2025-01-28"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/rx-2008-1861634",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "rx-2008-1861634",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "1861634"
+            }
+          ],
+          "text": "Empagliflozin 10 mg Oral Tab"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "_authoredOn": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/rx-2008-197884",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "rx-2008-197884",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197884"
+            }
+          ],
+          "text": "Insulin Glargine 100 U/mL"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "_authoredOn": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/pv-pat-001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pv-pat-001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Ines Müller"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1973-04-12",
+        "address": [
+          {
+            "city": "Berlin",
+            "country": "DE"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/pv-pat-001-tendon-rupture",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "pv-pat-001-tendon-rupture",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "415749005"
+            }
+          ],
+          "text": "Rupture of tendon"
+        },
+        "subject": {
+          "reference": "Patient/pv-pat-001"
+        },
+        "onsetDateTime": "2024-03-08"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/pv-pat-001-uti",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "pv-pat-001-uti",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "68566005"
+            }
+          ],
+          "text": "Urinary tract infectious disease"
+        },
+        "subject": {
+          "reference": "Patient/pv-pat-001"
+        },
+        "onsetDateTime": "2024-01-15"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/pv-pat-001-cipro",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "pv-pat-001-cipro",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "completed",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "2551"
+            }
+          ],
+          "text": "Ciprofloxacin 500 mg Oral Tab"
+        },
+        "subject": {
+          "reference": "Patient/pv-pat-001"
+        },
+        "_authoredOn": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/loader-pat-0001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "loader-pat-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "text": "Lena Hoffmann"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1984-07-21",
+        "address": [
+          {
+            "city": "Potsdam",
+            "state": "Brandenburg"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/loader-enc-0001",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "loader-enc-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "period": {
+          "start": "2019-04-02T10:00:00+02:00"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/loader-cond-0001",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "loader-cond-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "195662009"
+            }
+          ],
+          "text": "Acute viral pharyngitis (disorder)"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "onsetDateTime": "2019-04-02T10:00:00+02:00"
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/loader-obs-0001",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "loader-obs-0001",
+        "status": "unknown",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7"
+            }
+          ],
+          "text": "Body Weight"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "effectiveDateTime": "2019-04-02T10:00:00+02:00",
+        "valueQuantity": {
+          "value": 61.4,
+          "unit": "kg",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/loader-obs-0002",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "loader-obs-0002",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "status": "unknown",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "718-7"
+            }
+          ],
+          "text": "Hemoglobin [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "effectiveDateTime": "2019-04-02T10:00:00+02:00",
+        "performer": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
+        ],
+        "valueQuantity": {
+          "value": 13.6,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/loader-med-0001",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "loader-med-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "stopped",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "308182"
+            }
+          ],
+          "text": "Amoxicillin 250 MG Oral Capsule"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "authoredOn": "2019-04-02T10:00:00+02:00",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Procedure/loader-proc-0001",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "loader-proc-0001",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "117015009"
+            }
+          ],
+          "text": "Throat culture (procedure)"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "performedPeriod": {
+          "start": "2019-04-02T10:00:00+02:00",
+          "end": "2019-04-02T10:15:00+02:00"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Patient/sparse-pat-0001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "sparse-pat-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Encounter/sparse-enc-0001",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "sparse-enc-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "unknown",
+        "class": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Condition/sparse-cond-0001",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "sparse-cond-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core"
+          ]
+        },
+        "code": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/sparse-obs-0001",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "sparse-obs-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "status": "unknown",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2345-7"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "effectivePeriod": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "performer": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
+        ],
+        "valueQuantity": {
+          "value": 98
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/sparse-obs-0002",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "sparse-obs-0002",
+        "status": "unknown",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "effectivePeriod": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 27.1,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Observation/sparse-obs-0003",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "sparse-obs-0003",
+        "status": "unknown",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55284-4"
+            },
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "effectivePeriod": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6"
+                }
+              ]
+            },
+            "dataAbsentReason": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+                  "code": "unknown"
+                }
+              ]
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4"
+                }
+              ]
+            },
+            "dataAbsentReason": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+                  "code": "unknown"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/sparse-med-0001",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "sparse-med-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "status": "unknown",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "text": "Ibuprofen 400 mg"
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "_authoredOn": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Procedure/sparse-proc-0001",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "sparse-proc-0001",
+        "status": "unknown",
+        "code": {
+          "text": "Wound dressing"
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/DiagnosticReport/sparse-dr-0001",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "sparse-dr-0001",
+        "status": "unknown",
+        "code": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/Immunization/sparse-imm-0001",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "sparse-imm-0001",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "208"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "_occurrenceDateTime": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationStatement/sparse-ms-0001",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "sparse-ms-0001",
+        "status": "unknown",
+        "medicationCodeableConcept": {
+          "text": "Colecalciferol"
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    }
+  ]
+}

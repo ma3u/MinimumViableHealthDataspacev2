@@ -58,6 +58,11 @@ function toNumber(v: unknown): number {
   return typeof n === "number" ? n : Number(v);
 }
 
+/** The facade's base URL, as /metadata names it: entries' fullUrls hang off it. */
+function fhirBase(req: Request): string {
+  return `${req.protocol}://${req.get("host")}/fhir`;
+}
+
 /** The URL of a page of this search, at the path the caller asked on. */
 function pageUrl(req: Request, query: string): string {
   // A pull (routes/dataspace.ts) rewrites req.url; originalUrl is what the
@@ -170,10 +175,11 @@ app.get(
         limit: neo4j.int(search.count),
       });
       const rows = result.records.slice(0, search.count);
+      const base = fhirBase(req);
       const entries = rows
         .filter((r) => releasable(r.get("p")))
         .map((r) =>
-          toFhirEntry(toFhirResource("Patient", r.get("p").properties)),
+          toFhirEntry(toFhirResource("Patient", r.get("p").properties), base),
         )
         .map((e) => ({ ...e, search: { mode: "match" } }));
       const bundle = await searchset(
@@ -263,18 +269,22 @@ app.get(
 
       const matches: Entry[] = [];
       const patients = new Map<string, Entry>();
+      const base = fhirBase(req);
       for (const r of result.records.slice(0, search.count)) {
         const p = r.get("p");
         const o = r.get("o");
         if (!releasable(p) || !releasable(o)) continue;
         const pid = fhirIdOf(p.properties);
         matches.push({
-          ...toFhirEntry(toFhirResource("Observation", o.properties, pid)),
+          ...toFhirEntry(
+            toFhirResource("Observation", o.properties, pid),
+            base,
+          ),
           search: { mode: "match" },
         });
         if (pid && !patients.has(pid)) {
           patients.set(pid, {
-            ...toFhirEntry(toFhirResource("Patient", p.properties)),
+            ...toFhirEntry(toFhirResource("Patient", p.properties), base),
             search: { mode: "include" },
           });
         }
@@ -319,7 +329,7 @@ app.get("/fhir/metadata", (req: Request, res: Response) => {
   res.json(
     capabilityStatement({
       validator: Boolean(matchboxUrl()),
-      baseUrl: `${req.protocol}://${req.get("host")}/fhir`,
+      baseUrl: fhirBase(req),
     }),
   );
 });
@@ -434,7 +444,8 @@ app.get(
       OPTIONAL MATCH (p)-[:HAS_ENCOUNTER]->(enc:Encounter)
       OPTIONAL MATCH (enc)-[:HAS_CONDITION]->(encCond:Condition)
       OPTIONAL MATCH (enc)-[:HAS_OBSERVATION]->(encObs:Observation)
-      OPTIONAL MATCH (enc)-[:HAS_PROCEDURE]->(proc:Procedure)
+      OPTIONAL MATCH (enc)-[:HAS_PROCEDURE]->(encProc:Procedure)
+      OPTIONAL MATCH (p)-[:HAS_PROCEDURE]->(proc:Procedure)
       OPTIONAL MATCH (enc)-[:HAS_MEDICATION_REQUEST]->(encMed:MedicationRequest)
       OPTIONAL MATCH (p)-[:HAS_CONDITION]->(cond:Condition)
       OPTIONAL MATCH (p)-[:HAS_OBSERVATION]->(obs:Observation)
@@ -445,7 +456,7 @@ app.get(
       RETURN p, collect(DISTINCT enc) AS encounters,
              collect(DISTINCT encCond) + collect(DISTINCT cond) AS conditions,
              collect(DISTINCT encObs) + collect(DISTINCT obs)   AS observations,
-             collect(DISTINCT proc) AS procedures,
+             collect(DISTINCT encProc) + collect(DISTINCT proc) AS procedures,
              collect(DISTINCT encMed) + collect(DISTINCT med)   AS medications,
              collect(DISTINCT rep)  AS reports,
              collect(DISTINCT imm)  AS immunizations,
@@ -466,50 +477,39 @@ app.get(
 
       const rec = result.records[0];
       const patient = rec.get("p").properties;
-      const encounters = rec
-        .get("encounters")
-        .filter(releasable)
-        .map((n: any) => n.properties);
-      const conditions = rec
-        .get("conditions")
-        .filter(releasable)
-        .map((n: any) => n.properties);
-      const observations = rec
-        .get("observations")
-        .filter(releasable)
-        .map((n: any) => n.properties);
-      const procedures = rec
-        .get("procedures")
-        .filter(releasable)
-        .map((n: any) => n.properties);
-      const medications = rec
-        .get("medications")
-        .filter(releasable)
-        .map((n: any) => n.properties);
-      // Study results beyond laboratory values (ADR-059): reports, the
-      // vaccination record and the medication plan, as the hub seeds them.
-      const props = (key: string) =>
-        (rec.has?.(key) ? rec.get(key) : [])
+      // A record reached both from an Encounter and from the Patient is
+      // listed once: R4 wants each fullUrl once in a Bundle (bdl-7).
+      // Reports, the vaccination record and the medication plan (ADR-059)
+      // are absent from an answer of an older query, hence `has`.
+      const props = (key: string) => {
+        const seen = new Set<string>();
+        return (rec.has?.(key) === false ? [] : rec.get(key) ?? [])
           .filter(releasable)
-          .map((n: any) => n.properties);
-      const reports = props("reports");
-      const immunizations = props("immunizations");
-      const statements = props("statements");
+          .map((n: any) => n.properties as Record<string, unknown>)
+          .filter((n: Record<string, unknown>) => {
+            const id = fhirIdOf(n);
+            if (id === undefined) return true;
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          });
+      };
 
       // Every record refers to its patient, so a consumer can relate them (#876).
       const pid = fhirIdOf(patient);
-      const as = (type: string) => (n: any) =>
-        toFhirEntry(toFhirResource(type, n, pid));
+      const base = fhirBase(req);
+      const as = (type: string) => (n: Record<string, unknown>) =>
+        toFhirEntry(toFhirResource(type, n, pid), base);
       const entries = [
-        toFhirEntry(toFhirResource("Patient", patient)),
-        ...encounters.map(as("Encounter")),
-        ...conditions.map(as("Condition")),
-        ...observations.map(as("Observation")),
-        ...procedures.map(as("Procedure")),
-        ...medications.map(as("MedicationRequest")),
-        ...reports.map(as("DiagnosticReport")),
-        ...immunizations.map(as("Immunization")),
-        ...statements.map(as("MedicationStatement")),
+        toFhirEntry(toFhirResource("Patient", patient), base),
+        ...props("encounters").map(as("Encounter")),
+        ...props("conditions").map(as("Condition")),
+        ...props("observations").map(as("Observation")),
+        ...props("procedures").map(as("Procedure")),
+        ...props("medications").map(as("MedicationRequest")),
+        ...props("reports").map(as("DiagnosticReport")),
+        ...props("immunizations").map(as("Immunization")),
+        ...props("statements").map(as("MedicationStatement")),
       ];
 
       const bundle = {
@@ -575,10 +575,11 @@ app.post(
 
       const result = await session.run(cypher, params);
 
+      const base = fhirBase(req);
       const entries = result.records
         .filter((r) => releasable(r.get("p")))
         .map((r) =>
-          toFhirEntry(toFhirResource("Patient", r.get("p").properties)),
+          toFhirEntry(toFhirResource("Patient", r.get("p").properties), base),
         );
 
       res.setHeader("Content-Type", FHIR_JSON);

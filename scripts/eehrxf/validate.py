@@ -20,6 +20,11 @@ Sources, both of them what the hub actually takes in:
   Summaries and laboratory reports of seeded patients, under
   scripts/eehrxf/samples/documents/ (ui/scripts/export-fhir-document-samples.ts
   writes them; a unit test keeps them equal to what the builders produce).
+- facade: what the neo4j-proxy FHIR facade serves (/fhir/*), the mapper's
+  resources for fixed graph rows, scripts/eehrxf/samples/facade-sample.json
+  (services/neo4j-proxy/scripts/export-fhir-facade-samples.ts writes it; a
+  proxy test keeps it equal to the mapper, and its meta.profile claims equal
+  to what this report says passed).
 
 A resource passes when the validator reports no issue of severity error or
 fatal. Terminology is not checked (-tx n/a): see profiles.json.
@@ -69,6 +74,7 @@ REPORT = HERE / "validation-report.json"
 GOLDEN_GLOB = "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
 SYNTHEA_SAMPLE = "scripts/eehrxf/samples/synthea-sample.json"
 DOCUMENTS_DIR = "scripts/eehrxf/samples/documents"
+FACADE_SAMPLE = "scripts/eehrxf/samples/facade-sample.json"
 
 # At most this many resources per profile and source, so one validator run
 # stays within a few minutes in CI.
@@ -163,7 +169,21 @@ def collect_sources() -> dict[str, dict]:
         "resources": res,
     }
     sources["documents"] = collect_documents()
+    sources["facade"] = collect_entries(
+        FACADE_SAMPLE, "Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows"
+    )
     return sources
+
+
+def collect_entries(rel: str, description: str) -> dict:
+    """The entries of one collection Bundle, each a resource of its own."""
+    path = ROOT / rel
+    bundle = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    return {
+        "description": description,
+        "files": [rel] if path.exists() else [],
+        "resources": [(f"{path.name}#entry[{i}]", e["resource"]) for i, e in enumerate(bundle.get("entry", []))],
+    }
 
 
 def collect_documents() -> dict:

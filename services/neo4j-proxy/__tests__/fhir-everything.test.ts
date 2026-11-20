@@ -121,8 +121,51 @@ describe("GET /fhir/Patient/:id/$everything", () => {
     const report = res.body.entry.find(
       (e: any) => e.resource.resourceType === "DiagnosticReport",
     ).resource;
-    expect(report.code).toBe("11524-6");
-    expect(report.category).toBe("EC");
+    expect(report.code.coding).toEqual([
+      { system: "http://loinc.org", code: "11524-6" },
+    ]);
+    expect(report.category[0].coding[0]).toEqual({
+      system: "http://terminology.hl7.org/CodeSystem/v2-0074",
+      code: "EC",
+    });
+    expect(report.subject).toEqual({ reference: "Patient/P1" });
+    // An Immunization names its patient in `patient`, not `subject` (R4).
+    const imm = res.body.entry.find(
+      (e: any) => e.resource.resourceType === "Immunization",
+    ).resource;
+    expect(imm.patient).toEqual({ reference: "Patient/P1" });
+    expect(imm).not.toHaveProperty("subject");
+    expect(res.body.entry[0].fullUrl).toMatch(/\/fhir\/Patient\/P1$/);
+  });
+
+  it("collects procedures hanging off the patient, and lists a record once", async () => {
+    mockRun.mockResolvedValue({
+      records: [
+        record({
+          p: node({ id: "patient-2000", name: "Hartmut Becker" }),
+          encounters: [],
+          conditions: [
+            node({ id: "cond-1", code: "40930008" }),
+            node({ id: "cond-1", code: "40930008" }),
+          ],
+          observations: [],
+          procedures: [node({ id: "proc-1", code: "173160006" })],
+          medications: [],
+        }),
+      ],
+    });
+    const res = await request.get("/fhir/Patient/patient-2000/$everything");
+    expect(mockRun.mock.calls[0][0]).toMatch(
+      /OPTIONAL MATCH \(p\)-\[:HAS_PROCEDURE\]->\(proc:/,
+    );
+    const ids = res.body.entry.map(
+      (e: any) => `${e.resource.resourceType}/${e.resource.id}`,
+    );
+    expect(ids).toEqual([
+      "Patient/patient-2000",
+      "Condition/cond-1",
+      "Procedure/proc-1",
+    ]);
   });
 
   it("answers a record without the new resources as before", async () => {

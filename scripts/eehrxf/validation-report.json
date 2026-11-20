@@ -43,6 +43,13 @@
       ],
       "resources": 9
     },
+    "facade": {
+      "description": "Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows",
+      "files": [
+        "scripts/eehrxf/samples/facade-sample.json"
+      ],
+      "resources": 92
+    },
     "klarbefund": {
       "description": "Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
       "files": [
@@ -66,19 +73,23 @@
       "resources": 183
     }
   },
-  "inputsDigest": "caa2fbc5aba46d8b",
+  "inputsDigest": "41ca118a57f9d921",
   "profiles": {
     "patient-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
-      "tested": 21,
-      "passed": 11,
+      "tested": 29,
+      "passed": 19,
       "failed": 10,
       "bySource": {
         "documents": {
           "tested": 0,
           "passed": 0
+        },
+        "facade": {
+          "tested": 8,
+          "passed": 8
         },
         "klarbefund": {
           "tested": 9,
@@ -116,6 +127,10 @@
           "tested": 0,
           "passed": 0
         },
+        "facade": {
+          "tested": 0,
+          "passed": 0
+        },
         "klarbefund": {
           "tested": 0,
           "passed": 0
@@ -136,6 +151,10 @@
       "failed": 0,
       "bySource": {
         "documents": {
+          "tested": 0,
+          "passed": 0
+        },
+        "facade": {
           "tested": 0,
           "passed": 0
         },
@@ -162,6 +181,10 @@
           "tested": 0,
           "passed": 0
         },
+        "facade": {
+          "tested": 0,
+          "passed": 0
+        },
         "klarbefund": {
           "tested": 0,
           "passed": 0
@@ -177,13 +200,17 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
-      "tested": 20,
-      "passed": 20,
+      "tested": 32,
+      "passed": 32,
       "failed": 0,
       "bySource": {
         "documents": {
           "tested": 0,
           "passed": 0
+        },
+        "facade": {
+          "tested": 12,
+          "passed": 12
         },
         "klarbefund": {
           "tested": 0,
@@ -205,6 +232,10 @@
       "failed": 0,
       "bySource": {
         "documents": {
+          "tested": 0,
+          "passed": 0
+        },
+        "facade": {
           "tested": 0,
           "passed": 0
         },
@@ -231,6 +262,10 @@
           "tested": 6,
           "passed": 6
         },
+        "facade": {
+          "tested": 0,
+          "passed": 0
+        },
         "klarbefund": {
           "tested": 0,
           "passed": 0
@@ -246,13 +281,17 @@
       "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
       "ig": "hl7.fhir.eu.mpd#1.0.0",
       "gate": true,
-      "tested": 20,
-      "passed": 20,
+      "tested": 31,
+      "passed": 31,
       "failed": 0,
       "bySource": {
         "documents": {
           "tested": 0,
           "passed": 0
+        },
+        "facade": {
+          "tested": 11,
+          "passed": 11
         },
         "klarbefund": {
           "tested": 0,
@@ -274,6 +313,10 @@
       "failed": 0,
       "bySource": {
         "documents": {
+          "tested": 0,
+          "passed": 0
+        },
+        "facade": {
           "tested": 0,
           "passed": 0
         },
@@ -300,6 +343,10 @@
           "tested": 0,
           "passed": 0
         },
+        "facade": {
+          "tested": 0,
+          "passed": 0
+        },
         "klarbefund": {
           "tested": 0,
           "passed": 0
@@ -315,12 +362,16 @@
       "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
       "ig": "hl7.fhir.eu.imaging#1.0.0-ballot",
       "gate": false,
-      "tested": 1,
+      "tested": 3,
       "passed": 0,
-      "failed": 1,
+      "failed": 3,
       "bySource": {
         "documents": {
           "tested": 0,
+          "passed": 0
+        },
+        "facade": {
+          "tested": 2,
           "passed": 0
         },
         "klarbefund": {
@@ -335,23 +386,23 @@
       "topIssues": [
         {
           "issue": "DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-          "resources": 1
+          "resources": 3
         },
         {
           "issue": "DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-          "resources": 1
+          "resources": 3
         },
         {
           "issue": "DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-          "resources": 1
+          "resources": 3
         },
         {
           "issue": "DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t",
-          "resources": 1
+          "resources": 3
         },
         {
           "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice",
-          "resources": 1
+          "resources": 3
         }
       ]
     },
@@ -364,6 +415,10 @@
       "failed": 2,
       "bySource": {
         "documents": {
+          "tested": 0,
+          "passed": 0
+        },
+        "facade": {
           "tested": 0,
           "passed": 0
         },
@@ -391,13 +446,17 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
       "ig": "hl7.fhir.eu.laboratory#2.1.0",
       "gate": true,
-      "tested": 31,
-      "passed": 11,
+      "tested": 37,
+      "passed": 17,
       "failed": 20,
       "bySource": {
         "documents": {
           "tested": 0,
           "passed": 0
+        },
+        "facade": {
+          "tested": 6,
+          "passed": 6
         },
         "klarbefund": {
           "tested": 11,
@@ -426,6 +485,10 @@
         "documents": {
           "tested": 3,
           "passed": 3
+        },
+        "facade": {
+          "tested": 0,
+          "passed": 0
         },
         "klarbefund": {
           "tested": 9,
@@ -471,6 +534,10 @@
           "tested": 0,
           "passed": 0
         },
+        "facade": {
+          "tested": 0,
+          "passed": 0
+        },
         "klarbefund": {
           "tested": 0,
           "passed": 0
@@ -486,13 +553,17 @@
       "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr",
       "ig": "hl7.fhir.eu.hdr#1.0.0",
       "gate": true,
-      "tested": 20,
-      "passed": 20,
+      "tested": 31,
+      "passed": 31,
       "failed": 0,
       "bySource": {
         "documents": {
           "tested": 0,
           "passed": 0
+        },
+        "facade": {
+          "tested": 11,
+          "passed": 11
         },
         "klarbefund": {
           "tested": 0,
@@ -530,12 +601,16 @@
         "canonical": "https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request",
         "ig": "de.gematik.epa.medication#1.3.5",
         "gate": true,
-        "tested": 20,
+        "tested": 31,
         "passed": 0,
-        "failed": 20,
+        "failed": 31,
         "bySource": {
           "documents": {
             "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 11,
             "passed": 0
           },
           "klarbefund": {
@@ -550,23 +625,23 @@
         "topIssues": [
           {
             "issue": "MedicationRequest.subject: MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)",
-            "resources": 20
+            "resources": 31
           },
           {
-            "issue": "MedicationRequest.status: The System URI could not be determined for the code 'stopped' in the ValueSet '...'",
-            "resources": 16
+            "issue": "MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1",
+            "resources": 19
           },
           {
-            "issue": "MedicationRequest.status: The value provided ('stopped'...'TI Medication Request ValueSet'...'stopped' in the ValueSet '...'; The provided code '#stopped'...'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9",
-            "resources": 16
+            "issue": "MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2",
+            "resources": 19
+          },
+          {
+            "issue": "MedicationRequest.medication.ofType(CodeableConcept): The Profile '...' definition allows for the type Reference but found type CodeableConcept",
+            "resources": 19
           },
           {
             "issue": "MedicationRequest.medication.ofType(CodeableConcept).coding[n]: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1",
-            "resources": 8
-          },
-          {
-            "issue": "MedicationRequest.medication.ofType(CodeableConcept).coding[n]: This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2",
-            "resources": 8
+            "resources": 17
           }
         ]
       },
@@ -574,12 +649,16 @@
         "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study",
         "ig": "kbv.mio.laborbefund#1.0.0-update",
         "gate": false,
-        "tested": 31,
+        "tested": 37,
         "passed": 0,
-        "failed": 31,
+        "failed": 37,
         "bySource": {
           "documents": {
             "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 6,
             "passed": 0
           },
           "klarbefund": {
@@ -594,19 +673,19 @@
         "topIssues": [
           {
             "issue": "Observation.category[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update and slicing is CLOSED: Observation.category[n]: Doe",
-            "resources": 31
+            "resources": 37
           },
           {
             "issue": "Observation.subject: Observation.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 31
+            "resources": 37
           },
           {
             "issue": "Observation: Slice '...': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update). Note that other slices are allowed in addition to this required s",
-            "resources": 31
+            "resources": 37
           },
           {
             "issue": "Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 30
+            "resources": 36
           },
           {
             "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
@@ -623,6 +702,10 @@
         "failed": 2,
         "bySource": {
           "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
             "tested": 0,
             "passed": 0
           },
@@ -670,6 +753,10 @@
             "tested": 3,
             "passed": 0
           },
+          "facade": {
+            "tested": 0,
+            "passed": 0
+          },
           "klarbefund": {
             "tested": 2,
             "passed": 0
@@ -706,12 +793,16 @@
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp",
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
-        "tested": 31,
+        "tested": 37,
         "passed": 0,
-        "failed": 31,
+        "failed": 37,
         "bySource": {
           "documents": {
             "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 6,
             "passed": 0
           },
           "klarbefund": {
@@ -726,7 +817,7 @@
         "topIssues": [
           {
             "issue": "Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 30
+            "resources": 36
           },
           {
             "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
@@ -738,11 +829,11 @@
           },
           {
             "issue": "Observation: Observation.issued: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 11
+            "resources": 17
           },
           {
             "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 5
+            "resources": 9
           }
         ]
       },
@@ -755,6 +846,10 @@
         "failed": 2,
         "bySource": {
           "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
             "tested": 0,
             "passed": 0
           },
@@ -800,6 +895,10 @@
         "bySource": {
           "documents": {
             "tested": 3,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 0,
             "passed": 0
           },
           "klarbefund": {

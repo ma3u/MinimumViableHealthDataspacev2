@@ -29,8 +29,8 @@ SET c.name = 'Patient Summaries',
     c.ehdsGroup = 1,
     c.status = 'partial',
     c.profileCount = 7,
-    c.tested = 47,
-    c.passed = 37;
+    c.tested = 67,
+    c.passed = 57;
 
 MERGE (c:EEHRxFCategory {categoryId: 'eprescription'})
 SET c.name = 'ePrescriptions',
@@ -40,8 +40,8 @@ SET c.name = 'ePrescriptions',
     c.ehdsGroup = 1,
     c.status = 'available',
     c.profileCount = 1,
-    c.tested = 20,
-    c.passed = 20;
+    c.tested = 31,
+    c.passed = 31;
 
 MERGE (c:EEHRxFCategory {categoryId: 'edispensation'})
 SET c.name = 'eDispensations',
@@ -62,7 +62,7 @@ SET c.name = 'Medical Imaging Studies and Reports',
     c.ehdsGroup = 2,
     c.status = 'none',
     c.profileCount = 2,
-    c.tested = 1,
+    c.tested = 3,
     c.passed = 0;
 
 MERGE (c:EEHRxFCategory {categoryId: 'laboratory-results'})
@@ -73,8 +73,8 @@ SET c.name = 'Medical Test Results',
     c.ehdsGroup = 2,
     c.status = 'partial',
     c.profileCount = 4,
-    c.tested = 66,
-    c.passed = 25;
+    c.tested = 80,
+    c.passed = 39;
 
 MERGE (c:EEHRxFCategory {categoryId: 'hospital-discharge'})
 SET c.name = 'Discharge Reports',
@@ -84,8 +84,8 @@ SET c.name = 'Discharge Reports',
     c.ehdsGroup = 2,
     c.status = 'partial',
     c.profileCount = 3,
-    c.tested = 41,
-    c.passed = 31;
+    c.tested = 60,
+    c.passed = 50;
 
 MERGE (p:EEHRxFProfile {profileId: 'patient-eu-core'})
 SET p.name = 'Patient (EU core)',
@@ -97,8 +97,8 @@ SET p.name = 'Patient (EU core)',
     p.url = 'https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html',
     p.baseResource = 'Patient',
     p.description = null,
-    p.tested = 21,
-    p.passed = 11,
+    p.tested = 29,
+    p.passed = 19,
     p.failed = 10,
     p.topIssues = ['9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)', '9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)', '1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here'],
     p.coverage = 'partial';
@@ -161,8 +161,8 @@ SET p.name = 'Condition (EU core)',
     p.url = 'https://hl7.eu/fhir/base/StructureDefinition-condition-eu-core.html',
     p.baseResource = 'Condition',
     p.description = null,
-    p.tested = 20,
-    p.passed = 20,
+    p.tested = 32,
+    p.passed = 32,
     p.failed = 0,
     p.topIssues = [],
     p.coverage = 'full';
@@ -209,8 +209,8 @@ SET p.name = 'MedicationRequest (EU MPD)',
     p.url = 'https://hl7.eu/fhir/mpd/StructureDefinition-MedicationRequest-eu-mpd.html',
     p.baseResource = 'MedicationRequest',
     p.description = null,
-    p.tested = 20,
-    p.passed = 20,
+    p.tested = 31,
+    p.passed = 31,
     p.failed = 0,
     p.topIssues = [],
     p.coverage = 'full';
@@ -257,10 +257,10 @@ SET p.name = 'DiagnosticReport (EU Imaging)',
     p.url = 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/StructureDefinition-DiagnosticReportEuImaging.html',
     p.baseResource = 'DiagnosticReport',
     p.description = null,
-    p.tested = 1,
+    p.tested = 3,
     p.passed = 0,
-    p.failed = 1,
-    p.topIssues = ['1x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '1x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '1x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '1x DiagnosticReport: Slice \'...\' for extension \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t', '1x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice'],
+    p.failed = 3,
+    p.topIssues = ['3x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: Slice \'...\' for extension \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t', '3x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice'],
     p.coverage = 'none';
 
 MERGE (p:EEHRxFProfile {profileId: 'diagnostic-report-lab-eu'})
@@ -289,8 +289,8 @@ SET p.name = 'Observation results (EU Lab)',
     p.url = 'https://hl7.eu/fhir/laboratory/StructureDefinition-Observation-resultslab-eu-lab.html',
     p.baseResource = 'Observation',
     p.description = null,
-    p.tested = 31,
-    p.passed = 11,
+    p.tested = 37,
+    p.passed = 17,
     p.failed = 20,
     p.topIssues = ['20x Observation: Observation.performer: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab|2.1.0)'],
     p.coverage = 'partial';
@@ -337,8 +337,8 @@ SET p.name = 'Encounter (EU HDR)',
     p.url = 'https://hl7.eu/fhir/hdr/StructureDefinition-encounter-eu-hdr.html',
     p.baseResource = 'Encounter',
     p.description = null,
-    p.tested = 20,
-    p.passed = 20,
+    p.tested = 31,
+    p.passed = 31,
     p.failed = 0,
     p.topIssues = [],
     p.coverage = 'full';
@@ -399,10 +399,10 @@ SET g.name = 'EU Manifest-based Access to DICOM Objects (EU-MADO)',
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
     v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
-    v.inputsDigest = 'caa2fbc5aba46d8b',
+    v.inputsDigest = '41ca118a57f9d921',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
-    v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],
+    v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'facade: Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],
     v.terminology = 'not checked: run with -tx n/a, so codes are checked for shape, not against SNOMED CT, LOINC or the IG value sets',
     v.validatorUrl = 'https://github.com/hapifhir/org.hl7.fhir.core/releases/tag/7.0.5',
     v.validatorVersion = '7.0.5';

@@ -1,5 +1,6 @@
 import type { SearchParamDef } from "./fhir-search.js";
 import { RESULT_PARAMS } from "./fhir-search.js";
+import { PROFILE_CLAIMS } from "./fhir-profiles.js";
 
 // ---------------------------------------------------------------------------
 // What the FHIR facade serves, in one table (#1174)
@@ -160,8 +161,17 @@ export function capabilityStatement(opts: CapabilityOptions) {
       ...(r.search ? [{ code: "search-type" }] : []),
     ];
     const operation = ops(r.operations);
+    // The profiles a resource of this type claims when it validates (#1144).
+    const supportedProfile = [
+      ...new Set(
+        PROFILE_CLAIMS.filter((c) => c.resourceType === r.type).map(
+          (c) => c.canonical,
+        ),
+      ),
+    ];
     return {
       type: r.type,
+      ...(supportedProfile.length ? { supportedProfile } : {}),
       documentation: r.documentation,
       ...(interaction.length ? { interaction } : {}),
       ...(r.search
@@ -187,7 +197,7 @@ export function capabilityStatement(opts: CapabilityOptions) {
     software: { name: "neo4j-proxy FHIR facade" },
     implementation: {
       description:
-        "A narrow FHIR R4 facade over the hub's Neo4j graph (#1169, #1174): read by id, the search parameters listed, $everything and $validate. The resources are rebuilt from graph nodes and claim no profile (meta.profile) they have not been validated against (#1144).",
+        "A narrow FHIR R4 facade over the hub's Neo4j graph (#1169, #1174): read by id, the search parameters listed, $everything and $validate. The resources are mapped from graph nodes to R4 and claim in meta.profile only the profiles their class validated against (#1144); supportedProfile lists them.",
       ...(opts.baseUrl ? { url: opts.baseUrl } : {}),
     },
     fhirVersion: "4.0.1",

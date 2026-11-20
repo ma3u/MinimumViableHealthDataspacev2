@@ -27,8 +27,21 @@ tests {
     const matches = body.entry.filter((e) => e.search.mode === "match");
     expect(matches.length).to.be.at.most(2);
     for (const e of matches) {
-      expect(e.resource.code).to.equal("4548-4");
+      expect(e.resource.code.coding).to.deep.include({ system: "http://loinc.org", code: "4548-4" });
       expect(e.resource.subject.reference).to.equal("Patient/" + bru.getEnvVar("patientId"));
+    }
+  });
+  test("a lab value claims the EU lab profile it validates against (#1144)", function () {
+    const body = res.getBody();
+    const matches = body.entry.filter((e) => e.search.mode === "match");
+    for (const e of matches) {
+      expect(e.resource.valueQuantity.system).to.equal("http://unitsofmeasure.org");
+      const lab = (e.resource.category || []).some((c) => c.coding.some((x) => x.code === "laboratory"));
+      if (lab) {
+        expect(e.resource.meta.profile).to.deep.equal([
+          "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
+        ]);
+      }
     }
   });
   test("pages with a next link when there are more", function () {

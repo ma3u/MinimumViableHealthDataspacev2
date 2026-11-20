@@ -119,6 +119,22 @@ describe("the CapabilityStatement and the routes", () => {
   });
 });
 
+describe("supportedProfile (#1144)", () => {
+  it("lists for each type exactly the profiles its resources claim", async () => {
+    const { PROFILE_CLAIMS } = await import("../src/fhir-profiles.js");
+    const statement = capabilityStatement({ validator: false });
+    for (const r of statement.rest[0].resource) {
+      const claimed = PROFILE_CLAIMS.filter(
+        (c) => c.resourceType === r.type,
+      ).map((c) => c.canonical);
+      expect(
+        (r as { supportedProfile?: string[] }).supportedProfile ?? [],
+        r.type,
+      ).toEqual(claimed);
+    }
+  });
+});
+
 describe("every listed search parameter is applied by its route", () => {
   const VALUE: Record<string, string> = {
     token: "http://example.org|x",
