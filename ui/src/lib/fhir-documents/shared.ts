@@ -97,7 +97,7 @@ const XHTML_ESCAPES: Record<string, string> = {
   '"': "&quot;",
 };
 
-export function escapeXhtml(text: string): string {
+function escapeXhtml(text: string): string {
   return text.replace(/[&<>"]/g, (c) => XHTML_ESCAPES[c]);
 }
 

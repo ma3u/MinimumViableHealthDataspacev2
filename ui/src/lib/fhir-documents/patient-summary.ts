@@ -55,8 +55,7 @@ export const PATIENT_SUMMARY_TYPE = {
 };
 
 /** The identifier system of a Patient Summary in the hub. */
-export const PATIENT_SUMMARY_SYSTEM =
-  "https://ehds.mabu.red/fhir/sid/patient-summary";
+const PATIENT_SUMMARY_SYSTEM = "https://ehds.mabu.red/fhir/sid/patient-summary";
 
 export interface ConditionRow {
   id: string;

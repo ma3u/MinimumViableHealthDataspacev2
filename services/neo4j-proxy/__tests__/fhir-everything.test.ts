@@ -201,7 +201,9 @@ describe("GET /fhir/Observation (#876)", () => {
 
     await request.get("/fhir/Observation?code=4548-4");
 
-    expect(mockRun.mock.calls[0][0]).toMatch(/WHERE o\.code = \$code/);
-    expect(mockRun.mock.calls[0][1]).toMatchObject({ code: "4548-4" });
+    expect(mockRun.mock.calls[0][0]).toMatch(/all\(g IN \$code WHERE/);
+    expect(mockRun.mock.calls[0][1]).toMatchObject({
+      code: [[{ code: "4548-4", system: null, anySystem: true }]],
+    });
   });
 });

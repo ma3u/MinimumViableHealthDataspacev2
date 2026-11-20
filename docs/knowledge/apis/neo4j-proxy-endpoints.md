@@ -15,6 +15,17 @@ Core (from `.claude/rules/api-conventions.md` + startup log):
 `GET /nlq/templates` · `POST /federated/query` · `GET /federated/stats` ·
 `POST /trust-center/resolve` (HDAB only) · `GET /tck`.
 
+FHIR facade (#1174, `services/neo4j-proxy/src/fhir-capability.ts` is the one table):
+`GET /fhir/metadata` (CapabilityStatement generated from that table) ·
+`GET /fhir/Observation?patient=&code=&date=` and `GET /fhir/Patient?gender=&name=`
+(R4 token, date-prefix and reference semantics; `_count`/`_offset`, `next` link;
+an undeclared parameter is named in a `search.mode: outcome` OperationOutcome
+and left out of `self`, or 400 under `Prefer: handling=strict`) ·
+`GET /fhir/{Patient|Observation}/{id}` (dataspace pull only, 401 otherwise) ·
+`POST /fhir/$validate`, `POST /fhir/{type}/$validate` (forwarded to Matchbox,
+`MATCHBOX_URL`, `docker-compose.matchbox.yml`, local only; 503 without it).
+Errors under `/fhir` are OperationOutcomes. Details: `services/neo4j-proxy/README.md`.
+
 `POST /trust-center/resolve`, `DELETE /trust-center/revoke/:rpsn` and `GET /trust-center/audit` take a Keycloak
 access token (`Authorization: Bearer`) whose `realm_access.roles` holds `HDAB_AUTHORITY`
 or `TRUST_CENTER_OPERATOR`: 401 `{error: "Unauthorized"}` without a valid one, 403

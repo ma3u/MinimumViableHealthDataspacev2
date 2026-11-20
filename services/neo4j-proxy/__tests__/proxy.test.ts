@@ -149,8 +149,10 @@ describe("Neo4j Proxy API", () => {
       await request.get("/fhir/Patient?gender=female");
 
       expect(mockRun).toHaveBeenCalledWith(
-        expect.stringContaining("p.gender = $gender"),
-        expect.objectContaining({ gender: "female" }),
+        expect.stringContaining("all(g IN $gender WHERE"),
+        expect.objectContaining({
+          gender: [[{ code: "female", system: null, anySystem: true }]],
+        }),
       );
     });
 
