@@ -311,7 +311,7 @@
     },
     {
       "path": "/api/patient/documents",
-      "methods": ["GET"]
+      "methods": ["GET", "POST"]
     },
     {
       "path": "/api/patient/ehr-sync",
@@ -1457,7 +1457,7 @@
   "openapi": {
     "version": "3.1.0",
     "paths": 99,
-    "operations": 128
+    "operations": 129
   },
   "workflowJobs": {
     "test.yml": [

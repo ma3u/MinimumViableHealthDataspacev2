@@ -1,5 +1,5 @@
 import { runQuery } from "@/lib/neo4j";
-import type { DocumentPatient } from "./shared";
+import type { DocumentPatient, Run } from "./shared";
 import {
   groupLabReports,
   type LabObservationRow,
@@ -30,8 +30,9 @@ const PATIENT_MATCH = `MATCH (p:Patient)
 
 export async function loadDocumentPatient(
   patientId: string,
+  run: Run = runQuery,
 ): Promise<DocumentPatient | null> {
-  const rows = await runQuery<DocumentPatient>(
+  const rows = await run<DocumentPatient>(
     `${PATIENT_MATCH}
      RETURN coalesce(p.id, p.resourceId, elementId(p)) AS id,
             p.name AS name,
@@ -46,8 +47,9 @@ export async function loadDocumentPatient(
 /** Every laboratory report of the record, newest first. */
 export async function loadLabReports(
   patientId: string,
+  run: Run = runQuery,
 ): Promise<LabReportInput[]> {
-  const rows = await runQuery<LabObservationRow>(
+  const rows = await run<LabObservationRow>(
     `${PATIENT_MATCH}
      MATCH (p)-[:HAS_OBSERVATION]->(o:Observation)
      WHERE o.code IS NOT NULL
@@ -83,11 +85,13 @@ export async function loadLabReports(
   );
   return groupLabReports(
     rows.filter((r) => r.effective && Number.isFinite(r.value)),
+    patientId,
   );
 }
 
 export async function loadPatientSummaryInput(
   patientId: string,
+  run: Run = runQuery,
 ): Promise<PatientSummaryInput> {
   const [
     conditions,
@@ -97,7 +101,7 @@ export async function loadPatientSummaryInput(
     procedures,
     allergies,
   ] = await Promise.all([
-    runQuery<ConditionRow>(
+    run<ConditionRow>(
       `${PATIENT_MATCH}
          MATCH (p)-[:HAS_CONDITION]->(c:Condition)
          RETURN coalesce(c.resourceId, c.id, elementId(c)) AS id,
@@ -110,7 +114,7 @@ export async function loadPatientSummaryInput(
          LIMIT 500`,
       { patientId },
     ),
-    runQuery<Omit<MedicationRow, "kind" | "dosage" | "reason">>(
+    run<Omit<MedicationRow, "kind" | "dosage" | "reason">>(
       `${PATIENT_MATCH}
          MATCH (p)-[:HAS_MEDICATION_REQUEST|HAS_MEDICATION]->(m:MedicationRequest)
          WITH DISTINCT m
@@ -124,7 +128,7 @@ export async function loadPatientSummaryInput(
          LIMIT 500`,
       { patientId },
     ),
-    runQuery<Omit<MedicationRow, "kind">>(
+    run<Omit<MedicationRow, "kind">>(
       `${PATIENT_MATCH}
          MATCH (p)-[:HAS_MEDICATION_STATEMENT]->(m:MedicationStatement)
          RETURN coalesce(m.resourceId, m.id, elementId(m)) AS id,
@@ -139,7 +143,7 @@ export async function loadPatientSummaryInput(
          LIMIT 500`,
       { patientId },
     ),
-    runQuery<ImmunizationRow>(
+    run<ImmunizationRow>(
       `${PATIENT_MATCH}
          MATCH (p)-[:HAS_IMMUNIZATION]->(i:Immunization)
          WHERE i.vaccineCode IS NOT NULL
@@ -155,7 +159,7 @@ export async function loadPatientSummaryInput(
          LIMIT 500`,
       { patientId },
     ),
-    runQuery<ProcedureRow>(
+    run<ProcedureRow>(
       `${PATIENT_MATCH}
          MATCH (p)-[:HAS_PROCEDURE]->(x:Procedure)
          RETURN coalesce(x.resourceId, x.id, elementId(x)) AS id,
@@ -168,7 +172,7 @@ export async function loadPatientSummaryInput(
          LIMIT 500`,
       { patientId },
     ),
-    runQuery<AllergyRow>(
+    run<AllergyRow>(
       `${PATIENT_MATCH}
          MATCH (p)-[:HAS_ALLERGY_INTOLERANCE]->(a:AllergyIntolerance)
          RETURN coalesce(a.resourceId, a.id, elementId(a)) AS id,

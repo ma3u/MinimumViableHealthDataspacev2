@@ -9,63 +9,63 @@
     },
     {
       "type": "lab-report",
-      "reportId": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional",
+      "reportId": "lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional",
       "title": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)",
       "date": "2026-08-21T08:30:00Z",
       "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
       "results": 5,
       "profile": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
-      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
+      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
     },
     {
       "type": "lab-report",
-      "reportId": "lab-2026-02-10-alphaklinik-berlin-zentrallabor-fictional",
+      "reportId": "lab-p1-2026-02-10-alphaklinik-berlin-zentrallabor-fictional",
       "title": "Laboratory report 2026-02-10, AlphaKlinik Berlin, Zentrallabor (fictional)",
       "date": "2026-02-10T08:30:00Z",
       "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
       "results": 5,
       "profile": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
-      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2026-02-10-alphaklinik-berlin-zentrallabor-fictional"
+      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2026-02-10-alphaklinik-berlin-zentrallabor-fictional"
     },
     {
       "type": "lab-report",
-      "reportId": "lab-2025-09-18-alphaklinik-berlin-zentrallabor-fictional",
+      "reportId": "lab-p1-2025-09-18-alphaklinik-berlin-zentrallabor-fictional",
       "title": "Laboratory report 2025-09-18, AlphaKlinik Berlin, Zentrallabor (fictional)",
       "date": "2025-09-18T08:30:00Z",
       "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
       "results": 5,
       "profile": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
-      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2025-09-18-alphaklinik-berlin-zentrallabor-fictional"
+      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2025-09-18-alphaklinik-berlin-zentrallabor-fictional"
     },
     {
       "type": "lab-report",
-      "reportId": "lab-2025-05-15-alphaklinik-berlin-zentrallabor-fictional",
+      "reportId": "lab-p1-2025-05-15-alphaklinik-berlin-zentrallabor-fictional",
       "title": "Laboratory report 2025-05-15, AlphaKlinik Berlin, Zentrallabor (fictional)",
       "date": "2025-05-15T08:30:00Z",
       "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
       "results": 5,
       "profile": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
-      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2025-05-15-alphaklinik-berlin-zentrallabor-fictional"
+      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2025-05-15-alphaklinik-berlin-zentrallabor-fictional"
     },
     {
       "type": "lab-report",
-      "reportId": "lab-2025-01-20-alphaklinik-berlin-zentrallabor-fictional",
+      "reportId": "lab-p1-2025-01-20-alphaklinik-berlin-zentrallabor-fictional",
       "title": "Laboratory report 2025-01-20, AlphaKlinik Berlin, Zentrallabor (fictional)",
       "date": "2025-01-20T08:30:00Z",
       "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
       "results": 5,
       "profile": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
-      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2025-01-20-alphaklinik-berlin-zentrallabor-fictional"
+      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2025-01-20-alphaklinik-berlin-zentrallabor-fictional"
     },
     {
       "type": "lab-report",
-      "reportId": "lab-2024-09-12-alphaklinik-berlin-zentrallabor-fictional",
+      "reportId": "lab-p1-2024-09-12-alphaklinik-berlin-zentrallabor-fictional",
       "title": "Laboratory report 2024-09-12, AlphaKlinik Berlin, Zentrallabor (fictional)",
       "date": "2024-09-12T08:30:00Z",
       "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
       "results": 5,
       "profile": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
-      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-2024-09-12-alphaklinik-berlin-zentrallabor-fictional"
+      "href": "/api/patient/documents/lab-report?patientId=P1&reportId=lab-p1-2024-09-12-alphaklinik-berlin-zentrallabor-fictional"
     }
   ]
 }

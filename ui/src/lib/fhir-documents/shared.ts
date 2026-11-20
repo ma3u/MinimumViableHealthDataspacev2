@@ -38,6 +38,12 @@ export const EXT_SOURCE_REGION = `${EXT_BASE}/epa-ingest-source-region`;
 
 export type Json = Record<string, unknown>;
 
+/** Runs one Cypher statement: `runQuery`, or a test's transaction. */
+export type Run = <T>(
+  cypher: string,
+  params: Record<string, unknown>,
+) => Promise<T[]>;
+
 export interface FhirResource {
   resourceType: string;
   id: string;

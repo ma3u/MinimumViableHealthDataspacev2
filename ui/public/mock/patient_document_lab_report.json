@@ -7,16 +7,16 @@
   },
   "identifier": {
     "system": "urn:ietf:rfc:3986",
-    "value": "urn:uuid:7ed445b4-256a-808e-9936-29a2eec68119"
+    "value": "urn:uuid:bd6ef9d7-dfe0-8395-8fe7-7ad477894066"
   },
   "type": "document",
   "timestamp": "2026-11-20T09:00:00Z",
   "entry": [
     {
-      "fullUrl": "urn:uuid:12261295-4b11-85d3-9f93-c3b5da857250",
+      "fullUrl": "urn:uuid:1cd44f68-13b6-8124-93bc-fce2115db273",
       "resource": {
         "resourceType": "Composition",
-        "id": "12261295-4b11-85d3-9f93-c3b5da857250",
+        "id": "1cd44f68-13b6-8124-93bc-fce2115db273",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Composition-eu-lab"
@@ -24,7 +24,7 @@
         },
         "identifier": {
           "system": "https://ehds.mabu.red/fhir/sid/lab-report",
-          "value": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
+          "value": "lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
         },
         "status": "final",
         "type": {
@@ -38,18 +38,18 @@
           "text": "Laboratory report"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "date": "2026-11-20T09:00:00Z",
         "author": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
         "title": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)",
         "custodian": {
-          "reference": "urn:uuid:1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+          "reference": "urn:uuid:8848dad4-0997-8e64-b221-e073667261a9",
           "display": "EHDS Integration Hub (demo)"
         },
         "section": [
@@ -70,22 +70,22 @@
             },
             "entry": [
               {
-                "reference": "urn:uuid:504bf236-2296-8752-8d08-1ba800ce9450"
+                "reference": "urn:uuid:d923a886-1a38-8ec2-9a23-2ec1e7885816"
               },
               {
-                "reference": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c"
+                "reference": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef"
               },
               {
-                "reference": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04"
+                "reference": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3"
               },
               {
-                "reference": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd"
+                "reference": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26"
               },
               {
-                "reference": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b"
+                "reference": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621"
               },
               {
-                "reference": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15"
+                "reference": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb"
               }
             ]
           }
@@ -93,10 +93,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e",
+      "fullUrl": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9",
       "resource": {
         "resourceType": "Patient",
-        "id": "abec137a-4a51-8058-a010-ca5c0f66400e",
+        "id": "80ba9a7f-1428-80e7-887e-ecbdf01ddaa9",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
@@ -118,10 +118,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:504bf236-2296-8752-8d08-1ba800ce9450",
+      "fullUrl": "urn:uuid:d923a886-1a38-8ec2-9a23-2ec1e7885816",
       "resource": {
         "resourceType": "DiagnosticReport",
-        "id": "504bf236-2296-8752-8d08-1ba800ce9450",
+        "id": "d923a886-1a38-8ec2-9a23-2ec1e7885816",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
@@ -131,14 +131,14 @@
           {
             "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
             "valueReference": {
-              "reference": "urn:uuid:12261295-4b11-85d3-9f93-c3b5da857250"
+              "reference": "urn:uuid:1cd44f68-13b6-8124-93bc-fce2115db273"
             }
           }
         ],
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/lab-report",
-            "value": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
+            "value": "lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
           }
         ],
         "status": "final",
@@ -164,40 +164,40 @@
           "text": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "effectiveDateTime": "2026-08-21T08:30:00Z",
         "issued": "2026-11-20T09:00:00Z",
         "performer": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
         "result": [
           {
-            "reference": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c"
+            "reference": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef"
           },
           {
-            "reference": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04"
+            "reference": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3"
           },
           {
-            "reference": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd"
+            "reference": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26"
           },
           {
-            "reference": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b"
+            "reference": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621"
           },
           {
-            "reference": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15"
+            "reference": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb"
           }
         ]
       }
     },
     {
-      "fullUrl": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c",
+      "fullUrl": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef",
       "resource": {
         "resourceType": "Observation",
-        "id": "64db516f-8663-8e35-8739-5a8392d3560c",
+        "id": "583b854e-f7ce-826f-8565-59fbd3f1bbef",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -232,12 +232,12 @@
           "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "effectiveDateTime": "2026-08-21T08:30:00Z",
         "performer": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
@@ -267,10 +267,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04",
+      "fullUrl": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3",
       "resource": {
         "resourceType": "Observation",
-        "id": "3b7faac8-f75f-85bc-b1b6-f994710b2f04",
+        "id": "cf550749-5de4-8bc3-b377-37f45a4810e3",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -305,12 +305,12 @@
           "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "effectiveDateTime": "2026-08-21T08:30:00Z",
         "performer": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
@@ -340,10 +340,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd",
+      "fullUrl": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26",
       "resource": {
         "resourceType": "Observation",
-        "id": "91f8e67f-d3a6-8507-9e70-818caed868bd",
+        "id": "c458d317-6699-8cd8-9781-2e359e089e26",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -378,12 +378,12 @@
           "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "effectiveDateTime": "2026-08-21T08:30:00Z",
         "performer": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
@@ -413,10 +413,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b",
+      "fullUrl": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621",
       "resource": {
         "resourceType": "Observation",
-        "id": "1039c363-0fa1-85d8-aa58-a30fbee1e35b",
+        "id": "15c3a445-61f9-86d9-b155-7c81c411a621",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -451,12 +451,12 @@
           "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "effectiveDateTime": "2026-08-21T08:30:00Z",
         "performer": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
@@ -480,10 +480,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15",
+      "fullUrl": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb",
       "resource": {
         "resourceType": "Observation",
-        "id": "031d4a83-60f3-8360-a0aa-8d596b82be15",
+        "id": "5adc73fb-afb6-89c9-96e5-e72ce712aaeb",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -518,12 +518,12 @@
           "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
-          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
         },
         "effectiveDateTime": "2026-08-21T08:30:00Z",
         "performer": [
           {
-            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
             "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
           }
         ],
@@ -553,44 +553,44 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+      "fullUrl": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
       "resource": {
         "resourceType": "Organization",
-        "id": "eef31a1b-1a83-8764-b5d3-cf6651723175",
+        "id": "65f5441b-7758-87a0-ad6c-1bdba801601b",
         "name": "AlphaKlinik Berlin, Zentrallabor (fictional)"
       }
     },
     {
-      "fullUrl": "urn:uuid:1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+      "fullUrl": "urn:uuid:8848dad4-0997-8e64-b221-e073667261a9",
       "resource": {
         "resourceType": "Organization",
-        "id": "1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+        "id": "8848dad4-0997-8e64-b221-e073667261a9",
         "name": "EHDS Integration Hub (demo)"
       }
     },
     {
-      "fullUrl": "urn:uuid:edb8a871-1201-8e05-a1db-4943525fa202",
+      "fullUrl": "urn:uuid:6bbeafe2-04c0-847c-a5ab-b6b847b904ae",
       "resource": {
         "resourceType": "Provenance",
-        "id": "edb8a871-1201-8e05-a1db-4943525fa202",
+        "id": "6bbeafe2-04c0-847c-a5ab-b6b847b904ae",
         "target": [
           {
-            "reference": "urn:uuid:504bf236-2296-8752-8d08-1ba800ce9450"
+            "reference": "urn:uuid:d923a886-1a38-8ec2-9a23-2ec1e7885816"
           },
           {
-            "reference": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c"
+            "reference": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef"
           },
           {
-            "reference": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04"
+            "reference": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3"
           },
           {
-            "reference": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd"
+            "reference": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26"
           },
           {
-            "reference": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b"
+            "reference": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621"
           },
           {
-            "reference": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15"
+            "reference": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb"
           }
         ],
         "recorded": "2026-11-20T09:00:00Z",
@@ -615,7 +615,7 @@
               ]
             },
             "who": {
-              "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+              "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
               "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
             }
           },
@@ -629,7 +629,7 @@
               ]
             },
             "who": {
-              "reference": "urn:uuid:1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+              "reference": "urn:uuid:8848dad4-0997-8e64-b221-e073667261a9",
               "display": "EHDS Integration Hub (demo)"
             }
           }

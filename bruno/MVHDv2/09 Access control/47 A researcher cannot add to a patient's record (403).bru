@@ -1,0 +1,30 @@
+meta {
+  name: 47 A researcher cannot add to a patient's record (403)
+  type: http
+  seq: 47
+}
+
+post {
+  url: {{baseUrl}}/api/patient/documents?patientId={{patientId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/fhir+json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  { "resourceType": "Bundle", "type": "document" }
+}
+
+assert {
+  res.status: eq 403
+  res.body.error: isString
+}
+
+docs {
+  #1173: only the person, a holder treating them or the operator imports a
+  document into a record. A data user is refused before the body is read.
+}

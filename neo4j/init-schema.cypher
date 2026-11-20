@@ -79,6 +79,12 @@ CREATE INDEX medication_code IF NOT EXISTS FOR (mr:MedicationRequest) ON (mr.med
 CREATE CONSTRAINT encounter_id IF NOT EXISTS FOR (e:Encounter) REQUIRE e.resourceId IS UNIQUE;
 CREATE CONSTRAINT procedure_id IF NOT EXISTS FOR (pr:Procedure) REQUIRE pr.resourceId IS UNIQUE;
 CREATE INDEX procedure_code IF NOT EXISTS FOR (pr:Procedure) ON (pr.code);
+// FHIR documents read back into the record (#1173): allergies an imported
+// Patient Summary carries, the document itself (metadata and SHA-256, not
+// its content) and one Provenance per import, linked to every node it touched
+CREATE CONSTRAINT allergy_intolerance_id IF NOT EXISTS FOR (a:AllergyIntolerance) REQUIRE a.resourceId IS UNIQUE;
+CREATE CONSTRAINT document_reference_id IF NOT EXISTS FOR (d:DocumentReference) REQUIRE d.documentId IS UNIQUE;
+CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (pv:Provenance) REQUIRE pv.provenanceId IS UNIQUE;
 
 // ============================================================
 // Layer 4: OMOP Research Analytics

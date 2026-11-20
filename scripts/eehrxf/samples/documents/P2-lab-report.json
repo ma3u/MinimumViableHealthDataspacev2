@@ -7,16 +7,16 @@
  },
  "identifier": {
   "system": "urn:ietf:rfc:3986",
-  "value": "urn:uuid:eb08a894-5f3d-8c43-a6c4-8f0d03e1d0d8"
+  "value": "urn:uuid:48db8ec3-4b37-8aeb-9a5b-da56e5082712"
  },
  "type": "document",
  "timestamp": "2026-11-20T09:00:00Z",
  "entry": [
   {
-   "fullUrl": "urn:uuid:dc84c93e-9b19-8b2e-b843-1a688cf1f6e9",
+   "fullUrl": "urn:uuid:b0721372-78af-87b3-8366-e306f2227493",
    "resource": {
     "resourceType": "Composition",
-    "id": "dc84c93e-9b19-8b2e-b843-1a688cf1f6e9",
+    "id": "b0721372-78af-87b3-8366-e306f2227493",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Composition-eu-lab"
@@ -24,7 +24,7 @@
     },
     "identifier": {
      "system": "https://ehds.mabu.red/fhir/sid/lab-report",
-     "value": "lab-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic"
+     "value": "lab-p2-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic"
     },
     "status": "final",
     "type": {
@@ -38,18 +38,18 @@
      "text": "Laboratory report"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "date": "2026-11-20T09:00:00Z",
     "author": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
     "title": "Laboratory report 2026-09-08, Limburg Medical Centre, Klinisch Laboratorium (fictional)",
     "custodian": {
-     "reference": "urn:uuid:faaa877d-deb1-8f31-982c-32ce1f495d91",
+     "reference": "urn:uuid:a72ff53c-5e14-8926-a2c3-2491b2be71a9",
      "display": "EHDS Integration Hub (demo)"
     },
     "section": [
@@ -70,22 +70,22 @@
       },
       "entry": [
        {
-        "reference": "urn:uuid:fa6712af-af0d-8b82-bd6b-58a76b1db6ba"
+        "reference": "urn:uuid:42576356-c4e5-81ef-96c0-be5c7930b45b"
        },
        {
-        "reference": "urn:uuid:4d2a4c6f-50a5-837b-85ed-713443336755"
+        "reference": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2"
        },
        {
-        "reference": "urn:uuid:a2aa7aac-94c5-8917-a3cd-b4234b10a37e"
+        "reference": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127"
        },
        {
-        "reference": "urn:uuid:c53f69ee-4822-8e41-b815-5b53e5823d2d"
+        "reference": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff"
        },
        {
-        "reference": "urn:uuid:a9c293cb-a723-81ad-b961-a2601ebe78fb"
+        "reference": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412"
        },
        {
-        "reference": "urn:uuid:57b7a287-45e9-8c1d-abbd-95d61119dc6c"
+        "reference": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4"
        }
       ]
      }
@@ -93,10 +93,10 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade",
+   "fullUrl": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67",
    "resource": {
     "resourceType": "Patient",
-    "id": "93afdd2c-dca5-87a2-ac81-0e9f75035ade",
+    "id": "362d1f07-b528-8327-b4ac-4a44daf5fd67",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
@@ -118,10 +118,10 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:fa6712af-af0d-8b82-bd6b-58a76b1db6ba",
+   "fullUrl": "urn:uuid:42576356-c4e5-81ef-96c0-be5c7930b45b",
    "resource": {
     "resourceType": "DiagnosticReport",
-    "id": "fa6712af-af0d-8b82-bd6b-58a76b1db6ba",
+    "id": "42576356-c4e5-81ef-96c0-be5c7930b45b",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
@@ -131,14 +131,14 @@
      {
       "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
       "valueReference": {
-       "reference": "urn:uuid:dc84c93e-9b19-8b2e-b843-1a688cf1f6e9"
+       "reference": "urn:uuid:b0721372-78af-87b3-8366-e306f2227493"
       }
      }
     ],
     "identifier": [
      {
       "system": "https://ehds.mabu.red/fhir/sid/lab-report",
-      "value": "lab-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic"
+      "value": "lab-p2-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic"
      }
     ],
     "status": "final",
@@ -164,40 +164,40 @@
      "text": "Laboratory report 2026-09-08, Limburg Medical Centre, Klinisch Laboratorium (fictional)"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
     "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
     "result": [
      {
-      "reference": "urn:uuid:4d2a4c6f-50a5-837b-85ed-713443336755"
+      "reference": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2"
      },
      {
-      "reference": "urn:uuid:a2aa7aac-94c5-8917-a3cd-b4234b10a37e"
+      "reference": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127"
      },
      {
-      "reference": "urn:uuid:c53f69ee-4822-8e41-b815-5b53e5823d2d"
+      "reference": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff"
      },
      {
-      "reference": "urn:uuid:a9c293cb-a723-81ad-b961-a2601ebe78fb"
+      "reference": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412"
      },
      {
-      "reference": "urn:uuid:57b7a287-45e9-8c1d-abbd-95d61119dc6c"
+      "reference": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4"
      }
     ]
    }
   },
   {
-   "fullUrl": "urn:uuid:4d2a4c6f-50a5-837b-85ed-713443336755",
+   "fullUrl": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2",
    "resource": {
     "resourceType": "Observation",
-    "id": "4d2a4c6f-50a5-837b-85ed-713443336755",
+    "id": "5681d160-230a-8295-be19-ea5371764fd2",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -232,12 +232,12 @@
      "text": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
     "performer": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
@@ -267,10 +267,10 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:a2aa7aac-94c5-8917-a3cd-b4234b10a37e",
+   "fullUrl": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127",
    "resource": {
     "resourceType": "Observation",
-    "id": "a2aa7aac-94c5-8917-a3cd-b4234b10a37e",
+    "id": "2028aca4-9436-8fd6-a703-2f1e00e6d127",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -305,12 +305,12 @@
      "text": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
     "performer": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
@@ -340,10 +340,10 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:c53f69ee-4822-8e41-b815-5b53e5823d2d",
+   "fullUrl": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff",
    "resource": {
     "resourceType": "Observation",
-    "id": "c53f69ee-4822-8e41-b815-5b53e5823d2d",
+    "id": "cd14efc1-4653-8989-b3b3-bfd62dba95ff",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -378,12 +378,12 @@
      "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
     "performer": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
@@ -413,10 +413,10 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:a9c293cb-a723-81ad-b961-a2601ebe78fb",
+   "fullUrl": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412",
    "resource": {
     "resourceType": "Observation",
-    "id": "a9c293cb-a723-81ad-b961-a2601ebe78fb",
+    "id": "8b3feb6c-4601-875e-934c-88eea758b412",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -451,12 +451,12 @@
      "text": "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
     "performer": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
@@ -480,10 +480,10 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:57b7a287-45e9-8c1d-abbd-95d61119dc6c",
+   "fullUrl": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4",
    "resource": {
     "resourceType": "Observation",
-    "id": "57b7a287-45e9-8c1d-abbd-95d61119dc6c",
+    "id": "6251a2e7-79a1-8965-984f-d8c312ef97d4",
     "meta": {
      "profile": [
       "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
@@ -518,12 +518,12 @@
      "text": "INR in Platelet poor plasma by Coagulation assay"
     },
     "subject": {
-     "reference": "urn:uuid:93afdd2c-dca5-87a2-ac81-0e9f75035ade"
+     "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
     "performer": [
      {
-      "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+      "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
       "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
      }
     ],
@@ -553,44 +553,44 @@
    }
   },
   {
-   "fullUrl": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+   "fullUrl": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
    "resource": {
     "resourceType": "Organization",
-    "id": "760fd7a6-6d0f-847e-9df6-7692512069b8",
+    "id": "4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
     "name": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
    }
   },
   {
-   "fullUrl": "urn:uuid:faaa877d-deb1-8f31-982c-32ce1f495d91",
+   "fullUrl": "urn:uuid:a72ff53c-5e14-8926-a2c3-2491b2be71a9",
    "resource": {
     "resourceType": "Organization",
-    "id": "faaa877d-deb1-8f31-982c-32ce1f495d91",
+    "id": "a72ff53c-5e14-8926-a2c3-2491b2be71a9",
     "name": "EHDS Integration Hub (demo)"
    }
   },
   {
-   "fullUrl": "urn:uuid:a834e112-842c-86ce-aa36-71f5d832c803",
+   "fullUrl": "urn:uuid:f6cc87d9-c6bf-8022-a717-38f28ae2d30d",
    "resource": {
     "resourceType": "Provenance",
-    "id": "a834e112-842c-86ce-aa36-71f5d832c803",
+    "id": "f6cc87d9-c6bf-8022-a717-38f28ae2d30d",
     "target": [
      {
-      "reference": "urn:uuid:fa6712af-af0d-8b82-bd6b-58a76b1db6ba"
+      "reference": "urn:uuid:42576356-c4e5-81ef-96c0-be5c7930b45b"
      },
      {
-      "reference": "urn:uuid:4d2a4c6f-50a5-837b-85ed-713443336755"
+      "reference": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2"
      },
      {
-      "reference": "urn:uuid:a2aa7aac-94c5-8917-a3cd-b4234b10a37e"
+      "reference": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127"
      },
      {
-      "reference": "urn:uuid:c53f69ee-4822-8e41-b815-5b53e5823d2d"
+      "reference": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff"
      },
      {
-      "reference": "urn:uuid:a9c293cb-a723-81ad-b961-a2601ebe78fb"
+      "reference": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412"
      },
      {
-      "reference": "urn:uuid:57b7a287-45e9-8c1d-abbd-95d61119dc6c"
+      "reference": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4"
      }
     ],
     "recorded": "2026-11-20T09:00:00Z",
@@ -615,7 +615,7 @@
        ]
       },
       "who": {
-       "reference": "urn:uuid:760fd7a6-6d0f-847e-9df6-7692512069b8",
+       "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
        "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
       }
      },
@@ -629,7 +629,7 @@
        ]
       },
       "who": {
-       "reference": "urn:uuid:faaa877d-deb1-8f31-982c-32ce1f495d91",
+       "reference": "urn:uuid:a72ff53c-5e14-8926-a2c3-2491b2be71a9",
        "display": "EHDS Integration Hub (demo)"
       }
      }

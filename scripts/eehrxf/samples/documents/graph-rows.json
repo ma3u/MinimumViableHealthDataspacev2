@@ -779,7 +779,7 @@
     "birthDate": "1979-03-15"
    },
    "report": {
-    "reportId": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional",
+    "reportId": "lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional",
     "title": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)",
     "effective": "2026-08-21T08:30:00Z",
     "issued": null,
@@ -883,7 +883,7 @@
     "birthDate": "1965-06-02"
    },
    "report": {
-    "reportId": "lab-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic",
+    "reportId": "lab-p2-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic",
     "title": "Laboratory report 2026-09-08, Limburg Medical Centre, Klinisch Laboratorium (fictional)",
     "effective": "2026-09-08T08:30:00Z",
     "issued": null,
