@@ -119,6 +119,95 @@ class Config(unittest.TestCase):
         cfg = validate.load_config()
         report = json.loads(validate.REPORT.read_text(encoding="utf-8"))
         self.assertEqual(set(report["profiles"]), {p["profileId"] for p in cfg["profiles"]})
+        self.assertEqual(
+            set(report["national"]["profiles"]), {p["profileId"] for p in validate.national(cfg)["profiles"]}
+        )
+
+    def test_every_national_profile_names_a_known_national_ig(self):
+        cfg = validate.load_config()
+        nat = validate.national(cfg)
+        eehrxf_ids = {p["profileId"] for p in cfg["profiles"]}
+        for ig in nat["igs"].values():
+            self.assertIn(ig["status"], ("published", "ballot", "draft"), ig["package"])
+            self.assertTrue(ig["checkedOn"] and ig["checkedAt"].startswith("https://"), ig["package"])
+        for p in nat["profiles"]:
+            self.assertIn(p["ig"], nat["igs"], p["profileId"])
+            self.assertNotIn(p["profileId"], eehrxf_ids)
+            self.assertNotIn("categories", p, "a German profile is not an EEHRxF category member")
+
+
+class LabBundleFilter(unittest.TestCase):
+    def test_a_bundle_counts_as_lab_only_with_a_lab_report_in_it(self):
+        lab = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "LAB"}]}]}
+        ecg = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "EC"}]}]}
+        self.assertTrue(
+            validate.matches_filter({"resourceType": "Bundle", "entry": [{"resource": lab}]}, "laboratory-bundle")
+        )
+        self.assertFalse(
+            validate.matches_filter({"resourceType": "Bundle", "entry": [{"resource": ecg}]}, "laboratory-bundle")
+        )
+
+
+class ReportOnly(unittest.TestCase):
+    """#1172: draft and ballot guides report, every other guide gates."""
+
+    def test_status_decides(self):
+        for status in ("draft", "Draft", "ballot", "Ballot", " BALLOT "):
+            self.assertTrue(validate.report_only({"status": status}), status)
+        for status in ("published", "STU 1", "STU 2", ""):
+            self.assertFalse(validate.report_only({"status": status}), status)
+
+    def _results(self, status: str, outcome: list[dict]) -> dict:
+        igs = {"g": {"package": "x.y", "version": "1.0.0", "status": status}}
+        profiles = [{"profileId": "p", "ig": "g", "canonical": "http://x/p"}]
+        index = {"p__klarbefund__000.json": ("p", "klarbefund", "a.json")}
+        outcomes = {"p__klarbefund__000.json": outcome}
+        return validate.profile_results({"validator": {}}, igs, profiles, {"klarbefund": {}}, index, outcomes)
+
+    def test_a_draft_failure_is_reported_and_does_not_gate(self):
+        err = [{"severity": "error", "details": {"text": "Observation.performer: minimum required = 1"}}]
+        result = self._results("draft", err)["p"]
+        self.assertEqual((result["tested"], result["failed"], result["gate"]), (1, 1, False))
+        self.assertEqual(result["topIssues"][0]["resources"], 1)
+        report = {"profiles": {}, "national": {"profiles": {"p": result}}}
+        self.assertEqual(validate.gate_failures(report, None), [])
+
+    def test_the_same_failure_gates_once_published(self):
+        err = [{"severity": "error", "details": {"text": "Observation.performer: minimum required = 1"}}]
+        report = {"profiles": {}, "national": {"profiles": {"p": self._results("published", err)["p"]}}}
+        self.assertEqual(len(validate.gate_failures(report, None)), 1)
+        # A baseline that had the profile as report-only allows nothing.
+        draft = {"profiles": {}, "national": {"profiles": {"p": self._results("draft", err)["p"]}}}
+        self.assertEqual(len(validate.gate_failures(report, draft)), 1)
+        # A baseline that records the failure as gating accepts it: known failures do not fail a run.
+        self.assertEqual(validate.gate_failures(report, report), [])
+
+    def test_a_new_failure_of_a_gating_profile_fails_the_run(self):
+        before = {"profiles": {"p": {"ig": "x#1", "gate": True, "tested": 3, "failed": 1}}}
+        after = {"profiles": {"p": {"ig": "x#1", "gate": True, "tested": 3, "failed": 2}}}
+        self.assertEqual(validate.gate_failures(before, before), [])
+        self.assertEqual(len(validate.gate_failures(after, before)), 1)
+        # A baseline written before #1172 has no gate field: its entries gate.
+        legacy = {"profiles": {"p": {"ig": "x#1", "tested": 3, "failed": 2}}}
+        self.assertEqual(validate.gate_failures(after, legacy), [])
+
+    def test_committed_report_passes_its_own_gate(self):
+        report = json.loads(validate.REPORT.read_text(encoding="utf-8"))
+        self.assertEqual(validate.gate_failures(report, report), [])
+
+
+class NationalStaysOffTheEehrxfPage(unittest.TestCase):
+    def test_build_writes_no_german_package_or_profile(self):
+        cfg = validate.load_config()
+        report = json.loads(build.REPORT.read_text(encoding="utf-8"))
+        m = build.model(cfg, report)
+        text = build.cypher(m) + json.dumps(build.mock(m, None))
+        nat = validate.national(cfg)
+        for ig in nat["igs"].values():
+            self.assertNotIn(ig["package"], text)
+        for p in nat["profiles"]:
+            self.assertNotIn(p["profileId"], text)
+            self.assertNotIn(p["canonical"], text)
 
 
 if __name__ == "__main__":
