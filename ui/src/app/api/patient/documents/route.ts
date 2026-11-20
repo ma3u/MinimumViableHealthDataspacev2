@@ -64,7 +64,7 @@ const MAX_DOCUMENT_BYTES = 5_000_000;
  *
  * In order: the document's shape (a document Bundle, Composition first,
  * every reference inside it), then the HL7 validator against the document's
- * profile (`FHIR_VALIDATOR_URL`; none configured is 503, never a pass), then
+ * profile (the proxy's `$validate` or `FHIR_VALIDATOR_URL`; no validator is 503, never a pass), then
  * the record (a document naming another person's record or nodes is 409),
  * then the audit trail (fail closed, ADR-045), then one `MERGE` statement.
  * Importing the same document again writes nothing new; its DocumentReference

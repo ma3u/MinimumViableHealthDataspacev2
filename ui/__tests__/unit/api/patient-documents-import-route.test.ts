@@ -104,10 +104,13 @@ let outcome: Record<string, unknown> = {
   ],
 };
 let auditStatus = 201;
+let validateStatus = 200;
+const validateUrls: string[] = [];
 const audits: Record<string, unknown>[] = [];
 const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
   if (url.includes("/$validate")) {
-    return new Response(JSON.stringify(outcome), { status: 200 });
+    validateUrls.push(url);
+    return new Response(JSON.stringify(outcome), { status: validateStatus });
   }
   if (url.endsWith("/audit/record")) {
     audits.push(JSON.parse(String(init?.body)));
@@ -123,6 +126,8 @@ describe("POST /api/patient/documents", () => {
     foreign = [];
     stored = [STORED];
     auditStatus = 201;
+    validateStatus = 200;
+    validateUrls.length = 0;
     audits.length = 0;
     outcome = {
       resourceType: "OperationOutcome",
@@ -265,11 +270,31 @@ describe("POST /api/patient/documents", () => {
     expect(writes()).toBe(0);
   });
 
-  it("imports nothing when no validator is configured", async () => {
+  it("asks the proxy's $validate when no other validator is named", async () => {
     vi.stubEnv("FHIR_VALIDATOR_URL", "");
     const res = await post(LAB);
+    expect(res.status).toBe(201);
+    expect(validateUrls[0]).toMatch(/\/fhir\/\$validate\?profile=/);
+    expect(validateUrls[0]).not.toContain("matchbox.test");
+  });
+
+  it("imports nothing when the proxy has no validator (503)", async () => {
+    vi.stubEnv("FHIR_VALIDATOR_URL", "");
+    validateStatus = 503;
+    outcome = {
+      resourceType: "OperationOutcome",
+      issue: [
+        {
+          severity: "error",
+          code: "not-supported",
+          diagnostics:
+            "No validator is configured on this proxy (MATCHBOX_URL)",
+        },
+      ],
+    };
+    const res = await post(LAB);
     expect(res.status).toBe(503);
-    expect((await res.json()).reason).toMatch(/FHIR_VALIDATOR_URL/);
+    expect((await res.json()).reason).toMatch(/HTTP 503/);
     expect(writes()).toBe(0);
   });
 
