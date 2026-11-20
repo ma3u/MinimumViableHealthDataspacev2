@@ -574,6 +574,86 @@
         color: var(--accent);
       }
 
+      /* ---------- cover: a living dataspace behind the title ---------- */
+      .cover-net {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .cover > *:not(.cover-net) {
+        position: relative;
+        z-index: 1;
+      }
+      .cover > .who,
+      .cover > .version-jump {
+        position: absolute;
+      }
+      .version-jump .v {
+        position: relative;
+      }
+      /* a light sweeps round the 1.0 ring */
+      .version-jump .v.new::before {
+        content: "";
+        position: absolute;
+        inset: -16px;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent 0 62%, rgba(79, 195, 247, 0.95) 100%);
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+        animation: sweep 2.8s linear infinite;
+      }
+      .version-jump .v.old {
+        border-style: dashed;
+      }
+      @keyframes sweep {
+        to { transform: rotate(360deg); }
+      }
+      /* the cover builds itself when it opens */
+      .reveal section.cover.present .eyebrow,
+      .reveal section.cover.present h1 .w,
+      .reveal section.cover.present .sub,
+      .reveal section.cover.present .who,
+      .reveal section.cover.present .version-jump .v,
+      .reveal section.cover.present .version-jump .arrow-wrap {
+        animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      }
+      .cover h1 .w {
+        display: inline-block;
+      }
+      .reveal section.cover.present .eyebrow { animation-delay: 0.1s; }
+      .reveal section.cover.present .sub { animation-delay: 1.15s; }
+      .reveal section.cover.present .who { animation-delay: 1.45s; }
+      .reveal section.cover.present .version-jump .v.old { animation-delay: 0.5s; }
+      .reveal section.cover.present .version-jump .arrow-wrap { animation-delay: 0.85s; }
+      .reveal section.cover.present .version-jump .v.new {
+        animation:
+          pop 1s cubic-bezier(0.2, 1.4, 0.4, 1) 1.1s both,
+          glow 3.2s ease-in-out 2.1s infinite;
+      }
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(34px); filter: blur(6px); }
+        to { opacity: 1; transform: none; filter: none; }
+      }
+      @keyframes pop {
+        0% { opacity: 0; transform: scale(0.4); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .version-jump .v.new::before,
+        .reveal section.cover.present .eyebrow,
+        .reveal section.cover.present h1 .w,
+        .reveal section.cover.present .sub,
+        .reveal section.cover.present .who,
+        .reveal section.cover.present .version-jump .v,
+        .reveal section.cover.present .version-jump .arrow-wrap {
+          animation: none;
+        }
+      }
+
       /* checklist */
       .check {
         display: grid;
@@ -703,14 +783,15 @@
         <!-- 1 · cover -->
         <section data-id-slide="cover" class="cover">
           <p class="eyebrow">ECLIPSE TRACTUS-X COMMUNITY DAYS</p>
-          <h1>EDC 0.x to 1.0: what changes, and what to plan for</h1>
+          <canvas class="cover-net" id="cover-net" width="1920" height="1080" aria-hidden="true"></canvas>
+          <h1><span class="w" style="animation-delay: 0.25s">EDC</span> <span class="w" style="animation-delay: 0.32s">0.x</span> <span class="w" style="animation-delay: 0.39s">to</span> <span class="w" style="animation-delay: 0.46s">1.0:</span> <span class="w" style="animation-delay: 0.53s">what</span> <span class="w" style="animation-delay: 0.60s">changes,</span> <span class="w" style="animation-delay: 0.67s">and</span> <span class="w" style="animation-delay: 0.74s">what</span> <span class="w" style="animation-delay: 0.81s">to</span> <span class="w" style="animation-delay: 0.88s">plan</span> <span class="w" style="animation-delay: 0.95s">for</span></h1>
           <p class="sub">
             Data model, APIs, data plane and signalling, from moving the EHDS Integration Hub from EDC
             0.18 to 1.0.0-RC8 in fifteen days.
           </p>
           <div class="version-jump" aria-hidden="true">
-            <div class="v" style="--c: var(--old)">0.x</div>
-            <div class="arrow">→</div>
+            <div class="v old" style="--c: var(--old)">0.x</div>
+            <div class="arrow-wrap"><div class="arrow">→</div></div>
             <div class="v new" style="--c: var(--accent)">1.0</div>
           </div>
           <p class="who">
@@ -1326,10 +1407,13 @@
             </div>
           </div>
           <div class="notyet fragment">
-            <b>Honest status:</b> only the first is a siglet; siglet issues tokens and moves no data, so 2
-            and 3 are a data plane of our own (ADR-095, proposed). Not yet committed, not on Azure; token
-            renewal after the first hour (<a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/888" target="_blank" rel="noopener">#888</a>)
-            written, not yet proven.
+            <b>Honest status:</b> siglet does push only as a token service: with
+            <code>tokenSource = "client"</code> the consumer's siglet issues the token for its own inbox,
+            and the provider's application does the pushing. Kafka has no DPS transfer profile yet. So 2
+            and 3 are a data plane of ours on the DataPlane SDK, the way EDC's own end-to-end tests run
+            push and streaming (an ADR, proposed, still local). Not committed, not on Azure; token renewal
+            (<a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/888" target="_blank" rel="noopener">#888</a>)
+            not yet proven.
           </div>
           <p class="foot">
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/siglet-edc1.toml" target="_blank" rel="noopener">jad/siglet-edc1.toml</a>
@@ -1342,9 +1426,12 @@
           </p>
           <aside class="notes">
             [2:00] Answer to "which siglets": one siglet deployment for pull, used by every participant
-            context, on Azure. Push and streaming need a component that reads and writes, so we built one
-            on the DataPlane SDK and registered it beside siglet; the control plane picks by transfer
-            type. Say clearly that 2 and 3 run on my laptop's compose stack today.
+            context, on Azure. siglet can take part in an HttpData-PUSH, but only by issuing the token for
+            the consumer's inbox; it moves no bytes, and it has no Kafka. EDC's own e2e tests run
+            Finite and NonFinite push and pull against a data plane on the DataPlane SDK, and so do we:
+            registered beside siglet, the control plane picks by transfer type. Our transfer type names
+            are not the DPS profile URLs yet, and Kafka has no registered profile. Say clearly that 2 and
+            3 run on my laptop's compose stack today.
           </aside>
         </section>
 
@@ -1679,6 +1766,135 @@
         }
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(ready);
         setTimeout(ready, 2000);
+      })();
+
+      // Cover: participant contexts drift, links form between neighbours, and data flows run
+      // along them as light pulses, denser on the right behind 1.0. Runs only while the cover
+      // is on screen; one still frame when the viewer prefers reduced motion.
+      (function () {
+        var canvas = document.getElementById("cover-net");
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext("2d");
+        var W = 1920, H = 1080, LINK = 250;
+        var COLORS = ["#4fc3f7", "#148f77", "#ca6f1e", "#a77bd1", "#2471a3", "#f2b632"];
+        var seed = 7;
+        function rnd() {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        }
+        var nodes = [];
+        for (var i = 0; i < 58; i++) {
+          // more of them on the right, where the title does not sit
+          var x = rnd() < 0.68 ? 900 + rnd() * 1020 : rnd() * 900;
+          nodes.push({
+            x: x, y: 40 + rnd() * 1000,
+            vx: (rnd() - 0.5) * 0.35, vy: (rnd() - 0.5) * 0.35,
+            r: 2.5 + rnd() * 3.5, c: COLORS[Math.floor(rnd() * COLORS.length)],
+            hub: rnd() < 0.12,
+          });
+        }
+        var pulses = [];
+        var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        function fade(x) {
+          // keep the text side quiet
+          return x < 1000 ? 0.25 + 0.75 * (x / 1000) * (x / 1000) : 1;
+        }
+        function hexA(hex, a) {
+          var n = parseInt(hex.slice(1), 16);
+          return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a.toFixed(3) + ")";
+        }
+        function step(dt) {
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            n.x += n.vx * dt; n.y += n.vy * dt;
+            if (n.x < 0 || n.x > W) n.vx *= -1;
+            if (n.y < 0 || n.y > H) n.vy *= -1;
+          }
+          if (pulses.length < 26 && Math.random() < 0.18 * dt) {
+            var a = nodes[Math.floor(Math.random() * nodes.length)];
+            var best = null, bd = LINK;
+            for (var j = 0; j < nodes.length; j++) {
+              var b = nodes[j];
+              if (b === a) continue;
+              var d = Math.hypot(a.x - b.x, a.y - b.y);
+              if (d < bd && Math.random() < 0.5) { bd = d; best = b; }
+            }
+            if (best) pulses.push({ a: a, b: best, t: 0, v: 0.008 + Math.random() * 0.01, c: a.c });
+          }
+          for (var k = pulses.length - 1; k >= 0; k--) {
+            pulses[k].t += pulses[k].v * dt;
+            if (pulses[k].t >= 1) {
+              pulses[k].b.flash = 1;
+              pulses.splice(k, 1);
+            }
+          }
+        }
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          ctx.lineWidth = 1.4;
+          for (var i = 0; i < nodes.length; i++) {
+            for (var j = i + 1; j < nodes.length; j++) {
+              var a = nodes[i], b = nodes[j];
+              var d = Math.hypot(a.x - b.x, a.y - b.y);
+              if (d < LINK) {
+                ctx.strokeStyle = "rgba(131,153,168," + ((1 - d / LINK) * 0.32 * fade((a.x + b.x) / 2)).toFixed(3) + ")";
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+              }
+            }
+          }
+          for (var k = 0; k < pulses.length; k++) {
+            var p = pulses[k];
+            var x = p.a.x + (p.b.x - p.a.x) * p.t, y = p.a.y + (p.b.y - p.a.y) * p.t;
+            var f = fade(x);
+            var g = ctx.createRadialGradient(x, y, 0, x, y, 16);
+            g.addColorStop(0, hexA(p.c, 0.95 * f));
+            g.addColorStop(1, hexA(p.c, 0));
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI * 2); ctx.fill();
+            // a short trail behind the pulse
+            ctx.strokeStyle = hexA(p.c, 0.55 * f);
+            ctx.lineWidth = 2.5;
+            var tx = p.a.x + (p.b.x - p.a.x) * Math.max(0, p.t - 0.18), ty = p.a.y + (p.b.y - p.a.y) * Math.max(0, p.t - 0.18);
+            ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(x, y); ctx.stroke();
+            ctx.lineWidth = 1.4;
+          }
+          for (var i2 = 0; i2 < nodes.length; i2++) {
+            var n = nodes[i2];
+            var fl = n.flash || 0;
+            var a2 = (0.55 + 0.45 * fl) * fade(n.x);
+            if (n.hub || fl > 0.05) {
+              var h = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 6);
+              h.addColorStop(0, hexA(n.c, 0.35 * a2 + 0.3 * fl));
+              h.addColorStop(1, hexA(n.c, 0));
+              ctx.fillStyle = h;
+              ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 6, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.fillStyle = hexA(n.c, a2);
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (n.hub ? 1.6 : 1) + fl * 3, 0, Math.PI * 2); ctx.fill();
+            if (fl) n.flash = Math.max(0, fl - 0.04);
+          }
+        }
+        var running = false, last = 0, raf = 0;
+        function frame(ts) {
+          if (!running) return;
+          var dt = last ? Math.min(3, (ts - last) / 16.7) : 1;
+          last = ts;
+          step(dt);
+          draw();
+          raf = requestAnimationFrame(frame);
+        }
+        function sync() {
+          var on = Reveal.getCurrentSlide() === canvas.closest("section") && !document.hidden;
+          if (reduce) { draw(); return; }
+          if (on && !running) { running = true; last = 0; raf = requestAnimationFrame(frame); }
+          if (!on && running) { running = false; cancelAnimationFrame(raf); }
+        }
+        // a few seconds of history, so the first frame already has flows on it
+        for (var w = 0; w < 140; w++) step(1);
+        draw();
+        Reveal.on("ready", sync);
+        Reveal.on("slidechanged", sync);
+        document.addEventListener("visibilitychange", sync);
       })();
 
       // Kafka lane: while it is on screen, records travel and the inbox counts up to 121;

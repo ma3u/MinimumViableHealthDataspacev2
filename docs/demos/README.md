@@ -100,7 +100,7 @@ SPE and a Kafka stream on the DataPlane SDK), the RC-to-RC breaks and when to
 migrate, with a checklist the audience can tick. The facts are the ones in
 [discussion #1092](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092)
 and #930. Push and Kafka are marked LOCAL: they run on the compose stack only
-and their ADR (ADR-095) is proposed; update those slides when they land on main
+and their ADR is still a local draft (its number is not settled; ADR-095 on main is Matchbox); update those slides when they land on main
 and on Azure, and when the 24-hour ECG run passes. Not narrated. Speaker notes
 on S.
 
