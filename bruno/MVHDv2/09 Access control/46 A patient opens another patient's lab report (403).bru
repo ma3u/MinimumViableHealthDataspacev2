@@ -1,0 +1,25 @@
+meta {
+  name: 46 A patient opens another patient's lab report (403)
+  type: http
+  seq: 46
+}
+
+get {
+  url: {{baseUrl}}/api/patient/documents/lab-report?patientId=P2
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  // EHDS Art. 3: a patient reads their own record only. patient1 owns P1.
+  test("another patient's document is refused", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+  test("the refusal says why", function () {
+    expect(res.getBody()).to.have.property("error");
+  });
+}

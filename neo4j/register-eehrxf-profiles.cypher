@@ -29,8 +29,8 @@ SET c.name = 'Patient Summaries',
     c.ehdsGroup = 1,
     c.status = 'partial',
     c.profileCount = 7,
-    c.tested = 41,
-    c.passed = 31;
+    c.tested = 46,
+    c.passed = 36;
 
 MERGE (c:EEHRxFCategory {categoryId: 'eprescription'})
 SET c.name = 'ePrescriptions',
@@ -73,8 +73,8 @@ SET c.name = 'Medical Test Results',
     c.ehdsGroup = 2,
     c.status = 'partial',
     c.profileCount = 4,
-    c.tested = 63,
-    c.passed = 22;
+    c.tested = 66,
+    c.passed = 25;
 
 MERGE (c:EEHRxFCategory {categoryId: 'hospital-discharge'})
 SET c.name = 'Discharge Reports',
@@ -193,11 +193,11 @@ SET p.name = 'Bundle (EU Patient Summary)',
     p.url = 'https://hl7.eu/fhir/eps/1.0.0-ballot/StructureDefinition-bundle-eu-eps.html',
     p.baseResource = 'Bundle',
     p.description = null,
-    p.tested = 0,
-    p.passed = 0,
+    p.tested = 5,
+    p.passed = 5,
     p.failed = 0,
     p.topIssues = [],
-    p.coverage = 'untested';
+    p.coverage = 'full';
 
 MERGE (p:EEHRxFProfile {profileId: 'medication-request-eu'})
 SET p.name = 'MedicationRequest (EU MPD)',
@@ -305,11 +305,11 @@ SET p.name = 'Bundle (EU Lab Report)',
     p.url = 'https://hl7.eu/fhir/laboratory/StructureDefinition-Bundle-eu-lab.html',
     p.baseResource = 'Bundle',
     p.description = null,
-    p.tested = 9,
-    p.passed = 0,
+    p.tested = 12,
+    p.passed = 3,
     p.failed = 9,
     p.topIssues = ['9x Bundle.type: Value is \'collection\' but is fixed to \'document\' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type', '9x Bundle: Bundle.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0)', '9x Bundle: Constraint failed: dr-comp-type: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Constraint failed: one-comp: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice'],
-    p.coverage = 'none';
+    p.coverage = 'partial';
 
 MERGE (p:EEHRxFProfile {profileId: 'composition-hdr-eu'})
 SET p.name = 'Composition (EU HDR)',
@@ -399,10 +399,10 @@ SET g.name = 'EU Manifest-based Access to DICOM Objects (EU-MADO)',
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
     v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
-    v.inputsDigest = 'b4fe326289e0644e',
+    v.inputsDigest = 'e1f299a84286fbf9',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
-    v.sources = ['klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],
+    v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],
     v.terminology = 'not checked: run with -tx n/a, so codes are checked for shape, not against SNOMED CT, LOINC or the IG value sets',
     v.validatorUrl = 'https://github.com/hapifhir/org.hl7.fhir.core/releases/tag/7.0.5',
     v.validatorVersion = '7.0.5';

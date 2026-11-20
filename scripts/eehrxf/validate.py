@@ -16,6 +16,10 @@ Sources, both of them what the hub actually takes in:
 - synthea: scripts/eehrxf/samples/synthea-sample.json, a seeded Synthea run cut
   down to the resource types scripts/load_fhir_neo4j.py loads
   (sample_synthea.py writes it).
+- documents: the FHIR documents the hub builds from the graph (#1171), Patient
+  Summaries and laboratory reports of seeded patients, under
+  scripts/eehrxf/samples/documents/ (ui/scripts/export-fhir-document-samples.ts
+  writes them; a unit test keeps them equal to what the builders produce).
 
 A resource passes when the validator reports no issue of severity error or
 fatal. Terminology is not checked (-tx n/a): see profiles.json.
@@ -51,6 +55,7 @@ CONFIG = HERE / "profiles.json"
 REPORT = HERE / "validation-report.json"
 GOLDEN_GLOB = "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
 SYNTHEA_SAMPLE = "scripts/eehrxf/samples/synthea-sample.json"
+DOCUMENTS_DIR = "scripts/eehrxf/samples/documents"
 
 # At most this many resources per profile and source, so one validator run
 # stays within a few minutes in CI.
@@ -63,6 +68,7 @@ IMAGING_CODES = {"imaging", "RAD", "radiology"}
 # LOINC document types of the Composition a document Bundle starts with.
 PATIENT_SUMMARY = "60591-5"
 DISCHARGE_REPORT = "34105-7"
+LAB_REPORT = "11502-2"
 
 
 def loinc_type(resource: dict) -> set[str]:
@@ -100,6 +106,11 @@ def matches_filter(resource: dict, source_filter: str | None) -> bool:
         return DISCHARGE_REPORT in loinc_type(resource)
     if source_filter == "patient-summary-document":
         return resource.get("type") == "document" and PATIENT_SUMMARY in loinc_type(first_composition(resource))
+    if source_filter == "laboratory-report-bundle":
+        # A lab report document, or a Bundle with no Composition (the writer's
+        # collections, one lab report each). Never a Patient Summary.
+        composition = first_composition(resource)
+        return not composition or LAB_REPORT in loinc_type(composition)
     raise ValueError(f"unknown sourceFilter {source_filter!r}")
 
 
@@ -132,7 +143,18 @@ def collect_sources() -> dict[str, dict]:
         "files": [SYNTHEA_SAMPLE] if sample.exists() else [],
         "resources": res,
     }
+    sources["documents"] = collect_documents()
     return sources
+
+
+def collect_documents() -> dict:
+    """The hub's own FHIR documents (#1171), one Bundle per file."""
+    paths = sorted(p for p in (ROOT / DOCUMENTS_DIR).glob("*.json") if p.name != "graph-rows.json")
+    return {
+        "description": "FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients",
+        "files": [str(p.relative_to(ROOT)) for p in paths],
+        "resources": [(p.name, json.loads(p.read_text(encoding="utf-8"))) for p in paths],
+    }
 
 
 def candidates(profile: dict, sources: dict[str, dict]) -> list[tuple[str, str, dict]]:

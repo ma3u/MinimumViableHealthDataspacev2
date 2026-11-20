@@ -76,6 +76,17 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/patient/research?", "/mock/patient_research.json"],
   ["/api/patient/opt-out?", "/mock/patient_opt_out.json"],
   ["/api/patient/observations?", "/mock/patient_observations.json"],
+  // FHIR documents of a record (#1171): P1's index, Patient Summary and
+  // newest lab report, whichever record or report is named.
+  ["/api/patient/documents?", "/mock/patient_documents.json"],
+  [
+    "/api/patient/documents/patient-summary?",
+    "/mock/patient_document_patient_summary.json",
+  ],
+  [
+    "/api/patient/documents/lab-report?",
+    "/mock/patient_document_lab_report.json",
+  ],
   // Bonus programs (#934): the list for a named record, and the member's own
   // result for a program year, which the static demo shows as goal met.
   ["/api/patient/programmes?", "/mock/patient_programmes.json"],

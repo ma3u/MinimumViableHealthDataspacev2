@@ -1,5 +1,9 @@
 import { runQuery } from "@/lib/neo4j";
 import { SOURCE_KIND_EXTENSION } from "@/lib/overview/observations";
+import {
+  EXT_SOURCE_LINE,
+  EXT_SOURCE_REGION,
+} from "@/lib/fhir-documents/shared";
 
 /**
  * Values the Klarbefund app sends into the patient's own record (#473
@@ -38,6 +42,10 @@ export interface IncomingRow {
   effective: string;
   category: string;
   sourceKind: string | null;
+  /** The line on the paper the value was read from, as the app printed it. */
+  sourceLine: string | null;
+  /** `page@x,y,w,h` of that line, so a document can point at it (#1171). */
+  sourceRegion: string | null;
   performer: string | null;
 }
 
@@ -101,9 +109,9 @@ export function parseReportBundle(
         return refuse("no date");
       }
       const range = obj(arr(r.referenceRange)[0]);
-      const source = arr(r.extension)
-        .map(obj)
-        .find((e) => e.url === SOURCE_KIND_EXTENSION);
+      const extensions = arr(r.extension).map(obj);
+      const extension = (url: string) => extensions.find((e) => e.url === url);
+      const source = extension(SOURCE_KIND_EXTENSION);
       rows.push({
         resourceId: `${ids.patientId}-${ids.reportId}-${index + 1}`,
         code: str(loinc.code)!,
@@ -118,6 +126,8 @@ export function parseReportBundle(
         category:
           str(obj(arr(obj(arr(r.category)[0]).coding)[0]).code) ?? "laboratory",
         sourceKind: str(source?.valueCode) ?? str(source?.valueString),
+        sourceLine: str(extension(EXT_SOURCE_LINE)?.valueString),
+        sourceRegion: str(extension(EXT_SOURCE_REGION)?.valueString),
         performer,
       });
     });
@@ -147,7 +157,8 @@ export async function storeReportRows(input: {
          o.unit = r.unit, o.referenceLow = r.low, o.referenceHigh = r.high,
          o.referenceText = r.rangeText, o.effectiveDate = r.effective,
          o.category = r.category, o.status = 'preliminary',
-         o.sourceKind = r.sourceKind, o.performer = r.performer,
+         o.sourceKind = r.sourceKind, o.sourceLine = r.sourceLine,
+         o.sourceRegion = r.sourceRegion, o.performer = r.performer,
          o.sourceReport = $reportId, o.contributedBy = 'klarbefund-app'
      MERGE (p)-[:HAS_OBSERVATION]->(o)
      RETURN count(o) AS stored`,

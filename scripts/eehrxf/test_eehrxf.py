@@ -46,6 +46,16 @@ class Filters(unittest.TestCase):
         self.assertTrue(validate.matches_filter(doc, "patient-summary-document"))
         self.assertFalse(validate.matches_filter(collection, "patient-summary-document"))
 
+    def test_lab_report_bundle_is_never_a_patient_summary(self):
+        def doc(code):
+            comp = {"resourceType": "Composition", "type": {"coding": [{"code": code}]}}
+            return {"resourceType": "Bundle", "type": "document", "entry": [{"resource": comp}]}
+
+        collection = {"resourceType": "Bundle", "type": "collection", "entry": [{"resource": {"resourceType": "Patient"}}]}
+        self.assertTrue(validate.matches_filter(doc("11502-2"), "laboratory-report-bundle"))
+        self.assertTrue(validate.matches_filter(collection, "laboratory-report-bundle"))
+        self.assertFalse(validate.matches_filter(doc("60591-5"), "laboratory-report-bundle"))
+
     def test_unknown_filter_is_an_error(self):
         with self.assertRaises(ValueError):
             validate.matches_filter({}, "radiology")

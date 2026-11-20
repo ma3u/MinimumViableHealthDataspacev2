@@ -302,6 +302,18 @@
       "methods": ["POST"]
     },
     {
+      "path": "/api/patient/documents/lab-report",
+      "methods": ["GET"]
+    },
+    {
+      "path": "/api/patient/documents/patient-summary",
+      "methods": ["GET"]
+    },
+    {
+      "path": "/api/patient/documents",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/patient/ehr-sync",
       "methods": ["POST"]
     },
@@ -1444,8 +1456,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 96,
-    "operations": 125
+    "paths": 99,
+    "operations": 128
   },
   "workflowJobs": {
     "test.yml": [
@@ -1499,12 +1511,12 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
-    "/docs/developer": "2026-11-17",
-    "/docs/developer/quality-gates": "2026-11-17",
-    "/docs/developer/api": "2026-11-18",
-    "/docs/developer/reference": "2026-11-18",
+    "/docs/developer": "2026-11-20",
+    "/docs/developer/quality-gates": "2026-11-20",
+    "/docs/developer/api": "2026-11-20",
+    "/docs/developer/reference": "2026-11-20",
     "/docs/developer/[slug]": "2026-11-19",
-    "/docs/architecture": "2026-11-17",
+    "/docs/architecture": "2026-11-20",
     "/docs/security": "2026-11-19",
     "/docs/security/[slug]": "2026-11-19",
     "/docs/klarbefund": "2026-11-19",

@@ -74,8 +74,8 @@
       "status": "partial",
       "totalResources": 2588,
       "profileCount": 7,
-      "tested": 41,
-      "passed": 31,
+      "tested": 46,
+      "passed": 36,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -87,9 +87,9 @@
           "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/bundle-eu-eps",
           "url": "https://hl7.eu/fhir/eps/1.0.0-ballot/StructureDefinition-bundle-eu-eps.html",
           "baseResource": "Bundle",
-          "coverage": "untested",
-          "tested": 0,
-          "passed": 0,
+          "coverage": "full",
+          "tested": 5,
+          "passed": 5,
           "failed": 0,
           "topIssues": [],
           "resourceCount": 0
@@ -282,8 +282,8 @@
       "status": "partial",
       "totalResources": 37880,
       "profileCount": 4,
-      "tested": 63,
-      "passed": 22,
+      "tested": 66,
+      "passed": 25,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -295,9 +295,9 @@
           "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Bundle-eu-lab.html",
           "baseResource": "Bundle",
-          "coverage": "none",
-          "tested": 9,
-          "passed": 0,
+          "coverage": "partial",
+          "tested": 12,
+          "passed": 3,
           "failed": 9,
           "topIssues": [
             "9x Bundle.type: Value is 'collection' but is fixed to 'document' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type",
@@ -429,11 +429,11 @@
   "summary": {
     "totalCategories": 6,
     "totalProfiles": 16,
-    "testedProfiles": 8,
-    "passingProfiles": 3,
-    "resourcesTested": 124,
-    "resourcesPassed": 82,
-    "passRatePercent": 66,
+    "testedProfiles": 9,
+    "passingProfiles": 4,
+    "resourcesTested": 132,
+    "resourcesPassed": 90,
+    "passRatePercent": 68,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -474,10 +474,11 @@
     ],
     "validatorUrl": "https://github.com/hapifhir/org.hl7.fhir.core/releases/tag/7.0.5",
     "sources": [
+      "documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients",
       "klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "b4fe326289e0644e"
+    "inputsDigest": "e1f299a84286fbf9"
   },
   "planned": [
     {

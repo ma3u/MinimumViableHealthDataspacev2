@@ -233,7 +233,8 @@
       "ig": "laboratory",
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
       "baseResource": "Bundle",
-      "categories": ["laboratory-results"]
+      "categories": ["laboratory-results"],
+      "sourceFilter": "laboratory-report-bundle"
     },
     {
       "profileId": "composition-hdr-eu",

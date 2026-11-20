@@ -1,0 +1,1029 @@
+{
+ "$comment": "Written by ui/scripts/export-fhir-document-samples.ts from the seeded graph (#1171); do not edit. Each sample's document is the file it names.",
+ "timestamp": "2026-11-20T09:00:00Z",
+ "samples": [
+  {
+   "file": "P1-patient-summary.json",
+   "kind": "patient-summary",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "P1",
+    "name": "Maria Schmidt",
+    "gender": "female",
+    "birthDate": "1979-03-15"
+   },
+   "input": {
+    "conditions": [
+     {
+      "id": "cond-p1-195967001",
+      "code": "195967001",
+      "system": "http://snomed.info/sct",
+      "display": "Asthma",
+      "clinicalStatus": "active",
+      "onset": "2009-02-27"
+     },
+     {
+      "id": "cond-p1-40055000",
+      "code": "40055000",
+      "system": "http://snomed.info/sct",
+      "display": "Chronic sinusitis",
+      "clinicalStatus": "active",
+      "onset": "2013-09-14"
+     },
+     {
+      "id": "cond-p1-38341003",
+      "code": "38341003",
+      "system": "http://snomed.info/sct",
+      "display": "Hypertension",
+      "clinicalStatus": "active",
+      "onset": "2015-11-02"
+     },
+     {
+      "id": "cond-p1-414916001",
+      "code": "414916001",
+      "system": "http://snomed.info/sct",
+      "display": "Obesity (BMI 31.2)",
+      "clinicalStatus": "active",
+      "onset": "2017-06-20"
+     },
+     {
+      "id": "cond-p1-44054006",
+      "code": "44054006",
+      "system": "http://snomed.info/sct",
+      "display": "Diabetes mellitus type 2",
+      "clinicalStatus": "active",
+      "onset": "2018-04-10"
+     },
+     {
+      "id": "cond-p1-73595000",
+      "code": "73595000",
+      "system": "http://snomed.info/sct",
+      "display": "Stress (finding)",
+      "clinicalStatus": "active",
+      "onset": "2020-01-15"
+     },
+     {
+      "id": "cond-p1-271825005",
+      "code": "271825005",
+      "system": "http://snomed.info/sct",
+      "display": "Respiratory distress",
+      "clinicalStatus": "active",
+      "onset": "2021-03-08"
+     }
+    ],
+    "medications": [
+     {
+      "id": "ms-p1-R03AC02",
+      "code": "R03AC02",
+      "system": "http://www.whocc.no/atc",
+      "display": "Salbutamol 100 mcg inhaler",
+      "status": "active",
+      "date": "2009-02-27",
+      "dosage": "as needed, at most 8 puffs a day",
+      "reason": "Asthma",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-p1-C09AA03",
+      "code": "C09AA03",
+      "system": "http://www.whocc.no/atc",
+      "display": "Lisinopril 10 mg",
+      "status": "active",
+      "date": "2015-11-02",
+      "dosage": "1-0-0",
+      "reason": "Hypertension",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-p1-A10BA02",
+      "code": "A10BA02",
+      "system": "http://www.whocc.no/atc",
+      "display": "Metformin 500 mg",
+      "status": "active",
+      "date": "2018-04-10",
+      "dosage": "1-0-1",
+      "reason": "Diabetes mellitus type 2",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-p1-C10AA05",
+      "code": "C10AA05",
+      "system": "http://www.whocc.no/atc",
+      "display": "Atorvastatin 20 mg",
+      "status": "active",
+      "date": "2024-09-12",
+      "dosage": "0-0-1",
+      "reason": "LDL cholesterol above target",
+      "kind": "statement"
+     },
+     {
+      "id": "med-p1-308460",
+      "code": "308460",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Salbutamol 100 mcg inhaler",
+      "status": "active",
+      "date": "2009-02-27",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p1-197361",
+      "code": "197361",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Lisinopril 10 mg oral tablet",
+      "status": "active",
+      "date": "2015-11-02",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p1-860975",
+      "code": "860975",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Metformin 500 mg oral tablet",
+      "status": "active",
+      "date": "2018-04-10",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p1-209459",
+      "code": "209459",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Atorvastatin 20 mg oral tablet",
+      "status": "active",
+      "date": "2024-09-12",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     }
+    ],
+    "immunizations": [
+     {
+      "id": "imm-p1-2019-05-06-115",
+      "code": "115",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Tdap",
+      "status": "completed",
+      "occurrence": "2019-05-06",
+      "lot": "TD19-2208",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-p1-2024-11-05-216",
+      "code": "216",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Pneumococcal conjugate vaccine 20 valent",
+      "status": "completed",
+      "occurrence": "2024-11-05",
+      "lot": "PCV20-4410",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-p1-2025-10-14-150",
+      "code": "150",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Influenza, injectable, quadrivalent, preservative free",
+      "status": "completed",
+      "occurrence": "2025-10-14",
+      "lot": "FLU25-7731",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-p1-2025-10-14-208",
+      "code": "208",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "COVID-19, mRNA, LNP-S, PF, 30 mcg/0.3 mL dose",
+      "status": "completed",
+      "occurrence": "2025-10-14",
+      "lot": "CV25-0192",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     }
+    ],
+    "procedures": []
+   }
+  },
+  {
+   "file": "P2-patient-summary.json",
+   "kind": "patient-summary",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "P2",
+    "name": "Jan de Vries",
+    "gender": "male",
+    "birthDate": "1965-06-02"
+   },
+   "input": {
+    "conditions": [
+     {
+      "id": "cond-p2-77176002",
+      "code": "77176002",
+      "system": "http://snomed.info/sct",
+      "display": "Smoker",
+      "clinicalStatus": "active",
+      "onset": "1985-01-01"
+     },
+     {
+      "id": "cond-p2-38341003",
+      "code": "38341003",
+      "system": "http://snomed.info/sct",
+      "display": "Hypertension",
+      "clinicalStatus": "active",
+      "onset": "2010-05-17"
+     },
+     {
+      "id": "cond-p2-13644009",
+      "code": "13644009",
+      "system": "http://snomed.info/sct",
+      "display": "Hypercholesterolaemia",
+      "clinicalStatus": "active",
+      "onset": "2014-07-09"
+     },
+     {
+      "id": "cond-p2-414916001",
+      "code": "414916001",
+      "system": "http://snomed.info/sct",
+      "display": "Obesity (BMI 33.8)",
+      "clinicalStatus": "active",
+      "onset": "2016-03-22"
+     },
+     {
+      "id": "cond-p2-73595000",
+      "code": "73595000",
+      "system": "http://snomed.info/sct",
+      "display": "Work-related stress",
+      "clinicalStatus": "active",
+      "onset": "2017-04-01"
+     },
+     {
+      "id": "cond-p2-13645005",
+      "code": "13645005",
+      "system": "http://snomed.info/sct",
+      "display": "Chronic obstructive pulmonary disease",
+      "clinicalStatus": "active",
+      "onset": "2018-10-05"
+     },
+     {
+      "id": "cond-p2-49436004",
+      "code": "49436004",
+      "system": "http://snomed.info/sct",
+      "display": "Atrial fibrillation",
+      "clinicalStatus": "active",
+      "onset": "2019-08-03"
+     },
+     {
+      "id": "cond-p2-53741008",
+      "code": "53741008",
+      "system": "http://snomed.info/sct",
+      "display": "Coronary artery disease",
+      "clinicalStatus": "active",
+      "onset": "2020-11-30"
+     },
+     {
+      "id": "cond-p2-73430006",
+      "code": "73430006",
+      "system": "http://snomed.info/sct",
+      "display": "Sleep apnea",
+      "clinicalStatus": "active",
+      "onset": "2021-06-18"
+     },
+     {
+      "id": "cond-p2-44054006",
+      "code": "44054006",
+      "system": "http://snomed.info/sct",
+      "display": "Type 2 diabetes mellitus",
+      "clinicalStatus": "active",
+      "onset": "2022-01-11"
+     },
+     {
+      "id": "cond-p2-90560007",
+      "code": "90560007",
+      "system": "http://snomed.info/sct",
+      "display": "Gout",
+      "clinicalStatus": "active",
+      "onset": "2022-09-27"
+     },
+     {
+      "id": "cond-p2-84114007",
+      "code": "84114007",
+      "system": "http://snomed.info/sct",
+      "display": "Heart failure (stage B)",
+      "clinicalStatus": "active",
+      "onset": "2023-02-14"
+     }
+    ],
+    "medications": [
+     {
+      "id": "med-p2-314077",
+      "code": "314077",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Lisinopril 20 mg oral tablet",
+      "status": "active",
+      "date": "2010-05-17",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p2-854905",
+      "code": "854905",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Bisoprolol 5 mg oral tablet",
+      "status": "active",
+      "date": "2019-08-03",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p2-855332",
+      "code": "855332",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Warfarin 5 mg oral tablet",
+      "status": "active",
+      "date": "2019-08-03",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p2-617311",
+      "code": "617311",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Atorvastatin 40 mg oral tablet",
+      "status": "active",
+      "date": "2020-11-30",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p2-861004",
+      "code": "861004",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Metformin 1000 mg oral tablet",
+      "status": "active",
+      "date": "2022-01-11",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p2-313988",
+      "code": "313988",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Furosemide 40 mg oral tablet",
+      "status": "active",
+      "date": "2023-02-14",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     }
+    ],
+    "immunizations": [],
+    "procedures": []
+   }
+  },
+  {
+   "file": "fhir-pat-1002-patient-summary.json",
+   "kind": "patient-summary",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "fhir-pat-1002",
+    "name": "Patient fhir-pat-1002",
+    "gender": "male",
+    "birthDate": "1958-11-03"
+   },
+   "input": {
+    "conditions": [
+     {
+      "id": "fhir-cond-3002",
+      "code": "38341003",
+      "system": null,
+      "display": "Essential hypertension",
+      "clinicalStatus": "active",
+      "onset": "2023-09-12T11:30:00Z"
+     }
+    ],
+    "medications": [
+     {
+      "id": "ms-1002-C09AA03",
+      "code": "C09AA03",
+      "system": "http://www.whocc.no/atc",
+      "display": "Lisinopril 10 mg",
+      "status": "active",
+      "date": "2023-10-01",
+      "dosage": "1-0-0",
+      "reason": "Hypertension",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-1002-B01AC06",
+      "code": "B01AC06",
+      "system": "http://www.whocc.no/atc",
+      "display": "Acetylsalicylic acid 100 mg",
+      "status": "active",
+      "date": "2025-11-18",
+      "dosage": "1-0-0",
+      "reason": "Cardiovascular prevention",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-1002-C07AB07",
+      "code": "C07AB07",
+      "system": "http://www.whocc.no/atc",
+      "display": "Bisoprolol 2.5 mg",
+      "status": "active",
+      "date": "2025-11-18",
+      "dosage": "1-0-0",
+      "reason": "Hypertension",
+      "kind": "statement"
+     },
+     {
+      "id": "fhir-med-5002",
+      "code": null,
+      "system": null,
+      "display": "Lisinopril 10mg",
+      "status": "active",
+      "date": "2023-10-01T09:00:00Z",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     }
+    ],
+    "immunizations": [
+     {
+      "id": "imm-1002-2016-08-30-113",
+      "code": "113",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Td (adult), 5 Lf tetanus toxoid, preservative free, adsorbed",
+      "status": "completed",
+      "occurrence": "2016-08-30",
+      "lot": "TD16-1190",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-1002-2023-10-10-33",
+      "code": "33",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Pneumococcal polysaccharide vaccine, 23 valent",
+      "status": "completed",
+      "occurrence": "2023-10-10",
+      "lot": "PPSV23-6615",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-1002-2024-03-12-187",
+      "code": "187",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Zoster vaccine recombinant",
+      "status": "completed",
+      "occurrence": "2024-03-12",
+      "lot": "RZV24-0377",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-1002-2025-10-21-150",
+      "code": "150",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Influenza, injectable, quadrivalent, preservative free",
+      "status": "completed",
+      "occurrence": "2025-10-21",
+      "lot": "FLU25-8102",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     }
+    ],
+    "procedures": []
+   }
+  },
+  {
+   "file": "patient-2000-patient-summary.json",
+   "kind": "patient-summary",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "patient-2000",
+    "name": "Hartmut Becker",
+    "gender": "male",
+    "birthDate": "2001-03-24"
+   },
+   "input": {
+    "conditions": [
+     {
+      "id": "cond-2000-40930008",
+      "code": "40930008",
+      "system": null,
+      "display": "Hypothyroidism",
+      "clinicalStatus": "active",
+      "onset": "2020-09-01"
+     }
+    ],
+    "medications": [
+     {
+      "id": "rx-2000-197381",
+      "code": "197381",
+      "system": null,
+      "display": "Levothyroxine 50 mcg Tab",
+      "status": "active",
+      "date": null,
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     }
+    ],
+    "immunizations": [],
+    "procedures": [
+     {
+      "id": "proc-2000-173160006",
+      "code": "173160006",
+      "system": null,
+      "display": "Diabetic Eye Screening",
+      "status": "completed",
+      "performed": "2024-06-20"
+     }
+    ]
+   }
+  },
+  {
+   "file": "P1-patient-summary-own-copy.json",
+   "kind": "patient-summary",
+   "identity": {
+    "kind": "pseudonymous",
+    "pseudonym": "Patient 0a1b2c3d"
+   },
+   "patient": {
+    "id": "P1",
+    "name": "Maria Schmidt",
+    "gender": "female",
+    "birthDate": "1979-03-15"
+   },
+   "input": {
+    "conditions": [
+     {
+      "id": "cond-p1-195967001",
+      "code": "195967001",
+      "system": "http://snomed.info/sct",
+      "display": "Asthma",
+      "clinicalStatus": "active",
+      "onset": "2009-02-27"
+     },
+     {
+      "id": "cond-p1-40055000",
+      "code": "40055000",
+      "system": "http://snomed.info/sct",
+      "display": "Chronic sinusitis",
+      "clinicalStatus": "active",
+      "onset": "2013-09-14"
+     },
+     {
+      "id": "cond-p1-38341003",
+      "code": "38341003",
+      "system": "http://snomed.info/sct",
+      "display": "Hypertension",
+      "clinicalStatus": "active",
+      "onset": "2015-11-02"
+     },
+     {
+      "id": "cond-p1-414916001",
+      "code": "414916001",
+      "system": "http://snomed.info/sct",
+      "display": "Obesity (BMI 31.2)",
+      "clinicalStatus": "active",
+      "onset": "2017-06-20"
+     },
+     {
+      "id": "cond-p1-44054006",
+      "code": "44054006",
+      "system": "http://snomed.info/sct",
+      "display": "Diabetes mellitus type 2",
+      "clinicalStatus": "active",
+      "onset": "2018-04-10"
+     },
+     {
+      "id": "cond-p1-73595000",
+      "code": "73595000",
+      "system": "http://snomed.info/sct",
+      "display": "Stress (finding)",
+      "clinicalStatus": "active",
+      "onset": "2020-01-15"
+     },
+     {
+      "id": "cond-p1-271825005",
+      "code": "271825005",
+      "system": "http://snomed.info/sct",
+      "display": "Respiratory distress",
+      "clinicalStatus": "active",
+      "onset": "2021-03-08"
+     }
+    ],
+    "medications": [
+     {
+      "id": "ms-p1-R03AC02",
+      "code": "R03AC02",
+      "system": "http://www.whocc.no/atc",
+      "display": "Salbutamol 100 mcg inhaler",
+      "status": "active",
+      "date": "2009-02-27",
+      "dosage": "as needed, at most 8 puffs a day",
+      "reason": "Asthma",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-p1-C09AA03",
+      "code": "C09AA03",
+      "system": "http://www.whocc.no/atc",
+      "display": "Lisinopril 10 mg",
+      "status": "active",
+      "date": "2015-11-02",
+      "dosage": "1-0-0",
+      "reason": "Hypertension",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-p1-A10BA02",
+      "code": "A10BA02",
+      "system": "http://www.whocc.no/atc",
+      "display": "Metformin 500 mg",
+      "status": "active",
+      "date": "2018-04-10",
+      "dosage": "1-0-1",
+      "reason": "Diabetes mellitus type 2",
+      "kind": "statement"
+     },
+     {
+      "id": "ms-p1-C10AA05",
+      "code": "C10AA05",
+      "system": "http://www.whocc.no/atc",
+      "display": "Atorvastatin 20 mg",
+      "status": "active",
+      "date": "2024-09-12",
+      "dosage": "0-0-1",
+      "reason": "LDL cholesterol above target",
+      "kind": "statement"
+     },
+     {
+      "id": "med-p1-308460",
+      "code": "308460",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Salbutamol 100 mcg inhaler",
+      "status": "active",
+      "date": "2009-02-27",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p1-197361",
+      "code": "197361",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Lisinopril 10 mg oral tablet",
+      "status": "active",
+      "date": "2015-11-02",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p1-860975",
+      "code": "860975",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Metformin 500 mg oral tablet",
+      "status": "active",
+      "date": "2018-04-10",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     },
+     {
+      "id": "med-p1-209459",
+      "code": "209459",
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "display": "Atorvastatin 20 mg oral tablet",
+      "status": "active",
+      "date": "2024-09-12",
+      "kind": "request",
+      "dosage": null,
+      "reason": null
+     }
+    ],
+    "immunizations": [
+     {
+      "id": "imm-p1-2019-05-06-115",
+      "code": "115",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Tdap",
+      "status": "completed",
+      "occurrence": "2019-05-06",
+      "lot": "TD19-2208",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-p1-2024-11-05-216",
+      "code": "216",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Pneumococcal conjugate vaccine 20 valent",
+      "status": "completed",
+      "occurrence": "2024-11-05",
+      "lot": "PCV20-4410",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-p1-2025-10-14-150",
+      "code": "150",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "Influenza, injectable, quadrivalent, preservative free",
+      "status": "completed",
+      "occurrence": "2025-10-14",
+      "lot": "FLU25-7731",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     },
+     {
+      "id": "imm-p1-2025-10-14-208",
+      "code": "208",
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "display": "COVID-19, mRNA, LNP-S, PF, 30 mcg/0.3 mL dose",
+      "status": "completed",
+      "occurrence": "2025-10-14",
+      "lot": "CV25-0192",
+      "performer": "Hausarztpraxis Musterstadt (fictional)"
+     }
+    ],
+    "procedures": []
+   }
+  },
+  {
+   "file": "P1-lab-report.json",
+   "kind": "lab-report",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "P1",
+    "name": "Maria Schmidt",
+    "gender": "female",
+    "birthDate": "1979-03-15"
+   },
+   "report": {
+    "reportId": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional",
+    "title": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)",
+    "effective": "2026-08-21T08:30:00Z",
+    "issued": null,
+    "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+    "conclusion": null,
+    "sourceReport": null,
+    "results": [
+     {
+      "id": "obs-p1-2089-1-2026-08-21",
+      "code": "2089-1",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma",
+      "value": 132,
+      "unit": "mg/dL",
+      "low": 0,
+      "high": 116,
+      "rangeText": "0 - 116 mg/dL (as printed on the report)",
+      "effective": "2026-08-21T08:30:00Z",
+      "status": "final",
+      "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p1-2093-3-2026-08-21",
+      "code": "2093-3",
+      "display": "Cholesterol [Mass/volume] in Serum or Plasma",
+      "value": 205,
+      "unit": "mg/dL",
+      "low": 0,
+      "high": 200,
+      "rangeText": "0 - 200 mg/dL (as printed on the report)",
+      "effective": "2026-08-21T08:30:00Z",
+      "status": "final",
+      "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p1-2339-0-2026-08-21",
+      "code": "2339-0",
+      "display": "Glucose [Mass/volume] in Blood",
+      "value": 142,
+      "unit": "mg/dL",
+      "low": 70,
+      "high": 99,
+      "rangeText": "70 - 99 mg/dL (as printed on the report)",
+      "effective": "2026-08-21T08:30:00Z",
+      "status": "final",
+      "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p1-33914-3-2026-08-21",
+      "code": "33914-3",
+      "display": "Glomerular filtration rate/1.73 sq M.predicted",
+      "value": 88,
+      "unit": "mL/min/{1.73_m2}",
+      "low": 90,
+      "high": null,
+      "rangeText": "> 90 mL/min/{1.73_m2} (as printed on the report)",
+      "effective": "2026-08-21T08:30:00Z",
+      "status": "final",
+      "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p1-4548-4-2026-08-21",
+      "code": "4548-4",
+      "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+      "value": 7.6,
+      "unit": "%",
+      "low": 4,
+      "high": 6,
+      "rangeText": "4.0 - 6.0 % (as printed on the report)",
+      "effective": "2026-08-21T08:30:00Z",
+      "status": "final",
+      "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     }
+    ]
+   }
+  },
+  {
+   "file": "P2-lab-report.json",
+   "kind": "lab-report",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "P2",
+    "name": "Jan de Vries",
+    "gender": "male",
+    "birthDate": "1965-06-02"
+   },
+   "report": {
+    "reportId": "lab-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic",
+    "title": "Laboratory report 2026-09-08, Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+    "effective": "2026-09-08T08:30:00Z",
+    "issued": null,
+    "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+    "conclusion": null,
+    "sourceReport": null,
+    "results": [
+     {
+      "id": "obs-p2-22748-8-2026-09-08",
+      "code": "22748-8",
+      "display": "Cholesterol in LDL [Moles/volume] in Serum or Plasma",
+      "value": 1.9,
+      "unit": "mmol/L",
+      "low": 0,
+      "high": 3,
+      "rangeText": "0 - 3.0 mmol/L (as printed on the report)",
+      "effective": "2026-09-08T08:30:00Z",
+      "status": "final",
+      "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p2-33762-6-2026-09-08",
+      "code": "33762-6",
+      "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma",
+      "value": 420,
+      "unit": "pg/mL",
+      "low": 0,
+      "high": 125,
+      "rangeText": "0 - 125 pg/mL (as printed on the report)",
+      "effective": "2026-09-08T08:30:00Z",
+      "status": "final",
+      "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p2-4548-4-2026-09-08",
+      "code": "4548-4",
+      "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+      "value": 6.6,
+      "unit": "%",
+      "low": 4,
+      "high": 6,
+      "rangeText": "4.0 - 6.0 % (as printed on the report)",
+      "effective": "2026-09-08T08:30:00Z",
+      "status": "final",
+      "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p2-62238-1-2026-09-08",
+      "code": "62238-1",
+      "display": "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI",
+      "value": 66,
+      "unit": "mL/min/{1.73_m2}",
+      "low": 90,
+      "high": null,
+      "rangeText": "> 90 mL/min/{1.73_m2} (as printed on the report)",
+      "effective": "2026-09-08T08:30:00Z",
+      "status": "final",
+      "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     },
+     {
+      "id": "obs-p2-6301-6-2026-09-08",
+      "code": "6301-6",
+      "display": "INR in Platelet poor plasma by Coagulation assay",
+      "value": 2.8,
+      "unit": "{INR}",
+      "low": 0.8,
+      "high": 1.2,
+      "rangeText": "0.8 - 1.2 {INR} (as printed on the report)",
+      "effective": "2026-09-08T08:30:00Z",
+      "status": "final",
+      "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+      "sourceKind": null,
+      "sourceLine": null,
+      "sourceRegion": null
+     }
+    ]
+   }
+  },
+  {
+   "file": "sandbox-klarbefund-lab-report.json",
+   "kind": "lab-report",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "sandbox-demo",
+    "name": "Klarbefund sandbox (fictional)",
+    "gender": "female",
+    "birthDate": "1984-05-17"
+   },
+   "report": {
+    "reportId": "klarbefund-0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19",
+    "title": "Laboratory report 2026-06-02, Praxislabor Musterstadt (fictional)",
+    "effective": "2026-06-02",
+    "issued": null,
+    "performer": "Praxislabor Musterstadt (fictional)",
+    "conclusion": null,
+    "sourceReport": "0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19",
+    "results": [
+     {
+      "id": "sandbox-demo-0d3c6a52-1",
+      "code": "4548-4",
+      "display": "HbA1c",
+      "value": 5.6,
+      "unit": "%",
+      "low": 4,
+      "high": 6,
+      "rangeText": "4,0 - 6,0",
+      "effective": "2026-06-02",
+      "status": "preliminary",
+      "performer": "Praxislabor Musterstadt (fictional)",
+      "sourceKind": "ocr-transcribed",
+      "sourceLine": "HbA1c 5,6 % 4,0 - 6,0",
+      "sourceRegion": "1@0.08,0.41,0.84,0.02"
+     },
+     {
+      "id": "sandbox-demo-0d3c6a52-2",
+      "code": "2093-3",
+      "display": "Cholesterin gesamt",
+      "value": 212,
+      "unit": "mg/dL",
+      "low": null,
+      "high": 200,
+      "rangeText": "< 200",
+      "effective": "2026-06-02",
+      "status": "preliminary",
+      "performer": "Praxislabor Musterstadt (fictional)",
+      "sourceKind": "ocr-transcribed",
+      "sourceLine": "Cholesterin gesamt 212 mg/dl < 200",
+      "sourceRegion": "1@0.08,0.44,0.84,0.02"
+     }
+    ]
+   }
+  }
+ ]
+}

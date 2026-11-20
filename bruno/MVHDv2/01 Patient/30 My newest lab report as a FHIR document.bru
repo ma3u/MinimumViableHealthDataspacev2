@@ -1,0 +1,43 @@
+meta {
+  name: 30 My newest lab report as a FHIR document
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/api/patient/documents/lab-report?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.type: eq document
+  res.body.entry[0].resource.resourceType: eq Composition
+}
+
+tests {
+  // HL7 Europe Laboratory Report 2.1.0 (#1171): one DiagnosticReport, its
+  // Observations, each naming the laboratory that performed it.
+  const types = res.body.entry.map((e) => e.resource.resourceType);
+  test("one DiagnosticReport", () => {
+    expect(types.filter((t) => t === "DiagnosticReport").length).to.equal(1);
+  });
+  test("every result names its performer", () => {
+    res.body.entry
+      .filter((e) => e.resource.resourceType === "Observation")
+      .forEach((e) => expect(e.resource.performer.length).to.be.greaterThan(0));
+  });
+  test("a Provenance says where the values come from", () => {
+    expect(types).to.include("Provenance");
+  });
+}
+
+docs {
+  EHDS Art. 14(1)(e): the newest laboratory report of the record as a FHIR
+  document. /api/patient/documents lists the others with their reportId.
+}
