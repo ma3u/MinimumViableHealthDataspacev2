@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # =============================================================================
-# Bake the IG packages into the Matchbox image (ADR-095, #1174)
+# Bake the IG packages into the Matchbox image (ADR-097, #1174)
 # =============================================================================
 #   bake.sh          the image build's step: start Matchbox, let it install
 #                    every IG, check each one, stop it

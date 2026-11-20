@@ -43,7 +43,7 @@ The logic is `scripts/azure/offhours.sh`; the stop and start of single apps
 go through `scripts/azure/set-app-power.sh`. Apps that exist only once their
 own phase has run are left out until then: the CFM apps (`20-cfm-fork.sh`),
 Trustee (`21-aci-confidential-spe.sh`) and Matchbox (`22-matchbox.sh`,
-ADR-095), which starts first among the core apps, before the proxy that
+ADR-097), which starts first among the core apps, before the proxy that
 calls it, and stops after it.
 
 **Local development is not affected.** `docker compose` and `npm run dev` know

@@ -113,7 +113,7 @@ jobs:
             --push ./services/neo4j-proxy
 
       # Matchbox, the validator behind the proxy's $validate, with its IG
-      # packages baked in (ADR-095). Tagged with the git tree hash of
+      # packages baked in (ADR-097). Tagged with the git tree hash of
       # services/matchbox, so it is built only on a merge that changes the
       # Dockerfile, the bake script or the generated application.yaml: the
       # bake fetches the packages from the FHIR package servers and takes
@@ -202,14 +202,14 @@ jobs:
 
       # Moves an existing mvhd-matchbox to the image above. Creating it and
       # pointing the proxy at it is scripts/azure/22-matchbox.sh, run by the
-      # workflow matchbox.yml (ADR-095); until then the proxy's $validate
+      # workflow matchbox.yml (ADR-097); until then the proxy's $validate
       # answers 503 and the deploy goes on.
       - name: Deploy Matchbox
         env:
           IMAGE: ${{ env.ACR_LOGIN_SERVER }}/mvhd-matchbox:${{ steps.matchbox.outputs.tag }}
         run: |
           if ! az containerapp show -n mvhd-matchbox -g ${{ env.RESOURCE_GROUP }} -o none 2>/dev/null; then
-            echo "::warning::mvhd-matchbox does not exist yet (workflow matchbox.yml, scripts/azure/22-matchbox.sh, ADR-095)"
+            echo "::warning::mvhd-matchbox does not exist yet (workflow matchbox.yml, scripts/azure/22-matchbox.sh, ADR-097)"
             exit 0
           fi
           current=$(az containerapp show -n mvhd-matchbox -g ${{ env.RESOURCE_GROUP }} \

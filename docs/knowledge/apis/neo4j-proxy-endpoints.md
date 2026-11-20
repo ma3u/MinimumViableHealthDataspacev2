@@ -24,7 +24,7 @@ and left out of `self`, or 400 under `Prefer: handling=strict`) ·
 `GET /fhir/{Patient|Observation}/{id}` (dataspace pull only, 401 otherwise) ·
 `POST /fhir/$validate`, `POST /fhir/{type}/$validate` (forwarded to Matchbox,
 `MATCHBOX_URL`: `docker-compose.matchbox.yml` locally, the Container App
-`mvhd-matchbox` on Azure, ADR-095; 503 without it).
+`mvhd-matchbox` on Azure, ADR-097; 503 without it).
 Errors under `/fhir` are OperationOutcomes. Details: `services/neo4j-proxy/README.md`.
 
 `POST /trust-center/resolve`, `DELETE /trust-center/revoke/:rpsn` and `GET /trust-center/audit` take a Keycloak

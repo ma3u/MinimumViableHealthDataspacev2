@@ -129,7 +129,7 @@ export interface ValidateResult {
  * from our own or Synthea's domain is allowed and one from any other domain
  * stays an error. Matchbox v4.1.21 reads the domains only from the request:
  * the `extensions` of its application.yaml never reaches a $validate
- * (ADR-095, scripts/eehrxf/build.py).
+ * (ADR-097, scripts/eehrxf/build.py).
  */
 export function matchboxValidateUrl(base: string, profile: string): string {
   const query = [`profile=${encodeURIComponent(profile)}`];

@@ -1,5 +1,5 @@
 # =============================================================================
-# Matchbox with the IG packages baked in (ADR-095, #1174)
+# Matchbox with the IG packages baked in (ADR-097, #1174)
 # =============================================================================
 # The validator behind the neo4j-proxy's POST /fhir/$validate: Matchbox
 # (ahdis, the HL7 Java validator as a FHIR server), configured by
@@ -11,7 +11,7 @@
 # and its dependencies from the FHIR package servers into its H2 database
 # under /database, and stops it. A container from this image starts from that
 # database and fetches nothing: no network to packages.fhir.org at start, and
-# about a minute instead of four and a half (measured, ADR-095). A new IG or
+# about a minute instead of four and a half (measured, ADR-097). A new IG or
 # version in profiles.json is a new image; build.py --check keeps
 # application.yaml current.
 #

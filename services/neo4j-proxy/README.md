@@ -59,7 +59,7 @@ disagree.
   patient data and write none.
 - **Errors** under `/fhir` are `OperationOutcome`s.
 - **`$validate`** is forwarded to Matchbox (`MATCHBOX_URL`), the image in
-  `services/matchbox` with its IG packages baked in (ADR-095). Its config
+  `services/matchbox` with its IG packages baked in (ADR-097). Its config
   comes from `scripts/eehrxf/profiles.json` through `scripts/eehrxf/build.py`.
   Without `MATCHBOX_URL`, `$validate` is 503 and `/metadata` does not list it.
 

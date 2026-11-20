@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # =============================================================================
-# Phase 22: mvhd-matchbox, the FHIR validator behind the proxy's $validate (ADR-095)
+# Phase 22: mvhd-matchbox, the FHIR validator behind the proxy's $validate (ADR-097)
 # =============================================================================
 #   22-matchbox.sh                 create or update mvhd-matchbox, then point
 #                                  mvhd-neo4j-proxy at it (idempotent)
@@ -9,7 +9,7 @@ set -euo pipefail
 #                                  $validate answers 503, the app stays
 #   22-matchbox.sh --check         report, change nothing
 #
-# Decided in ADR-095 (discussion #1169, #1174, #1173):
+# Decided in ADR-097 (discussion #1169, #1174, #1173):
 #   - Matchbox v4.1.21 with the IG packages baked into the image
 #     (services/matchbox): a start fetches nothing from packages.fhir.org;
 #   - internal ingress only. The proxy reaches it as
@@ -105,7 +105,7 @@ chmod 600 "$SPEC"
 # inside the environment; a redirect to HTTPS would turn that POST into a GET.
 cat >"$SPEC" <<YAML
 location: ${LOCATION}
-tags: {project: mvhd, adr: ADR-095}
+tags: {project: mvhd, adr: ADR-097}
 properties:
   environmentId: ${ENV_ID}
   configuration:

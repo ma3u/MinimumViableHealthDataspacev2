@@ -1,5 +1,5 @@
 # =============================================================================
-# Matchbox: the validator behind the FHIR facade's $validate (#1174, ADR-095)
+# Matchbox: the validator behind the FHIR facade's $validate (#1174, ADR-097)
 # =============================================================================
 # On top of the JAD stack (the neo4j-proxy is defined in docker-compose.jad.yml):
 #   docker compose -f docker-compose.yml -f docker-compose.jad.yml \

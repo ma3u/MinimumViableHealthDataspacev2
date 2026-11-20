@@ -141,7 +141,7 @@ cd MinimumViableHealthDataspacev2
 | **Issuer Service**    | `mvhd-issuerservice.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io` | 10013 | HTTP     |
 | **Tenant Manager**    | `mvhd-tenant-mgr.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`    | 8080  | HTTP     |
 | **Provision Manager** | `mvhd-provision-mgr.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io` | 8080  | HTTP     |
-| **Matchbox**          | `http://mvhd-matchbox/matchboxv3/fhir` (short app name; ADR-095)                    | 8080  | HTTP     |
+| **Matchbox**          | `http://mvhd-matchbox/matchboxv3/fhir` (short app name; ADR-097)                    | 8080  | HTTP     |
 
 Neo4j is the exception in that table: it has TCP ingress with `targetPort` and
 `exposedPort` 7687 and no `additionalPortMappings`, so there is no HTTP endpoint
@@ -295,7 +295,7 @@ rehearsal. On the hub they are what the live apps carry beyond 4.2:
 - The SPE workspaces and Trustee: `21-aci-confidential-spe.sh` (ADR-068,
   ADR-069).
 - The FHIR validator behind the proxy's `$validate`: `22-matchbox.sh`, run
-  by the workflow `matchbox.yml` (ADR-095), once `deploy-azure.yml` has
+  by the workflow `matchbox.yml` (ADR-097), once `deploy-azure.yml` has
   pushed `mvhd-matchbox:<tree hash>`.
 - Custom domains, on the hub only: `06-post-deploy.sh` with `CUSTOM_DOMAIN`
   set binds `ehds.mabu.red` (DNS records at the registrar), and the
