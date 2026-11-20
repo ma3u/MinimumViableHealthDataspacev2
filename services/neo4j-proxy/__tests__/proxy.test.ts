@@ -127,9 +127,15 @@ describe("Neo4j Proxy API", () => {
       expect(res.body.type).toBe("searchset");
       expect(res.body.total).toBe(2);
       expect(res.body.entry).toHaveLength(2);
-      expect(res.body.entry[0].fullUrl).toBe("Patient/pat-001");
+      // R4 Bundle.entry.fullUrl is absolute, under the facade's base (#1144).
+      expect(res.body.entry[0].fullUrl).toMatch(
+        /^http:\/\/[^/]+\/fhir\/Patient\/pat-001$/,
+      );
       expect(res.body.entry[0].resource.resourceType).toBe("Patient");
-      expect(res.body.entry[0].resource.firstName).toBe("Alice");
+      expect(res.body.entry[0].resource.name).toEqual([
+        { text: "Alice Smith", family: "Smith", given: ["Alice"] },
+      ]);
+      expect(res.body.entry[0].resource).not.toHaveProperty("firstName");
     });
 
     it("should support _count query parameter", async () => {

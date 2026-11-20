@@ -102,6 +102,33 @@ describe("bundleToRecords", () => {
     ]);
   });
 
+  it("names a prescription and a vaccination by the code element R4 gives them", () => {
+    const { records } = bundleToRecords("tp-1", {
+      resourceType: "Bundle",
+      type: "searchset",
+      entry: [
+        {
+          resource: {
+            resourceType: "MedicationRequest",
+            id: "m1",
+            medicationCodeableConcept: { text: "Metformin 500 mg" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "Immunization",
+            id: "i1",
+            vaccineCode: { coding: [{ code: "208" }] },
+          },
+        },
+      ],
+    });
+    expect(records.map((r) => r.name)).toEqual([
+      "MedicationRequest: Metformin 500 mg",
+      "Immunization: 208",
+    ]);
+  });
+
   it("refuses data that is not a FHIR Bundle", () => {
     expect(() => bundleToRecords("tp-1", { datasets: [] })).toThrow(
       /Only a FHIR Bundle/,
@@ -504,6 +531,33 @@ describe("recordFacts", () => {
       display: "HbA1c",
       valueQuantity: 8.1,
       valueUnit: "%",
+    });
+  });
+
+  it("reads an R4 resource's code and value out of their structures", () => {
+    const facts = recordFacts(
+      "Observation",
+      "tp-1/Observation/o1",
+      JSON.stringify({
+        resourceType: "Observation",
+        id: "o1",
+        status: "final",
+        code: {
+          coding: [{ system: "http://loinc.org", code: "4548-4" }],
+          text: "HbA1c",
+        },
+        valueQuantity: { value: 8.1, unit: "%", code: "%" },
+        effectiveDateTime: "2023-06-15T10:15:00Z",
+      }),
+    );
+    expect(facts).toEqual({
+      resourceType: "Observation",
+      resourceId: "o1",
+      code: "4548-4",
+      display: "HbA1c",
+      value: "8.1 %",
+      status: "final",
+      effectiveDateTime: "2023-06-15T10:15:00Z",
     });
   });
 

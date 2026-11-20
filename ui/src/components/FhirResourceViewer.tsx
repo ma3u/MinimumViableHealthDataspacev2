@@ -112,11 +112,17 @@ const DEFAULT_META = {
 function getResourceDisplayName(r: FhirResource): string {
   const rt = r.resourceType;
   if (rt === "Patient") {
-    const names = r.name as Array<{ given?: string[]; family?: string }>;
+    const names = r.name as Array<{
+      given?: string[];
+      family?: string;
+      text?: string;
+    }>;
     if (names?.[0]) {
-      return `${(names[0].given ?? []).join(" ")} ${
+      // The hub's facade writes the name as text (neo4j-proxy fhir-resource.ts).
+      const parts = `${(names[0].given ?? []).join(" ")} ${
         names[0].family ?? ""
       }`.trim();
+      if (parts || names[0].text) return parts || names[0].text!;
     }
   }
   if (rt === "Condition" || rt === "Procedure") {

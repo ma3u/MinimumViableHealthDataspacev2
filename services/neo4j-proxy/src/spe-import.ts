@@ -47,7 +47,9 @@ export class ImportShapeError extends Error {}
 
 /** What a person reads on a record's node. */
 function displayName(r: Record<string, unknown>, id: string): string {
-  const code = r.code as
+  // A prescription, a medication plan entry and a vaccination carry their
+  // code in an element of their own (R4), not in `code`.
+  const code = (r.code ?? r.medicationCodeableConcept ?? r.vaccineCode) as
     | { text?: string; coding?: Array<{ display?: string; code?: string }> }
     | undefined;
   const coded =
@@ -374,6 +376,22 @@ export function recordFacts(
       out[k] = v;
       n++;
     }
+  }
+  // An R4 resource holds its code and value in structures (#1144): their
+  // plain reading, where the record has no plain value of that name.
+  const coded = (parsed.code ??
+    parsed.medicationCodeableConcept ??
+    parsed.vaccineCode) as
+    | { text?: unknown; coding?: Array<{ code?: unknown }> }
+    | undefined;
+  const code = coded?.coding?.[0]?.code;
+  if (typeof code === "string" && !("code" in out)) out.code = code;
+  if (typeof coded?.text === "string" && !("display" in out)) {
+    out.display = coded.text;
+  }
+  const q = parsed.valueQuantity as { value?: unknown; unit?: unknown };
+  if (q && typeof q === "object" && typeof q.value === "number") {
+    out.value = typeof q.unit === "string" ? `${q.value} ${q.unit}` : q.value;
   }
   return out;
 }

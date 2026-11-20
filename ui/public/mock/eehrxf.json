@@ -42,8 +42,8 @@
       "status": "available",
       "totalResources": 3895,
       "profileCount": 1,
-      "tested": 20,
-      "passed": 20,
+      "tested": 31,
+      "passed": 31,
       "profiles": [
         {
           "profileId": "medication-request-eu",
@@ -56,8 +56,8 @@
           "url": "https://hl7.eu/fhir/mpd/StructureDefinition-MedicationRequest-eu-mpd.html",
           "baseResource": "MedicationRequest",
           "coverage": "full",
-          "tested": 20,
-          "passed": 20,
+          "tested": 31,
+          "passed": 31,
           "failed": 0,
           "topIssues": [],
           "resourceCount": 3895
@@ -74,8 +74,8 @@
       "status": "partial",
       "totalResources": 2588,
       "profileCount": 7,
-      "tested": 56,
-      "passed": 46,
+      "tested": 76,
+      "passed": 66,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -122,8 +122,8 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-condition-eu-core.html",
           "baseResource": "Condition",
           "coverage": "full",
-          "tested": 20,
-          "passed": 20,
+          "tested": 32,
+          "passed": 32,
           "failed": 0,
           "topIssues": [],
           "resourceCount": 2421
@@ -156,8 +156,8 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
           "coverage": "partial",
-          "tested": 21,
-          "passed": 11,
+          "tested": 29,
+          "passed": 19,
           "failed": 10,
           "topIssues": [
             "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
@@ -212,8 +212,8 @@
       "status": "partial",
       "totalResources": 5628,
       "profileCount": 3,
-      "tested": 41,
-      "passed": 31,
+      "tested": 60,
+      "passed": 50,
       "profiles": [
         {
           "profileId": "composition-hdr-eu",
@@ -243,8 +243,8 @@
           "url": "https://hl7.eu/fhir/hdr/StructureDefinition-encounter-eu-hdr.html",
           "baseResource": "Encounter",
           "coverage": "full",
-          "tested": 20,
-          "passed": 20,
+          "tested": 31,
+          "passed": 31,
           "failed": 0,
           "topIssues": [],
           "resourceCount": 5461
@@ -260,8 +260,8 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
           "coverage": "partial",
-          "tested": 21,
-          "passed": 11,
+          "tested": 29,
+          "passed": 19,
           "failed": 10,
           "topIssues": [
             "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
@@ -282,8 +282,8 @@
       "status": "partial",
       "totalResources": 37880,
       "profileCount": 4,
-      "tested": 66,
-      "passed": 25,
+      "tested": 80,
+      "passed": 39,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -339,8 +339,8 @@
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Observation-resultslab-eu-lab.html",
           "baseResource": "Observation",
           "coverage": "partial",
-          "tested": 31,
-          "passed": 11,
+          "tested": 37,
+          "passed": 17,
           "failed": 20,
           "topIssues": [
             "20x Observation: Observation.performer: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab|2.1.0)"
@@ -358,8 +358,8 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
           "coverage": "partial",
-          "tested": 21,
-          "passed": 11,
+          "tested": 29,
+          "passed": 19,
           "failed": 10,
           "topIssues": [
             "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
@@ -380,7 +380,7 @@
       "status": "none",
       "totalResources": 0,
       "profileCount": 2,
-      "tested": 1,
+      "tested": 3,
       "passed": 0,
       "profiles": [
         {
@@ -394,15 +394,15 @@
           "url": "https://hl7.eu/fhir/imaging/1.0.0-ballot/en/StructureDefinition-DiagnosticReportEuImaging.html",
           "baseResource": "DiagnosticReport",
           "coverage": "none",
-          "tested": 1,
+          "tested": 3,
           "passed": 0,
-          "failed": 1,
+          "failed": 3,
           "topIssues": [
-            "1x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-            "1x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-            "1x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-            "1x DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t",
-            "1x DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+            "3x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+            "3x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+            "3x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+            "3x DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t",
+            "3x DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
           ],
           "resourceCount": 0
         },
@@ -431,9 +431,9 @@
     "totalProfiles": 16,
     "testedProfiles": 10,
     "passingProfiles": 5,
-    "resourcesTested": 142,
-    "resourcesPassed": 100,
-    "passRatePercent": 70,
+    "resourcesTested": 192,
+    "resourcesPassed": 148,
+    "passRatePercent": 77,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -475,10 +475,11 @@
     "validatorUrl": "https://github.com/hapifhir/org.hl7.fhir.core/releases/tag/7.0.5",
     "sources": [
       "documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients",
+      "facade: Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows",
       "klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "f188dd2ba3db7c73"
+    "inputsDigest": "678b81ee0780edbd"
   },
   "planned": [
     {

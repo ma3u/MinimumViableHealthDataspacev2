@@ -188,6 +188,24 @@ class LabBundleFilter(unittest.TestCase):
         )
 
 
+class FacadeSource(unittest.TestCase):
+    """#1144: what the neo4j-proxy FHIR facade serves is a source of its own."""
+
+    def test_each_entry_of_the_facade_sample_is_a_resource_to_validate(self):
+        facade = validate.collect_sources()["facade"]
+        self.assertEqual(facade["files"], [validate.FACADE_SAMPLE])
+        sample = json.loads((validate.ROOT / validate.FACADE_SAMPLE).read_text(encoding="utf-8"))
+        self.assertEqual(len(facade["resources"]), len(sample["entry"]))
+        origin, resource = facade["resources"][0]
+        self.assertEqual(origin, "facade-sample.json#entry[0]")
+        self.assertEqual(resource, sample["entry"][0]["resource"])
+
+    def test_a_missing_sample_is_an_empty_source(self):
+        empty = validate.collect_entries("scripts/eehrxf/samples/no-such-sample.json", "none")
+        self.assertEqual(empty["files"], [])
+        self.assertEqual(empty["resources"], [])
+
+
 class ReportOnly(unittest.TestCase):
     """#1172: draft and ballot guides report, every other guide gates."""
 

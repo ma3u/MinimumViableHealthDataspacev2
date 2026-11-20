@@ -1,0 +1,1310 @@
+{
+  "$comment": "Graph rows of fictional and synthetic patients, read by services/neo4j-proxy/scripts/export-fhir-facade-samples.ts; facade-sample.json is what the facade's mapper makes of them. The last two patients are written by hand: one in the shape scripts/load_fhir_neo4j.py writes, one as sparse as a node can be.",
+  "patients": [
+    {
+      "patient": {
+        "birthDate": "1979-03-15",
+        "city": "Berlin",
+        "country": "DE",
+        "demo": true,
+        "ehrSyncedAt": "2026-09-22T18:05:00Z",
+        "ehrSyncSource": "ePA transfer, GesundheitsID-authenticated",
+        "fictional": true,
+        "gender": "female",
+        "id": "P1",
+        "interests": [
+          "cardiology",
+          "sleep"
+        ],
+        "interestsChosenAt": "2026-11-19T16:25:33.946000000Z",
+        "name": "Maria Schmidt",
+        "resourceId": "P1"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2025-03-14T09:00:00Z",
+            "display": "Check-up, AlphaKlinik Berlin (fictional)",
+            "fictional": true,
+            "name": "Yearly check-up 2025",
+            "period": "2025-03-14",
+            "resourceId": "checkup-p1-2025-03-14",
+            "serviceProvider": "AlphaKlinik Berlin",
+            "status": "finished",
+            "type": "Encounter for check up",
+            "typeCode": "185349003",
+            "typeSystem": "http://snomed.info/sct"
+          }
+        },
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2024-09-12T08:00:00Z",
+            "display": "Laboratory visit, AlphaKlinik Berlin (fictional)",
+            "fictional": true,
+            "name": "Laboratory visit 1 of 6",
+            "period": "2024-09-12",
+            "resourceId": "enc-p1-2024-09-12",
+            "serviceProvider": "AlphaKlinik Berlin",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "195967001",
+            "codeSystem": "http://snomed.info/sct",
+            "display": "Asthma",
+            "fictional": true,
+            "name": "Asthma",
+            "onsetDate": "2009-02-27",
+            "resourceId": "cond-p1-195967001"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "271825005",
+            "codeSystem": "http://snomed.info/sct",
+            "display": "Respiratory distress",
+            "fictional": true,
+            "name": "Respiratory distress",
+            "onsetDate": "2021-03-08",
+            "resourceId": "cond-p1-271825005"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "activity",
+            "code": "55411-3",
+            "codeSystem": "http://loinc.org",
+            "display": "Exercise duration",
+            "effectiveDate": "2025-01-05",
+            "effectiveStart": "2024-12-30",
+            "fictional": true,
+            "name": "Exercise duration 18 min/d (weekly mean)",
+            "performer": "Fictional fitness tracker",
+            "resourceId": "act-p1-2025-01-05",
+            "sourceKind": "device-weekly-mean",
+            "status": "final",
+            "unit": "min/d",
+            "value": 18,
+            "valueQuantity": 18,
+            "valueUnit": "min/d"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "activity",
+            "code": "55411-3",
+            "codeSystem": "http://loinc.org",
+            "display": "Exercise duration",
+            "effectiveDate": "2025-01-12",
+            "effectiveStart": "2025-01-06",
+            "fictional": true,
+            "name": "Exercise duration 22 min/d (weekly mean)",
+            "performer": "Fictional fitness tracker",
+            "resourceId": "act-p1-2025-01-12",
+            "sourceKind": "device-weekly-mean",
+            "status": "final",
+            "unit": "min/d",
+            "value": 22,
+            "valueQuantity": 22,
+            "valueUnit": "min/d"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "procedure",
+            "code": "8625-6",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2026-03-04T10:00:00Z",
+            "display": "P-R Interval",
+            "effectiveDate": "2026-03-04",
+            "fictional": true,
+            "name": "P-R Interval 158 ms",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "referenceHigh": 200,
+            "referenceLow": 120,
+            "referenceText": "120 - 200 ms",
+            "resourceId": "dr-ecg-p1-2026-03-04-8625-6",
+            "status": "final",
+            "unit": "ms",
+            "value": 158,
+            "valueQuantity": 158,
+            "valueUnit": "ms"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "procedure",
+            "code": "8632-2",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2026-03-04T10:00:00Z",
+            "display": "QRS axis",
+            "effectiveDate": "2026-03-04",
+            "fictional": true,
+            "name": "QRS axis 45 deg",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "referenceHigh": 90,
+            "referenceLow": -30,
+            "referenceText": "-30 - 90 deg",
+            "resourceId": "dr-ecg-p1-2026-03-04-8632-2",
+            "status": "final",
+            "unit": "deg",
+            "value": 45,
+            "valueQuantity": 45,
+            "valueUnit": "deg"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "vital-signs",
+            "code": "8867-4",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2026-03-04T10:00:00Z",
+            "display": "Heart rate",
+            "effectiveDate": "2026-03-04",
+            "fictional": true,
+            "name": "Heart rate 72 /min",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "referenceHigh": 100,
+            "referenceLow": 60,
+            "referenceText": "60 - 100 /min",
+            "resourceId": "dr-ecg-p1-2026-03-04-8867-4",
+            "status": "final",
+            "unit": "/min",
+            "value": 72,
+            "valueQuantity": 72,
+            "valueUnit": "/min"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "laboratory",
+            "code": "2089-1",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2024-09-12T08:30:00Z",
+            "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma",
+            "effectiveDate": "2024-09-12",
+            "fictional": true,
+            "name": "Cholesterol in LDL [Mass/volume] in Serum or Plasma 158 mg/dL",
+            "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+            "referenceHigh": 116,
+            "referenceLow": 0,
+            "referenceText": "0 - 116 mg/dL (as printed on the report)",
+            "resourceId": "obs-p1-2089-1-2024-09-12",
+            "status": "final",
+            "unit": "mg/dL",
+            "value": 158,
+            "valueQuantity": 158,
+            "valueUnit": "mg/dL"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "laboratory",
+            "code": "2089-1",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-01-20T08:30:00Z",
+            "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma",
+            "effectiveDate": "2025-01-20",
+            "fictional": true,
+            "name": "Cholesterol in LDL [Mass/volume] in Serum or Plasma 149 mg/dL",
+            "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+            "referenceHigh": 116,
+            "referenceLow": 0,
+            "referenceText": "0 - 116 mg/dL (as printed on the report)",
+            "resourceId": "obs-p1-2089-1-2025-01-20",
+            "status": "final",
+            "unit": "mg/dL",
+            "value": 149,
+            "valueQuantity": 149,
+            "valueUnit": "mg/dL"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "vital-signs",
+            "code": "39156-5",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2024-09-12T08:30:00Z",
+            "display": "Body mass index (BMI) [Ratio]",
+            "effectiveDate": "2024-09-12",
+            "fictional": true,
+            "name": "Body mass index (BMI) [Ratio] 30.4 kg/m2",
+            "performer": "AlphaKlinik Berlin, Zentrallabor (fictional)",
+            "referenceHigh": 25,
+            "referenceLow": 18.5,
+            "referenceText": "18.5 - 25.0 kg/m2 (as printed on the report)",
+            "resourceId": "obs-p1-39156-5-2024-09-12",
+            "status": "final",
+            "unit": "kg/m2",
+            "value": 30.4,
+            "valueQuantity": 30.4,
+            "valueUnit": "kg/m2"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "197361",
+            "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "date": "2015-11-02",
+            "display": "Lisinopril 10 mg oral tablet",
+            "fictional": true,
+            "intent": "order",
+            "medicationCode": "197361",
+            "name": "Lisinopril 10 mg oral tablet",
+            "resourceId": "med-p1-197361",
+            "status": "active"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "209459",
+            "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "date": "2024-09-12",
+            "display": "Atorvastatin 20 mg oral tablet",
+            "fictional": true,
+            "intent": "order",
+            "medicationCode": "209459",
+            "name": "Atorvastatin 20 mg oral tablet",
+            "resourceId": "med-p1-209459",
+            "status": "active"
+          }
+        },
+        {
+          "type": "DiagnosticReport",
+          "properties": {
+            "category": "EC",
+            "categoryDisplay": "Electrocardiac (e.g., EKG, EEC, Holter)",
+            "code": "11524-6",
+            "codeSystem": "http://loinc.org",
+            "conclusion": "Sinus rhythm, normal intervals, no repolarisation abnormality.",
+            "display": "EKG study",
+            "effectiveDate": "2026-03-04",
+            "fictional": true,
+            "issued": "2026-03-04T10:00:00Z",
+            "name": "Resting ECG 2026-03-04",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "resourceId": "dr-ecg-p1-2026-03-04",
+            "status": "final"
+          }
+        },
+        {
+          "type": "DiagnosticReport",
+          "properties": {
+            "category": "RAD",
+            "categoryDisplay": "Radiology",
+            "code": "36643-5",
+            "codeSystem": "http://loinc.org",
+            "conclusion": "Lungs clear. Cardiomediastinal silhouette within normal limits. No pleural effusion, no pneumothorax.",
+            "display": "XR Chest 2 Views",
+            "effectiveDate": "2026-01-22",
+            "fictional": true,
+            "issued": "2026-01-22T15:30:00Z",
+            "modality": "DX",
+            "name": "XR Chest 2 Views 2026-01-22",
+            "performer": "AlphaKlinik Berlin, Radiologie (fictional)",
+            "resourceId": "dr-img-p1-2026-01-22",
+            "status": "final"
+          }
+        },
+        {
+          "type": "Immunization",
+          "properties": {
+            "codeSystem": "http://hl7.org/fhir/sid/cvx",
+            "display": "Tdap",
+            "fictional": true,
+            "lotNumber": "TD19-2208",
+            "name": "Tdap 2019-05-06",
+            "occurrenceDate": "2019-05-06",
+            "performer": "Hausarztpraxis Musterstadt (fictional)",
+            "resourceId": "imm-p1-2019-05-06-115",
+            "status": "completed",
+            "vaccineCode": "115"
+          }
+        },
+        {
+          "type": "Immunization",
+          "properties": {
+            "codeSystem": "http://hl7.org/fhir/sid/cvx",
+            "display": "Pneumococcal conjugate vaccine 20 valent",
+            "fictional": true,
+            "lotNumber": "PCV20-4410",
+            "name": "Pneumococcal conjugate vaccine 20 valent 2024-11-05",
+            "occurrenceDate": "2024-11-05",
+            "performer": "Hausarztpraxis Musterstadt (fictional)",
+            "resourceId": "imm-p1-2024-11-05-216",
+            "status": "completed",
+            "vaccineCode": "216"
+          }
+        },
+        {
+          "type": "MedicationStatement",
+          "properties": {
+            "codeSystem": "http://www.whocc.no/atc",
+            "display": "Metformin 500 mg",
+            "dosageText": "1-0-1",
+            "dose": 500,
+            "doseUnit": "mg",
+            "effectiveStart": "2018-04-10",
+            "fictional": true,
+            "medicationCode": "A10BA02",
+            "name": "Metformin 500 mg 1-0-1",
+            "planId": "bmp-p1-2026-08-21",
+            "planPrinted": "2026-08-21",
+            "reason": "Diabetes mellitus type 2",
+            "resourceId": "ms-p1-A10BA02",
+            "source": "Bundeseinheitlicher Medikationsplan (fictional)",
+            "status": "active"
+          }
+        },
+        {
+          "type": "MedicationStatement",
+          "properties": {
+            "codeSystem": "http://www.whocc.no/atc",
+            "display": "Lisinopril 10 mg",
+            "dosageText": "1-0-0",
+            "dose": 10,
+            "doseUnit": "mg",
+            "effectiveStart": "2015-11-02",
+            "fictional": true,
+            "medicationCode": "C09AA03",
+            "name": "Lisinopril 10 mg 1-0-0",
+            "planId": "bmp-p1-2026-08-21",
+            "planPrinted": "2026-08-21",
+            "reason": "Hypertension",
+            "resourceId": "ms-p1-C09AA03",
+            "source": "Bundeseinheitlicher Medikationsplan (fictional)",
+            "status": "active"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "birthDate": "1965-06-02",
+        "city": "Maastricht",
+        "country": "NL",
+        "demo": true,
+        "fictional": true,
+        "gender": "male",
+        "id": "P2",
+        "name": "Jan de Vries",
+        "resourceId": "P2"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2025-10-07T09:00:00Z",
+            "display": "Check-up, Limburg Medical Centre (fictional)",
+            "fictional": true,
+            "name": "Yearly check-up 2025",
+            "period": "2025-10-07",
+            "resourceId": "checkup-p2-2025-10-07",
+            "serviceProvider": "Limburg Medical Centre",
+            "status": "finished",
+            "type": "Encounter for check up",
+            "typeCode": "185349003",
+            "typeSystem": "http://snomed.info/sct"
+          }
+        },
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2025-03-04T08:00:00Z",
+            "display": "Laboratory visit, Limburg Medical Centre (fictional)",
+            "fictional": true,
+            "name": "Laboratory visit 1 of 4",
+            "period": "2025-03-04",
+            "resourceId": "enc-p2-2025-03-04",
+            "serviceProvider": "Limburg Medical Centre",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "13644009",
+            "codeSystem": "http://snomed.info/sct",
+            "display": "Hypercholesterolaemia",
+            "fictional": true,
+            "name": "Hypercholesterolaemia",
+            "onsetDate": "2014-07-09",
+            "resourceId": "cond-p2-13644009"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "13645005",
+            "codeSystem": "http://snomed.info/sct",
+            "display": "Chronic obstructive pulmonary disease",
+            "fictional": true,
+            "name": "Chronic obstructive pulmonary disease",
+            "onsetDate": "2018-10-05",
+            "resourceId": "cond-p2-13645005"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "activity",
+            "code": "55411-3",
+            "codeSystem": "http://loinc.org",
+            "display": "Exercise duration",
+            "effectiveDate": "2025-01-05",
+            "effectiveStart": "2024-12-30",
+            "fictional": true,
+            "name": "Exercise duration 9 min/d (weekly mean)",
+            "performer": "Fictional fitness ring",
+            "resourceId": "act-p2-2025-01-05",
+            "sourceKind": "device-weekly-mean",
+            "status": "final",
+            "unit": "min/d",
+            "value": 9,
+            "valueQuantity": 9,
+            "valueUnit": "min/d"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "activity",
+            "code": "55411-3",
+            "codeSystem": "http://loinc.org",
+            "display": "Exercise duration",
+            "effectiveDate": "2025-01-12",
+            "effectiveStart": "2025-01-06",
+            "fictional": true,
+            "name": "Exercise duration 12 min/d (weekly mean)",
+            "performer": "Fictional fitness ring",
+            "resourceId": "act-p2-2025-01-12",
+            "sourceKind": "device-weekly-mean",
+            "status": "final",
+            "unit": "min/d",
+            "value": 12,
+            "valueQuantity": 12,
+            "valueUnit": "min/d"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "laboratory",
+            "code": "22748-8",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-03-04T08:30:00Z",
+            "display": "Cholesterol in LDL [Moles/volume] in Serum or Plasma",
+            "effectiveDate": "2025-03-04",
+            "fictional": true,
+            "name": "Cholesterol in LDL [Moles/volume] in Serum or Plasma 3.4 mmol/L",
+            "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+            "referenceHigh": 3,
+            "referenceLow": 0,
+            "referenceText": "0 - 3.0 mmol/L (as printed on the report)",
+            "resourceId": "obs-p2-22748-8-2025-03-04",
+            "status": "final",
+            "unit": "mmol/L",
+            "value": 3.4,
+            "valueQuantity": 3.4,
+            "valueUnit": "mmol/L"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "laboratory",
+            "code": "22748-8",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-09-16T08:30:00Z",
+            "display": "Cholesterol in LDL [Moles/volume] in Serum or Plasma",
+            "effectiveDate": "2025-09-16",
+            "fictional": true,
+            "name": "Cholesterol in LDL [Moles/volume] in Serum or Plasma 2.6 mmol/L",
+            "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+            "referenceHigh": 3,
+            "referenceLow": 0,
+            "referenceText": "0 - 3.0 mmol/L (as printed on the report)",
+            "resourceId": "obs-p2-22748-8-2025-09-16",
+            "status": "final",
+            "unit": "mmol/L",
+            "value": 2.6,
+            "valueQuantity": 2.6,
+            "valueUnit": "mmol/L"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "vital-signs",
+            "code": "39156-5",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-03-04T08:30:00Z",
+            "display": "Body mass index (BMI) [Ratio]",
+            "effectiveDate": "2025-03-04",
+            "fictional": true,
+            "name": "Body mass index (BMI) [Ratio] 34.6 kg/m2",
+            "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+            "referenceHigh": 25,
+            "referenceLow": 18.5,
+            "referenceText": "18.5 - 25.0 kg/m2 (as printed on the report)",
+            "resourceId": "obs-p2-39156-5-2025-03-04",
+            "status": "final",
+            "unit": "kg/m2",
+            "value": 34.6,
+            "valueQuantity": 34.6,
+            "valueUnit": "kg/m2"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "vital-signs",
+            "code": "39156-5",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-09-16T08:30:00Z",
+            "display": "Body mass index (BMI) [Ratio]",
+            "effectiveDate": "2025-09-16",
+            "fictional": true,
+            "name": "Body mass index (BMI) [Ratio] 34.1 kg/m2",
+            "performer": "Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+            "referenceHigh": 25,
+            "referenceLow": 18.5,
+            "referenceText": "18.5 - 25.0 kg/m2 (as printed on the report)",
+            "resourceId": "obs-p2-39156-5-2025-09-16",
+            "status": "final",
+            "unit": "kg/m2",
+            "value": 34.1,
+            "valueQuantity": 34.1,
+            "valueUnit": "kg/m2"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "313988",
+            "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "date": "2023-02-14",
+            "display": "Furosemide 40 mg oral tablet",
+            "fictional": true,
+            "intent": "order",
+            "medicationCode": "313988",
+            "name": "Furosemide 40 mg oral tablet",
+            "resourceId": "med-p2-313988",
+            "status": "active"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "314077",
+            "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "date": "2010-05-17",
+            "display": "Lisinopril 20 mg oral tablet",
+            "fictional": true,
+            "intent": "order",
+            "medicationCode": "314077",
+            "name": "Lisinopril 20 mg oral tablet",
+            "resourceId": "med-p2-314077",
+            "status": "active"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "birthDate": "1958-11-03",
+        "gender": "male",
+        "name": "Patient fhir-pat-1002",
+        "resourceId": "fhir-pat-1002"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2023-09-12T11:00:00Z",
+            "display": "Cardiology consultation",
+            "name": "Cardiology Visit",
+            "resourceId": "fhir-enc-2002",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "38341003",
+            "display": "Essential hypertension",
+            "name": "Essential Hypertension (FHIR)",
+            "onsetDate": "2023-09-12T11:30:00Z",
+            "resourceId": "fhir-cond-3002"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "procedure",
+            "code": "8625-6",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-11-18T10:00:00Z",
+            "display": "P-R Interval",
+            "effectiveDate": "2025-11-18",
+            "fictional": true,
+            "name": "P-R Interval 212 ms",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "referenceHigh": 200,
+            "referenceLow": 120,
+            "referenceText": "120 - 200 ms",
+            "resourceId": "dr-ecg-1002-2025-11-18-8625-6",
+            "status": "final",
+            "unit": "ms",
+            "value": 212,
+            "valueQuantity": 212,
+            "valueUnit": "ms"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "procedure",
+            "code": "8632-2",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-11-18T10:00:00Z",
+            "display": "QRS axis",
+            "effectiveDate": "2025-11-18",
+            "fictional": true,
+            "name": "QRS axis -10 deg",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "referenceHigh": 90,
+            "referenceLow": -30,
+            "referenceText": "-30 - 90 deg",
+            "resourceId": "dr-ecg-1002-2025-11-18-8632-2",
+            "status": "final",
+            "unit": "deg",
+            "value": -10,
+            "valueQuantity": -10,
+            "valueUnit": "deg"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "category": "vital-signs",
+            "code": "8867-4",
+            "codeSystem": "http://loinc.org",
+            "dateTime": "2025-11-18T10:00:00Z",
+            "display": "Heart rate",
+            "effectiveDate": "2025-11-18",
+            "fictional": true,
+            "name": "Heart rate 54 /min",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "referenceHigh": 100,
+            "referenceLow": 60,
+            "referenceText": "60 - 100 /min",
+            "resourceId": "dr-ecg-1002-2025-11-18-8867-4",
+            "status": "final",
+            "unit": "/min",
+            "value": 54,
+            "valueQuantity": 54,
+            "valueUnit": "/min"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "55284-4",
+            "dateTime": "2023-09-12T11:45:00Z",
+            "display": "Blood pressure 145/92 mmHg",
+            "name": "BP 145/92 (FHIR)",
+            "resourceId": "fhir-obs-4002",
+            "status": "final",
+            "valueQuantity": 145,
+            "valueUnit": "mmHg"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "date": "2023-10-01T09:00:00Z",
+            "display": "Lisinopril 10mg",
+            "intent": "order",
+            "name": "Lisinopril 10mg (FHIR)",
+            "resourceId": "fhir-med-5002",
+            "status": "active"
+          }
+        },
+        {
+          "type": "DiagnosticReport",
+          "properties": {
+            "category": "EC",
+            "categoryDisplay": "Electrocardiac (e.g., EKG, EEC, Holter)",
+            "code": "11524-6",
+            "codeSystem": "http://loinc.org",
+            "conclusion": "Sinus bradycardia with first-degree AV block, no sign of acute ischaemia.",
+            "display": "EKG study",
+            "effectiveDate": "2025-11-18",
+            "fictional": true,
+            "issued": "2025-11-18T10:00:00Z",
+            "name": "Resting ECG 2025-11-18",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "resourceId": "dr-ecg-1002-2025-11-18",
+            "status": "final"
+          }
+        },
+        {
+          "type": "DiagnosticReport",
+          "properties": {
+            "category": "RAD",
+            "categoryDisplay": "Radiology",
+            "code": "34552-0",
+            "codeSystem": "http://loinc.org",
+            "conclusion": "Normal left ventricular size and systolic function. Mild concentric remodelling. No significant valvular disease.",
+            "display": "Cardiac 2D echo panel",
+            "effectiveDate": "2025-11-18",
+            "fictional": true,
+            "issued": "2025-11-18T15:30:00Z",
+            "modality": "US",
+            "name": "Cardiac 2D echo panel 2025-11-18",
+            "performer": "AlphaKlinik Berlin, Kardiologie (fictional)",
+            "resourceId": "dr-img-1002-2025-11-18",
+            "status": "final"
+          }
+        },
+        {
+          "type": "Immunization",
+          "properties": {
+            "codeSystem": "http://hl7.org/fhir/sid/cvx",
+            "display": "Td (adult), 5 Lf tetanus toxoid, preservative free, adsorbed",
+            "fictional": true,
+            "lotNumber": "TD16-1190",
+            "name": "Td (adult), 5 Lf tetanus toxoid, preservative free, adsorbed 2016-08-30",
+            "occurrenceDate": "2016-08-30",
+            "performer": "Hausarztpraxis Musterstadt (fictional)",
+            "resourceId": "imm-1002-2016-08-30-113",
+            "status": "completed",
+            "vaccineCode": "113"
+          }
+        },
+        {
+          "type": "Immunization",
+          "properties": {
+            "codeSystem": "http://hl7.org/fhir/sid/cvx",
+            "display": "Pneumococcal polysaccharide vaccine, 23 valent",
+            "fictional": true,
+            "lotNumber": "PPSV23-6615",
+            "name": "Pneumococcal polysaccharide vaccine, 23 valent 2023-10-10",
+            "occurrenceDate": "2023-10-10",
+            "performer": "Hausarztpraxis Musterstadt (fictional)",
+            "resourceId": "imm-1002-2023-10-10-33",
+            "status": "completed",
+            "vaccineCode": "33"
+          }
+        },
+        {
+          "type": "MedicationStatement",
+          "properties": {
+            "codeSystem": "http://www.whocc.no/atc",
+            "display": "Acetylsalicylic acid 100 mg",
+            "dosageText": "1-0-0",
+            "dose": 100,
+            "doseUnit": "mg",
+            "effectiveStart": "2025-11-18",
+            "fictional": true,
+            "medicationCode": "B01AC06",
+            "name": "Acetylsalicylic acid 100 mg 1-0-0",
+            "planId": "bmp-1002-2025-12-01",
+            "planPrinted": "2025-12-01",
+            "reason": "Cardiovascular prevention",
+            "resourceId": "ms-1002-B01AC06",
+            "source": "Bundeseinheitlicher Medikationsplan (fictional)",
+            "status": "active"
+          }
+        },
+        {
+          "type": "MedicationStatement",
+          "properties": {
+            "codeSystem": "http://www.whocc.no/atc",
+            "display": "Bisoprolol 2.5 mg",
+            "dosageText": "1-0-0",
+            "dose": 2.5,
+            "doseUnit": "mg",
+            "effectiveStart": "2025-11-18",
+            "fictional": true,
+            "medicationCode": "C07AB07",
+            "name": "Bisoprolol 2.5 mg 1-0-0",
+            "planId": "bmp-1002-2025-12-01",
+            "planPrinted": "2025-12-01",
+            "reason": "Hypertension",
+            "resourceId": "ms-1002-C07AB07",
+            "source": "Bundeseinheitlicher Medikationsplan (fictional)",
+            "status": "active"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "birthDate": "2001-03-24",
+        "gender": "male",
+        "id": "patient-2000",
+        "name": "Hartmut Becker"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "emergency",
+            "date": "2025-12-03",
+            "id": "enc-2000-0",
+            "name": "Emergency Visit 2025-12",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2023-01-03",
+            "id": "enc-2000-1",
+            "name": "Ambulatory Visit 2023-01",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "code": "40930008",
+            "display": "Hypothyroidism",
+            "id": "cond-2000-40930008",
+            "onsetDate": "2020-09-01",
+            "status": "active"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "2093-3",
+            "date": "2026-03-23",
+            "display": "2093-3 result",
+            "id": "obs-2000-2093-3",
+            "status": "final",
+            "value": 4.3
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "3016-3",
+            "date": "2021-05-26",
+            "display": "3016-3 result",
+            "id": "obs-2000-3016-3",
+            "status": "final",
+            "value": 91.5
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "3026-2",
+            "date": "2023-03-07",
+            "display": "3026-2 result",
+            "id": "obs-2000-3026-2",
+            "status": "final",
+            "value": 70
+          }
+        },
+        {
+          "type": "Procedure",
+          "properties": {
+            "code": "173160006",
+            "date": "2024-06-20",
+            "display": "Diabetic Eye Screening",
+            "id": "proc-2000-173160006",
+            "status": "completed"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "197381",
+            "display": "Levothyroxine 50 mcg Tab",
+            "id": "rx-2000-197381",
+            "status": "active"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "birthDate": "1993-06-25",
+        "gender": "male",
+        "id": "patient-2008",
+        "name": "Patrick Fischer"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "ambulatory",
+            "date": "2025-05-24",
+            "id": "enc-2008-0",
+            "name": "Ambulatory Visit 2025-05",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Encounter",
+          "properties": {
+            "class": "inpatient",
+            "date": "2024-12-18",
+            "id": "enc-2008-1",
+            "name": "Inpatient Visit 2024-12",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "code": "38341003",
+            "display": "Essential Hypertension",
+            "id": "cond-2008-38341003",
+            "onsetDate": "2019-02-01",
+            "status": "active"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "code": "44054006",
+            "display": "Type 2 Diabetes",
+            "id": "cond-2008-73211009",
+            "onsetDate": "2023-09-01",
+            "status": "active"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "2160-0",
+            "date": "2021-06-26",
+            "display": "2160-0 result",
+            "id": "obs-2008-2160-0",
+            "status": "final",
+            "value": 11.2
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "2345-7",
+            "date": "2024-03-14",
+            "display": "2345-7 result",
+            "id": "obs-2008-2345-7",
+            "status": "final",
+            "value": 195.3
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "4548-4",
+            "date": "2023-06-26",
+            "display": "4548-4 result",
+            "id": "obs-2008-4548-4",
+            "status": "final",
+            "value": 38.3
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "8462-4",
+            "date": "2024-03-14",
+            "display": "8462-4 result",
+            "id": "obs-2008-8462-4",
+            "status": "final",
+            "value": 117.8
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "code": "8480-6",
+            "date": "2019-04-22",
+            "display": "8480-6 result",
+            "id": "obs-2008-8480-6",
+            "status": "final",
+            "value": 180.1
+          }
+        },
+        {
+          "type": "Procedure",
+          "properties": {
+            "code": "173160006",
+            "date": "2025-01-28",
+            "display": "Diabetic Eye Screening",
+            "id": "proc-2008-173160006",
+            "status": "completed"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "1861634",
+            "display": "Empagliflozin 10 mg Oral Tab",
+            "id": "rx-2008-1861634",
+            "status": "active"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "code": "197884",
+            "display": "Insulin Glargine 100 U/mL",
+            "id": "rx-2008-197884",
+            "status": "active"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "birthDate": "1973-04-12",
+        "city": "Berlin",
+        "country": "DE",
+        "gender": "female",
+        "name": "Ines Müller",
+        "patientId": "pv-pat-001",
+        "pvCohort": true,
+        "resourceId": "pv-pat-001"
+      },
+      "records": [
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "415749005",
+            "display": "Rupture of tendon",
+            "onsetDate": "2024-03-08",
+            "pvCohort": true,
+            "resourceId": "pv-pat-001-tendon-rupture"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "clinicalStatus": "active",
+            "code": "68566005",
+            "display": "Urinary tract infectious disease",
+            "onsetDate": "2024-01-15",
+            "pvCohort": true,
+            "resourceId": "pv-pat-001-uti"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "display": "Ciprofloxacin 500 mg Oral Tab",
+            "medicationCode": "2551",
+            "pvCohort": true,
+            "resourceId": "pv-pat-001-cipro",
+            "status": "completed"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "id": "loader-pat-0001",
+        "name": "Lena Hoffmann",
+        "birthDate": "1984-07-21",
+        "gender": "female",
+        "deceased": false,
+        "city": "Potsdam",
+        "state": "Brandenburg"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "id": "loader-enc-0001",
+            "name": "Encounter 2019-04-02",
+            "date": "2019-04-02T10:00:00+02:00",
+            "class": "AMB",
+            "type": "General examination of patient (procedure)",
+            "status": "finished"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "id": "loader-cond-0001",
+            "name": "Acute viral pharyngitis (disorder)",
+            "onsetDate": "2019-04-02T10:00:00+02:00",
+            "code": "195662009",
+            "display": "Acute viral pharyngitis (disorder)",
+            "system": "http://snomed.info/sct",
+            "status": "resolved"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "id": "loader-obs-0001",
+            "name": "Body Weight",
+            "dateTime": "2019-04-02T10:00:00+02:00",
+            "code": "29463-7",
+            "display": "Body Weight",
+            "system": "http://loinc.org",
+            "value": "61.4",
+            "unit": "kg",
+            "category": "vital-signs"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "id": "loader-obs-0002",
+            "name": "Hemoglobin [Mass/volume] in Blood",
+            "dateTime": "2019-04-02T10:00:00+02:00",
+            "code": "718-7",
+            "display": "Hemoglobin [Mass/volume] in Blood",
+            "system": "http://loinc.org",
+            "value": "13.6",
+            "unit": "g/dL",
+            "category": "laboratory"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "id": "loader-med-0001",
+            "name": "Amoxicillin 250 MG Oral Capsule",
+            "date": "2019-04-02T10:00:00+02:00",
+            "code": "308182",
+            "display": "Amoxicillin 250 MG Oral Capsule",
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "status": "stopped",
+            "intent": "order"
+          }
+        },
+        {
+          "type": "Procedure",
+          "properties": {
+            "id": "loader-proc-0001",
+            "name": "Throat culture (procedure)",
+            "performedStart": "2019-04-02T10:00:00+02:00",
+            "performedEnd": "2019-04-02T10:15:00+02:00",
+            "code": "117015009",
+            "display": "Throat culture (procedure)",
+            "system": "http://snomed.info/sct",
+            "status": "completed"
+          }
+        }
+      ]
+    },
+    {
+      "patient": {
+        "id": "sparse-pat-0001"
+      },
+      "records": [
+        {
+          "type": "Encounter",
+          "properties": {
+            "id": "sparse-enc-0001",
+            "status": "done",
+            "class": "phone"
+          }
+        },
+        {
+          "type": "Condition",
+          "properties": {
+            "id": "sparse-cond-0001"
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "id": "sparse-obs-0001",
+            "code": "2345-7",
+            "category": "laboratory",
+            "value": 98
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "id": "sparse-obs-0002",
+            "code": "39156-5",
+            "value": 27.1
+          }
+        },
+        {
+          "type": "Observation",
+          "properties": {
+            "id": "sparse-obs-0003",
+            "code": "55284-4"
+          }
+        },
+        {
+          "type": "MedicationRequest",
+          "properties": {
+            "id": "sparse-med-0001",
+            "display": "Ibuprofen 400 mg"
+          }
+        },
+        {
+          "type": "Procedure",
+          "properties": {
+            "id": "sparse-proc-0001",
+            "display": "Wound dressing"
+          }
+        },
+        {
+          "type": "DiagnosticReport",
+          "properties": {
+            "id": "sparse-dr-0001"
+          }
+        },
+        {
+          "type": "Immunization",
+          "properties": {
+            "id": "sparse-imm-0001",
+            "vaccineCode": "208",
+            "codeSystem": "http://hl7.org/fhir/sid/cvx"
+          }
+        },
+        {
+          "type": "MedicationStatement",
+          "properties": {
+            "id": "sparse-ms-0001",
+            "display": "Colecalciferol"
+          }
+        }
+      ]
+    }
+  ]
+}

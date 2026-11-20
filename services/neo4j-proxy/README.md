@@ -81,9 +81,29 @@ disagree.
   `https://ehds.mabu.red/fhir/` extensions were errors. An extension from
   any other domain still is one.
 
-- **`meta.profile`** is not set on any served resource: they are rebuilt from
-  graph nodes (the `code` of an Observation is a string, not a
-  CodeableConcept) and do not validate against base R4 yet (#1144).
+- **Resources** (`src/fhir-resource.ts`, #1144): one mapper per type turns a
+  graph node into R4 elements and nothing else. Codes are CodeableConcepts
+  with their system (LOINC, SNOMED CT, RxNorm, CVX, ATC; the graph's display
+  as `text`), values are UCUM Quantities, statuses come from the R4 value
+  sets, every record refers to its patient (`subject`, `patient` for an
+  Immunization) and every Bundle entry has an absolute `fullUrl`. Vital
+  signs follow R4's vital-sign profiles (category, unit, blood pressure as
+  components). A required element the graph does not hold is a
+  `data-absent-reason`, never a guess. Graph-only properties (`fictional`,
+  `pvCohort`, a node's `name` label) are not served; a device's weekly mean
+  keeps its source kind in the shared writer's
+  `https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind`.
+- **`meta.profile`** names a profile only when the resource class passed it
+  (`src/fhir-profiles.ts`): Patient (EU core), Condition (EU core),
+  MedicationRequest (EU MPD), Encounter (EU HDR) and a laboratory Observation
+  (EU Lab). The proof is `scripts/eehrxf/validate.py` over
+  `scripts/eehrxf/samples/facade-sample.json`, the mapper's output for fixed
+  graph rows (`scripts/export-fhir-facade-samples.ts` writes it, read-only
+  on the graph). `__tests__/fhir-facade-sample.test.ts` keeps the sample
+  equal to the mapper and `__tests__/fhir-profile-claims.test.ts` keeps the
+  claims equal to what the report says passed, in both directions. After a
+  mapper change: `npx tsx scripts/export-fhir-facade-samples.ts`, then
+  `python3 scripts/eehrxf/validate.py` and `python3 scripts/eehrxf/build.py`.
 
 ## Development
 
