@@ -47,7 +47,7 @@ export const LAB_PROFILES = {
 const EXT_DR_COMPOSITION =
   "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition";
 /** The identifier system of a report in the hub. */
-export const LAB_REPORT_SYSTEM = "https://ehds.mabu.red/fhir/sid/lab-report";
+const LAB_REPORT_SYSTEM = "https://ehds.mabu.red/fhir/sid/lab-report";
 const REPORT_TYPE = {
   system: LOINC,
   code: "11502-2",

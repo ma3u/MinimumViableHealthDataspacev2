@@ -48,15 +48,14 @@ export const EPS_PROFILES = {
     "http://hl7.eu/fhir/eps/StructureDefinition/organization-obl-eu-eps",
 } as const;
 
-export const PATIENT_SUMMARY_TYPE = {
+const PATIENT_SUMMARY_TYPE = {
   system: LOINC,
   code: "60591-5",
   display: "Patient summary Document",
 };
 
 /** The identifier system of a Patient Summary in the hub. */
-export const PATIENT_SUMMARY_SYSTEM =
-  "https://ehds.mabu.red/fhir/sid/patient-summary";
+const PATIENT_SUMMARY_SYSTEM = "https://ehds.mabu.red/fhir/sid/patient-summary";
 
 export interface ConditionRow {
   id: string;

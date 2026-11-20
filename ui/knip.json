@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
+    "scripts/export-fhir-document-samples.ts",
     "scripts/forge-bruno-session.mjs",
     "scripts/generate-overview-fixture.ts",
     "scripts/record-deck-preview.ts",

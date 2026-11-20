@@ -17,7 +17,7 @@ const obj = (v: unknown): Json =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as Json) : {};
 
 /** Every `reference` string anywhere inside a value. */
-export function referencesIn(value: unknown, out: string[] = []): string[] {
+function referencesIn(value: unknown, out: string[] = []): string[] {
   if (Array.isArray(value)) {
     value.forEach((v) => referencesIn(v, out));
   } else if (value && typeof value === "object") {

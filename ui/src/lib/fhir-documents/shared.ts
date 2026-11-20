@@ -23,10 +23,9 @@ const DATA_ABSENT_REASON =
  * came from this way, so an import (#1173) writes back to the same node
  * rather than a copy of it.
  */
-export const GRAPH_NODE_SYSTEM = "https://ehds.mabu.red/fhir/sid/graph-node";
+const GRAPH_NODE_SYSTEM = "https://ehds.mabu.red/fhir/sid/graph-node";
 /** The hub's patient record id (`P1`, `patient-2000`). */
-export const PATIENT_RECORD_SYSTEM =
-  "https://ehds.mabu.red/fhir/sid/patient-record";
+const PATIENT_RECORD_SYSTEM = "https://ehds.mabu.red/fhir/sid/patient-record";
 /** The author and custodian of a document the hub assembles. */
 export const HUB_ORGANIZATION_NAME = "EHDS Integration Hub (demo)";
 
@@ -91,7 +90,7 @@ const XHTML_ESCAPES: Record<string, string> = {
   '"': "&quot;",
 };
 
-export function escapeXhtml(text: string): string {
+function escapeXhtml(text: string): string {
   return text.replace(/[&<>"]/g, (c) => XHTML_ESCAPES[c]);
 }
 
