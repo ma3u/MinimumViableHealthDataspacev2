@@ -1,0 +1,49 @@
+meta {
+  name: 29 My Patient Summary as a FHIR document
+  type: http
+  seq: 29
+}
+
+get {
+  url: {{baseUrl}}/api/patient/documents/patient-summary?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.resourceType: eq Bundle
+  res.body.type: eq document
+  res.body.entry[0].resource.resourceType: eq Composition
+}
+
+tests {
+  // HL7 Europe Patient Summary 1.0.0-ballot (#1171). Whether it conforms is the
+  // HL7 validator's call (scripts/eehrxf/validate.py); this checks the shape.
+  const urls = new Set(res.body.entry.map((e) => e.fullUrl));
+  test("every section entry resolves inside the Bundle", () => {
+    res.body.entry[0].resource.section.forEach((s) => {
+      (s.entry || []).forEach((r) => expect(urls.has(r.reference), r.reference).to.equal(true));
+    });
+  });
+  test("an empty section says why", () => {
+    res.body.entry[0].resource.section
+      .filter((s) => !s.entry)
+      .forEach((s) => expect(s.emptyReason, s.title).to.be.an("object"));
+  });
+  test("my own copy names me by my pseudonym, without a birth date", () => {
+    const patient = res.body.entry.find((e) => e.resource.resourceType === "Patient").resource;
+    expect(patient.name[0].text).to.match(/^Patient [0-9a-f]{8}$/);
+    expect(patient.birthDate).to.equal(undefined);
+  });
+}
+
+docs {
+  EHDS Art. 14(1)(a) and the Art. 7 copy: problems, allergies, medications,
+  immunisations and procedures as a FHIR document Bundle. The graph holds no
+  allergies, so that section is empty with the reason "unavailable".
+}

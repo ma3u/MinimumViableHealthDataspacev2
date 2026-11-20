@@ -1,0 +1,1120 @@
+{
+ "resourceType": "Bundle",
+ "meta": {
+  "profile": [
+   "http://hl7.eu/fhir/eps/StructureDefinition/bundle-eu-eps"
+  ]
+ },
+ "identifier": {
+  "system": "urn:ietf:rfc:3986",
+  "value": "urn:uuid:d535cee5-318e-8521-b4ad-76ff58741b6d"
+ },
+ "type": "document",
+ "timestamp": "2026-11-20T09:00:00Z",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:7e8edc52-7cac-8f77-8cc4-d433473c93b2",
+   "resource": {
+    "resourceType": "Composition",
+    "id": "7e8edc52-7cac-8f77-8cc4-d433473c93b2",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps"
+     ]
+    },
+    "identifier": {
+     "system": "https://ehds.mabu.red/fhir/sid/patient-summary",
+     "value": "P1"
+    },
+    "status": "final",
+    "type": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "60591-5",
+       "display": "Patient summary Document"
+      }
+     ]
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "date": "2026-11-20T09:00:00Z",
+    "author": [
+     {
+      "reference": "urn:uuid:b57b1d56-6938-8042-a23d-3d8d7dd39c5f",
+      "display": "EHDS Integration Hub (demo)"
+     }
+    ],
+    "title": "Patient Summary",
+    "custodian": {
+     "reference": "urn:uuid:b57b1d56-6938-8042-a23d-3d8d7dd39c5f",
+     "display": "EHDS Integration Hub (demo)"
+    },
+    "section": [
+     {
+      "title": "Problem list",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "11450-4",
+         "display": "Problem list - Reported"
+        }
+       ]
+      },
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Asthma, since 2009-02-27</li><li>Chronic sinusitis, since 2013-09-14</li><li>Hypertension, since 2015-11-02</li><li>Obesity (BMI 31.2), since 2017-06-20</li><li>Diabetes mellitus type 2, since 2018-04-10</li><li>Stress (finding), since 2020-01-15</li><li>Respiratory distress, since 2021-03-08</li></ul></div>"
+      },
+      "entry": [
+       {
+        "reference": "urn:uuid:8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127"
+       },
+       {
+        "reference": "urn:uuid:b70112cd-9b39-889a-b466-d103ff71c95c"
+       },
+       {
+        "reference": "urn:uuid:493293e4-649c-8d83-a804-7f4f366b9557"
+       },
+       {
+        "reference": "urn:uuid:f6fd10fa-461c-8167-bae5-5adf56ccf941"
+       },
+       {
+        "reference": "urn:uuid:e2a775cd-ee2c-80ea-9be5-1cb0326db1a9"
+       },
+       {
+        "reference": "urn:uuid:049288e3-b192-874c-85a0-b6d986a40bc5"
+       },
+       {
+        "reference": "urn:uuid:b882100d-8d51-86ec-80ca-bfae743d2dc9"
+       }
+      ]
+     },
+     {
+      "title": "Allergies and intolerances",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "48765-2",
+         "display": "Allergies and adverse reactions Document"
+        }
+       ]
+      },
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This record holds no information on allergies or intolerances; that is not a statement that there are none.</p></div>"
+      },
+      "emptyReason": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/list-empty-reason",
+         "code": "unavailable",
+         "display": "Unavailable"
+        }
+       ]
+      }
+     },
+     {
+      "title": "Medication summary",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "10160-0",
+         "display": "History of Medication use Narrative"
+        }
+       ]
+      },
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Salbutamol 100 mcg inhaler as needed, at most 8 puffs a day, since 2009-02-27</li><li>Lisinopril 10 mg 1-0-0, since 2015-11-02</li><li>Metformin 500 mg 1-0-1, since 2018-04-10</li><li>Atorvastatin 20 mg 0-0-1, since 2024-09-12</li><li>Salbutamol 100 mcg inhaler, since 2009-02-27</li><li>Lisinopril 10 mg oral tablet, since 2015-11-02</li><li>Metformin 500 mg oral tablet, since 2018-04-10</li><li>Atorvastatin 20 mg oral tablet, since 2024-09-12</li></ul></div>"
+      },
+      "entry": [
+       {
+        "reference": "urn:uuid:1a553224-d065-8bc5-bc78-5f51f9a283a8"
+       },
+       {
+        "reference": "urn:uuid:a93e3faf-4c60-8c17-8e42-815ead2c039e"
+       },
+       {
+        "reference": "urn:uuid:63598485-ed45-8a63-a873-b91a5803bb95"
+       },
+       {
+        "reference": "urn:uuid:de07231c-26d0-86ad-be96-d5fb28017874"
+       },
+       {
+        "reference": "urn:uuid:03490597-c854-88c8-a3e6-0252a7763d53"
+       },
+       {
+        "reference": "urn:uuid:1fd066e9-80d7-8b56-90df-3da90ed80157"
+       },
+       {
+        "reference": "urn:uuid:282d9411-e911-87a5-a147-2671b6780629"
+       },
+       {
+        "reference": "urn:uuid:45108799-eba6-88f1-90dd-75f3313030d7"
+       }
+      ]
+     },
+     {
+      "title": "Immunizations",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "11369-6",
+         "display": "History of Immunization Narrative"
+        }
+       ]
+      },
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Tdap, 2019-05-06</li><li>Pneumococcal conjugate vaccine 20 valent, 2024-11-05</li><li>Influenza, injectable, quadrivalent, preservative free, 2025-10-14</li><li>COVID-19, mRNA, LNP-S, PF, 30 mcg/0.3 mL dose, 2025-10-14</li></ul></div>"
+      },
+      "entry": [
+       {
+        "reference": "urn:uuid:3c159309-2d8d-8e79-bade-ca568efbd8c7"
+       },
+       {
+        "reference": "urn:uuid:bd3da9d6-e49a-82d2-a714-c0ab085c7437"
+       },
+       {
+        "reference": "urn:uuid:b24e684e-de44-8065-94e1-6e53f5fdeaa8"
+       },
+       {
+        "reference": "urn:uuid:a1d85431-8d60-875e-aa3a-6121242f3c6c"
+       }
+      ]
+     },
+     {
+      "title": "History of procedures",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "47519-4",
+         "display": "History of Procedures Document"
+        }
+       ]
+      },
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>No procedure is recorded in this record.</p></div>"
+      },
+      "emptyReason": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/list-empty-reason",
+         "code": "unavailable",
+         "display": "Unavailable"
+        }
+       ]
+      }
+     },
+     {
+      "title": "Medical devices",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "46264-8",
+         "display": "History of medical device use"
+        }
+       ]
+      },
+      "text": {
+       "status": "generated",
+       "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This record holds no information on medical devices; that is not a statement that there are none.</p></div>"
+      },
+      "emptyReason": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/list-empty-reason",
+         "code": "unavailable",
+         "display": "Unavailable"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "9fcadfa3-8101-830a-b36f-0c0f274143d4",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/patient-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+      "value": "P1"
+     }
+    ],
+    "name": [
+     {
+      "text": "Maria Schmidt"
+     }
+    ],
+    "gender": "female",
+    "birthDate": "1979-03-15"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:b57b1d56-6938-8042-a23d-3d8d7dd39c5f",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "b57b1d56-6938-8042-a23d-3d8d7dd39c5f",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/organization-obl-eu-eps"
+     ]
+    },
+    "name": "EHDS Integration Hub (demo)"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-195967001"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "195967001",
+       "display": "Asthma"
+      }
+     ],
+     "text": "Asthma"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2009-02-27"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:b70112cd-9b39-889a-b466-d103ff71c95c",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "b70112cd-9b39-889a-b466-d103ff71c95c",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-40055000"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "40055000",
+       "display": "Chronic sinusitis"
+      }
+     ],
+     "text": "Chronic sinusitis"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2013-09-14"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:493293e4-649c-8d83-a804-7f4f366b9557",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "493293e4-649c-8d83-a804-7f4f366b9557",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-38341003"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "38341003",
+       "display": "Hypertension"
+      }
+     ],
+     "text": "Hypertension"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2015-11-02"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:f6fd10fa-461c-8167-bae5-5adf56ccf941",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "f6fd10fa-461c-8167-bae5-5adf56ccf941",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-414916001"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "414916001",
+       "display": "Obesity (BMI 31.2)"
+      }
+     ],
+     "text": "Obesity (BMI 31.2)"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2017-06-20"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:e2a775cd-ee2c-80ea-9be5-1cb0326db1a9",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "e2a775cd-ee2c-80ea-9be5-1cb0326db1a9",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-44054006"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "44054006",
+       "display": "Diabetes mellitus type 2"
+      }
+     ],
+     "text": "Diabetes mellitus type 2"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2018-04-10"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:049288e3-b192-874c-85a0-b6d986a40bc5",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "049288e3-b192-874c-85a0-b6d986a40bc5",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-73595000"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "73595000",
+       "display": "Stress (finding)"
+      }
+     ],
+     "text": "Stress (finding)"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2020-01-15"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:b882100d-8d51-86ec-80ca-bfae743d2dc9",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "b882100d-8d51-86ec-80ca-bfae743d2dc9",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/condition-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "cond-p1-271825005"
+     }
+    ],
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+        "code": "problem-list-item",
+        "display": "Problem List Item"
+       }
+      ]
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "271825005",
+       "display": "Respiratory distress"
+      }
+     ],
+     "text": "Respiratory distress"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "onsetDateTime": "2021-03-08"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:1a553224-d065-8bc5-bc78-5f51f9a283a8",
+   "resource": {
+    "resourceType": "MedicationStatement",
+    "id": "1a553224-d065-8bc5-bc78-5f51f9a283a8",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "ms-p1-R03AC02"
+     }
+    ],
+    "status": "active",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.whocc.no/atc",
+       "code": "R03AC02",
+       "display": "Salbutamol 100 mcg inhaler"
+      }
+     ],
+     "text": "Salbutamol 100 mcg inhaler"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "effectivePeriod": {
+     "start": "2009-02-27"
+    },
+    "reasonCode": [
+     {
+      "text": "Asthma"
+     }
+    ],
+    "dosage": [
+     {
+      "text": "as needed, at most 8 puffs a day"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:a93e3faf-4c60-8c17-8e42-815ead2c039e",
+   "resource": {
+    "resourceType": "MedicationStatement",
+    "id": "a93e3faf-4c60-8c17-8e42-815ead2c039e",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "ms-p1-C09AA03"
+     }
+    ],
+    "status": "active",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.whocc.no/atc",
+       "code": "C09AA03",
+       "display": "Lisinopril 10 mg"
+      }
+     ],
+     "text": "Lisinopril 10 mg"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "effectivePeriod": {
+     "start": "2015-11-02"
+    },
+    "reasonCode": [
+     {
+      "text": "Hypertension"
+     }
+    ],
+    "dosage": [
+     {
+      "text": "1-0-0"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:63598485-ed45-8a63-a873-b91a5803bb95",
+   "resource": {
+    "resourceType": "MedicationStatement",
+    "id": "63598485-ed45-8a63-a873-b91a5803bb95",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "ms-p1-A10BA02"
+     }
+    ],
+    "status": "active",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.whocc.no/atc",
+       "code": "A10BA02",
+       "display": "Metformin 500 mg"
+      }
+     ],
+     "text": "Metformin 500 mg"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "effectivePeriod": {
+     "start": "2018-04-10"
+    },
+    "reasonCode": [
+     {
+      "text": "Diabetes mellitus type 2"
+     }
+    ],
+    "dosage": [
+     {
+      "text": "1-0-1"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:de07231c-26d0-86ad-be96-d5fb28017874",
+   "resource": {
+    "resourceType": "MedicationStatement",
+    "id": "de07231c-26d0-86ad-be96-d5fb28017874",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/MedicationStatement-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "ms-p1-C10AA05"
+     }
+    ],
+    "status": "active",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.whocc.no/atc",
+       "code": "C10AA05",
+       "display": "Atorvastatin 20 mg"
+      }
+     ],
+     "text": "Atorvastatin 20 mg"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "effectivePeriod": {
+     "start": "2024-09-12"
+    },
+    "reasonCode": [
+     {
+      "text": "LDL cholesterol above target"
+     }
+    ],
+    "dosage": [
+     {
+      "text": "0-0-1"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:03490597-c854-88c8-a3e6-0252a7763d53",
+   "resource": {
+    "resourceType": "MedicationRequest",
+    "id": "03490597-c854-88c8-a3e6-0252a7763d53",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "med-p1-308460"
+     }
+    ],
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+       "code": "308460",
+       "display": "Salbutamol 100 mcg inhaler"
+      }
+     ],
+     "text": "Salbutamol 100 mcg inhaler"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "authoredOn": "2009-02-27"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:1fd066e9-80d7-8b56-90df-3da90ed80157",
+   "resource": {
+    "resourceType": "MedicationRequest",
+    "id": "1fd066e9-80d7-8b56-90df-3da90ed80157",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "med-p1-197361"
+     }
+    ],
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+       "code": "197361",
+       "display": "Lisinopril 10 mg oral tablet"
+      }
+     ],
+     "text": "Lisinopril 10 mg oral tablet"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "authoredOn": "2015-11-02"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:282d9411-e911-87a5-a147-2671b6780629",
+   "resource": {
+    "resourceType": "MedicationRequest",
+    "id": "282d9411-e911-87a5-a147-2671b6780629",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "med-p1-860975"
+     }
+    ],
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+       "code": "860975",
+       "display": "Metformin 500 mg oral tablet"
+      }
+     ],
+     "text": "Metformin 500 mg oral tablet"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "authoredOn": "2018-04-10"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:45108799-eba6-88f1-90dd-75f3313030d7",
+   "resource": {
+    "resourceType": "MedicationRequest",
+    "id": "45108799-eba6-88f1-90dd-75f3313030d7",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "med-p1-209459"
+     }
+    ],
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+     "coding": [
+      {
+       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+       "code": "209459",
+       "display": "Atorvastatin 20 mg oral tablet"
+      }
+     ],
+     "text": "Atorvastatin 20 mg oral tablet"
+    },
+    "subject": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "authoredOn": "2024-09-12"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:3c159309-2d8d-8e79-bade-ca568efbd8c7",
+   "resource": {
+    "resourceType": "Immunization",
+    "id": "3c159309-2d8d-8e79-bade-ca568efbd8c7",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/immunization-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "imm-p1-2019-05-06-115"
+     }
+    ],
+    "status": "completed",
+    "vaccineCode": {
+     "coding": [
+      {
+       "system": "http://hl7.org/fhir/sid/cvx",
+       "code": "115",
+       "display": "Tdap"
+      }
+     ],
+     "text": "Tdap"
+    },
+    "patient": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "occurrenceDateTime": "2019-05-06",
+    "lotNumber": "TD19-2208",
+    "performer": [
+     {
+      "actor": {
+       "display": "Hausarztpraxis Musterstadt (fictional)"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:bd3da9d6-e49a-82d2-a714-c0ab085c7437",
+   "resource": {
+    "resourceType": "Immunization",
+    "id": "bd3da9d6-e49a-82d2-a714-c0ab085c7437",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/immunization-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "imm-p1-2024-11-05-216"
+     }
+    ],
+    "status": "completed",
+    "vaccineCode": {
+     "coding": [
+      {
+       "system": "http://hl7.org/fhir/sid/cvx",
+       "code": "216",
+       "display": "Pneumococcal conjugate vaccine 20 valent"
+      }
+     ],
+     "text": "Pneumococcal conjugate vaccine 20 valent"
+    },
+    "patient": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "occurrenceDateTime": "2024-11-05",
+    "lotNumber": "PCV20-4410",
+    "performer": [
+     {
+      "actor": {
+       "display": "Hausarztpraxis Musterstadt (fictional)"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:b24e684e-de44-8065-94e1-6e53f5fdeaa8",
+   "resource": {
+    "resourceType": "Immunization",
+    "id": "b24e684e-de44-8065-94e1-6e53f5fdeaa8",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/immunization-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "imm-p1-2025-10-14-150"
+     }
+    ],
+    "status": "completed",
+    "vaccineCode": {
+     "coding": [
+      {
+       "system": "http://hl7.org/fhir/sid/cvx",
+       "code": "150",
+       "display": "Influenza, injectable, quadrivalent, preservative free"
+      }
+     ],
+     "text": "Influenza, injectable, quadrivalent, preservative free"
+    },
+    "patient": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "occurrenceDateTime": "2025-10-14",
+    "lotNumber": "FLU25-7731",
+    "performer": [
+     {
+      "actor": {
+       "display": "Hausarztpraxis Musterstadt (fictional)"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:a1d85431-8d60-875e-aa3a-6121242f3c6c",
+   "resource": {
+    "resourceType": "Immunization",
+    "id": "a1d85431-8d60-875e-aa3a-6121242f3c6c",
+    "meta": {
+     "profile": [
+      "http://hl7.eu/fhir/eps/StructureDefinition/immunization-obl-eu-eps"
+     ]
+    },
+    "identifier": [
+     {
+      "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+      "value": "imm-p1-2025-10-14-208"
+     }
+    ],
+    "status": "completed",
+    "vaccineCode": {
+     "coding": [
+      {
+       "system": "http://hl7.org/fhir/sid/cvx",
+       "code": "208",
+       "display": "COVID-19, mRNA, LNP-S, PF, 30 mcg/0.3 mL dose"
+      }
+     ],
+     "text": "COVID-19, mRNA, LNP-S, PF, 30 mcg/0.3 mL dose"
+    },
+    "patient": {
+     "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+    },
+    "occurrenceDateTime": "2025-10-14",
+    "lotNumber": "CV25-0192",
+    "performer": [
+     {
+      "actor": {
+       "display": "Hausarztpraxis Musterstadt (fictional)"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}
