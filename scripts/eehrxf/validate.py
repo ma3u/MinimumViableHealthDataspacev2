@@ -20,12 +20,25 @@ Sources, both of them what the hub actually takes in:
 A resource passes when the validator reports no issue of severity error or
 fatal. Terminology is not checked (-tx n/a): see profiles.json.
 
+German ePA profiles (#1172) sit in profiles.json's national section. Each of
+their guides is validated in a run of its own and written to the report's
+national section, which build.py does not read: a German result is never
+shown as EEHRxF coverage on /eehrxf.
+
+The gate (#1172). A guide whose status is draft or ballot is report-only: its
+failures are written to the report and never change the exit code. Every
+other guide gates: the script exits 1 when a gating profile fails more
+resources than the baseline (the committed report) records for it as a gating
+profile. So the known failures of a published guide do not fail a run, a new
+one does, and a guide that turns published starts from zero.
+
 The report carries no timestamp, so a rerun on unchanged inputs gives the same
 file and CI can fail on a difference.
 
 Usage:
     python3 scripts/eehrxf/validate.py            # validate and write the report
     python3 scripts/eehrxf/validate.py --keep     # keep the work directory
+    python3 scripts/eehrxf/validate.py --baseline none   # no gate, report only
 """
 
 from __future__ import annotations
@@ -100,6 +113,12 @@ def matches_filter(resource: dict, source_filter: str | None) -> bool:
         return DISCHARGE_REPORT in loinc_type(resource)
     if source_filter == "patient-summary-document":
         return resource.get("type") == "document" and PATIENT_SUMMARY in loinc_type(first_composition(resource))
+    if source_filter == "laboratory-bundle":
+        return resource.get("resourceType") == "Bundle" and any(
+            e.get("resource", {}).get("resourceType") == "DiagnosticReport"
+            and matches_filter(e["resource"], "laboratory")
+            for e in resource.get("entry", [])
+        )
     raise ValueError(f"unknown sourceFilter {source_filter!r}")
 
 
@@ -133,6 +152,18 @@ def collect_sources() -> dict[str, dict]:
         "resources": res,
     }
     return sources
+
+
+REPORT_ONLY = {"draft", "ballot"}
+
+
+def report_only(ig: dict) -> bool:
+    """A draft or ballot guide reports; anything else (published, STU n) gates."""
+    return ig.get("status", "").strip().lower() in REPORT_ONLY
+
+
+def national(cfg: dict) -> dict:
+    return cfg.get("national", {"igs": {}, "profiles": []})
 
 
 def candidates(profile: dict, sources: dict[str, dict]) -> list[tuple[str, str, dict]]:
@@ -170,10 +201,12 @@ def file_name(profile_id: str, sid: str, n: int) -> str:
     return f"{profile_id}__{sid}__{n:03d}.json"
 
 
-def write_inputs(cfg: dict, sources: dict, work: Path) -> dict[str, tuple[str, str, str]]:
+def write_inputs(
+    cfg: dict, sources: dict, work: Path, profiles: list[dict] | None = None
+) -> dict[str, tuple[str, str, str]]:
     """Write one copy per (profile, resource). Returns {file: (profileId, sid, origin)}."""
     index: dict[str, tuple[str, str, str]] = {}
-    for profile in cfg["profiles"]:
+    for profile in cfg["profiles"] if profiles is None else profiles:
         counter: collections.Counter = collections.Counter()
         for sid, origin, resource in candidates(profile, sources):
             r = copy.deepcopy(resource)
@@ -185,10 +218,10 @@ def write_inputs(cfg: dict, sources: dict, work: Path) -> dict[str, tuple[str, s
     return index
 
 
-def run_validator(cfg: dict, jar: Path, work: Path, out: Path) -> None:
+def run_validator(cfg: dict, jar: Path, work: Path, out: Path, igs: list[dict] | None = None) -> None:
     v = cfg["validator"]
     cmd = ["java", "-jar", str(jar), "-version", v["fhirVersion"]]
-    for ig in sorted(cfg["igs"].values(), key=lambda i: i["package"]):
+    for ig in sorted(cfg["igs"].values() if igs is None else igs, key=lambda i: i["package"]):
         cmd += ["-ig", f"{ig['package']}#{ig['version']}"]
     cmd += ["-tx", "n/a"]
     for domain in v.get("allowedExtensionDomains", []):
@@ -255,10 +288,11 @@ def ignored(cfg: dict, sid: str, issue: dict) -> bool:
     )
 
 
-def build_report(cfg: dict, sources: dict, index: dict, outcomes: dict) -> dict:
+def profile_results(cfg: dict, igs: dict, profile_list: list[dict], sources: dict, index: dict, outcomes: dict) -> dict:
     profiles = {}
-    for profile in cfg["profiles"]:
+    for profile in profile_list:
         pid = profile["profileId"]
+        ig = igs[profile["ig"]]
         by_source: dict[str, dict] = {sid: {"tested": 0, "passed": 0} for sid in sorted(sources)}
         issues: collections.Counter = collections.Counter()
         for fname, (p, sid, _origin) in sorted(index.items()):
@@ -276,7 +310,8 @@ def build_report(cfg: dict, sources: dict, index: dict, outcomes: dict) -> dict:
         passed = sum(s["passed"] for s in by_source.values())
         profiles[pid] = {
             "canonical": profile["canonical"],
-            "ig": f"{cfg['igs'][profile['ig']]['package']}#{cfg['igs'][profile['ig']]['version']}",
+            "ig": f"{ig['package']}#{ig['version']}",
+            "gate": not report_only(ig),
             "tested": tested,
             "passed": passed,
             "failed": tested - passed,
@@ -286,6 +321,11 @@ def build_report(cfg: dict, sources: dict, index: dict, outcomes: dict) -> dict:
                 for text, n in sorted(issues.items(), key=lambda kv: (-kv[1], kv[0]))[:TOP_ISSUES]
             ],
         }
+    return profiles
+
+
+def build_report(cfg: dict, sources: dict, index: dict, outcomes: dict) -> dict:
+    nat = national(cfg)
     return {
         "$comment": "Written by scripts/eehrxf/validate.py; do not edit. build.py reads it.",
         "validator": {
@@ -302,27 +342,78 @@ def build_report(cfg: dict, sources: dict, index: dict, outcomes: dict) -> dict:
             for sid, s in sorted(sources.items())
         },
         "inputsDigest": inputs_digest(sources),
-        "profiles": profiles,
+        "profiles": profile_results(cfg, cfg["igs"], cfg["profiles"], sources, index, outcomes),
+        "national": {
+            "$comment": "German ePA profiles (#1172). Not EEHRxF: build.py does not read this section, so /eehrxf never shows it as coverage.",
+            "igs": {
+                k: {"package": f"{v['package']}#{v['version']}", "status": v["status"], "gate": not report_only(v)}
+                for k, v in sorted(nat["igs"].items())
+            },
+            "profiles": profile_results(cfg, nat["igs"], nat["profiles"], sources, index, outcomes),
+        },
     }
+
+
+def all_profiles(report: dict) -> dict[str, dict]:
+    return {**report.get("profiles", {}), **report.get("national", {}).get("profiles", {})}
+
+
+def gate_failures(report: dict, baseline: dict | None) -> list[str]:
+    """Gating profiles that fail more resources than the baseline records for them as gating.
+
+    A report-only profile never fails the run. A profile the baseline does not
+    have, or had as report-only, is allowed no failure.
+    """
+    known = all_profiles(baseline or {})
+    out = []
+    for pid, p in sorted(all_profiles(report).items()):
+        if not p.get("gate", True):
+            continue
+        before = known.get(pid)
+        allowed = before["failed"] if before and before.get("gate", True) else 0
+        if p["failed"] > allowed:
+            out.append(f"{pid} ({p['ig']}): {p['failed']} of {p['tested']} fail, the baseline allows {allowed}")
+    return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--keep", action="store_true", help="keep the work directory")
     ap.add_argument("--report", default=str(REPORT), help="where to write the report")
+    ap.add_argument(
+        "--baseline",
+        default=str(REPORT),
+        help="report whose failures a gating profile may keep (default: the committed report; none: no gate)",
+    )
     args = ap.parse_args()
 
+    baseline = None
+    if args.baseline != "none" and Path(args.baseline).exists():
+        baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
     cfg = load_config()
     sources = collect_sources()
     jar = ensure_validator(cfg)
     work = Path(tempfile.mkdtemp(prefix="eehrxf-"))
     try:
-        inputs = work / "in"
-        inputs.mkdir()
-        index = write_inputs(cfg, sources, inputs)
-        out = work / "outcome.json"
-        run_validator(cfg, jar, inputs, out)
-        report = build_report(cfg, sources, index, parse_outcomes(out))
+        # One run for the EEHRxF guides, then one per German guide: they pin
+        # other versions of the same HL7 Europe packages.
+        nat = national(cfg)
+        runs = [("eehrxf", list(cfg["igs"].values()), cfg["profiles"])]
+        for key, ig in sorted(nat["igs"].items()):
+            runs.append((f"national-{key}", [ig], [p for p in nat["profiles"] if p["ig"] == key]))
+        index: dict[str, tuple[str, str, str]] = {}
+        outcomes: dict[str, list[dict]] = {}
+        for name, igs, profiles in runs:
+            inputs = work / "in" / name
+            inputs.mkdir(parents=True)
+            run_index = write_inputs(cfg, sources, inputs, profiles)
+            index.update(run_index)
+            if not run_index:
+                continue
+            out = work / f"outcome-{name}.json"
+            run_validator(cfg, jar, inputs, out, igs)
+            outcomes.update(parse_outcomes(out))
+        report = build_report(cfg, sources, index, outcomes)
     finally:
         if args.keep:
             print(f"work directory kept: {work}", file=sys.stderr)
@@ -330,9 +421,13 @@ def main() -> int:
             shutil.rmtree(work, ignore_errors=True)
 
     Path(args.report).write_text(json.dumps(report, indent=2, sort_keys=False) + "\n", encoding="utf-8")
-    for pid, p in report["profiles"].items():
-        print(f"{pid:32} {p['passed']:3}/{p['tested']:<3} passed")
-    return 0
+    for pid, p in all_profiles(report).items():
+        mode = "" if p["gate"] else "  (report-only)"
+        print(f"{pid:32} {p['passed']:3}/{p['tested']:<3} passed{mode}")
+    failures = gate_failures(report, baseline)
+    for line in failures:
+        print(f"gate: {line}", file=sys.stderr)
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":
