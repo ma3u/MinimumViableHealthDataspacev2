@@ -22,6 +22,7 @@ import {
 import { foreignNodes, storeDocument } from "@/lib/fhir-documents/store";
 import { OPT_OUT_CYPHER, PERSON_LABELS } from "@/lib/opt-out";
 import type { DocumentPatient, Run } from "@/lib/fhir-documents/shared";
+import { omopTransformStatements } from "../../fixtures/omop-transform";
 
 const BOLT = process.env.FHIR_IMPORT_IT_BOLT;
 const T = "2026-11-20T09:00:00Z";
@@ -198,43 +199,9 @@ describe.skipIf(!BOLT)("importing FHIR documents into the graph", () => {
   });
 
   it("reaches OMOP through neo4j/fhir-to-omop-transform.cypher, unchanged", async () => {
-    // The transform reads the loader's shape: an `id` on every node and dates
-    // as strings. Some seeds key by resourceId and write Neo4j dates, and the
-    // transform fails on them before it reaches an import. Both are filled in
-    // here, inside the transaction only; the import itself writes that shape.
-    await tx.run(
-      `MATCH (n) WHERE (n:Patient OR n:Encounter OR n:Condition OR n:Observation
-         OR n:MedicationRequest OR n:Procedure) AND n.id IS NULL
-       SET n.id = coalesce(n.resourceId, elementId(n))`,
-    );
-    for (const [label, prop] of [
-      ["Patient", "birthDate"],
-      ["Encounter", "date"],
-      ["Condition", "onsetDate"],
-      ["Observation", "dateTime"],
-      ["MedicationRequest", "date"],
-      ["Procedure", "performedStart"],
-    ]) {
-      await tx.run(
-        `MATCH (n:${label}) WHERE n.${prop} IS NOT NULL
-         SET n.${prop} = toString(n.${prop})`,
-      );
-    }
-    const transform = readFileSync(
-      path.resolve(
-        __dirname,
-        "../../../../neo4j/fhir-to-omop-transform.cypher",
-      ),
-      "utf8",
-    );
-    const statements = transform
-      .split("\n")
-      .filter((l) => !l.trim().startsWith("//"))
-      .join("\n")
-      .split(";")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    for (const statement of statements) await tx.run(statement);
+    // The graph as the seeds left it: P1 is keyed by resourceId only and has
+    // a Neo4j date of birth, which the transform reads as they are.
+    for (const statement of omopTransformStatements()) await tx.run(statement);
     const mapped = await one(
       `MATCH (p:Patient)-[:HAS_OBSERVATION]->(o:Observation {imported: true})-[:MAPPED_TO]->(om:OMOPMeasurement)
        WHERE coalesce(p.id, p.resourceId) = 'P1'
