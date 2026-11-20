@@ -512,10 +512,15 @@ function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
   // Build summary line based on resource type
   let summary = "";
   if (type === "Patient") {
-    const name = (r.name as Array<{ given?: string[]; family?: string }>)?.[0];
-    summary = name
-      ? `${name.given?.[0] || ""} ${name.family || ""}`.trim()
-      : r.id || "";
+    const name = (
+      r.name as Array<{ given?: string[]; family?: string; text?: string }>
+    )?.[0];
+    // The hub's facade writes the name as text (neo4j-proxy fhir-resource.ts).
+    summary =
+      `${name?.given?.[0] || ""} ${name?.family || ""}`.trim() ||
+      name?.text ||
+      r.id ||
+      "";
   } else if (type === "Observation") {
     const code = (r.code as { text?: string })?.text || "";
     const val = r.valueQuantity as

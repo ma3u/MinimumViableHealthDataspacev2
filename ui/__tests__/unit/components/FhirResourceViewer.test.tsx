@@ -111,6 +111,28 @@ describe("FhirResourceViewer", () => {
     expect(screen.getByText(/John Smith/)).toBeInTheDocument();
   });
 
+  it("displays a name the hub's facade writes as text only", async () => {
+    render(
+      <FhirResourceViewer
+        bundle={{
+          ...sampleBundle,
+          entry: [
+            {
+              fullUrl: "http://neo4j-proxy:9090/fhir/Patient/P1",
+              resource: {
+                resourceType: "Patient",
+                id: "P1",
+                name: [{ text: "Maria Schmidt" }],
+              },
+            },
+          ],
+        }}
+      />,
+    );
+    await userEvent.click(screen.getByText("Patients").closest("button")!);
+    expect(screen.getByText(/Maria Schmidt/)).toBeInTheDocument();
+  });
+
   it("displays condition text after expanding group", async () => {
     render(<FhirResourceViewer bundle={sampleBundle} />);
     const condBtn = screen.getByText("Conditions").closest("button")!;
