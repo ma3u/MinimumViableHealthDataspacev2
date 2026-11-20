@@ -1,0 +1,38 @@
+meta {
+  name: 28 My FHIR documents
+  type: http
+  seq: 28
+}
+
+get {
+  url: {{baseUrl}}/api/patient/documents?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.patientId: eq {{patientId}}
+  res.body.documents: isArray
+}
+
+tests {
+  // #1171: the Patient Summary first, then one lab report per report.
+  test("the Patient Summary is listed first", () => {
+    expect(res.body.documents[0].type).to.equal("patient-summary");
+    expect(res.body.documents[0].profile).to.equal("http://hl7.eu/fhir/eps/StructureDefinition/bundle-eu-eps");
+  });
+  test("every document says where to fetch it", () => {
+    res.body.documents.forEach((d) => expect(d.href).to.match(/^\/api\/patient\/documents\//));
+  });
+}
+
+docs {
+  EHDS Art. 7 and Art. 14: the documents a person's record yields in the European
+  exchange format, built from the graph on request (#1171). P1 has laboratory
+  values from neo4j/seed-patient-overview.cypher, so its list carries lab reports.
+}

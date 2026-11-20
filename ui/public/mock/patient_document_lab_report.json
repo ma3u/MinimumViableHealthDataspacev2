@@ -1,0 +1,640 @@
+{
+  "resourceType": "Bundle",
+  "meta": {
+    "profile": [
+      "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab"
+    ]
+  },
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:uuid:7ed445b4-256a-808e-9936-29a2eec68119"
+  },
+  "type": "document",
+  "timestamp": "2026-11-20T09:00:00Z",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:12261295-4b11-85d3-9f93-c3b5da857250",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "12261295-4b11-85d3-9f93-c3b5da857250",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Composition-eu-lab"
+          ]
+        },
+        "identifier": {
+          "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+          "value": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11502-2",
+              "display": "Laboratory report"
+            }
+          ],
+          "text": "Laboratory report"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "date": "2026-11-20T09:00:00Z",
+        "author": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "title": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)",
+        "custodian": {
+          "reference": "urn:uuid:1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+          "display": "EHDS Integration Hub (demo)"
+        },
+        "section": [
+          {
+            "title": "Laboratory examinations",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "26436-6",
+                  "display": "Laboratory studies (set)"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Cholesterol in LDL [Mass/volume] in Serum or Plasma: 132 mg/dL (range 0 - 116 mg/dL (as printed on the report))</li><li>Cholesterol [Mass/volume] in Serum or Plasma: 205 mg/dL (range 0 - 200 mg/dL (as printed on the report))</li><li>Glucose [Mass/volume] in Blood: 142 mg/dL (range 70 - 99 mg/dL (as printed on the report))</li><li>Glomerular filtration rate/1.73 sq M.predicted: 88 mL/min/{1.73_m2} (range &gt; 90 mL/min/{1.73_m2} (as printed on the report))</li><li>Hemoglobin A1c/Hemoglobin.total in Blood: 7.6 % (range 4.0 - 6.0 % (as printed on the report))</li></ul></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:504bf236-2296-8752-8d08-1ba800ce9450"
+              },
+              {
+                "reference": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c"
+              },
+              {
+                "reference": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04"
+              },
+              {
+                "reference": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd"
+              },
+              {
+                "reference": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b"
+              },
+              {
+                "reference": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "abec137a-4a51-8058-a010-ca5c0f66400e",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "P1"
+          }
+        ],
+        "name": [
+          {
+            "text": "Maria Schmidt"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1979-03-15"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:504bf236-2296-8752-8d08-1ba800ce9450",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "504bf236-2296-8752-8d08-1ba800ce9450",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+            "valueReference": {
+              "reference": "urn:uuid:12261295-4b11-85d3-9f93-c3b5da857250"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+            "value": "lab-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "LAB",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11502-2",
+              "display": "Laboratory report"
+            }
+          ],
+          "text": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "result": [
+          {
+            "reference": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c"
+          },
+          {
+            "reference": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04"
+          },
+          {
+            "reference": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd"
+          },
+          {
+            "reference": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b"
+          },
+          {
+            "reference": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "64db516f-8663-8e35-8739-5a8392d3560c",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-2089-1-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2089-1",
+              "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 132,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 116,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "0 - 116 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "3b7faac8-f75f-85bc-b1b6-f994710b2f04",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-2093-3-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3",
+              "display": "Cholesterol [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 205,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 200,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "0 - 200 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "91f8e67f-d3a6-8507-9e70-818caed868bd",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-2339-0-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2339-0",
+              "display": "Glucose [Mass/volume] in Blood"
+            }
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 142,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 70,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 99,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "70 - 99 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "1039c363-0fa1-85d8-aa58-a30fbee1e35b",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-33914-3-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33914-3",
+              "display": "Glomerular filtration rate/1.73 sq M.predicted"
+            }
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 88,
+          "unit": "mL/min/{1.73_m2}",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL/min/{1.73_m2}"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 90,
+              "unit": "mL/min/{1.73_m2}",
+              "system": "http://unitsofmeasure.org",
+              "code": "mL/min/{1.73_m2}"
+            },
+            "text": "> 90 mL/min/{1.73_m2} (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "031d4a83-60f3-8360-a0aa-8d596b82be15",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-4548-4-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:abec137a-4a51-8058-a010-ca5c0f66400e"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 7.6,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 4,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "high": {
+              "value": 6,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "text": "4.0 - 6.0 % (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "eef31a1b-1a83-8764-b5d3-cf6651723175",
+        "name": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+        "name": "EHDS Integration Hub (demo)"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:edb8a871-1201-8e05-a1db-4943525fa202",
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "edb8a871-1201-8e05-a1db-4943525fa202",
+        "target": [
+          {
+            "reference": "urn:uuid:504bf236-2296-8752-8d08-1ba800ce9450"
+          },
+          {
+            "reference": "urn:uuid:64db516f-8663-8e35-8739-5a8392d3560c"
+          },
+          {
+            "reference": "urn:uuid:3b7faac8-f75f-85bc-b1b6-f994710b2f04"
+          },
+          {
+            "reference": "urn:uuid:91f8e67f-d3a6-8507-9e70-818caed868bd"
+          },
+          {
+            "reference": "urn:uuid:1039c363-0fa1-85d8-aa58-a30fbee1e35b"
+          },
+          {
+            "reference": "urn:uuid:031d4a83-60f3-8360-a0aa-8d596b82be15"
+          }
+        ],
+        "recorded": "2026-11-20T09:00:00Z",
+        "activity": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+              "code": "CREATE",
+              "display": "create"
+            }
+          ],
+          "text": "Values reported by the performing laboratory"
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:eef31a1b-1a83-8764-b5d3-cf6651723175",
+              "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+            }
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "assembler"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:1688ede5-24d8-8091-9fd6-0fcdb92b5dc1",
+              "display": "EHDS Integration Hub (demo)"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

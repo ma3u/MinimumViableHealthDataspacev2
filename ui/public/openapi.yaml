@@ -161,6 +161,35 @@ components:
         connected phone.
 
   schemas:
+    FhirDocumentBundle:
+      description: >
+        A FHIR R4 `document` Bundle (#1171): the Composition is the first
+        entry and every reference resolves inside the Bundle.
+      type: object
+      required: [resourceType, identifier, type, timestamp, entry]
+      properties:
+        resourceType: { type: string, enum: [Bundle] }
+        meta: { type: object }
+        identifier:
+          type: object
+          properties:
+            system: { type: string }
+            value: { type: string }
+        type: { type: string, enum: [document] }
+        timestamp: { type: string, format: date-time }
+        entry:
+          type: array
+          items:
+            type: object
+            required: [fullUrl, resource]
+            properties:
+              fullUrl: { type: string }
+              resource:
+                type: object
+                required: [resourceType, id]
+                properties:
+                  resourceType: { type: string }
+                  id: { type: string }
     OptOutState:
       type: object
       required: [patientId, optedOut, since, history, article]
@@ -1597,6 +1626,111 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { description: A patient reads their own record only }
         "404": { description: Patient not found }
+        "502": { description: Neo4j unavailable }
+  /api/patient/documents:
+    get:
+      tags: [Patient]
+      summary: The FHIR documents a record yields (EHDS Art. 7, Art. 14)
+      x-required-roles: [EDC_ADMIN, PATIENT]
+      description: >
+        The record's Patient Summary and one laboratory report per report in
+        the graph, each with the profile it validates against and the address
+        to fetch it from (#1171). Built from the graph on request. A PATIENT
+        reads their own record only; EDC_ADMIN any.
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: The documents of the record
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [patientId, documents]
+                properties:
+                  patientId: { type: string }
+                  documents:
+                    type: array
+                    items:
+                      type: object
+                      required: [type, title, profile, href]
+                      properties:
+                        type:
+                          { type: string, enum: [patient-summary, lab-report] }
+                        title: { type: string }
+                        profile: { type: string }
+                        href: { type: string }
+                        reportId: { type: string }
+                        date: { type: string }
+                        performer: { type: string, nullable: true }
+                        results: { type: integer }
+        "400": { description: patientId is required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: A patient reads their own record only }
+        "404": { description: Patient not found }
+        "502": { description: Neo4j unavailable }
+  /api/patient/documents/patient-summary:
+    get:
+      tags: [Patient]
+      summary: The record's Patient Summary as a FHIR document (EHDS Art. 14(1)(a))
+      x-required-roles: [EDC_ADMIN, PATIENT]
+      description: >
+        A FHIR R4 `document` Bundle, HL7 Europe Patient Summary
+        1.0.0-ballot: Composition first, then problems, allergies,
+        medications, immunisations and procedures from layer 3 of the graph
+        (#1171). A section the graph has nothing for is empty with the reason
+        `unavailable`. A PATIENT reads their own record only and appears in
+        it under their pseudonym, without a birth date; EDC_ADMIN sees the
+        name. Validated by scripts/eehrxf/validate.py.
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: FHIR R4 document Bundle
+          content:
+            application/fhir+json:
+              schema: { $ref: "#/components/schemas/FhirDocumentBundle" }
+        "400": { description: patientId is required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: A patient reads their own record only }
+        "404": { description: Patient not found }
+        "502": { description: Neo4j unavailable }
+  /api/patient/documents/lab-report:
+    get:
+      tags: [Patient]
+      summary: One laboratory report as a FHIR document (EHDS Art. 14(1)(e))
+      x-required-roles: [EDC_ADMIN, PATIENT]
+      description: >
+        A FHIR R4 `document` Bundle, HL7 Europe Laboratory Report 2.1.0:
+        Composition, DiagnosticReport, its Observations, the performing
+        laboratory and a Provenance (#1171). A value the Klarbefund app read
+        off paper keeps the page and line it came from. Without `reportId`,
+        the newest report; /api/patient/documents lists the ids.
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: reportId
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: FHIR R4 document Bundle
+          content:
+            application/fhir+json:
+              schema: { $ref: "#/components/schemas/FhirDocumentBundle" }
+        "400": { description: patientId is required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: A patient reads their own record only }
+        "404": { description: Patient or report not found }
         "502": { description: Neo4j unavailable }
   /api/patient/app/account:
     delete:

@@ -1,0 +1,25 @@
+meta {
+  name: 45 A researcher cannot read a Patient Summary (403)
+  type: http
+  seq: 45
+}
+
+get {
+  url: {{baseUrl}}/api/patient/documents/patient-summary?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.error: isString
+}
+
+docs {
+  #1171: a record's documents are primary use (Art. 3, Art. 7). A data user
+  works on secondary-use data through a permit, never on a named document.
+}

@@ -92,6 +92,29 @@ describe("reading the app's report bundle", () => {
     });
   });
 
+  it("keeps the line on the paper and where it is, for the lab report document (#1171)", () => {
+    const base =
+      "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source";
+    const { rows } = parseReportBundle(
+      bundle(
+        observation("obs-1", {
+          extension: [
+            { url: SOURCE, valueCode: "ocr-transcribed" },
+            { url: `${base}-line`, valueString: "Cholesterin 190 mg/dl < 200" },
+            { url: `${base}-region`, valueString: "1@0.1,0.4,0.8,0.02" },
+          ],
+        }),
+        observation("obs-2"),
+      ),
+      ids,
+    );
+    expect(rows[0]).toMatchObject({
+      sourceLine: "Cholesterin 190 mg/dl < 200",
+      sourceRegion: "1@0.1,0.4,0.8,0.02",
+    });
+    expect(rows[1]).toMatchObject({ sourceLine: null, sourceRegion: null });
+  });
+
   it("refuses a final value, an uncoded one, one without a unit and one without a date", () => {
     const { rows, skipped } = parseReportBundle(
       bundle(
