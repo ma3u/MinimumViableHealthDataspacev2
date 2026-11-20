@@ -75,6 +75,11 @@ public struct Taxon: Sendable, Equatable, Codable {
 }
 
 public enum Analytes {
+  /// The LOINC release every code in this table was checked against, written
+  /// as `Coding.version` on every LOINC coding. Mirrors `LOINC_VERSION`,
+  /// whose comment says how it was checked.
+  public static let loincVersion = "2.83"
+
   /// Printed unit spelling → UCUM code. Mirrors `normaliseUnit`.
   public static let unitMap: [String: String] = [
     "{beats}": "{beats}",
@@ -1105,9 +1110,9 @@ public enum Analytes {
     AnalyteCoding(labelKey: "eag", ucum: "mmol/L", loinc: "53553-4", display: "Glucose mean value [Moles/volume] in Blood Estimated from glycated hemoglobin", analyteKey: "glucose-mean-estimated"),
     AnalyteCoding(labelKey: "ecwtbw", ucum: "%", loinc: nil, display: "Extracellular to total body water ratio by bioimpedance", analyteKey: "ecw-tbw", uncodedReason: "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports."),
     AnalyteCoding(labelKey: "ecwtbwverhaeltnis", ucum: "%", loinc: nil, display: "Extracellular to total body water ratio by bioimpedance", analyteKey: "ecw-tbw", uncodedReason: "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports."),
-    AnalyteCoding(labelKey: "egfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "egfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "egfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "egfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "egfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "egfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "eicosapentaensaeure", ucum: "mg/L", loinc: nil, display: "Eicosapentaenoate (C20:5w3) [Mass/volume] in Blood", analyteKey: "epa", uncodedReason: "LOINC codes EPA in serum or plasma, or as an amount of substance in red blood cells (75097-6), not as a mass per volume of blood."),
     AnalyteCoding(labelKey: "eicosapentaensaeureepa205w3", ucum: "mg/L", loinc: nil, display: "Eicosapentaenoate (C20:5w3) [Mass/volume] in Blood", analyteKey: "epa", uncodedReason: "LOINC codes EPA in serum or plasma, or as an amount of substance in red blood cells (75097-6), not as a mass per volume of blood."),
     AnalyteCoding(labelKey: "einsekundenkapazitaet", ucum: "L", loinc: "20150-9", display: "FEV1", analyteKey: "fev1"),
@@ -1342,14 +1347,14 @@ public enum Analytes {
     AnalyteCoding(labelKey: "gesamtkoerperwasser", ucum: "kg", loinc: "101683-1", display: "Body water mass", analyteKey: "body-water"),
     AnalyteCoding(labelKey: "gesamtprotein", ucum: "g/dL", loinc: "2885-2", display: "Protein [Mass/volume] in Serum or Plasma", analyteKey: "protein-total"),
     AnalyteCoding(labelKey: "gesamtprotein", ucum: "g/L", loinc: "2885-2", display: "Protein [Mass/volume] in Serum or Plasma", analyteKey: "protein-total"),
-    AnalyteCoding(labelKey: "geschaetztegfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "geschaetztegfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "geschaetztegfregfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "geschaetztegfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "geschaetztegfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "geschaetztegfregfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "gewicht", ucum: "kg", loinc: "29463-7", display: "Body weight", analyteKey: "body-weight"),
-    AnalyteCoding(labelKey: "gfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "gfrberechnungnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "gfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
-    AnalyteCoding(labelKey: "gfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "gfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "gfrberechnungnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "gfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "gfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "ggt", ucum: "U/L", loinc: "2324-2", display: "Gamma glutamyl transferase [Enzymatic activity/volume] in Serum or Plasma", analyteKey: "ggt"),
     AnalyteCoding(labelKey: "ggt", ucum: "ukat/L", loinc: "2324-2", display: "Gamma glutamyl transferase [Enzymatic activity/volume] in Serum or Plasma", analyteKey: "ggt"),
     AnalyteCoding(labelKey: "gln", ucum: "umol/L", loinc: "20643-3", display: "Glutamine [Moles/volume] in Serum or Plasma", analyteKey: "glutamine"),
@@ -1376,7 +1381,7 @@ public enum Analytes {
     AnalyteCoding(labelKey: "gly", ucum: "umol/L", loinc: "20644-1", display: "Glycine [Moles/volume] in Serum or Plasma", analyteKey: "glycine"),
     AnalyteCoding(labelKey: "glycin", ucum: "umol/L", loinc: "20644-1", display: "Glycine [Moles/volume] in Serum or Plasma", analyteKey: "glycine"),
     AnalyteCoding(labelKey: "glykohaemoglobin", ucum: "%", loinc: "4548-4", display: "Hemoglobin A1c/Hemoglobin.total in Blood", analyteKey: "hba1c"),
-    AnalyteCoding(labelKey: "glykohaemoglobin", ucum: "mmol/mol", loinc: "59261-8", display: "Hemoglobin A1c/Hemoglobin.total in Blood by IFCC protocol", analyteKey: "hba1c"),
+    AnalyteCoding(labelKey: "glykohaemoglobin", ucum: "mmol/mol", loinc: "59261-8", display: "Hemoglobin A1c/Hemoglobin.total standardized per IFCC-RMP for CDT in Blood", analyteKey: "hba1c"),
     AnalyteCoding(labelKey: "glyzin", ucum: "umol/L", loinc: "20644-1", display: "Glycine [Moles/volume] in Serum or Plasma", analyteKey: "glycine"),
     AnalyteCoding(labelKey: "got", ucum: "U/L", loinc: "1920-8", display: "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma", analyteKey: "ast"),
     AnalyteCoding(labelKey: "got", ucum: "ukat/L", loinc: "1920-8", display: "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma", analyteKey: "ast"),
@@ -1398,7 +1403,7 @@ public enum Analytes {
     AnalyteCoding(labelKey: "haemoglobin", ucum: "g/L", loinc: "718-7", display: "Hemoglobin [Mass/volume] in Blood", analyteKey: "haemoglobin"),
     AnalyteCoding(labelKey: "haemoglobin", ucum: "mmol/L", loinc: "59260-0", display: "Hemoglobin [Moles/volume] in Blood", analyteKey: "haemoglobin"),
     AnalyteCoding(labelKey: "haemoglobina1c", ucum: "%", loinc: "4548-4", display: "Hemoglobin A1c/Hemoglobin.total in Blood", analyteKey: "hba1c"),
-    AnalyteCoding(labelKey: "haemoglobina1c", ucum: "mmol/mol", loinc: "59261-8", display: "Hemoglobin A1c/Hemoglobin.total in Blood by IFCC protocol", analyteKey: "hba1c"),
+    AnalyteCoding(labelKey: "haemoglobina1c", ucum: "mmol/mol", loinc: "59261-8", display: "Hemoglobin A1c/Hemoglobin.total standardized per IFCC-RMP for CDT in Blood", analyteKey: "hba1c"),
     AnalyteCoding(labelKey: "hafniaalveii", ucum: "%", loinc: nil, display: "Hafnia alveii [relative abundance] in Stool", analyteKey: "mb-hafnia-alveii", uncodedReason: "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.", taxon: Taxon(ncbiTaxId: "569", scientificName: "Hafnia alvei", rank: "species")),
     AnalyteCoding(labelKey: "harg", ucum: "umol/L", loinc: "79612-8", display: "L-homoarginine [Moles/volume] in Serum or Plasma", analyteKey: "homoarginine"),
     AnalyteCoding(labelKey: "harnsaeure", ucum: "mg/dL", loinc: "3084-1", display: "Urate [Mass/volume] in Serum or Plasma", analyteKey: "urate"),
@@ -1409,7 +1414,7 @@ public enum Analytes {
     AnalyteCoding(labelKey: "hb", ucum: "g/L", loinc: "718-7", display: "Hemoglobin [Mass/volume] in Blood", analyteKey: "haemoglobin"),
     AnalyteCoding(labelKey: "hb", ucum: "mmol/L", loinc: "59260-0", display: "Hemoglobin [Moles/volume] in Blood", analyteKey: "haemoglobin"),
     AnalyteCoding(labelKey: "hba1c", ucum: "%", loinc: "4548-4", display: "Hemoglobin A1c/Hemoglobin.total in Blood", analyteKey: "hba1c"),
-    AnalyteCoding(labelKey: "hba1c", ucum: "mmol/mol", loinc: "59261-8", display: "Hemoglobin A1c/Hemoglobin.total in Blood by IFCC protocol", analyteKey: "hba1c"),
+    AnalyteCoding(labelKey: "hba1c", ucum: "mmol/mol", loinc: "59261-8", display: "Hemoglobin A1c/Hemoglobin.total standardized per IFCC-RMP for CDT in Blood", analyteKey: "hba1c"),
     AnalyteCoding(labelKey: "hbe", ucum: "fmol", loinc: "59468-9", display: "MCH [Entitic substance]", analyteKey: "mch"),
     AnalyteCoding(labelKey: "hbe", ucum: "pg", loinc: "785-6", display: "MCH [Entitic mass] by Automated count", analyteKey: "mch"),
     AnalyteCoding(labelKey: "hbsak", ucum: "[IU]/L", loinc: "5193-8", display: "Hepatitis B virus surface Ab [Units/volume] in Serum or Plasma by Immunoassay", analyteKey: "hbs-antibody"),

@@ -43,6 +43,10 @@
   ],
   "bundle": {
     "resourceType": "Bundle",
+    "identifier": {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:5dd91b73-4262-5318-ad26-4cbb254abdad"
+    },
     "type": "collection",
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
@@ -95,6 +99,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "18752-6",
                 "display": "Exercise stress test study"
               }
@@ -108,6 +113,7 @@
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -178,8 +184,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -226,6 +234,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "29463-7",
                 "display": "Body weight"
               }
@@ -236,8 +245,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -299,6 +310,14 @@
               }
             }
           ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "performer-1",
+          "name": "Praxis Dr. Muster"
         }
       }
     ]

@@ -62,6 +62,10 @@
   ],
   "bundle": {
     "resourceType": "Bundle",
+    "identifier": {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:5dd91b73-4262-5318-ad26-4cbb254abdad"
+    },
     "type": "collection",
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
@@ -114,6 +118,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "11524-6",
                 "display": "EKG study"
               }
@@ -127,6 +132,7 @@
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -187,6 +193,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "8897-1",
                 "display": "QRS complex Ventricles by EKG"
               }
@@ -197,8 +204,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -245,6 +254,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "76635-2",
                 "display": "Q-T interval corrected based on Bazett formula"
               }
@@ -255,8 +265,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -303,6 +315,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "8632-2",
                 "display": "QRS axis"
               }
@@ -313,8 +326,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -379,6 +394,14 @@
               }
             }
           ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "performer-1",
+          "name": "Praxis Dr. Muster"
         }
       }
     ]

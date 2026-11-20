@@ -148,9 +148,13 @@ each file at **25 MB**.
   Composition and the KBV profiles. The resource shapes here are chosen so that step is
   additive, but claiming conformance we have not validated would be worse than not claiming it.
   MIO Laborbefund 1.0.0 is a FHIR bundle; manufacturer-mandatory is expected autumn 2026.
-- **Not validated LOINC.** The codes in `src/analytes.ts` are the widely used ones for these
-  measurements. Validate the table against an official LOINC release before anyone treats the
-  output as a clinical document.
+- **Not a clinical review of the LOINC table.** Every code the writer can emit was looked up
+  against LOINC 2.83 through the NLM clinical tables API on 2026-11-20 (present, not
+  deprecated, display equal to the long common name), and every LOINC coding carries
+  `version: "2.83"` (`LOINC_VERSION` in `src/analytes.ts`, which says how it was checked). A
+  lookup says the code exists with that name; whether it is the right code for what a German
+  lab prints still wants a clinician's review before anyone treats the output as a clinical
+  document.
 - **Not a clinical device.** It transcribes and codes; it does not interpret, flag or advise.
 - **Not fully covered by tests.** ~78% lines. The uncovered remainder is the external-tool
   boundary, `pdfjs-dist`, `tesseract.js` and the CLI's process shell. The parser, the analyte

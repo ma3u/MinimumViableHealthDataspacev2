@@ -4,8 +4,8 @@ import Foundation
 /// FHIR R4 writer, the Swift side of `services/epa-ingest/src/to-fhir.ts`.
 ///
 /// Emits a `collection` bundle: a DiagnosticReport, one Observation per coded
-/// value, a DocumentReference standing for the paper, and a Provenance tying
-/// them together.
+/// value, a DocumentReference standing for the paper, a Provenance tying them
+/// together, and the Organization that printed the report when it names one.
 ///
 /// It is **not** a KBV MIO Laborbefund document. That needs a `document` bundle
 /// with a Composition and the KBV profiles, and claiming a conformance nobody
@@ -36,6 +36,17 @@ public enum FhirWriter {
 
   static let ucumSystem = "http://unitsofmeasure.org"
   static let loincSystem = "http://loinc.org"
+
+  /// A LOINC coding with the release its code was checked against
+  /// (`Analytes.loincVersion`). The German lab profiles require the version
+  /// (#1172), and a code without one leaves the reader to guess the release.
+  static func loinc(_ code: String, _ display: String) -> JSON {
+    [
+      "system": .string(loincSystem), "version": .string(Analytes.loincVersion),
+      "code": .string(code), "display": .string(display),
+    ]
+  }
+
   /// NCBI Taxonomy as a FHIR code system: the numeric taxon id is the code
   /// and the scientific name the display, as HL7's Clinical Genomics work
   /// uses the same database.
@@ -177,6 +188,18 @@ public enum FhirWriter {
     let status = status(for: source.kind)
     let subject: JSON = ["reference": .string("Patient/\(meta.patientId)")]
 
+    // The laboratory or practice that printed the report, as printed. The
+    // German lab profiles want the performer as a reference (#1172), so the
+    // printed name becomes an Organization in the bundle, and the reference
+    // keeps the name as its display for a reader that does not resolve it.
+    // A report with no performer line has no Organization: none is invented.
+    let organization: JSON? = meta.performer.map {
+      ["resourceType": "Organization", "id": "performer-1", "name": .string($0)]
+    }
+    let performer: JSON? = meta.performer.map {
+      .array([["reference": "Organization/performer-1", "display": .string($0)]])
+    }
+
     // No name, no insurance number, no birth date: this bundle is an extraction
     // artefact, and the ePA already knows who its owner is.
     let patient: JSON = [
@@ -225,16 +248,16 @@ public enum FhirWriter {
         "code": codeableConcept(for: value),
         "subject": subject,
         "effectiveDateTime": .string(meta.effectiveDateTime),
+        // When this transcription was documented, the same moment as the
+        // report's `issued`. The German lab profiles require it (#1172); the
+        // lab's own release time is not on what we read.
+        "issued": .string(now),
         "valueQuantity": quantity(
           value.raw.value, ucum: value.coding.ucum, comparator: value.raw.comparator?.rawValue),
       ]
-      // Who reported the value: the laboratory or practice that printed the
-      // report, as printed. The HL7 Europe Laboratory Report profile requires
-      // a performer on every result (#1144); a report with no performer line
-      // leaves it out rather than inventing one.
-      if let performer = meta.performer {
-        observation["performer"] = .array([["display": .string(performer)]])
-      }
+      // Who reported the value. The HL7 Europe Laboratory Report profile
+      // requires a performer on every result (#1144).
+      if let performer { observation["performer"] = performer }
 
       // FHIR's rng-2: a range needs a low, a high or a text. The text is the
       // range as printed, so a range with no number in it still travels, and
@@ -265,11 +288,7 @@ public enum FhirWriter {
           [
             "code": [
               "coding": .array([
-                [
-                  "system": .string(loincSystem),
-                  "code": "41852-5",
-                  "display": "Microorganism or agent identified in Specimen",
-                ]
+                loinc("41852-5", "Microorganism or agent identified in Specimen")
               ])
             ],
             "valueCodeableConcept": [
@@ -320,16 +339,9 @@ public enum FhirWriter {
           "coding": .array([
             ecg
               ? (isHolter(values)
-                ? [
-                  "system": .string(loincSystem), "code": "18754-2",
-                  "display": "Ambulatory cardiac rhythm monitor (Holter) study",
-                ]
-                : ["system": .string(loincSystem), "code": "11524-6", "display": "EKG study"])
-              : [
-                "system": .string(loincSystem),
-                "code": .string(kind?.loinc ?? "11502-2"),
-                "display": .string(kind?.display ?? "Laboratory report"),
-              ]
+                ? loinc("18754-2", "Ambulatory cardiac rhythm monitor (Holter) study")
+                : loinc("11524-6", "EKG study"))
+              : loinc(kind?.loinc ?? "11502-2", kind?.display ?? "Laboratory report")
           ])
         ]
         if let title = meta.title { code["text"] = .string(title) }
@@ -339,9 +351,7 @@ public enum FhirWriter {
       "effectiveDateTime": .string(meta.effectiveDateTime),
       "issued": .string(now),
     ]
-    if let performer = meta.performer {
-      report["performer"] = .array([["display": .string(performer)]])
-    }
+    if let performer { report["performer"] = performer }
     report["result"] = .array(
       observations.map { ["reference": .string("Observation/\($0["id"]?.stringValue ?? "")")] })
     report["presentedForm"] = .array([["title": .string(source.sourceDocument)]])
@@ -389,9 +399,17 @@ public enum FhirWriter {
       ]),
     ]
 
-    let resources = [patient, docRef, report] + observations + [provenance]
+    // The Organization last, so every other entry keeps the position, and so
+    // the fullUrl, it had before there was one.
+    let resources =
+      [patient, docRef, report] + observations + [provenance] + (organization.map { [$0] } ?? [])
     return [
       "resourceType": "Bundle",
+      // The bundle's own identity, named like its entries.
+      "identifier": [
+        "system": "urn:ietf:rfc:3986",
+        "value": .string("urn:uuid:" + uuidV5("\(now)|\(source.sourceDocument)|bundle")),
+      ],
       "type": "collection",
       "timestamp": .string(now),
       "entry": .array(
@@ -440,14 +458,8 @@ public enum FhirWriter {
   /// consumer is told rather than left to guess.
   private static func codeableConcept(for value: CodedLabValue) -> JSON {
     var concept: JSON = [:]
-    if let loinc = value.coding.loinc {
-      concept["coding"] = .array([
-        [
-          "system": .string(loincSystem),
-          "code": .string(loinc),
-          "display": .string(value.coding.display),
-        ]
-      ])
+    if let code = value.coding.loinc {
+      concept["coding"] = .array([loinc(code, value.coding.display)])
     } else if let reason = value.coding.uncodedReason {
       concept["extension"] = .array([
         [
