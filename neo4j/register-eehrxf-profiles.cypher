@@ -29,8 +29,8 @@ SET c.name = 'Patient Summaries',
     c.ehdsGroup = 1,
     c.status = 'partial',
     c.profileCount = 7,
-    c.tested = 46,
-    c.passed = 36;
+    c.tested = 47,
+    c.passed = 37;
 
 MERGE (c:EEHRxFCategory {categoryId: 'eprescription'})
 SET c.name = 'ePrescriptions',
@@ -193,8 +193,8 @@ SET p.name = 'Bundle (EU Patient Summary)',
     p.url = 'https://hl7.eu/fhir/eps/1.0.0-ballot/StructureDefinition-bundle-eu-eps.html',
     p.baseResource = 'Bundle',
     p.description = null,
-    p.tested = 5,
-    p.passed = 5,
+    p.tested = 6,
+    p.passed = 6,
     p.failed = 0,
     p.topIssues = [],
     p.coverage = 'full';
@@ -399,7 +399,7 @@ SET g.name = 'EU Manifest-based Access to DICOM Objects (EU-MADO)',
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
     v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
-    v.inputsDigest = 'e1f299a84286fbf9',
+    v.inputsDigest = 'c6b8ffab9e1358a0',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
     v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],

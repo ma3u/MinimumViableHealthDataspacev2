@@ -41,6 +41,8 @@ export const EPS_PROFILES = {
     "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps",
   immunization:
     "http://hl7.eu/fhir/eps/StructureDefinition/immunization-obl-eu-eps",
+  allergy:
+    "http://hl7.eu/fhir/eps/StructureDefinition/allergyintolerance-obl-eu-eps",
   procedure: "http://hl7.eu/fhir/eps/StructureDefinition/procedure-eu-eps",
   organization:
     "http://hl7.eu/fhir/eps/StructureDefinition/organization-obl-eu-eps",
@@ -99,8 +101,25 @@ export interface ProcedureRow {
   performed: string | null;
 }
 
+export interface AllergyRow {
+  id: string;
+  code: string | null;
+  system: string | null;
+  display: string;
+  clinicalStatus: string | null;
+  verificationStatus: string | null;
+  /** `allergy` or `intolerance` */
+  type: string | null;
+  /** `food`, `medication`, `environment`, `biologic` */
+  category: string | null;
+  criticality: string | null;
+  onset: string | null;
+}
+
 export interface PatientSummaryInput {
   conditions: ConditionRow[];
+  /** Absent or empty: the record holds no allergy information. */
+  allergies?: AllergyRow[];
   medications: MedicationRow[];
   immunizations: ImmunizationRow[];
   procedures: ProcedureRow[];
@@ -149,6 +168,21 @@ const EVENT_STATUS = new Set([
   "entered-in-error",
   "unknown",
 ]);
+
+const ALLERGY_CLINICAL = new Set(["active", "inactive", "resolved"]);
+const ALLERGY_VERIFICATION = new Set([
+  "unconfirmed",
+  "confirmed",
+  "refuted",
+  "entered-in-error",
+]);
+const ALLERGY_CATEGORY = new Set([
+  "food",
+  "medication",
+  "environment",
+  "biologic",
+]);
+const ALLERGY_CRITICALITY = new Set(["low", "high", "unable-to-assess"]);
 
 const pick = (value: string | null, allowed: Set<string>, fallback: string) =>
   value && allowed.has(value) ? value : fallback;
@@ -302,6 +336,48 @@ export function buildPatientSummaryDocument(
       : {}),
   }));
 
+  const allergyRows = input.allergies ?? [];
+  const allergies: FhirResource[] = allergyRows.map((a) => ({
+    resourceType: "AllergyIntolerance",
+    id: uuid(`allergy|${a.id}`),
+    meta: { profile: [EPS_PROFILES.allergy] },
+    identifier: [graphIdentifier(a.id)],
+    clinicalStatus: {
+      coding: [
+        {
+          system:
+            "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+          code: pick(a.clinicalStatus, ALLERGY_CLINICAL, "active"),
+        },
+      ],
+    },
+    ...(a.verificationStatus && ALLERGY_VERIFICATION.has(a.verificationStatus)
+      ? {
+          verificationStatus: {
+            coding: [
+              {
+                system:
+                  "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+                code: a.verificationStatus,
+              },
+            ],
+          },
+        }
+      : {}),
+    ...(a.type === "allergy" || a.type === "intolerance"
+      ? { type: a.type }
+      : {}),
+    ...(a.category && ALLERGY_CATEGORY.has(a.category)
+      ? { category: [a.category] }
+      : {}),
+    ...(a.criticality && ALLERGY_CRITICALITY.has(a.criticality)
+      ? { criticality: a.criticality }
+      : {}),
+    code: codeable(a.code, systemOr(a.system, a.code, SNOMED), a.display),
+    patient: subject,
+    ...(a.onset ? { onsetDateTime: a.onset } : {}),
+  }));
+
   const procedures: FhirResource[] = input.procedures.map((p) => ({
     resourceType: "Procedure",
     id: uuid(`procedure|${p.id}`),
@@ -339,8 +415,8 @@ export function buildPatientSummaryDocument(
       title: "Allergies and intolerances",
       code: "48765-2",
       display: "Allergies and adverse reactions Document",
-      resources: [],
-      lines: [],
+      resources: allergies,
+      lines: allergyRows.map((a) => `${a.display}${since(a.onset)}`),
       empty:
         "This record holds no information on allergies or intolerances; that is not a statement that there are none.",
     }),
@@ -411,6 +487,7 @@ export function buildPatientSummaryDocument(
     ...medications,
     ...immunizations,
     ...procedures,
+    ...allergies,
   ];
   return {
     resourceType: "Bundle",

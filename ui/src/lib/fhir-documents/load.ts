@@ -6,6 +6,7 @@ import {
   type LabReportInput,
 } from "./lab-report";
 import type {
+  AllergyRow,
   ConditionRow,
   ImmunizationRow,
   MedicationRow,
@@ -49,16 +50,18 @@ export async function loadLabReports(
   const rows = await runQuery<LabObservationRow>(
     `${PATIENT_MATCH}
      MATCH (p)-[:HAS_OBSERVATION]->(o:Observation)
-     WHERE o.valueQuantity IS NOT NULL
-       AND coalesce(o.category, 'laboratory') = 'laboratory'
-       AND o.code IS NOT NULL
+     WHERE o.code IS NOT NULL
+       AND (
+         (o.valueQuantity IS NOT NULL AND coalesce(o.category, 'laboratory') = 'laboratory')
+         OR (o.valueQuantity IS NULL AND o.value IS NOT NULL AND o.category = 'laboratory')
+       )
      OPTIONAL MATCH (d:DiagnosticReport)-[:HAS_RESULT]->(o)
        WHERE d.category IN ['LAB', 'laboratory']
      WITH o, head(collect(d)) AS d
      RETURN coalesce(o.resourceId, o.id, elementId(o)) AS id,
             o.code AS code,
             coalesce(o.display, o.name, o.code) AS display,
-            toFloat(o.valueQuantity) AS value,
+            toFloat(coalesce(o.valueQuantity, o.value)) AS value,
             coalesce(o.unit, o.valueUnit, '1') AS unit,
             toFloat(o.referenceLow) AS low,
             toFloat(o.referenceHigh) AS high,
@@ -86,36 +89,43 @@ export async function loadLabReports(
 export async function loadPatientSummaryInput(
   patientId: string,
 ): Promise<PatientSummaryInput> {
-  const [conditions, requests, statements, immunizations, procedures] =
-    await Promise.all([
-      runQuery<ConditionRow>(
-        `${PATIENT_MATCH}
+  const [
+    conditions,
+    requests,
+    statements,
+    immunizations,
+    procedures,
+    allergies,
+  ] = await Promise.all([
+    runQuery<ConditionRow>(
+      `${PATIENT_MATCH}
          MATCH (p)-[:HAS_CONDITION]->(c:Condition)
          RETURN coalesce(c.resourceId, c.id, elementId(c)) AS id,
                 c.code AS code,
-                c.codeSystem AS system,
+                coalesce(c.codeSystem, c.system) AS system,
                 coalesce(c.display, c.name, c.code, 'Condition') AS display,
                 coalesce(c.clinicalStatus, c.status) AS clinicalStatus,
                 toString(c.onsetDate) AS onset
          ORDER BY onset, id
          LIMIT 500`,
-        { patientId },
-      ),
-      runQuery<Omit<MedicationRow, "kind" | "dosage" | "reason">>(
-        `${PATIENT_MATCH}
-         MATCH (p)-[:HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
+      { patientId },
+    ),
+    runQuery<Omit<MedicationRow, "kind" | "dosage" | "reason">>(
+      `${PATIENT_MATCH}
+         MATCH (p)-[:HAS_MEDICATION_REQUEST|HAS_MEDICATION]->(m:MedicationRequest)
+         WITH DISTINCT m
          RETURN coalesce(m.resourceId, m.id, elementId(m)) AS id,
                 coalesce(m.medicationCode, m.code) AS code,
-                m.codeSystem AS system,
+                coalesce(m.codeSystem, m.system) AS system,
                 coalesce(m.display, m.name, 'Medication') AS display,
                 m.status AS status,
                 toString(m.date) AS date
          ORDER BY date, id
          LIMIT 500`,
-        { patientId },
-      ),
-      runQuery<Omit<MedicationRow, "kind">>(
-        `${PATIENT_MATCH}
+      { patientId },
+    ),
+    runQuery<Omit<MedicationRow, "kind">>(
+      `${PATIENT_MATCH}
          MATCH (p)-[:HAS_MEDICATION_STATEMENT]->(m:MedicationStatement)
          RETURN coalesce(m.resourceId, m.id, elementId(m)) AS id,
                 m.medicationCode AS code,
@@ -127,10 +137,10 @@ export async function loadPatientSummaryInput(
                 m.reason AS reason
          ORDER BY date, id
          LIMIT 500`,
-        { patientId },
-      ),
-      runQuery<ImmunizationRow>(
-        `${PATIENT_MATCH}
+      { patientId },
+    ),
+    runQuery<ImmunizationRow>(
+      `${PATIENT_MATCH}
          MATCH (p)-[:HAS_IMMUNIZATION]->(i:Immunization)
          WHERE i.vaccineCode IS NOT NULL
          RETURN coalesce(i.resourceId, i.id, elementId(i)) AS id,
@@ -143,24 +153,42 @@ export async function loadPatientSummaryInput(
                 i.performer AS performer
          ORDER BY occurrence, id
          LIMIT 500`,
-        { patientId },
-      ),
-      runQuery<ProcedureRow>(
-        `${PATIENT_MATCH}
+      { patientId },
+    ),
+    runQuery<ProcedureRow>(
+      `${PATIENT_MATCH}
          MATCH (p)-[:HAS_PROCEDURE]->(x:Procedure)
          RETURN coalesce(x.resourceId, x.id, elementId(x)) AS id,
                 x.code AS code,
-                x.codeSystem AS system,
+                coalesce(x.codeSystem, x.system) AS system,
                 coalesce(x.display, x.name, x.code, 'Procedure') AS display,
                 x.status AS status,
-                toString(coalesce(x.performedDate, x.date)) AS performed
+                toString(coalesce(x.performedStart, x.performedDate, x.date)) AS performed
          ORDER BY performed, id
          LIMIT 500`,
-        { patientId },
-      ),
-    ]);
+      { patientId },
+    ),
+    runQuery<AllergyRow>(
+      `${PATIENT_MATCH}
+         MATCH (p)-[:HAS_ALLERGY_INTOLERANCE]->(a:AllergyIntolerance)
+         RETURN coalesce(a.resourceId, a.id, elementId(a)) AS id,
+                a.code AS code,
+                coalesce(a.codeSystem, a.system) AS system,
+                coalesce(a.display, a.name, a.code, 'Allergy') AS display,
+                a.clinicalStatus AS clinicalStatus,
+                a.verificationStatus AS verificationStatus,
+                a.type AS type,
+                a.category AS category,
+                a.criticality AS criticality,
+                toString(a.onsetDate) AS onset
+         ORDER BY onset, id
+         LIMIT 500`,
+      { patientId },
+    ),
+  ]);
   return {
     conditions,
+    allergies,
     medications: [
       ...statements.map((m) => ({ ...m, kind: "statement" as const })),
       ...requests.map((m) => ({

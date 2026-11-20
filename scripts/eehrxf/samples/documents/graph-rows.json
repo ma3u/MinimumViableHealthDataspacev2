@@ -73,6 +73,7 @@
       "onset": "2021-03-08"
      }
     ],
+    "allergies": [],
     "medications": [
      {
       "id": "ms-p1-R03AC02",
@@ -319,6 +320,7 @@
       "onset": "2023-02-14"
      }
     ],
+    "allergies": [],
     "medications": [
      {
       "id": "med-p2-314077",
@@ -414,6 +416,7 @@
       "onset": "2023-09-12T11:30:00Z"
      }
     ],
+    "allergies": [],
     "medications": [
      {
       "id": "ms-1002-C09AA03",
@@ -528,6 +531,7 @@
       "onset": "2020-09-01"
      }
     ],
+    "allergies": [],
     "medications": [
      {
       "id": "rx-2000-197381",
@@ -626,6 +630,7 @@
       "onset": "2021-03-08"
      }
     ],
+    "allergies": [],
     "medications": [
      {
       "id": "ms-p1-R03AC02",
@@ -1023,6 +1028,39 @@
       "sourceRegion": "1@0.08,0.44,0.84,0.02"
      }
     ]
+   }
+  },
+  {
+   "file": "sandbox-patient-summary-with-allergy.json",
+   "kind": "patient-summary",
+   "identity": {
+    "kind": "identified"
+   },
+   "patient": {
+    "id": "sandbox-demo",
+    "name": "Klarbefund sandbox (fictional)",
+    "gender": "female",
+    "birthDate": "1984-05-17"
+   },
+   "input": {
+    "conditions": [],
+    "allergies": [
+     {
+      "id": "sandbox-demo-allergy-1",
+      "code": "91936005",
+      "system": "http://snomed.info/sct",
+      "display": "Allergy to penicillin",
+      "clinicalStatus": "active",
+      "verificationStatus": "confirmed",
+      "type": "allergy",
+      "category": "medication",
+      "criticality": "high",
+      "onset": "2002-07-01"
+     }
+    ],
+    "medications": [],
+    "immunizations": [],
+    "procedures": []
    }
   }
  ]

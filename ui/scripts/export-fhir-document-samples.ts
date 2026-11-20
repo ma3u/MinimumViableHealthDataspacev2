@@ -140,6 +140,39 @@ async function main() {
     },
     report: KLARBEFUND_REPORT,
   });
+  // No seed writes an allergy, but an imported Patient Summary can (#1173),
+  // so the allergy entries are validated on a fictional record.
+  samples.push({
+    file: "sandbox-patient-summary-with-allergy.json",
+    kind: "patient-summary",
+    identity: { kind: "identified" },
+    patient: {
+      id: "sandbox-demo",
+      name: "Klarbefund sandbox (fictional)",
+      gender: "female",
+      birthDate: "1984-05-17",
+    },
+    input: {
+      conditions: [],
+      allergies: [
+        {
+          id: "sandbox-demo-allergy-1",
+          code: "91936005",
+          system: "http://snomed.info/sct",
+          display: "Allergy to penicillin",
+          clinicalStatus: "active",
+          verificationStatus: "confirmed",
+          type: "allergy",
+          category: "medication",
+          criticality: "high",
+          onset: "2002-07-01",
+        },
+      ],
+      medications: [],
+      immunizations: [],
+      procedures: [],
+    },
+  });
 
   mkdirSync(OUT, { recursive: true });
   for (const name of readdirSync(OUT)) rmSync(join(OUT, name));

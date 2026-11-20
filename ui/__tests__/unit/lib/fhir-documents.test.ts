@@ -242,6 +242,41 @@ describe("Patient Summary", () => {
     });
   });
 
+  it("lists an allergy the record holds instead of the empty reason", () => {
+    const withAllergy = buildPatientSummaryDocument(
+      PATIENT,
+      {
+        ...input,
+        allergies: [
+          {
+            id: "allergy-1",
+            code: "91936005",
+            system: null,
+            display: "Allergy to penicillin",
+            clinicalStatus: "active",
+            verificationStatus: "confirmed",
+            type: "allergy",
+            category: "medication",
+            criticality: "high",
+            onset: "2002-07-01",
+          },
+        ],
+      },
+      { timestamp: T, identity: { kind: "identified" } },
+    );
+    const section = sectionByCode(withAllergy, "48765-2");
+    expect(section?.entry).toHaveLength(1);
+    expect(section?.emptyReason).toBeUndefined();
+    const [allergy] = resources(withAllergy, "AllergyIntolerance");
+    expect(allergy).toMatchObject({
+      type: "allergy",
+      category: ["medication"],
+      criticality: "high",
+      onsetDateTime: "2002-07-01",
+    });
+    expect(documentProblems(withAllergy)).toEqual([]);
+  });
+
   it("lists problems and both kinds of medication, each naming its graph node", () => {
     expect(sectionByCode(doc, "11450-4")?.entry).toHaveLength(1);
     expect(sectionByCode(doc, "10160-0")?.entry).toHaveLength(2);
