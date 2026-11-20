@@ -344,7 +344,7 @@ describe("$validate", () => {
     expect(mockRun).not.toHaveBeenCalled();
   });
 
-  it("allows the extension domains of profiles.json, and no other, on every call (ADR-095)", async () => {
+  it("allows the extension domains of profiles.json, and no other, on every call (ADR-097)", async () => {
     // Matchbox v4.1.21 drops the extensions of its application.yaml from a
     // $validate; only the request parameter sets them. The list is generated
     // from the CI validator's allowedExtensionDomains by build.py.

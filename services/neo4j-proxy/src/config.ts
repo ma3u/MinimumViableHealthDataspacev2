@@ -108,7 +108,7 @@ export const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
 // written here: Matchbox, its FHIR base URL. Locally docker-compose.matchbox.yml
 // (http://health-dataspace-matchbox:8080/matchboxv3/fhir), on Azure the
 // internal Container App mvhd-matchbox (http://mvhd-matchbox/matchboxv3/fhir,
-// set by scripts/azure/22-matchbox.sh, ADR-095). Read per request, so a test
+// set by scripts/azure/22-matchbox.sh, ADR-097). Read per request, so a test
 // can set it. Unset, $validate answers 503 and /fhir/metadata does not list it.
 export function matchboxUrl(): string {
   return (process.env.MATCHBOX_URL ?? "").replace(/\/+$/, "");

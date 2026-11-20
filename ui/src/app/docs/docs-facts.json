@@ -1420,8 +1420,8 @@
       "status": "Proposed"
     },
     {
-      "id": "ADR-095",
-      "file": "ADR-095-matchbox-runs-on-azure-with-its-packages-baked-in.md",
+      "id": "ADR-097",
+      "file": "ADR-097-matchbox-runs-on-azure-with-its-packages-baked-in.md",
       "title": "Matchbox runs on Azure as an internal Container App, with its IG packages baked into the image",
       "status": "Proposed"
     }

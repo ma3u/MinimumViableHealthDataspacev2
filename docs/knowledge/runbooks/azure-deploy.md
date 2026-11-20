@@ -13,7 +13,7 @@ status: stable
 the UI + neo4j-proxy images, pushes to ACR, updates ACA apps in `rg-mvhd-dev`.
 Watch: `gh run list --workflow=deploy-azure.yml --limit 1`.
 
-**Matchbox, the FHIR validator (ADR-095).** The same workflow builds
+**Matchbox, the FHIR validator (ADR-097).** The same workflow builds
 `mvhd-matchbox:<git tree hash of services/matchbox>` only when that
 directory changes (the bake fetches the IG packages, about five minutes) and
 moves an existing `mvhd-matchbox` to it. Creating the app, internal ingress,

@@ -84,7 +84,7 @@ export NATS_APP="mvhd-nats"
 export CONTROLPLANE_APP="mvhd-controlplane"
 export IDENTITYHUB_APP="mvhd-identityhub"
 export ISSUER_APP="mvhd-issuerservice"
-# The FHIR validator behind the proxy's $validate (ADR-095, 22-matchbox.sh).
+# The FHIR validator behind the proxy's $validate (ADR-097, 22-matchbox.sh).
 export MATCHBOX_APP="mvhd-matchbox"
 # EDC 0.18's two data planes and the seven apps of the 2026-03 CFM were
 # deleted on 2026-11-09 (#927). CFM 0.0.7's apps (ADR-085) are named in
@@ -159,7 +159,7 @@ export EDC_CP_MEMORY="1Gi"
 export EDC_ID_CPU="0.25"
 export EDC_ID_MEMORY="0.5Gi"
 export EDC_JVM_HEAP_OPTS="-XX:MaxRAMPercentage=50"
-# Matchbox's size (ADR-095). Measured locally: about 2.7 GB once an engine
+# Matchbox's size (ADR-097). Measured locally: about 2.7 GB once an engine
 # is built for the HL7 Europe IGs. The image's JVM takes 70 % of the
 # container's memory as its heap ceiling; the Consumption profile pairs 4 GiB
 # with 2 vCPU. 22-matchbox.sh applies these.

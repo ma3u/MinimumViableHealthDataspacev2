@@ -135,7 +135,7 @@ class Config(unittest.TestCase):
         self.assertIn("      httpReadOnly: true\n", text)
 
     def test_the_matchbox_image_bakes_exactly_the_pinned_igs(self):
-        # ADR-095: the image (services/matchbox) is built from the file build.py
+        # ADR-097: the image (services/matchbox) is built from the file build.py
         # writes, and its bake step checks the IGs it reads from that file.
         # Both must name FHIR R4 core and every IG of profiles.json, no more.
         import subprocess

@@ -1,6 +1,8 @@
-# ADR-095: Matchbox runs on Azure as an internal Container App, with its IG packages baked into the image
+# ADR-097: Matchbox runs on Azure as an internal Container App, with its IG packages baked into the image
 
 Date: 2026-11-20
+
+Merged as ADR-095 in #1180 and renumbered the same day: ADR-095 is the push data plane on the Dataplane SDK, accepted under that number, and ADR-096 is kept for its Kafka broker decision.
 
 **Status:** Proposed
 **Relates to:** [ADR-029](ADR-029-dependency-version-pinning.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-058](ADR-058-azure-triggers-the-off-hours-schedule.md)

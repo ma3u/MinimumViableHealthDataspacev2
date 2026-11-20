@@ -1,4 +1,4 @@
-name: Matchbox (ADR-095)
+name: Matchbox (ADR-097)
 
 # Creates or updates mvhd-matchbox, the FHIR validator behind the proxy's
 # POST /fhir/$validate, and points mvhd-neo4j-proxy at it (MATCHBOX_URL). Runs

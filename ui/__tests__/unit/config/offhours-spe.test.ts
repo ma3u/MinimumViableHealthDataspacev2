@@ -411,11 +411,11 @@ describe("offhours.sh and the CFM apps (ADR-088)", SLOW, () => {
 });
 
 /**
- * Matchbox, the FHIR validator behind the proxy's $validate (ADR-095), stops
+ * Matchbox, the FHIR validator behind the proxy's $validate (ADR-097), stops
  * and starts with the stack once 22-matchbox.sh has created it: it starts
  * before the proxy that calls it and stops after it.
  */
-describe("offhours.sh and Matchbox (ADR-095)", SLOW, () => {
+describe("offhours.sh and Matchbox (ADR-097)", SLOW, () => {
   it("starts Matchbox before the proxy, after Trustee", () => {
     const { status, stderr, log } = run("start", { ...BOTH, matchbox: true });
     expect(status, stderr).toBe(0);
