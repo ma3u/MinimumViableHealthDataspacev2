@@ -48,3 +48,7 @@
   gate; Linked Data credentials became opt-in (Connector #6242), which changed
   the refusal `run-simpl-issuer-interop.sh` reads. A rehearsal that keeps the
   Neo4j volume needs the seed files `main` changed since.
+- 2026-11-20 · `runbooks/edc-1-on-azure.md` and `runbooks/cfm-fork.md`: Azure runs
+  EDC 1.0.0-RC8 and CFM `v0.0.9-mvhd.2` (#930), with the cutover's images,
+  backup and gate results. `20-cfm-fork.sh --check` reports the database
+  missing while the estate is stopped; read it on a running estate.
