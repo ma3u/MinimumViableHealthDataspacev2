@@ -6,7 +6,7 @@
     <title>EDC 0.x to 1.0 · Tractus-X Community Days</title>
     <meta
       name="description"
-      content="What changes from Eclipse Dataspace Components 0.x to 1.0, and what to plan for in the migration: data model, APIs, data plane and Data Plane Signaling, and the siglets a running health dataspace hub uses today. Talk for the Eclipse Tractus-X Community Days."
+      content="What changes from Eclipse Dataspace Components 0.x to 1.0, and what to plan for in the migration: data model, APIs, data plane and Data Plane Signaling, the catalogue and HealthDCAT-AP, onboarding with CFM, the data planes a running health dataspace hub uses, and a push into a secure processing environment with a Kafka stream. Talk for the Eclipse Tractus-X Community Days."
     />
     <link rel="icon" href="../../favicon.svg" />
     <!-- reveal.js is the HL7 deck's vendored copy, shared rather than duplicated (its CodeQL
@@ -339,6 +339,79 @@
         color: var(--amber);
       }
 
+      /* code example */
+      pre.code {
+        margin: 0;
+        background: #0a1620;
+        border: 1px solid var(--rule);
+        border-radius: 16px;
+        padding: 24px 28px;
+        font: 22px/1.45 "JetBrains Mono", Menlo, monospace;
+        color: #cfeefd;
+        white-space: pre;
+        box-shadow: none;
+        width: auto;
+      }
+      pre.code .k {
+        color: var(--accent);
+      }
+      pre.code .v {
+        color: var(--amber);
+      }
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-top: 34px;
+      }
+      .flow .st {
+        background: var(--card);
+        border-radius: 16px;
+        border-top: 8px solid var(--c, var(--accent));
+        padding: 20px 20px 22px;
+        font-size: 21px;
+        color: var(--body);
+        line-height: 1.35;
+      }
+      .flow .st h3 {
+        font-size: 25px;
+        margin-bottom: 8px;
+      }
+      .flow .st .who {
+        font: 600 17px "JetBrains Mono", monospace;
+        color: var(--muted);
+        letter-spacing: 1px;
+      }
+      .status {
+        display: inline-block;
+        font: 700 18px "Sora", sans-serif;
+        letter-spacing: 1px;
+        padding: 3px 12px;
+        border-radius: 999px;
+        border: 2px solid var(--c);
+        color: var(--c);
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+      table.res {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 21px;
+      }
+      table.res td,
+      table.res th {
+        border: 0;
+        border-bottom: 1px solid var(--rule);
+        padding: 9px 10px;
+        text-align: left;
+        color: var(--body);
+      }
+      table.res th {
+        color: var(--muted);
+        font-size: 17px;
+        letter-spacing: 1px;
+      }
+
       /* checklist */
       .check {
         display: grid;
@@ -619,7 +692,8 @@
             </div>
             <div class="area fragment" style="--c: var(--l4)">
               <h3>3 · Data plane</h3>
-              None in the box. Ours were replaced, not migrated: siglet plus one small endpoint.
+              None in the box. Ours were replaced, not migrated: siglet for pull, and a data plane on the
+              DataPlane SDK for push and Kafka (local, in progress).
             </div>
             <div class="area fragment" style="--c: var(--l5)">
               <h3>4 · Signalling</h3>
@@ -788,6 +862,146 @@
           </aside>
         </section>
 
+        <!-- catalogue and HealthDCAT-AP -->
+        <section data-id-slide="catalogue">
+          <p class="eyebrow" style="color: var(--l2)">2 · APIs, CONTINUED: THE CATALOGUE</p>
+          <h2 class="h2">The catalogue moved into the Connector</h2>
+          <table class="cmp body" style="margin-top: 22px; font-size: 21px">
+            <thead>
+              <tr>
+                <th></th>
+                <th>0.x</th>
+                <th>1.0</th>
+                <th>WHAT TO DO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="fragment">
+                <td>Where it lives</td>
+                <td class="old">FederatedCatalog, its own repository and crawler</td>
+                <td class="new">In the Connector. FederatedCatalog archived 2026-03-19; the multi-participant cache came after RC5 (Connector #6199)</td>
+                <td class="todo">Give your crawler a new source of truth. Ours still reads mock DSP endpoints (#929, open)</td>
+              </tr>
+              <tr class="fragment">
+                <td>Who answers</td>
+                <td class="old">The connector</td>
+                <td class="new">A participant context, once linked to <code>http-dsp-profile-2025-1</code>; otherwise 400 "No profile"</td>
+                <td class="todo">Link every context at onboarding, before the first catalogue request</td>
+              </tr>
+              <tr class="fragment">
+                <td>How to ask</td>
+                <td class="old"><code>/v3/catalog/request</code></td>
+                <td class="new"><code>POST /v5/participants/{ctx}/catalog/request</code>, or DSP 2025-1 with a DCP token and a MembershipCredential</td>
+                <td class="todo">A crawler needs a participant context of its own, or a hub that asks on a context's behalf</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="row" style="margin-top: 14px">
+            <div class="card fragment" style="--c: var(--l2); font-size: 22px; padding: 20px 28px">
+              <span class="tag">OUR METADATA: HealthDCAT-AP</span>
+              <p>
+                Every dataset is described in <b>HealthDCAT-AP Release 8</b>, the release Implementing
+                Regulation 2026/2098 points to, in its namespace <code>http://healthdataportal.eu/ns/health#</code>
+                (ADR-063).
+              </p>
+              <p>
+                DSP lists offers as <code>dcat:Dataset</code> with a policy; the full record is itself an
+                offer. MedReg DE pulls <b>20 HealthDCAT-AP datasets</b> from Limburg Medical Centre through
+                siglet.
+              </p>
+            </div>
+            <div class="card fragment" style="--c: var(--l1); font-size: 22px; padding: 20px 28px">
+              <span class="tag">FEDERATED VIEW</span>
+              <p>
+                A crawler collects every participant's catalogue each five minutes with a bearer token
+                from Key Vault (ADR-020).
+              </p>
+              <p>
+                On 1.0 it still reads the hub's mock DSP endpoints, not the live offers: #929.
+              </p>
+            </div>
+          </div>
+          <p class="foot">
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md" target="_blank" rel="noopener">ADR-063</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-020-cross-participant-dataset-discovery.md" target="_blank" rel="noopener">ADR-020</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/929" target="_blank" rel="noopener">#929</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/881" target="_blank" rel="noopener">#881</a>
+            finding 8
+          </p>
+          <aside class="notes">
+            [2:00] The shape of a DSP catalogue did not change much; where it comes from did. For a health
+            dataspace the DCAT in DSP is too thin, so the HealthDCAT-AP record travels as data under its
+            own contract. Tractus-X has the same question with its own semantic models.
+          </aside>
+        </section>
+
+        <!-- CFM onboarding -->
+        <section data-id-slide="cfm">
+          <p class="eyebrow" style="color: var(--l2)">ONBOARDING WITH CFM</p>
+          <h2 class="h2">CFM puts a participant onto a 1.0 control plane in one call</h2>
+          <div class="row body">
+            <div class="card fragment" style="--c: var(--accent)">
+              <span class="tag">WHAT IT IS</span>
+              <h3>Connector Fabric Manager</h3>
+              <p>
+                A tenant manager, a provision manager and agents for the control plane, IdentityHub, jwtlet,
+                registration, onboarding and siglet.
+              </p>
+              <p>
+                Upstream's provisioning layer for EDC 1.0: JAD and the core-platform-distribution chart
+                deploy it beside the connector.
+              </p>
+            </div>
+            <div class="card fragment" style="--c: var(--ok)">
+              <span class="tag">WHAT IT DOES FOR US</span>
+              <h3>Deploy and dispose</h3>
+              <p>
+                One call to the tenant manager creates the participant context, its identity and keys, its
+                credentials and its siglet; one call removes them.
+              </p>
+              <p>
+                Compose: <b>12 of 12</b> (deploy, DSP catalogue, dispose). Azure since 2026-11-20:
+                <b>10 passed, 0 failed</b>.
+              </p>
+            </div>
+            <div class="card fragment" style="--c: var(--amber)">
+              <span class="tag">WHY A FORK</span>
+              <h3><code>v0.0.9-mvhd.2</code></h3>
+              <p>
+                The agents get tokens by exchanging a Kubernetes service-account token. Keycloak answers 400
+                "supports access tokens only".
+              </p>
+              <p>
+                Six patch branches on the release tag, each with Go tests, one of them client credentials
+                for the exchange. Upstream pull requests wait for the contributor agreement.
+              </p>
+            </div>
+          </div>
+          <p class="stand fragment">
+            <b>If you run outside Kubernetes:</b> test CFM's token exchange against your identity provider
+            before anything else.
+          </p>
+          <p class="foot">
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md" target="_blank" rel="noopener">ADR-085</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md" target="_blank" rel="noopener">ADR-088</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/cfm-fork.md" target="_blank" rel="noopener">runbook: the CFM fork</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1043" target="_blank" rel="noopener">#1043</a>
+            ·
+            <a href="https://github.com/ma3u/cfm" target="_blank" rel="noopener">ma3u/cfm</a>
+          </p>
+          <aside class="notes">
+            [2:00] Multi-tenancy means someone has to create the tenants. On 0.x that was a connector
+            deployment per participant; on 1.0 it is a participant context, and CFM is how upstream
+            creates them. Its model is not tied to Kubernetes; its token exchange is.
+          </aside>
+        </section>
+
         <!-- 8 · data plane -->
         <section data-id-slide="data-plane">
           <p class="eyebrow" style="color: var(--l4)">3 · DATA PLANE</p>
@@ -818,7 +1032,7 @@
               <h3>Your own, on the DataPlane SDK</h3>
               <p>siglet is <b>pull only</b>: one transfer type, <code>HttpData-PULL</code>.</p>
               <p>Push, streaming or a large file extract needs a real data plane that speaks DPS.</p>
-              <p>Prove it with the DPS TCK.</p>
+              <p>Prove it with the DPS TCK. Ours is on the next slides, still local.</p>
             </div>
           </div>
           <p class="foot">
@@ -909,61 +1123,175 @@
           </aside>
         </section>
 
-        <!-- 10 · siglets -->
+        <!-- siglets: the three data planes -->
         <section data-id-slide="siglets">
           <p class="eyebrow">WHICH SIGLETS RUN TODAY</p>
-          <h2 class="h2">One siglet, one endpoint, one onboarding agent</h2>
-          <div class="row body">
+          <h2 class="h2">Three data planes: pull, push into an SPE, a Kafka stream</h2>
+          <div class="row body" style="margin-top: 32px">
             <div class="card fragment" style="--c: var(--l5)">
-              <span class="tag">DATA PLANE</span>
+              <span class="tag">1 · PULL</span><span class="status" style="--c: var(--ok)">AZURE</span>
               <h3>siglet 0.1.6</h3>
               <p>
-                Pinned by digest, on Compose and on Azure Container Apps. One instance; each participant
-                context registers its own <code>siglet-&lt;context&gt;</code>, provider and consumer.
+                Pinned by digest, on Compose and Azure. Each participant context registers its own
+                <code>siglet-&lt;context&gt;</code> for <code>HttpData-PULL</code>; the CFM siglet agent sets it
+                up at onboarding.
               </p>
               <p>
-                <code>HttpData-PULL</code>, token source provider. On Azure: renewable tokens in Postgres, the
-                others in Vault, signing with a Vault transit key.
+                The data comes from <code>/dataspace/data</code> in our Neo4j proxy, which checks siglet's
+                token: FHIR R4, OMOP CDM 5.4, HealthDCAT-AP.
               </p>
             </div>
             <div class="card fragment" style="--c: var(--l4)">
-              <span class="tag">DATA ENDPOINT</span>
-              <h3><code>/dataspace/data</code></h3>
+              <span class="tag">2 · PUSH</span><span class="status" style="--c: var(--amber)">LOCAL</span>
+              <h3>mvhd-dataplane</h3>
               <p>
-                In the Neo4j proxy. Verifies the token against siglet's JWKS and serves the dataset the
-                token names:
+                Our data plane on the <b>DataPlane SDK 1.2.1</b> (the version RC8 pins), registered beside
+                siglet as <code>mvhd-dp-&lt;context&gt;</code>.
               </p>
-              <p><b>FHIR R4, OMOP CDM 5.4, HealthDCAT-AP</b> and a bonus programme answer, from one route.</p>
+              <p>
+                <code>HttpData-PUSH</code>, <code>HttpStream-PUSH</code>, <code>HttpFile-PUSH</code> into the
+                inbox of an attested secure processing environment: all three <b>COMPLETED</b> on Compose.
+              </p>
             </div>
             <div class="card fragment" style="--c: var(--l2)">
-              <span class="tag">ONBOARDING</span>
-              <h3>CFM siglet agent</h3>
+              <span class="tag">3 · STREAM</span><span class="status" style="--c: var(--amber)">LOCAL</span>
+              <h3>the same, over Kafka</h3>
+              <p><code>Kafka-PUSH</code> and <code>Kafka-PULL</code>, one topic per transfer.</p>
               <p>
-                From our fork of eclipse-cfm (<code>v0.0.9-mvhd.2</code>). Sets up siglet for every
-                participant CFM onboards.
+                One hour of ECG: <b>121 of 121 records</b> both ways, the same SHA-256. The 24-hour run
+                stopped on the proxy's rate limit.
               </p>
-              <p>On Azure since 2026-11-20: <b>check-onboarding 10 passed, 0 failed</b>.</p>
             </div>
           </div>
           <div class="notyet fragment">
-            <b>Not yet:</b> push, streaming and file transfer; token renewal after the first hour
-            (<a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/888" target="_blank" rel="noopener">#888</a>);
-            a DPS data plane of our own on the DataPlane SDK. That is the next step, with its own ADR.
+            <b>Honest status:</b> only the first is a siglet; siglet issues tokens and moves no data, so 2
+            and 3 are a data plane of our own (ADR-095, proposed). Not yet committed, not on Azure; token
+            renewal after the first hour (<a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/888" target="_blank" rel="noopener">#888</a>)
+            written, not yet proven.
           </div>
           <p class="foot">
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/siglet-edc1.toml" target="_blank" rel="noopener">jad/siglet-edc1.toml</a>
             ·
-            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/17-siglet.sh" target="_blank" rel="noopener">scripts/azure/17-siglet.sh</a>
-            ·
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/routes/dataspace.ts" target="_blank" rel="noopener">routes/dataspace.ts</a>
             ·
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/cfm/sigletagent.dotenv" target="_blank" rel="noopener">cfm/sigletagent.dotenv</a>
+            ·
+            <a href="https://github.com/eclipse-dataplane-core/dataplane-sdk-java/releases/tag/v1.2.1" target="_blank" rel="noopener">dataplane-sdk-java v1.2.1</a>
           </p>
           <aside class="notes">
-            [2:00] Answer to "which siglets": one siglet deployment, configured for one transfer type,
-            used by all five participant contexts. No other connector or data plane is needed for what
-            the hub does today. Push into a secure processing environment is where pull stops being
-            enough.
+            [2:00] Answer to "which siglets": one siglet deployment for pull, used by every participant
+            context, on Azure. Push and streaming need a component that reads and writes, so we built one
+            on the DataPlane SDK and registered it beside siglet; the control plane picks by transfer
+            type. Say clearly that 2 and 3 run on my laptop's compose stack today.
+          </aside>
+        </section>
+
+        <!-- push into an attested SPE -->
+        <section data-id-slide="spe-push">
+          <p class="eyebrow" style="color: var(--l4)">PUSH INTO A SECURE PROCESSING ENVIRONMENT<span class="status" style="--c: var(--amber)">LOCAL</span></p>
+          <h2 class="h2">No push into a workspace that is not attested</h2>
+          <div class="flow">
+            <div class="st fragment" style="--c: var(--l2)">
+              <div class="who">CONSUMER DATA PLANE</div>
+              <h3>1 · prepare</h3>
+              Asks the SPE for an inbox for this flow. Refused unless the workspace's latest attestation
+              passed. Answer: address, one-time token, attestation record.
+            </div>
+            <div class="st fragment" style="--c: var(--l4)">
+              <div class="who">PROVIDER DATA PLANE</div>
+              <h3>2 · start</h3>
+              Checks the record against its floor: <code>simulated</code> &lt; <code>node</code> &lt;
+              <code>workload</code>. Below it: <b>TERMINATED</b>, with the reason.
+            </div>
+            <div class="st fragment" style="--c: var(--l4)">
+              <div class="who">PROVIDER DATA PLANE</div>
+              <h3>3 · read</h3>
+              Waits for the consumer's "started", then reads the dataset page by page with a token it
+              signs. Pseudonymised at the source.
+            </div>
+            <div class="st fragment" style="--c: var(--l2)">
+              <div class="who">SPE INBOX</div>
+              <h3>4 · receive</h3>
+              Compares the SHA-256 it computed with the sender's. Refuses a difference, and any Patient that
+              still carries a name, address, identifier or full birth date.
+            </div>
+            <div class="st fragment" style="--c: var(--ok)">
+              <div class="who">AUDIT CHAIN</div>
+              <h3>5 · record</h3>
+              Opened, started, received, refused: each on the hash-chained <code>spe</code> chain. Local:
+              <b>45 events, intact</b>.
+            </div>
+          </div>
+          <div class="row" style="margin-top: 26px">
+            <div class="card fragment" style="--c: var(--accent)">
+              <span class="tag">KEYS</span>
+              <p>
+                Control plane to data plane: a Keycloak token of one client, checked. Back: an RS256 token
+                the data plane signs, <code>sub</code> its id, checked against its JWKS. The inbox token
+                never leaves the consumer's side.
+              </p>
+            </div>
+            <div class="card fragment" style="--c: var(--amber)">
+              <span class="tag">HONEST LIMITS</span>
+              <p>
+                Local floor <code>simulated</code>: no confidential hardware on a laptop; Azure would use
+                <code>workload</code>. The provider trusts the record the hub relays; verifying Trustee's
+                token itself is the next step.
+              </p>
+            </div>
+          </div>
+          <aside class="notes">
+            [2:30] EHDS Article 73: data for secondary use ends in a secure processing environment. With
+            pull, our hub's web server held the data on the way. With push, the holder's data plane writes
+            straight into the workspace's inbox, and only after it has seen the attestation. Everything
+            here runs on the compose stack today, not on Azure.
+          </aside>
+        </section>
+
+        <!-- Kafka example -->
+        <section data-id-slide="kafka">
+          <p class="eyebrow" style="color: var(--l2)">EXAMPLE: A LONG-TERM ECG OVER KAFKA<span class="status" style="--c: var(--amber)">LOCAL</span></p>
+          <h2 class="h2">A Kafka stream is one transfer request away</h2>
+          <div class="row body" style="gap: 40px; margin-top: 30px">
+            <div style="flex: 1.05">
+<pre class="code fragment">{
+  <span class="k">"@type"</span>: <span class="v">"TransferRequest"</span>,
+  <span class="k">"contractId"</span>: <span class="v">"&lt;agreement&gt;"</span>,
+  <span class="k">"assetId"</span>: <span class="v">"ecg-holter-hour"</span>,
+  <span class="k">"transferType"</span>: <span class="v">"Kafka-PUSH"</span>,
+  <span class="k">"dataplaneMetadata"</span>: {
+    <span class="k">"@type"</span>: <span class="v">"DataplaneMetadata"</span>,
+    <span class="k">"properties"</span>: { <span class="k">"speId"</span>: <span class="v">"SPE-1"</span> }
+  }
+}</pre>
+              <p style="font-size: 21px; color: var(--muted); margin-top: 12px">
+                <code>POST /v5/participants/{ctx}/transferprocesses</code>. <code>dataplaneMetadata</code>
+                reaches the consumer's data plane in <code>prepare</code> and names the workspace.
+              </p>
+            </div>
+            <div style="flex: 1">
+              <ul class="fragment" style="font-size: 23px">
+                <li><b>Test data:</b> a synthetic Holter ECG, two leads at 250 Hz, one FHIR Observation with sampled data per 30 s.</li>
+                <li><b>One topic per transfer,</b> one partition, so the order of the recording is the order on the topic.</li>
+                <li><b>Every record acknowledged, none twice;</b> a last record carries the count and the SHA-256.</li>
+                <li><b>The consumer commits an offset</b> only after the inbox stored the batch, and closes the inbox only when count and hash agree.</li>
+              </ul>
+              <table class="res fragment" style="margin-top: 14px">
+                <tr><th>RUN</th><th>RECORDS</th><th>RESULT</th></tr>
+                <tr><td>1 h, <code>Kafka-PUSH</code></td><td>121 of 121</td><td style="color: var(--ok)">COMPLETED in 9 s</td></tr>
+                <tr><td>1 h, <code>Kafka-PULL</code></td><td>121 of 121</td><td style="color: var(--ok)">COMPLETED in 6 s</td></tr>
+                <tr><td>24 h, <code>Kafka-PUSH</code></td><td>2,881 planned</td><td style="color: var(--no)">stopped: proxy rate limit</td></tr>
+              </table>
+            </div>
+          </div>
+          <p class="foot">
+            Both 1-hour runs end with the same SHA-256 (<code>9b7021d4a2e2…</code>). The broker on Compose is
+            plain text; one shared between organisations needs TLS, SASL and an ACL per topic.
+          </p>
+          <aside class="notes">
+            [2:00] The point for Tractus-X: streaming is a transfer type, not a side channel. The contract,
+            the policy and the audit stay the same; only the data plane differs. The 24-hour run found a
+            real limit: our proxy's query rate limit counts the paging. That is the next fix.
           </aside>
         </section>
 

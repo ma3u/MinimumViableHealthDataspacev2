@@ -93,12 +93,16 @@ audio and `narration.json`. The rendered videos are not in the repository.
 on GitHub Pages at
 [ma3u.github.io/MinimumViableHealthDataspacev2/presentations/tractus-x-community-days/](https://ma3u.github.io/MinimumViableHealthDataspacev2/presentations/tractus-x-community-days/).
 "EDC 0.x to 1.0: what changes, and what to plan for", for the Eclipse Tractus-X
-community. Fifteen slides on the data model, the APIs, the data plane and Data
-Plane Signaling, the siglets the hub runs, the RC-to-RC breaks and when to
+community. Nineteen slides on the data model, the APIs, the catalogue and
+HealthDCAT-AP, onboarding with CFM, the data plane and Data Plane Signaling,
+the three data planes the hub runs (siglet for pull, and push into an attested
+SPE and a Kafka stream on the DataPlane SDK), the RC-to-RC breaks and when to
 migrate, with a checklist the audience can tick. The facts are the ones in
 [discussion #1092](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092)
-and #930; update the deck when they change (a new RC, push or streaming on the
-DataPlane SDK). Not narrated. Speaker notes on S.
+and #930. Push and Kafka are marked LOCAL: they run on the compose stack only
+and their ADR (ADR-095) is proposed; update those slides when they land on main
+and on Azure, and when the 24-hour ECG run passes. Not narrated. Speaker notes
+on S.
 
 ## Guides
 
