@@ -1,0 +1,46 @@
+meta {
+  name: 13 FHIR Observation search by patient and code
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{proxyUrl}}/fhir/Observation?patient={{patientId}}&code=http://loinc.org%7C4548-4&_count=2
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.resourceType: eq Bundle
+  res.body.type: eq searchset
+  res.body.link[0].relation: eq self
+}
+
+tests {
+  test("every match is an HbA1c of the patient asked for", function () {
+    const body = res.getBody();
+    const matches = body.entry.filter((e) => e.search.mode === "match");
+    expect(matches.length).to.be.at.most(2);
+    for (const e of matches) {
+      expect(e.resource.code).to.equal("4548-4");
+      expect(e.resource.subject.reference).to.equal("Patient/" + bru.getEnvVar("patientId"));
+    }
+  });
+  test("pages with a next link when there are more", function () {
+    const body = res.getBody();
+    const next = body.link.find((l) => l.relation === "next");
+    if (body.total > 2) expect(next.url).to.contain("_offset=2");
+    else expect(next).to.equal(undefined);
+  });
+}
+
+docs {
+  FHIR token and paging semantics on the facade (#1174): patient, code as
+  [system]|[code] and _count, with a next link when the patient has more
+  HbA1c values than the page holds. The seeded demo patient P1 has six.
+}
