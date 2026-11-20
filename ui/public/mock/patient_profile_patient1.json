@@ -8,7 +8,7 @@
   },
   "conditions": [
     {
-      "code": "73211009",
+      "code": "44054006",
       "display": "Diabetes mellitus type 2",
       "onsetDate": "2018-04-10"
     },
@@ -21,11 +21,6 @@
       "code": "73595000",
       "display": "Stress (finding)",
       "onsetDate": "2020-01-15"
-    },
-    {
-      "code": "E11.9",
-      "display": "T2D without complications",
-      "onsetDate": "2018-04-10"
     },
     {
       "code": "414916001",
@@ -94,10 +89,10 @@
     "stress-reduction"
   ],
   "gdprRights": {
-    "rightToAccess": "GDPR Art. 15 \u2014 request a copy of your electronic health record",
-    "rightToPortability": "GDPR Art. 20 \u2014 export your data in FHIR R4 format",
-    "rightToErasure": "GDPR Art. 17 \u2014 request deletion of non-mandatory records",
-    "ehdsAccess": "EHDS Art. 3 \u2014 access your EHR via the EU national contact point"
+    "rightToAccess": "GDPR Art. 15 — request a copy of your electronic health record",
+    "rightToPortability": "GDPR Art. 20 — export your data in FHIR R4 format",
+    "rightToErasure": "GDPR Art. 17 — request deletion of non-mandatory records",
+    "ehdsAccess": "EHDS Art. 3 — access your EHR via the EU national contact point"
   },
   "totalConditionCount": 8
 }

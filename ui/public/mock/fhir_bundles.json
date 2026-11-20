@@ -4375,7 +4375,7 @@
             "coding": [
               {
                 "system": "http://snomed.info/sct",
-                "code": "698754002",
+                "code": "82423001",
                 "display": "Chronic pain"
               }
             ],
@@ -4587,7 +4587,7 @@
             "coding": [
               {
                 "system": "http://snomed.info/sct",
-                "code": "698754002",
+                "code": "82423001",
                 "display": "Chronic pain"
               }
             ],

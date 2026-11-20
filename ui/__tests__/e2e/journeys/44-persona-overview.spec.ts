@@ -59,16 +59,16 @@ async function skipIfSeedMissing(page: Page, { byName = true } = {}) {
 // ── The seeded data through the routes that exist today ────────────────────
 
 test.describe("Issue #271 · M0 the seed is visible through today's routes", () => {
-  test("J960 P1 is Maria Schmidt with her eight diagnoses and four medications", async ({
+  test("J960 P1 is Maria Schmidt with her seven diagnoses and four medications", async ({
     page,
   }) => {
     await loginAsAdmin(page);
     await skipIfSeedMissing(page);
     const data = await apiGet(page, `/api/patient/profile?patientId=${P1}`);
     expect(data.patient.name).toBe("Maria Schmidt");
-    expect(data.conditions.length).toBeGreaterThanOrEqual(8);
+    expect(data.conditions.length).toBeGreaterThanOrEqual(7);
     expect(data.conditions.map((c: { code: string }) => c.code)).toContain(
-      "73211009",
+      "44054006",
     );
     expect(data.medications.length).toBeGreaterThanOrEqual(4);
   });

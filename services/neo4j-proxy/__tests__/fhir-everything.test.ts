@@ -69,7 +69,7 @@ describe("GET /fhir/Patient/:id/$everything", () => {
           encounters: [node({ resourceId: "enc-p1-2026-02-10" })],
           conditions: [
             node({
-              resourceId: "cond-p1-73211009",
+              resourceId: "cond-p1-44054006",
               display: "Diabetes mellitus type 2",
             }),
           ],
