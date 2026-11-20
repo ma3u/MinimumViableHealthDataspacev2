@@ -1406,6 +1406,12 @@
       "file": "ADR-094-national-health-data-stays-at-the-source.md",
       "title": "National health data stays at the source; the hub takes descriptions, aggregates and counts",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-095",
+      "file": "ADR-095-matchbox-runs-on-azure-with-its-packages-baked-in.md",
+      "title": "Matchbox runs on Azure as an internal Container App, with its IG packages baked into the image",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1504,7 +1510,7 @@
     "/docs/developer/api": "2026-11-18",
     "/docs/developer/reference": "2026-11-18",
     "/docs/developer/[slug]": "2026-11-19",
-    "/docs/architecture": "2026-11-17",
+    "/docs/architecture": "2026-11-20",
     "/docs/security": "2026-11-19",
     "/docs/security/[slug]": "2026-11-19",
     "/docs/klarbefund": "2026-11-19",
