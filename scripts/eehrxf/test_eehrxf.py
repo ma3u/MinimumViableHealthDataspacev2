@@ -115,6 +115,15 @@ class Config(unittest.TestCase):
         self.assertEqual(set(category_mapper.EEHRXF_CATEGORY_IDS), ids)
         self.assertEqual(set(category_mapper.KEYWORDS), ids)
 
+    def test_matchbox_loads_every_pinned_ig(self):
+        # The proxy's $validate (#1174) must validate against the guides CI does.
+        cfg = validate.load_config()
+        text = build.matchbox_config(cfg)
+        for key, ig in cfg["igs"].items():
+            self.assertIn(f"      {key}:\n        name: {ig['package']}\n        version: \"{ig['version']}\"\n", text)
+        self.assertIn("      txServer: n/a\n", text)
+        self.assertIn("      httpReadOnly: true\n", text)
+
     def test_report_covers_every_configured_profile(self):
         cfg = validate.load_config()
         report = json.loads(validate.REPORT.read_text(encoding="utf-8"))
