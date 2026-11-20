@@ -412,6 +412,168 @@
         letter-spacing: 1px;
       }
 
+      /* ---------- motion that follows the speaker ---------- */
+      /* A build rises into place; SVG builds only fade (drawn arrows below). */
+      .reveal .slides section .fragment:not(line):not(text):not(g):not(path) {
+        transform: translateY(18px);
+        transition:
+          opacity 0.45s ease,
+          transform 0.45s ease,
+          box-shadow 0.35s ease,
+          background-color 0.35s ease;
+      }
+      .reveal .slides section .fragment.visible:not(line):not(text):not(g):not(path) {
+        transform: none;
+      }
+      /* The build just shown is the one being talked about: it gets a ring. */
+      .reveal .card.current-fragment,
+      .reveal .area.current-fragment,
+      .reveal .tl.current-fragment,
+      .reveal .flow .st.current-fragment {
+        box-shadow:
+          0 0 0 3px var(--c, var(--accent)),
+          0 22px 50px rgba(0, 0, 0, 0.45);
+      }
+      .reveal table.cmp tr.current-fragment td {
+        box-shadow:
+          inset 0 3px 0 var(--accent),
+          inset 0 -3px 0 var(--accent);
+      }
+      .reveal table.cmp tr.current-fragment td:first-child {
+        box-shadow:
+          inset 3px 3px 0 var(--accent),
+          inset 0 -3px 0 var(--accent);
+      }
+      .reveal table.cmp tr.current-fragment td:last-child {
+        box-shadow:
+          inset -3px 3px 0 var(--accent),
+          inset 0 -3px 0 var(--accent);
+      }
+      .reveal li.current-fragment,
+      .reveal .notyet.current-fragment,
+      .reveal p.stand.current-fragment {
+        color: var(--ink);
+      }
+      /* Signalling: each arrow is drawn from sender to receiver. */
+      .seq line.fragment {
+        stroke-dasharray: 1600;
+        stroke-dashoffset: 1600;
+        transition:
+          stroke-dashoffset 0.8s ease,
+          opacity 0.2s linear;
+      }
+      .seq line.fragment.visible {
+        stroke-dashoffset: 0;
+      }
+      .seq line.fragment.current-fragment {
+        stroke: var(--accent);
+      }
+      .seq text.fragment.current-fragment {
+        fill: var(--accent);
+      }
+      /* SPE push: an arrow between steps appears with the step after it. */
+      .flow .st {
+        position: relative;
+      }
+      .flow .st + .st::before {
+        content: "›";
+        position: absolute;
+        left: -17px;
+        top: 50%;
+        transform: translateY(-50%);
+        font: 700 34px "Sora", sans-serif;
+        color: var(--muted);
+      }
+      /* Cover: the jump from 0.x to 1.0. */
+      .version-jump .arrow {
+        animation: nudge 2.4s ease-in-out infinite;
+      }
+      .version-jump .v.new {
+        animation: glow 3.2s ease-in-out infinite;
+      }
+      @keyframes nudge {
+        0%, 100% { transform: translateX(-8px); opacity: 0.6; }
+        50% { transform: translateX(10px); opacity: 1; }
+      }
+      @keyframes glow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(79, 195, 247, 0); }
+        50% { box-shadow: 0 0 46px 6px rgba(79, 195, 247, 0.35); }
+      }
+      /* Status badges marked LOCAL breathe once, so nobody misses them. */
+      .reveal section.present .status {
+        animation: badge 1.6s ease-out 0.6s 2;
+      }
+      @keyframes badge {
+        0% { box-shadow: 0 0 0 0 rgba(242, 182, 50, 0.6); }
+        100% { box-shadow: 0 0 0 14px rgba(242, 182, 50, 0); }
+      }
+      /* Kafka: records travel from the provider over the topic into the inbox. */
+      .lane {
+        margin-top: 26px;
+      }
+      .lane svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .lane .rec {
+        transform-box: view-box;
+        opacity: 0;
+      }
+      .lane.run .rec {
+        animation: travel 2.6s linear infinite;
+      }
+      .lane.run .rec.end {
+        animation: none;
+        opacity: 0;
+      }
+      .lane.done .rec {
+        animation: none;
+        opacity: 0;
+      }
+      .lane.done .rec.end {
+        animation: settle 0.9s ease forwards;
+      }
+      @keyframes travel {
+        0% { transform: translateX(0); opacity: 0; }
+        8% { opacity: 1; }
+        92% { opacity: 1; }
+        100% { transform: translateX(1010px); opacity: 0; }
+      }
+      @keyframes settle {
+        0% { transform: translateX(0); opacity: 0; }
+        15% { opacity: 1; }
+        100% { transform: translateX(1010px); opacity: 1; }
+      }
+      .lane .ok-mark {
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+      .lane.done .ok-mark {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal .slides section .fragment:not(line):not(text):not(g):not(path) {
+          transform: none;
+          transition: opacity 0.2s linear;
+        }
+        .seq line.fragment {
+          stroke-dasharray: none;
+          stroke-dashoffset: 0;
+        }
+        .version-jump .arrow,
+        .version-jump .v.new,
+        .reveal section.present .status,
+        .lane.run .rec,
+        .lane.done .rec.end {
+          animation: none;
+        }
+      }
+      .reveal .progress {
+        height: 6px;
+        color: var(--accent);
+      }
+
       /* checklist */
       .check {
         display: grid;
@@ -543,16 +705,16 @@
           <p class="eyebrow">ECLIPSE TRACTUS-X COMMUNITY DAYS</p>
           <h1>EDC 0.x to 1.0: what changes, and what to plan for</h1>
           <p class="sub">
-            Data model, APIs, data plane and signalling, from moving a running dataspace hub from EDC
+            Data model, APIs, data plane and signalling, from moving the EHDS Integration Hub from EDC
             0.18 to 1.0.0-RC8 in fifteen days.
           </p>
           <div class="version-jump" aria-hidden="true">
             <div class="v" style="--c: var(--old)">0.x</div>
             <div class="arrow">→</div>
-            <div class="v" style="--c: var(--accent)">1.0</div>
+            <div class="v new" style="--c: var(--accent)">1.0</div>
           </div>
           <p class="who">
-            <b>Matthias Buchhorn-Roth</b> · Minimum Viable Health Dataspace v2 ·
+            <b>Matthias Buchhorn-Roth</b> · EHDS Integration Hub ·
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2" target="_blank" rel="noopener"
               >github.com/ma3u/MinimumViableHealthDataspacev2</a
             >
@@ -1284,13 +1446,58 @@
               </table>
             </div>
           </div>
+          <div class="lane fragment" id="kafka-lane" aria-label="Animation: ECG records move from the provider's data plane over a Kafka topic into the SPE inbox">
+            <svg viewBox="0 0 1680 190" aria-hidden="true">
+              <g font-family="Sora, Verdana, sans-serif" font-weight="700" text-anchor="middle">
+                <rect x="0" y="40" width="270" height="106" rx="14" fill="#1d3a50" stroke="#ca6f1e" stroke-width="3" />
+                <text x="135" y="86" font-size="22" fill="#eef3f6">Provider</text>
+                <text x="135" y="116" font-size="19" fill="#b9c7d1" font-family="JetBrains Mono, monospace" font-weight="400">mvhd-dataplane</text>
+                <rect x="1380" y="40" width="300" height="106" rx="14" fill="#1d3a50" stroke="#148f77" stroke-width="3" />
+                <text x="1530" y="78" font-size="22" fill="#eef3f6">SPE-1 inbox</text>
+                <text x="1530" y="112" font-size="26" fill="#4fc3f7" font-family="JetBrains Mono, monospace" id="kafka-count">0 / 121</text>
+                <text class="ok-mark" x="1530" y="174" font-size="19" fill="#3fb950" font-family="DM Sans, Arial, sans-serif" font-weight="600">count and SHA-256 agree</text>
+              </g>
+              <rect x="280" y="58" width="1090" height="70" rx="35" fill="none" stroke="#2a4558" stroke-width="3" stroke-dasharray="10 9" />
+              <text x="825" y="30" text-anchor="middle" font-size="19" fill="#8399a8" font-family="JetBrains Mono, monospace">topic mvhd.flow.&lt;transfer&gt; · 1 partition · acks=all</text>
+                <g class="rec" style="animation-delay: 0.00s">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#148f77" />
+                  <polyline points="293,96 305,96 310,84 316,108 322,90 327,96 351,96" fill="none" stroke="#eef3f6" stroke-width="3" />
+                </g>
+                <g class="rec" style="animation-delay: 0.43s">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#148f77" />
+                  <polyline points="293,96 305,96 310,84 316,108 322,90 327,96 351,96" fill="none" stroke="#eef3f6" stroke-width="3" />
+                </g>
+                <g class="rec" style="animation-delay: 0.86s">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#148f77" />
+                  <polyline points="293,96 305,96 310,84 316,108 322,90 327,96 351,96" fill="none" stroke="#eef3f6" stroke-width="3" />
+                </g>
+                <g class="rec" style="animation-delay: 1.29s">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#148f77" />
+                  <polyline points="293,96 305,96 310,84 316,108 322,90 327,96 351,96" fill="none" stroke="#eef3f6" stroke-width="3" />
+                </g>
+                <g class="rec" style="animation-delay: 1.72s">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#148f77" />
+                  <polyline points="293,96 305,96 310,84 316,108 322,90 327,96 351,96" fill="none" stroke="#eef3f6" stroke-width="3" />
+                </g>
+                <g class="rec" style="animation-delay: 2.15s">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#148f77" />
+                  <polyline points="293,96 305,96 310,84 316,108 322,90 327,96 351,96" fill="none" stroke="#eef3f6" stroke-width="3" />
+                </g>
+                <g class="rec end">
+                  <rect x="285" y="66" width="74" height="54" rx="9" fill="#f2b632" />
+                  <text x="322" y="99" text-anchor="middle" font-size="17" font-weight="700" fill="#0d1b26" font-family="Sora, sans-serif">END</text>
+                </g>
+            </svg>
+          </div>
           <p class="foot">
             Both 1-hour runs end with the same SHA-256 (<code>9b7021d4a2e2…</code>). The broker on Compose is
             plain text; one shared between organisations needs TLS, SASL and an ACL per topic.
           </p>
           <aside class="notes">
             [2:00] The point for Tractus-X: streaming is a transfer type, not a side channel. The contract,
-            the policy and the audit stay the same; only the data plane differs. The 24-hour run found a
+            the policy and the audit stay the same; only the data plane differs. Clicks: the request,
+            the list, the results, then the lane: records run over the topic and the inbox counts to 121,
+            then the END record arrives and count and hash agree. The 24-hour run found a
             real limit: our proxy's query rate limit counts the paging. That is the next fix.
           </aside>
         </section>
@@ -1453,6 +1660,7 @@
       Reveal.initialize({
         hash: true,
         slideNumber: "c/t",
+        progress: true,
         transition: "fade",
         backgroundTransition: "fade",
         fragments: true,
@@ -1471,6 +1679,49 @@
         }
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(ready);
         setTimeout(ready, 2000);
+      })();
+
+      // Kafka lane: while it is on screen, records travel and the inbox counts up to 121;
+      // then the END record arrives and the check line shows. Restarts each time it is shown.
+      (function () {
+        var lane = document.getElementById("kafka-lane");
+        var count = document.getElementById("kafka-count");
+        var TOTAL = 121;
+        var timer = null;
+        var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        function stop() {
+          if (timer) clearInterval(timer);
+          timer = null;
+          lane.classList.remove("run", "done");
+          count.textContent = "0 / " + TOTAL;
+        }
+        function finish() {
+          if (timer) clearInterval(timer);
+          timer = null;
+          count.textContent = TOTAL + " / " + TOTAL;
+          lane.classList.remove("run");
+          lane.classList.add("done");
+        }
+        function start() {
+          stop();
+          if (reduce) return finish();
+          lane.classList.add("run");
+          var n = 0;
+          timer = setInterval(function () {
+            n += 3;
+            if (n >= TOTAL) return finish();
+            count.textContent = n + " / " + TOTAL;
+          }, 110);
+        }
+        function sync() {
+          var shown = lane.classList.contains("visible") && Reveal.getCurrentSlide() === lane.closest("section");
+          if (shown && !lane.classList.contains("run") && !lane.classList.contains("done")) start();
+          if (!shown) stop();
+        }
+        Reveal.on("fragmentshown", sync);
+        Reveal.on("fragmenthidden", sync);
+        Reveal.on("slidechanged", sync);
+        Reveal.on("ready", sync);
       })();
 
       // The checklist: ticks are counted, and kept per viewer when storage is available.
