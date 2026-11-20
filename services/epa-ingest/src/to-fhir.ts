@@ -2,8 +2,8 @@
  * FHIR R4 writer.
  *
  * Emits a `collection` bundle: a DiagnosticReport, one Observation per coded
- * value, a DocumentReference standing for the paper, and a Provenance tying
- * them to it.
+ * value, a DocumentReference standing for the paper, a Provenance tying them
+ * to it, and the Organization that printed the report when it names one.
  *
  * It is **not** a KBV MIO Laborbefund document yet. That needs a `document`
  * bundle with a Composition and the KBV profiles, and claiming conformance we
@@ -20,6 +20,7 @@ import type {
 } from "./types.js";
 import {
   ELECTROCARDIOGRAM_CODES,
+  LOINC_VERSION,
   OBSERVATION_CATEGORIES,
   REPORT_KINDS,
   type ReportKind,
@@ -75,17 +76,24 @@ export const EXT_SOURCE_REGION = `${EXT_BASE}/epa-ingest-source-region`;
 const UCUM = "http://unitsofmeasure.org";
 const LOINC = "http://loinc.org";
 /**
+ * A LOINC coding with the release its code was checked against
+ * (LOINC_VERSION). The German lab profiles require the version (#1172), and a
+ * code without one leaves the reader to guess which release it meant.
+ */
+function loinc(code: string, display: string): Coding {
+  return { system: LOINC, version: LOINC_VERSION, code, display };
+}
+/**
  * NCBI Taxonomy as a FHIR code system: the numeric taxon id is the code and
  * the scientific name the display, the convention HL7's Clinical Genomics
  * work uses for the same database.
  */
 export const NCBI_TAXONOMY = "http://www.ncbi.nlm.nih.gov/taxonomy";
 /** LOINC's term for the organism an observation is about. */
-const ORGANISM_IDENTIFIED: Coding = {
-  system: LOINC,
-  code: "41852-5",
-  display: "Microorganism or agent identified in Specimen",
-};
+const ORGANISM_IDENTIFIED: Coding = loinc(
+  "41852-5",
+  "Microorganism or agent identified in Specimen",
+);
 
 /**
  * Observation status by provenance.
@@ -170,6 +178,7 @@ export function statusForSource(kind: SourceKind): "final" | "preliminary" {
 
 interface Coding {
   system: string;
+  version?: string;
   code: string;
   display?: string;
 }
@@ -198,6 +207,7 @@ interface FhirResource {
 }
 export interface FhirBundle {
   resourceType: "Bundle";
+  identifier: { system: string; value: string };
   type: "collection";
   timestamp: string;
   entry: { fullUrl: string; resource: FhirResource }[];
@@ -266,6 +276,23 @@ export function buildBundle(
   const status = statusForSource(source.kind);
   const subject: Reference = { reference: `Patient/${meta.patientId}` };
 
+  // The laboratory or practice that printed the report, as printed. The
+  // German lab profiles want the performer as a reference (#1172), so the
+  // printed name becomes an Organization in the bundle, and the reference
+  // keeps the name as its display for a reader that does not resolve it.
+  // A report with no performer line has no Organization: none is invented.
+  const organization: FhirResource | undefined = meta.performer
+    ? { resourceType: "Organization", id: "performer-1", name: meta.performer }
+    : undefined;
+  const performer: Reference[] | undefined = organization
+    ? [
+        {
+          reference: `Organization/${organization.id}`,
+          display: meta.performer,
+        },
+      ]
+    : undefined;
+
   const patient: FhirResource = {
     resourceType: "Patient",
     id: meta.patientId,
@@ -316,13 +343,7 @@ export function buildBundle(
       // guess whether a lookup failed.
       ...(v.coding.loincNumber !== null
         ? {
-            coding: [
-              {
-                system: LOINC,
-                code: v.coding.loincNumber,
-                display: v.coding.display,
-              } satisfies Coding,
-            ],
+            coding: [loinc(v.coding.loincNumber, v.coding.display)],
           }
         : v.coding.uncodedReason
           ? {
@@ -348,11 +369,13 @@ export function buildBundle(
     },
     subject,
     effectiveDateTime: meta.effectiveDateTime,
-    // Who reported the value: the laboratory or practice that printed the
-    // report, as printed. The HL7 Europe Laboratory Report profile requires a
-    // performer on every result (#1144); a report with no performer line
-    // leaves it out rather than inventing one.
-    ...(meta.performer ? { performer: [{ display: meta.performer }] } : {}),
+    // When this transcription was documented, the same moment as the
+    // report's `issued`. The German lab profiles require it (#1172); the
+    // lab's own release time is not on what we read.
+    issued: now,
+    // Who reported the value. The HL7 Europe Laboratory Report profile
+    // requires a performer on every result (#1144).
+    ...(performer ? { performer } : {}),
     valueQuantity: quantity(v.value, v.coding.ucum, v.comparator),
     // The organism, where the quantity is the relative abundance of one. The
     // test has no LOINC code and says so above; the organism is a different
@@ -431,24 +454,22 @@ export function buildBundle(
       coding: [
         (ecg
           ? isHolter(values)
-            ? {
-                system: LOINC,
-                code: "18754-2",
-                display: "Ambulatory cardiac rhythm monitor (Holter) study",
-              }
-            : { system: LOINC, code: "11524-6", display: "EKG study" }
-          : {
-              system: LOINC,
-              code: kind?.loinc ?? "11502-2",
-              display: kind?.display ?? "Laboratory report",
-            }) satisfies Coding,
+            ? loinc(
+                "18754-2",
+                "Ambulatory cardiac rhythm monitor (Holter) study",
+              )
+            : loinc("11524-6", "EKG study")
+          : loinc(
+              kind?.loinc ?? "11502-2",
+              kind?.display ?? "Laboratory report",
+            )) satisfies Coding,
       ],
       ...(meta.title ? { text: meta.title } : {}),
     },
     subject,
     effectiveDateTime: meta.effectiveDateTime,
     issued: now,
-    ...(meta.performer ? { performer: [{ display: meta.performer }] } : {}),
+    ...(performer ? { performer } : {}),
     result: observations.map(
       (o) => ({ reference: `Observation/${o.id}` }) satisfies Reference,
     ),
@@ -497,9 +518,24 @@ export function buildBundle(
     ],
   };
 
-  const resources = [patient, docRef, report, ...observations, provenance];
+  // The Organization last, so every other entry keeps the position, and so
+  // the fullUrl, it had before there was one.
+  const resources = [
+    patient,
+    docRef,
+    report,
+    ...observations,
+    provenance,
+    ...(organization ? [organization] : []),
+  ];
+  const name = (part: string) => `${now}|${source.sourceDocument}|${part}`;
   return {
     resourceType: "Bundle",
+    // The bundle's own identity, named like its entries.
+    identifier: {
+      system: "urn:ietf:rfc:3986",
+      value: `urn:uuid:${uuidV5(name("bundle"))}`,
+    },
     type: "collection",
     timestamp: now,
     // A urn:uuid must be a UUID (#1144). Named by the report it comes from
@@ -508,9 +544,7 @@ export function buildBundle(
     // goes into the name: the Patient's id is the patient id, and no
     // identifier should go into SHA-1 (CodeQL js/weak-cryptographic-algorithm).
     entry: resources.map((resource, index) => ({
-      fullUrl: `urn:uuid:${uuidV5(
-        `${now}|${source.sourceDocument}|entry/${index}`,
-      )}`,
+      fullUrl: `urn:uuid:${uuidV5(name(`entry/${index}`))}`,
       resource,
     })),
   };

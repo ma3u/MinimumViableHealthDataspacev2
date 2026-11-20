@@ -76,10 +76,22 @@ export function parseReportBundle(
     throw new Error("the body is not a FHIR Bundle");
   }
   const resources = arr(bundle.entry).map((e) => obj(obj(e).resource));
+  // The laboratory that printed the report. The app names it as an
+  // Organization in the bundle and references it (#1172), keeping the name
+  // as the reference's display; an app built before that sends the display
+  // alone. The Organization's own name wins when the reference resolves.
+  const organizationName = (reference: Json): string | null => {
+    const id = str(reference.reference)?.match(/^Organization\/(.+)$/)?.[1];
+    const organization = resources.find(
+      (r) => r.resourceType === "Organization" && r.id === id,
+    );
+    return id && organization ? str(organization.name) : null;
+  };
   const performer =
     resources
       .filter((r) => r.resourceType === "DiagnosticReport")
-      .map((r) => str(obj(arr(r.performer)[0]).display))
+      .map((r) => obj(arr(r.performer)[0]))
+      .map((p) => organizationName(p) ?? str(p.display))
       .find(Boolean) ?? null;
 
   const rows: IncomingRow[] = [];

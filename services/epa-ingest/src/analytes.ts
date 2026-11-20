@@ -12,11 +12,32 @@
  * selects the coding and a unit we do not recognise for an analyte is an error,
  * not a fallback.
  *
- * The codes below are the widely used ones for these measurements. Validate the
- * table against an official LOINC release before anyone treats its output as a
- * clinical document, see README, "What this is not".
+ * The codes below are the widely used ones for these measurements, each checked
+ * against the LOINC release named in LOINC_VERSION. That is a lookup of every
+ * code, not a clinical review of the table, see README, "What this is not".
  */
 import type { AnalyteCoding, Taxon } from "./types.js";
+
+/**
+ * The LOINC release every code and display in this table was checked against,
+ * written as `Coding.version` on every LOINC coding the FHIR writer emits
+ * (the German lab profiles require it, #1172).
+ *
+ * The codes were looked up one by one against the NLM clinical tables API
+ * between 2026-09-19 and 2026-10-11, but which release that API served then
+ * was not recorded, so it is not claimed. On 2026-11-20 every LOINC code the
+ * writer can emit (226: the table, the report kinds and the writer's own
+ * report and organism codes) was checked again against
+ * https://clinicaltables.nlm.nih.gov/api/loinc_items/v3/search, whose
+ * `data_version` endpoint answered 2.83 before and after the run: all 226
+ * present, none deprecated, every display equal to the release's long common
+ * name once the two renamed in it (59261-8, 62238-1) were updated here.
+ *
+ * Raise it only after the same check against the newer release. The German
+ * lab profiles pin their own report code to 2.82; a value checked against
+ * 2.83 still says 2.83. Generated into Swift (`Analytes.loincVersion`).
+ */
+export const LOINC_VERSION = "2.83";
 
 /**
  * Latin letters that OCR sometimes returns as their Cyrillic or Greek twins.
@@ -829,7 +850,7 @@ const DEFINITIONS: AnalyteDefinition[] = [
       "%": c("4548-4", "Hemoglobin A1c/Hemoglobin.total in Blood", "%"),
       "mmol/mol": c(
         "59261-8",
-        "Hemoglobin A1c/Hemoglobin.total in Blood by IFCC protocol",
+        "Hemoglobin A1c/Hemoglobin.total standardized per IFCC-RMP for CDT in Blood",
         "mmol/mol",
       ),
     },
@@ -925,7 +946,7 @@ const DEFINITIONS: AnalyteDefinition[] = [
     byUnit: {
       "mL/min/{1.73_m2}": c(
         "62238-1",
-        "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)",
+        "Glomerular filtration rate [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)/1.73 sq M",
         "mL/min/{1.73_m2}",
       ),
     },

@@ -192,6 +192,10 @@ export function buildLabReportDocument(
     },
     subject,
     effectiveDateTime: r.effective,
+    // When the value was documented: the report's issue time, as on the
+    // DiagnosticReport. The German lab profiles require it (#1172), and so
+    // does the shared writer.
+    issued: report.issued ?? options.timestamp,
     performer: [ref(laboratory, laboratory.name as string)],
     valueQuantity: quantity(r.value, r.unit),
     ...(r.low !== null || r.high !== null || r.rangeText

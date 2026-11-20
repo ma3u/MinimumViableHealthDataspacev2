@@ -56,7 +56,7 @@
         "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-spirometry.json",
         "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle.json"
       ],
-      "resources": 75
+      "resources": 84
     },
     "synthea": {
       "description": "Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads",
@@ -66,7 +66,7 @@
       "resources": 183
     }
   },
-  "inputsDigest": "caa2fbc5aba46d8b",
+  "inputsDigest": "f188dd2ba3db7c73",
   "profiles": {
     "patient-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
@@ -131,8 +131,8 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/organization-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
-      "tested": 0,
-      "passed": 0,
+      "tested": 9,
+      "passed": 9,
       "failed": 0,
       "bySource": {
         "documents": {
@@ -140,8 +140,8 @@
           "passed": 0
         },
         "klarbefund": {
-          "tested": 0,
-          "passed": 0
+          "tested": 9,
+          "passed": 9
         },
         "synthea": {
           "tested": 0,
@@ -442,10 +442,6 @@
           "resources": 9
         },
         {
-          "issue": "Bundle: Bundle.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0)",
-          "resources": 9
-        },
-        {
           "issue": "Bundle: Constraint failed: dr-comp-type: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
           "resources": 9
         },
@@ -455,6 +451,10 @@
         },
         {
           "issue": "Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice",
+          "resources": 9
+        },
+        {
+          "issue": "entry/*DiagnosticReport/report-1*/: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)",
           "resources": 9
         }
       ]
@@ -606,7 +606,7 @@
           },
           {
             "issue": "Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 30
+            "resources": 20
           },
           {
             "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
@@ -637,15 +637,11 @@
         },
         "topIssues": [
           {
-            "issue": "DiagnosticReport.code.coding[n].version: Missing element 'version' - required by fixed value assigned in profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update",
+            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code",
             "resources": 2
           },
           {
-            "issue": "DiagnosticReport.code.coding[n]: DiagnosticReport.code.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 2
-          },
-          {
-            "issue": "DiagnosticReport.performer[n]: DiagnosticReport.performer.reference: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code.coding",
             "resources": 2
           },
           {
@@ -654,6 +650,10 @@
           },
           {
             "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.data: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "resources": 2
+          },
+          {
+            "issue": "DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
             "resources": 2
           }
         ]
@@ -707,8 +707,8 @@
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
         "tested": 31,
-        "passed": 0,
-        "failed": 31,
+        "passed": 5,
+        "failed": 26,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -716,7 +716,7 @@
           },
           "klarbefund": {
             "tested": 11,
-            "passed": 0
+            "passed": 5
           },
           "synthea": {
             "tested": 20,
@@ -726,7 +726,7 @@
         "topIssues": [
           {
             "issue": "Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 30
+            "resources": 20
           },
           {
             "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
@@ -737,12 +737,12 @@
             "resources": 20
           },
           {
-            "issue": "Observation: Observation.issued: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 11
-          },
-          {
             "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
             "resources": 5
+          },
+          {
+            "issue": "Observation.referenceRange[n]: Constraint failed: obs-range-2: '...' (defined in https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp)",
+            "resources": 4
           }
         ]
       },
@@ -769,11 +769,11 @@
         },
         "topIssues": [
           {
-            "issue": "DiagnosticReport.code.coding[n].version: Missing element 'version' - required by fixed value assigned in profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0",
+            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code",
             "resources": 2
           },
           {
-            "issue": "DiagnosticReport.code.coding[n]: DiagnosticReport.code.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code.coding",
             "resources": 2
           },
           {
@@ -785,7 +785,7 @@
             "resources": 2
           },
           {
-            "issue": "DiagnosticReport.performer[n]: DiagnosticReport.performer.reference: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
             "resources": 2
           }
         ]
@@ -822,7 +822,7 @@
           },
           {
             "issue": "entry: Unable to find a match for the specified profile among choices: https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-image-attachment-dglp, https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-labo",
-            "resources": 5
+            "resources": 4
           },
           {
             "issue": "entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0)",

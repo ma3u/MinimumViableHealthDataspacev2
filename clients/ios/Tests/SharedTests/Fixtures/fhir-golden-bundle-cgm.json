@@ -55,6 +55,10 @@
   ],
   "bundle": {
     "resourceType": "Bundle",
+    "identifier": {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:5dd91b73-4262-5318-ad26-4cbb254abdad"
+    },
     "type": "collection",
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
@@ -107,6 +111,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "107930-0",
                 "display": "Continuous glucose monitoring summary report Document"
               }
@@ -120,6 +125,7 @@
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -176,6 +182,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "97507-8",
                 "display": "Average glucose [Mass/volume] in Interstitial fluid during Reporting Period"
               }
@@ -186,8 +193,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -234,6 +243,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "97510-2",
                 "display": "Glucose measurements in range out of Total glucose measurements during reporting period"
               }
@@ -244,8 +254,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -292,6 +304,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "97506-0",
                 "display": "Glucose management indicator"
               }
@@ -302,8 +315,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -368,6 +383,14 @@
               }
             }
           ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "performer-1",
+          "name": "Praxis Dr. Muster"
         }
       }
     ]

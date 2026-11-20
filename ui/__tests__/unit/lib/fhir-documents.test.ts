@@ -457,6 +457,14 @@ describe("laboratory report", () => {
     }
   });
 
+  it("says when every result was documented: the report's issue time (#1172)", () => {
+    const [dr] = resources(doc, "DiagnosticReport");
+    expect(dr.issued).toBeTruthy();
+    for (const obs of resources(doc, "Observation")) {
+      expect(obs.issued).toBe(dr.issued);
+    }
+  });
+
   it("refuses a report with no results", () => {
     expect(() =>
       buildLabReportDocument(

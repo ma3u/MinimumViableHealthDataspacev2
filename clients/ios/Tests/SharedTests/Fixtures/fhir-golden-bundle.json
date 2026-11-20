@@ -154,6 +154,10 @@
   ],
   "bundle": {
     "resourceType": "Bundle",
+    "identifier": {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:5dd91b73-4262-5318-ad26-4cbb254abdad"
+    },
     "type": "collection",
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
@@ -206,6 +210,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "11502-2",
                 "display": "Laboratory report"
               }
@@ -219,6 +224,7 @@
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -291,6 +297,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "2089-1",
                 "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
               }
@@ -301,8 +308,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -368,6 +377,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "4548-4",
                 "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
               }
@@ -378,8 +388,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -447,6 +459,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "33762-6",
                 "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
               }
@@ -457,8 +470,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -515,6 +530,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "2276-4",
                 "display": "Ferritin [Mass/volume] in Serum or Plasma"
               }
@@ -525,8 +541,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -584,6 +602,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "1988-5",
                 "display": "C reactive protein [Mass/volume] in Serum or Plasma"
               }
@@ -594,8 +613,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -664,8 +685,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -681,6 +704,7 @@
                 "coding": [
                   {
                     "system": "http://loinc.org",
+                    "version": "2.83",
                     "code": "41852-5",
                     "display": "Microorganism or agent identified in Specimen"
                   }
@@ -743,6 +767,7 @@
             "coding": [
               {
                 "system": "http://loinc.org",
+                "version": "2.83",
                 "code": "29463-7",
                 "display": "Body weight"
               }
@@ -753,8 +778,10 @@
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
+              "reference": "Organization/performer-1",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -831,6 +858,14 @@
               }
             }
           ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:d4ef62bd-92f6-5468-a932-3d860678c814",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "performer-1",
+          "name": "Praxis Dr. Muster"
         }
       }
     ]
