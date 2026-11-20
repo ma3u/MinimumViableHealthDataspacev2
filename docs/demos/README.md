@@ -87,6 +87,19 @@ also holds the pitch for the call for speakers, under a minute.
 `python3 scripts/narrate-nodes-ai-deck.py [slide-id … | pitch]` regenerates the
 audio and `narration.json`. The rendered videos are not in the repository.
 
+## Tractus-X Community Days talk
+
+[`ui/public/presentations/tractus-x-community-days/`](../../ui/public/presentations/tractus-x-community-days/index.html),
+on GitHub Pages at
+[ma3u.github.io/MinimumViableHealthDataspacev2/presentations/tractus-x-community-days/](https://ma3u.github.io/MinimumViableHealthDataspacev2/presentations/tractus-x-community-days/).
+"EDC 0.x to 1.0: what changes, and what to plan for", for the Eclipse Tractus-X
+community. Fifteen slides on the data model, the APIs, the data plane and Data
+Plane Signaling, the siglets the hub runs, the RC-to-RC breaks and when to
+migrate, with a checklist the audience can tick. The facts are the ones in
+[discussion #1092](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/1092)
+and #930; update the deck when they change (a new RC, push or streaming on the
+DataPlane SDK). Not narrated. Speaker notes on S.
+
 ## Guides
 
 | File                                                                         | What it is                                                                                                           |
