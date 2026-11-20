@@ -1,0 +1,36 @@
+meta {
+  name: 12 FHIR CapabilityStatement
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{proxyUrl}}/fhir/metadata
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.resourceType: eq CapabilityStatement
+  res.body.fhirVersion: eq 4.0.1
+  res.body.rest[0].mode: eq server
+}
+
+tests {
+  test("lists Observation with the search parameters its route applies", function () {
+    const obs = res.getBody().rest[0].resource.find((r) => r.type === "Observation");
+    expect(obs.searchParam.map((p) => p.name)).to.have.members(["patient", "code", "date"]);
+  });
+}
+
+docs {
+  The FHIR facade's CapabilityStatement (#1174), generated from the table the
+  routes are registered from (services/neo4j-proxy/src/fhir-capability.ts).
+  $validate is listed only when the proxy has a validator (MATCHBOX_URL,
+  docker-compose.matchbox.yml).
+}
