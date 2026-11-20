@@ -74,8 +74,8 @@
       "status": "partial",
       "totalResources": 2588,
       "profileCount": 7,
-      "tested": 67,
-      "passed": 57,
+      "tested": 76,
+      "passed": 66,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -138,9 +138,9 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/organization-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-organization-eu-core.html",
           "baseResource": "Organization",
-          "coverage": "untested",
-          "tested": 0,
-          "passed": 0,
+          "coverage": "full",
+          "tested": 9,
+          "passed": 9,
           "failed": 0,
           "topIssues": [],
           "resourceCount": 0
@@ -301,10 +301,10 @@
           "failed": 9,
           "topIssues": [
             "9x Bundle.type: Value is 'collection' but is fixed to 'document' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type",
-            "9x Bundle: Bundle.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0)",
             "9x Bundle: Constraint failed: dr-comp-type: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
             "9x Bundle: Constraint failed: one-comp: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-            "9x Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice"
+            "9x Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice",
+            "9x entry/*DiagnosticReport/report-1*/: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)"
           ],
           "resourceCount": 0
         },
@@ -429,11 +429,11 @@
   "summary": {
     "totalCategories": 6,
     "totalProfiles": 16,
-    "testedProfiles": 9,
-    "passingProfiles": 4,
-    "resourcesTested": 183,
-    "resourcesPassed": 139,
-    "passRatePercent": 76,
+    "testedProfiles": 10,
+    "passingProfiles": 5,
+    "resourcesTested": 192,
+    "resourcesPassed": 148,
+    "passRatePercent": 77,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -479,7 +479,7 @@
       "klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "41ca118a57f9d921"
+    "inputsDigest": "678b81ee0780edbd"
   },
   "planned": [
     {

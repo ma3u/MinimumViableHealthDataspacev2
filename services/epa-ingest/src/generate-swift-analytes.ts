@@ -22,6 +22,7 @@ import {
   ANALYTE_DESCRIPTIONS,
   ANALYTE_DESCRIPTIONS_DE,
   ELECTROCARDIOGRAM_CODES,
+  LOINC_VERSION,
   REPORT_KINDS,
   OBSERVATION_CATEGORIES,
   ANALYTE_KEYS,
@@ -268,6 +269,11 @@ public struct Taxon: Sendable, Equatable, Codable {
 }
 
 public enum Analytes {
+  /// The LOINC release every code in this table was checked against, written
+  /// as \`Coding.version\` on every LOINC coding. Mirrors \`LOINC_VERSION\`,
+  /// whose comment says how it was checked.
+  public static let loincVersion = ${swiftString(LOINC_VERSION)}
+
   /// Printed unit spelling → UCUM code. Mirrors \`normaliseUnit\`.
   public static let unitMap: [String: String] = [
 ${units}

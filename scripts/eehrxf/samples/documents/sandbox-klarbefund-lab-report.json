@@ -231,6 +231,7 @@
      "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
     },
     "effectiveDateTime": "2026-06-02",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
@@ -318,6 +319,7 @@
      "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
     },
     "effectiveDateTime": "2026-06-02",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",

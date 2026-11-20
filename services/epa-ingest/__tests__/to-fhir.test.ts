@@ -16,7 +16,7 @@ import {
   statusForSource,
   uuidV5,
 } from "../src/to-fhir.js";
-import { lookupAnalyte } from "../src/analytes.js";
+import { LOINC_VERSION, lookupAnalyte } from "../src/analytes.js";
 import {
   GOLDEN_ECG_VALUES,
   GOLDEN_EXERCISE_VALUES,
@@ -75,13 +75,14 @@ describe("statusForSource", () => {
 describe("buildBundle", () => {
   const bundle = build(digitalSource);
 
-  it("emits a collection bundle with patient, document, report, observations and provenance", () => {
+  it("emits a collection bundle with patient, document, report, observations, provenance and performer", () => {
     expect(bundle.resourceType).toBe("Bundle");
     expect(bundle.type).toBe("collection");
     expect(ofType(bundle, "Patient")).toHaveLength(1);
     expect(ofType(bundle, "DocumentReference")).toHaveLength(1);
     expect(ofType(bundle, "DiagnosticReport")).toHaveLength(1);
     expect(ofType(bundle, "Provenance")).toHaveLength(1);
+    expect(ofType(bundle, "Organization")).toHaveLength(1);
     expect(ofType(bundle, "Observation").length).toBeGreaterThan(10);
   });
 
@@ -183,6 +184,88 @@ describe("buildBundle", () => {
   });
 });
 
+describe("what the German lab profiles ask of the writer (#1172)", () => {
+  const bundle = build(ocrSource);
+  const lab = (resource: Resource) => resource as Record<string, any>;
+  const codings = (concept: { coding?: { system: string }[] }) =>
+    concept.coding ?? [];
+
+  it("names the LOINC release on every LOINC coding", () => {
+    expect(LOINC_VERSION).toMatch(/^2\.\d{2}$/);
+    const loinc = [
+      ...ofType(bundle, "Observation").flatMap((o) => codings(lab(o).code)),
+      ...ofType(bundle, "DiagnosticReport").flatMap((r) =>
+        codings(lab(r).code),
+      ),
+    ].filter((c) => c.system === "http://loinc.org");
+    expect(loinc.length).toBeGreaterThan(10);
+    for (const c of loinc) expect(c).toHaveProperty("version", LOINC_VERSION);
+  });
+
+  it("says when each value was documented, with the report", () => {
+    const [report] = ofType(bundle, "DiagnosticReport");
+    expect(report.issued).toBe(NOW);
+    for (const o of ofType(bundle, "Observation")) expect(o.issued).toBe(NOW);
+  });
+
+  it("makes the printed performer an Organization the results reference", () => {
+    const [organization] = ofType(bundle, "Organization");
+    expect(organization).toEqual({
+      resourceType: "Organization",
+      id: "performer-1",
+      name: "AlphaKlinik Berlin CPC",
+    });
+    const performer = [
+      {
+        reference: "Organization/performer-1",
+        display: "AlphaKlinik Berlin CPC",
+      },
+    ];
+    for (const r of [
+      ...ofType(bundle, "Observation"),
+      ...ofType(bundle, "DiagnosticReport"),
+    ]) {
+      expect(r.performer).toEqual(performer);
+    }
+    // Last, so every other entry keeps its position and fullUrl.
+    expect(bundle.entry.at(-1)?.resource.resourceType).toBe("Organization");
+  });
+
+  it("invents no performer when the report names none", () => {
+    const { coded } = codeValues(parseLabReport(FIXTURE).values);
+    const anonymous = buildBundle(coded, {
+      meta: { patientId: "self", effectiveDateTime: "2026-08-14" },
+      source: ocrSource,
+      now: NOW,
+    });
+    expect(ofType(anonymous, "Organization")).toHaveLength(0);
+    for (const r of [
+      ...ofType(anonymous, "Observation"),
+      ...ofType(anonymous, "DiagnosticReport"),
+    ]) {
+      expect(r.performer).toBeUndefined();
+    }
+  });
+
+  it("gives the bundle an identifier named like its entries", () => {
+    expect(bundle.identifier.system).toBe("urn:ietf:rfc:3986");
+    expect(bundle.identifier.value).toBe(
+      `urn:uuid:${uuidV5(`${NOW}|${ocrSource.sourceDocument}|bundle`)}`,
+    );
+    expect(bundle.entry.map((e) => e.fullUrl)).not.toContain(
+      bundle.identifier.value,
+    );
+  });
+
+  it("leaves the reference range's type unset: what was printed does not say", () => {
+    const ranges = ofType(bundle, "Observation").flatMap(
+      (o) => (lab(o).referenceRange ?? []) as object[],
+    );
+    expect(ranges.length).toBeGreaterThan(0);
+    for (const range of ranges) expect(range).not.toHaveProperty("type");
+  });
+});
+
 describe("buildBundle with OCR provenance", () => {
   const bundle = build(ocrSource);
 
@@ -248,6 +331,7 @@ describe("an organism from a stool report", () => {
     const [component] = observation().component;
     expect(component.code.coding[0]).toEqual({
       system: "http://loinc.org",
+      version: LOINC_VERSION,
       code: "41852-5",
       display: "Microorganism or agent identified in Specimen",
     });

@@ -135,6 +135,31 @@ describe("reading the app's report bundle", () => {
     ]);
   });
 
+  it("names the laboratory by the Organization the report references (#1172)", () => {
+    const sent = bundle(observation("obs-1"));
+    const report = sent.entry.at(-1)!.resource as Record<string, unknown>;
+    report.performer = [{ reference: "Organization/performer-1" }];
+    sent.entry.push({
+      resource: {
+        resourceType: "Organization",
+        id: "performer-1",
+        name: "Praxislabor Musterstadt (fictional)",
+      } as never,
+    });
+    const { rows } = parseReportBundle(sent, ids);
+    expect(rows[0].performer).toBe("Praxislabor Musterstadt (fictional)");
+  });
+
+  it("falls back to the reference's display when no Organization resolves", () => {
+    const sent = bundle(observation("obs-1"));
+    const report = sent.entry.at(-1)!.resource as Record<string, unknown>;
+    report.performer = [
+      { reference: "Organization/elsewhere", display: "Labor Musterstadt" },
+    ];
+    const { rows } = parseReportBundle(sent, ids);
+    expect(rows[0].performer).toBe("Labor Musterstadt");
+  });
+
   it("refuses a body that is not a FHIR Bundle", () => {
     expect(() => parseReportBundle({ resourceType: "Patient" }, ids)).toThrow();
   });

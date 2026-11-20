@@ -235,6 +235,7 @@
      "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
@@ -308,6 +309,7 @@
      "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
@@ -381,6 +383,7 @@
      "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
@@ -454,6 +457,7 @@
      "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
@@ -521,6 +525,7 @@
      "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
     },
     "effectiveDateTime": "2026-09-08T08:30:00Z",
+    "issued": "2026-11-20T09:00:00Z",
     "performer": [
      {
       "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
