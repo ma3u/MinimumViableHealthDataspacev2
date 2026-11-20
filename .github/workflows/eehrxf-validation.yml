@@ -11,6 +11,12 @@ name: EEHRxF validation
 # cannot change what the page claims without the claim changing in the same
 # pull request. It also fails when the seed or mock were edited by hand.
 #
+# The same run checks the German ePA profiles in profiles.json's national
+# section (#1172), written to the report but never to /eehrxf. A draft or
+# ballot guide is report-only; a published one gates: validate.py exits 1
+# when a gating profile fails more resources than the committed report
+# records for it.
+#
 # Fixing a failure: run locally and commit the three generated files.
 #   python3 scripts/eehrxf/validate.py
 #   python3 scripts/eehrxf/build.py
@@ -78,8 +84,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      # The validator jar (about 200 MB) and the FHIR packages it loads.
-      # Both are pinned in profiles.json, so the key is its hash.
+      # The validator jar (about 200 MB) and the FHIR packages it loads,
+      # the German ones and their KBV and gematik dependencies included.
+      # All are pinned in profiles.json, so the key is its hash.
       - uses: actions/cache@v6
         with:
           path: |
@@ -87,7 +94,7 @@ jobs:
             ~/.fhir/packages
           key: eehrxf-${{ hashFiles('scripts/eehrxf/profiles.json') }}
       - name: Validate
-        run: python3 scripts/eehrxf/validate.py --report "${RUNNER_TEMP}/validation-report.json"
+        run: python3 scripts/eehrxf/validate.py --report "${RUNNER_TEMP}/validation-report.json" --baseline scripts/eehrxf/validation-report.json
       - name: Compare with the committed report
         run: |
           set -euo pipefail

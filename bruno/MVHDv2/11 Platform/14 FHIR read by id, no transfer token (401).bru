@@ -1,0 +1,29 @@
+meta {
+  name: 14 FHIR read by id, no transfer token (401)
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{proxyUrl}}/fhir/Observation/obs-p1-4548-4-2026-02-10
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 401
+  res.body.resourceType: eq OperationOutcome
+  res.body.issue[0].code: eq login
+}
+
+docs {
+  Read by id answers a dataspace pull only (#1174): GET /dataspace/data/{id}
+  with the siglet token of a transfer of the dataset whose route is
+  /fhir/Observation. Called directly, without one, it is 401 with an
+  OperationOutcome. The runner forges sessions, not siglet tokens, so the
+  answer itself is covered by the unit suite (fhir-facade.test.ts).
+}

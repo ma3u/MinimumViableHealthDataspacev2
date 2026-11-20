@@ -103,3 +103,17 @@ export const ANTHROPIC_MODEL =
   process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 export const AZURE_OPENAI_GPT4O_URL = process.env.AZURE_OPENAI_GPT4O_URL;
 export const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
+
+// $validate on the FHIR facade (#1174) is forwarded to a validator, never
+// written here: Matchbox (docker-compose.matchbox.yml), its FHIR base URL,
+// e.g. http://matchbox:8080/matchboxv3/fhir. Read per request, so a test can
+// set it. Unset, $validate answers 503 and /fhir/metadata does not list it.
+// Local compose only; not deployed on Azure.
+export function matchboxUrl(): string {
+  return (process.env.MATCHBOX_URL ?? "").replace(/\/+$/, "");
+}
+/** How long a validation may take; Matchbox builds an engine on first use. */
+export const MATCHBOX_TIMEOUT_MS = parseInt(
+  process.env.MATCHBOX_TIMEOUT_MS ?? "120000",
+  10,
+);
