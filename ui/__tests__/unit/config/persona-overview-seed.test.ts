@@ -126,7 +126,7 @@ describe("seed-persona-overview.cypher", () => {
     expect(seed).toContain("MERGE (p)-[:HAS_MEDICATION_REQUEST]->(med)");
     expect(seed).toContain("MERGE (p)-[:GAVE_CONSENT]->(pc)");
     expect(seed).toContain("MERGE (pc)-[:FOR_STUDY]->(st)");
-    expect(seed.match(/\{id: 'cond-p1-/g)).toHaveLength(8);
+    expect(seed.match(/\{id: 'cond-p1-/g)).toHaveLength(7);
     expect(seed.match(/\{id: 'med-p1-/g)).toHaveLength(4);
     expect(seed.match(/\{id: 'CONSENT-\d+'/g)).toHaveLength(3);
     // one consent is withdrawn: the Art. 71 opt-out state

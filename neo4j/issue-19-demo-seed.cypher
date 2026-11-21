@@ -24,7 +24,7 @@ MERGE (icdUti:ICD10Code {code: 'N39.0'})
   ON CREATE SET icdUti.display = 'Urinary tract infection, site not specified';
 MERGE (rxCipro:RxNormConcept {rxcui: '2551'})
   ON CREATE SET rxCipro.display = 'Ciprofloxacin';
-MERGE (scTendon:SnomedConcept {conceptId: '262615006'})
+MERGE (scTendon:SnomedConcept {conceptId: '415749005'})
   ON CREATE SET scTendon.display = 'Rupture of tendon';
 MERGE (icdTendon:ICD10Code {code: 'M66.9'})
   ON CREATE SET icdTendon.display = 'Spontaneous rupture of unspecified tendon';
@@ -89,7 +89,7 @@ WITH p, row
 FOREACH (_ IN CASE WHEN row.tendon THEN [1] ELSE [] END |
   MERGE (tr:Condition {resourceId: row.id + '-tendon-rupture'})
     ON CREATE SET
-      tr.code      = '262615006',
+      tr.code      = '415749005',
       tr.display   = 'Rupture of tendon',
       tr.onsetDate = '2024-03-08',
       tr.clinicalStatus = 'active',
@@ -99,8 +99,8 @@ FOREACH (_ IN CASE WHEN row.tendon THEN [1] ELSE [] END |
 
 // Wire tendon-rupture conditions to their ontology nodes in a second pass
 // (separated from the UNWIND to keep FOREACH/MATCH semantics clean).
-MATCH (tr:Condition {code: '262615006', pvCohort: true})
-MATCH (scTendon:SnomedConcept {conceptId: '262615006'})
+MATCH (tr:Condition {code: '415749005', pvCohort: true})
+MATCH (scTendon:SnomedConcept {conceptId: '415749005'})
 MATCH (icdTendon:ICD10Code {code: 'M66.9'})
 MERGE (tr)-[:CODED_BY]->(scTendon)
 MERGE (tr)-[:CODED_BY]->(icdTendon);
@@ -108,7 +108,7 @@ MERGE (tr)-[:CODED_BY]->(icdTendon);
 // Verification: expect 6 cohort patients, 5 on cipro, 2 with tendon rupture.
 MATCH (p:Patient {pvCohort: true})
 OPTIONAL MATCH (p)-[:HAS_MEDICATION_REQUEST]->(m:MedicationRequest {medicationCode: '2551'})
-OPTIONAL MATCH (p)-[:HAS_CONDITION]->(tr:Condition {code: '262615006'})
+OPTIONAL MATCH (p)-[:HAS_CONDITION]->(tr:Condition {code: '415749005'})
 RETURN count(DISTINCT p) AS cohortPatients,
        count(DISTINCT m) AS ciproRx,
        count(DISTINCT tr) AS tendonRuptures;

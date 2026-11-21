@@ -144,6 +144,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
   run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
   run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
+  run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
@@ -230,6 +231,12 @@ run_file "$SEED_DIR"/backfill-coded-by.cypher "CODED_BY edge backfill (issue #19
 # against the Synthea-based synthetic dataset (which does not include
 # fluoroquinolones out of the box). 6 fictional patients. Idempotent.
 run_file "$SEED_DIR"/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (issue #19)"
+
+# Issue #1167: the seeds above once paired SNOMED CT codes with the label of
+# another disease (breast cancer with the code of colon cancer, and so on).
+# Recodes what an earlier run left, after the persona and issue #19 seeds.
+# Idempotent: it matches the old codes only.
+run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
 
 # Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
 # Requires the graph-data-science plugin; silently no-ops on installs without

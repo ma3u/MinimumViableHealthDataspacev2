@@ -105,7 +105,7 @@ export async function GET(req: Request) {
             studyId: "study-diabetes-de-nl-2025",
             finding:
               "Patients with Type 2 Diabetes on Metformin showed 18% lower cardiovascular event rate compared to non-treated cohort (n=1,240, p<0.01)",
-            relevantConditions: ["E11.9", "I10", "73211009"],
+            relevantConditions: ["E11.9", "I10", "44054006"],
             recommendation:
               "Discuss cardiovascular screening schedule and Metformin continuation with your physician",
             evidenceLevel: "high",

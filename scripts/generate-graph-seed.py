@@ -25,46 +25,48 @@ random.seed(42)  # reproducible
 
 # ─── Real public ontology codes ──────────────────────────────────────────────
 
+# Every code checked with the SNOMED CT $lookup of r4.ontoserver.csiro.au on
+# 2026-11-20 (#1167): the display it returns names the label next to it. Seven
+# codes here used to name another disease (73211009 is diabetes unspecified,
+# 267036007 dyspnoea, 363406005 colon cancer, ...); a graph seeded before is
+# corrected by neo4j/migrate-snomed-condition-codes.cypher.
 SNOMED = [
-    (73211009,  "Type 2 Diabetes Mellitus"),
+    (44054006,  "Type 2 Diabetes Mellitus"),
     (38341003,  "Essential Hypertension"),
     (195967001, "Asthma"),
     (13645005,  "COPD"),
     (84114007,  "Heart Failure"),
-    (709044004, "CKD Stage 3"),
+    (433144002, "CKD Stage 3"),
     (414545008, "Ischemic Heart Disease"),
-    (44054006,  "Type 2 DM with Neuropathy"),
     (49436004,  "Atrial Fibrillation"),
-    (73211009,  "Type 2 Diabetes Mellitus"),  # dup filtered
     (40930008,  "Hypothyroidism"),
     (35489007,  "Depression"),
     (197480006, "Anxiety Disorder"),
-    (267036007, "Iron Deficiency Anaemia"),
+    (87522002,  "Iron Deficiency Anaemia"),
     (396275006, "Osteoarthritis"),
     (22298006,  "Myocardial Infarction"),
     (230690007, "Stroke"),
-    (44054006,  "Diabetic Neuropathy"),
+    (230572002, "Diabetic Neuropathy"),
     (399068003, "Malignant Neoplasm of Prostate"),
     (254637007, "Non-small Cell Lung Cancer"),
     (93761005,  "Primary Malignant Neoplasm of Colon"),
     (90708001,  "Kidney Disease"),
     (367498001, "Seasonal Allergic Rhinitis"),
-    (266356007, "Chronic Low Back Pain"),
+    (278860009, "Chronic Low Back Pain"),
     (34000006,  "Crohn Disease"),
     (64572001,  "Disease"),  # parent concept
     (128462008, "Metastatic Disease"),
-    (239720000, "Psoriatic Arthritis"),
+    (156370009, "Psoriatic Arthritis"),
     (69896004,  "Rheumatoid Arthritis"),
     (46635009,  "Type 1 Diabetes"),
-    (363406005, "Malignant Neoplasm of Breast"),
-    (235856003, "Hepatitis C"),
+    (254837009, "Malignant Neoplasm of Breast"),
+    (50711007,  "Hepatitis C"),
     (86406008,  "HIV"),
     (56717001,  "Tuberculosis"),
     (398254007, "Pre-eclampsia"),
     (371631005, "Panic Disorder"),
-    (66857006,  "Hemophilia"),
-    (73211009,  "T2D"),  # dup
-    (190828008, "Hyperlipidaemia"),
+    (90935002,  "Hemophilia"),
+    (55822004,  "Hyperlipidaemia"),
     (414916001, "Obesity"),
 ]
 # Deduplicate by concept ID
@@ -238,26 +240,26 @@ LAST_NAMES = [
 # ── Condition-to-ontology mapping ───────────────────────────────────────────
 # Each condition profile: (name, snomed_id, icd10, common_loinc_tests, common_rx)
 CONDITION_PROFILES = [
-    ("Type 2 Diabetes", 73211009, "E11", ["4548-4","2345-7","33914-3","2160-0"], [860975,1861634,197696,197884]),
+    ("Type 2 Diabetes", 44054006, "E11", ["4548-4","2345-7","33914-3","2160-0"], [860975,1861634,197696,197884]),
     ("Essential Hypertension", 38341003, "I10", ["8480-6","8462-4","2160-0","2823-3"], [316672,197361,198013,197770]),
     ("Asthma", 195967001, "J45.20", ["71426-1","6690-2","718-7"], [897122,1245689]),
     ("COPD", 13645005, "J44.1", ["2744-1","71426-1","718-7","2028-9"], [897122,1245689,198405]),
     ("Heart Failure", 84114007, "I50.9", ["33762-6","2093-3","2823-3","2951-2"], [197591,310798,1049630]),
-    ("CKD Stage 3", 709044004, "N18.3", ["2160-0","33914-3","14959-1","2823-3"], [316672,197361]),
+    ("CKD Stage 3", 433144002, "N18.3", ["2160-0","33914-3","14959-1","2823-3"], [316672,197361]),
     ("Atrial Fibrillation", 49436004, "I48.91", ["33762-6","5902-2","48065-7"], [855332,1049630,310798]),
     ("Hypothyroidism", 40930008, "E03.9", ["3016-3","3026-2","2093-3"], [197381]),
     ("Depression", 35489007, "F32.1", ["3016-3","718-7","2276-4"], [312938]),
     ("Anxiety Disorder", 197480006, "F41.1", ["3016-3","718-7"], [312938]),
-    ("Iron Deficiency Anaemia", 267036007, "D50.9", ["718-7","4544-3","2276-4"], []),
+    ("Iron Deficiency Anaemia", 87522002, "D50.9", ["718-7","4544-3","2276-4"], []),
     ("Osteoarthritis", 396275006, "M17.11", ["30341-2","71426-1"], [197807,311671]),
     ("Ischemic Heart Disease", 414545008, "I25.10", ["2093-3","2571-8","2085-9","13457-7"], [259255,352272,310798]),
-    ("Hyperlipidaemia", 190828008, "E78.5", ["2093-3","2571-8","2085-9","13457-7"], [259255,213169,308136]),
+    ("Hyperlipidaemia", 55822004, "E78.5", ["2093-3","2571-8","2085-9","13457-7"], [259255,213169,308136]),
     ("Obesity", 414916001, "E66.01", ["39156-5","4548-4","2093-3","2571-8"], [860975,261222,1546356]),
     ("Prostate Cancer", 399068003, "C61", ["14937-7","718-7","1751-7","71426-1"], []),
-    ("Breast Cancer", 363406005, "C50.911", ["718-7","777-3","6690-2","71426-1"], []),
+    ("Breast Cancer", 254837009, "C50.911", ["718-7","777-3","6690-2","71426-1"], []),
     ("Colon Cancer", 93761005, "C18.9", ["718-7","777-3","48065-7","1751-7"], []),
     ("Rheumatoid Arthritis", 69896004, "M05.79", ["71426-1","30341-2","6690-2"], [198405,197807]),
-    ("Hepatitis C", 235856003, "B18.2", ["1742-6","1920-8","1975-2","777-3"], []),
+    ("Hepatitis C", 50711007, "B18.2", ["1742-6","1920-8","1975-2","777-3"], []),
     ("Crohn Disease", 34000006, "K50.90", ["71426-1","718-7","1751-7","30341-2"], [198405]),
 ]
 
@@ -364,13 +366,13 @@ for cid, name in SNOMED:
 
 # SNOMED → ICD-10 cross-mapping
 SNOMED_ICD_MAP = [
-    (73211009,  "E11"), (38341003, "I10"), (195967001, "J45.20"),
-    (13645005,  "J44.1"), (84114007, "I50.9"), (709044004, "N18.3"),
+    (44054006,  "E11"), (38341003, "I10"), (195967001, "J45.20"),
+    (13645005,  "J44.1"), (84114007, "I50.9"), (433144002, "N18.3"),
     (49436004,  "I48.91"), (40930008, "E03.9"), (35489007, "F32.1"),
-    (197480006, "F41.1"), (267036007, "D50.9"), (396275006, "M17.11"),
-    (414545008, "I25.10"), (190828008, "E78.5"), (414916001, "E66.01"),
-    (399068003, "C61"), (363406005, "C50.911"), (93761005, "C18.9"),
-    (69896004,  "M05.79"), (235856003, "B18.2"), (34000006, "K50.90"),
+    (197480006, "F41.1"), (87522002,  "D50.9"), (396275006, "M17.11"),
+    (414545008, "I25.10"), (55822004,  "E78.5"), (414916001, "E66.01"),
+    (399068003, "C61"), (254837009, "C50.911"), (93761005, "C18.9"),
+    (69896004,  "M05.79"), (50711007,  "B18.2"), (34000006, "K50.90"),
 ]
 emit("// ═══ SNOMED → ICD-10 STANDARD_CONCEPT mappings ═══")
 for sid, icd in SNOMED_ICD_MAP:

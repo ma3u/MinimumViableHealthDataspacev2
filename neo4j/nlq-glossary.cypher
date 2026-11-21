@@ -64,7 +64,7 @@ UNWIND [
   {term: 'pbc',               code: '31712002',  system: 'snomed', display: 'Primary biliary cholangitis',    icd10: 'K74.3'},
   {term: 'cholangitis',       code: '82403002',  system: 'snomed', display: 'Cholangitis',                    icd10: 'K83.0'},
   // Adverse-drug-reaction symptoms / side-effects
-  {term: 'tendon rupture',     code: '262615006',system: 'snomed', display: 'Rupture of tendon',        icd10: 'M66.9'},
+  {term: 'tendon rupture',     code: '415749005',system: 'snomed', display: 'Rupture of tendon',        icd10: 'M66.9'},
   {term: 'tendinitis',         code: '202882001',system: 'snomed', display: 'Tendinitis',               icd10: 'M77.9'},
   {term: 'tendinopathy',       code: '202882001',system: 'snomed', display: 'Tendinopathy',             icd10: 'M77.9'},
   {term: 'headache',           code: '25064002', system: 'snomed', display: 'Headache',                 icd10: 'R51'},

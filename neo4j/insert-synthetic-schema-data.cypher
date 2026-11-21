@@ -13,7 +13,7 @@
 // LAYER 5: CLINICAL ONTOLOGY BACKBONE
 // ==============================================================================
 // SNOMED CT Concepts
-MERGE (scDM:SnomedConcept {conceptId: 73211009})
+MERGE (scDM:SnomedConcept {conceptId: 44054006})
   SET scDM.name = 'Type 2 Diabetes (SNOMED)',
       scDM.fsn = 'Diabetes mellitus type 2 (disorder)',
       scDM.preferredTerm = 'Type 2 diabetes',
@@ -167,7 +167,7 @@ MERGE (patient)-[:HAS_ENCOUNTER]->(encounter)
 MERGE (condition:Condition {resourceId: 'fhir-cond-3001'})
   SET condition.name = 'Type 2 Diabetes (FHIR)',
       condition.clinicalStatus = 'active',
-      condition.code = '73211009',
+      condition.code = '44054006',
       condition.codeSystem = 'http://snomed.info/sct',
       condition.onsetDate = '2023-06-15T10:00:00Z',
       condition.display = 'Type 2 diabetes mellitus'
@@ -256,7 +256,7 @@ MERGE (medReq)-[:MAPPED_TO]->(omopDrug)
 
 // ── Re-bind existing ontology nodes from first statement ──
 MERGE (scDisease:SnomedConcept {conceptId: 64572001})
-MERGE (scDM:SnomedConcept {conceptId: 73211009})
+MERGE (scDM:SnomedConcept {conceptId: 44054006})
 MERGE (icdDM:ICD10Code {code: 'E11.9'})
 MERGE (loincHbA1c:LoincCode {loincNumber: '4548-4'})
 MERGE (rxMetformin:RxNormConcept {rxcui: '860975'})
@@ -275,7 +275,7 @@ MERGE (scAsthma:SnomedConcept {conceptId: 195967001})
       scAsthma.active = true
 MERGE (scAsthma)-[:IS_A]->(scDisease)
 
-MERGE (scCKD:SnomedConcept {conceptId: 709044004})
+MERGE (scCKD:SnomedConcept {conceptId: 433144002})
   SET scCKD.name = 'CKD Stage 3 (SNOMED)',
       scCKD.fsn = 'Chronic kidney disease stage 3 (disorder)',
       scCKD.active = true
@@ -401,7 +401,7 @@ MERGE (enc4:Encounter {resourceId: 'fhir-enc-2004'})
       enc4.date = '2024-04-18T08:30:00Z', enc4.display = 'Annual check-up'
 MERGE (p4)-[:HAS_ENCOUNTER]->(enc4)
 MERGE (cond4a:Condition {resourceId: 'fhir-cond-3004a'})
-  SET cond4a.name = 'Type 2 Diabetes (FHIR)', cond4a.clinicalStatus = 'active', cond4a.code = '73211009',
+  SET cond4a.name = 'Type 2 Diabetes (FHIR)', cond4a.clinicalStatus = 'active', cond4a.code = '44054006',
       cond4a.onsetDate = '2023-11-22T09:15:00Z', cond4a.display = 'Type 2 diabetes mellitus'
 MERGE (p4)-[:HAS_CONDITION]->(cond4a)
 MERGE (cond4a)-[:CODED_BY]->(scDM)
@@ -446,7 +446,7 @@ MERGE (enc5:Encounter {resourceId: 'fhir-enc-2005'})
       enc5.date = '2024-05-10T13:15:00Z', enc5.display = 'Nephrology consultation'
 MERGE (p5)-[:HAS_ENCOUNTER]->(enc5)
 MERGE (cond5:Condition {resourceId: 'fhir-cond-3005'})
-  SET cond5.name = 'CKD Stage 3 (FHIR)', cond5.clinicalStatus = 'active', cond5.code = '709044004',
+  SET cond5.name = 'CKD Stage 3 (FHIR)', cond5.clinicalStatus = 'active', cond5.code = '433144002',
       cond5.onsetDate = '2023-12-05T10:30:00Z', cond5.display = 'Chronic kidney disease stage 3'
 MERGE (p5)-[:HAS_CONDITION]->(cond5)
 MERGE (cond5)-[:CODED_BY]->(scCKD)
@@ -481,7 +481,7 @@ MERGE (enc6:Encounter {resourceId: 'fhir-enc-2006'})
       enc6.date = '2024-08-22T15:00:00Z', enc6.display = 'Diabetology follow-up'
 MERGE (p6)-[:HAS_ENCOUNTER]->(enc6)
 MERGE (cond6:Condition {resourceId: 'fhir-cond-3006'})
-  SET cond6.name = 'Type 2 Diabetes (FHIR)', cond6.clinicalStatus = 'active', cond6.code = '73211009',
+  SET cond6.name = 'Type 2 Diabetes (FHIR)', cond6.clinicalStatus = 'active', cond6.code = '44054006',
       cond6.onsetDate = '2022-03-14T11:00:00Z', cond6.display = 'Type 2 diabetes mellitus'
 MERGE (p6)-[:HAS_CONDITION]->(cond6)
 MERGE (cond6)-[:CODED_BY]->(scDM)
@@ -531,7 +531,7 @@ MERGE (cond7a:Condition {resourceId: 'fhir-cond-3007a'})
 MERGE (p7)-[:HAS_CONDITION]->(cond7a)
 MERGE (cond7a)-[:CODED_BY]->(scHTN)
 MERGE (cond7b:Condition {resourceId: 'fhir-cond-3007b'})
-  SET cond7b.name = 'CKD Stage 3 (FHIR)', cond7b.clinicalStatus = 'active', cond7b.code = '709044004',
+  SET cond7b.name = 'CKD Stage 3 (FHIR)', cond7b.clinicalStatus = 'active', cond7b.code = '433144002',
       cond7b.onsetDate = '2022-11-15T10:30:00Z', cond7b.display = 'Chronic kidney disease stage 3'
 MERGE (p7)-[:HAS_CONDITION]->(cond7b)
 MERGE (cond7b)-[:CODED_BY]->(scCKD)

@@ -46,10 +46,9 @@ MERGE (p)-[:FROM_DATASET]->(ds);
 // ── 2. Her diagnoses and medications (as in patient_profile_patient1.json) ──
 MATCH (p:Patient {resourceId: 'P1'})
 UNWIND [
-  {id: 'cond-p1-73211009', code: '73211009', system: 'http://snomed.info/sct', display: 'Diabetes mellitus type 2', onset: '2018-04-10'},
+  {id: 'cond-p1-44054006', code: '44054006', system: 'http://snomed.info/sct', display: 'Diabetes mellitus type 2', onset: '2018-04-10'},
   {id: 'cond-p1-38341003', code: '38341003', system: 'http://snomed.info/sct', display: 'Hypertension', onset: '2015-11-02'},
   {id: 'cond-p1-73595000', code: '73595000', system: 'http://snomed.info/sct', display: 'Stress (finding)', onset: '2020-01-15'},
-  {id: 'cond-p1-E11.9', code: 'E11.9', system: 'http://hl7.org/fhir/sid/icd-10', display: 'T2D without complications', onset: '2018-04-10'},
   {id: 'cond-p1-414916001', code: '414916001', system: 'http://snomed.info/sct', display: 'Obesity (BMI 31.2)', onset: '2017-06-20'},
   {id: 'cond-p1-271825005', code: '271825005', system: 'http://snomed.info/sct', display: 'Respiratory distress', onset: '2021-03-08'},
   {id: 'cond-p1-40055000', code: '40055000', system: 'http://snomed.info/sct', display: 'Chronic sinusitis', onset: '2013-09-14'},
