@@ -1430,6 +1430,12 @@
       "file": "ADR-097-matchbox-runs-on-azure-with-its-packages-baked-in.md",
       "title": "Matchbox runs on Azure as an internal Container App, with its IG packages baked into the image",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-098",
+      "file": "ADR-098-omop-rows-are-keyed-by-their-cdm-id.md",
+      "title": "OMOP rows are keyed by their CDM id, an integer derived from the FHIR reference",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1528,7 +1534,7 @@
     "/docs/developer/api": "2026-11-20",
     "/docs/developer/reference": "2026-11-20",
     "/docs/developer/[slug]": "2026-11-19",
-    "/docs/architecture": "2026-11-20",
+    "/docs/architecture": "2026-11-21",
     "/docs/security": "2026-11-19",
     "/docs/security/[slug]": "2026-11-19",
     "/docs/klarbefund": "2026-11-19",

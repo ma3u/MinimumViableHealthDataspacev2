@@ -249,9 +249,13 @@ describe("Neo4j Proxy API", () => {
         timeline: [event],
       });
       const [cypher, params] = mockRun.mock.calls[0];
-      expect(cypher).toContain("(p:(OMOPPerson)&!OptedOut {personId: $personId})");
+      expect(cypher).toContain(
+        "(p:(OMOPPerson)&!OptedOut {personId: $personId})",
+      );
       expect(cypher).toContain("|OMOPProcedureOccurrence)&!OptedOut");
-      expect(cypher).not.toMatch(/Patient|personSourceValue|MAPS_TO_OMOP_PERSON/);
+      expect(cypher).not.toMatch(
+        /Patient|personSourceValue|MAPS_TO_OMOP_PERSON/,
+      );
       expect(params).toEqual({ personId: "2933907311533648" });
     });
 

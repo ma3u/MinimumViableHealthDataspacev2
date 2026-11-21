@@ -33,10 +33,7 @@ const BOLT = process.env.OMOP_TRANSFORM_IT_BOLT;
 
 /** ADR-098: 52 bits of the MD5 of the FHIR reference, as the transform derives it. */
 const cdmId = (reference: string) =>
-  parseInt(
-    createHash("md5").update(reference).digest("hex").slice(0, 13),
-    16,
-  );
+  parseInt(createHash("md5").update(reference).digest("hex").slice(0, 13), 16);
 
 interface Changes {
   nodesCreated: number;

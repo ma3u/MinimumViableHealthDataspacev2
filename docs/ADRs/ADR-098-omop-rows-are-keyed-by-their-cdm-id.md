@@ -10,12 +10,12 @@ Date: 2026-11-21
 
 Layer 4 of the graph holds the OMOP CDM v5.4 rows. Three writers create them, and each keys them its own way:
 
-| Writer | Person | Event rows | Visit edge |
-| --- | --- | --- | --- |
-| [`neo4j/init-schema.cypher`](../../neo4j/init-schema.cypher#L92-L98), the constraints | `personId` unique | `conditionOccurrenceId`, `measurementId`, `procedureOccurrenceId` unique; nothing for visits and drugs | |
-| [`neo4j/insert-synthetic-schema-data.cypher`](../../neo4j/insert-synthetic-schema-data.cypher#L206-L240) | `personId` 99001… | the CDM names, integers (`visitOccurrenceId` 88001, `conditionOccurrenceId` 77001, …) | `HAS_VISIT_OCCURRENCE` |
-| [`scripts/generate-graph-seed.py`](../../scripts/generate-graph-seed.py#L443) | `personId` 2000… | the FHIR record's id as text, under `visitId`, `conditionId`, `drugId`, `procedureId`, and under the CDM name `measurementId`; no `MAPPED_TO` | `HAS_VISIT_OCCURRENCE` |
-| [`neo4j/fhir-to-omop-transform.cypher`](../../neo4j/fhir-to-omop-transform.cypher) (Phase 3b, 2026-03-08) | `id: 'omop-person-' + FHIR id`, no `personId` | `id: 'omop-visit-' + FHIR id` and so on; `personId` set to the person's `id` text | `HAS_VISIT` |
+| Writer                                                                                                    | Person                                        | Event rows                                                                                                                                    | Visit edge             |
+| --------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| [`neo4j/init-schema.cypher`](../../neo4j/init-schema.cypher#L92-L98), the constraints                     | `personId` unique                             | `conditionOccurrenceId`, `measurementId`, `procedureOccurrenceId` unique; nothing for visits and drugs                                        |                        |
+| [`neo4j/insert-synthetic-schema-data.cypher`](../../neo4j/insert-synthetic-schema-data.cypher#L206-L240)  | `personId` 99001…                             | the CDM names, integers (`visitOccurrenceId` 88001, `conditionOccurrenceId` 77001, …)                                                         | `HAS_VISIT_OCCURRENCE` |
+| [`scripts/generate-graph-seed.py`](../../scripts/generate-graph-seed.py#L443)                             | `personId` 2000…                              | the FHIR record's id as text, under `visitId`, `conditionId`, `drugId`, `procedureId`, and under the CDM name `measurementId`; no `MAPPED_TO` | `HAS_VISIT_OCCURRENCE` |
+| [`neo4j/fhir-to-omop-transform.cypher`](../../neo4j/fhir-to-omop-transform.cypher) (Phase 3b, 2026-03-08) | `id: 'omop-person-' + FHIR id`, no `personId` | `id: 'omop-visit-' + FHIR id` and so on; `personId` set to the person's `id` text                                                             | `HAS_VISIT`            |
 
 The schema and the synthetic seed follow the CDM column names (`person_id`, `measurement_id`). The transform was written with the Synthea loader, whose FHIR ids are text (UUIDs), and took the FHIR id with a prefix. Nobody noticed, because until #1186 the transform did not run on the seeded graph.
 
@@ -32,6 +32,7 @@ What it costs:
 ## Decision
 
 1. **One key per OMOP label, under the CDM column's name, as an integer:**
+
    - `OMOPPerson.personId`
    - `OMOPVisitOccurrence.visitOccurrenceId`
    - `OMOPConditionOccurrence.conditionOccurrenceId`
@@ -40,6 +41,7 @@ What it costs:
    - `OMOPProcedureOccurrence.procedureOccurrenceId`
 
    Each has a uniqueness constraint. The ones on visits and drugs are new. Every event row also carries `personId`, its person's key, which is the CDM's foreign key.
+
 2. **The integer is derived from the FHIR reference.** It is the first 13 hex digits (52 bits) of the MD5 of `<FHIR type>/<FHIR id>`, for example `Encounter/enc-2000-0`.
    - Cypher computes it with `apoc.util.md5`, and the seed generator computes it with `hashlib.md5`.
    - Because it is deterministic, a rebuilt graph, the generator and the migration give the same row the same id. Nothing has to coordinate a counter between writers.
@@ -52,6 +54,7 @@ What it costs:
    - The `*SourceValue` columns keep what the CDM puts in them, which is the source code (SNOMED, LOINC, RxNorm).
 4. **A visit hangs on `HAS_VISIT_OCCURRENCE`**, as the generator, the synthetic seed and the embedding projection already have it. The transform's `HAS_VISIT` goes.
 5. **The transform migrates.** It runs in every pipeline (`neo4j/seed.sh`, `scripts/seed-spe2.sh`, `scripts/load_fhir_neo4j.py`), so its new step 0 brings older rows to this shape before anything is mapped:
+
    - adopts the generator's rows by the FHIR id they carry;
    - gives every row without an integer key its derived one;
    - sets `personId` on every event row;
@@ -59,6 +62,7 @@ What it costs:
    - moves `HAS_VISIT` to `HAS_VISIT_OCCURRENCE`.
 
    A second run changes nothing.
+
 6. **Readers ask for these keys.**
    - The timeline route finds a person by `personId` and builds the timeline from the person's OMOP rows, not from FHIR nodes.
    - The patient route reads the CDM keys.
