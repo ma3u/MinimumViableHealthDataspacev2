@@ -24,7 +24,7 @@
       "date": "2025-05-18",
       "display": "VO\u2082max 47 ml/kg/min",
       "omopType": "Measurement",
-      "omopId": "3022318"
+      "omopId": 2861013179810431
     },
     {
       "fhirType": "Observation",
@@ -32,7 +32,7 @@
       "date": "2025-05-18",
       "display": "C-reactive protein 0.8 mg/L",
       "omopType": "Measurement",
-      "omopId": "3020460"
+      "omopId": 3706902633347982
     },
     {
       "fhirType": "Observation",
@@ -40,7 +40,7 @@
       "date": "2025-05-12",
       "display": "Vitamin D (25-OH) 48 ng/mL",
       "omopType": "Measurement",
-      "omopId": "3026910"
+      "omopId": 4420947844864889
     },
     {
       "fhirType": "Encounter",
@@ -48,7 +48,7 @@
       "date": "2025-05-12",
       "display": "Preventive health review",
       "omopType": "VisitOccurrence",
-      "omopId": "9202"
+      "omopId": 3535601068859980
     },
     {
       "fhirType": "Observation",
@@ -56,7 +56,7 @@
       "date": "2025-03-04",
       "display": "Heart rate variability 48 ms",
       "omopType": "Measurement",
-      "omopId": "4239408"
+      "omopId": 2765689581250709
     },
     {
       "fhirType": "Observation",
@@ -64,7 +64,7 @@
       "date": "2025-02-26",
       "display": "HbA1c 5.5 %",
       "omopType": "Measurement",
-      "omopId": "3004410"
+      "omopId": 1528171475800547
     },
     {
       "fhirType": "Observation",
@@ -72,7 +72,7 @@
       "date": "2025-02-26",
       "display": "LDL cholesterol 118 mg/dL",
       "omopType": "Measurement",
-      "omopId": "3028288"
+      "omopId": 3277820560859679
     },
     {
       "fhirType": "Procedure",
@@ -80,7 +80,7 @@
       "date": "2025-02-26",
       "display": "Lipid panel",
       "omopType": "ProcedureOccurrence",
-      "omopId": "4055137"
+      "omopId": 203634402371881
     },
     {
       "fhirType": "Encounter",
@@ -88,7 +88,7 @@
       "date": "2025-02-26",
       "display": "GP follow-up \u2014 cardiometabolic",
       "omopType": "VisitOccurrence",
-      "omopId": "9202"
+      "omopId": 2412832752577816
     },
     {
       "fhirType": "MedicationRequest",
@@ -96,7 +96,7 @@
       "date": "2025-02-26",
       "display": "Cholecalciferol 2000 IU daily",
       "omopType": "DrugExposure",
-      "omopId": "19035704"
+      "omopId": 3866751955116461
     },
     {
       "fhirType": "Observation",
@@ -104,7 +104,7 @@
       "date": "2024-11-19",
       "display": "Ferritin 108 ng/mL",
       "omopType": "Measurement",
-      "omopId": "3001122"
+      "omopId": 2319961419086071
     },
     {
       "fhirType": "Observation",
@@ -112,7 +112,7 @@
       "date": "2024-11-19",
       "display": "BMI 24.8 kg/m\u00b2",
       "omopType": "Measurement",
-      "omopId": "3038553"
+      "omopId": 403054636507257
     },
     {
       "fhirType": "Observation",
@@ -120,7 +120,7 @@
       "date": "2024-11-19",
       "display": "Blood pressure 124/78 mmHg",
       "omopType": "Measurement",
-      "omopId": "3004249"
+      "omopId": 2879764358421319
     },
     {
       "fhirType": "Encounter",
@@ -128,7 +128,7 @@
       "date": "2024-11-19",
       "display": "Annual check-up",
       "omopType": "VisitOccurrence",
-      "omopId": "9202"
+      "omopId": 966762101013563
     },
     {
       "fhirType": "Procedure",
@@ -136,7 +136,7 @@
       "date": "2024-08-07",
       "display": "12-lead ECG",
       "omopType": "ProcedureOccurrence",
-      "omopId": "4154102"
+      "omopId": 2666188483265041
     },
     {
       "fhirType": "Condition",
@@ -144,7 +144,7 @@
       "date": "2024-08-07",
       "display": "Vitamin D deficiency",
       "omopType": "ConditionOccurrence",
-      "omopId": "4319998"
+      "omopId": 3023070532760510
     },
     {
       "fhirType": "Encounter",
@@ -152,7 +152,7 @@
       "date": "2024-08-07",
       "display": "GP consultation \u2014 fatigue",
       "omopType": "VisitOccurrence",
-      "omopId": "9202"
+      "omopId": 476646629917581
     },
     {
       "fhirType": "MedicationRequest",
@@ -160,7 +160,7 @@
       "date": "2024-03-15",
       "display": "Atorvastatin 10 mg daily",
       "omopType": "DrugExposure",
-      "omopId": "1545958"
+      "omopId": 3733678675837635
     },
     {
       "fhirType": "Condition",
@@ -168,7 +168,7 @@
       "date": "2024-03-15",
       "display": "Mixed hyperlipidaemia",
       "omopType": "ConditionOccurrence",
-      "omopId": "432867"
+      "omopId": 3483533411667116
     },
     {
       "fhirType": "Observation",
@@ -176,7 +176,7 @@
       "date": "2024-03-15",
       "display": "LDL cholesterol 162 mg/dL",
       "omopType": "Measurement",
-      "omopId": "3028288"
+      "omopId": 1750585498471817
     },
     {
       "fhirType": "Condition",
@@ -184,7 +184,7 @@
       "date": "2023-10-02",
       "display": "Pre-diabetes (impaired fasting glucose)",
       "omopType": "ConditionOccurrence",
-      "omopId": "4271305"
+      "omopId": 2190484098294887
     },
     {
       "fhirType": "Observation",
@@ -192,7 +192,7 @@
       "date": "2023-10-02",
       "display": "HbA1c 6.0 %",
       "omopType": "Measurement",
-      "omopId": "3004410"
+      "omopId": 2354877847091192
     },
     {
       "fhirType": "Procedure",
@@ -200,7 +200,7 @@
       "date": "2023-10-02",
       "display": "Oral glucose tolerance test",
       "omopType": "ProcedureOccurrence",
-      "omopId": "4046263"
+      "omopId": 4132574890269044
     },
     {
       "fhirType": "Encounter",
@@ -208,7 +208,7 @@
       "date": "2023-10-02",
       "display": "GP consultation \u2014 metabolic screen",
       "omopType": "VisitOccurrence",
-      "omopId": "9202"
+      "omopId": 1109534742480235
     },
     {
       "fhirType": "Condition",
@@ -216,7 +216,7 @@
       "date": "2022-06-21",
       "display": "Migraine without aura",
       "omopType": "ConditionOccurrence",
-      "omopId": "318736"
+      "omopId": 2542698065936733
     },
     {
       "fhirType": "MedicationRequest",
@@ -224,7 +224,7 @@
       "date": "2022-06-21",
       "display": "Sumatriptan 50 mg as needed",
       "omopType": "DrugExposure",
-      "omopId": "1112807"
+      "omopId": 2410363711160976
     },
     {
       "fhirType": "Procedure",
@@ -232,7 +232,7 @@
       "date": "2022-02-14",
       "display": "DXA bone density scan",
       "omopType": "ProcedureOccurrence",
-      "omopId": "4011988"
+      "omopId": 3530480755612412
     },
     {
       "fhirType": "Encounter",
@@ -240,7 +240,7 @@
       "date": "2021-09-09",
       "display": "New-patient registration",
       "omopType": "VisitOccurrence",
-      "omopId": "9202"
+      "omopId": 66387245175969
     },
     {
       "fhirType": "Condition",
@@ -248,7 +248,7 @@
       "date": "2021-09-09",
       "display": "Mild intermittent asthma",
       "omopType": "ConditionOccurrence",
-      "omopId": "317009"
+      "omopId": 2505869105745218
     },
     {
       "fhirType": "Immunization",
@@ -256,7 +256,7 @@
       "date": "2025-10-15",
       "display": "Influenza vaccine 2025/26",
       "omopType": "DrugExposure",
-      "omopId": "40213154"
+      "omopId": 2121416263028828
     },
     {
       "fhirType": "Immunization",
@@ -264,7 +264,7 @@
       "date": "2024-10-08",
       "display": "Influenza vaccine 2024/25",
       "omopType": "DrugExposure",
-      "omopId": "40213154"
+      "omopId": 1372697647768930
     },
     {
       "fhirType": "Condition",
@@ -272,7 +272,7 @@
       "date": "2024-12-03",
       "display": "Influenza (seasonal) \u2014 resolved",
       "omopType": "ConditionOccurrence",
-      "omopId": "4266367"
+      "omopId": 4317146633521741
     },
     {
       "fhirType": "Immunization",
@@ -280,7 +280,7 @@
       "date": "2024-04-02",
       "display": "COVID-19 mRNA booster",
       "omopType": "DrugExposure",
-      "omopId": "724904"
+      "omopId": 3513364523398083
     },
     {
       "fhirType": "Condition",
@@ -288,7 +288,7 @@
       "date": "2023-03-20",
       "display": "Acute bronchitis \u2014 resolved",
       "omopType": "ConditionOccurrence",
-      "omopId": "260139"
+      "omopId": 1038749343750831
     },
     {
       "fhirType": "Condition",
@@ -296,7 +296,7 @@
       "date": "2022-11-08",
       "display": "COVID-19, mild \u2014 recovered",
       "omopType": "ConditionOccurrence",
-      "omopId": "37311061"
+      "omopId": 579069816154647
     },
     {
       "fhirType": "Immunization",
@@ -304,7 +304,7 @@
       "date": "2021-05-18",
       "display": "Tetanus-diphtheria (Td) booster",
       "omopType": "DrugExposure",
-      "omopId": "529411"
+      "omopId": 2496955847466018
     },
     {
       "fhirType": "Procedure",
@@ -312,7 +312,7 @@
       "date": "2020-09-22",
       "display": "Knee arthroscopy (meniscus repair)",
       "omopType": "ProcedureOccurrence",
-      "omopId": "4006988"
+      "omopId": 1069844143727967
     },
     {
       "fhirType": "Procedure",
@@ -320,7 +320,7 @@
       "date": "2018-06-14",
       "display": "Laparoscopic appendectomy",
       "omopType": "ProcedureOccurrence",
-      "omopId": "4232476"
+      "omopId": 4108957343140948
     }
   ],
   "lastEhrSync": {

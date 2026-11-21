@@ -80,7 +80,7 @@ describe("GET /api/patient", () => {
           date: "2023-01-15",
           display: "Diabetes",
           omopType: "OMOPConditionOccurrence",
-          omopId: "omop-cond-001",
+          omopId: 4201150187323473,
         },
         {
           fhirType: "Observation",
@@ -88,7 +88,7 @@ describe("GET /api/patient", () => {
           date: "2023-02-10",
           display: "HbA1c",
           omopType: "OMOPMeasurement",
-          omopId: "omop-meas-001",
+          omopId: 3171502285064161,
         },
       ];
 
