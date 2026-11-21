@@ -27,6 +27,7 @@ beteiligt war. Wie sie entstehen, steht am
 | ------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | Läuft auf    | iPhone, iOS 26 oder neuer                                                                                                  |
 | Bezugsquelle | [Öffentliche TestFlight-Beta](https://testflight.apple.com/join/ssADSXX6), 200 Plätze                                      |
+| Website      | [klarbefund.mabu.red](https://klarbefund.mabu.red/): Klarbefund für iPhone und Mac auf einer Seite (englisch)              |
 | Sprachen     | Englisch und Deutsch, entsprechend der Sprache des Telefons                                                                |
 | Quellcode    | [`clients/ios/`](../../clients/ios/)                                                                                       |
 | Datenschutz  | [Datenschutzerklärung](https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html)                      |

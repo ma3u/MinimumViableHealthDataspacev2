@@ -25,7 +25,8 @@ these are their sources.
 The source is in [`clients/ios/`](../../clients/ios/), with its own
 [README](../../clients/ios/README.md) as the command card. The beta is joined
 by the [public TestFlight link](https://testflight.apple.com/join/ssADSXX6)
-on an iPhone with iOS 26 or later.
+on an iPhone with iOS 26 or later. The app and Klarbefund for Mac are
+explained in one page at [klarbefund.mabu.red](https://klarbefund.mabu.red/).
 
 Every screenshot under `img/` shows invented data from the app's own
 development dataset; `diagrams/` holds the PlantUML sources of the figures in

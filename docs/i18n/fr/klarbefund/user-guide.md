@@ -27,6 +27,7 @@ ait jamais été impliqué. La manière dont elles sont réalisées est expliqu�
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | Fonctionne sur        | iPhone, iOS 26 ou ultérieur                                                                                                        |
 | Obtenir l’application | [Bêta publique TestFlight](https://testflight.apple.com/join/ssADSXX6), 200 places                                                 |
+| Site web              | [klarbefund.mabu.red](https://klarbefund.mabu.red/) : Klarbefund pour iPhone et Mac sur une page (en anglais)                      |
 | Langues               | Anglais et allemand, selon la langue du téléphone                                                                                  |
 | Code source           | [`clients/ios/`](../../clients/ios/)                                                                                               |
 | Confidentialité       | [Politique de confidentialité](https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html)                      |
