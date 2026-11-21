@@ -64,7 +64,7 @@ interface TimelineEntry {
   value?: string | null;
   unit?: string | null;
   omopType: string;
-  omopId: string;
+  omopId: number | null;
 }
 
 /* WCAG-safe FHIR type colours — ≥4.5:1 on white (light) and on #0b1326 (dark) */

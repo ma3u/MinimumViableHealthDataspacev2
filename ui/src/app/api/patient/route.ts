@@ -51,7 +51,8 @@ interface TimelineRow {
   value: string | null;
   unit: string | null;
   omopType: string;
-  omopId: string;
+  /** The OMOP row's CDM key (ADR-098); null when the event has no OMOP row. */
+  omopId: number | null;
 }
 
 /** One patient's clinical events with their OMOP mappings, oldest first. */
@@ -72,9 +73,10 @@ async function loadTimeline(patientId: string): Promise<TimelineRow[]> {
             toString(fhir.valueQuantity)                                             AS value,
             coalesce(fhir.valueUnit, fhir.unit)                                      AS unit,
             labels(omop)[0]                                                          AS omopType,
-            coalesce(omop.id, omop.personId, omop.visitOccurrenceId,
-                     omop.conditionOccurrenceId, omop.measurementId,
-                     omop.drugExposureId)                                            AS omopId
+            // The row's CDM key (ADR-098), one per OMOP label.
+            coalesce(omop.visitOccurrenceId, omop.conditionOccurrenceId,
+                     omop.measurementId, omop.drugExposureId,
+                     omop.procedureOccurrenceId)                                     AS omopId
      ORDER BY date`,
     { patientId },
   );

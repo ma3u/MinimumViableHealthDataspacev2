@@ -494,7 +494,7 @@ describe("PatientPage", () => {
             fhirId: "enc-1",
             display: "Office visit",
             omopType: "Visit",
-            omopId: "v-1",
+            omopId: 1,
           },
         ],
       }),
