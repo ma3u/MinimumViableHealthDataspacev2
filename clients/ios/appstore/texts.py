@@ -43,7 +43,7 @@ KEYWORDS = {
 }
 
 SUPPORT_URL = "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues"
-MARKETING_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html"
+MARKETING_URL = "https://klarbefund.mabu.red/"  # the website for iPhone and Mac, English and German
 PRIVACY_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html"
 
 DESCRIPTION = {
