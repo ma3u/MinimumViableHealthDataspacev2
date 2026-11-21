@@ -73,9 +73,11 @@ Written for lay people: [Informed Health Choices Key Concepts](https://www.infor
 - Payment registers: [Open Payments](https://openpaymentsdata.cms.gov) (US), Disclosure UK, transparence.sante.gouv.fr. Germany has no central register: companies publish on their own sites, and a doctor is named only with consent
 - Company registers and patent databases (Espacenet) for posts, equity and patents
 
-## 3. Master prompt (version 2)
+## 3. Master prompt (version 3)
 
-Changes from version 1: a gate for "right study?", a status gate that may not be answered from memory, one tool per study design, a numbers step that is run as code, a money-and-people step that names what to look up, and two certainty ratings kept apart, and a module for meta-analyses and pooled analyses.
+Changes from version 2, after a review by a clinical pharmacologist who appraises a published trial of a herbal medicine six times a year in a German journal: what a study can say lies in its confidence interval, not in its head count or its p-value; very small studies stay suspect even when their interval looks narrow; peer review, registration and "not retracted" are form, and the weaknesses that matter are often the ones a paper does not mention. So: an imprecision step after GRADE in place of a size threshold, a small-study check, a critical reading done in escalating rounds, a check that the intervention can be identified (for plant extracts above all), and two models whose findings a person decides on.
+
+Changes from version 1 to 2: a gate for "right study?", a status gate that may not be answered from memory, one tool per study design, a numbers step that is run as code, a money-and-people step that names what to look up, and two certainty ratings kept apart, and a module for meta-analyses and pooled analyses.
 
 ```text
 ROLE
@@ -107,6 +109,13 @@ R6 Do not recommend starting, stopping or changing a medicine, a diet or a test.
 R7 People and money: report only what disclosures, registries and public records document,
    each with its source. A conflict of interest is a reason to look harder, not proof that
    a result is wrong. No speculation about motives.
+R8 Form is not quality. Peer review, a registration and a clean status are necessary, and
+   they say nothing about the weaknesses a paper leaves unmentioned. Do not write "the study
+   is sound" after a first read: say which checks of steps 6 and 7 found nothing, and which
+   could not be run.
+R9 Judge informativeness by the confidence interval, never by the p-value alone (it does
+   not measure the size or importance of an effect, ASA 2016) and never by the number of
+   participants alone.
 
 GATE 0. Is this the right study for my question?
 Write the study's PICO (population, intervention or exposure, comparator, outcome) next to
@@ -153,7 +162,12 @@ extrapolation.
 
 STEP 5. Results in numbers that mean something
 Primary outcome with effect size and 95% CI. Hard outcome or surrogate; if surrogate, is it
-validated for this intervention? Convert to absolute numbers: of 1000 people like me over
+validated for this intervention? The intervention or exposure: can it be identified and
+repeated? For a medicine: substance, dose, schedule. For a plant extract: species, plant
+part, extract and drug-extract ratio, solvent, the constituent it is standardised on and its
+amount (St John's wort acts on CYP3A according to its hyperforin content), the product
+name (CONSORT extension for herbal interventions, Gagnier et al. 2006). An extract that
+cannot be identified cannot be compared with another trial or with a guideline. Convert to absolute numbers: of 1000 people like me over
 N years, how many have the event without and with the exposure or treatment, the
 difference, and NNT or NNH. State the baseline risk used and its source. Harms: reported?
 Follow-up long enough to see them?
@@ -173,7 +187,27 @@ f) Do the numbers agree with each other: totals between abstract, text, tables a
    supplement; a median inside its quartiles; percentages and means that fit the stated n?
 g) Meta-analysis: heterogeneity, prediction interval, small-study effects, the weight of
    single trials, and whether the included trials overlap with earlier analyses.
+h) Imprecision (GRADE): does the 95% CI hold both no effect and an appreciable effect, a
+   relative change of 25% (0.75 or 1.25) or the minimal important difference for a measured
+   outcome? A CI that rules out an appreciable change is a precise "no". Does the evidence
+   reach the optimal information size, by rule of thumb 400 events or 800 participants
+   (0.2 SD), or the size computed for this outcome?
+i) Small-study effects: a trial, or a pooled trial, with fewer than 50 people. Such trials
+   report effects about 48% larger than trials of 1000 or more (Dechartres et al., BMJ
+   2013). A narrow interval from many small trials pooled with a fixed effect is precise
+   about a possibly biased answer. Flag it, and say what chance or bias would have to do
+   to produce this result.
 Mark each: PASS / FLAG / NOT APPLICABLE / NOT POSSIBLE FROM THE PAPER.
+
+STEP 7b. Read it again as its critic
+A first read of a registered, peer-reviewed trial tends to end in "sound". Do not stop
+there. Go through the paper in rounds, each round asking one thing harder than the last:
+(1) do abstract, text, tables and supplement say the same; (2) are the dispersions
+possible (an SD larger than the mean of a positive quantity, a range a median does not
+fit) and the lab and vital values physiologically plausible; (3) do the p-values fit the
+data shown; (4) were co-treatments, rescue medication and dropouts the same in both arms;
+(5) what would a reviewer of this paper have asked that the paper does not answer? Report
+what each round found, or that it found nothing.
 
 STEP 8. Money and people
 a) Funders: who, of what kind (public, charity, company, advocacy group, crowd-funded),
@@ -202,6 +236,9 @@ STEP 10. Certainty, two ratings kept apart
 (ii) Certainty of the whole body of evidence for MY QUESTION (GRADE): rating, with the
      reasons for rating down (bias, inconsistency, indirectness, imprecision, publication
      bias) or up.
+(iii) Who decides: your bias judgements (step 6) and your findings in steps 7 and 7b are
+     a draft for a person. Say so. If a second model has appraised the same paper, list
+     where the two disagree and what only one of them found.
 
 MODULE M. When the study is a meta-analysis, a pooled analysis or a review of reviews
 Size shrinks random error. It does not shrink bias; it makes a biased answer look precise.
@@ -250,6 +287,8 @@ D) Table: check | finding | source | red flag (yes / no / partly).
 E) What this study cannot tell me.
 F) Three to five questions for my doctor.
 G) Every source opened (link, date) and everything NOT CHECKED.
+G2) What a person still has to judge: the bias domains, the round of step 7b that found
+   something, and every FLAG.
 H) When to look again (status and evidence change).
 ```
 
@@ -376,6 +415,8 @@ The risk score knows only yes or no. For very light smoking "no" is too low and 
 - **Do the numbers agree with each other?** Two of three papers contain figures that cannot all be true. This costs no statistics, only attention.
 - **Conflicts are specific or they are useless.** "Industry: yes/no" separates none of the three. What did: who measured the outcome, who saw the data before publication, what the published disclosure omits, and who can see the data now.
 - **Bias ratings by a model are a prompt for a person, not a rating.** Three published validations, main texts read in full ✔. Claude 2 against Cochrane authors' RoB 2 judgements in [100 trials](https://pubmed.ncbi.nlm.nih.gov/41626932/): weighted κ for the overall judgement "0.22 (0.06; 0.38)"; the model got "the text extracted from the PDF article of the RCT" plus a protocol or register entry, three runs each, and rated risk lower than the reviewers (4 against 22 trials at high risk) ✔. Four models of spring 2025 against published judgements [in 100 trials](https://pubmed.ncbi.nlm.nih.gov/41905260/): κ 0.06 to 0.13 for the overall RoB 2 judgement, "consistently over-flagging concerns", the opposite direction; they were "used in their base mode though web chat with no additional features enabled", got the PDFs, and "systemically failed to retrieve publicly available protocols" ✔. One of the four was "a non-reasoning model", and trained reviewers "typically reach κ values of 0.15–0.20" among themselves ✔. An [earlier study](https://pubmed.ncbi.nlm.nih.gov/38776081/) of two models on 30 trials found 84.5% and 89.5% correct ✔, with a tool that has no "unclear" answer, scored as high or low risk, on text converted from the PDFs, and with a prompt refined "until it consistently matched the experts’ results" ✔. None of the three gave the model a search or code tool. For reporting and review-quality checklists, [five models over an API](https://doi.org/10.1016/j.jclinepi.2024.111533) "appraised evidence substantially worse than humans"; a human rater whose rating a model confirmed was right more often than the rater alone, and the "median quote similarity with the original full text was 99%" ✔. What models do well here is extraction with quotes and arithmetic run as code; fetching the protocol and the registry entry is a job for code.
+- **A first read says "sound".** In a comparison of three models (ChatGPT 5.2, Claude 4.5, Gemini 3) on one double-blind, registered trial, all three first largely confirmed the study; only an escalating protocol of four steps, compared blind with an expert critique, brought out mathematically impossible dispersions, implausible lab values, p-values that do not fit the data and contradictions between abstract, text and tables. No model invented a fault; with targeted follow-up prompts two models went deeper than the third. The authors conclude that a multi-step protocol and several models in parallel are needed ([Niedenthal and Uehleke, Z Phytother 2026;47:21](https://doi.org/10.1055/a-2683-2290) ◐). Step 7b and output G2 come from there.
+- **Size is a reason for suspicion, precision is the measure.** The health graph's gate first asked for 1,000 participants, the size the CTT Collaboration requires of a trial. Version 3 asks what GRADE asks: an interval that does not hold both no effect and an appreciable one ([Guyatt et al. 2011](https://doi.org/10.1016/j.jclinepi.2011.01.012)), the optimal information size, and no trials under 50 people in a pooled result ([Dechartres et al. 2013](https://doi.org/10.1136/bmj.f2304)). The size limit was not wrong about the Q10 trials; it was right for the wrong reason.
 - **Three hand-picked papers show that the method runs, not that it is better.** A fair test: 30 to 50 papers with reference answers (Cochrane risk-of-bias judgements, known retractions and expressions of concern, known outcome switching, and sound papers as controls), the same model with and without the prompt, repeated runs. Measure status detection, whether each quote exists where the answer says, agreement with the reference, and whether lay readers then answer comprehension questions correctly.
 
 ## 6. Ideas for MVHDv2 / Klarbefund
