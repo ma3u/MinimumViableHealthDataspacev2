@@ -20,6 +20,7 @@ ever being involved. How they are made is at the
 | --------- | ------------------------------------------------------------------------------------------------------------- |
 | Runs on   | iPhone, iOS 26 or later                                                                                       |
 | Get it    | [Public TestFlight beta](https://testflight.apple.com/join/ssADSXX6), 200 places                              |
+| Website   | [klarbefund.mabu.red](https://klarbefund.mabu.red/): Klarbefund for iPhone and Mac in one page                |
 | Languages | English and German, following the phone's language                                                            |
 | Source    | [`clients/ios/`](../../clients/ios/)                                                                          |
 | Privacy   | [Privacy policy](https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html)               |

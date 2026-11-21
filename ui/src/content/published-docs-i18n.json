@@ -53,7 +53,7 @@
     },
     "klarbefund/klarbefund-user-guide": {
       "de": {
-        "status": "current",
+        "status": "stale",
         "title": "Benutzerhandbuch für Klarbefund",
         "summary": "Die App, wie eine Person sie nutzt, Bildschirm für Bildschirm mit Screenshots: einen Befund erfassen, einen Wert mit dem Papier abgleichen, Verläufe, Einwilligungen, die Verbindung zum EHDS, Exporte und Ihre Rechte an Ihren Daten."
       },
