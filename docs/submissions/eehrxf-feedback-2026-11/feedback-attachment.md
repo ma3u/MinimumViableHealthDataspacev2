@@ -45,6 +45,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 - State that a download under Article 3(2) contains every registered result in full: value, unit, method, specimen, reference range and the earlier results (`previousResults`), not only what a summary selects.
 - For imaging studies, the person can download the DICOM objects themselves, not only a PDF.
 - Allow a result recorded during a research study visit to be exchanged as a medical test result with a reference to the study (for example an EU trial number), so it is not lost to the person's record.
+- When a person donates data to a study or takes part in a trial, the person can receive the study's result and their own measured values (laboratory values, and imaging as DICOM) back in the EEHRxF, as FHIR. Today the person gets at most the lay summary that Regulation (EU) No 536/2014 requires for clinical trials, and in Germany § 27(2) BDSG allows research to restrict the GDPR right of access. The EEHRxF is the natural format for returning these values into the person's record.
 - Extend EHDSMedicationUse, or add a data group, for food supplements and other non-medicinal products, with the person as author (see point 1).
 
 # 3. Reference ranges
