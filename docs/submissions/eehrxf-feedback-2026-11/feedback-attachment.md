@@ -15,9 +15,32 @@ I am a patient who keeps years of laboratory reports from different laboratories
 
 My iPhone app (Klarbefund) reads paper laboratory reports and Apple Watch data on the device and exports them as FHIR R4 DiagnosticReport and Observation resources. That is the primary-use situation of Articles 3, 5 and 7: a person holds, adds to and forwards their own data.
 
-What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profiles. The HL7 FHIR Validator 7.0.5 checks a sample of the hub's own resources against them (synthetic Synthea patients, FHIR documents built from the graph, the FHIR facade, and the app's output): 148 of 192 resources pass (77%), 5 profiles pass completely, and 6 have nothing to test yet (eDispensation, the patient summary Composition, the discharge report Composition, ImagingStudy, Practitioner, PractitionerRole). By category: patient summary 66 of 76, ePrescription 31 of 31, imaging report 0 of 3, laboratory 39 of 80, discharge report 50 of 60. Codes are checked for shape only; see point 7.
+What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profiles. The HL7 FHIR Validator 7.0.5 checks a sample of the hub's own resources against them (synthetic Synthea patients, FHIR documents built from the graph, the FHIR facade, and the app's output): 148 of 192 resources pass (77%), 5 profiles pass completely, and 6 have nothing to test yet (eDispensation, the patient summary Composition, the discharge report Composition, ImagingStudy, Practitioner, PractitionerRole). By category: patient summary 66 of 76, ePrescription 31 of 31, imaging report 0 of 3, laboratory 39 of 80, discharge report 50 of 60. Codes are checked for shape only; see point 8.
 
-# 1. Information inserted by the person
+# 1. Adding and exporting single values
+
+**Situation:** I want to add a single value to my record (a value I measured, or one from a paper report I scanned), push it from my app through an interface, and export all my values for trend analysis. Today I can do none of this with my record.
+
+**What the German ePA offers today:** insured people can add their own documents, for example old paper reports, through their insurer's ePA app. The official page names no file format, no way to add a single value, no interface for the person's own app, and no download or export of the data ([gesund.bund.de](https://gesund.bund.de/die-elektronische-patientenakte), as of 1 September 2025).
+
+**What the GDPR gives me:**
+
+- **Art. 15(3):** a copy of the data, and for a request made electronically, "in a commonly used electronic form". That is a copy, not necessarily structured data, and not an interface.
+- **Art. 16:** the right to have incomplete data completed, "including by means of providing a supplementary statement". That is a request to the controller, not a way to write a value myself.
+- **Art. 20:** a structured, machine-readable copy and its transmission, but only of data I provided, and only where processing rests on consent or a contract. Care records usually rest on Art. 9(2)(h) and the duty to document care, not on consent, so Art. 20 does not usually reach them.
+
+So the GDPR gives me a copy, but not the structured export and the write access I need. The EHDS (Art. 3, 5 and 7) closes this gap, and the EEHRxF decides whether it works in practice.
+
+**Draft:** Annex II names the "HL7 FHIR REST API" as content transmission for every category, but only between systems.
+
+**Request:**
+
+- State that the HL7 FHIR REST API of Annex II is open to an application the natural person chooses, with patient-facing authorisation (for example SMART App Launch), for reading every category (Art. 3) and writing single values the person inserts (Art. 5), marked as theirs (point 2).
+- State that the download of Art. 3(2) can be a FHIR Bundle with every Observation, so a person can run their own trend analysis.
+
+**It works already.** The screenshots in the section "How it can be solved" show Klarbefund and the demo hub doing this with synthetic data.
+
+# 2. Information inserted by the person
 
 **Draft:** Annex III tables 1 and 2, and every category header (e.g. Annex IV p. 11, Annex VIII p. 40), allow `author` = EHDSHealthProfessional, EHDSOrganisation or EHDSDevice; `attester` = EHDSHealthProfessional or EHDSDevice. EHDSLaboratoryObservation (Annex X table 19) allows the patient as `performer`, but not as author.
 
@@ -30,7 +53,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 - Add EHDSPatient and EHDSRelatedPerson to `author` in Annex III and the category headers.
 - Add a coded element for the information source, with a Union value set, for example: issued by a provider; digitised by the person from a provider document; measured by the person; device generated; reported by the person.
 
-# 2. Access to the raw data, study results and supplements
+# 3. Access to the raw data, study results and supplements
 
 **Situation:** I take part in medical studies and use my data for prevention: longevity markers, and the supplements I take. For that I need the data itself, in full, not a summary.
 
@@ -47,9 +70,9 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 - For imaging studies, the person can download the DICOM objects themselves, not only a PDF.
 - Allow a result recorded during a research study visit to be exchanged as a medical test result with a reference to the study (for example an EU trial number), so it is not lost to the person's record.
 - When a person donates data to a study or takes part in a trial, the person can receive the study's result and their own measured values (laboratory values, and imaging as DICOM) back in the EEHRxF, as FHIR. Today the person gets at most the lay summary that Regulation (EU) No 536/2014 requires for clinical trials, and in Germany § 27(2) BDSG allows research to restrict the GDPR right of access. The EEHRxF is the natural format for returning these values into the person's record, where the person can discuss them with their family doctor.
-- Extend EHDSMedicationUse, or add a data group, for food supplements and other non-medicinal products, with the person as author (see point 1).
+- Extend EHDSMedicationUse, or add a data group, for food supplements and other non-medicinal products, with the person as author (see point 2).
 
-# 3. Reference ranges
+# 4. Reference ranges
 
 **Draft:** Annex X table 19, `referenceRange` with low, high, normalValue, type, appliesTo, age, text. `previousResults` links earlier results of the same test.
 
@@ -57,19 +80,19 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 
 **Request:** add `referenceRange.source` (laboratory or guideline, with citation) and `referenceRange.validity` (Period).
 
-# 4. Integrity of forwarded copies
+# 5. Integrity of forwarded copies
 
 **Draft:** EHDSAttachment (Annex X table 6) has contentType, language, data, url, size, title.
 
 **Request:** add `hash` and `creation` as in the FHIR R4 Attachment type, and make `contentType` mandatory. A provider receiving a copy forwarded by the person (Article 7(4)) should be able to check that it is unchanged.
 
-# 5. PDF version
+# 6. PDF version
 
 **Draft:** Annex II footnote 1: PDF/A-1a or PDF/A-1b.
 
 **Request:** allow PDF/A-2 and PDF/A-3. PDF/A-1 (2005) does not support embedded files; PDF/A-3 can carry the structured FHIR document inside the human-readable PDF, which serves both Article 3(1)(a) and (c) in one file.
 
-# 6. Units and LOINC
+# 7. Units and LOINC
 
 **Draft:** Annex I defines Quantity as "a unit of measure, preferably expressed as a coded concept"; Annex X binds UCUM for units.
 
@@ -86,7 +109,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 - Publish a Union mapping of common printed unit strings to UCUM through the terminology service of Article 6(5).
 - Allow a text-only observation type with an English designation where no code exists, as Article 6(3) already does for national codes.
 
-# 7. Implementation guide, versions and testing
+# 8. Implementation guide, versions and testing
 
 **Draft:** Article 9(2): first implementation guide by 31 October 2027. The act names no FHIR implementation guide or version.
 
@@ -110,7 +133,7 @@ An implementer cannot target a moving draft, and a conformance claim nobody can 
 
 **National profiles (Article 10):** national profiles under Article 10 should be published as machine-readable FHIR packages that declare their derivation from the EU package, so conformance of national data to the EEHRxF can be tested automatically rather than asserted.
 
-# 8. Editorial
+# 9. Editorial
 
 - Annex I, data type "EHDS[Name of the data group]": refers to "Annex IX"; the common data groups are in Annex X.
 - Annex III, footnote 4: "BCP 47: Best Current Practice 13, Media Type Specifications and Registration Procedures". BCP 47 is Tags for Identifying Languages; BCP 13 is media types.
@@ -118,6 +141,26 @@ An implementer cannot target a moving draft, and a conformance claim nobody can 
 - Recital 13 still begins with a drafting note on national profiles, in square brackets.
 - Article 9(4): "requirements o the implementation guide".
 - The cover page still shows a 2024 draft reference without a number.
+
+# How it can be solved: screenshots
+
+All screenshots show synthetic data. Each links to the public page it was taken from.
+
+**Klarbefund on the iPhone: from a paper report to coded FHIR values.** The app reads the report on the device, codes each value with LOINC and UCUM, keeps the page and line it was read from, and marks scanned values preliminary until the person checks them. Source: <https://klarbefund.mabu.red/#iphone>
+
+![Klarbefund: from paper to coded values](img/01-klarbefund-scan.jpg)
+
+**Klarbefund and the hub: the person decides what goes into the record.** Connect, read your record, and add to it with two switches, off until turned on: send my reports, send my device trends. Source: <https://klarbefund.mabu.red/#ehds>
+
+![Klarbefund: your own record on the EHDS hub](img/02-klarbefund-ehds.jpg)
+
+**The hub: the person's own record with values from devices and reports.** Source: <https://ma3u.github.io/MinimumViableHealthDataspacev2/patient> (sign in as the demo patient)
+
+![Hub: the patient's record](img/03-hub-patient-record.jpg)
+
+**The hub: trend view of the person's lab values.** Source: the same page, "View 3-month trends" on Lab results.
+
+![Hub: lab trends](img/05-hub-lab-trends.jpg)
 
 # Sources
 
@@ -129,6 +172,11 @@ The draft and the law:
 - Regulation (EU) 2025/327 (EHDS), Articles 3, 5 and 7: <https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng>
 - Regulation (EU) No 536/2014 on clinical trials (lay summaries): <https://eur-lex.europa.eu/eli/reg/2014/536/oj/eng>
 - German Federal Data Protection Act, § 27: <https://www.gesetze-im-internet.de/bdsg_2018/__27.html>
+- GDPR Art. 15 (right of access, copy): <https://gdpr-info.eu/art-15-gdpr/>
+- GDPR Art. 16 (rectification and completion): <https://gdpr-info.eu/art-16-gdpr/>
+- GDPR Art. 20 (data portability): <https://gdpr-info.eu/art-20-gdpr/>
+- German ePA, what insured people can do: <https://gesund.bund.de/die-elektronische-patientenakte>
+- SMART App Launch (patient-facing FHIR authorisation): <https://hl7.org/fhir/smart-app-launch/>
 
 The HL7 Europe guides the hub validates against:
 
