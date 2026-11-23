@@ -1,6 +1,7 @@
 # Builds one EDC launcher image (ADR-076):
 #   docker build --build-arg RUNTIME=controlplane -t edc-controlplane runtimes/edc
-# RUNTIME is controlplane, identity-hub or issuerservice.
+# RUNTIME is controlplane, identity-hub, issuerservice, or dataplane (the push
+# data plane of ADR-095, which is not an EDC runtime but builds the same way).
 # The jar is the same on every platform, so it builds on the builder's own
 # (a linux/amd64 image for Azure builds on an arm64 laptop without emulating
 # Gradle); only the runtime stage is the target platform. The unit tests of

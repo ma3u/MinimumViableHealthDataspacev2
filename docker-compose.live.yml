@@ -30,3 +30,16 @@ services:
       # EDC 0.18 JAD launchers serve the v5beta management API (issue #97
       # Phase B); the Azure stack stays v5alpha until its Phase D cutover.
       EDC_MGMT_API_VERSION: v5
+      # Token renewal (#888): onboarding makes the participant's signing key in
+      # Vault's transit engine and maps it in siglet
+      # (ui/src/lib/edc/siglet-signing-key.ts). Without the token it registers
+      # the participant and reports the step as not done. Dev-mode root token,
+      # compose only, as siglet's.
+      VAULT_URL: http://vault:8200
+      VAULT_TOKEN: root
+      SIGLET_MANAGEMENT_URL: http://siglet:8083
+      # The push data plane (ADR-095): onboarding registers it for a new
+      # participant beside siglet. The client secret is the compose stack's
+      # (jad/keycloak-realm.json).
+      PUSH_DATAPLANE_URL: http://dataplane:8090
+      PUSH_DATAPLANE_CLIENT_SECRET: dataplane-signaling-secret

@@ -10,6 +10,15 @@ shadow = "9.6.1"
 jnats = "2.27.0"
 # the JUnit EDC 1.0.0-RC8 is built with
 junit = "6.1.3"
+# the push data plane (ADR-095): the DataPlane SDK EDC 1.0.0-RC8 itself tests
+# against, and the libraries that SDK release is built with
+dataplaneSdk = "1.2.1"
+jackson3 = "3.2.3"
+nimbusJoseJwt = "10.10"
+postgresql = "42.7.13"
+slf4j = "2.0.20"
+# the Kafka transfer types of the push data plane
+kafkaClients = "4.3.2"
 
 [libraries]
 # control plane: the virtual (multi-participant) control plane, merged from EDC-V
@@ -45,6 +54,15 @@ edc-events-nats = { module = "org.eclipse.edc:events-nats", version.ref = "edc" 
 bouncyCastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncyCastle" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 jnats = { module = "io.nats:jnats", version.ref = "jnats" }
+
+# the push data plane (ADR-095)
+dataplane-sdk-core = { module = "org.eclipse.dataplane-core:dataplane-sdk-core", version.ref = "dataplaneSdk" }
+dataplane-sdk-postgresql = { module = "org.eclipse.dataplane-core:dataplane-sdk-postgresql", version.ref = "dataplaneSdk" }
+jackson3-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson3" }
+nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbusJoseJwt" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafkaClients" }
 
 # tests of the hub's own extensions
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

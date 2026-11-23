@@ -23,6 +23,9 @@ GRANT ALL ON SCHEMA public TO kc;
 -- The owner of cfm_v007, CFM 0.0.7's database (ADR-085, init-postgres-edc1.sql).
 CREATE USER cfm WITH PASSWORD 'cfm';
 
+-- The owner of dataplane_v1, the push data plane's store (ADR-095, init-postgres-edc1.sql).
+CREATE USER dataplane WITH PASSWORD 'dataplane';
+
 CREATE DATABASE redlinedb;
 CREATE USER redline WITH PASSWORD 'redline';
 GRANT ALL PRIVILEGES ON DATABASE redlinedb TO redline;

@@ -174,5 +174,10 @@ DP_STATUS=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X PUT "${EDC_
     '{dataplaneId:$id,endpoint:$e,profiles:["HttpData-PULL"],transferTypes:["HttpData-PULL"]}')" 2>/dev/null) || DP_STATUS="000"
 case "$DP_STATUS" in 2??) ;; *) fail "step 8, AlphaKasse's data plane: HTTP ${DP_STATUS}" ;; esac
 echo -e "${GREEN}OK${NC}: ${HOLDER} has a data plane for HttpData-PULL"
+# and the push data plane, as every other participant has (ADR-095)
+# shellcheck source=lib/push-dataplane.sh
+source "${SCRIPT_DIR}/lib/push-dataplane.sh"
+register_push_dataplane "${EDC_MANAGEMENT_URL}/v5" "$ATOKEN" "$AK_CTX" || fail "step 8, AlphaKasse's push data plane"
+echo -e "${GREEN}OK${NC}: ${HOLDER} has a data plane for the push types"
 
 echo -e "\n${GREEN}second data space seeded${NC}: ${HOLDER} holds its MembershipCredential and its bonus payout purpose from ${GA_DID}"

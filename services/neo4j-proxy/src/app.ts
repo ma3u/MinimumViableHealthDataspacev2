@@ -21,10 +21,23 @@ app.use(requestLogging());
 // the default 100 kB; every other route keeps the default.
 const jsonDefault = express.json();
 const jsonImport = express.json({ limit: "20mb" });
+
+/**
+ * A push's deliveries into an SPE inbox (ADR-095, routes/spe-inbox.ts). They
+ * are not parsed here: each route reads its body as raw bytes itself, after
+ * the inbox token is checked, because X-Content-Sha256 is a hash of those
+ * bytes and because nobody without a token should make the proxy buffer
+ * 16 MiB.
+ */
+export const INBOX_DELIVERY_PATH =
+  /^\/spe\/[^/]+\/inbox\/[^/]+\/(bundle|chunks\/[^/]+|file)$/;
+
 app.use((req: Request, res: Response, next: NextFunction) =>
-  /^\/spe\/[^/]+\/import$/.test(req.path)
-    ? jsonImport(req, res, next)
-    : jsonDefault(req, res, next),
+  INBOX_DELIVERY_PATH.test(req.path)
+    ? next()
+    : /^\/spe\/[^/]+\/import$/.test(req.path)
+      ? jsonImport(req, res, next)
+      : jsonDefault(req, res, next),
 );
 
 // ---------------------------------------------------------------------------
@@ -118,11 +131,23 @@ export const auditLimiter = rateLimit({
 
 /** Pull transfers on EDC 1.0 (routes/dataspace.ts). */
 export const PULL_PATH = /^\/dataspace\/data(\/.*)?$/;
+/** The dataset a push carries, read by the push data plane (ADR-095). */
+export const PUSH_SOURCE_PATH = /^\/dataspace\/push-source(\/.*)?$/;
+
+/**
+ * The two inbox routes that check a data plane token (routes/spe-inbox.ts):
+ * opening an inbox and the consumer's "started".
+ */
+export const INBOX_TOKEN_PATH = /^\/spe\/[^/]+\/inbox(\/[^/]+\/started)?$/;
 
 // The pull route applies the general limit itself, first in its chain, so that
-// it visibly guards the token check; it is not counted here as well.
+// it visibly guards the token check; it is not counted here as well. The push
+// source and the inbox routes that check a token are accounted the same way.
 app.use((req: Request, res: Response, next: NextFunction) =>
-  req.path === "/audit/dsp" || PULL_PATH.test(req.path)
+  req.path === "/audit/dsp" ||
+  PULL_PATH.test(req.path) ||
+  PUSH_SOURCE_PATH.test(req.path) ||
+  (req.method === "POST" && INBOX_TOKEN_PATH.test(req.path))
     ? next()
     : generalLimiter(req, res, next),
 );

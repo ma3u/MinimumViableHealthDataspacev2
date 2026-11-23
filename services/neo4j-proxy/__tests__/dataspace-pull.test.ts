@@ -89,6 +89,10 @@ describe("a pull through /dataspace/data", () => {
     const fifth = await pull("irs", "10.0.3.5");
     expect(fifth.status).toBe(429);
     expect(fifth.body.error).toMatch(/^Query rate limit exceeded/);
+    // A data plane that waits out a 429 needs to know how long.
+    expect(Number(fifth.headers["retry-after"])).toBeGreaterThan(0);
+    expect(Number(fifth.headers["ratelimit-reset"])).toBeGreaterThan(0);
+    expect(fifth.headers["ratelimit-limit"]).toBe("4");
   });
 
   it("refuses a pull with a method the dataset is not read with", async () => {

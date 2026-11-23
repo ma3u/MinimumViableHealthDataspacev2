@@ -406,6 +406,13 @@ run_keypair_tests() {
       # created through the Identity API without it lands under the hub's
       # global vault, i.e. secret/<alias>. Either location is the property.
       local found=0 path
+      # siglet's proof key (#888, scripts/seed-siglet-key-mappings.sh) never
+      # leaves Vault's transit engine: IdentityHub publishes its public half
+      # under the alias transit-<key name>, and the material is the transit key.
+      if [ "${alias#transit-}" != "$alias" ] && docker exec -e VAULT_ADDR=http://127.0.0.1:8200 \
+           -e VAULT_TOKEN="${VAULT_TOKEN:-root}" "$vault_c" vault read "transit/keys/${alias#transit-}" >/dev/null 2>&1; then
+        continue
+      fi
       for path in "participants/${PROVIDER_CTX}/identityhub/${alias}" "secret/${alias}" \
                   "participants/${PROVIDER_CTX}/identityhub/${enc}" "secret/${enc}"; do
         if docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -e VAULT_TOKEN="${VAULT_TOKEN:-root}" "$vault_c" \

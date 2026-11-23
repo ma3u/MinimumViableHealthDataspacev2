@@ -3,6 +3,128 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-20: a day of ECG was 1,440 requests, and the proxy allows a participant 200 heavy ones a minute
+
+The first 24 hour stream over Kafka (ADR-095, `ecg-holter-stream`) stopped
+after 161 of 2,881 records. The provider's data plane read the recording from
+`/dataspace/push-source` in one-minute pages, as fast as it could, and a page
+answered `429 Query rate limit exceeded`: a page is a heavy request, of which
+a participant has 200 a minute (#519; the message says "max 20", which is one
+person's budget, whoever is limited). The data plane took the 429 for a
+refusal and reported the transfer errored. The reader on the other side then
+waited ten minutes on a topic nothing would arrive on. The check script
+reported "in no state" for a third reason: its own token had expired after
+five minutes.
+
+Fix: the two ECG datasets are read in ten-minute pages, the route's largest
+(144 requests for the day); the data plane waits out a 429 for as long as the
+proxy says; the reader of a stream asks between polls whether its transfer
+was ended; and the check takes a fresh token every minute. What arrived of
+the failed stream stayed in the workspace marked incomplete, with
+`push-stream-started` and no `push-received` on the audit chain, as designed.
+
+Rule: when one transfer becomes many requests, count them against the limit
+before the first run, and treat 429 as "later", not as "no".
+
+## 2026-11-19: siglet renews a token only with three things nothing created, and its hour cannot be shortened
+
+A pull stopped working one hour after its transfer started (#888, #881
+finding 23). The consumer's siglet renews the access token at the provider's
+with a proof it signs through Vault's transit engine, and it finds the key in
+a signing-key mapping per participant context. Nothing made one, so every
+renewal answered `500 {"error":"Internal server error"}` and siglet logged
+`Failed to resolve signing key: no signing key mapping for participant
+context '<id>'`.
+
+Three things are needed, and `scripts/seed-siglet-key-mappings.sh` (phase 5
+of `jad/seed-all.sh`) and the hub's onboarding now make them: a transit key
+`siglet-proof-<context>` (ed25519; IdentityHub's own keys are in the KV
+store, where siglet cannot sign with them), its public half in the
+participant's DID document as `<did>#siglet-<fingerprint>`, and the mapping
+in siglet. With the mapping and without `SIGLET__VAULT__USE_HTTP_RESOLUTION`
+the provider fails next: `Failed to fetch DID document ...
+https://identityhub:7083/...`, because the stack's `did:web` is http.
+
+siglet 0.1.6 has no setting for the token's lifetime (`token_duration` is a
+builder default of 3600 s that nothing sets), so a renewal can be proven only
+by waiting the hour. `scripts/check-siglet-token-renewal.sh` does: on
+2026-11-19 a transfer pulled data 3,713 s after it started, with a second
+token.
+
+Rule: on compose siglet keeps mappings and flows in memory. After a restart
+of siglet run `./jad/seed-all.sh --only 5`, or every renewal fails again.
+
+## 2026-11-19: a push that finishes fast is refused by the consumer, and EDC does not ask again
+
+The push data plane (ADR-095) delivered a small bundle within a second, told
+the provider's control plane `completed`, and the transfer ended `TERMINATED`
+on both sides. A stream of the same dataset, a few seconds slower, completed.
+The provider logged: `Counter Party responded with ... 400 ...
+"Cannot process TransferCompletionMessage because transfer cannot be completed"`.
+
+On a start message the consumer's control plane only notes "startup
+requested"; it becomes `STARTED` later, after it has called its own data
+plane's `started`. A completion that arrives in between is answered 400
+([`TransferProcessProtocolServiceImpl.completedAction` at `v1.0.0-RC8`](https://github.com/eclipse-edc/Connector/blob/v1.0.0-RC8/core/control-plane/control-plane-aggregate-services/src/main/java/org/eclipse/edc/connector/controlplane/services/transferprocess/TransferProcessProtocolServiceImpl.java)),
+where the suspension next to it answers "retry later", and the provider
+treats a 400 as final. Data Plane Signaling gives the provider's data plane
+no way to know the consumer's state.
+
+Fix: the two sides meet at the SPE inbox. The consumer's data plane tells the
+inbox when its control plane calls `started`
+(`POST /spe/<id>/inbox/<flow>/started`), and the provider's reads
+`.../ready` before it delivers, then waits one more second
+(`DATAPLANE_SETTLE_MILLIS`) for the consumer to save its state. Three suite
+runs, nine pushes, nine `COMPLETED`.
+
+Rule: a data plane that can finish before the start message is processed
+must wait for a sign from the consumer's side. Raising it upstream (answer
+the early completion with 503, as RC8 does for other early messages) is open,
+on Matthias's go.
+
+## 2026-11-19: the control plane image cannot verify an ES256 token
+
+The push data plane first signed its callbacks with ES256. The control plane
+answered each with 500, and the log said `NoClassDefFoundError: Could not
+initialize class org.bouncycastle.jce.provider.BouncyCastleProvider`, caused
+by `UnsatisfiedLinkError: /tmp/bc-lts-jni.../libbc-probe-le.so: Error loading
+shared library ld-linux-aarch64.so.1`.
+
+EDC verifies an ECDSA signature through BouncyCastle
+(`CryptoConverter.getEcdsaVerifier`). The BouncyCastle classes in the
+launcher's jar are the LTS build's, which unpacks a native library made for
+glibc; the image is Alpine (musl). The load fails once, the provider class
+never initialises, and every later ECDSA verification in that process fails.
+Nothing hit it before: the participants' and the issuer's keys are Ed25519,
+and Keycloak signs RS256.
+
+Fix here: the data plane signs RS256, which EDC verifies with the JDK alone.
+Not fixed: the control plane itself. A partner with P-256 keys would be
+refused with a 500. Open: find which dependency brings the LTS classes into
+the shadow jar, or force the Java implementation
+(`-Dorg.bouncycastle.native.cpu_variant=java`, not tried).
+
+Rule: when a Java service on Alpine answers 500 on a signature, look for
+`UnsatisfiedLinkError` further up the log; the class that "could not
+initialise" names the victim, not the cause.
+
+## 2026-11-19: a pull is pseudonymised in the UI, so a push would have carried names
+
+Building the push into an SPE (ADR-095), reading the code before the first
+real push showed that it would deliver patients' names and birth dates; none
+did. `/dataspace/data` serves the graph as it is; a data user's pull is pseudonymised afterwards, in the hub's
+web server (`pseudonymiseFhir` in `ui/src/lib/transfer-data.ts`, #475). A push
+goes from the proxy to the inbox and never passes the UI.
+
+Fix: the proxy pseudonymises what `/dataspace/push-source` hands out, with
+the UI's rule and the UI's key (`PATIENT_PSEUDONYM_KEY`, so a patient has one
+pseudonym on both ways; in production an unset key answers 503). The inbox
+is a second line: it refuses a Patient that still carries a name, an address,
+an identifier or a full birth date, and writes the refusal to the audit chain.
+
+Rule: a privacy rule that lives in one caller does not cover a second way to
+the same data. Put a check at the place the data arrives.
+
 ## 2026-11-19: on EDC RC8 a Linked Data credential meets no verifier, and the refusal has a new name
 
 The move to EDC 1.0.0-RC8 (#930) broke none of the five gates. One thing of

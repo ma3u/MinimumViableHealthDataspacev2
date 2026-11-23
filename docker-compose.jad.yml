@@ -491,6 +491,14 @@ services:
       # The task store (jad/init-postgres.sql). Explicit since #566: in
       # production the proxy no longer falls back to it on its own.
       TASK_DB_URL: "postgresql://taskuser:taskuser@postgres:5432/taskdb"
+      # The push data plane's keys (ADR-095): its tokens open an SPE inbox and
+      # read a dataset for a push. Unset, those routes answer 503.
+      DATAPLANE_JWKS_URL: "http://dataplane:8090/.well-known/jwks.json"
+      # What a push hands out is pseudonymised here, with the key the UI
+      # pseudonymises a pull with, so one patient has one pseudonym on both
+      # ways. The UI's key is its NEXTAUTH_SECRET (docker-compose.yml); this
+      # is that development value. In production an unset key answers 503.
+      PATIENT_PSEUDONYM_KEY: health-dataspace-dev-secret-change-in-prod
       # Phase 5: Second SPE for federated queries (optional)
       NEO4J_SPE2_URI: "bolt://health-dataspace-neo4j-spe2:7687"
       NEO4J_SPE2_USER: "neo4j"
@@ -858,6 +866,16 @@ services:
       SIGLET__TOKEN__ISSUER: "siglet-issuer"
       SIGLET__VAULT__URL: "http://vault:8200"
       SIGLET__VAULT__TOKEN: "root" # dev-mode Vault root token (compose only)
+      # Renewing a token after its hour (#888): the provider's siglet checks
+      # the consumer's proof against the consumer's DID document, and resolves
+      # did:web over https unless told otherwise. The compose DIDs are
+      # did:web:identityhub%3A7083:<slug>, plain http, so without this every
+      # renewal ends in "Failed to fetch DID document ... https://identityhub:7083".
+      SIGLET__VAULT__USE_HTTP_RESOLUTION: "true"
+      # The refresh endpoint goes into the consumer's data address. The default
+      # is http://<bind>:8082/token, that is http://0.0.0.0:8082/token, which
+      # only reaches this siglet because provider and consumer share it.
+      SIGLET__TOKEN__REFRESH_ENDPOINT: "http://siglet:8082/token"
       SIGLET__SIGNALING_AUTH__MODE: "disabled" # dev: skip JWT verification
       SIGLET__MANAGEMENT_API_AUTH__MODE: "disabled"
       SIGLET__TOKEN_API_AUTH__MODE: "disabled" # dev, as signaling and management already are
@@ -867,6 +885,120 @@ services:
     depends_on:
       vault:
         condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # The push data plane (ADR-095): Data Plane Signaling on the Eclipse DataPlane
+  # SDK, built here from runtimes/edc/dataplane
+  # ---------------------------------------------------------------------------
+  # siglet stays the data plane of a pull. This one has the push transfer types
+  # (HttpData-PUSH, HttpStream-PUSH, HttpFile-PUSH): the consumer's side opens
+  # an inbox in an SPE workspace at the neo4j-proxy, the provider's side reads
+  # the dataset there and delivers it, and only into a workspace whose
+  # attestation is at or above DATAPLANE_ATTESTATION_FLOOR. On compose every
+  # workspace is "simulated" (ADR-068 decision 5), so that is the floor here;
+  # Azure sets "workload".
+  #
+  # Each participant context registers it as mvhd-dp-<context>
+  # (scripts/lib/push-dataplane.sh). On a Postgres volume or a Keycloak realm
+  # older than this service, scripts/seed-dataplane.sh creates the database and
+  # the client first.
+  dataplane:
+    image: mvhd/edc-dataplane:1.0.0-RC8
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: dataplane
+        EDC_VERSION: 1.0.0-RC8
+    container_name: health-dataspace-dataplane
+    environment:
+      DATAPLANE_PORT: "8090"
+      DATAPLANE_PUBLIC_URL: "http://dataplane:8090"
+      # the control plane's signaling API, where callbacks go (its default port)
+      DATAPLANE_CONTROL_PLANE_SIGNALING_URL: "http://controlplane:8182/api/signaling"
+      DATAPLANE_SIGNALING_JWKS_URL: "http://keycloak:8080/realms/edcv/protocol/openid-connect/certs"
+      DATAPLANE_SIGNALING_CLIENT_ID: "dataplane-signaling"
+      DATAPLANE_PROXY_URL: "http://neo4j-proxy:9090"
+      DATAPLANE_ATTESTATION_FLOOR: "simulated"
+      # The broker of the two Kafka transfer types (profile `streaming`). With
+      # the profile down a Kafka transfer fails at prepare; the HTTP types do
+      # not need it.
+      # Through the broker's SASL listener, so the login path that Event Hubs
+      # needs on Azure (ADR-096) runs here every day. Compose-only credentials.
+      DATAPLANE_KAFKA_BOOTSTRAP: "kafka:9094"
+      DATAPLANE_KAFKA_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
+      DATAPLANE_KAFKA_SASL_USERNAME: "dataplane"
+      DATAPLANE_KAFKA_SASL_PASSWORD: "dataplane-local" # compose only
+      DATAPLANE_DB_URL: "jdbc:postgresql://postgres:5432/dataplane_v1"
+      DATAPLANE_DB_USER: "dataplane"
+      DATAPLANE_DB_PASSWORD: "dataplane" # compose only
+      # the Kafka client logs every group join at info; the data plane's own lines are enough
+      JAVA_OPTS: "-Xmx256m -Dorg.slf4j.simpleLogger.defaultLogLevel=warn"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8090/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Kafka, for the streaming transfer types Kafka-PUSH and Kafka-PULL (ADR-095).
+  # Profile `streaming`.
+  # ---------------------------------------------------------------------------
+  # One broker in KRaft mode, plain text, reachable only inside the stack's
+  # network: the data plane writes a transfer's records to a topic of its own
+  # (mvhd.flow.<flow id>) and reads them into the SPE inbox. Nothing is kept:
+  # no volume, and a topic is gone with the container. A broker that two
+  # organisations share needs TLS, SASL and ACLs, which this one does not have.
+  #
+  #   docker compose -f docker-compose.yml -f docker-compose.jad.yml --profile streaming up -d kafka
+  kafka:
+    profiles: ["streaming"]
+    image: apache/kafka:4.3.2
+    container_name: health-dataspace-kafka
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      # 9092 plain for the broker itself and its health check; 9094 with SASL
+      # PLAIN for the data plane (ADR-096, "the login path")
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,SASL://:9094"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,SASL://kafka:9094"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SASL:SASL_PLAINTEXT"
+      KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN"
+      KAFKA_LISTENER_NAME_SASL_PLAIN_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required user_dataplane="dataplane-local";'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_NUM_PARTITIONS: "1"
+      # a transfer's topic is deleted by time: a recording is not kept here
+      KAFKA_LOG_RETENTION_HOURS: "2"
+      # a 30 s strip of an ECG is about 100 kB; room for more leads
+      KAFKA_MESSAGE_MAX_BYTES: "4194304"
+      KAFKA_HEAP_OPTS: "-Xmx384m -Xms256m"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
     networks:
       - edcv
     restart: unless-stopped

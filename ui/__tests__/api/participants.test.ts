@@ -199,7 +199,14 @@ describe("/api/participants", () => {
         provisioned: true,
       });
       expect(data.did).toMatch(/^did:web:identityhub%3A7083:test-clinic-/);
-      expect(data.steps).toHaveLength(7);
+      // Seven steps done, and the eighth reported as not done: without a Vault
+      // token the hub cannot make siglet's signing key (#888), and says so.
+      expect(data.steps).toHaveLength(8);
+      expect(
+        data.steps
+          .filter((s: { ok: boolean }) => !s.ok)
+          .map((s: { step: string }) => s.step),
+      ).toEqual(["siglet signing key"]);
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5/participants",
         "POST",

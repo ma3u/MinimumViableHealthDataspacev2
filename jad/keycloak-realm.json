@@ -353,6 +353,20 @@
       ]
     },
     {
+      "clientId": "dataplane-signaling",
+      "name": "Data Plane Signaling",
+      "description": "The control plane calls the push data plane with this client's token (ADR-095)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "secret": "dataplane-signaling-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "fullScopeAllowed": false,
+      "defaultClientScopes": []
+    },
+    {
       "clientId": "health-dataspace-ui",
       "name": "Health Dataspace UI",
       "description": "Next.js UI client \u2014 confidential, Authorization Code Flow with client secret",
