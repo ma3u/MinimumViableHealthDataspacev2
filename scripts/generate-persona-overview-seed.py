@@ -86,10 +86,9 @@ PARAMETERS = [
 ]
 
 CONDITIONS = [
-    ("73211009", "http://snomed.info/sct", "Diabetes mellitus type 2", "2018-04-10"),
+    ("44054006", "http://snomed.info/sct", "Diabetes mellitus type 2", "2018-04-10"),
     ("38341003", "http://snomed.info/sct", "Hypertension", "2015-11-02"),
     ("73595000", "http://snomed.info/sct", "Stress (finding)", "2020-01-15"),
-    ("E11.9", "http://hl7.org/fhir/sid/icd-10", "T2D without complications", "2018-04-10"),
     ("414916001", "http://snomed.info/sct", "Obesity (BMI 31.2)", "2017-06-20"),
     ("271825005", "http://snomed.info/sct", "Respiratory distress", "2021-03-08"),
     ("40055000", "http://snomed.info/sct", "Chronic sinusitis", "2013-09-14"),

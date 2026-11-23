@@ -42,6 +42,8 @@ interface EEHRxFCategory {
   categoryId: string;
   name: string;
   article: string;
+  // The annex of the EEHRxF implementing act that defines it (#1205)
+  annex?: string;
   description: string;
   ehdsDeadline: string;
   ehdsGroup: number;
@@ -82,6 +84,17 @@ interface EEHRxFData {
     issue: number | null;
     scope: string;
   }[];
+  // The Commission implementing act that lays down the EEHRxF (#1205)
+  implementingAct?: {
+    reference: string;
+    status: string;
+    fhirVersion: string;
+    feedbackUntil: string;
+    implementationGuideDue: string;
+    url: string;
+    actUrl: string;
+    annexUrl: string;
+  } | null;
 }
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -298,7 +311,13 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
             <StatusBadge status={category.status} />
           </div>
           <p className="text-xs text-(--text-secondary) line-clamp-1">
-            {category.article ? `${category.article}: ` : ""}
+            {category.article ? `${category.article}` : ""}
+            {category.annex
+              ? `, ${t("draft act, Annex {n}", {
+                  n: category.annex.replace(/^Annex /, ""),
+                })}`
+              : ""}
+            {category.article || category.annex ? ": " : ""}
             {category.description}
           </p>
         </div>
@@ -454,6 +473,72 @@ export default function EEHRxFPage() {
                 </span>
               </div>
             </div>
+
+            {/* The implementing act the categories come from (#1205) */}
+            {data?.implementingAct && (
+              <section
+                className="bg-(--surface) border border-(--border) rounded-xl p-5 mb-8 text-xs text-(--text-secondary) flex flex-col gap-1.5"
+                aria-labelledby="eehrxf-act"
+                data-testid="eehrxf-implementing-act"
+              >
+                <h2
+                  id="eehrxf-act"
+                  className="font-semibold text-sm text-(--text-primary)"
+                >
+                  {data.implementingAct.status === "draft"
+                    ? t("Draft implementing act {ref}", {
+                        ref: data.implementingAct.reference,
+                      })
+                    : t("Implementing act {ref}", {
+                        ref: data.implementingAct.reference,
+                      })}
+                </h2>
+                <p>
+                  {t(
+                    "Its Annexes IV to IX define the six categories and require FHIR {version}. It names no HL7 guide: the HL7 Europe guides below are the hub's choice, not the act's.",
+                    { version: data.implementingAct.fhirVersion },
+                  )}
+                </p>
+                <p>
+                  {data.implementingAct.status === "draft"
+                    ? t(
+                        "Feedback is open until {until}. The first EEHRxF implementation guide is due on {due}.",
+                        {
+                          until: data.implementingAct.feedbackUntil,
+                          due: data.implementingAct.implementationGuideDue,
+                        },
+                      )
+                    : t(
+                        "The first EEHRxF implementation guide is due on {due}.",
+                        { due: data.implementingAct.implementationGuideDue },
+                      )}
+                </p>
+                <p className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+                  {[
+                    {
+                      label: "Draft act (PDF)",
+                      href: data.implementingAct.actUrl,
+                    },
+                    {
+                      label: "Annexes (PDF)",
+                      href: data.implementingAct.annexUrl,
+                    },
+                    { label: "Have your say", href: data.implementingAct.url },
+                  ].map((l) => (
+                    <a
+                      key={l.label}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 hover:text-teal-800 dark:hover:text-teal-300"
+                    >
+                      <ExternalLink size={12} />
+                      {t(l.label)}
+                    </a>
+                  ))}
+                </p>
+              </section>
+            )}
 
             {/* How the numbers are made */}
             {data?.validation && (

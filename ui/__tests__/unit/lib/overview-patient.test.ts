@@ -135,7 +135,7 @@ describe("buildPatientView", () => {
       kind: "Risk",
     });
     expect(byId.get("risk:cardiovascular")).toMatchObject({ status: "warn" });
-    expect(view.nodes.filter((n) => n.kind === "Diagnosis")).toHaveLength(8);
+    expect(view.nodes.filter((n) => n.kind === "Diagnosis")).toHaveLength(7);
     expect(view.nodes.filter((n) => n.kind === "Medication")).toHaveLength(4);
     expect(
       view.nodes.filter((n) => n.kind === "Recommendation").length,

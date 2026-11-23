@@ -27,6 +27,7 @@ bij betrokken was. Hoe ze worden gemaakt, staat aan het
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Draait op        | iPhone, iOS 26 of later                                                                                                       |
 | Verkrijgbaar via | [Openbare TestFlight-bèta](https://testflight.apple.com/join/ssADSXX6), 200 plaatsen                                          |
+| Website          | [klarbefund.mabu.red](https://klarbefund.mabu.red/): Klarbefund voor iPhone en Mac op één pagina (Engelstalig)                |
 | Talen            | Engels en Duits, volgens de taal van de telefoon                                                                              |
 | Broncode         | [`clients/ios/`](../../clients/ios/)                                                                                          |
 | Privacy          | [Privacybeleid](https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html)                                |

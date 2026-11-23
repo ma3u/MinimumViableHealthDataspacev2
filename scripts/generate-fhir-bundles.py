@@ -23,7 +23,7 @@ conditions = [
     {"code": "431855005", "display": "Chronic kidney disease stage 1", "category": "encounter-diagnosis"},
     {"code": "267036007", "display": "Dyspnea", "category": "encounter-diagnosis"},
     {"code": "59621000", "display": "Essential hypertension", "category": "encounter-diagnosis"},
-    {"code": "698754002", "display": "Chronic pain", "category": "encounter-diagnosis"},
+    {"code": "82423001", "display": "Chronic pain", "category": "encounter-diagnosis"},
     {"code": "230690007", "display": "Cerebrovascular accident", "category": "encounter-diagnosis"},
 ]
 

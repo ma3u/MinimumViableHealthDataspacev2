@@ -10,7 +10,7 @@
  *   1. Match the adverse_event_in_cohort template (regex pattern).
  *   2. Resolve the three semantic roles via the :NlqGlossary nodes —
  *      drug=ciprofloxacin (RxCUI 2551), indication=UTI (SNOMED 68566005),
- *      side-effect=tendon rupture (SNOMED 262615006).
+ *      side-effect=tendon rupture (SNOMED 415749005).
  *   3. Execute a cohort Cypher that returns non-zero population /
  *      indication-cohort / drug-cohort sizes against Synthea-seeded data,
  *      using the :HAS_MEDICATION + .code fallback path (issue #19) and
@@ -105,7 +105,7 @@ describe("Issue #19 — pharmacovigilance NLQ", () => {
       });
       expect(byTerm["tendon rupture"]).toMatchObject({
         kind: "concept",
-        code: "262615006",
+        code: "415749005",
       });
     } finally {
       await session.close();
@@ -120,7 +120,7 @@ describe("Issue #19 — pharmacovigilance NLQ", () => {
     expect(data.templateName).toBe("adverse_event_in_cohort");
     expect(data.interpretation?.drug?.code).toBe("2551");
     expect(data.interpretation?.indication?.code).toBe("68566005");
-    expect(data.interpretation?.sideEffect?.code).toBe("262615006");
+    expect(data.interpretation?.sideEffect?.code).toBe("415749005");
     expect(data.interpretation?.unresolved).toEqual({
       drug: false,
       indication: false,

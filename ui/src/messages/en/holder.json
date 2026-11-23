@@ -205,5 +205,14 @@
   "Profiles and guides": "Profiles and guides",
   "FHIR writer (TypeScript)": "FHIR writer (TypeScript)",
   "FHIR writer (Swift)": "FHIR writer (Swift)",
-  "Synthea sample": "Synthea sample"
+  "Synthea sample": "Synthea sample",
+  "draft act, Annex {n}": "draft act, Annex {n}",
+  "Draft implementing act {ref}": "Draft implementing act {ref}",
+  "Implementing act {ref}": "Implementing act {ref}",
+  "Its Annexes IV to IX define the six categories and require FHIR {version}. It names no HL7 guide: the HL7 Europe guides below are the hub's choice, not the act's.": "Its Annexes IV to IX define the six categories and require FHIR {version}. It names no HL7 guide: the HL7 Europe guides below are the hub's choice, not the act's.",
+  "Feedback is open until {until}. The first EEHRxF implementation guide is due on {due}.": "Feedback is open until {until}. The first EEHRxF implementation guide is due on {due}.",
+  "The first EEHRxF implementation guide is due on {due}.": "The first EEHRxF implementation guide is due on {due}.",
+  "Draft act (PDF)": "Draft act (PDF)",
+  "Annexes (PDF)": "Annexes (PDF)",
+  "Have your say": "Have your say"
 }

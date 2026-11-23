@@ -188,7 +188,7 @@
       "facts": [["drives", "diabetes risk"]]
     },
     {
-      "id": "cond:73211009",
+      "id": "cond:44054006",
       "label": "Diabetes mellitus type 2",
       "layer": "me",
       "kind": "Diagnosis",
@@ -196,7 +196,7 @@
       "color": "#86efac",
       "title": "Diabetes mellitus type 2",
       "sub": "since 2018-04-10",
-      "facts": [["code", "73211009"]],
+      "facts": [["code", "44054006"]],
       "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
     },
     {
@@ -221,18 +221,6 @@
       "title": "Stress (finding)",
       "sub": "since 2020-01-15",
       "facts": [["code", "73595000"]],
-      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
-    },
-    {
-      "id": "cond:E11.9",
-      "label": "T2D without complications",
-      "layer": "me",
-      "kind": "Diagnosis",
-      "size": 1.2,
-      "color": "#86efac",
-      "title": "T2D without complications",
-      "sub": "since 2018-04-10",
-      "facts": [["code", "E11.9"]],
       "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
     },
     {
@@ -2795,7 +2783,7 @@
     },
     {
       "source": "me",
-      "target": "cond:73211009",
+      "target": "cond:44054006",
       "kind": "diagnosis",
       "color": "#4ade80",
       "distance": 55
@@ -2810,13 +2798,6 @@
     {
       "source": "me",
       "target": "cond:73595000",
-      "kind": "diagnosis",
-      "color": "#4ade80",
-      "distance": 55
-    },
-    {
-      "source": "me",
-      "target": "cond:E11.9",
       "kind": "diagnosis",
       "color": "#4ade80",
       "distance": 55
@@ -2858,7 +2839,7 @@
       "particles": 1
     },
     {
-      "source": "cond:73211009",
+      "source": "cond:44054006",
       "target": "fac:type-2-diabetes",
       "kind": "behind",
       "color": "#fb923c",
@@ -2882,7 +2863,7 @@
       "particles": 1
     },
     {
-      "source": "cond:73211009",
+      "source": "cond:44054006",
       "target": "fac:active-t2d-diagnosis",
       "kind": "behind",
       "color": "#fb923c",
@@ -2899,7 +2880,7 @@
     },
     {
       "source": "med:860975",
-      "target": "cond:73211009",
+      "target": "cond:44054006",
       "kind": "treats",
       "color": "#a78bfa",
       "distance": 45
@@ -2942,7 +2923,7 @@
       "arrow": true
     },
     {
-      "source": "cond:73211009",
+      "source": "cond:44054006",
       "target": "find:INS-001",
       "kind": "informs",
       "color": "#38bdf8",

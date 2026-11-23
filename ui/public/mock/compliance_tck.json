@@ -147,7 +147,7 @@
           "suite": "EHDS",
           "name": "EEHRxF profiles present",
           "status": "pass",
-          "detail": "12 EEHRxF profile(s)"
+          "detail": "16 EEHRxF profile(s)"
         },
         {
           "id": "EHDS-3.1",

@@ -75,10 +75,10 @@ for (const c of profile.conditions) {
 const matchCond = (text) => Object.entries(condByWord).find(([w]) => text.toLowerCase().includes(w.split(" ")[0].replace(/[()]/g, "")))?.[1];
 // a factor that is also a diagnosis links down to it: the parameter behind the risk
 for (const [fid, f] of Object.entries(factorIds)) {
-  const cid = matchCond(f) ?? (f.includes("T2D") ? "cond:73211009" : f.includes("BMI") ? "cond:414916001" : null);
+  const cid = matchCond(f) ?? (f.includes("T2D") ? "cond:44054006" : f.includes("BMI") ? "cond:414916001" : null);
   if (cid) link(cid, fid, { color: "#fb923c", distance: 60, particles: 1 });
 }
-const medTarget = { Metformin: "cond:73211009", Lisinopril: "cond:38341003", Salbutamol: "cond:195967001", Atorvastatin: "risk:cardiovascular" };
+const medTarget = { Metformin: "cond:44054006", Lisinopril: "cond:38341003", Salbutamol: "cond:195967001", Atorvastatin: "risk:cardiovascular" };
 for (const m of profile.medications) {
   const id = `med:${m.code}`;
   add({ id, label: m.display.split(" ")[0], layer: "me", size: 1, color: "#c4b5fd", detail: { title: m.display, sub: "FHIR R4 MedicationRequest", facts: [["RxNorm", m.code]] } });
