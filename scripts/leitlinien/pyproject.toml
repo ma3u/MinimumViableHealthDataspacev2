@@ -2,7 +2,7 @@
 name = "leitlinien-ingestion"
 version = "0.1.0"
 description = "AWMF Leitlinien ingestion pipeline for issue #20 — Phase 1 (discovery / download / Docling parse) and Phase 2 (Neo4j Layer 6 loader) of the EHDS Integration Hub knowledge graph."
-requires-python = ">=3.11"
+requires-python = ">=3.11.5"
 dependencies = [
     "docling>=2.91.0",
     "playwright>=1.58.0",
@@ -13,3 +13,9 @@ dependencies = [
 dev = [
     "pytest>=8.3.0",
 ]
+
+[tool.uv]
+# soupsieve below 4.0 carries CVE-2026-126190 (HIGH, found by Trivy on
+# 2026-11-23). It comes in through beautifulsoup4 (docling). soupsieve 4
+# needs Python 3.11.5 or later, hence the requires-python floor above.
+constraint-dependencies = ["soupsieve>=4.0.1"]
