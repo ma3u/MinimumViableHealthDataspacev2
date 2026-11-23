@@ -12,7 +12,9 @@
 #   2. seed-ehds-credentials.sh — Register EHDS credential types on IssuerService
 #   3. seed-ehds-policies.sh    — Create ODRL policies for all participants
 #   4. seed-data-assets.sh      — Register data assets + contracts on EDC-V
-#   5. seed-contract-negotiation.sh — PharmaCo↔AlphaKlinik negotiations + data planes
+#   5. ../scripts/seed-siglet-key-mappings.sh: each participant's signing key
+#      for renewing an access token after its hour (#888), then
+#      seed-contract-negotiation.sh — PharmaCo↔AlphaKlinik negotiations + data planes
 #   6. seed-federated-catalog.sh  — MedReg↔LMC federated catalog negotiation
 #   7. seed-data-transfer.sh    — Verify EDR tokens and data plane transfers
 #
@@ -151,6 +153,11 @@ run_step 1 "Participants and their identity (EDC 1.0)" "../scripts/seed-identity
 run_step 2 "EHDS Credential Types (IssuerService)"    "seed-ehds-credentials.sh"
 run_step 3 "EHDS ODRL Policies (EDC-V)"               "seed-ehds-policies.sh"
 run_step 4 "Data Assets & Contracts (EDC-V)"           "seed-data-assets.sh"
+# Two scripts, one phase. The signing-key mappings belong to the data plane as
+# the transfers do: siglet's memory backend loses both on a restart, so the
+# phase one runs again after a restart (--only 5) has to bring both back. They
+# come first because a transfer without one is dead an hour after it started.
+run_step 5 "Signing keys for token renewal (siglet)"   "../scripts/seed-siglet-key-mappings.sh"
 run_step 5 "Contract Negotiations & Data Planes"       "seed-contract-negotiation.sh"
 run_step 6 "Federated Catalog (HealthDCAT-AP)"         "seed-federated-catalog.sh"
 run_step 7 "Data Transfer Verification"                "seed-data-transfer.sh"

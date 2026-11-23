@@ -17,11 +17,14 @@ import {
 } from "../spe-import.js";
 
 // ---- A transfer's data into an SPE workspace (#876) -------------------------
+// The target checks and the answers for a workspace that does not answer are
+// exported for the push inbox (routes/spe-inbox.ts, ADR-095), which writes
+// into the same workspaces and must refuse the same way.
 
-const SPE_IDS = new Set(["SPE-1", "SPE-2"]);
-const DATASET_ID = /^[A-Za-z0-9._:@~-]{1,200}$/;
+export const SPE_IDS = new Set(["SPE-1", "SPE-2"]);
+export const DATASET_ID = /^[A-Za-z0-9._:@~-]{1,200}$/;
 
-function workspace(speId: string) {
+export function workspace(speId: string) {
   return getSpeDrivers().find((s) => s.label === speId)?.driver ?? null;
 }
 
@@ -35,7 +38,7 @@ const RETRY_AFTER = String(Math.round(SPE_CONNECT_MAX_INTERVAL_MS / 1000));
 /** The driver's codes for a workspace it cannot reach: stopped, or still starting. */
 const UNREACHABLE_CODES = new Set(["ServiceUnavailable", "SessionExpired"]);
 
-function notAnswering(err: unknown): boolean {
+export function notAnswering(err: unknown): boolean {
   return (
     err instanceof NoAnswerError ||
     UNREACHABLE_CODES.has(String((err as { code?: unknown } | null)?.code))
@@ -43,12 +46,12 @@ function notAnswering(err: unknown): boolean {
 }
 
 /** 503 with Retry-After: the caller is told to come back, not that the proxy failed. */
-function unavailable(res: Response, error: string) {
+export function unavailable(res: Response, error: string) {
   res.status(503).set("Retry-After", RETRY_AFTER).json({ error });
 }
 
 /** 400 for a bad SPE or dataset id, 503 when that workspace is not connected. */
-function checkTarget(res: Response, speId: string, datasetId: string) {
+export function checkTarget(res: Response, speId: string, datasetId: string) {
   if (!SPE_IDS.has(speId)) {
     res.status(400).json({ error: `Unknown SPE '${speId}' (SPE-1 or SPE-2)` });
     return null;

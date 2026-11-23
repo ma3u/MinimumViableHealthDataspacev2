@@ -800,6 +800,16 @@
         "ports": []
       },
       {
+        "name": "dataplane",
+        "profiles": [],
+        "ports": []
+      },
+      {
+        "name": "kafka",
+        "profiles": ["streaming"],
+        "ports": []
+      },
+      {
         "name": "cfm7-nats",
         "profiles": ["cfm"],
         "ports": []
@@ -850,6 +860,7 @@
     "cfm_v007",
     "controlplane",
     "controlplane_v1",
+    "dataplane_v1",
     "identityhub_v1",
     "issuerservice_v1",
     "keycloak",
@@ -1420,6 +1431,12 @@
       "status": "Proposed"
     },
     {
+      "id": "ADR-095",
+      "file": "ADR-095-a-push-data-plane-on-the-dataplane-sdk-beside-siglet.md",
+      "title": "A data plane on the DataPlane SDK, beside siglet, that delivers into an attested SPE over HTTP and Kafka",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-096",
       "file": "ADR-096-the-kafka-broker-on-azure-is-event-hubs.md",
       "title": "The Kafka broker on Azure is Event Hubs; Compose keeps Apache Kafka",
@@ -1523,12 +1540,12 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
-    "/docs/developer": "2026-11-20",
-    "/docs/developer/quality-gates": "2026-11-20",
+    "/docs/developer": "2026-11-23",
+    "/docs/developer/quality-gates": "2026-11-23",
     "/docs/developer/api": "2026-11-23",
     "/docs/developer/reference": "2026-11-23",
     "/docs/developer/[slug]": "2026-11-21",
-    "/docs/architecture": "2026-11-20",
+    "/docs/architecture": "2026-11-23",
     "/docs/security": "2026-11-21",
     "/docs/security/[slug]": "2026-11-21",
     "/docs/klarbefund": "2026-11-21",

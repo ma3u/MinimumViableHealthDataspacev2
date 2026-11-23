@@ -254,6 +254,8 @@ CREATE CONSTRAINT jurisdiction_milestone_id IF NOT EXISTS FOR (m:JurisdictionMil
 // same constraints from this file where it is applied to them.
 CREATE CONSTRAINT imported_dataset_id IF NOT EXISTS FOR (d:ImportedDataset) REQUIRE d.datasetId IS UNIQUE;
 CREATE CONSTRAINT imported_record_key IF NOT EXISTS FOR (r:ImportedRecord) REQUIRE r.recordKey IS UNIQUE;
+// A file pushed into the workspace with HttpFile-PUSH (ADR-095): one per flow.
+CREATE CONSTRAINT imported_file_key IF NOT EXISTS FOR (f:ImportedFile) REQUIRE f.fileKey IS UNIQUE;
 CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
 CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
 

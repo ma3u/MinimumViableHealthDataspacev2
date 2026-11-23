@@ -19,10 +19,20 @@ export const SIGLET_JWKS_URL =
   process.env.SIGLET_JWKS_URL ?? "http://siglet:8080/keys";
 export const SIGLET_ISSUER = process.env.SIGLET_ISSUER ?? "siglet-issuer";
 
-/** Where each seeded asset's data lives on this proxy (jad/seed-data-assets.sh). */
+/**
+ * Where each seeded asset's data lives on this proxy (jad/seed-data-assets.sh).
+ * `query` fixes parameters of the route for this dataset: the hand-on adds
+ * them when the caller's query does not set them, and refuses (400) a
+ * caller that sets one to another value, so a token for a shorter dataset
+ * cannot read a longer one.
+ */
 export const DATASET_ROUTES: Record<
   string,
-  { method: "GET" | "POST"; path: string }
+  {
+    method: "GET" | "POST";
+    path: string;
+    query?: Readonly<Record<string, string>>;
+  }
 > = {
   "fhir-patient-search": { method: "GET", path: "/fhir/Patient" },
   "fhir-patient-everything": { method: "GET", path: "/fhir/Patient" },
@@ -38,6 +48,22 @@ export const DATASET_ROUTES: Record<
   // A bonus program's yes or no, for the insurer that published it (#934
   // step 8, ADR-091; scripts/seed-second-data-space.sh).
   "bonus-programme-answer": { method: "GET", path: "/programmes/answers" },
+  // A synthetic 24 hour Holter ECG, read window by window and streamed into
+  // an SPE (ADR-095, ecg-holter.ts); `next` pages through it.
+  // Ten minutes a page, the route's largest window: a page is a heavy
+  // request, of which a participant has 20 a minute, and the day in one
+  // minute pages is 1,440 of them (docs/gotchas.md, 2026-11-20).
+  "ecg-holter-stream": {
+    method: "GET",
+    path: "/synthetic/ecg-holter",
+    query: { seconds: "600" },
+  },
+  // The same recording cut at one hour, for the routine check.
+  "ecg-holter-hour": {
+    method: "GET",
+    path: "/synthetic/ecg-holter",
+    query: { durationSeconds: "3600", seconds: "600" },
+  },
 };
 
 export interface DataspaceGrant {
@@ -66,7 +92,12 @@ export async function verifyDataspaceToken(
   return toGrant(payload);
 }
 
-function toGrant(payload: JWTPayload): DataspaceGrant {
+/**
+ * What a verified token grants. Shared with the data plane's dataset:read
+ * token (dataplane-token.ts, ADR-095 decision 8), which carries the same
+ * three claims, so both issuers grant the same way.
+ */
+export function toGrant(payload: JWTPayload): DataspaceGrant {
   const datasetId = payload.datasetId;
   if (typeof datasetId !== "string" || datasetId.length === 0) {
     throw new Error("the token names no dataset");

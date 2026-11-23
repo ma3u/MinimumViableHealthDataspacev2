@@ -88,6 +88,21 @@ export const SPE_AUDIT_SYNC_MS = parseInt(
   10,
 );
 
+// A push into an SPE (ADR-095, spe-inbox.ts): how long an inbox's token is
+// valid, and the address the provider's data plane is told to push to.
+export const SPE_INBOX_TTL_SECONDS = int("SPE_INBOX_TTL_SECONDS", 900);
+/**
+ * The most records one stream (HttpStream-PUSH, Kafka-PUSH, Kafka-PULL) may
+ * write. A 24 hour Holter recording in 30 s strips is 2,880.
+ */
+export const SPE_INBOX_STREAM_MAX_RECORDS = int(
+  "SPE_INBOX_STREAM_MAX_RECORDS",
+  5000,
+);
+export const SPE_INBOX_PUBLIC_URL = (
+  process.env.SPE_INBOX_PUBLIC_URL || "http://neo4j-proxy:9090"
+).replace(/\/+$/, "");
+
 // GDPR / EHDS: k-anonymity minimum cohort size for federated queries.
 // Callers may request a HIGHER threshold via the request body, but never lower.
 // Set to 0 to disable enforcement (not recommended for production).

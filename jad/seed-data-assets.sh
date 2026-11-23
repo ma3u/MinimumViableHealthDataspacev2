@@ -285,6 +285,22 @@ create_asset "$ALPHA_KLINIK_CTX" "fhir-observation-bundle" \
   "application/fhir+json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Observation\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
+# A long-term ECG (Holter) of one fictional patient, synthetic, for the
+# streaming transfer types (ADR-095). The proxy makes it window by window, so
+# the data plane streams it without holding the day in memory. The hour is the
+# one the checks stream; the day is the recording a Holter gives.
+create_asset "$ALPHA_KLINIK_CTX" "ecg-holter-hour" \
+  "Long-term ECG, one hour (synthetic)" \
+  "One hour of a synthetic two-lead Holter ECG at 250 Hz as FHIR R4 Observations with sampled data, 30 s per Observation. For streaming transfers." \
+  "application/fhir+json" \
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/synthetic/ecg-holter?durationSeconds=3600\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+
+create_asset "$ALPHA_KLINIK_CTX" "ecg-holter-stream" \
+  "Long-term ECG, 24 hours (synthetic)" \
+  "24 hours of a synthetic two-lead Holter ECG at 250 Hz as FHIR R4 Observations with sampled data, 30 s per Observation: 2,880 Observations. For streaming transfers." \
+  "application/fhir+json" \
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/synthetic/ecg-holter\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+
 AK_POLICY='{
   "@type": "Set",
   "permission": [{
@@ -303,6 +319,11 @@ create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-patient" "open-fhir-access-poli
 
 TC_OBS_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-observation-bundle\"}]"
 create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-observation" "open-fhir-access-policy" "mvhd-ehds-permit-spe" "$TC_OBS_SELECTOR"
+
+for ecg in ecg-holter-hour ecg-holter-stream; do
+  ECG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"$ecg\"}]"
+  create_contract_def "$ALPHA_KLINIK_CTX" "cd-$ecg" "open-fhir-access-policy" "mvhd-ehds-permit-spe" "$ECG_SELECTOR"
+done
 
 echo ""
 
@@ -536,6 +557,10 @@ echo "────────────────────────�
 # /api/control/v1/dataflows answers 404 on the 0.18 launcher (#542).
 SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"   # Azure: http://mvhd-siglet:8081/api/v1
 
+# The push data plane's registration, beside siglet's (ADR-095).
+# shellcheck source=../scripts/lib/push-dataplane.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/lib/push-dataplane.sh"
+
 register_dataplane() {
   local ctx_id="$1" label="$2"
   # A plain registration, not JSON-LD. RC6 renamed transferTypes to profiles
@@ -565,6 +590,12 @@ register_dataplane() {
   else
     warn "Data plane registration for $label returned HTTP $http_code"
   fi
+  # A participant with siglet alone can pull and cannot push into an SPE.
+  if register_push_dataplane "$CP_MGMT/${MGMT_V}" "$token" "$ctx_id"; then
+    ok "Push data plane registered for $label"
+  else
+    warn "Push data plane registration for $label failed"
+  fi
 }
 
 register_dataplane "$ALPHA_KLINIK_CTX" "AlphaKlinik Berlin"
@@ -582,9 +613,9 @@ echo "Data Asset Registration Summary"
 echo "════════════════════════════════════════════════"
 echo ""
 echo "AlphaKlinik Berlin ($ALPHA_KLINIK_CTX):"
-echo "  Assets:    fhir-patient-search, fhir-observation-bundle"
+echo "  Assets:    fhir-patient-search, fhir-observation-bundle, ecg-holter-hour, ecg-holter-stream"
 echo "  Policies:  open-fhir-access-policy"
-echo "  Contracts: cd-fhir-patient, cd-fhir-observation"
+echo "  Contracts: cd-fhir-patient, cd-fhir-observation, cd-ecg-holter-hour, cd-ecg-holter-stream"
 echo ""
 echo "Limburg MC ($LMC_CTX):"
 echo "  Assets:    fhir-patient-everything, fhir-cohort-bundle, omop-cohort-statistics, healthdcatap-catalog"

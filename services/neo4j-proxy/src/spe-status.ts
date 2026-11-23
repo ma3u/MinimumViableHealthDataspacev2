@@ -42,7 +42,10 @@ import { OPTED_OUT_LABEL, PERSON_LABELS } from "./opt-out.js";
 
 export const SPE_CHAIN = "spe";
 const PROXY = "mvhd-neo4j-proxy";
-const CODES = "https://ehds.mabu.red/fhir/CodeSystem/spe-audit-event";
+/** The code system of every event on the `spe` chain, the push events' too (spe-inbox.ts). */
+export const SPE_EVENT_CODES =
+  "https://ehds.mabu.red/fhir/CodeSystem/spe-audit-event";
+const CODES = SPE_EVENT_CODES;
 
 export type SpeEventType =
   | "spe.attestation"

@@ -521,11 +521,12 @@ start_stack() {
   docker compose $COMPOSE_FILES up -d traefik
   ok "Traefik gateway started"
 
-  log "=== Phase 4: Starting the EDC 1.0 services and siglet ==="
+  log "=== Phase 4: Starting the EDC 1.0 services, siglet and the push data plane ==="
   # EDC 1.0 (#881, ADR-078): the launchers from runtimes/edc, which compose
   # builds on the first run (a few minutes of Gradle); siglet is the data
-  # plane. CFM 0.0.7 runs only under the cfm profile (ADR-085).
-  docker compose $COMPOSE_FILES up -d controlplane identityhub issuerservice simpl-ga-issuer siglet
+  # plane of a pull, dataplane that of a push (ADR-095). CFM 0.0.7 runs only
+  # under the cfm profile (ADR-085).
+  docker compose $COMPOSE_FILES up -d controlplane identityhub issuerservice simpl-ga-issuer siglet dataplane
 
   wait_for_api "Control Plane" "http://localhost:11003/api/mgmt/v5/participants" 60 5 || exit 1
   wait_for_api "Identity Hub" "http://localhost:11005/api/identity" 60 5 || exit 1

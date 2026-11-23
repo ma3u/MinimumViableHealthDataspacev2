@@ -2,7 +2,7 @@
  * The hub's own participant provisioning on EDC 1.0 (ADR-078): the seeds'
  * sequence, in order, and undone in reverse when a step fails.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("@/lib/edc", () => ({
   edcClient: { management: vi.fn(), identity: vi.fn(), issuer: vi.fn() },
@@ -79,7 +79,15 @@ describe("provisionParticipant", () => {
     expect(out.did).toMatch(
       /^did:web:identityhub%3A7083:riverside-general-[0-9a-f]{6}$/,
     );
-    expect(out.steps.every((s) => s.ok)).toBe(true);
+    // Without a Vault token the hub cannot make the signing key (#888): the
+    // registration stands, and the step says what is missing.
+    expect(out.steps.filter((s) => !s.ok)).toEqual([
+      {
+        step: "siglet signing key",
+        ok: false,
+        detail: expect.stringContaining("seed-siglet-key-mappings.sh"),
+      },
+    ]);
     expect(calls()).toEqual([
       "mgmt POST /v5/participants",
       "identity POST /v1/participants",
@@ -187,6 +195,44 @@ describe("provisionParticipant", () => {
     });
   });
 
+  it("registers the push data plane too where the deployment has one (ADR-095)", async () => {
+    happyPath();
+    vi.stubEnv("PUSH_DATAPLANE_URL", "http://dataplane:8090");
+    vi.stubEnv("PUSH_DATAPLANE_CLIENT_SECRET", "local-test-value");
+    try {
+      const out = await provisionParticipant(REG);
+      expect(out.steps.map((s) => s.step)).toContain("data plane (push)");
+      const registration = mgmt.mock.calls.find(
+        (c) =>
+          String(c[0]).endsWith("/dataplanes") &&
+          (c[2] as { dataplaneId?: string }).dataplaneId === `mvhd-dp-${CTX}`,
+      );
+      expect(registration).toBeDefined();
+      const body = registration?.[2] as {
+        endpoint: string;
+        profiles: string[];
+        authorization: Record<string, string>;
+      };
+      expect(body.endpoint).toBe(
+        `http://dataplane:8090/api/v1/${CTX}/dataflows`,
+      );
+      expect(body.profiles).toContain("HttpData-PUSH");
+      expect(body.profiles).toContain("Kafka-PULL");
+      expect(body.authorization.type).toBe("oauth2_client_credentials");
+      expect(body.authorization.jwksUri).toBe(
+        "http://dataplane:8090/.well-known/jwks.json",
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("leaves the push data plane out where none is configured", async () => {
+    happyPath();
+    const out = await provisionParticipant(REG);
+    expect(out.steps.map((s) => s.step)).not.toContain("data plane (push)");
+  });
+
   it("takes a 2xx with an empty body as done (data plane, holder)", async () => {
     happyPath();
     const empty = () => {
@@ -204,8 +250,10 @@ describe("provisionParticipant", () => {
       return undefined;
     });
     const out = await provisionParticipant(REG);
-    expect(out.steps.every((s) => s.ok)).toBe(true);
-    expect(out.steps).toHaveLength(7);
+    expect(out.steps.filter((s) => !s.ok).map((s) => s.step)).toEqual([
+      "siglet signing key",
+    ]);
+    expect(out.steps).toHaveLength(8);
   });
 
   it("undoes what it created, in reverse, when a later step fails", async () => {
@@ -299,6 +347,169 @@ describe("provisionParticipant", () => {
     );
     expect(undoCp).toMatchObject({ ok: false });
     expect(undoCp.detail).toContain("409");
+  });
+});
+
+/**
+ * With a Vault token the hub makes what a token renewal needs (#888): a
+ * transit key, its public half in the DID document, siglet's mapping.
+ */
+describe("provisionParticipant, the siglet signing key", () => {
+  // 32 bytes, as Vault returns an ed25519 public key: standard base64.
+  const PUBLIC_KEY = Buffer.alloc(32, 7).toString("base64");
+  const X = Buffer.alloc(32, 7).toString("base64url");
+  let outside: string[];
+  let answer: (url: string, method: string) => Response | undefined;
+
+  beforeEach(() => {
+    mgmt.mockReset();
+    identity.mockReset();
+    issuer.mockReset();
+    happyPath();
+    outside = [];
+    answer = () => undefined;
+    vi.stubEnv("VAULT_TOKEN", "test-token");
+    vi.stubEnv("VAULT_URL", "http://vault.test:8200");
+    vi.stubEnv("SIGLET_MANAGEMENT_URL", "http://siglet.test:8083");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        const method = init?.method ?? "GET";
+        outside.push(`${method} ${url}`);
+        const special = answer(url, method);
+        if (special) return special;
+        if (method === "GET" && url.includes("/v1/transit/keys/")) {
+          return Response.json({
+            data: {
+              type: "ed25519",
+              latest_version: 1,
+              keys: { "1": { public_key: PUBLIC_KEY } },
+            },
+          });
+        }
+        return new Response(null, { status: 204 });
+      }),
+    );
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("makes the key, publishes it and maps it, before the credential request", async () => {
+    const out = await provisionParticipant(REG);
+
+    expect(out.steps.every((s) => s.ok)).toBe(true);
+    expect(out.steps.map((s) => s.step)).toEqual([
+      "control plane context",
+      "IdentityHub participant",
+      "context config",
+      "DSP profile",
+      "data plane (siglet)",
+      "siglet signing key (Vault transit)",
+      "siglet signing key in the DID document",
+      "siglet signing-key mapping",
+      "issuer holder",
+      "MembershipCredential request",
+    ]);
+    expect(outside).toEqual([
+      `POST http://vault.test:8200/v1/transit/keys/siglet-proof-${CTX}`,
+      `GET http://vault.test:8200/v1/transit/keys/siglet-proof-${CTX}`,
+      "POST http://siglet.test:8083/key-mappings",
+    ]);
+
+    // The key id carries a fingerprint of the public key; the key pair can
+    // sign nothing in IdentityHub, which does not hold the private key.
+    const keypair = identity.mock.calls.find((c) => c[0].endsWith("/keypairs"));
+    expect(keypair?.[1]).toBe("PUT");
+    const descriptor = keypair?.[2] as {
+      keyId: string;
+      usage: string[];
+      publicKeyJwk: Record<string, string>;
+      keyGeneratorParams?: unknown;
+    };
+    const [keyDid, fragment] = descriptor.keyId.split("#");
+    expect(keyDid).toBe(out.did);
+    expect(fragment).toMatch(/^siglet-[0-9a-f]{8}$/);
+    expect(descriptor.usage).toEqual(["sign_credentials"]);
+    expect(descriptor.publicKeyJwk).toEqual({
+      kty: "OKP",
+      crv: "Ed25519",
+      x: X,
+    });
+    expect(descriptor.keyGeneratorParams).toBeUndefined();
+
+    const fetchMock = vi.mocked(fetch);
+    const mapping = fetchMock.mock.calls.find((c) =>
+      String(c[0]).endsWith("/key-mappings"),
+    );
+    expect(JSON.parse(String(mapping?.[1]?.body))).toEqual({
+      participantContextId: CTX,
+      keyName: `siglet-proof-${CTX}`,
+      kid: descriptor.keyId,
+    });
+    const create = fetchMock.mock.calls[0];
+    expect(create[1]?.headers).toMatchObject({ "X-Vault-Token": "test-token" });
+    expect(JSON.parse(String(create[1]?.body))).toEqual({ type: "ed25519" });
+  });
+
+  it("replaces a mapping siglet already holds", async () => {
+    answer = (url, method) =>
+      method === "POST" && url.endsWith("/key-mappings")
+        ? new Response(null, { status: 409 })
+        : undefined;
+    const out = await provisionParticipant(REG);
+    expect(out.steps.every((s) => s.ok)).toBe(true);
+    expect(outside.at(-1)).toBe(
+      `PUT http://siglet.test:8083/key-mappings/${CTX}`,
+    );
+  });
+
+  it("undoes the key and the participant when siglet refuses the mapping", async () => {
+    answer = (url, method) =>
+      method === "POST" && url.endsWith("/key-mappings")
+        ? new Response(null, { status: 500 })
+        : undefined;
+
+    const err = await provisionParticipant(REG).catch((e) => e);
+
+    expect(err).toBeInstanceOf(ProvisioningError);
+    expect(err.message).toContain("siglet signing-key mapping failed");
+    expect(
+      err.steps
+        .filter((s: { step: string }) => s.step.startsWith("undo: "))
+        .map((s: { step: string; ok: boolean }) => `${s.step}:${s.ok}`),
+    ).toEqual([
+      "undo: siglet signing key (Vault transit):true",
+      "undo: IdentityHub participant:true",
+      "undo: control plane context:true",
+    ]);
+    // Vault deletes a key only after its configuration allows it.
+    expect(outside.slice(-2)).toEqual([
+      `POST http://vault.test:8200/v1/transit/keys/siglet-proof-${CTX}/config`,
+      `DELETE http://vault.test:8200/v1/transit/keys/siglet-proof-${CTX}`,
+    ]);
+    expect(issuer).not.toHaveBeenCalled();
+  });
+
+  it("undoes the participant when Vault refuses the key", async () => {
+    answer = (url, method) =>
+      method === "POST" && url.includes("/v1/transit/keys/")
+        ? new Response(null, { status: 403 })
+        : undefined;
+
+    const err = await provisionParticipant(REG).catch((e) => e);
+
+    expect(err.message).toContain(
+      "siglet signing key (Vault transit) failed: Vault answered 403",
+    );
+    expect(calls().slice(-2)).toEqual([
+      `identity DELETE /v1/participants/${CTX}`,
+      `mgmt DELETE /v5/participants/${CTX}`,
+    ]);
+    expect(identity.mock.calls.some((c) => c[0].endsWith("/keypairs"))).toBe(
+      false,
+    );
   });
 });
 

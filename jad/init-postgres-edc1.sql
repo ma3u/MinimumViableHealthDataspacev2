@@ -8,3 +8,5 @@ CREATE DATABASE simplga_v1 OWNER simplga;
 CREATE DATABASE rogueissuer_v1 OWNER rogueissuer;
 -- CFM 0.0.7 (ADR-085, profile `cfm`).
 CREATE DATABASE cfm_v007 OWNER cfm;
+-- The push data plane's flows and control plane entries (ADR-095).
+CREATE DATABASE dataplane_v1 OWNER dataplane;

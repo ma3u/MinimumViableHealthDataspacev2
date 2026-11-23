@@ -45,6 +45,12 @@ export interface ImportReference {
 
 export class ImportShapeError extends Error {}
 
+/**
+ * More records than MAX_RECORDS. A shape error still (the import answers
+ * 422 as before); the push inbox tells it apart to answer 413 (ADR-095).
+ */
+export class TooManyRecordsError extends ImportShapeError {}
+
 /** What a person reads on a record's node. */
 function displayName(r: Record<string, unknown>, id: string): string {
   // A prescription, a medication plan entry and a vaccination carry their
@@ -87,11 +93,14 @@ function references(
 /**
  * A FHIR Bundle (a searchset, a collection, an $everything answer) as the
  * records and references of one dataset. A reference to a resource outside
- * the bundle is dropped: the workspace holds no node for it.
+ * the bundle is dropped: the workspace holds no node for it. `known` names
+ * ("Type/id") records the dataset holds already, from a stream's earlier
+ * chunks (ADR-095): a reference to one of them is kept.
  */
 export function bundleToRecords(
   datasetId: string,
   bundle: unknown,
+  known: ReadonlySet<string> = new Set(),
 ): { records: ImportRecord[]; references: ImportReference[] } {
   const b = bundle as { resourceType?: unknown; entry?: unknown } | null;
   if (!b || b.resourceType !== "Bundle" || !Array.isArray(b.entry)) {
@@ -120,7 +129,7 @@ export function bundleToRecords(
     resources.push([local, r]);
   }
   if (records.size > MAX_RECORDS) {
-    throw new ImportShapeError(
+    throw new TooManyRecordsError(
       `The bundle holds ${records.size} records; at most ${MAX_RECORDS} are imported at once`,
     );
   }
@@ -132,13 +141,14 @@ export function bundleToRecords(
     references(r, "", found);
     for (const { ref, path } of found) {
       const target = /([A-Z][A-Za-z]+\/[A-Za-z0-9\-.]+)$/.exec(ref)?.[1];
-      if (!target || target === local || !records.has(target)) continue;
+      if (!target || target === local) continue;
+      if (!records.has(target) && !known.has(target)) continue;
       const key = `${local}>${target}>${path}`;
       if (seen.has(key)) continue;
       seen.add(key);
       refs.push({
         from: records.get(local)!.recordKey,
-        to: records.get(target)!.recordKey,
+        to: `${datasetId}/${target}`,
         path,
       });
     }
@@ -301,6 +311,112 @@ export async function writeImport(
   };
 }
 
+// ---- a stream, written chunk by chunk (ADR-095) -------------------------------
+//
+// A stream into an SPE (HttpStream-PUSH, Kafka-PUSH, Kafka-PULL) can be a
+// 24 hour recording; nothing holds it in memory until the end. Each chunk is
+// merged into the dataset as it arrives, in a transaction of its own, with
+// the import's own record and reference statements. The dataset says
+// `complete: false` until the stream's closing message checks out.
+
+const APPEND_DATASET = `
+MERGE (w:SpeWorkspace {speId: $meta.speId})
+  ON CREATE SET w.createdAt = $importedAt
+MERGE (d:ImportedDataset {datasetId: $meta.datasetId})
+  ON CREATE SET d.name = 'Transfer of ' + $meta.assetId,
+                d.speId = $meta.speId, d.transferId = $meta.transferId,
+                d.agreementId = $meta.agreementId, d.assetId = $meta.assetId,
+                d.provider = $meta.provider, d.consumer = $meta.consumer,
+                d.importedBy = $meta.importedBy,
+                d.pseudonymised = $meta.pseudonymised,
+                d.importedAt = $importedAt, d.updatedAt = $importedAt,
+                d.records = $added, d.complete = false, d.refused = false
+  ON MATCH SET d.records = coalesce(d.records, 0) + $added,
+               d.updatedAt = $importedAt
+MERGE (d)-[:LOADED_INTO]->(w)`;
+
+/**
+ * Merges one chunk's records and references into the dataset, all or none.
+ * The first chunk refuses a dataset the workspace holds already, as an
+ * import does. `added` is how many of the records are new to the dataset
+ * (the caller knows what earlier chunks wrote), so `records` stays a count
+ * of records, not of lines.
+ */
+export async function appendImport(
+  session: Session,
+  meta: ImportRequest,
+  chunk: { records: ImportRecord[]; references: ImportReference[] },
+  opts: { first: boolean; added: number },
+  now: () => Date = () => new Date(),
+): Promise<void> {
+  const importedAt = now().toISOString();
+  await session.executeWrite(async (tx) => {
+    if (opts.first) {
+      const held = await tx.run(READ_EXISTING, {
+        datasetIds: [meta.datasetId],
+      });
+      if (held.records.length) {
+        const r = held.records[0];
+        throw new AlreadyImportedError({
+          datasetId: meta.datasetId,
+          speId: meta.speId,
+          records: toNumber(r.get("records")),
+          importedAt: String(r.get("importedAt") ?? ""),
+        });
+      }
+    }
+    await tx.run(APPEND_DATASET, {
+      meta,
+      importedAt,
+      added: neo4j.int(opts.added),
+    });
+    for (let i = 0; i < chunk.records.length; i += 500) {
+      await tx.run(WRITE_RECORDS, {
+        datasetId: meta.datasetId,
+        records: chunk.records.slice(i, i + 500),
+      });
+    }
+    for (let i = 0; i < chunk.references.length; i += 500) {
+      await tx.run(WRITE_REFERENCES, {
+        refs: chunk.references.slice(i, i + 500),
+      });
+    }
+  });
+}
+
+const MARK_STREAM = `
+MERGE (w:SpeWorkspace {speId: $meta.speId})
+  ON CREATE SET w.createdAt = $at
+MERGE (d:ImportedDataset {datasetId: $meta.datasetId})
+  ON CREATE SET d.name = 'Transfer of ' + $meta.assetId,
+                d.speId = $meta.speId, d.transferId = $meta.transferId,
+                d.agreementId = $meta.agreementId, d.assetId = $meta.assetId,
+                d.provider = $meta.provider, d.consumer = $meta.consumer,
+                d.importedBy = $meta.importedBy,
+                d.pseudonymised = $meta.pseudonymised,
+                d.importedAt = $at, d.records = 0,
+                d.complete = $complete, d.refused = $refused,
+                d.refusedReason = $reason, d.closedAt = $at
+  ON MATCH SET d.complete = $complete, d.refused = $refused,
+               d.refusedReason = $reason, d.closedAt = $at
+MERGE (d)-[:LOADED_INTO]->(w)`;
+
+/**
+ * The stream's end on its dataset: `complete: true` when the closing message
+ * checked out, or `complete: false, refused: true` with the reason when it
+ * did not. What arrived is kept either way, never deleted.
+ */
+export async function markStreamDataset(
+  session: Session,
+  meta: ImportRequest,
+  end: { complete: boolean; refused: boolean; reason: string | null },
+  now: () => Date = () => new Date(),
+): Promise<void> {
+  await session.executeWrite((tx) =>
+    tx.run(MARK_STREAM, { meta, at: now().toISOString(), ...end }),
+  );
+}
+
 type Shown = Record<string, string | number | boolean>;
 
 export interface ImportGraph {
@@ -432,6 +548,9 @@ export async function readImportGraph(
     "importedAt",
     "records",
     "pseudonymised",
+    "complete",
+    "refused",
+    "refusedReason",
   ]) {
     const v = dataset[k];
     if (

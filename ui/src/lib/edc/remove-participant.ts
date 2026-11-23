@@ -19,6 +19,11 @@ import { edcClient } from "@/lib/edc";
 import { getContext, type HubContext } from "@/lib/edc/participants";
 import { cfmProvisioning, removeFromCfm } from "@/lib/edc/cfm-provision";
 import type { ProvisionStep } from "@/lib/edc/provision";
+import {
+  deleteKeyMapping,
+  deleteSigningKey,
+  signingKeyConfigured,
+} from "@/lib/edc/siglet-signing-key";
 
 const ISSUER_CTX = process.env.EDC_ISSUER_CTX || "issuer";
 const SIGLET_MANAGEMENT_URL =
@@ -123,6 +128,16 @@ export async function removeParticipant(contextId: string): Promise<Removed> {
         throw new Error(`siglet answered ${res.status}`);
       }
     });
+  }
+
+  // What provision.ts made for token renewal (#888), when the hub has the
+  // Vault token to make it. The key pair in IdentityHub goes with the
+  // participant below.
+  if (signingKeyConfigured()) {
+    await run("siglet signing-key mapping", () => deleteKeyMapping(contextId));
+    await run("siglet signing key (Vault transit)", () =>
+      deleteSigningKey(contextId),
+    );
   }
 
   // Takes the participant's keys, STS client and credentials with it.

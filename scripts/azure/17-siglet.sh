@@ -25,6 +25,9 @@ set -euo pipefail
 #   - ingress internal to the environment, API auth disabled as in compose.
 #     Turning auth on (Keycloak JWKS, audience, scopes) is still open.
 #
+# Token renewal (#888): the two settings below it in ENV_VARS, and one signing
+# key per participant context from edc-seed-siglet-key-mappings.yml.
+#
 # The image is the digest docker-compose.jad.yml pins, imported into ACR
 # (ADR-029). It is multi-arch (linux/amd64 and arm64).
 #
@@ -125,6 +128,13 @@ ENV_VARS=(
   "SIGLET__VAULT__URL=${VAULT_URL}"
   "SIGLET__VAULT__TOKEN=secretref:vault-token"
   "SIGLET__VAULT__SIGNING_KEY_NAME=signing-siglet"
+  # Renewing a token after its hour (#888). The provider's siglet resolves the
+  # consumer's did:web over https unless told otherwise, and the DIDs here are
+  # did:web:mvhd-identityhub%3A7083:<slug>, plain http inside the environment.
+  "SIGLET__VAULT__USE_HTTP_RESOLUTION=true"
+  # The refresh endpoint in the consumer's data address; the default is
+  # http://0.0.0.0:8082/token, which names no host.
+  "SIGLET__TOKEN__REFRESH_ENDPOINT=http://${SIGLET_APP}:8082/token"
   "SIGLET__SIGNALING_AUTH__MODE=disabled"
   "SIGLET__TOKEN_API_AUTH__MODE=disabled"
   "SIGLET__MANAGEMENT_API_AUTH__MODE=disabled"
@@ -274,3 +284,9 @@ done
 }
 ok "${rev} Healthy"
 report
+# A renewal also needs a signing key per participant context: a transit key,
+# its public half in the DID document and siglet's mapping (#888). They are
+# made inside the environment, by the workflow edc-seed-siglet-key-mappings.yml
+# (scripts/azure/siglet-key-mappings-job.sh); siglet keeps the mappings in
+# ${DB}, so a fresh database needs the workflow again.
+log "token renewal: run the workflow edc-seed-siglet-key-mappings.yml (plan, then apply) if this database is new"

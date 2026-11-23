@@ -50,6 +50,7 @@ import { dcpDiscoveryTick, startDcpDiscoveryLoop } from "./dcp-discovery.js";
 // error handler comes last, as it did when everything lived in this file.
 import "./routes/ops.js";
 import "./routes/fhir.js";
+import "./routes/ecg-holter.js";
 import "./routes/omop.js";
 import "./routes/catalog.js";
 import "./routes/federated.js";
@@ -62,6 +63,7 @@ import "./routes/spe.js";
 import "./routes/dataspace.js";
 import "./routes/programmes.js";
 import "./routes/spe-import.js";
+import "./routes/spe-inbox.js";
 import "./error-handler.js";
 import { logger } from "./logger.js";
 import { startSpeSync } from "./spe-status.js";
