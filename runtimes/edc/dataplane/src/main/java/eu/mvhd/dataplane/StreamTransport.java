@@ -26,6 +26,13 @@ public interface StreamTransport {
     End read(String bootstrap, String topic, String group, Sink sink, java.util.function.BooleanSupplier stopped)
             throws Exception;
 
+    /**
+     * Removes a transfer's topic once the transfer has ended. A stream is
+     * kept in the workspace, not on the broker, and Event Hubs allows a
+     * namespace ten topics (ADR-096).
+     */
+    void deleteTopic(String bootstrap, String topic) throws Exception;
+
     /** Whether the reader of that group has taken everything on the topic, the end mark included. */
     boolean consumed(String bootstrap, String topic, String group) throws Exception;
 

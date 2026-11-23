@@ -366,6 +366,14 @@ class PushFlowTest {
         assertEquals(3, complete.get("records"));
         assertEquals("/api/signaling/transfers/flow-provider/dataflow/completed",
                 callbacks.stream().filter(c -> c.path().endsWith("/completed")).findFirst().orElseThrow().path());
+        // the topic goes when the transfer ends: the stream is kept in the workspace
+        await(() -> transport.deleted.contains("mvhd.flow.flow-consumer"));
+    }
+
+    @Test
+    void aJaasValueCannotEndItsOwnQuotes() {
+        assertEquals("Endpoint=sb://x/;Key=a\\\"b", KafkaTransport.jaas("Endpoint=sb://x/;Key=a\"b"));
+        assertEquals("a\\\\b", KafkaTransport.jaas("a\\b"));
     }
 
     @Test
@@ -691,6 +699,14 @@ class PushFlowTest {
                 sink.accept(List.of(record[1]));
                 committed.put(topic + "/" + group, at);
             }
+        }
+
+        final List<String> deleted = new CopyOnWriteArrayList<>();
+
+        @Override
+        public void deleteTopic(String bootstrap, String topic) {
+            // kept readable: the reader of a test may still be on it
+            deleted.add(topic);
         }
 
         @Override

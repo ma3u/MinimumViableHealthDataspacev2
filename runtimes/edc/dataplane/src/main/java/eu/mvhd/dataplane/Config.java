@@ -19,6 +19,9 @@ import java.util.function.Function;
  * @param startWaitSeconds how long the provider waits for the consumer to report the transfer started
  * @param settleMillis a pause after that report, for the consumer's control plane to save its state
  * @param kafkaBootstrap the broker for the Kafka transfer types; empty offers none of them
+ * @param kafkaSecurityProtocol PLAINTEXT, SASL_PLAINTEXT or SASL_SSL (Event Hubs, ADR-096)
+ * @param kafkaUsername the SASL PLAIN user; on Event Hubs the literal $ConnectionString
+ * @param kafkaPassword the SASL PLAIN password; on Event Hubs a connection string. Never logged
  * @param dbUrl JDBC address of the store; empty keeps flows in memory (tests only)
  * @param dbUser the store's user
  * @param dbPassword the store's password
@@ -36,6 +39,9 @@ public record Config(
         int startWaitSeconds,
         int settleMillis,
         String kafkaBootstrap,
+        String kafkaSecurityProtocol,
+        String kafkaUsername,
+        String kafkaPassword,
         String dbUrl,
         String dbUser,
         String dbPassword,
@@ -63,6 +69,9 @@ public record Config(
                 Integer.parseInt(value(env, "DATAPLANE_START_WAIT_SECONDS", "60")),
                 Integer.parseInt(value(env, "DATAPLANE_SETTLE_MILLIS", "1000")),
                 value(env, "DATAPLANE_KAFKA_BOOTSTRAP", ""),
+                value(env, "DATAPLANE_KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
+                value(env, "DATAPLANE_KAFKA_SASL_USERNAME", ""),
+                value(env, "DATAPLANE_KAFKA_SASL_PASSWORD", ""),
                 value(env, "DATAPLANE_DB_URL", ""),
                 value(env, "DATAPLANE_DB_USER", ""),
                 value(env, "DATAPLANE_DB_PASSWORD", ""),

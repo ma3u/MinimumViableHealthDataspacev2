@@ -62,31 +62,57 @@ export function birthYear(birthDate: unknown): string | null {
   return m ? m[1] : null;
 }
 
-/** A `reference` (or a fullUrl) that points at a Patient. */
-const PATIENT_REFERENCE = /\bPatient\/[^/?#]+$/;
-
-/**
- * True when the data holds a Patient resource or a reference to one: what
- * push-source must pseudonymise, even in a window without the Patient.
- */
-export function holdsPatientOrReference(data: unknown): boolean {
-  if (Array.isArray(data)) return data.some(holdsPatientOrReference);
-  if (!data || typeof data !== "object") return false;
-  const r = data as Record<string, unknown>;
-  if (r.resourceType === "Patient") return true;
-  return Object.entries(r).some(([k, v]) =>
-    (k === "reference" || k === "fullUrl") && typeof v === "string"
-      ? PATIENT_REFERENCE.test(v)
-      : holdsPatientOrReference(v),
-  );
-}
-
 /** True when any object in the data is a Patient resource. */
 export function holdsPatient(data: unknown): boolean {
   if (Array.isArray(data)) return data.some(holdsPatient);
   if (!data || typeof data !== "object") return false;
   const r = data as Record<string, unknown>;
   return r.resourceType === "Patient" || Object.values(r).some(holdsPatient);
+}
+
+// Not in the UI's version, for a push (`everywhere`): a Patient's id leaves
+// pseudonymised wherever it stands, not only in a reference to a Patient of
+// the same answer. A window of a paged dataset refers to a Patient that came
+// in an earlier window; the facade writes absolute fullUrls
+// (http://host/fhir/Patient/<id>); a link or a message can carry
+// Patient/<id> mid-string, or a patient search parameter.
+// One pass, so an id is pseudonymised once: `Patient/<id>` anywhere in the
+// text (also Patient%2F<id>), or the value of a patient or subject parameter.
+const PATIENT_ID =
+  /(\bPatient(?:\/|%2F))([^/?#&\s"'<>]+)|([?&](?:patient|subject)(?::[A-Za-z]+)?=)(?!Patient(?:\/|%2F))([^&#\s"'<>]+)/g;
+const MENTIONS_PATIENT =
+  /\bPatient(?:\/|%2F)|[?&](?:patient|subject)(?::[A-Za-z]+)?=/;
+
+const decoded = (id: string) => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    return id;
+  }
+};
+
+function everywhere(text: string, pseudonymOf: (id: string) => string) {
+  if (!MENTIONS_PATIENT.test(text)) return text;
+  return text.replace(
+    PATIENT_ID,
+    (_m, path?: string, pathId?: string, param?: string, paramId?: string) =>
+      path
+        ? `${path}${pseudonymOf(decoded(pathId!))}`
+        : `${param}${pseudonymOf(decoded(paramId!))}`,
+  );
+}
+
+/**
+ * True when the data holds a Patient resource or names a Patient anywhere
+ * in a string: what push-source must pseudonymise. Anything else leaves as
+ * the route made it.
+ */
+export function mentionsPatient(data: unknown): boolean {
+  if (typeof data === "string") return MENTIONS_PATIENT.test(data);
+  if (Array.isArray(data)) return data.some(mentionsPatient);
+  if (!data || typeof data !== "object") return false;
+  const r = data as Record<string, unknown>;
+  return r.resourceType === "Patient" || Object.values(r).some(mentionsPatient);
 }
 
 /**
@@ -97,7 +123,7 @@ export function holdsPatient(data: unknown): boolean {
  */
 export function pseudonymiseFhir(
   data: unknown,
-  opts: { absentPatients?: boolean } = {},
+  opts: { everywhere?: boolean } = {},
 ): unknown {
   const ids = new Map<string, string>();
   // The proxy answered graph properties before it gave FHIR ids
@@ -119,23 +145,17 @@ export function pseudonymiseFhir(
   };
   collect(data);
 
-  const rewrite = (node: unknown, key?: string): unknown => {
+  const pseudonymOf = (id: string) =>
+    ids.get(id) ?? patientPseudonym(id).replace("Patient ", "p-");
+
+  const rewrite = (node: unknown): unknown => {
     if (typeof node === "string") {
+      if (opts.everywhere) return everywhere(node, pseudonymOf);
       // A relative reference or a fullUrl ending in one.
       const m = /^(.*\bPatient\/)([^/?#]+)$/.exec(node);
-      if (m && ids.has(m[2])) return `${m[1]}${ids.get(m[2])}`;
-      // Not in the UI's version: a window of a paged dataset refers to a
-      // Patient that came in an earlier window, and its id would leave as it
-      // is. Only `reference` and `fullUrl` values, the same pseudonym.
-      if (
-        m &&
-        opts.absentPatients &&
-        (key === "reference" || key === "fullUrl")
-      )
-        return `${m[1]}${patientPseudonym(m[2]).replace("Patient ", "p-")}`;
-      return node;
+      return m && ids.has(m[2]) ? `${m[1]}${ids.get(m[2])}` : node;
     }
-    if (Array.isArray(node)) return node.map((v) => rewrite(v, key));
+    if (Array.isArray(node)) return node.map(rewrite);
     if (!node || typeof node !== "object") return node;
     const r = node as Record<string, unknown>;
     if (r.resourceType === "Patient") {
@@ -148,7 +168,7 @@ export function pseudonymiseFhir(
       return out;
     }
     return Object.fromEntries(
-      Object.entries(r).map(([k, v]) => [k, rewrite(v, k)]),
+      Object.entries(r).map(([k, v]) => [k, rewrite(v)]),
     );
   };
   return rewrite(data);

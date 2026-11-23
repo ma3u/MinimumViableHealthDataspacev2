@@ -925,7 +925,12 @@ services:
       # The broker of the two Kafka transfer types (profile `streaming`). With
       # the profile down a Kafka transfer fails at prepare; the HTTP types do
       # not need it.
-      DATAPLANE_KAFKA_BOOTSTRAP: "kafka:9092"
+      # Through the broker's SASL listener, so the login path that Event Hubs
+      # needs on Azure (ADR-096) runs here every day. Compose-only credentials.
+      DATAPLANE_KAFKA_BOOTSTRAP: "kafka:9094"
+      DATAPLANE_KAFKA_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
+      DATAPLANE_KAFKA_SASL_USERNAME: "dataplane"
+      DATAPLANE_KAFKA_SASL_PASSWORD: "dataplane-local" # compose only
       DATAPLANE_DB_URL: "jdbc:postgresql://postgres:5432/dataplane_v1"
       DATAPLANE_DB_USER: "dataplane"
       DATAPLANE_DB_PASSWORD: "dataplane" # compose only
@@ -964,10 +969,15 @@ services:
     environment:
       KAFKA_NODE_ID: "1"
       KAFKA_PROCESS_ROLES: "broker,controller"
-      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      # 9092 plain for the broker itself and its health check; 9094 with SASL
+      # PLAIN for the data plane (ADR-096, "the login path")
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,SASL://:9094"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,SASL://kafka:9094"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SASL:SASL_PLAINTEXT"
+      KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN"
+      KAFKA_LISTENER_NAME_SASL_PLAIN_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required user_dataplane="dataplane-local";'
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"

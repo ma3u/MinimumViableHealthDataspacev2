@@ -1147,7 +1147,10 @@ describe("GET /dataspace/push-source pseudonymises what it serves", () => {
       gender: "female",
       birthDate: "1965",
     });
-    expect(patient.fullUrl).toBe(`Patient/${id}`);
+    // The facade writes absolute fullUrls (#1174); the id in it is the pseudonym.
+    expect(patient.fullUrl).toMatch(
+      new RegExp(`^http://[^/]+/fhir/Patient/${id}$`),
+    );
     const observation = res.body.entry.find(
       (e: { resource: { resourceType: string } }) =>
         e.resource.resourceType === "Observation",
@@ -1183,15 +1186,30 @@ describe("GET /dataspace/push-source pseudonymises what it serves", () => {
     }
   });
 
-  it("leaves the pull through /dataspace/data byte for byte as the route answers it", async () => {
+  it("leaves the pull through /dataspace/data as the route answers it, its links leading back through the pull", async () => {
     const pulled = await request
       .get("/dataspace/data")
       .set("Authorization", "Bearer siglet-test-token");
     const direct = await request.get("/fhir/Observation");
 
     expect(pulled.status).toBe(200);
-    expect(pulled.text).toBe(direct.text);
+    // Not pseudonymised here: the UI does that for a pull, by role. Each
+    // request reaches its own test server, so the fullUrls' ports differ.
+    const portless = (b: { entry: Array<{ fullUrl?: string }> }) =>
+      b.entry.map((e) => ({
+        ...e,
+        fullUrl: e.fullUrl && new URL(e.fullUrl).pathname,
+      }));
+    expect(portless(pulled.body)).toEqual(portless(direct.body));
+    expect(pulled.body.total).toBe(direct.body.total);
     expect(pulled.text).toContain("Erika Muster");
+    // The facade writes each link at the path the caller asked on (#1174).
+    for (const l of pulled.body.link as Array<{ url: string }>) {
+      expect(new URL(l.url).pathname).toBe("/dataspace/data");
+    }
+    for (const l of direct.body.link as Array<{ url: string }>) {
+      expect(new URL(l.url).pathname).toBe("/fhir/Observation");
+    }
   });
 
   it("serves a bundle the SPE inbox accepts", async () => {
@@ -1391,7 +1409,7 @@ describe("the Holter ECG through /dataspace/push-source", () => {
     expect(second.status).toBe(200);
     expect(
       second.body.entry.map((e: { resource: { id: string } }) => e.resource.id),
-    ).toEqual(["holter-demo-1-10"]);
+    ).toEqual(["holter-strip-10"]);
     expect(second.body.entry[0].resource.subject).toEqual({
       reference: `Patient/${pseudonym}`,
     });
@@ -1400,15 +1418,19 @@ describe("the Holter ECG through /dataspace/push-source", () => {
     expect(first.text).not.toContain("Holter Demo");
   });
 
-  it("leaves the pull through /dataspace/data as the route answers it, query and links included", async () => {
+  it("leaves the pull through /dataspace/data as the route answers it, its links leading back through the pull", async () => {
     const pulled = await request
       .get(`/dataspace/data?${QUERY}`)
       .set("Authorization", "Bearer siglet-ecg-token");
-    const direct = await request.get(`/fhir/ecg-holter?${QUERY}`);
+    const direct = await request.get(`/synthetic/ecg-holter?${QUERY}`);
     expect(pulled.status).toBe(200);
-    expect(pulled.text).toBe(direct.text);
-    expect(pulled.body.link[1].url).toMatch(
-      /^\/fhir\/ecg-holter\?offsetSeconds=600&seconds=600/,
+    expect(pulled.body.entry).toEqual(direct.body.entry);
+    expect(pulled.body.total).toBe(direct.body.total);
+    expect(pulled.body.link[1].url).toBe(
+      "/dataspace/data?offsetSeconds=600&seconds=600&durationSeconds=660&stripSeconds=60",
+    );
+    expect(direct.body.link[1].url).toBe(
+      "/synthetic/ecg-holter?offsetSeconds=600&seconds=600&durationSeconds=660&stripSeconds=60",
     );
   });
 
@@ -1474,7 +1496,7 @@ describe("the one hour Holter dataset (ecg-holter-hour)", () => {
     );
     const second = await get(next);
     expect(second.status).toBe(200);
-    expect(second.body.entry[0].resource.id).toBe("holter-demo-1-20");
+    expect(second.body.entry[0].resource.id).toBe("holter-strip-20");
 
     // The last window of the hour has no next.
     const last = await get("/dataspace/push-source?offsetSeconds=3000");
@@ -1513,5 +1535,230 @@ describe("the one hour Holter dataset (ecg-holter-hour)", () => {
     );
     expect(res.status).toBe(200);
     expect(res.body.total).toBe(2880);
+  });
+});
+
+// ---- no Patient id but a pseudonym leaves push-source ----------------------------
+
+describe("push-source answers carry no original Patient id", () => {
+  const ERIKA = {
+    labels: ["Patient"],
+    properties: {
+      resourceId: "pt-1001",
+      name: "Erika Muster",
+      birthDate: "1965-04-12",
+      gender: "female",
+      city: "Berlin",
+    },
+  };
+  const MAX = {
+    labels: ["Patient"],
+    properties: {
+      fhirId: "8c1f2e4a-7b3d-4e5f-9a6b-1c2d3e4f5a6b",
+      firstName: "Max",
+      lastName: "Beispiel",
+      birthDate: "1972-09-30",
+      gender: "male",
+    },
+  };
+  const OBS = (id: string) => ({
+    labels: ["Observation"],
+    properties: { resourceId: id, code: "4548-4", display: "HbA1c" },
+  });
+  const COND = {
+    labels: ["Condition"],
+    properties: { resourceId: "cond-1", code: "44054006", display: "Diabetes" },
+  };
+  const ORIGINAL = [
+    "pt-1001",
+    "8c1f2e4a-7b3d-4e5f-9a6b-1c2d3e4f5a6b",
+    "Erika",
+    "Muster",
+    "Beispiel",
+    "Berlin",
+    "1965-04-12",
+    "1972-09-30",
+  ];
+
+  beforeEach(() => {
+    hubRun.mockImplementation(async (cypher: string) => {
+      const c = String(cypher);
+      if (c.includes("collect(DISTINCT enc)")) {
+        return {
+          records: [
+            row({
+              p: ERIKA,
+              encounters: [],
+              conditions: [COND],
+              observations: [OBS("obs-9")],
+              procedures: [],
+              medications: [],
+              reports: [],
+              immunizations: [],
+              statements: [],
+            }),
+          ],
+        };
+      }
+      if (c.includes("HAS_OBSERVATION")) {
+        return {
+          records: [
+            row({ p: ERIKA, o: OBS("obs-1") }),
+            row({ p: MAX, o: OBS("obs-2") }),
+          ],
+        };
+      }
+      if (c.includes("RETURN p ORDER BY")) {
+        return { records: [row({ p: ERIKA }), row({ p: MAX })] };
+      }
+      return { records: [] };
+    });
+  });
+  afterEach(() => {
+    hubRun.mockReset();
+    hubRun.mockResolvedValue({ records: [] });
+  });
+
+  const read = async (datasetId: string, url: string) =>
+    request.get(url).set(
+      "Authorization",
+      `Bearer ${await dpToken({
+        scope: "dataset:read",
+        flowId: "flow-scan",
+        datasetId,
+        sub: PARTIES.consumer,
+        aud: PARTIES.provider,
+      })}`,
+    );
+
+  /** The whole JSON text, as the data plane receives it. */
+  function expectNoOriginal(text: string, where: string) {
+    for (const original of ORIGINAL) {
+      expect(text, `${where} carries ${original}`).not.toContain(original);
+    }
+  }
+
+  it("for /fhir/Patient", async () => {
+    const res = await read("fhir-patient-search", "/dataspace/push-source");
+    expect(res.status).toBe(200);
+    expect(res.body.entry).toHaveLength(2);
+    expectNoOriginal(res.text, "/fhir/Patient");
+    expect(res.text).toMatch(/\/fhir\/Patient\/p-[0-9a-f]{8}"/);
+  });
+
+  it("for /fhir/Observation, a patient parameter in its links included", async () => {
+    for (const query of [
+      "",
+      "?patient=pt-1001",
+      "?patient=Patient%2Fpt-1001",
+      "?patient=Patient/pt-1001",
+    ]) {
+      const res = await read(
+        "fhir-observation-bundle",
+        `/dataspace/push-source${query}`,
+      );
+      expect(res.status, query).toBe(200);
+      expectNoOriginal(res.text, `/fhir/Observation${query}`);
+      if (query) {
+        const self = res.body.link.find(
+          (l: { relation: string }) => l.relation === "self",
+        ).url as string;
+        expect(new URL(self).searchParams.get("patient")).toMatch(
+          /^(Patient\/)?p-[0-9a-f]{8}$/,
+        );
+      }
+    }
+  });
+
+  it("for $everything, and for its not-found outcome", async () => {
+    const res = await read(
+      "fhir-patient-everything",
+      "/dataspace/push-source/pt-1001/$everything",
+    );
+    expect(res.status).toBe(200);
+    expect(res.body.entry.length).toBeGreaterThanOrEqual(3);
+    expectNoOriginal(res.text, "$everything");
+
+    hubRun.mockResolvedValue({ records: [] });
+    hubRun.mockImplementation(async () => ({ records: [] }));
+    const missing = await read(
+      "fhir-patient-everything",
+      "/dataspace/push-source/pt-1001/$everything",
+    );
+    expect(missing.status).toBe(404);
+    expectNoOriginal(missing.text, "$everything not found");
+  });
+
+  it("for every window of the Holter ECG", async () => {
+    let url: string | undefined =
+      "/dataspace/push-source?offsetSeconds=0&seconds=600&durationSeconds=1260&stripSeconds=60";
+    let pages = 0;
+    while (url) {
+      const res = await read("ecg-holter-stream", url);
+      expect(res.status).toBe(200);
+      expect(res.text).not.toContain("holter-demo-1");
+      expect(res.text).not.toContain("Holter Demo");
+      expect(res.text).not.toContain("1961-05-23");
+      url = res.body.link.find(
+        (l: { relation: string }) => l.relation === "next",
+      )?.url;
+      pages++;
+    }
+    expect(pages).toBe(3);
+  });
+});
+
+describe("pseudonymiseFhir everywhere: the shapes a Patient id takes", () => {
+  it("rewrites the id in each shape the facade and the routes emit", async () => {
+    const { pseudonymiseFhir, patientPseudonym } = await import(
+      "../src/pseudonymise.js"
+    );
+    const p = patientPseudonym("pt-1001").replace("Patient ", "p-");
+    const out = pseudonymiseFhir(
+      {
+        resourceType: "Bundle",
+        link: [
+          {
+            relation: "self",
+            url: "http://h:9090/dataspace/push-source?patient=pt-1001&_count=1",
+          },
+          {
+            relation: "next",
+            url: "http://h/x?subject:Patient=pt-1001&_offset=1",
+          },
+          {
+            relation: "other",
+            url: "http://h/fhir/Patient/pt-1001/$everything",
+          },
+        ],
+        entry: [
+          {
+            fullUrl: "http://h:9090/fhir/Observation/o1",
+            resource: {
+              resourceType: "Observation",
+              id: "o1",
+              subject: { reference: "Patient/pt-1001" },
+              performer: [{ reference: "http://h/fhir/Patient/pt-1001" }],
+              focus: [{ reference: "urn:x/Patient/pt-1001" }],
+              note: [{ text: "see Patient/pt-1001 for context" }],
+            },
+          },
+          {
+            resource: {
+              resourceType: "OperationOutcome",
+              issue: [{ diagnostics: "Patient/pt-1001 not found" }],
+            },
+          },
+          { fullUrl: "http://h/fhir/Patient%2Fpt-1001", resource: {} },
+        ],
+      },
+      { everywhere: true },
+    );
+    const text = JSON.stringify(out);
+    expect(text).not.toContain("pt-1001");
+    expect(text.split(p).length - 1).toBe(9);
+    // The rest of a link is left as it was.
+    expect(text).toContain("&_count=1");
+    expect(text).toContain("/fhir/Observation/o1");
   });
 });

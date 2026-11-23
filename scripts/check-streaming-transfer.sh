@@ -156,7 +156,7 @@ for profile in $PROFILES; do
   sha="$(jq -r '.sha256 // empty' <<<"$inbox")"
   scope="$(jq -r '.attestation.scope // empty' <<<"$inbox")"
   # every strip of the recording, and the Patient with the first window
-  expected="$(curl -sS --max-time 20 "${SPE_PROXY_URL}/fhir/ecg-holter?seconds=30$([ "$ASSET" = "ecg-holter-hour" ] && echo '&durationSeconds=3600')" | jq -r '.total + 1')"
+  expected="$(curl -sS --max-time 20 "${SPE_PROXY_URL}/synthetic/ecg-holter?seconds=30$([ "$ASSET" = "ecg-holter-hour" ] && echo '&durationSeconds=3600')" | jq -r '.total + 1')"
   if [ "$records" = "$expected" ] && [ "${#sha}" -eq 64 ] && [ -n "$scope" ]; then
     ok "${profile}: COMPLETED in ${took} s; ${SPE_ID} holds ${records} records (${expected} expected), attestation '${scope}', sha256 ${sha:0:12}"
   else

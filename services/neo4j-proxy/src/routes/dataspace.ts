@@ -18,7 +18,7 @@ import {
   verifyDatasetReadToken,
 } from "../dataplane-token.js";
 import {
-  holdsPatientOrReference,
+  mentionsPatient,
   pseudonymiseFhir,
   pseudonymKey,
 } from "../pseudonymise.js";
@@ -151,49 +151,21 @@ function requirePseudonymKey(_req: Request, res: Response, next: NextFunction) {
 }
 
 /**
- * A paged dataset's links point at its own route (/fhir/ecg-holter?...). The
- * data plane follows `next` relative to the proxy with a fresh token, so on
- * push-source they point at push-source, with the same query.
- */
-export function linksToPushSource(body: unknown, routePath: string): unknown {
-  const b = body as { resourceType?: unknown; link?: unknown } | null;
-  if (!b || b.resourceType !== "Bundle" || !Array.isArray(b.link)) return body;
-  const own = (url: unknown) =>
-    typeof url === "string" &&
-    (url === routePath ||
-      url.startsWith(`${routePath}?`) ||
-      url.startsWith(`${routePath}/`));
-  if (!b.link.some((l: { url?: unknown }) => own(l?.url))) return body;
-  return {
-    ...b,
-    link: b.link.map((l: { url?: unknown }) =>
-      own(l?.url)
-        ? {
-            ...l,
-            url: `/dataspace/push-source${String(l.url).slice(
-              routePath.length,
-            )}`,
-          }
-        : l,
-    ),
-  };
-}
-
-/**
- * Pseudonymises the dataset route's JSON answer before it leaves, every
- * Patient and every reference to one, a window without the Patient too. An
- * answer with neither goes out as the route made it; one that is not JSON
- * (res.send) is not touched. Its paging links are turned to push-source.
+ * Pseudonymises the dataset route's JSON answer before it leaves: every
+ * Patient, and a Patient's id wherever it stands (a reference, an absolute
+ * fullUrl, a link, a patient parameter), a window without the Patient too.
+ * An answer that names no Patient goes out as the route made it; one that is
+ * not JSON (res.send) is not touched. The routes write their links at the
+ * path the caller asked on, so they already lead back to push-source.
  */
 function pseudonymiseAnswer(_req: Request, res: Response, next: NextFunction) {
   const json = res.json.bind(res);
-  const route = res.locals.datasetRoute as DatasetRoute;
-  res.json = ((body: unknown) => {
-    const shown = holdsPatientOrReference(body)
-      ? pseudonymiseFhir(body, { absentPatients: true })
-      : body;
-    return json(linksToPushSource(shown, route.path));
-  }) as typeof res.json;
+  res.json = ((body: unknown) =>
+    json(
+      mentionsPatient(body)
+        ? pseudonymiseFhir(body, { everywhere: true })
+        : body,
+    )) as typeof res.json;
   next();
 }
 

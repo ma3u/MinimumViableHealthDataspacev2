@@ -501,6 +501,13 @@ public final class PushLogic {
         } catch (Exception e) {
             log.accept("flow %s: writing the stream failed: %s".formatted(flowId, e.getMessage()));
             report(flowId, "errored", () -> dataplane.notifyErrored(flowId, e));
+        } finally {
+            // read to its end or failed: either way the topic has done its work
+            try {
+                transport.deleteTopic(to.bootstrap(), to.topic());
+            } catch (Exception e) {
+                log.accept("flow %s: the topic %s could not be deleted: %s".formatted(flowId, to.topic(), e.getMessage()));
+            }
         }
     }
 

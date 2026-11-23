@@ -55,13 +55,13 @@ export const DATASET_ROUTES: Record<
   // minute pages is 1,440 of them (docs/gotchas.md, 2026-11-20).
   "ecg-holter-stream": {
     method: "GET",
-    path: "/fhir/ecg-holter",
+    path: "/synthetic/ecg-holter",
     query: { seconds: "600" },
   },
   // The same recording cut at one hour, for the routine check.
   "ecg-holter-hour": {
     method: "GET",
-    path: "/fhir/ecg-holter",
+    path: "/synthetic/ecg-holter",
     query: { durationSeconds: "3600", seconds: "600" },
   },
 };

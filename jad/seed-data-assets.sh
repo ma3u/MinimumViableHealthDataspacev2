@@ -293,13 +293,13 @@ create_asset "$ALPHA_KLINIK_CTX" "ecg-holter-hour" \
   "Long-term ECG, one hour (synthetic)" \
   "One hour of a synthetic two-lead Holter ECG at 250 Hz as FHIR R4 Observations with sampled data, 30 s per Observation. For streaming transfers." \
   "application/fhir+json" \
-  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/ecg-holter?durationSeconds=3600\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/synthetic/ecg-holter?durationSeconds=3600\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
 create_asset "$ALPHA_KLINIK_CTX" "ecg-holter-stream" \
   "Long-term ECG, 24 hours (synthetic)" \
   "24 hours of a synthetic two-lead Holter ECG at 250 Hz as FHIR R4 Observations with sampled data, 30 s per Observation: 2,880 Observations. For streaming transfers." \
   "application/fhir+json" \
-  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/ecg-holter\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/synthetic/ecg-holter\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
 AK_POLICY='{
   "@type": "Set",

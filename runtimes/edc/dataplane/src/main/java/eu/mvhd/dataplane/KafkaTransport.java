@@ -43,11 +43,41 @@ public final class KafkaTransport implements StreamTransport {
     private final String bootstrap;
     private final int batchRecords;
     private final ObjectMapper mapper;
+    private final String securityProtocol;
+    private final String username;
+    private final String password;
 
     public KafkaTransport(String bootstrap, int batchRecords, ObjectMapper mapper) {
+        this(bootstrap, batchRecords, mapper, "PLAINTEXT", "", "");
+    }
+
+    /**
+     * With SASL PLAIN, over TLS or not. The one login is used for every
+     * broker this process talks to, so the two sides of a transfer share a
+     * broker or a login for now.
+     */
+    public KafkaTransport(String bootstrap, int batchRecords, ObjectMapper mapper, String securityProtocol,
+                          String username, String password) {
         this.bootstrap = bootstrap;
         this.batchRecords = Math.max(1, batchRecords);
         this.mapper = mapper;
+        this.securityProtocol = securityProtocol;
+        this.username = username;
+        this.password = password;
+        if (securityProtocol.startsWith("SASL") && (username.isBlank() || password.isBlank())) {
+            throw new IllegalArgumentException("the Kafka security protocol " + securityProtocol + " needs a user and a password");
+        }
+    }
+
+    @Override
+    public void deleteTopic(String bootstrap, String topic) throws Exception {
+        try (var admin = AdminClient.create(common(bootstrap))) {
+            admin.deleteTopics(List.of(topic)).all().get(30, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            if (!(e.getCause() instanceof org.apache.kafka.common.errors.UnknownTopicOrPartitionException)) {
+                throw e;
+            }
+        }
     }
 
     @Override
@@ -160,10 +190,22 @@ public final class KafkaTransport implements StreamTransport {
         }
     }
 
-    private static Properties common(String bootstrap) {
+    private Properties common(String bootstrap) {
         var properties = new Properties();
         properties.put("bootstrap.servers", bootstrap);
         properties.put("client.id", "mvhd-dataplane");
+        properties.put("security.protocol", securityProtocol);
+        if (securityProtocol.startsWith("SASL")) {
+            properties.put("sasl.mechanism", "PLAIN");
+            properties.put("sasl.jaas.config",
+                    "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";"
+                            .formatted(jaas(username), jaas(password)));
+        }
         return properties;
+    }
+
+    /** A value inside a quoted JAAS option: a backslash or a quote would end it early. */
+    static String jaas(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

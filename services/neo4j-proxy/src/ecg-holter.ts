@@ -24,8 +24,20 @@
 //   - category: observation-category "procedure", as in that example.
 //   - meta.tag: v3-ActReason HTEST "test health data": the record is synthetic.
 
-export const ECG_DATASET_PATH = "/fhir/ecg-holter";
+/**
+ * Not under /fhir: the FHIR facade is narrow by decision (#1169, #1174) and
+ * its CapabilityStatement lists only what is served from the graph. This is
+ * computed test data with its own paging parameters, not a FHIR search; it
+ * answers FHIR R4 resources, but is not part of the FHIR API.
+ */
+export const ECG_DATASET_PATH = "/synthetic/ecg-holter";
 export const ECG_PATIENT_ID = "holter-demo-1";
+/**
+ * A strip's id is its own, never derived from the Patient's: an Observation
+ * id that carries the Patient's id would carry it past the pseudonymisation
+ * of a push, which rewrites the Patient's id and references to it only.
+ */
+export const STRIP_ID_PREFIX = "holter-strip-";
 /** The recording starts here; a strip's period is this plus its offset. */
 export const RECORDING_START_MS = Date.parse("2026-11-01T08:00:00Z");
 export const SAMPLE_RATE_HZ = 250;
@@ -200,7 +212,7 @@ export function stripObservation(
   });
   return {
     resourceType: "Observation",
-    id: `${ECG_PATIENT_ID}-${index}`,
+    id: `${STRIP_ID_PREFIX}${index}`,
     meta: SYNTHETIC_TAG,
     status: "final",
     category: [
@@ -242,23 +254,28 @@ export const HOLTER_PATIENT = {
   birthDate: "1961-05-23",
 };
 
-function link(q: HolterQuery, offsetSeconds: number): string {
+function link(q: HolterQuery, offsetSeconds: number, path: string): string {
   const p = new URLSearchParams({
     offsetSeconds: String(offsetSeconds),
     seconds: String(q.seconds),
     durationSeconds: String(q.durationSeconds),
     stripSeconds: String(q.stripSeconds),
   });
-  return `${ECG_DATASET_PATH}?${p.toString()}`;
+  return `${path}?${p.toString()}`;
 }
 
 /**
  * One window of the recording as a searchset: the strips that start in
  * [offsetSeconds, offsetSeconds + seconds), the Patient in the first window
  * only. `total` counts the strips of the whole recording; `next` is there
- * while more follow.
+ * while more follow. The links are relative, at `path`: the path the caller
+ * asked on, so a pull's links lead back through /dataspace/data and a push
+ * source's through /dataspace/push-source, as the FHIR facade's do.
  */
-export function holterWindow(q: HolterQuery): Record<string, unknown> {
+export function holterWindow(
+  q: HolterQuery,
+  path: string = ECG_DATASET_PATH,
+): Record<string, unknown> {
   const total = Math.ceil(q.durationSeconds / q.stripSeconds);
   const first = Math.ceil(q.offsetSeconds / q.stripSeconds);
   const end = Math.min(
@@ -275,7 +292,7 @@ export function holterWindow(q: HolterQuery): Record<string, unknown> {
   }
   for (let i = first; i < end; i++) {
     entry.push({
-      fullUrl: `Observation/${ECG_PATIENT_ID}-${i}`,
+      fullUrl: `Observation/${STRIP_ID_PREFIX}${i}`,
       resource: stripObservation(i, q),
       search: { mode: "match" },
     });
@@ -286,9 +303,9 @@ export function holterWindow(q: HolterQuery): Record<string, unknown> {
     type: "searchset",
     total,
     link: [
-      { relation: "self", url: link(q, q.offsetSeconds) },
+      { relation: "self", url: link(q, q.offsetSeconds, path) },
       ...(nextOffset < q.durationSeconds
-        ? [{ relation: "next", url: link(q, nextOffset) }]
+        ? [{ relation: "next", url: link(q, nextOffset, path) }]
         : []),
     ],
     entry,

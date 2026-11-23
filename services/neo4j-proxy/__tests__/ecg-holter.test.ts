@@ -45,12 +45,12 @@ interface Entry {
   };
 }
 
-const window = (query: string) => request.get(`/fhir/ecg-holter${query}`);
+const window = (query: string) => request.get(`/synthetic/ecg-holter${query}`);
 const ids = (entries: Entry[]) => entries.map((e) => e.resource.id);
 const nextOf = (body: { link: Array<{ relation: string; url: string }> }) =>
   body.link.find((l) => l.relation === "next")?.url;
 
-describe("GET /fhir/ecg-holter", () => {
+describe("GET /synthetic/ecg-holter", () => {
   it("answers the same bytes for the same window", async () => {
     const a = await window("?offsetSeconds=3600&seconds=60");
     const b = await window("?offsetSeconds=3600&seconds=60");
@@ -66,8 +66,8 @@ describe("GET /fhir/ecg-holter", () => {
     expect(res.body.total).toBe(2880);
     expect(ids(res.body.entry)).toEqual([
       "holter-demo-1",
-      "holter-demo-1-0",
-      "holter-demo-1-1",
+      "holter-strip-0",
+      "holter-strip-1",
     ]);
     const strip = res.body.entry[1].resource;
     expect(strip).toMatchObject({
@@ -108,18 +108,18 @@ describe("GET /fhir/ecg-holter", () => {
     expect(res.body.link).toEqual([
       {
         relation: "self",
-        url: "/fhir/ecg-holter?offsetSeconds=0&seconds=60&durationSeconds=86400&stripSeconds=30",
+        url: "/synthetic/ecg-holter?offsetSeconds=0&seconds=60&durationSeconds=86400&stripSeconds=30",
       },
       {
         relation: "next",
-        url: "/fhir/ecg-holter?offsetSeconds=60&seconds=60&durationSeconds=86400&stripSeconds=30",
+        url: "/synthetic/ecg-holter?offsetSeconds=60&seconds=60&durationSeconds=86400&stripSeconds=30",
       },
     ]);
   });
 
   it("serves the following windows without the Patient, in order, and the last one without next", async () => {
     let url: string | undefined =
-      "/fhir/ecg-holter?offsetSeconds=0&seconds=60&durationSeconds=150&stripSeconds=30";
+      "/synthetic/ecg-holter?offsetSeconds=0&seconds=60&durationSeconds=150&stripSeconds=30";
     const seen: string[] = [];
     let pages = 0;
     while (url) {
@@ -132,11 +132,11 @@ describe("GET /fhir/ecg-holter", () => {
     expect(pages).toBe(3);
     expect(seen).toEqual([
       "holter-demo-1",
-      "holter-demo-1-0",
-      "holter-demo-1-1",
-      "holter-demo-1-2",
-      "holter-demo-1-3",
-      "holter-demo-1-4",
+      "holter-strip-0",
+      "holter-strip-1",
+      "holter-strip-2",
+      "holter-strip-3",
+      "holter-strip-4",
     ]);
     // The last strip is cut at the end of the recording: 150 s is 5 strips.
     const last = await window(
