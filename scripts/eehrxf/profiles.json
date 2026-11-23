@@ -63,6 +63,20 @@
       "home": "https://hl7.eu/fhir/imaging/1.0.0-ballot/en/"
     }
   },
+  "implementingAct": {
+    "$comment": "The Commission's implementing act under Art. 15(1) that lays down the EEHRxF (#1205). Its Annexes IV to IX define the six categories; it requires FHIR R4 and names no HL7 guide, so the HL7 Europe guides above are the hub's choice, not the act's.",
+    "reference": "Ares(2026)10884928",
+    "title": "Commission Implementing Regulation on the European electronic health record exchange format (EEHRxF)",
+    "status": "draft",
+    "legalBasis": "Art. 15(1), Regulation (EU) 2025/327",
+    "fhirVersion": "R4",
+    "feedbackFrom": "2026-11-23",
+    "feedbackUntil": "2026-12-21",
+    "implementationGuideDue": "2027-10-31",
+    "url": "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/17512-European-Health-Data-Space-specifications-for-the-European-electronic-health-exchange-format-EEHRxF-_en",
+    "actUrl": "https://ec.europa.eu/info/law/better-regulation/api/download/090166e5374c0181",
+    "annexUrl": "https://ec.europa.eu/info/law/better-regulation/api/download/090166e5374c0182"
+  },
   "categories": [
     {
       "categoryId": "patient-summary",
@@ -70,7 +84,8 @@
       "article": "Art. 14(1)(a)",
       "description": "Essential clinical information: problems, allergies, medications, immunisations, procedures",
       "ehdsDeadline": "2029-03",
-      "ehdsGroup": 1
+      "ehdsGroup": 1,
+      "annex": "Annex IV"
     },
     {
       "categoryId": "eprescription",
@@ -78,7 +93,8 @@
       "article": "Art. 14(1)(b)",
       "description": "Electronic prescriptions of medicinal products",
       "ehdsDeadline": "2029-03",
-      "ehdsGroup": 1
+      "ehdsGroup": 1,
+      "annex": "Annex V"
     },
     {
       "categoryId": "edispensation",
@@ -86,7 +102,8 @@
       "article": "Art. 14(1)(c)",
       "description": "Records of medicinal products dispensed against an electronic prescription",
       "ehdsDeadline": "2029-03",
-      "ehdsGroup": 1
+      "ehdsGroup": 1,
+      "annex": "Annex VI"
     },
     {
       "categoryId": "medical-imaging",
@@ -94,7 +111,8 @@
       "article": "Art. 14(1)(d)",
       "description": "Imaging studies and the related imaging reports",
       "ehdsDeadline": "2031-03",
-      "ehdsGroup": 2
+      "ehdsGroup": 2,
+      "annex": "Annex VII"
     },
     {
       "categoryId": "laboratory-results",
@@ -102,7 +120,8 @@
       "article": "Art. 14(1)(e)",
       "description": "Laboratory and other diagnostic results and the related reports",
       "ehdsDeadline": "2031-03",
-      "ehdsGroup": 2
+      "ehdsGroup": 2,
+      "annex": "Annex VIII"
     },
     {
       "categoryId": "hospital-discharge",
@@ -110,7 +129,8 @@
       "article": "Art. 14(1)(f)",
       "description": "Summary of an inpatient stay: diagnoses, procedures, medication, follow-up",
       "ehdsDeadline": "2031-03",
-      "ehdsGroup": 2
+      "ehdsGroup": 2,
+      "annex": "Annex IX"
     }
   ],
   "profiles": [

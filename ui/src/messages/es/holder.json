@@ -205,5 +205,14 @@
   "Profiles and guides": "Perfiles y guías",
   "FHIR writer (TypeScript)": "Generador FHIR (TypeScript)",
   "FHIR writer (Swift)": "Generador FHIR (Swift)",
-  "Synthea sample": "Muestra de Synthea"
+  "Synthea sample": "Muestra de Synthea",
+  "draft act, Annex {n}": "proyecto de acto, anexo {n}",
+  "Draft implementing act {ref}": "Proyecto de acto de ejecución {ref}",
+  "Implementing act {ref}": "Acto de ejecución {ref}",
+  "Its Annexes IV to IX define the six categories and require FHIR {version}. It names no HL7 guide: the HL7 Europe guides below are the hub's choice, not the act's.": "Sus anexos IV a IX definen las seis categorías y exigen FHIR {version}. No designa ninguna guía HL7: las guías HL7 Europe de abajo son elección del hub, no del acto.",
+  "Feedback is open until {until}. The first EEHRxF implementation guide is due on {due}.": "Se pueden enviar comentarios hasta el {until}. La primera guía de implementación del EEHRxF debe publicarse a más tardar el {due}.",
+  "The first EEHRxF implementation guide is due on {due}.": "La primera guía de implementación del EEHRxF debe publicarse a más tardar el {due}.",
+  "Draft act (PDF)": "Proyecto de acto (PDF)",
+  "Annexes (PDF)": "Anexos (PDF)",
+  "Have your say": "Dé su opinión"
 }

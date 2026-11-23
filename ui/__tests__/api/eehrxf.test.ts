@@ -3,7 +3,8 @@
  *
  * The coverage figures are validation results written into the graph by
  * scripts/eehrxf/build.py; the route groups them and sums them without
- * counting a profile twice when it sits in several categories.
+ * counting a profile twice when it sits in several categories. Each category
+ * names the annex of the EEHRxF implementing act that defines it (#1205).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
@@ -22,6 +23,7 @@ const category = (categoryId: string, tested: number, passed: number) => ({
   categoryId,
   name: categoryId,
   article: "Art. 14(1)(a)",
+  annex: "Annex IV",
   description: "",
   ehdsDeadline: "2029-03",
   ehdsGroup: 1,
@@ -67,6 +69,20 @@ const run = {
   inputsDigest: "abc",
 };
 
+const act = {
+  reference: "Ares(2026)10884928",
+  title: "EEHRxF",
+  status: "draft",
+  legalBasis: "Art. 15(1), Regulation (EU) 2025/327",
+  fhirVersion: "R4",
+  feedbackFrom: "2026-11-23",
+  feedbackUntil: "2026-12-21",
+  implementationGuideDue: "2027-10-31",
+  url: "https://ec.europa.eu/",
+  actUrl: "https://ec.europa.eu/act",
+  annexUrl: "https://ec.europa.eu/annex",
+};
+
 describe("GET /api/eehrxf", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -85,7 +101,8 @@ describe("GET /api/eehrxf", () => {
       ])
       .mockResolvedValueOnce([run])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ label: "Patient", count: 5 }]);
+      .mockResolvedValueOnce([{ label: "Patient", count: 5 }])
+      .mockResolvedValueOnce([act]);
 
     const response = await GET();
     const data = await response.json();
@@ -96,7 +113,13 @@ describe("GET /api/eehrxf", () => {
     expect(data.categories[0].profiles[0]).not.toHaveProperty("categoryId");
     expect(data.categories[0].profiles[0].topIssues).toHaveLength(1);
     expect(data.validation.validatorVersion).toBe("7.0.5");
-    expect(mockRunQuery).toHaveBeenCalledTimes(5);
+    expect(data.categories[0].annex).toBe("Annex IV");
+    expect(data.implementingAct).toMatchObject({
+      reference: "Ares(2026)10884928",
+      status: "draft",
+      fhirVersion: "R4",
+    });
+    expect(mockRunQuery).toHaveBeenCalledTimes(6);
   });
 
   it("counts a profile in several categories once", async () => {
@@ -110,7 +133,8 @@ describe("GET /api/eehrxf", () => {
       ])
       .mockResolvedValueOnce([run])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([act]);
 
     const data = await (await GET()).json();
 
@@ -130,11 +154,13 @@ describe("GET /api/eehrxf", () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const data = await (await GET()).json();
 
     expect(data.categories).toEqual([]);
+    expect(data.implementingAct).toBeNull();
     expect(data.summary.passRatePercent).toBe(0);
     expect(data.validation).toBeNull();
     expect(data.planned).toEqual([]);
@@ -158,6 +184,20 @@ describe("GET /api/eehrxf", () => {
     // The Cancer Model is planned, and not one of the six categories.
     expect(mock.planned.map((g: { guideId: string }) => g.guideId)).toContain(
       "cancer-common",
+    );
+    // Annexes IV to IX of the draft implementing act (#1205).
+    expect(mock.implementingAct.reference).toBe("Ares(2026)10884928");
+    expect(
+      mock.categories.map((c: { annex: string }) => c.annex).sort(),
+    ).toEqual(
+      [
+        "Annex IV",
+        "Annex V",
+        "Annex VI",
+        "Annex VII",
+        "Annex VIII",
+        "Annex IX",
+      ].sort(),
     );
     for (const c of mock.categories) {
       for (const p of c.profiles) {

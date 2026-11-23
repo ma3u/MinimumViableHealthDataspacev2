@@ -205,5 +205,14 @@
   "Profiles and guides": "Profielen en gidsen",
   "FHIR writer (TypeScript)": "FHIR-writer (TypeScript)",
   "FHIR writer (Swift)": "FHIR-writer (Swift)",
-  "Synthea sample": "Synthea-steekproef"
+  "Synthea sample": "Synthea-steekproef",
+  "draft act, Annex {n}": "ontwerphandeling, bijlage {n}",
+  "Draft implementing act {ref}": "Ontwerpuitvoeringshandeling {ref}",
+  "Implementing act {ref}": "Uitvoeringshandeling {ref}",
+  "Its Annexes IV to IX define the six categories and require FHIR {version}. It names no HL7 guide: the HL7 Europe guides below are the hub's choice, not the act's.": "De bijlagen IV tot en met IX leggen de zes categorieën vast en vereisen FHIR {version}. De handeling noemt geen HL7-gids: de HL7 Europe-gidsen hieronder zijn de keuze van de hub, niet van de handeling.",
+  "Feedback is open until {until}. The first EEHRxF implementation guide is due on {due}.": "Feedback is mogelijk tot {until}. De eerste EEHRxF-implementatiegids moet er uiterlijk {due} zijn.",
+  "The first EEHRxF implementation guide is due on {due}.": "De eerste EEHRxF-implementatiegids moet er uiterlijk {due} zijn.",
+  "Draft act (PDF)": "Ontwerp (PDF)",
+  "Annexes (PDF)": "Bijlagen (PDF)",
+  "Have your say": "Geef uw mening"
 }
