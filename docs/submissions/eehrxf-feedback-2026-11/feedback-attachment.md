@@ -133,7 +133,19 @@ An implementer cannot target a moving draft, and a conformance claim nobody can 
 
 **National profiles (Article 10):** national profiles under Article 10 should be published as machine-readable FHIR packages that declare their derivation from the EU package, so conformance of national data to the EEHRxF can be tested automatically rather than asserted.
 
-# 9. Editorial
+# 9. Terminology: SNOMED GPS and ICD-10
+
+**Draft:** the annexes never name SNOMED CT. They bind **SNOMED GPS**, the Global Patient Set, a free subset of SNOMED CT published by SNOMED International (70 mentions, often as the preferred system, for example for conditions, procedures, body sites and interpretations). For diagnoses the alternatives are **ICD-10** (14 mentions) and Orphacode. **ICD-11**, in force at WHO since 1 January 2022, is not mentioned. Article 6(1) lets a Member State keep another coding system only with mapping rules to a listed one.
+
+**Problem:** a Member State that licenses full SNOMED CT, as Germany does, records concepts outside the Global Patient Set. Under the draft those codes cannot be exchanged as they are: they are lost, or they need a mapping to a coarser code. The same holds for a country moving to ICD-11.
+
+**Request:**
+
+- Allow full SNOMED CT wherever the sender holds a licence, with SNOMED GPS as the minimum every receiver must understand.
+- Name ICD-11 next to ICD-10 in the binding requirements, with a transition, since WHO and Member States are moving to it.
+- Publish the GPS-to-SNOMED CT and ICD-10-to-ICD-11 relationships through the terminology service of Article 6(5).
+
+# 10. Editorial
 
 - Annex I, data type "EHDS[Name of the data group]": refers to "Annex IX"; the common data groups are in Annex X.
 - Annex III, footnote 4: "BCP 47: Best Current Practice 13, Media Type Specifications and Registration Procedures". BCP 47 is Tags for Identifying Languages; BCP 13 is media types.
@@ -177,6 +189,9 @@ The draft and the law:
 - GDPR Art. 20 (data portability): <https://gdpr-info.eu/art-20-gdpr/>
 - German ePA, what insured people can do: <https://gesund.bund.de/die-elektronische-patientenakte>
 - SMART App Launch (patient-facing FHIR authorisation): <https://hl7.org/fhir/smart-app-launch/>
+- SNOMED GPS, the Global Patient Set: <https://www.snomed.org/gps>
+- SNOMED CT in Germany (national release centre at BfArM): <https://www.bfarm.de/DE/Kodiersysteme/Terminologien/SNOMED-CT/_node.html>
+- ICD-11 (WHO): <https://icd.who.int/en>
 
 The HL7 Europe guides the hub validates against:
 

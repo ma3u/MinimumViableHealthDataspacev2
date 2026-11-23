@@ -1,4 +1,4 @@
-I write as a patient using my own health data, as an open-source developer and as a contributor to Eclipse Dataspace Components. I keep years of lab reports, take part in medical studies and use my data for prevention (longevity, supplements). I build an EHDS demo hub (https://github.com/ma3u/MinimumViableHealthDataspacev2) and Klarbefund (https://klarbefund.mabu.red), an iPhone app that turns my paper reports and watch data into FHIR on my device. Nine points:
+I write as a patient using my own health data, as an open-source developer and as a contributor to Eclipse Dataspace Components. I keep years of lab reports, take part in medical studies and use my data for prevention (longevity, supplements). I build an EHDS demo hub (https://github.com/ma3u/MinimumViableHealthDataspacev2) and Klarbefund (https://klarbefund.mabu.red), an iPhone app that turns my paper reports and watch data into FHIR on my device. Ten points:
 
 1. I cannot add or export single values. My ePA takes my own documents, not a single value, has no API for my app, and gives me no export for trend analysis. The GDPR gives me a copy in a common electronic form (Art. 15(3)) and completion of my data (Art. 16), but portability (Art. 20) covers only data I provided on consent or contract, not my doctors' records. Annex II names the FHIR REST API for transmission; please open it to the person's own app, to write single values (Art. 5) and read everything (Art. 3).
 
@@ -16,6 +16,8 @@ I write as a patient using my own health data, as an open-source developer and a
 
 8. As a developer, I need named guides and versions. The first implementation guide is due 31 October 2027; the HL7 Europe guides changed under me (laboratory 0.1.1 to 2.1.0, imaging R5 to R4). Please publish it as a versioned FHIR package with an open validator, synthetic test data and a test bed, and national profiles (Art. 10) as packages derived from it. My hub: 148 of 192 resources pass 16 profiles; codes are checked only for shape, as no terminology service is open to test runs.
 
-9. Editorial: Annex I points to Annex IX for the common data groups (Annex X); the BCP 47 footnote describes BCP 13; the title varies ("electronic" missing); recital 13 starts with a drafting note; Art. 9(4) has a typo ("requirements o").
+9. Terminology. The annex binds SNOMED GPS, a free subset, not SNOMED CT, and ICD-10, not ICD-11. A Member State that licenses full SNOMED CT, as Germany does, loses codes outside the subset or must map them. Please allow full SNOMED CT where licensed, with GPS as the minimum, and ICD-11 next to ICD-10.
+
+10. Editorial: Annex I points to Annex IX for the common data groups (Annex X); the BCP 47 footnote describes BCP 13; the title varies ("electronic" missing); recital 13 starts with a drafting note; Art. 9(4) has a typo ("requirements o").
 
 Details, sources and screenshots of a working solution are in the attachment.
