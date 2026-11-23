@@ -11,6 +11,7 @@ I am a patient who keeps years of laboratory reports from different laboratories
 - Source code: <https://github.com/ma3u/MinimumViableHealthDataspacev2>
 - Documentation: <https://ma3u.github.io/MinimumViableHealthDataspacev2/docs>
 - EEHRxF coverage view: <https://ma3u.github.io/MinimumViableHealthDataspacev2/eehrxf>
+- Klarbefund app: <https://klarbefund.mabu.red>
 
 My iPhone app (Klarbefund) reads paper laboratory reports and Apple Watch data on the device and exports them as FHIR R4 DiagnosticReport and Observation resources. That is the primary-use situation of Articles 3, 5 and 7: a person holds, adds to and forwards their own data.
 
