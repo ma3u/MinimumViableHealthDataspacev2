@@ -6,7 +6,7 @@ date: "November 2026"
 
 # Who I am
 
-I am a patient who keeps years of laboratory reports from different laboratories, mostly on paper. I take part in medical studies and use my data for prevention (longevity, supplements), under Articles 3, 5 and 7 of the EHDS Regulation. I am also an open-source developer. The Minimum Viable Health Dataspace, which I build, is an open-source reference implementation of Regulation (EU) 2025/327. It combines the Dataspace Protocol, HL7 FHIR R4, OMOP CDM 5.4 and biomedical terminologies in one knowledge graph, with synthetic patients and fictional organisations only.
+I am a patient who keeps years of laboratory reports from different laboratories, mostly on paper. I take part in medical studies and use my data for prevention (longevity, supplements), under Articles 3, 5 and 7 of the EHDS Regulation. I am also an open-source developer and a contributor to Eclipse Dataspace Components (<https://github.com/eclipse-edc>). The Minimum Viable Health Dataspace, which I build, is an open-source reference implementation of Regulation (EU) 2025/327. It combines the Dataspace Protocol, HL7 FHIR R4, OMOP CDM 5.4 and biomedical terminologies in one knowledge graph, with synthetic patients and fictional organisations only.
 
 - Source code: <https://github.com/ma3u/MinimumViableHealthDataspacev2>
 - Documentation: <https://ma3u.github.io/MinimumViableHealthDataspacev2/docs>
@@ -19,7 +19,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 
 # 1. Information inserted by the person
 
-**Draft:** Annex III tables 1 and 2, and every category header (e.g. Annex IV p. 11, Annex VIII p. 40), allow `author[x]` = EHDSHealthProfessional, EHDSOrganisation or EHDSDevice; `attester[x]` = EHDSHealthProfessional or EHDSDevice. EHDSLaboratoryObservation (Annex X table 19) allows the patient as `performer[x]`, but not as author.
+**Draft:** Annex III tables 1 and 2, and every category header (e.g. Annex IV p. 11, Annex VIII p. 40), allow `author` = EHDSHealthProfessional, EHDSOrganisation or EHDSDevice; `attester` = EHDSHealthProfessional or EHDSDevice. EHDSLaboratoryObservation (Annex X table 19) allows the patient as `performer`, but not as author.
 
 **Regulation:** Article 5 of Regulation (EU) 2025/327 gives natural persons the right to insert information into their own EHR, clearly distinguishable as inserted by them or their representative.
 
@@ -27,7 +27,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 
 **Request:**
 
-- Add EHDSPatient and EHDSRelatedPerson to `author[x]` in Annex III and the category headers.
+- Add EHDSPatient and EHDSRelatedPerson to `author` in Annex III and the category headers.
 - Add a coded element for the information source, with a Union value set, for example: issued by a provider; digitised by the person from a provider document; measured by the person; device generated; reported by the person.
 
 # 2. Access to the raw data, study results and supplements
@@ -38,7 +38,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 
 - Recital 3: the EEHRxF "does not establish a minimum or maximum set of data". Article 1(2)(a) covers the download of an electronic copy under Article 3(2).
 - Annex II allows a PDF as the unstructured representation of medical imaging studies.
-- EHDSMedicationUse (Annex X table 23) describes "a use of a single medicinal product", with `author[x]` limited to health professional, organisation or device.
+- EHDSMedicationUse (Annex X table 23) describes "a use of a single medicinal product", with `author` limited to health professional, organisation or device.
 - Nothing in Annexes IV to X marks a result as coming from a research study visit.
 
 **Request:**
@@ -115,6 +115,32 @@ An implementer cannot target a moving draft, and a conformance claim nobody can 
 - Annex I, data type "EHDS[Name of the data group]": refers to "Annex IX"; the common data groups are in Annex X.
 - Annex III, footnote 4: "BCP 47: Best Current Practice 13, Media Type Specifications and Registration Procedures". BCP 47 is Tags for Identifying Languages; BCP 13 is media types.
 - The title alternates between "European health record exchange format" (act cover page, annex) and "European electronic health record exchange format" (act title).
-- Recital 13 begins with the placeholder "[Article: National profiles]".
+- Recital 13 still begins with a drafting note on national profiles, in square brackets.
 - Article 9(4): "requirements o the implementation guide".
-- Cover page: `[…](2024) XXX draft`.
+- The cover page still shows a 2024 draft reference without a number.
+
+# Sources
+
+The draft and the law:
+
+- Draft implementing act, Ares(2026)10884928: <https://ec.europa.eu/info/law/better-regulation/api/download/090166e5374c0181>
+- Annexes I to X: <https://ec.europa.eu/info/law/better-regulation/api/download/090166e5374c0182>
+- Feedback page, initiative 17512: <https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/17512-European-Health-Data-Space-specifications-for-the-European-electronic-health-exchange-format-EEHRxF-_en>
+- Regulation (EU) 2025/327 (EHDS), Articles 3, 5 and 7: <https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng>
+- Regulation (EU) No 536/2014 on clinical trials (lay summaries): <https://eur-lex.europa.eu/eli/reg/2014/536/oj/eng>
+- German Federal Data Protection Act, § 27: <https://www.gesetze-im-internet.de/bdsg_2018/__27.html>
+
+The HL7 Europe guides the hub validates against:
+
+- Laboratory Report: <https://hl7.eu/fhir/laboratory/>
+- Imaging Report (R4 ballot): <https://hl7.eu/fhir/imaging/1.0.0-ballot/en/>
+- Base and Core: <https://hl7.eu/fhir/base/>
+
+Evidence in my own code:
+
+- Validation report, 148 of 192 resources: <https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/eehrxf/validation-report.json>
+- Profiles and guide versions: <https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/eehrxf/profiles.json>
+- Klarbefund FHIR writer with its custom extensions: <https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/Sources/Shared/FhirBundle.swift>
+- The unit decides the LOINC code (ADR-033): <https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-033-lab-report-extraction-pipeline.md#L33>
+- Published reference ranges next to the printed ones (ADR-039): <https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-039-published-reference-ranges.md>
+- OCR misreads of units such as U/l: <https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/gotchas.md#L1659>
