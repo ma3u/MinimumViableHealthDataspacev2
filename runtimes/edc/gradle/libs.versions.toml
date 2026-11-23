@@ -7,7 +7,7 @@ opentelemetry = "1.68.0"
 shadow = "9.6.1"
 # what EDC's NATS subscribers bring at runtime (negotiation-tasks-subscriber-nats
 # 1.0.0-RC8); the liveness check compiles against it, so keep them equal
-jnats = "2.26.4"
+jnats = "2.27.0"
 # the JUnit EDC 1.0.0-RC8 is built with
 junit = "6.1.3"
 # the push data plane (ADR-095): the DataPlane SDK EDC 1.0.0-RC8 itself tests
