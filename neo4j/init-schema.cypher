@@ -57,6 +57,8 @@ CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseR
 CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidationRun) REQUIRE v.runId IS UNIQUE;
 // HL7 Europe drafts the hub plans to track, shown on /eehrxf (#1144, #1145)
 CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
+// The EEHRxF implementing act (Art. 15(1)) whose annexes define the categories (#1205)
+CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImplementingAct) REQUIRE a.reference IS UNIQUE;
 
 // ============================================================
 // Layer 3: FHIR Clinical Knowledge Graph

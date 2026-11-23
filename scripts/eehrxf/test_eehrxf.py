@@ -106,6 +106,25 @@ class Config(unittest.TestCase):
             [f"Art. 14(1)({x})" for x in "abcdef"],
         )
 
+    def test_each_category_is_one_annex_of_the_implementing_act(self):
+        # Draft act Ares(2026)10884928: Annexes IV to IX, in the order of Art. 14(1) (#1205).
+        cfg = validate.load_config()
+        by_article = {c["article"]: c["annex"] for c in cfg["categories"]}
+        self.assertEqual(
+            [by_article[f"Art. 14(1)({x})"] for x in "abcdef"],
+            [f"Annex {n}" for n in ("IV", "V", "VI", "VII", "VIII", "IX")],
+        )
+        act = cfg["implementingAct"]
+        self.assertEqual(act["fhirVersion"], "R4")
+        self.assertIn(act["status"], ("draft", "adopted"))
+
+    def test_mock_carries_the_act_and_the_annexes(self):
+        cfg = validate.load_config()
+        m = build.mock(build.model(cfg, json.loads(build.REPORT.read_text(encoding="utf-8"))), None)
+        self.assertEqual(m["implementingAct"]["reference"], cfg["implementingAct"]["reference"])
+        self.assertNotIn("$comment", m["implementingAct"])
+        self.assertTrue(all(c["annex"].startswith("Annex ") for c in m["categories"]))
+
     def test_every_profile_names_a_known_ig_and_category(self):
         cfg = validate.load_config()
         ids = {c["categoryId"] for c in cfg["categories"]}

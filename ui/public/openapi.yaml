@@ -3026,6 +3026,8 @@ paths:
         fare against them in the HL7 FHIR Validator (#1144). `coverage` per
         profile is full, partial, none or untested; it is readiness evidence
         against the guides, not EHDS conformity. Terminology is not checked.
+        Each category names the annex of the EEHRxF implementing act that
+        defines it, and `implementingAct` describes that act (#1205).
       responses:
         "200":
           description: Categories with their profiles, totals and the validation run
@@ -3041,6 +3043,7 @@ paths:
                       properties:
                         categoryId: { type: string }
                         article: { type: string, example: "Art. 14(1)(a)" }
+                        annex: { type: string, example: "Annex IV" }
                         status:
                           type: string
                           enum: [available, partial, none, untested]
@@ -3095,6 +3098,22 @@ paths:
                       validatorUrl: { type: string }
                       sources: { type: array, items: { type: string } }
                       inputsDigest: { type: string }
+                  implementingAct:
+                    description: The Commission implementing act that lays down the EEHRxF (Art. 15(1)); null before it is in the graph
+                    type: object
+                    nullable: true
+                    properties:
+                      reference: { type: string, example: "Ares(2026)10884928" }
+                      title: { type: string }
+                      status: { type: string, enum: [draft, adopted] }
+                      legalBasis: { type: string }
+                      fhirVersion: { type: string, example: "R4" }
+                      feedbackFrom: { type: string, format: date }
+                      feedbackUntil: { type: string, format: date }
+                      implementationGuideDue: { type: string, format: date }
+                      url: { type: string }
+                      actUrl: { type: string }
+                      annexUrl: { type: string }
                   planned:
                     description: HL7 Europe drafts the hub plans to track, not validated yet
                     type: array
