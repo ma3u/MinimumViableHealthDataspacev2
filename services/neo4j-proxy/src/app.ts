@@ -134,13 +134,20 @@ export const PULL_PATH = /^\/dataspace\/data(\/.*)?$/;
 /** The dataset a push carries, read by the push data plane (ADR-095). */
 export const PUSH_SOURCE_PATH = /^\/dataspace\/push-source(\/.*)?$/;
 
+/**
+ * The two inbox routes that check a data plane token (routes/spe-inbox.ts):
+ * opening an inbox and the consumer's "started".
+ */
+export const INBOX_TOKEN_PATH = /^\/spe\/[^/]+\/inbox(\/[^/]+\/started)?$/;
+
 // The pull route applies the general limit itself, first in its chain, so that
 // it visibly guards the token check; it is not counted here as well. The push
-// source is accounted the same way.
+// source and the inbox routes that check a token are accounted the same way.
 app.use((req: Request, res: Response, next: NextFunction) =>
   req.path === "/audit/dsp" ||
   PULL_PATH.test(req.path) ||
-  PUSH_SOURCE_PATH.test(req.path)
+  PUSH_SOURCE_PATH.test(req.path) ||
+  (req.method === "POST" && INBOX_TOKEN_PATH.test(req.path))
     ? next()
     : generalLimiter(req, res, next),
 );

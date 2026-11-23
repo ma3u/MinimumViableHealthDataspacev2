@@ -428,9 +428,9 @@ describe("provisionParticipant, the siglet signing key", () => {
       publicKeyJwk: Record<string, string>;
       keyGeneratorParams?: unknown;
     };
-    expect(descriptor.keyId).toMatch(
-      new RegExp(`^${out.did.replace(/[%]/g, "\\$&")}#siglet-[0-9a-f]{8}$`),
-    );
+    const [keyDid, fragment] = descriptor.keyId.split("#");
+    expect(keyDid).toBe(out.did);
+    expect(fragment).toMatch(/^siglet-[0-9a-f]{8}$/);
     expect(descriptor.usage).toEqual(["sign_credentials"]);
     expect(descriptor.publicKeyJwk).toEqual({
       kty: "OKP",

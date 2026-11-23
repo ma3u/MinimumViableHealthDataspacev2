@@ -4,7 +4,7 @@ import express, {
   type Response,
 } from "express";
 import { type Session } from "neo4j-driver";
-import { app } from "../app.js";
+import { app, generalLimiter } from "../app.js";
 import {
   SPE_INBOX_PUBLIC_URL,
   SPE_INBOX_STREAM_MAX_RECORDS,
@@ -390,6 +390,8 @@ function delivery(
  */
 app.post(
   "/spe/:speId/inbox",
+  // named here as well as in app.ts: a route that checks a token says its limit
+  generalLimiter,
   requireDataplane,
   async (req: Request, res: Response, next: NextFunction) => {
     const token = bearer(req);
@@ -746,7 +748,7 @@ app.post(
     }
     noteSpeQueried([inbox.speId]);
     stream.hash.update(raw);
-    stream.bytes += raw.length;
+    stream.bytes += raw.byteLength;
     stream.received += resources.length;
     for (const k of local) stream.written.add(k);
     stream.relationships += chunk.references.length;
@@ -906,13 +908,13 @@ app.put(
     const hash = checkHash(req, raw);
     if (!hash.ok) {
       await refuseDelivery(res, inbox, hash.status, hash.reason, {
-        bytes: raw.length,
+        bytes: raw.byteLength,
       });
       return;
     }
     const file = {
       sha256: hash.sha256,
-      bytes: raw.length,
+      bytes: raw.byteLength,
       mediaType:
         text(req.header("content-type"), 256) || "application/octet-stream",
       // A name to show, never a path: separators and control characters go.
@@ -980,6 +982,8 @@ app.post(
  */
 app.post(
   "/spe/:speId/inbox/:flowId/started",
+  // named here as well as in app.ts: a route that checks a token says its limit
+  generalLimiter,
   requireDataplane,
   async (req: Request, res: Response) => {
     const token = bearer(req);

@@ -59,7 +59,7 @@ export interface SigningKey {
 }
 
 /** The transit key of a participant context. */
-export function signingKeyName(contextId: string): string {
+function signingKeyName(contextId: string): string {
   return `${KEY_PREFIX}-${contextId}`;
 }
 
@@ -67,7 +67,7 @@ export function signingKeyName(contextId: string): string {
  * The key id: the DID and a fingerprint of the public key, so a key that was
  * replaced in Vault gets a new id and never answers to the old one.
  */
-export function signingKid(did: string, x: string): string {
+function signingKid(did: string, x: string): string {
   const fingerprint = createHash("sha256").update(x).digest("hex").slice(0, 8);
   return `${did}#siglet-${fingerprint}`;
 }
