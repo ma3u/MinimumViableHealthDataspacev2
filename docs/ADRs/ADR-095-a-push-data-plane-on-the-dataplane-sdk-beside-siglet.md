@@ -2,7 +2,7 @@
 
 Date: 2026-11-19
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-20)
 **Revisits:** [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md) decision 5 (siglet is the only data plane) and [ADR-076](ADR-076-edc-1-runtimes-are-built-here.md) decision 2 (own Java data planes), neither of which it edits
 **Relates to:** [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md), [ADR-072](ADR-072-spe-workspaces-start-on-demand.md), [ADR-045](ADR-045-observability-and-regulatory-audit-trail.md)
 **Tracks:** [#888](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/888)

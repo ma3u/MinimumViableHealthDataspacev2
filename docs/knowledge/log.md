@@ -52,3 +52,6 @@
   EDC 1.0.0-RC8 and CFM `v0.0.9-mvhd.2` (#930), with the cutover's images,
   backup and gate results. `20-cfm-fork.sh --check` reports the database
   missing while the estate is stopped; read it on a running estate.
+- 2026-11-23 · Added `services/dataplane.md` (status draft): the hub's own data
+  plane on the DataPlane SDK (ADR-095, #888), five transfer types into an
+  attested SPE inbox over HTTP and Kafka, its checks and its limits.

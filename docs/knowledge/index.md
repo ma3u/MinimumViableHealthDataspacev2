@@ -16,7 +16,7 @@ frontmatter. Spec:
 [ui](services/ui.md) · [keycloak](services/keycloak.md) ·
 [catalog-crawler](services/catalog-crawler.md) ·
 [catalog-enricher](services/catalog-enricher.md) ·
-[nats](services/nats.md) · [vault](services/vault.md) ·
+[dataplane](services/dataplane.md) · [nats](services/nats.md) · [vault](services/vault.md) ·
 [postgres](services/postgres.md)
 
 ## datamodels/ — graph & wire formats

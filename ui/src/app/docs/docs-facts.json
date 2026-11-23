@@ -1737,7 +1737,7 @@
       "id": "ADR-095",
       "file": "ADR-095-a-push-data-plane-on-the-dataplane-sdk-beside-siglet.md",
       "title": "A data plane on the DataPlane SDK, beside siglet, that delivers into an attested SPE over HTTP and Kafka",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-096",
