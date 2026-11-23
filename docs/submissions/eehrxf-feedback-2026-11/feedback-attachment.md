@@ -6,7 +6,7 @@ date: "November 2026"
 
 # Who I am
 
-I am a patient who keeps years of laboratory reports from different laboratories, mostly on paper, and I want to use them under Articles 3, 5 and 7 of the EHDS Regulation. I am also an open-source developer. The Minimum Viable Health Dataspace, which I build, is an open-source reference implementation of Regulation (EU) 2025/327. It combines the Dataspace Protocol, HL7 FHIR R4, OMOP CDM 5.4 and biomedical terminologies in one knowledge graph, with synthetic patients and fictional organisations only.
+I am a patient who keeps years of laboratory reports from different laboratories, mostly on paper. I take part in medical studies and use my data for prevention (longevity, supplements), under Articles 3, 5 and 7 of the EHDS Regulation. I am also an open-source developer. The Minimum Viable Health Dataspace, which I build, is an open-source reference implementation of Regulation (EU) 2025/327. It combines the Dataspace Protocol, HL7 FHIR R4, OMOP CDM 5.4 and biomedical terminologies in one knowledge graph, with synthetic patients and fictional organisations only.
 
 - Source code: <https://github.com/ma3u/MinimumViableHealthDataspacev2>
 - Documentation: <https://ma3u.github.io/MinimumViableHealthDataspacev2/docs>
@@ -14,7 +14,7 @@ I am a patient who keeps years of laboratory reports from different laboratories
 
 My iPhone app (Klarbefund) reads paper laboratory reports and Apple Watch data on the device and exports them as FHIR R4 DiagnosticReport and Observation resources. That is the primary-use situation of Articles 3, 5 and 7: a person holds, adds to and forwards their own data.
 
-What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profiles. The HL7 FHIR Validator 7.0.5 checks a sample of the hub's own resources against them (synthetic Synthea patients, FHIR documents built from the graph, the FHIR facade, and the app's output): 148 of 192 resources pass (77%), 5 profiles pass completely, and 6 have nothing to test yet (eDispensation, the patient summary Composition, the discharge report Composition, ImagingStudy, Practitioner, PractitionerRole). By category: patient summary 66 of 76, ePrescription 31 of 31, imaging report 0 of 3, laboratory 39 of 80, discharge report 50 of 60. Codes are checked for shape only; see point 6.
+What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profiles. The HL7 FHIR Validator 7.0.5 checks a sample of the hub's own resources against them (synthetic Synthea patients, FHIR documents built from the graph, the FHIR facade, and the app's output): 148 of 192 resources pass (77%), 5 profiles pass completely, and 6 have nothing to test yet (eDispensation, the patient summary Composition, the discharge report Composition, ImagingStudy, Practitioner, PractitionerRole). By category: patient summary 66 of 76, ePrescription 31 of 31, imaging report 0 of 3, laboratory 39 of 80, discharge report 50 of 60. Codes are checked for shape only; see point 7.
 
 # 1. Information inserted by the person
 
@@ -29,7 +29,25 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 - Add EHDSPatient and EHDSRelatedPerson to `author[x]` in Annex III and the category headers.
 - Add a coded element for the information source, with a Union value set, for example: issued by a provider; digitised by the person from a provider document; measured by the person; device generated; reported by the person.
 
-# 2. Reference ranges
+# 2. Access to the raw data, study results and supplements
+
+**Situation:** I take part in medical studies and use my data for prevention: longevity markers, and the supplements I take. For that I need the data itself, in full, not a summary.
+
+**Draft:**
+
+- Recital 3: the EEHRxF "does not establish a minimum or maximum set of data". Article 1(2)(a) covers the download of an electronic copy under Article 3(2).
+- Annex II allows a PDF as the unstructured representation of medical imaging studies.
+- EHDSMedicationUse (Annex X table 23) describes "a use of a single medicinal product", with `author[x]` limited to health professional, organisation or device.
+- Nothing in Annexes IV to X marks a result as coming from a research study visit.
+
+**Request:**
+
+- State that a download under Article 3(2) contains every registered result in full: value, unit, method, specimen, reference range and the earlier results (`previousResults`), not only what a summary selects.
+- For imaging studies, the person can download the DICOM objects themselves, not only a PDF.
+- Allow a result recorded during a research study visit to be exchanged as a medical test result with a reference to the study (for example an EU trial number), so it is not lost to the person's record.
+- Extend EHDSMedicationUse, or add a data group, for food supplements and other non-medicinal products, with the person as author (see point 1).
+
+# 3. Reference ranges
 
 **Draft:** Annex X table 19, `referenceRange` with low, high, normalValue, type, appliesTo, age, text. `previousResults` links earlier results of the same test.
 
@@ -37,19 +55,19 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 
 **Request:** add `referenceRange.source` (laboratory or guideline, with citation) and `referenceRange.validity` (Period).
 
-# 3. Integrity of forwarded copies
+# 4. Integrity of forwarded copies
 
 **Draft:** EHDSAttachment (Annex X table 6) has contentType, language, data, url, size, title.
 
 **Request:** add `hash` and `creation` as in the FHIR R4 Attachment type, and make `contentType` mandatory. A provider receiving a copy forwarded by the person (Article 7(4)) should be able to check that it is unchanged.
 
-# 4. PDF version
+# 5. PDF version
 
 **Draft:** Annex II footnote 1: PDF/A-1a or PDF/A-1b.
 
 **Request:** allow PDF/A-2 and PDF/A-3. PDF/A-1 (2005) does not support embedded files; PDF/A-3 can carry the structured FHIR document inside the human-readable PDF, which serves both Article 3(1)(a) and (c) in one file.
 
-# 5. Units and LOINC
+# 6. Units and LOINC
 
 **Draft:** Annex I defines Quantity as "a unit of measure, preferably expressed as a coded concept"; Annex X binds UCUM for units.
 
@@ -66,7 +84,7 @@ What the hub tracks today: the six Art. 14(1) categories and 16 HL7 Europe profi
 - Publish a Union mapping of common printed unit strings to UCUM through the terminology service of Article 6(5).
 - Allow a text-only observation type with an English designation where no code exists, as Article 6(3) already does for national codes.
 
-# 6. Implementation guide, versions and testing
+# 7. Implementation guide, versions and testing
 
 **Draft:** Article 9(2): first implementation guide by 31 October 2027. The act names no FHIR implementation guide or version.
 
@@ -88,9 +106,7 @@ An implementer cannot target a moving draft, and a conformance claim nobody can 
 - the version applicable on a given date is unambiguous, including transition periods;
 - the versioned terminology service of Article 6(5) is openly usable by such test runs, so codes can be checked against the value sets.
 
-# 7. National profiles
-
-**Request:** national profiles under Article 10 should be published as machine-readable FHIR packages that declare their derivation from the EU package, so conformance of national data to the EEHRxF can be tested automatically rather than asserted.
+**National profiles (Article 10):** national profiles under Article 10 should be published as machine-readable FHIR packages that declare their derivation from the EU package, so conformance of national data to the EEHRxF can be tested automatically rather than asserted.
 
 # 8. Editorial
 
