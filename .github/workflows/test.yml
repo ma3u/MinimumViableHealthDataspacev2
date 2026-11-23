@@ -359,9 +359,12 @@ jobs:
 
       - name: Trivy filesystem scan (HIGH+CRITICAL)
         run: |
+          # Trivy reads <name>.dockerignore as a Dockerfile and fails to parse it
+          # (services/spe-loader/Dockerfile.dockerignore, 2026-11-23); skip them.
           trivy fs \
             --scanners vuln,secret,misconfig \
             --severity HIGH,CRITICAL \
+            --skip-files "**/*.dockerignore" \
             --format sarif \
             --output trivy-results.sarif \
             --exit-code 1 \
@@ -384,6 +387,7 @@ jobs:
           trivy fs \
             --scanners vuln,secret,misconfig \
             --severity HIGH,CRITICAL \
+            --skip-files "**/*.dockerignore" \
             --format table \
             . >> $GITHUB_STEP_SUMMARY 2>&1 || true
 
@@ -399,20 +403,25 @@ jobs:
 
       # Kubescape: k8s/ manifests against the NSA and CIS frameworks,
       # statically, no cluster needed.
-      # The upstream install script fails now and then (twice on 2026-11-03),
-      # and in one job that would fail every scan, so it gets three tries.
-      - name: Install kubescape
+      # A pinned release binary, checked against the release's checksums, as
+      # Trivy is above. The upstream install script asked the GitHub API for
+      # the latest version first, and that lookup failed three times in a row
+      # on 2026-11-23 ("Failed to fetch latest release version"), failing the
+      # job. Bump KUBESCAPE_VERSION deliberately, to a release a few weeks old.
+      - name: Install kubescape 4.0.20 (pinned)
         if: ${{ !cancelled() }}
         run: |
-          for attempt in 1 2 3; do
-            if curl -sfL https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash; then
-              break
-            fi
-            [ "$attempt" = 3 ] && exit 1
-            echo "kubescape install failed, attempt $attempt; retrying"
-            sleep 10
-          done
+          KUBESCAPE_VERSION="4.0.20"
+          BIN="kubescape_${KUBESCAPE_VERSION}_linux_amd64"
+          BASE="https://github.com/kubescape/kubescape/releases/download/v${KUBESCAPE_VERSION}"
+          curl -sfL --retry 5 --retry-delay 5 --retry-all-errors --connect-timeout 20 "${BASE}/${BIN}" -o "${BIN}"
+          curl -sfL --retry 5 --retry-delay 5 --retry-all-errors --connect-timeout 20 "${BASE}/checksums.sha256" -o kubescape_checksums.sha256
+          grep " ${BIN}\$" kubescape_checksums.sha256 | sha256sum -c -
+          mkdir -p "$HOME/.kubescape/bin"
+          install -m 0755 "${BIN}" "$HOME/.kubescape/bin/kubescape"
+          rm -f "${BIN}" kubescape_checksums.sha256
           echo "$HOME/.kubescape/bin" >> "$GITHUB_PATH"
+          "$HOME/.kubescape/bin/kubescape" version
 
       - name: Scan k8s manifests (NSA framework)
         if: ${{ !cancelled() }}
