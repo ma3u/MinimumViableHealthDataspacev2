@@ -38,6 +38,7 @@ interface EEHRxFCategory {
   categoryId: string;
   name: string;
   article: string;
+  annex: string;
   description: string;
   ehdsDeadline: string;
   ehdsGroup: number;
@@ -59,6 +60,21 @@ interface PlannedGuide {
   scope: string;
 }
 
+// The Commission implementing act that lays down the EEHRxF (#1205).
+interface ImplementingAct {
+  reference: string;
+  title: string;
+  status: string;
+  legalBasis: string;
+  fhirVersion: string;
+  feedbackFrom: string;
+  feedbackUntil: string;
+  implementationGuideDue: string;
+  url: string;
+  actUrl: string;
+  annexUrl: string;
+}
+
 interface ValidationRun {
   validatorVersion: string;
   terminology: string;
@@ -75,13 +91,14 @@ export async function GET() {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
 
-  const [categories, profiles, runs, planned, resourceCounts] =
+  const [categories, profiles, runs, planned, resourceCounts, acts] =
     await Promise.all([
       runQuery<Omit<EEHRxFCategory, "profiles">>(
         `MATCH (c:EEHRxFCategory) WHERE c.categoryId IS NOT NULL
        RETURN c.categoryId AS categoryId,
               c.name AS name,
               coalesce(c.article, '') AS article,
+              coalesce(c.annex, '') AS annex,
               c.description AS description,
               c.ehdsDeadline AS ehdsDeadline,
               c.ehdsGroup AS ehdsGroup,
@@ -154,6 +171,23 @@ export async function GET() {
        UNION ALL
        MATCH (c:Condition) WITH 'Condition' AS label, count(c) AS count RETURN label, count`,
       ),
+
+      runQuery<ImplementingAct>(
+        `MATCH (a:EEHRxFImplementingAct)
+       RETURN a.reference AS reference,
+              a.title AS title,
+              a.status AS status,
+              a.legalBasis AS legalBasis,
+              a.fhirVersion AS fhirVersion,
+              a.feedbackFrom AS feedbackFrom,
+              a.feedbackUntil AS feedbackUntil,
+              a.implementationGuideDue AS implementationGuideDue,
+              a.url AS url,
+              a.actUrl AS actUrl,
+              a.annexUrl AS annexUrl
+       ORDER BY a.reference
+       LIMIT 1`,
+      ),
     ]);
 
   const countMap: Record<string, number> = {};
@@ -195,5 +229,6 @@ export async function GET() {
     },
     validation: runs[0] ?? null,
     planned,
+    implementingAct: acts[0] ?? null,
   });
 }
