@@ -83,6 +83,34 @@ describe("removeParticipant", () => {
     expect(result.steps.every((s) => s.ok)).toBe(true);
   });
 
+  it("removes the siglet signing key too when the hub has a Vault token (#888)", async () => {
+    vi.stubEnv("VAULT_TOKEN", "test-token");
+    vi.stubEnv("VAULT_URL", "http://vault.test:8200");
+    const outside: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        outside.push(`${init?.method} ${url}`);
+        return new Response(null, { status: 204 });
+      }),
+    );
+
+    const result = await removeParticipant(CTX);
+
+    expect(outside).toEqual([
+      `DELETE http://siglet:8083/key-mappings/${CTX}`,
+      `POST http://vault.test:8200/v1/transit/keys/siglet-proof-${CTX}/config`,
+      `DELETE http://vault.test:8200/v1/transit/keys/siglet-proof-${CTX}`,
+    ]);
+    expect(result.steps.map((s) => `${s.step}:${s.ok}`)).toEqual([
+      "issuer holder:true",
+      "siglet signing-key mapping:true",
+      "siglet signing key (Vault transit):true",
+      "IdentityHub participant:true",
+      "control plane context:true",
+    ]);
+  });
+
   it("refuses a seeded participant and touches nothing", async () => {
     mgmt.mockImplementation(async () => ({
       "@id": CTX,

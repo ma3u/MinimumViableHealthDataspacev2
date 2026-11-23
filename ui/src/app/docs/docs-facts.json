@@ -3,403 +3,634 @@
   "apiRoutes": [
     {
       "path": "/api/activity-report",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/admin/audit/retention",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/admin/audit",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/admin/components/[name]/diagnosis",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/admin/components/[name]/restart",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/admin/components",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/admin/components/topology",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/admin/participants",
-      "methods": ["GET", "POST", "DELETE"]
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/admin/policies",
-      "methods": ["GET", "POST", "PUT", "DELETE"]
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/admin/spe/power",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/admin/spe",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/admin/tenants",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/agreements/[id]",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/analytics",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/app-accounts/challenge",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/app-accounts",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/assets",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/auth/[...nextauth]",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/auth/eudi/register",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/auth/eudi/start",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/auth/eudi/status",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/catalog/jsonld",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/catalog",
-      "methods": ["GET", "POST", "DELETE"]
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/compliance/applications/clock",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/applications/complete",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/applications",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/findings/close",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/findings/respond",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/findings",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/information-requests/answer",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/information-requests",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/permits/revoke",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/permits",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/requests/decide",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/requests",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance/results",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/compliance",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/compliance/tck",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/credentials/[id]",
-      "methods": ["DELETE"]
+      "methods": [
+        "DELETE"
+      ]
     },
     {
       "path": "/api/credentials/definitions",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/credentials/request",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/credentials",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/debug/phase26",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/eehrxf",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/federated",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/graph/expand",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/graph/node",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/graph",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/graph/validate",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/health",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/information",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/jurisdictions",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/keycloak-config",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/mock-dsp/[participant]/catalog/request",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/negotiations/[id]",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/negotiations",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/nlq/backend",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/nlq",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/odrl/scope",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/overview",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/participants/[id]/credentials",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/participants/[id]",
-      "methods": ["PATCH", "DELETE"]
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/participants/me",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/participants",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/app-devices/[deviceId]",
-      "methods": ["DELETE"]
+      "methods": [
+        "DELETE"
+      ]
     },
     {
       "path": "/api/patient/app-devices",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/app-pairing/[pairingId]",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/app-pairing",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/app/account",
-      "methods": ["DELETE"]
+      "methods": [
+        "DELETE"
+      ]
     },
     {
       "path": "/api/patient/app/programmes/consent",
-      "methods": ["POST", "DELETE"]
+      "methods": [
+        "POST",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/patient/app/programmes/evaluation",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/app/programmes",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/app/programmes/transfer",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/app/record",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/app/wearables",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/documents/lab-report",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/documents/patient-summary",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/documents",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/ehr-sync",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/insights",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/observations",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/opt-out",
-      "methods": ["GET", "POST", "DELETE"]
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/patient/profile/interests",
-      "methods": ["PUT"]
+      "methods": [
+        "PUT"
+      ]
     },
     {
       "path": "/api/patient/profile",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/programmes/consent",
-      "methods": ["POST", "DELETE"]
+      "methods": [
+        "POST",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/patient/programmes/evaluation",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/programmes",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/programmes/transfer",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/patient/research",
-      "methods": ["GET", "POST", "DELETE"]
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/patient",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/patient/wallet-link",
-      "methods": ["GET", "DELETE"]
+      "methods": [
+        "GET",
+        "DELETE"
+      ]
     },
     {
       "path": "/api/permits",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/spe-imports/[id]/graph",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/spe-imports",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/tasks",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/transfers/[id]/data",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/transfers/[id]/import",
-      "methods": ["POST"]
+      "methods": [
+        "POST"
+      ]
     },
     {
       "path": "/api/transfers/[id]",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     },
     {
       "path": "/api/transfers",
-      "methods": ["GET", "POST"]
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/api/trust-center",
-      "methods": ["GET"]
+      "methods": [
+        "GET"
+      ]
     }
   ],
   "uiPages": [
@@ -695,34 +926,52 @@
       {
         "name": "neo4j",
         "profiles": [],
-        "ports": ["7474:7474", "7687:7687"]
+        "ports": [
+          "7474:7474",
+          "7687:7687"
+        ]
       },
       {
         "name": "neo4j-spe2",
-        "profiles": ["federated"],
-        "ports": ["7475:7474", "7688:7687"]
+        "profiles": [
+          "federated"
+        ],
+        "ports": [
+          "7475:7474",
+          "7688:7687"
+        ]
       },
       {
         "name": "graph-explorer",
         "profiles": [],
-        "ports": ["3000:3000", "3003:3000"]
+        "ports": [
+          "3000:3000",
+          "3003:3000"
+        ]
       }
     ],
     "docker-compose.jad.yml": [
       {
         "name": "traefik",
         "profiles": [],
-        "ports": ["80:80", "8090:8080"]
+        "ports": [
+          "80:80",
+          "8090:8080"
+        ]
       },
       {
         "name": "postgres",
         "profiles": [],
-        "ports": ["5432:5432"]
+        "ports": [
+          "5432:5432"
+        ]
       },
       {
         "name": "vault",
         "profiles": [],
-        "ports": ["8200:8200"]
+        "ports": [
+          "8200:8200"
+        ]
       },
       {
         "name": "vault-unseal",
@@ -732,12 +981,18 @@
       {
         "name": "keycloak",
         "profiles": [],
-        "ports": ["8080:8080", "9000:9000"]
+        "ports": [
+          "8080:8080",
+          "9000:9000"
+        ]
       },
       {
         "name": "nats",
         "profiles": [],
-        "ports": ["4222:4222", "8222:8222"]
+        "ports": [
+          "4222:4222",
+          "8222:8222"
+        ]
       },
       {
         "name": "nats-streams",
@@ -752,47 +1007,71 @@
       {
         "name": "controlplane",
         "profiles": [],
-        "ports": ["11003:8081"]
+        "ports": [
+          "11003:8081"
+        ]
       },
       {
         "name": "neo4j-proxy",
         "profiles": [],
-        "ports": ["9090:9090"]
+        "ports": [
+          "9090:9090"
+        ]
       },
       {
         "name": "identityhub",
         "profiles": [],
-        "ports": ["11005:7081"]
+        "ports": [
+          "11005:7081"
+        ]
       },
       {
         "name": "issuerservice",
         "profiles": [],
-        "ports": ["10013:10013"]
+        "ports": [
+          "10013:10013"
+        ]
       },
       {
         "name": "simpl-ga-issuer",
         "profiles": [],
-        "ports": ["10023:10013"]
+        "ports": [
+          "10023:10013"
+        ]
       },
       {
         "name": "wellbeing-ga-issuer",
-        "profiles": ["wellbeing"],
-        "ports": ["10053:10013"]
+        "profiles": [
+          "wellbeing"
+        ],
+        "ports": [
+          "10053:10013"
+        ]
       },
       {
         "name": "rogue-issuer",
-        "profiles": ["trust-check"],
-        "ports": ["10033:10013"]
+        "profiles": [
+          "trust-check"
+        ],
+        "ports": [
+          "10033:10013"
+        ]
       },
       {
         "name": "simpl-vault",
-        "profiles": ["simpl"],
+        "profiles": [
+          "simpl"
+        ],
         "ports": []
       },
       {
         "name": "simpl-issuer",
-        "profiles": ["simpl"],
-        "ports": ["10043:8080"]
+        "profiles": [
+          "simpl"
+        ],
+        "ports": [
+          "10043:8080"
+        ]
       },
       {
         "name": "siglet",
@@ -800,48 +1079,82 @@
         "ports": []
       },
       {
+        "name": "dataplane",
+        "profiles": [],
+        "ports": []
+      },
+      {
+        "name": "kafka",
+        "profiles": [
+          "streaming"
+        ],
+        "ports": []
+      },
+      {
         "name": "cfm7-nats",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       },
       {
         "name": "cfm7-tmanager",
-        "profiles": ["cfm"],
-        "ports": ["18181:8080"]
+        "profiles": [
+          "cfm"
+        ],
+        "ports": [
+          "18181:8080"
+        ]
       },
       {
         "name": "cfm7-pmanager",
-        "profiles": ["cfm"],
-        "ports": ["18182:8080"]
+        "profiles": [
+          "cfm"
+        ],
+        "ports": [
+          "18182:8080"
+        ]
       },
       {
         "name": "cfm7-jwtletagent",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       },
       {
         "name": "cfm7-edcvagent",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       },
       {
         "name": "cfm7-ihagent",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       },
       {
         "name": "cfm7-regagent",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       },
       {
         "name": "cfm7-obagent",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       },
       {
         "name": "cfm7-sigletagent",
-        "profiles": ["cfm"],
+        "profiles": [
+          "cfm"
+        ],
         "ports": []
       }
     ]
@@ -850,6 +1163,7 @@
     "cfm_v007",
     "controlplane",
     "controlplane_v1",
+    "dataplane_v1",
     "identityhub_v1",
     "issuerservice_v1",
     "keycloak",
@@ -1420,6 +1734,12 @@
       "status": "Proposed"
     },
     {
+      "id": "ADR-095",
+      "file": "ADR-095-a-push-data-plane-on-the-dataplane-sdk-beside-siglet.md",
+      "title": "A data plane on the DataPlane SDK, beside siglet, that delivers into an attested SPE over HTTP and Kafka",
+      "status": "Proposed"
+    },
+    {
       "id": "ADR-096",
       "file": "ADR-096-the-kafka-broker-on-azure-is-event-hubs.md",
       "title": "The Kafka broker on Azure is Event Hubs; Compose keeps Apache Kafka",
@@ -1500,7 +1820,9 @@
       "Severity gate",
       "Summary"
     ],
-    "pr-gate.yml": ["PR Gate"],
+    "pr-gate.yml": [
+      "PR Gate"
+    ],
     "deploy-azure.yml": [
       "load-test-hold-check",
       "build-and-deploy",
@@ -1523,12 +1845,12 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-10",
-    "/docs/developer": "2026-11-20",
-    "/docs/developer/quality-gates": "2026-11-20",
+    "/docs/developer": "2026-11-23",
+    "/docs/developer/quality-gates": "2026-11-23",
     "/docs/developer/api": "2026-11-20",
     "/docs/developer/reference": "2026-11-20",
     "/docs/developer/[slug]": "2026-11-21",
-    "/docs/architecture": "2026-11-20",
+    "/docs/architecture": "2026-11-23",
     "/docs/security": "2026-11-21",
     "/docs/security/[slug]": "2026-11-21",
     "/docs/klarbefund": "2026-11-21",

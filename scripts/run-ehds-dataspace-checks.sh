@@ -528,6 +528,108 @@ run_transfer_tests() {
 }
 
 # ---------------------------------------------------------------------------
+# Category 4b: Push into an SPE workspace (ADR-095)
+# ---------------------------------------------------------------------------
+# The transfer types of the push data plane, end to end on this stack: the consumer asks
+# for a transfer of a dataset it holds an agreement for, the push data plane
+# opens an inbox in SPE-1 and delivers into it, and the control plane reports
+# COMPLETED. Then the inbox is read back at the neo4j-proxy: what arrived, its
+# SHA-256, and the attestation the workspace showed when the inbox was opened.
+#
+# Skipped, with the reason, where the stack cannot run it: no finalised
+# agreement (nothing was negotiated), SPE-1 does not answer at the proxy, or,
+# for the two Kafka types, the broker is not up. A long-term ECG over Kafka,
+# from the catalogue on, is scripts/check-streaming-transfer.sh.
+SPE_PROXY_URL="${SPE_PROXY_URL:-http://localhost:9090}"
+
+run_push_tests() {
+  log "Category 4b: Push into an SPE workspace (ADR-095)"
+  local profiles=("HttpData-PUSH" "HttpStream-PUSH" "HttpFile-PUSH" "Kafka-PUSH" "Kafka-PULL")
+  local ids=("PUSH-4b.1" "PUSH-4b.2" "PUSH-4b.3" "PUSH-4b.4" "PUSH-4b.5")
+  # The two Kafka types need the broker of the compose profile `streaming`.
+  local kafka_up=0
+  if [ "$(docker inspect -f '{{.State.Health.Status}}' "${KAFKA_CONTAINER:-health-dataspace-kafka}" 2>/dev/null || true)" = "healthy" ]; then
+    kafka_up=1
+  fi
+
+  local negotiations agreement asset reason=""
+  negotiations=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/contractnegotiations/request" \
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":100}') || negotiations=""
+  # a FHIR dataset: the bundle and the stream need resources to write
+  agreement=""
+  asset=""
+  local candidate
+  for candidate in $(echo "$negotiations" | jq -r '.[]? | select(.state == "FINALIZED") | .contractAgreementId // empty' 2>/dev/null); do
+    asset=$(mgmt_get "/${MGMT_V}/participants/${CONSUMER_CTX}/contractagreements/${candidate}" | jq -r '.assetId // empty' 2>/dev/null) || asset=""
+    case "$asset" in fhir-patient-search | fhir-observation-bundle | fhir-patient-everything)
+      agreement="$candidate"
+      break
+      ;;
+    esac
+  done
+  if [ -z "$agreement" ]; then
+    reason="the consumer holds no finalised agreement for a FHIR dataset"
+  elif ! curl -s --max-time 10 -o /dev/null "${SPE_PROXY_URL}/health" 2>/dev/null; then
+    reason="the neo4j-proxy does not answer at ${SPE_PROXY_URL}"
+  fi
+  if [ -n "$reason" ]; then
+    local id
+    for id in "${ids[@]}"; do
+      skip "$id: ${reason}"
+      record_result "$id" "push" "skipped" "$reason"
+    done
+    return
+  fi
+
+  local i
+  for i in "${!profiles[@]}"; do
+    local profile="${profiles[$i]}" test_id="${ids[$i]}" body created tp state="" detail="" n
+    if [ "${profile%%-*}" = "Kafka" ] && [ "$kafka_up" -eq 0 ]; then
+      skip "$test_id: ${profile} needs the Kafka broker (compose profile 'streaming'), which is not up"
+      record_result "$test_id" "push" "skipped" "no Kafka broker"
+      continue
+    fi
+    body=$(jq -nc --arg addr "${DSP_INTERNAL_URL}/${PROVIDER_CTX}/${DSP_PROTOCOL}" --arg p "$DSP_PROTOCOL" \
+      --arg ag "$agreement" --arg asset "$asset" --arg profile "$profile" \
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"TransferRequest",
+        counterPartyAddress:$addr,protocol:$p,contractId:$ag,assetId:$asset,transferType:$profile,
+        dataplaneMetadata:{"@type":"DataplaneMetadata",properties:{speId:"SPE-1"}}}')
+    created=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/transferprocesses" "$body") || created=""
+    tp=$(echo "$created" | jq -r '."@id" // empty' 2>/dev/null) || tp=""
+    if [ -z "$tp" ]; then
+      fail "$test_id: the control plane did not take a ${profile} transfer"
+      record_result "$test_id" "push" "failed" "transfer request refused"
+      continue
+    fi
+    for n in $(seq 1 30); do
+      created=$(mgmt_get "/${MGMT_V}/participants/${CONSUMER_CTX}/transferprocesses/${tp}") || created=""
+      state=$(echo "$created" | jq -r '.state // empty' 2>/dev/null) || state=""
+      case "$state" in COMPLETED | TERMINATED) break ;; esac
+      sleep 2
+    done
+    if [ "$state" != "COMPLETED" ]; then
+      detail=$(echo "$created" | jq -r '.errorDetail // "no error detail"' 2>/dev/null | head -c 200)
+      fail "$test_id: ${profile} ended ${state:-in no state}: ${detail}"
+      record_result "$test_id" "push" "failed" "state ${state:-none}"
+      continue
+    fi
+    # On the consumer's side the flow id is the transfer id, and the inbox is keyed by it.
+    local inbox arrived sha scope
+    inbox=$(curl -s --max-time 20 "${SPE_PROXY_URL}/spe/SPE-1/inbox/${tp}" 2>/dev/null) || inbox=""
+    arrived=$(echo "$inbox" | jq -r 'if .state == "completed" then (.records // .bytes // 0) else 0 end' 2>/dev/null) || arrived=0
+    sha=$(echo "$inbox" | jq -r '.sha256 // empty' 2>/dev/null) || sha=""
+    scope=$(echo "$inbox" | jq -r '.attestation.scope // empty' 2>/dev/null) || scope=""
+    if [ "${arrived:-0}" -gt 0 ] && [ "${#sha}" -eq 64 ] && [ -n "$scope" ]; then
+      pass "$test_id: ${profile} COMPLETED; SPE-1 holds ${arrived} $([ "$profile" = "HttpFile-PUSH" ] && echo bytes || echo records), attestation '${scope}'"
+      record_result "$test_id" "push" "passed" "${arrived} arrived, attestation ${scope}"
+    else
+      fail "$test_id: ${profile} COMPLETED, but the inbox of SPE-1 does not show it (${inbox:0:160})"
+      record_result "$test_id" "push" "failed" "inbox read-back"
+    fi
+  done
+}
+
+# ---------------------------------------------------------------------------
 # Category 5: Policy Definition Tests
 # ---------------------------------------------------------------------------
 run_policy_tests() {
@@ -734,6 +836,8 @@ main() {
   run_negotiation_tests
   echo ""
   run_transfer_tests
+  echo ""
+  run_push_tests
   echo ""
   run_policy_tests
   echo ""

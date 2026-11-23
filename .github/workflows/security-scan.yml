@@ -107,6 +107,8 @@ jobs:
           - neo4j:5.26.33-community
           - nats:2.15.3-alpine
           - natsio/nats-box:0.20.2
+          # the broker of the Kafka transfer types (ADR-095, profile streaming)
+          - apache/kafka:4.3.2
           - traefik:v3.7
           - hashicorp/vault:2.2
           # nginx (the CFM shim), curl (jad-seed) and JAD's 0.18 data plane

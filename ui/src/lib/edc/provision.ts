@@ -1,5 +1,15 @@
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { newDidSlug } from "@/lib/cfm-participant";
+import {
+  createSigningKey,
+  deleteKeyMapping,
+  deleteSigningKey,
+  putKeyMapping,
+  signingKeyConfigured,
+  signingKeyDescriptor,
+  SIGNING_KEY_NOT_CONFIGURED,
+  type SigningKey,
+} from "@/lib/edc/siglet-signing-key";
 
 /**
  * Provisioning a dataspace participant on EDC 1.0, without CFM (ADR-078).
@@ -12,9 +22,11 @@ import { newDidSlug } from "@/lib/cfm-participant";
  * The MembershipCredential is requested, not awaited: the issuer delivers it
  * over DCP a few seconds later, and /api/participants/me reports when it has.
  *
- * Not yet: the participant's signing-key mapping in siglet, which renewing an
- * access token after its hour needs (#881 finding 23). siglet accepts only key
- * names without '%' and '#', and signs through Vault Transit.
+ * The last three steps are what renewing an access token after its hour needs
+ * (#888, siglet-signing-key.ts): a key in Vault's transit engine, its public
+ * half in the DID document, and siglet's signing-key mapping. They need a
+ * Vault token. A hub without one (VAULT_TOKEN unset) registers the participant
+ * as before and reports the step as not done, with the script that does it.
  */
 
 const DID_BASE =
@@ -29,6 +41,34 @@ const PROTOCOL_BASE =
 const STS_TOKEN_URL =
   process.env.EDC_STS_TOKEN_URL || "http://identityhub:7084/api/sts/token";
 const DSP_PROFILE = process.env.DSP_PROFILE || "http-dsp-profile-2025-1";
+/** The transfer types of the push data plane, as scripts/lib/push-dataplane.sh registers them. */
+const PUSH_PROFILES = [
+  "HttpData-PUSH",
+  "HttpStream-PUSH",
+  "HttpFile-PUSH",
+  "Kafka-PUSH",
+  "Kafka-PULL",
+];
+
+/**
+ * Where the push data plane is and how the control plane signs in to it, or
+ * null where the deployment has none (Azure, until its ADR-095 step). Read at
+ * call time: onboarding must not need a restart to learn of it.
+ */
+function pushDataplane() {
+  const url = process.env.PUSH_DATAPLANE_URL;
+  const clientSecret = process.env.PUSH_DATAPLANE_CLIENT_SECRET;
+  if (!url || !clientSecret) return null;
+  return {
+    url,
+    clientSecret,
+    clientId: process.env.PUSH_DATAPLANE_CLIENT_ID || "dataplane-signaling",
+    tokenEndpoint:
+      process.env.PUSH_DATAPLANE_TOKEN_ENDPOINT ||
+      "http://keycloak:8080/realms/edcv/protocol/openid-connect/token",
+  };
+}
+
 const SIGLET_SIGNALING_URL =
   process.env.SIGLET_SIGNALING_URL || "http://siglet:8081/api/v1";
 const ISSUER_DID =
@@ -272,6 +312,71 @@ export async function provisionParticipant(
       }),
     ),
   );
+
+  // The push data plane (ADR-095), where a deployment has one: siglet alone
+  // lets the participant pull, and not push or stream into an SPE. The
+  // authorization profile is what the control plane calls it with (a token of
+  // the Keycloak client) and what it verifies its callbacks against (jwksUri).
+  const push = pushDataplane();
+  if (push) {
+    await run("data plane (push)", () =>
+      bodyNotNeeded(
+        edcClient.management(
+          `/v5/participants/${contextId}/dataplanes`,
+          "PUT",
+          {
+            dataplaneId: `mvhd-dp-${contextId}`,
+            endpoint: `${push.url}/api/v1/${contextId}/dataflows`,
+            profiles: PUSH_PROFILES,
+            authorization: {
+              type: "oauth2_client_credentials",
+              tokenEndpoint: push.tokenEndpoint,
+              clientId: push.clientId,
+              clientSecret: push.clientSecret,
+              jwksUri: `${push.url}/.well-known/jwks.json`,
+            },
+          },
+        ),
+      ),
+    );
+  }
+
+  // Before the credential request, which cannot be recalled once it is sent:
+  // a participant whose transfers stop after an hour is not a whole one, so a
+  // failure here still undoes everything.
+  if (signingKeyConfigured()) {
+    let key: SigningKey | undefined;
+    await run("siglet signing key (Vault transit)", async () => {
+      key = await createSigningKey(contextId, did);
+      undo.push({
+        step: "siglet signing key (Vault transit)",
+        run: () => deleteSigningKey(contextId),
+      });
+    });
+    // Removed with the IdentityHub participant, so it needs no undo of its own.
+    await run("siglet signing key in the DID document", () =>
+      bodyNotNeeded(
+        edcClient.identity(
+          `/v1/participants/${contextId}/keypairs`,
+          "PUT",
+          signingKeyDescriptor(key as SigningKey),
+        ),
+      ),
+    );
+    await run("siglet signing-key mapping", async () => {
+      await putKeyMapping(contextId, key as SigningKey);
+      undo.push({
+        step: "siglet signing-key mapping",
+        run: () => deleteKeyMapping(contextId),
+      });
+    });
+  } else {
+    steps.push({
+      step: "siglet signing key",
+      ok: false,
+      detail: SIGNING_KEY_NOT_CONFIGURED,
+    });
+  }
 
   // Keyed by the context id, not the DID as the seeds do: a did:web carries
   // '%3A', and the IssuerService's Jetty refuses any path holding '%25' (400

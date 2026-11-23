@@ -116,6 +116,10 @@ jobs:
             image: mvhd/edc-identity-hub:1.0.0-RC8
           - runtime: issuerservice
             image: mvhd/edc-issuerservice:1.0.0-RC8
+          # not an EDC launcher: the push data plane on the DataPlane SDK
+          # (ADR-095), built by the same Dockerfile; its unit tests run here
+          - runtime: dataplane
+            image: mvhd/edc-dataplane:1.0.0-RC8
     steps:
       - uses: actions/checkout@v7
 
