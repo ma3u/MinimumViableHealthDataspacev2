@@ -4,7 +4,7 @@
  * fixtures and an Azure-shaped answer.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "fs";
 import path from "path";
@@ -340,5 +340,62 @@ describe("/admin/attestation", () => {
         "Secure processing environments unavailable: Forbidden",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("answers in plain words first, with the key's place and who can reach it", async () => {
+    answer(STATIC_SPE);
+    render(<AdminAttestationPage />);
+    const spe1 = await screen.findByRole("region", {
+      name: "SPE-1 · AlphaKlinik Berlin",
+    });
+    expect(within(spe1).getByTestId("attestation-in-short")).toHaveTextContent(
+      "The key was released, but no hardware vouched for it.",
+    );
+    const custody = within(spe1).getByTestId("key-custody");
+    expect(custody).toHaveTextContent(
+      "Where the key is kept, and who can reach it",
+    );
+    expect(custody).toHaveTextContent("Demo level");
+    expect(custody).toHaveTextContent("Who can change it");
+  });
+
+  it("says whether the host data is the permit's policy hash", async () => {
+    answer(STATIC_SPE);
+    render(<AdminAttestationPage />);
+    const spe1 = await screen.findByRole("region", {
+      name: "SPE-1 · AlphaKlinik Berlin",
+    });
+    expect(within(spe1).getByTestId("host-data-match")).toHaveTextContent(
+      "Same as the permit's policy hash",
+    );
+  });
+
+  it("explains a field behind its info button, on hover and on focus", async () => {
+    answer(STATIC_SPE);
+    const user = userEvent.setup();
+    render(<AdminAttestationPage />);
+    const spe1 = await screen.findByRole("region", {
+      name: "SPE-1 · AlphaKlinik Berlin",
+    });
+    const info = within(spe1).getByRole("button", { name: "About Host data" });
+    expect(info).toHaveAccessibleDescription(
+      /must equal the permit's policy hash/,
+    );
+    const tip = document.getElementById(
+      info.getAttribute("aria-describedby")!,
+    )!;
+    expect(tip).toHaveClass("hidden");
+    await user.hover(info);
+    expect(info).toHaveAttribute("aria-expanded", "true");
+    expect(tip).toHaveClass("block");
+    await user.unhover(info);
+    expect(tip).toHaveClass("hidden");
+    act(() => info.focus());
+    expect(tip).toHaveClass("block");
+    await user.keyboard("{Escape}");
+    expect(tip).toHaveClass("hidden");
+    expect(
+      within(spe1).getAllByRole("button", { name: /^About / }).length,
+    ).toBeGreaterThan(10);
   });
 });

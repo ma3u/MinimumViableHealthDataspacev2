@@ -1,7 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowDown, CheckCircle2, CircleSlash, XCircle } from "lucide-react";
+import {
+  ArrowDown,
+  CheckCircle2,
+  CircleSlash,
+  KeyRound,
+  XCircle,
+} from "lucide-react";
+import { InfoTip } from "@/components/ui/InfoTip";
+import {
+  attestationInShort,
+  EVIDENCE_INTRO,
+  EVIDENCE_SUMMARY,
+  FIELD_INFO,
+  HOST_DATA_MATCH,
+  HOST_DATA_MISMATCH,
+  hostDataMatchesPolicy,
+  keyCustody,
+} from "@/lib/attestation-explained";
 import { PolicyHash, SpeLabelBadge } from "@/components/spe/SpeBadges";
 import { SpePowerControls } from "@/components/spe/SpePowerControls";
 import {
@@ -36,6 +53,15 @@ const VERDICT_ICONS = {
   none: CircleSlash,
 } as const;
 
+/** The English labels of the chain steps, in order, for their explanations. */
+const CHAIN_KEYS = [
+  "Data permit",
+  "Policy hash",
+  "Trustee resource",
+  "Key released",
+  "Workspace loaded",
+];
+
 const SCOPE_TEXT: Record<string, string> = {
   node: "Node level: the confidential VM's encrypted memory and measured boot, not which container ran",
   workload:
@@ -45,15 +71,22 @@ const SCOPE_TEXT: Record<string, string> = {
 
 function Field({
   label,
+  info,
   children,
 }: {
   label: string;
+  /** The English key of FIELD_INFO, explained behind an "i". */
+  info?: string;
   children: React.ReactNode;
 }) {
+  const t = useT("admin");
   return (
     <div className="flex flex-col gap-0.5">
       <dt className="text-[10px] uppercase tracking-wide text-(--text-secondary)">
         {label}
+        {info && FIELD_INFO[info] && (
+          <InfoTip label={label} text={t(FIELD_INFO[info])} />
+        )}
       </dt>
       <dd className="text-xs text-(--text-primary) break-words">{children}</dd>
     </div>
@@ -105,6 +138,9 @@ export function AttestationCard({
   const loaded = events.find((e) => e.eventType === "spe.workspace_loaded");
   const pcrs = claims?.pcrs ? Object.entries(claims.pcrs) : [];
   const simulated = spe.simulated !== false;
+  const inShort = attestationInShort(verdict.verdict, simulated);
+  const custody = keyCustody(simulated);
+  const hostMatch = hostDataMatchesPolicy(claims?.hostData, spe.policyHash);
 
   const chain: { label: string; value: React.ReactNode }[] = [
     {
@@ -183,24 +219,56 @@ export function AttestationCard({
         </p>
       )}
 
+      <div
+        data-testid="attestation-in-short"
+        className="rounded-lg border border-(--border) bg-(--surface-2) px-4 py-3"
+      >
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-(--text-secondary)">
+          {t("In short")}
+        </h3>
+        <p className="mt-1 text-sm font-semibold text-(--text-primary)">
+          {t(inShort.headline)}
+        </p>
+        <p className="mt-1 text-xs text-(--text-secondary)">
+          {t(inShort.detail)}
+        </p>
+      </div>
+
+      <div data-testid="key-custody">
+        <h3 className="flex items-center gap-1.5 text-sm font-semibold text-(--text-primary) mb-2">
+          <KeyRound size={14} aria-hidden="true" />
+          {t(custody.title)}
+        </h3>
+        <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-2">
+          {custody.rows.map((r) => (
+            <div key={r.label}>
+              <dt className="text-xs font-semibold text-(--text-primary)">
+                {t(r.label)}
+              </dt>
+              <dd className="text-xs text-(--text-secondary)">{t(r.text)}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
             {t("Who verified")}
           </h3>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <Field label={t("Trustee operator")}>
+            <Field label={t("Trustee operator")} info="Trustee operator">
               {trustee?.operator ?? notReported}
             </Field>
-            <Field label={t("Verifier")}>
+            <Field label={t("Verifier")} info="Verifier">
               <span className="font-mono">
                 {a?.verifier ?? trustee?.verifier ?? notReported}
               </span>
             </Field>
-            <Field label={t("Attestation policy")}>
+            <Field label={t("Attestation policy")} info="Attestation policy">
               <span className="font-mono">{a?.policyId ?? notReported}</span>
             </Field>
-            <Field label={t("Token valid")}>
+            <Field label={t("Token valid")} info="Token valid">
               {a?.tokenIssuedAt || a?.tokenExpiresAt
                 ? t("{from} to {to}", {
                     from: when(a?.tokenIssuedAt),
@@ -215,7 +283,7 @@ export function AttestationCard({
             {t("What was proven")}
           </h3>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <Field label={t("Scope")}>
+            <Field label={t("Scope")} info="Scope">
               {spe.attestationScope}
               <span className="block text-[11px] text-(--text-secondary)">
                 {SCOPE_TEXT[spe.attestationScope]
@@ -223,15 +291,19 @@ export function AttestationCard({
                   : ""}
               </span>
             </Field>
-            <Field label={t("TEE")}>{claims?.tee ?? spe.teeType}</Field>
-            <Field label={t("Residual trust")}>
+            <Field label={t("TEE")} info="TEE">
+              {claims?.tee ?? spe.teeType}
+            </Field>
+            <Field label={t("Residual trust")} info="Residual trust">
               {residualTrust.length > 0
                 ? residualTrust.join(", ")
                 : simulated
                   ? t("everything: no hardware proof")
                   : notReported}
             </Field>
-            <Field label={t("Last attestation")}>{when(spe.attestedAt)}</Field>
+            <Field label={t("Last attestation")} info="Last attestation">
+              {when(spe.attestedAt)}
+            </Field>
           </dl>
         </div>
       </div>
@@ -241,28 +313,47 @@ export function AttestationCard({
           {t("Evidence")}
         </h3>
         {a ? (
-          <>
+          <details data-testid="attestation-evidence">
+            <summary className="cursor-pointer text-xs font-semibold text-(--accent)">
+              {t(EVIDENCE_SUMMARY)}
+            </summary>
+            <p className="mt-2 mb-2 text-xs text-(--text-secondary)">
+              {t(EVIDENCE_INTRO)}
+            </p>
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-              <Field label={t("Measurement")}>
+              <Field label={t("Measurement")} info="Measurement">
                 <Hex value={claims?.measurement} />
               </Field>
-              <Field label={t("Reported TCB")}>
+              <Field label={t("Reported TCB")} info="Reported TCB">
                 {claims?.reportedTcb ?? (
                   <span className="text-(--text-secondary)">{notReported}</span>
                 )}
               </Field>
-              <Field label={t("Host data")}>
+              <Field label={t("Host data")} info="Host data">
                 <Hex value={claims?.hostData} />
+                {hostMatch !== null && (
+                  <span
+                    data-testid="host-data-match"
+                    className={`block mt-0.5 text-[11px] font-semibold ${
+                      hostMatch
+                        ? "text-(--success-text)"
+                        : "text-(--danger-text)"
+                    }`}
+                  >
+                    {hostMatch ? "✓ " : "✗ "}
+                    {t(hostMatch ? HOST_DATA_MATCH : HOST_DATA_MISMATCH)}
+                  </span>
+                )}
               </Field>
-              <Field label={t("Report data")}>
+              <Field label={t("Report data")} info="Report data">
                 <Hex value={claims?.reportData} />
               </Field>
-              <Field label={t("VM id")}>
+              <Field label={t("VM id")} info="VM id">
                 {claims?.vmId ?? (
                   <span className="text-(--text-secondary)">{notReported}</span>
                 )}
               </Field>
-              <Field label={t("Evidence digest")}>
+              <Field label={t("Evidence digest")} info="Evidence digest">
                 <PolicyHash hash={a.evidenceDigest} />
               </Field>
             </dl>
@@ -302,7 +393,7 @@ export function AttestationCard({
                   : t("No PCRs reported")}
               </p>
             )}
-          </>
+          </details>
         ) : (
           <p className="text-sm text-(--text-secondary)">
             {t("No attestation recorded")}
@@ -321,8 +412,14 @@ export function AttestationCard({
           {chain.map((step, i) => (
             <li key={step.label}>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="w-32 shrink-0 text-(--text-secondary)">
+                <span className="w-36 shrink-0 text-(--text-secondary)">
                   {step.label}
+                  {FIELD_INFO[CHAIN_KEYS[i]] && (
+                    <InfoTip
+                      label={step.label}
+                      text={t(FIELD_INFO[CHAIN_KEYS[i]])}
+                    />
+                  )}
                 </span>
                 <span className="text-(--text-primary)">{step.value}</span>
               </div>
