@@ -2,8 +2,8 @@
   "speCount": 2,
   "totals": {
     "patients": 200,
-    "encounters": 7465,
-    "conditions": 3457,
+    "encounters": 7337,
+    "conditions": 3402,
     "observations": 53765
   },
   "aggregatedConditions": [
@@ -17,20 +17,45 @@
     { "gender": "female", "count": 105 },
     { "gender": "male", "count": 95 }
   ],
-  "spes": [
+  "perSpe": [
     {
-      "label": "SPE-1",
-      "patients": 167,
+      "source": "SPE-1",
+      "patients": 166,
       "encounters": 5461,
       "conditions": 2444,
-      "observations": 42099
+      "observations": 42099,
+      "topConditions": [
+        { "name": "Medication review due (situation)", "count": 541 },
+        { "name": "Stress (finding)", "count": 190 },
+        { "name": "Full-time employment (finding)", "count": 187 },
+        { "name": "Gingivitis (disorder)", "count": 187 },
+        { "name": "Part-time employment (finding)", "count": 120 }
+      ],
+      "genderBreakdown": [
+        { "gender": "female", "count": 87 },
+        { "gender": "male", "count": 79 }
+      ]
     },
     {
-      "label": "SPE-2",
+      "source": "SPE-2",
       "patients": 34,
       "encounters": 1876,
       "conditions": 958,
-      "observations": 11666
+      "observations": 11666,
+      "topConditions": [
+        { "name": "Medication review due (situation)", "count": 182 },
+        { "name": "Stress (finding)", "count": 63 },
+        { "name": "Full-time employment (finding)", "count": 63 },
+        { "name": "Part-time employment (finding)", "count": 41 },
+        { "name": "Gingivitis (disorder)", "count": "<5" }
+      ],
+      "genderBreakdown": [
+        { "gender": "female", "count": 18 },
+        { "gender": "male", "count": 16 }
+      ]
     }
-  ]
+  ],
+  "minKApplied": 5,
+  "filtered": 2,
+  "suppressionReason": "small_cells"
 }

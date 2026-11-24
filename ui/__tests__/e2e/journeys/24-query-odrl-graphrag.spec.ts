@@ -877,11 +877,16 @@ test.describe("D · Federated Search with Policy Scoping", () => {
   test("J374 cross-SPE condition aggregation sums correctly", async () => {
     const r = await proxyFetch("/federated/stats");
     const data = await r.json();
-    if (data.perSpe?.length > 1) {
-      const sum = data.perSpe.reduce(
-        (a: number, s: { patients: number }) => a + s.patients,
-        0,
-      );
+    // A count below k comes back as "<k" (ADR-094), and the total then
+    // leaves it out rather than give it back; compare only whole numbers.
+    const counts = (data.perSpe ?? []).map(
+      (s: { patients: number | string }) => s.patients,
+    );
+    if (
+      counts.length > 1 &&
+      counts.every((c: unknown) => typeof c === "number")
+    ) {
+      const sum = counts.reduce((a: number, c: number) => a + c, 0);
       expect(data.totals.patients).toBe(sum);
     }
   });

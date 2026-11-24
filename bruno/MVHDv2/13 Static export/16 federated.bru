@@ -17,6 +17,33 @@ headers {
 assert {
   res.status: eq 200
   res.body: isJson
+  res.body.minKApplied: gte 5
+}
+
+tests {
+  // ADR-094, #1123: a feasibility count below k is shown as "<k", never as
+  // the number, per SPE and in the totals.
+  test("no count below k leaves as a number", function () {
+    const body = res.getBody();
+    const k = body.minKApplied;
+    const counts = [
+      ...Object.values(body.totals),
+      ...body.aggregatedConditions.map((c) => c.count),
+      ...body.aggregatedGenders.map((g) => g.count),
+      ...body.perSpe.flatMap((s) => [
+        s.patients,
+        s.encounters,
+        s.conditions,
+        s.observations,
+        ...s.topConditions.map((c) => c.count),
+        ...s.genderBreakdown.map((g) => g.count),
+      ]),
+    ];
+    for (const c of counts) {
+      if (typeof c === "number") expect(c === 0 || c >= k, String(c)).to.equal(true);
+      else expect(c).to.equal("<" + k);
+    }
+  });
 }
 
 docs {
