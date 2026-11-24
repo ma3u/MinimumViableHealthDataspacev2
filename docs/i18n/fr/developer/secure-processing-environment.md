@@ -208,7 +208,25 @@ les ajoute à la chaîne d’audit `spe` du hub ([ADR-045](../ADRs/ADR-045-obser
 
 **Où le voir dans l’UI**, connecté en tant que `edcadmin` :
 
-- `/admin/attestation` : l’attestation de chaque espace de travail et son étiquette.
+- `/admin/attestation` : un feu tricolore par espace de travail et cinq
+  vérifications simples. Vert : la preuve vient du matériel, le HOST_DATA du
+  rapport est égal à l’empreinte de politique de l’autorisation de
+  traitement de données et la clé a été libérée ; orange : cela fonctionne,
+  mais ce n’est pas entièrement prouvé (preuve d’exemple, pas encore
+  comparé, pas encore de clé) ; rouge : bloqué (preuve en échec, clé
+  refusée ou logiciel non permis). Les vérifications : matériel
+  confidentiel, le logiciel de l’autorisation, la clé libérée seulement
+  après la vérification, l’endroit où la clé est gardée (orange sur Azure
+  tant que l’organisme responsable de l’accès aux données de santé
+  n’exploite pas Trustee dans son propre abonnement, voir la section 11) et
+  la chaîne d’audit. Chacune a une info-bulle ; les valeurs brutes, la
+  chaîne et les événements d’audit sont sous « Preuves techniques, pour les
+  auditeurs »
+  ([#1232](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1232),
+  [#1233](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1233)).
+
+  ![SPE-1 on Azure, 24 November 2026](../images/screenshots/spe-attestation-azure-sev-snp.png)
+
 - `/admin/components` : la topologie du SPE, avec un bouton d’alimentation par espace de travail.
 - `/admin/audit` : la chaîne `spe`.
 - `/admin/policies` : quelle autorisation est liée à quel hash de politique.

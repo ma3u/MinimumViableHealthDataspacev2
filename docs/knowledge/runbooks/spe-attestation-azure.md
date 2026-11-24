@@ -202,7 +202,24 @@ again.
 `connected to Neo4j SPE-1` and `connected to Neo4j SPE-2`, with `tls: true`,
 and no `Neo.ClientError.Security.Unauthorized`.
 
-**The page** https://ehds.mabu.red/admin/attestation (EDC_ADMIN), per SPE:
+**The page** https://ehds.mabu.red/admin/attestation (EDC_ADMIN), per SPE.
+At the top, the traffic light and five checks:
+
+| What                  | Expected on Azure                                                     |
+| --------------------- | --------------------------------------------------------------------- |
+| Traffic light         | Green: proven by hardware                                             |
+| Confidential hardware | green, "Runs on confidential hardware"                                |
+| The permit's software | green, "Runs exactly the software the permit allows"                  |
+| Key                   | green, "Key released only after the check"                            |
+| Where the key is kept | amber until the access body runs Trustee in a subscription of its own |
+| Audit chain           | green, "Every step recorded on the audit chain"                       |
+
+![SPE-1 on Azure after a start on 24 November 2026: green, proven by AMD SEV-SNP](../../images/screenshots/spe-attestation-azure-sev-snp.png)
+
+An amber light on Azure means the evidence came from the sample attester or
+was not compared with the permit; red means a refusal, a failed proof or a
+HOST_DATA that differs from the policy hash. Under "Technical evidence, for
+auditors":
 
 | Field                          | Expected on Azure                                    |
 | ------------------------------ | ---------------------------------------------------- |
