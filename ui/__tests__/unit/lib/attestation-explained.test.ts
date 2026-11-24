@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   allAttestationTexts,
+  attestationChecks,
+  attestationLight,
   attestationInShort,
   hostDataMatchesPolicy,
   keyCustody,
@@ -47,5 +49,42 @@ describe("attestation in plain words", () => {
         lang,
       ).toEqual([]);
     }
+  });
+});
+
+import {
+  attestationChecks,
+  attestationLight,
+} from "@/lib/attestation-explained";
+
+describe("the attestation traffic light", () => {
+  const base = {
+    verdict: "pass" as const,
+    simulated: false,
+    hostMatch: true,
+    keyReleased: true,
+  };
+  it("is green only for hardware proof that matches the permit, with the key out", () => {
+    expect(attestationLight(base)).toBe("green");
+    expect(attestationLight({ ...base, simulated: true })).toBe("amber");
+    expect(attestationLight({ ...base, hostMatch: null })).toBe("amber");
+    expect(attestationLight({ ...base, keyReleased: false })).toBe("amber");
+    expect(attestationLight({ ...base, verdict: "none" })).toBe("amber");
+  });
+  it("is red when the proof failed, the key was refused or the software differs", () => {
+    expect(attestationLight({ ...base, verdict: "fail" })).toBe("red");
+    expect(attestationLight({ ...base, verdict: "refused" })).toBe("red");
+    expect(attestationLight({ ...base, hostMatch: false })).toBe("red");
+  });
+  it("marks the sovereignty gap of the hosted key as amber even when all else is green", () => {
+    const checks = attestationChecks({ ...base, audited: true });
+    expect(checks.map((c) => c.state)).toEqual([
+      "ok",
+      "ok",
+      "ok",
+      "warn",
+      "ok",
+    ]);
+    expect(checks[3].text).toMatch(/hub's own subscription/);
   });
 });

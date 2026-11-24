@@ -167,6 +167,143 @@ export function allAttestationTexts(): string[] {
       ...custody,
       "In short",
       "About {label}",
+      ...allLightTexts(),
     ]),
   ];
+}
+
+export type Light = "green" | "amber" | "red";
+
+/** The traffic light of one SPE's attestation. */
+export function attestationLight(input: {
+  verdict: AttestationVerdict;
+  simulated: boolean;
+  hostMatch: boolean | null;
+  keyReleased: boolean;
+}): Light {
+  const { verdict, simulated, hostMatch, keyReleased } = input;
+  if (verdict === "fail" || verdict === "refused" || hostMatch === false) {
+    return "red";
+  }
+  if (verdict === "pass" && !simulated && hostMatch === true && keyReleased) {
+    return "green";
+  }
+  return "amber";
+}
+
+export const LIGHT_MEANING: Record<Light, string> = {
+  green: "Green: proven by hardware",
+  amber: "Amber: works, but not fully proven",
+  red: "Red: blocked, no key and no data",
+};
+
+export type CheckState = "ok" | "warn" | "fail";
+
+/** The few plain checks under the light, each with its own colour. */
+export function attestationChecks(input: {
+  verdict: AttestationVerdict;
+  simulated: boolean;
+  hostMatch: boolean | null;
+  keyReleased: boolean;
+  audited: boolean;
+}): { state: CheckState; text: string; info: string }[] {
+  const { verdict, simulated, hostMatch, keyReleased, audited } = input;
+  return [
+    simulated
+      ? {
+          state: "warn",
+          text: "No confidential hardware on this machine",
+          info: "A test attester stood in for the processor. The steps are real, but nothing proves that the memory is protected.",
+        }
+      : {
+          state: "ok",
+          text: "Runs on confidential hardware",
+          info: "The processor (AMD SEV-SNP) encrypts the workspace's memory and signs a report of what it started, so the operator cannot read the data.",
+        },
+    hostMatch === true
+      ? {
+          state: "ok",
+          text: "Runs exactly the software the permit allows",
+          info: "The fingerprint in the processor's report equals the fingerprint recorded on the data permit. A changed image, command or setting would give a different one.",
+        }
+      : hostMatch === false
+        ? {
+            state: "fail",
+            text: "Runs software the permit does not allow",
+            info: "The fingerprint in the processor's report differs from the one on the data permit, so the key broker must not release the key.",
+          }
+        : {
+            state: "warn",
+            text: "Not compared with the permit yet",
+            info: "There is no report or no permit fingerprint to compare, so it is not known whether the workspace runs what the permit allows.",
+          },
+    verdict === "refused" || verdict === "fail"
+      ? {
+          state: "fail",
+          text: "Key refused, the data stays encrypted",
+          info: "The key broker did not hand out the key, so the workspace cannot read its data.",
+        }
+      : keyReleased
+        ? {
+            state: "ok",
+            text: "Key released only after the check",
+            info: "The access body's key broker handed out the key only after the proof matched the permit. It reaches the workspace only in encrypted form.",
+          }
+        : {
+            state: "warn",
+            text: "No key released yet",
+            info: "The workspace has not received its key, so it holds no data yet.",
+          },
+    simulated
+      ? {
+          state: "warn",
+          text: "Key kept by the demo's key broker on the same machine",
+          info: "Anyone with access to the machine could read it. Fine for seeing the flow, never for real data.",
+        }
+      : {
+          state: "warn",
+          text: "Key kept for the access body, in the hub's own subscription",
+          info: "Not in the cloud provider's key vault, so the cloud provider does not decide who gets the key. But the subscription owner could read the key broker's storage until the access body runs it in a subscription of its own.",
+        },
+    audited
+      ? {
+          state: "ok",
+          text: "Every step recorded on the audit chain",
+          info: "Attestation, key release, loading and deletion each leave a record on the tamper-evident audit chain.",
+        }
+      : {
+          state: "warn",
+          text: "Nothing recorded on the audit chain yet",
+          info: "No attestation or key event of this workspace has reached the audit chain.",
+        },
+  ];
+}
+
+/** Every text of the light and the checks, for the translation tests. */
+export function allLightTexts(): string[] {
+  const out = new Set<string>(Object.values(LIGHT_MEANING));
+  for (const verdict of ["none", "fail", "refused", "pass"] as const) {
+    for (const simulated of [true, false]) {
+      for (const hostMatch of [true, false, null]) {
+        for (const keyReleased of [true, false]) {
+          for (const audited of [true, false]) {
+            for (const c of attestationChecks({
+              verdict,
+              simulated,
+              hostMatch,
+              keyReleased,
+              audited,
+            })) {
+              out.add(c.text);
+              out.add(c.info);
+            }
+          }
+        }
+      }
+    }
+  }
+  out.add("Attestation light: {meaning}");
+  out.add("{id} checks");
+  out.add("More about attestation");
+  return [...out];
 }

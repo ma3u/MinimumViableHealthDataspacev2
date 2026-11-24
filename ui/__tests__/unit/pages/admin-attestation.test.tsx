@@ -398,4 +398,28 @@ describe("/admin/attestation", () => {
       within(spe1).getAllByRole("button", { name: /^About / }).length,
     ).toBeGreaterThan(10);
   });
+
+  it("shows a traffic light and plain checks, the details folded away", async () => {
+    answer(STATIC_SPE);
+    render(<AdminAttestationPage />);
+    const spe1 = await screen.findByRole("region", {
+      name: "SPE-1 · AlphaKlinik Berlin",
+    });
+    expect(
+      within(spe1).getByRole("img", {
+        name: "Attestation light: Amber: works, but not fully proven",
+      }),
+    ).toHaveAttribute("data-light", "amber");
+    const checks = within(spe1).getByRole("list", { name: "SPE-1 checks" });
+    expect(checks).toHaveTextContent(
+      "No confidential hardware on this machine",
+    );
+    expect(checks).toHaveTextContent(
+      "Runs exactly the software the permit allows",
+    );
+    const details = within(spe1).getByTestId("attestation-details");
+    expect(details.tagName).toBe("DETAILS");
+    expect(details).not.toHaveAttribute("open");
+    expect(within(details).getByTestId("key-custody")).toBeInTheDocument();
+  });
 });
