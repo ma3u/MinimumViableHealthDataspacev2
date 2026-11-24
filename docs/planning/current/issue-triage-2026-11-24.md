@@ -2,7 +2,7 @@
 
 All 102 open issues checked against the code on `main` (`817abb47`), CI, the
 109 closed issues and the [Roadmap to 2031](https://github.com/users/ma3u/projects/1)
-Project. 100 stay open, 2 were closed, 8 more are proposed for closing below.
+Project. 95 stay open; 7 were closed, 2 at first and 5 after the decision below.
 
 ## The taxonomy
 
@@ -32,21 +32,18 @@ What changed on 2026-11-24:
 - [#765](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/765) CodeQL (Swift) cancelled at the timeout: every run since 2026-11-18 ends in success, the Monday schedule of 2026-11-23 included.
 - [#994](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/994) TEHDAS2 final conference: took place on 16 Nov 2026; the guideline re-rating continues in #997.
 
-## Proposed for closing, waiting on a decision
+## Decided with Matthias, 2026-11-24
 
-| Issue                                                                                                                                                                                                                                   | Why                                                                                                                                                                                                                                                       | Proposed                                            |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| [#519](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/519)                                                                                                                                                               | The load and stress plan; its continuation [#571](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/571) holds the open runs (16 of 21 done) and the results                                                                                  | close as duplicate of #571                          |
-| [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698)                                                                                                                                                               | What is left (Art. 5, 6, 8, 9, 10) overlaps [#1120](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1120) (Art. 6, 8, 9, 11 to 15); Art. 7 is #718                                                                                          | move Art. 5 and Art. 10 into #1120, close           |
-| [#26](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)                                                                                                                                                                 | SHACL validation is done ([#700](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/700), Release 8 shapes); the upstream defect is [#884](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/884); only ShEx is left, with no task | close as not planned, move its future/ file to done |
-| [#891](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/891)                                                                                                                                                               | Asks why CFM never moves contexts to ACTIVATED on Azure; CFM is retired there ([#927](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/927), ADR-078)                                                                                        | check the state once on Azure, then close           |
-| [#1123](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1123)                                                                                                                                                             | A question, answered in its body: national data stays at the source                                                                                                                                                                                       | move the answer into `docs/`, close                 |
-| [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)                                                                                                                                                                 | Demo preparation from May 2026, 13 of 18 tasks; the rest belongs to the access-body work that stays local                                                                                                                                                 | close                                               |
-| [#847](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/847)                                                                                                                                                               | 21 of 22 tasks; the last is one manual nightly run on an unchanged main                                                                                                                                                                                   | run it, then close                                  |
-| [#1043](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1043) to [#1047](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1047), [#1105](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1105) | CFM fork patches; they matter only if the local stack keeps CFM ([#973](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973))                                                                                                               | decide #973, then keep or close all six             |
+Closed:
 
-No open issue repeats a closed one. #696, #697 and #698 carry the remainder of
-the closed #694 on purpose; #571 continues #519; #929 continues the closed #8.
+Kept open, because the check showed the proposal was wrong:
+
+- [#891](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/891): CFM is not retired on Azure. [#927](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/927) retired it with EDC 0.18, but the fork `v0.0.8-mvhd.1` runs there again since 2026-11-12 ([#973](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973)), so the question stands.
+- [#1043](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1043) to [#1047](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1047), [#1105](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1105): the same fork runs these patches on Azure; #1105 waits upstream on the Eclipse Contributor Agreement.
+- [#1123](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1123): the answer is ADR-094 (merged in #1124), but the issue holds eight build tasks. Retyped from `question` to `enhancement`.
+
+No open issue repeats a closed one. #696 and #697 carry the remainder of
+the closed #694 on purpose; #929 continues the closed #8.
 
 ## Open issues by priority
 
@@ -104,7 +101,6 @@ Epics with P1 work: [#725](https://github.com/ma3u/MinimumViableHealthDataspacev
 
 - [#413](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/413) Lab reports: specimen type end to end and ISO 15189:2022 report content (7.4.1.6 to 7.4.1.8)
 - [#697](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/697) [PLAN] EHDS implementing acts 2026: dataset descriptions to 2026/2098 and HealthDCAT-AP Release 8, Art. 78 label, Art. 75 HealthData@EU, new Chapter IV duties
-- [#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698) [PLAN] EHDS 26 March 2029: Chapter II rights as adopted (Art. 5 to 10), EU FHIR IGs for the exchange format, EUDI health attestations (2026/2099)
 - [#713](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/713) [EHDS GAP] Art. 75 HealthData@EU: a national contact point adapter over eDelivery
 - [#714](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/714) [EHDS GAP] Art. 79 EU dataset catalogue: publish the HealthDCAT-AP catalogue for harvesting
 - [#715](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/715) [EHDS GAP] Art. 78 quality and utility label in the dataset metadata
@@ -138,11 +134,8 @@ Epics with P1 work: [#725](https://github.com/ma3u/MinimumViableHealthDataspacev
 **Quality** ([#966](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/966))
 
 - [#375](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/375) 55% of the successful-path API checks pass on an empty answer
-- [#847](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/847) CI: cut GitHub Actions job-minutes by about three quarters (nightly suites, path filters, cache hygiene)
 
 **Demos** ([#967](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/967))
-
-- [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27) Spanish HDAB regulator 30-min demo prep & follow-up
 
 **TEHDAS2** ([#990](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/990))
 
@@ -168,7 +161,6 @@ Epics with P1 work: [#725](https://github.com/ma3u/MinimumViableHealthDataspacev
 
 - [#16](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/16) [PLAN] CDISC SDTM export for regulatory submissions (FDA / PMDA / EMA)
 - [#20](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/20) [FEATURE] Ingest clinical guidelines (AWMF Leitlinien) as Layer 6 via Docling + Neo4j GraphRAG
-- [#26](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26) [FEATURE] RDF Validate HEalth DCAT-AP with Shacl and validate the structure ShEx
 - [#884](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/884) HealthDCAT-AP validator applies Dataset shapes to the catalogue (dcat:Catalog subClassOf dcat:Dataset), fixed upstream in Release 9
 - [#1145](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1145) [PLAN] A cancer journey on the HL7 Europe Common Cancer Model, in FHIR and OMOP (E7 of #1143)
 
@@ -188,7 +180,6 @@ Epics with P1 work: [#725](https://github.com/ma3u/MinimumViableHealthDataspacev
 
 **Security and operations** ([#965](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/965))
 
-- [#519](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/519) [PLAN] Load, stress and scalability test of the platform on Local cluster and Azure
 - [#571](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/571) [PLAN] After the load and stress tests: Neo4j and /api/graph first, then the UI, the faults found, and the remaining runs
 
 **Quality** ([#966](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/966))
@@ -209,7 +200,7 @@ Epics with P1 work: [#725](https://github.com/ma3u/MinimumViableHealthDataspacev
 
 ## What to do next
 
-1. **#1205**, by Matthias: submit the EEHRxF feedback (`docs/submissions/eehrxf-feedback-2026-11/`) before 21 December.
+1. **#1205**, by Matthias: review, then submit the EEHRxF feedback (`docs/submissions/eehrxf-feedback-2026-11/`) before 21 December.
 2. **#1140**: the npm audit exception for picomatch expires on 17 December and no fixed version exists. Remove the dependency path (Scalar's `@unhead/vue` build plugins) or extend the exception with a reason; otherwise every push fails on 18 December.
 3. **#779**, then **#1032** and **#514**: one security gap and two bugs, each a small change with a test.
 4. **#928** and **#442**: the larger security gaps; #442 needs a live Azure window.
