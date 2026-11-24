@@ -21,22 +21,14 @@ demo or a load test. The `az` session lasts an hour (conditional access): log
 in again before each block, and after activating PIM, since a role activated
 after `az login` is not in the token.
 
-## Before the first step: decide the proxy's replicas
+## The proxy at one replica (ADR-099)
 
-`--check` warns that `mvhd-neo4j-proxy` runs up to two replicas. An SPE inbox
-is held in the memory of the replica that opened it
-([dataplane](../services/dataplane.md)), so a push whose calls reach the other
-replica answers 401 and the transfer ends `TERMINATED`. Three ways out, the
-maintainer's call:
-
-1. The proxy at one replica (`maxReplicas: 1`). Simplest; ADR-061 scales it to
-   two for load.
-2. Session affinity on the proxy's ingress. The data plane's HTTP client keeps
-   no cookies, so this does not help without a change in the data plane.
-3. The inbox state in Postgres or Neo4j instead of memory. The real fix, and a
-   change to the proxy.
-
-Until one is chosen, a push on Azure works only by chance.
+An SPE inbox is held in the memory of the proxy replica that opened it
+([dataplane](../services/dataplane.md)), so a push whose calls reach another
+replica answers 401 and the transfer ends `TERMINATED`. Matthias decided on
+2026-11-24 ([ADR-099](../../ADRs/ADR-099-the-proxy-runs-one-replica-while-spe-inboxes-are-in-memory.md)):
+the proxy runs at most one replica while inboxes are in memory. Step 8 sets it;
+`--check` reports two as missing.
 
 ## Steps, in order
 
@@ -87,7 +79,7 @@ ingress on 8090, one replica, floor `workload`, `SASL_SSL` to Event Hubs on
 - control plane: port 8182 (the signaling API) inside the environment, by an
   ingress change that starts no revision; the data plane's callbacks arrive
   there;
-- proxy: `DATAPLANE_JWKS_URL`, `SPE_INBOX_PUBLIC_URL`, and `PATIENT_PSEUDONYM_KEY`
+- proxy: at most one replica (ADR-099), then `DATAPLANE_JWKS_URL`, `SPE_INBOX_PUBLIC_URL`, and `PATIENT_PSEUDONYM_KEY`
   from the Key Vault secret `patient-pseudonym-key`. That secret is created
   from the UI's own key (its `PATIENT_PSEUDONYM_KEY`, or the `NEXTAUTH_SECRET`
   it falls back to), so no pseudonym a researcher has seen changes;
@@ -155,7 +147,9 @@ to a tracked file. Gate: both profiles COMPLETED and no event hub left.
 Each step is undone on its own, newest first:
 
 - `DATAPLANE_WIRE_GO="proxy ui" 23-dataplane.sh unwire`: the push routes answer
-  503 and onboarding registers siglet alone. The pseudonym key stays: it is the
+  503 and onboarding registers siglet alone. The proxy stays at one replica;
+  `az containerapp update -n mvhd-neo4j-proxy -g rg-mvhd-dev --max-replicas 2`
+  brings back ADR-061's second one once no push is in flight. The pseudonym key stays: it is the
   UI's own value. The control plane's port mapping stays; nothing outside the
   environment reaches it.
 - The registrations: `DELETE /v5/participants/<ctx>/dataplanes/mvhd-dp-<ctx>`

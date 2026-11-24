@@ -1453,6 +1453,12 @@
       "file": "ADR-098-omop-rows-are-keyed-by-their-cdm-id.md",
       "title": "OMOP rows are keyed by their CDM id, an integer derived from the FHIR reference",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-099",
+      "file": "ADR-099-the-proxy-runs-one-replica-while-spe-inboxes-are-in-memory.md",
+      "title": "The proxy runs one replica while SPE inboxes are held in memory",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

@@ -321,7 +321,7 @@ report() {
   if [ "$count" = 1 ]; then
     line replicas "at most 1"
   else
-    line WARNING "at most ${count} replicas: an SPE inbox lives in one replica's memory, so a push whose calls reach two replicas fails"
+    line MISSING "at most ${count} replicas, ADR-099 says 1: an SPE inbox lives in one replica's memory (wire, proxy)"
   fi
 
   echo "UI ${UI_APP}"
@@ -673,6 +673,12 @@ PY
         ;;
       proxy)
         ensure_pseudonym_key
+        # One replica (ADR-099): an SPE inbox lives in the memory of the
+        # replica that opened it, and a push whose calls reach another one
+        # fails. Set first, so the data plane never meets two.
+        log "${NEO4J_PROXY_APP}: at most one replica (ADR-099)"
+        az containerapp update --name "$NEO4J_PROXY_APP" --resource-group "$RG" \
+          --max-replicas 1 -o none
         log "${NEO4J_PROXY_APP}: identity, the pseudonym key, the data plane's keys, the inbox address"
         az containerapp identity assign --name "$NEO4J_PROXY_APP" --resource-group "$RG" \
           --user-assigned "$KV_READER_ID" -o none
