@@ -191,5 +191,9 @@
   "Reason for the refusal": "Grund der Ablehnung",
   "Refuse": "Ablehnen",
   "Cancel": "Abbrechen",
-  "Approve": "Freigeben"
+  "Approve": "Freigeben",
+  "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "Der Import eines Nutzers wartet im Bereitstellungsbereich des Workspaces, außerhalb seiner Daten, bis die Zugangsstelle für Gesundheitsdaten ihn auf der Seite EHDS-Genehmigung freigibt; eine Ablehnung entfernt ihn. Die Daten der Gesundheitsdateninhaber kommen verschlüsselt an, ihr Fingerabdruck ist Teil der Datengenehmigung.",
+  "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Nur die im Antrag zur Datengenehmigung genannten Personen dürfen unter ihr abfragen oder analysieren; ein Schlüssel pro Workspace dient noch mehreren Datengenehmigungen.",
+  "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "Ein verkettetes Audit-Protokoll von Abfragen, Attestierung, Schlüsselherausgabe, Laden, Löschen, Importen und Verwaltungsaktionen (Start, Stopp, Widerruf, Entscheidungen, Prüfungen); die Anmeldung steht noch nicht darin, und es liegt nicht in nur einmal beschreibbarem Speicher.",
+  "EHDS Approval": "EHDS-Genehmigung"
 }

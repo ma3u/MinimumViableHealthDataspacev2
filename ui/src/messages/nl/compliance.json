@@ -191,5 +191,9 @@
   "Reason for the refusal": "Reden van de weigering",
   "Refuse": "Weigeren",
   "Cancel": "Annuleren",
-  "Approve": "Goedkeuren"
+  "Approve": "Goedkeuren",
+  "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "De invoer van een gebruiker wacht in de voorbereidingsruimte van de werkruimte, buiten haar gegevens, totdat de instantie voor toegang tot gezondheidsgegevens hem goedkeurt op de pagina EHDS-goedkeuring; een weigering verwijdert hem. De gegevens van houders komen versleuteld binnen en hun vingerafdruk maakt deel uit van de vergunning.",
+  "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Alleen de personen die in de aanvraag van de vergunning staan, mogen eronder vragen stellen of analyseren; één sleutel per werkruimte dient nog meerdere vergunningen.",
+  "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "Een met hashes geketend auditlog van vragen, attestatie, vrijgave van de sleutel, laden, verwijderen, invoer en beheerhandelingen (start, stop, intrekking, besluiten, beoordelingen); aanmelden staat er nog niet in, en het staat niet in opslag die maar één keer beschreven wordt.",
+  "EHDS Approval": "EHDS-goedkeuring"
 }

@@ -191,5 +191,9 @@
   "Reason for the refusal": "Motivo del rechazo",
   "Refuse": "Rechazar",
   "Cancel": "Cancelar",
-  "Approve": "Aprobar"
+  "Approve": "Aprobar",
+  "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "La importación de un usuario espera en la zona de preparación del espacio de trabajo, fuera de sus datos, hasta que el organismo de acceso a datos de salud la aprueba en la página Aprobación EEDS; un rechazo la retira. Los datos de los tenedores llegan cifrados y su huella forma parte del permiso.",
+  "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Solo las personas nombradas en la solicitud del permiso pueden consultar o analizar con él; una clave por espacio de trabajo aún sirve a varios permisos.",
+  "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "Un registro de auditoría encadenado de consultas, atestación, entrega de clave, carga, borrado, importaciones y acciones de administración (arranque, parada, revocación, decisiones, revisiones); el inicio de sesión aún no figura, y no está en almacenamiento de escritura única.",
+  "EHDS Approval": "Aprobación EEDS"
 }
