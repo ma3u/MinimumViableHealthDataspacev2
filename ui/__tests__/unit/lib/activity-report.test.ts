@@ -302,3 +302,48 @@ describe("toMarkdown", () => {
     expect(md).not.toContain("undefined");
   });
 });
+
+describe("(e) requests from natural persons: the Art. 71 opt-outs (#1032)", () => {
+  const optOuts = [
+    // opted out and reversed in the period: two requests
+    {
+      optedOutAt: "2025-03-01T10:00:00.000000000Z",
+      reversedAt: "2025-04-01T10:00:00Z",
+    },
+    // opted out in the period, still open at its end
+    { optedOutAt: "2026-06-01T10:00:00Z", reversedAt: null },
+    // opted out before the period, reversed in it: one request
+    {
+      optedOutAt: "2024-01-01T10:00:00Z",
+      reversedAt: "2025-01-01T10:00:00Z",
+    },
+    // after the period: not counted, not open at its end
+    { optedOutAt: "2026-10-01T10:00:00Z", reversedAt: null },
+  ];
+
+  it("counts the opt-outs and reversals recorded in the period", () => {
+    const { e } = build([], { optOuts }).items;
+    expect(e.optOuts).toBe(2);
+    expect(e.reversals).toBe(2);
+    expect(e.requests).toBe(4);
+    expect(e.openAtEnd).toBe(1);
+    expect(e.note).toContain("Art. 71");
+  });
+
+  it("is zero, not invented, when the graph holds no opt-out", () => {
+    const { e } = build().items;
+    expect(e).toMatchObject({
+      requests: 0,
+      optOuts: 0,
+      reversals: 0,
+      openAtEnd: 0,
+    });
+  });
+
+  it("names the figures in the Markdown", () => {
+    const md = toMarkdown(build([], { optOuts }));
+    expect(md).toContain(
+      "- Requests handled: 4 (opt-outs 2, reversals 2); opted out at the end of the period: 1.",
+    );
+  });
+});

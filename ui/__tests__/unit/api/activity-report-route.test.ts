@@ -119,6 +119,16 @@ function graphAnswers() {
         },
       ];
     }
+    if (cypher.includes("OptOutRecord")) {
+      // Art. 71 (#1032): one opt-out reversed a day later, one still open
+      return [
+        {
+          optedOutAt: "2026-09-02T10:00:00.000000000Z",
+          reversedAt: "2026-09-03T10:00:00.000000000Z",
+        },
+        { optedOutAt: "2026-09-04T10:00:00.000000000Z", reversedAt: null },
+      ];
+    }
     throw new Error(`unexpected query: ${cypher.slice(0, 60)}`);
   });
 }
@@ -165,7 +175,13 @@ describe("GET /api/activity-report", () => {
     expect(body.items.c.accessEvents).toBe(41);
     expect(body.items.h.averageDays).toBe(14);
     expect(body.items.i.total).toBe(1);
-    expect(mockRunQuery).toHaveBeenCalledTimes(7);
+    expect(body.items.e).toMatchObject({
+      requests: 3,
+      optOuts: 2,
+      reversals: 1,
+      openAtEnd: 1,
+    });
+    expect(mockRunQuery).toHaveBeenCalledTimes(8);
   });
 
   it("passes the period to the access-event query and honours ?from and ?to", async () => {

@@ -95,8 +95,11 @@
     },
     "e": {
       "title": "Requests from natural persons exercising their rights",
-      "requests": 0,
-      "note": "The opt-out of the patient portal (Art. 71) is exercised in the browser of the demo; no request from a natural person reaches the graph."
+      "requests": 3,
+      "optOuts": 2,
+      "reversals": 1,
+      "openAtEnd": 1,
+      "note": "Counts the opt-outs from secondary use (Art. 71) and their reversals recorded in the period, each an OptOutRecord in the graph (ADR-062); open at the end are the persons still opted out on the last day. Requests under other articles reach the data holders, not the access body, and are not recorded here."
     },
     "f": {
       "title": "Engagement with stakeholders",

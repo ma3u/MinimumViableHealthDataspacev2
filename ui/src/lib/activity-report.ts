@@ -84,6 +84,12 @@ export interface LabelRow {
   status: string | null;
 }
 
+/** Art. 71: one opt-out from secondary use, and its reversal if any (ADR-062). */
+export interface OptOutRow {
+  optedOutAt: string | null;
+  reversedAt: string | null;
+}
+
 export interface BodyRow {
   name: string | null;
   did: string | null;
@@ -98,6 +104,7 @@ export interface ReportInput {
   labels: LabelRow[];
   results?: ResultReportRow[];
   measures?: MeasureRow[];
+  optOuts?: OptOutRow[];
   from: Date;
   to: Date;
   now?: Date;
@@ -151,7 +158,14 @@ export interface ActivityReport {
       note: string;
     };
     d: { title: string; audits: string[]; note: string };
-    e: { title: string; requests: number; note: string };
+    e: {
+      title: string;
+      requests: number;
+      optOuts: number;
+      reversals: number;
+      openAtEnd: number;
+      note: string;
+    };
     f: { title: string; activities: string[]; note: string };
     g: {
       title: string;
@@ -353,6 +367,23 @@ export function buildActivityReport(input: ReportInput): ActivityReport {
   const fines = otherMeasures.filter((m) => m.measure === "FINE");
   const finesEur = fines.reduce((n, m) => n + Number(m.fineEur ?? 0), 0);
 
+  // (e) Art. 71: an opt-out and a reversal are each a request from a person.
+  const optOutRows = input.optOuts ?? [];
+  const optOutsInPeriod = optOutRows.filter((o) =>
+    inPeriod(o.optedOutAt, from, to),
+  ).length;
+  const reversalsInPeriod = optOutRows.filter(
+    (o) => o.reversedAt !== null && inPeriod(o.reversedAt, from, to),
+  ).length;
+  const optOutsOpenAtEnd = optOutRows.filter((o) => {
+    const start = parseGraphTime(o.optedOutAt);
+    const end = parseGraphTime(o.reversedAt);
+    return (
+      (start === null || start <= to.getTime()) &&
+      (end === null || end > to.getTime())
+    );
+  }).length;
+
   const permitsEur = apps
     .filter((a) =>
       ["APPROVED", "REVOKED"].includes((a.permitStatus ?? "").toUpperCase()),
@@ -425,8 +456,11 @@ export function buildActivityReport(input: ReportInput): ActivityReport {
       },
       e: {
         title: ITEM_TITLES.e,
-        requests: 0,
-        note: "The opt-out of the patient portal (Art. 71) is exercised in the browser of the demo; no request from a natural person reaches the graph.",
+        requests: optOutsInPeriod + reversalsInPeriod,
+        optOuts: optOutsInPeriod,
+        reversals: reversalsInPeriod,
+        openAtEnd: optOutsOpenAtEnd,
+        note: "Counts the opt-outs from secondary use (Art. 71) and their reversals recorded in the period, each an OptOutRecord in the graph (ADR-062); open at the end are the persons still opted out on the last day. Requests under other articles reach the data holders, not the access body, and are not recorded here.",
       },
       f: {
         title: ITEM_TITLES.f,
@@ -559,7 +593,7 @@ export function toMarkdown(report: ActivityReport): string {
     ``,
     `## (e) ${items.e.title}`,
     ``,
-    `- Requests handled: ${items.e.requests}. ${items.e.note}`,
+    `- Requests handled: ${items.e.requests} (opt-outs ${items.e.optOuts}, reversals ${items.e.reversals}); opted out at the end of the period: ${items.e.openAtEnd}. ${items.e.note}`,
     ``,
     `## (f) ${items.f.title}`,
     ``,
