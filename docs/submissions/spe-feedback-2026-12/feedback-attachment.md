@@ -1,15 +1,20 @@
 ---
 title: "Feedback on the draft Implementing Regulation on secure processing environments, Ares(2026)10903532"
-subtitle: "An open-source developer who runs a confidential, federated SPE"
+subtitle: "From an open-source developer, with a non-commercial EHDS demo that runs a confidential, federated SPE"
 date: "December 2026"
 ---
 
 # Who I am
 
-I am an open-source developer and a contributor to Eclipse Dataspace Components (<https://github.com/eclipse-edc>). I build the Minimum Viable Health Dataspace, an open-source reference implementation of Regulation (EU) 2025/327. It combines the Dataspace Protocol, HL7 FHIR R4, OMOP CDM 5.4 and HealthDCAT-AP in one knowledge graph, with synthetic patients and fictional organisations only. It plays all roles of Chapter IV: a health data access body, two data holders and a data user.
+I am an open-source developer and a contributor to Eclipse Dataspace Components (<https://github.com/eclipse-edc>). I build the Minimum Viable Health Dataspace, an open-source reference implementation of Regulation (EU) 2025/327.
 
-- Source code: <https://github.com/ma3u/MinimumViableHealthDataspacev2>
+> **A non-commercial demo.** The Minimum Viable Health Dataspace is not a product and is not for sale. No company stands behind it, nothing is offered as a service, and it holds no real health data: its patients are synthetic and its organisations (AlphaKlinik Berlin, Limburg Medical Centre, PharmaCo Research AG, MedReg DE) are fictional. It exists to show the EHDS standards working together, so that access bodies, data holders and developers can see, test and question them before 2029. Everything is published under an open-source licence.
+
+It combines the Dataspace Protocol, the Decentralised Claims Protocol, HL7 FHIR R4, OMOP CDM 5.4, HealthDCAT-AP, ODRL policies and CNCF Confidential Containers in one knowledge graph. It plays all roles of Chapter IV: a health data access body, two data holders and a data user.
+
+- Try the demo (no sign-in, synthetic data): <https://ma3u.github.io/MinimumViableHealthDataspacev2>
 - Documentation: <https://ma3u.github.io/MinimumViableHealthDataspacev2/docs>
+- Source code: <https://github.com/ma3u/MinimumViableHealthDataspacev2>
 
 # How the hub's secure processing environment works
 
@@ -28,6 +33,22 @@ The decisions behind this are public:
 The hub is a demonstrator. It is not an SPE that holds real data, and it does not claim to comply with the draft. I checked it against the draft article by article (table at the end) to find out what the text asks in practice. The points below come from that check.
 
 Article 18's paragraphs are numbered 8 to 11 in the draft; I cite them by position, as 18(1) to 18(4).
+
+# The SPE in the demo
+
+The screenshots come from the public demo, viewed as its demo administrator persona (no account is needed). Each page can be opened at the link under it. The public demo is a static build and shows a recorded run from a laptop, which has no confidential hardware, so it is labelled "Simulated attestation": the Trustee, the policy, the key release and the audit record are real, the hardware proof is not. The same flow runs with AMD SEV-SNP evidence in the Azure deployment (ADR-069).
+
+![From data permit to released key: who verified the workspace, what the evidence proves and what it does not, and the chain from the permit's policy hash to the loaded workspace (Art. 5(1), (2)).](img/01-spe-attestation.png)
+
+SPE attestation: <https://ma3u.github.io/MinimumViableHealthDataspacev2/admin/attestation>
+
+![A federated question answered by both workspaces. Each reports aggregates only, and counts below five are shown as "<5" (Art. 18(2)(e), (g)).](img/02-federated-query.png)
+
+Natural-language and federated query: <https://ma3u.github.io/MinimumViableHealthDataspacev2/query>
+
+![The secure-processing log: attestation, key release and refusal, workspace loaded and destroyed, and opt-outs synced, each with the permit and its policy hash (Art. 16(3), Art. 17(1)). The badge "Records are not sealed" is honest: the log is hash-chained, not yet in write-once storage (Art. 16(2)).](img/03-spe-audit.png)
+
+Audit and provenance, tab "Secure processing": <https://ma3u.github.io/MinimumViableHealthDataspacev2/admin/audit>
 
 # 1. Protection of data in use
 
