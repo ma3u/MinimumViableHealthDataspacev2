@@ -2,7 +2,7 @@ I write as a patient using my own health data, as an open-source developer and a
 
 1. I cannot add or export single values. My ePA takes my own documents, not a single value, has no API for my app, and gives me no export for trend analysis. The GDPR gives me a copy in a common electronic form (Art. 15(3)) and completion of my data (Art. 16), but portability (Art. 20) covers only data I provided on consent or contract, not my doctors' records. Annex II names the FHIR REST API for transmission; please open it to the person's own app, to write single values (Art. 5) and read everything (Art. 3).
 
-2. I cannot be the author of my own data. Author and attester allow only a health professional, an organisation or a device. Please allow EHDSPatient and EHDSRelatedPerson as author, with a coded information source (issued by a provider, digitised or measured by the person). Article 5 of Regulation (EU) 2025/327 lets me insert information, clearly marked as mine; my app needs custom extensions for this today.
+2. My own entries cannot be marked as mine. Author and attester allow only a professional, an organisation or a device; the patient may be performer of an observation, which fits a value I measured, not a report I digitised. Article 5 of Regulation (EU) 2025/327 lets me insert information, clearly marked as mine. Please add a coded information source (issued by a provider, digitised or measured by the person); my app needs extensions for this today.
 
 3. I need raw data, not summaries. A download should hold every result in full: value, unit, method, specimen, history, and for imaging the DICOM images (Annex II allows a PDF). When I donate data to a study, I want its result and my values back as FHIR to discuss with my family doctor, not only a lay summary; § 27(2) BDSG lets research limit my access. Please allow food supplements in EHDSMedicationUse, with me as author.
 
@@ -18,6 +18,6 @@ I write as a patient using my own health data, as an open-source developer and a
 
 9. Terminology. The annex binds SNOMED GPS, a free subset, not SNOMED CT, and ICD-10, not ICD-11. A Member State that licenses full SNOMED CT, as Germany does, loses codes outside the subset or must map them. Please allow full SNOMED CT where licensed, with GPS as the minimum, and ICD-11 next to ICD-10.
 
-10. Editorial: Annex I points to Annex IX for the common data groups (Annex X); the BCP 47 footnote describes BCP 13; the title varies ("electronic" missing); recital 13 starts with a drafting note; Art. 9(4) has a typo ("requirements o").
+10. Consistency: emptyReason is bound to Data Absent Reason, but FHIR R4 binds it to List Empty Reasons, and Art. 9(3) keeps the guide from fixing that; date is 1..1 in Annex III, 0..1 in Annex X; the document version is 1..1 with no R4 element. Editorial: Annex I points to Annex IX for Annex X; the BCP 47 footnote describes BCP 13; the title varies; recital 13 holds a drafting note; Art. 9(4) has a typo.
 
 Details, sources and screenshots of a working solution are in the attachment.
