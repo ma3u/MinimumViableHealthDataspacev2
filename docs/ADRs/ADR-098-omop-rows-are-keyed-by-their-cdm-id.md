@@ -2,7 +2,7 @@
 
 Date: 2026-11-21
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-21
 **Relates to:** [ADR-062](ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md) (an opted-out person's OMOP rows carry `OptedOut`)
 **Tracks:** [#1190](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1190)
 
