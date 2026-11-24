@@ -1894,6 +1894,18 @@ export default function UserGuidePage() {
           </FeatureCard>
 
           <FeatureCard
+            href="/compliance/spe-act"
+            title={tn("SPE requirements")}
+            icon={Scale}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              {t(
+                "The draft implementing act on secure processing environments (EHDS Art. 73(5), published for feedback in November 2026), requirement by requirement in plain words, with a light for what this demo does about each: green where the mechanism works here, amber where it works in part, red where it is still missing. Each row links its evidence: the attestation, the audit chain, the decision record or the open issue.",
+              )}
+            </p>
+          </FeatureCard>
+
+          <FeatureCard
             href="/compliance/tck"
             title={tn("Protocol TCK")}
             icon={TestTube}
