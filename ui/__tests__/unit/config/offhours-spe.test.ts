@@ -57,6 +57,9 @@ case "$*" in
   *"containerapp show --name mvhd-matchbox"*)
     if [ "$MATCHBOX_EXISTS" = 1 ]; then echo mvhd-matchbox; exit 0; fi
     echo "ResourceNotFound" >&2; exit 3 ;;
+  *"containerapp show --name mvhd-dataplane"*)
+    if [ "$DATAPLANE_EXISTS" = 1 ]; then echo mvhd-dataplane; exit 0; fi
+    echo "ResourceNotFound" >&2; exit 3 ;;
   *"containerapp update --name mvhd-ui"*"LIVE_DEMO_OFFLINE=true"*) echo true > "$STATE/ui_flag" ;;
   *"containerapp update --name mvhd-ui"*"LIVE_DEMO_OFFLINE=false"*) echo false > "$STATE/ui_flag" ;;
   *LIVE_DEMO_OFFLINE*) cat "$STATE/ui_flag" ;;
@@ -82,6 +85,7 @@ function run(
     trustee: boolean;
     cfm?: string[];
     matchbox?: boolean;
+    dataplane?: boolean;
     env?: Record<string, string>;
   },
 ) {
@@ -96,6 +100,7 @@ function run(
       TRUSTEE_EXISTS: opts.trustee ? "1" : "0",
       CFM_APPS_EXIST: (opts.cfm ?? []).join(" "),
       MATCHBOX_EXISTS: opts.matchbox ? "1" : "0",
+      DATAPLANE_EXISTS: opts.dataplane ? "1" : "0",
       ...(opts.env ?? {}),
     },
     encoding: "utf8",
@@ -265,6 +270,49 @@ describe("offhours.sh on EDC 1.0 (ADR-078, #927)", SLOW, () => {
         "mvhd-issuerservice",
       ]),
     );
+  });
+});
+
+/**
+ * The push data plane beside siglet (ADR-095) stops and starts with the stack
+ * once 23-dataplane.sh has created it: it stops before every app it calls and
+ * starts after the EDC apps. Its broker, an Event Hubs namespace, is not in
+ * the schedule: it cannot be stopped (ADR-096).
+ */
+describe("offhours.sh and the push data plane (ADR-095)", SLOW, () => {
+  it("stops the data plane first, before the control plane and the proxy", () => {
+    const { status, stderr, log } = run("stop", { ...NONE, dataplane: true });
+    expect(status, stderr).toBe(0);
+    const stopped = appsOf(log, "set-app-power.sh stop");
+    expect(stopped[0]).toBe("mvhd-dataplane");
+    expect(stopped).toContain("mvhd-controlplane");
+    expect(stopped).toContain("mvhd-neo4j-proxy");
+  });
+
+  it("starts the data plane after the EDC apps", () => {
+    const { status, stderr, log } = run("start", { ...NONE, dataplane: true });
+    expect(status, stderr).toBe(0);
+    const edc = indexOf(log, "set-app-power.sh start mvhd-controlplane");
+    const dp = indexOf(log, "set-app-power.sh start mvhd-dataplane");
+    expect(edc).toBeGreaterThan(-1);
+    expect(dp).toBeGreaterThan(edc);
+  });
+
+  it("leaves the data plane out while it does not exist", () => {
+    for (const action of ["stop", "start"] as const) {
+      const { status, stderr, log } = run(action, NONE);
+      expect(status, stderr).toBe(0);
+      expect(
+        log.filter((l) => /set-app-power.*mvhd-dataplane/.test(l)),
+      ).toEqual([]);
+    }
+  });
+
+  it("never touches the Event Hubs namespace", () => {
+    for (const action of ["stop", "start"] as const) {
+      const { log } = run(action, { ...NONE, dataplane: true });
+      expect(log.filter((l) => /eventhubs/.test(l))).toEqual([]);
+    }
   });
 });
 

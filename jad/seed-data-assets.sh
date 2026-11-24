@@ -557,9 +557,22 @@ echo "────────────────────────�
 # /api/control/v1/dataflows answers 404 on the 0.18 launcher (#542).
 SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"   # Azure: http://mvhd-siglet:8081/api/v1
 
-# The push data plane's registration, beside siglet's (ADR-095).
-# shellcheck source=../scripts/lib/push-dataplane.sh
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/lib/push-dataplane.sh"
+# The push data plane's registration, beside siglet's (ADR-095). The library
+# is in the checkout, or beside this file where a job unpacked both flat (the
+# Azure seed job: edc-seed-data-assets.yml, run-seed-job.sh). Until
+# 2026-11-24 only the first was looked for, and the Azure job stopped here,
+# before any data plane was registered.
+# SKIP_PUSH_DATAPLANE=1 registers siglet alone: an environment without the
+# push data plane (Azure before scripts/azure/23-dataplane.sh) must not get a
+# registration that points at compose's address.
+SEED_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "${SEED_DIR}/push-dataplane.sh" ]; then
+  # shellcheck source=../scripts/lib/push-dataplane.sh
+  source "${SEED_DIR}/push-dataplane.sh"
+else
+  # shellcheck source=../scripts/lib/push-dataplane.sh
+  source "${SEED_DIR}/../scripts/lib/push-dataplane.sh"
+fi
 
 register_dataplane() {
   local ctx_id="$1" label="$2"
@@ -591,7 +604,9 @@ register_dataplane() {
     warn "Data plane registration for $label returned HTTP $http_code"
   fi
   # A participant with siglet alone can pull and cannot push into an SPE.
-  if register_push_dataplane "$CP_MGMT/${MGMT_V}" "$token" "$ctx_id"; then
+  if [ "${SKIP_PUSH_DATAPLANE:-}" = "1" ]; then
+    warn "Push data plane not registered for $label (SKIP_PUSH_DATAPLANE=1)"
+  elif register_push_dataplane "$CP_MGMT/${MGMT_V}" "$token" "$ctx_id"; then
     ok "Push data plane registered for $label"
   else
     warn "Push data plane registration for $label failed"

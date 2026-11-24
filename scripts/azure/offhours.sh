@@ -93,6 +93,12 @@ TRUSTEE_APP="${TRUSTEE_APP:-mvhd-trustee}"
 # first among the core apps, since its start is the longest of them and the
 # proxy calls it, and it stops after the proxy.
 MATCHBOX_APP="${MATCHBOX_APP:-mvhd-matchbox}"
+# The push data plane beside siglet (ADR-095), from the moment 23-dataplane.sh
+# has created it; left out while it does not exist. It calls the control
+# plane, the proxy and Postgres, so it stops before all of them and starts
+# after the EDC apps. Its broker, the Event Hubs namespace, is not stopped:
+# a namespace has no stopped state, and bills until it is deleted (ADR-096).
+DATAPLANE_APP="${DATAPLANE_APP:-mvhd-dataplane}"
 # ADR-072: off by default, started on demand; true restores the morning start.
 SPE_START_WITH_STACK="${SPE_START_WITH_STACK:-false}"
 SPE_IDLE_STOP_MINUTES="${SPE_IDLE_STOP_MINUTES:-30}"
@@ -123,6 +129,8 @@ trustee_present() { az containerapp show --name "$TRUSTEE_APP" --resource-group 
                       --query name -o tsv >/dev/null 2>&1; }
 matchbox_present() { az containerapp show --name "$MATCHBOX_APP" --resource-group "$RESOURCE_GROUP" \
                        --query name -o tsv >/dev/null 2>&1; }
+dataplane_present() { az containerapp show --name "$DATAPLANE_APP" --resource-group "$RESOURCE_GROUP" \
+                        --query name -o tsv >/dev/null 2>&1; }
 spe_groups() {  # the SPE container groups that exist, one per line
   local g
   for g in "${SPE_GROUPS[@]}"; do
@@ -291,6 +299,8 @@ do_stop() {
   local -a apps=()
   local cfm
   while read -r cfm; do [ -n "$cfm" ] && apps=("$cfm" ${apps[@]+"${apps[@]}"}); done < <(cfm_apps)
+  # First of all: a transfer it is delivering needs every app behind it.
+  if dataplane_present; then apps=("$DATAPLANE_APP" ${apps[@]+"${apps[@]}"}); fi
   apps+=("${BACKEND_APPS[@]}")
   # After the proxy, which calls it (ADR-097).
   if matchbox_present; then apps+=("$MATCHBOX_APP"); fi
@@ -361,6 +371,11 @@ do_start() {
   log "EDC apps (ADR-024)"
   "${SCRIPT_DIR}/set-app-power.sh" start "${EDC_APPS[@]}" || warn "Not every EDC app reported running, see above"
   scale 1 1 "${EDC_APPS[@]}"
+
+  if dataplane_present; then
+    log "push data plane (ADR-095)"
+    "${SCRIPT_DIR}/set-app-power.sh" start "$DATAPLANE_APP" || warn "$DATAPLANE_APP did not report running, see above"
+  fi
 
   local -a cfm=()
   local a

@@ -4,7 +4,10 @@
 # =============================================================================
 #   run-seed-job.sh reseed       plan|apply   the five demo participants
 #   run-seed-job.sh data-assets  plan|apply   policies, assets, contract
-#                                             definitions, siglet data planes
+#                                             definitions, siglet data planes,
+#                                             and the push data plane's
+#                                             registrations where mvhd-dataplane
+#                                             exists (ADR-095)
 #
 # The same one-shot jobs as edc-reseed-identity-layer.yml and
 # edc-seed-data-assets.yml (the EDC APIs are internal to the environment), for
@@ -79,8 +82,17 @@ if [ "$WHAT" = reseed ]; then
     scripts/lib/dsp-protocol.sh)
 else
   JOB="mvhd-seed-data-assets"
+  # push-dataplane.sh flat beside seed-data-assets.sh, which looks for it there.
   (cd "$REPO_DIR" && tar -czf "${work}/scripts.tgz" -C scripts/azure seed-data-assets-job.sh \
-    -C ../../jad seed-data-assets.sh policies)
+    -C ../../jad seed-data-assets.sh policies -C ../scripts/lib push-dataplane.sh)
+  # The push data plane (ADR-095, 23-dataplane.sh), when this resource group
+  # has it: its signaling client's secret, never printed. Without the app the
+  # seed registers siglet alone.
+  PUSH_DP_SECRET=""
+  if az containerapp show -n "$DATAPLANE_APP" -g "$RG" -o none 2>/dev/null; then
+    PUSH_DP_SECRET=$(kv_secret dataplane-signaling-client-secret quiet)
+    [ -n "$PUSH_DP_SECRET" ] || { err "${DATAPLANE_APP} exists, but Key Vault has no dataplane-signaling-client-secret (23-dataplane.sh keycloak)"; exit 1; }
+  fi
 fi
 
 WHAT="$WHAT" MODE="$MODE" KC="$KC" ENV_ID="$ENV_ID" LOCATION="$LOCATION" \
@@ -88,6 +100,8 @@ WHAT="$WHAT" MODE="$MODE" KC="$KC" ENV_ID="$ENV_ID" LOCATION="$LOCATION" \
   VAULT_URL="${VAULT_URL:-}" VAULT_TOKEN="${VAULT_TOKEN:-}" \
   CP_APP="$CONTROLPLANE_APP" IH_APP="$IDENTITYHUB_APP" ISSUER="$ISSUER_APP" \
   PROXY_APP="$NEO4J_PROXY_APP" SIGLET="$SIGLET_APP" \
+  DP_APP="$DATAPLANE_APP" KC_APP="$KEYCLOAK_APP" PUSH_DP_SECRET="${PUSH_DP_SECRET:-}" \
+  ACA_DOMAIN="$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query properties.defaultDomain -o tsv)" \
   python3 - "${work}/job.yaml" "${work}/scripts.tgz" "${SCRIPT_DIR}/reseed-identity-layer.sh" <<'PY'
 import base64, os, sys, yaml
 out, tgz, reseed = sys.argv[1:4]
@@ -118,6 +132,15 @@ else:
            "SCRIPTS_TGZ_B64": b64}
     secrets = {"admin-secret": e["ADMIN_SECRET"]}
     refs = {"KC_CLIENT_SECRET": "admin-secret"}
+    if e["PUSH_DP_SECRET"]:
+        # as 23-dataplane.sh register: the app's short name, Keycloak's internal address
+        env["PUSH_DATAPLANE_URL"] = f"http://{e['DP_APP']}"
+        env["PUSH_DATAPLANE_TOKEN_ENDPOINT"] = (
+            f"https://{e['KC_APP']}.internal.{e['ACA_DOMAIN']}/realms/edcv/protocol/openid-connect/token")
+        secrets["push-dp-secret"] = e["PUSH_DP_SECRET"]
+        refs["PUSH_DATAPLANE_CLIENT_SECRET"] = "push-dp-secret"
+    else:
+        env["SKIP_PUSH_DATAPLANE"] = "1"
     body = ("set -u\napk add --no-cache bash curl jq python3 >/dev/null 2>&1\n"
             "mkdir -p /tmp/s && echo \"$SCRIPTS_TGZ_B64\" | base64 -d | tar -xz -C /tmp/s\n"
             "bash /tmp/s/seed-data-assets-job.sh; rc=$?\necho \"=== seed exited with $rc ===\"\nsleep 30\nexit $rc\n")
@@ -131,7 +154,7 @@ doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
            + [{"name": k, "secretRef": v} for k, v in refs.items()]}]}}}
 yaml.safe_dump(doc, open(out, "w"), sort_keys=False)
 PY
-unset ADMIN_SECRET PROVISIONER_SECRET VAULT_TOKEN
+unset ADMIN_SECRET PROVISIONER_SECRET VAULT_TOKEN PUSH_DP_SECRET
 
 if az containerapp job show -n "$JOB" -g "$RG" -o none 2>/dev/null; then
   az containerapp job update -n "$JOB" -g "$RG" --yaml "${work}/job.yaml" -o none

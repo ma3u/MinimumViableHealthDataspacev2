@@ -1,0 +1,54 @@
+name: Data plane database (ADR-095)
+
+# Creates the role `dataplane` and the database `dataplane_v1` it owns on the
+# Flexible Server, for the push data plane mvhd-dataplane (ADR-095,
+# scripts/azure/23-dataplane.sh). The work is
+# scripts/azure/create-dataplane-database.sh, which runs a one-shot job inside
+# the environment: a role is SQL, and the server admits only Azure addresses.
+#
+# Runs as the CI identity because the maintainer's own role does not cover the
+# Flexible Server. Neither password passes through this workflow: the job reads
+# postgres-admin-password and dataplane-db-password from Key Vault by
+# reference. `23-dataplane.sh secrets` must have generated the second one.
+#
+# Manual trigger only. Runbook: docs/knowledge/runbooks/dataplane-on-azure.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (the server is not changed) or apply"
+        type: choice
+        options: [plan, apply]
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  database:
+    name: Data plane database (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Role and database
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+        run: |
+          ./scripts/azure/create-dataplane-database.sh "$MODE" </dev/null
+          echo "**Data plane database: ${MODE} done** on the Flexible Server (ADR-095)." >> "$GITHUB_STEP_SUMMARY"

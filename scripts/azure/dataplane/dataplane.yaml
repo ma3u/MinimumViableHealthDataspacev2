@@ -1,0 +1,100 @@
+# mvhd-dataplane: the hub's push data plane on the DataPlane SDK, beside siglet
+# (ADR-095), with Event Hubs as its Kafka broker (ADR-096).
+# Rendered by scripts/azure/23-dataplane.sh; the $${NAME} placeholders are filled there.
+# One replica: SPE inboxes and Kafka flows are held in memory
+# (docs/knowledge/services/dataplane.md).
+# allowInsecure: the control plane POSTs its signals to http://mvhd-dataplane
+# inside the environment, and a redirect to HTTPS would turn a POST into a GET
+# (as for mvhd-matchbox, 22-matchbox.sh).
+# Every secret but the registry password is a Key Vault reference read through
+# the identity below (ADR-036), so no value passes through the definition.
+# $$ConnectionString is a literal dollar sign for the renderer: the SASL user
+# Event Hubs expects is the text $$ConnectionString, not a variable.
+name: mvhd-dataplane
+type: Microsoft.App/containerApps
+location: ${LOCATION}
+tags: { project: mvhd, adr: ADR-095 }
+identity:
+  type: UserAssigned
+  userAssignedIdentities:
+    ${KV_READER_ID}: {}
+properties:
+  managedEnvironmentId: ${ENV_ID}
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: false
+      targetPort: 8090
+      transport: http
+      allowInsecure: true
+    registries:
+      - server: ${ACR_LOGIN_SERVER}
+        username: ${ACR_NAME}
+        passwordSecretRef: acr-password
+    secrets:
+      - { name: acr-password, value: "<acr-password>" }
+      - name: dataplane-db-password
+        keyVaultUrl: ${KV_URI}/secrets/${KV_DB_PASSWORD}
+        identity: ${KV_READER_ID}
+      - name: dataplane-kafka-password
+        keyVaultUrl: ${KV_URI}/secrets/${KV_KAFKA_CONNECTION}
+        identity: ${KV_READER_ID}
+      - name: dataplane-signing-key-jwk
+        keyVaultUrl: ${KV_URI}/secrets/${KV_SIGNING_KEY}
+        identity: ${KV_READER_ID}
+  template:
+    containers:
+      - name: dataplane
+        image: ${IMAGE}
+        # block style: a flow mapping holding ${...} is not YAML before the
+        # values are substituted, and the check-yaml hook reads it then
+        resources:
+          cpu: ${CPU}
+          memory: ${MEMORY}
+        env:
+          - { name: DATAPLANE_PORT, value: "8090" }
+          - { name: DATAPLANE_PUBLIC_URL, value: "${PUBLIC_URL}" }
+          - {
+              name: DATAPLANE_CONTROL_PLANE_SIGNALING_URL,
+              value: "${CP_SIGNALING_URL}",
+            }
+          - { name: DATAPLANE_SIGNALING_JWKS_URL, value: "${KC_JWKS_URL}" }
+          - {
+              name: DATAPLANE_SIGNALING_CLIENT_ID,
+              value: "${SIGNALING_CLIENT_ID}",
+            }
+          - { name: DATAPLANE_PROXY_URL, value: "${PROXY_URL}" }
+          - { name: DATAPLANE_ATTESTATION_FLOOR, value: "${ATTESTATION_FLOOR}" }
+          - { name: DATAPLANE_KAFKA_BOOTSTRAP, value: "${KAFKA_BOOTSTRAP}" }
+          - { name: DATAPLANE_KAFKA_SECURITY_PROTOCOL, value: "SASL_SSL" }
+          - { name: DATAPLANE_KAFKA_SASL_USERNAME, value: "$$ConnectionString" }
+          - {
+              name: DATAPLANE_KAFKA_SASL_PASSWORD,
+              secretRef: dataplane-kafka-password,
+            }
+          - { name: DATAPLANE_DB_URL, value: "${DB_URL}" }
+          - { name: DATAPLANE_DB_USER, value: "${DB_USER}" }
+          - { name: DATAPLANE_DB_PASSWORD, secretRef: dataplane-db-password }
+          - {
+              name: DATAPLANE_SIGNING_KEY_JWK,
+              secretRef: dataplane-signing-key-jwk,
+            }
+          - { name: JAVA_OPTS, value: "${JAVA_OPTS}" }
+        probes:
+          - type: Startup
+            httpGet: { path: /health, port: 8090 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 24
+          - type: Liveness
+            httpGet: { path: /health, port: 8090 }
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          - type: Readiness
+            httpGet: { path: /health, port: 8090 }
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+    scale: { minReplicas: 1, maxReplicas: 1 }

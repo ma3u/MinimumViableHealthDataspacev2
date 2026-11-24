@@ -22,6 +22,11 @@ set -euo pipefail
 #   ASSET=ecg-holter-stream ./scripts/check-streaming-transfer.sh   # the 24 hours: 2,881 records, about 124 MB
 #   PROFILES="Kafka-PUSH" ./scripts/check-streaming-transfer.sh
 #
+# On Azure it runs inside the environment, as the job of
+# scripts/azure/23-dataplane.sh check-streaming: KAFKA_CONTAINER=none (the
+# broker is Event Hubs, no container to inspect) and TOKEN_CLIENT_ID,
+# TOKEN_CLIENT_SECRET for the client that environment has.
+#
 # Exit 0 when every transfer passed, 1 when one failed, 3 when the stack
 # cannot run it (the reason is printed).
 # ---------------------------------------------------------------------------
@@ -31,6 +36,8 @@ DSP_INTERNAL_URL="${DSP_INTERNAL_URL:-http://controlplane:8082/api/dsp}"
 DSP_PROTOCOL="${DSP_PROTOCOL:-http-dsp-profile-2025-1}"
 SPE_PROXY_URL="${SPE_PROXY_URL:-http://localhost:9090}"
 KAFKA_CONTAINER="${KAFKA_CONTAINER:-health-dataspace-kafka}"
+TOKEN_CLIENT_ID="${TOKEN_CLIENT_ID:-provisioner}"
+TOKEN_CLIENT_SECRET="${TOKEN_CLIENT_SECRET:-provisioner-secret}"
 ASSET="${ASSET:-ecg-holter-hour}"
 PROFILES="${PROFILES:-Kafka-PUSH Kafka-PULL}"
 SPE_ID="${SPE_ID:-SPE-1}"
@@ -47,8 +54,10 @@ cannot() {
 }
 FAILED=0
 
-[ "$(docker inspect -f '{{.State.Health.Status}}' "$KAFKA_CONTAINER" 2>/dev/null || true)" = "healthy" ] ||
-  cannot "${KAFKA_CONTAINER} is not healthy; start the profile 'streaming'"
+if [ "$KAFKA_CONTAINER" != "none" ]; then
+  [ "$(docker inspect -f '{{.State.Health.Status}}' "$KAFKA_CONTAINER" 2>/dev/null || true)" = "healthy" ] ||
+    cannot "${KAFKA_CONTAINER} is not healthy; start the profile 'streaming'"
+fi
 
 # A token lives five minutes and a day of ECG takes longer, so every call
 # gets a token no older than a minute.
@@ -57,12 +66,13 @@ TOKEN_AT=0
 token() {
   if [ -z "$TOKEN" ] || [ $(($(date +%s) - TOKEN_AT)) -gt 60 ]; then
     TOKEN="$(curl -sS --max-time 20 -X POST "${KEYCLOAK_URL}/realms/edcv/protocol/openid-connect/token" \
-      -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" | jq -r '.access_token // empty')"
+      --data-urlencode grant_type=client_credentials --data-urlencode "client_id=${TOKEN_CLIENT_ID}" \
+      --data-urlencode "client_secret=${TOKEN_CLIENT_SECRET}" | jq -r '.access_token // empty')"
     TOKEN_AT=$(date +%s)
   fi
 }
 token
-[ -n "$TOKEN" ] || cannot "no provisioner token from ${KEYCLOAK_URL}"
+[ -n "$TOKEN" ] || cannot "no token for ${TOKEN_CLIENT_ID} from ${KEYCLOAK_URL}"
 api() {
   local method="$1" path="$2" body="${3:-}"
   token

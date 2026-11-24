@@ -5,6 +5,12 @@
 #   scripts/azure/push-edc1-images.sh build   linux/amd64 images, local only
 #   scripts/azure/push-edc1-images.sh push    the built images to ACR
 #   scripts/azure/push-edc1-images.sh check   which tags ACR already holds
+#   scripts/azure/push-edc1-images.sh tag     print the tag, nothing else
+#
+#   build, push and check take runtime names after the verb and then handle
+#   only those: `build dataplane` is how 23-dataplane.sh builds the push data
+#   plane (ADR-095), which the same Dockerfile builds with RUNTIME=dataplane.
+#   Without names they handle the three EDC launchers, as before.
 #
 # Three images from runtimes/edc (controlplane, identity-hub, issuerservice),
 # tagged mvhd-edc-<runtime>:<EDC_VERSION>-<12 characters of the last commit
@@ -31,6 +37,17 @@ EDC_VERSION="${EDC_VERSION:-1.0.0-RC8}"
 REV="$(git -C "$REPO_ROOT" log -1 --format=%H -- runtimes/edc)"
 TAG="${EDC_VERSION}-${REV:0:12}"
 RUNTIMES=(controlplane identity-hub issuerservice)
+VERB="${1:-}"
+if [ "$#" -gt 1 ]; then
+  shift
+  RUNTIMES=("$@")
+  for r in "${RUNTIMES[@]}"; do
+    case "$r" in
+      controlplane | identity-hub | issuerservice | dataplane) ;;
+      *) err "unknown runtime '${r}' (controlplane, identity-hub, issuerservice, dataplane)"; exit 2 ;;
+    esac
+  done
+fi
 
 image() { echo "${ACR_LOGIN_SERVER}/mvhd-edc-$1:${TAG}"; }
 
@@ -58,7 +75,7 @@ cmd_push() {
       { err "$(image "$r") is not built; run '$0 build' first"; exit 1; }
     docker push "$(image "$r")"
   done
-  ok "ACR holds the 1.0 images, tag ${TAG}; set EDC1_TAG=${TAG} for migrate-edc-to-v1.sh"
+  ok "ACR holds ${RUNTIMES[*]}, tag ${TAG}; set EDC1_TAG=${TAG} for migrate-edc-to-v1.sh"
 }
 
 cmd_check() {
@@ -71,9 +88,10 @@ cmd_check() {
   done
 }
 
-case "${1:-}" in
+case "$VERB" in
   build) cmd_build ;;
   push) cmd_push ;;
   check) cmd_check ;;
-  *) sed -n '5,7p' "$0"; exit 2 ;;
+  tag) echo "$TAG" ;;
+  *) sed -n '5,8p' "$0"; exit 2 ;;
 esac
