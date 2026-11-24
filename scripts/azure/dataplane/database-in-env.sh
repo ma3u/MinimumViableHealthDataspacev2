@@ -57,11 +57,24 @@ else
   echo "database ${DB}: created"
 fi
 
-# Read back as the role itself (ADR-031): it logs in, owns the database, and
-# can create the SDK's tables in it.
+# The tables go into a schema of the role's own. On PostgreSQL 15 and later
+# `public` no longer takes anyone's tables, and on the Flexible Server the
+# role could not create any there (first apply, 2026-11-24: has_schema_privilege
+# false). The owner of a database may create schemas in it, and a role may set
+# its own search path, so this runs as the role and needs nothing of the admin.
+PGUSER="$ROLE" PGPASSWORD="$ROLE_PASSWORD" PGDATABASE="$DB" q <<SQL >/dev/null ||
+create schema if not exists ${ROLE} authorization ${ROLE};
+alter role ${ROLE} in database ${DB} set search_path = ${ROLE};
+SQL
+  fail "${ROLE} could not create its schema in ${DB}"
+
+# Read back as the role itself (ADR-031), in a new session so the search path
+# applies: it logs in, owns the database, and creates its tables in its schema.
 got="$(PGUSER="$ROLE" PGPASSWORD="$ROLE_PASSWORD" PGDATABASE="$DB" q -c \
-  "select current_user || ' ' || pg_get_userbyid(datdba) || ' ' || has_schema_privilege('public', 'CREATE')
+  "select current_user || ' ' || pg_get_userbyid(datdba) || ' ' || current_schema() || ' '
+          || has_schema_privilege(current_schema(), 'CREATE')
      from pg_database where datname = current_database()")" ||
   fail "${ROLE} cannot log in to ${DB}"
-[ "$got" = "${ROLE} ${ROLE} true" ] || fail "read-back as ${ROLE}: '${got}', expected '${ROLE} ${ROLE} true'"
-echo "OK: ${ROLE} logs in to ${DB}, owns it and may create tables"
+[ "$got" = "${ROLE} ${ROLE} ${ROLE} true" ] ||
+  fail "read-back as ${ROLE}: '${got}', expected '${ROLE} ${ROLE} ${ROLE} true'"
+echo "OK: ${ROLE} logs in to ${DB}, owns it and creates its tables in schema ${ROLE}"
