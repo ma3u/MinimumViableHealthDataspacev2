@@ -418,6 +418,22 @@ describe("the persons a permit names (#1236, draft SPE act Art. 5(3))", () => {
     }
   });
 
+  it("chooses the permit that names the person when the organisation holds several", async () => {
+    mockRunQuery.mockResolvedValue([
+      permit({ permitId: "p-other", namedPersons: "Dr. K. Berger" }),
+      permit({ permitId: "p-mine", namedPersons: NAMED }),
+    ]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      what: "query",
+      person: { email: "researcher@pharmaco.de" },
+      now: NOW,
+    });
+    expect(g.allowed).toBe(true);
+    if (g.allowed) expect(g.check?.permitId).toBe("p-mine");
+  });
+
   it("refuses everyone under a permit that names no person", async () => {
     mockRunQuery.mockResolvedValue([permit({ namedPersons: null })]);
     const g = await gateSecondaryUse({

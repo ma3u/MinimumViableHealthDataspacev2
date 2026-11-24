@@ -61,6 +61,8 @@ test.describe("Issue #206 · the data permit gates the transfer", () => {
           "Journey 40: real-world outcomes of second-line type 2 diabetes therapies, aggregate output only.",
         periodMonths: 12,
         ethicsCommitteeRef: "EC-PharmaCo-2026-011",
+        // The persons who will access the data, checked at every query (#1236).
+        namedPersons: "Research Analyst (researcher@pharmaco.de)",
       },
     });
     expect(r.status(), await r.text()).toBe(201);

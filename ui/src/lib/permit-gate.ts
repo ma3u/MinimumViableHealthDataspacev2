@@ -96,6 +96,8 @@ export async function checkPermit(input: {
   consumerDid: string | null;
   datasetId?: string | null;
   assetId?: string | null;
+  /** Prefer a permit that names this person (#1236); any valid one otherwise. */
+  person?: GatePerson;
   now?: Date;
 }): Promise<PermitCheck> {
   const base: Omit<PermitCheck, "allowed" | "reason"> = {
@@ -146,10 +148,16 @@ export async function checkPermit(input: {
       reason: `The health data access body refused the access application of ${input.consumerDid} (${rows[0].permitId}); no data permit exists.`,
     };
   }
-  const valid = approved.filter((r) => {
+  const unexpired = approved.filter((r) => {
     const t = parseGraphTime(r.validUntil);
     return t === null || t >= now;
   });
+  // Several permits may cover the caller's organisation; the one that names
+  // the signed-in person is the one their access runs under (#1236).
+  const naming = input.person
+    ? unexpired.filter((r) => personIsNamed(r.namedPersons, input.person!))
+    : [];
+  const valid = naming.length ? naming : unexpired;
   if (valid.length === 0) {
     return {
       ...base,
@@ -365,6 +373,7 @@ export async function gateSecondaryUse(input: {
     check = await checkPermit({
       consumerDid: input.consumerDid,
       datasetId: input.datasetId ?? null,
+      person: input.person,
       now: input.now,
     });
   } catch (err) {
