@@ -7,7 +7,9 @@ name: EDC data assets and data planes on Azure (#542)
 # through scripts/azure/seed-data-assets-job.sh: `plan` lists each context's
 # state, assets and contract definitions; `apply` registers compose's assets on
 # the same participants, plus one data plane per context that the control plane
-# signals through the siglet (http://mvhd-siglet:8081/api/v1).
+# signals through the siglet (http://mvhd-siglet:8081/api/v1), and, once the
+# app mvhd-dataplane exists (ADR-095, scripts/azure/23-dataplane.sh), the push
+# data plane's registration mvhd-dp-<context> for each of them.
 #
 # The admin client secret is read from Keycloak's admin API, masked, and handed
 # to the job as an ACA secret, as edc-reseed-identity-layer.yml does.
@@ -76,7 +78,19 @@ jobs:
           ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
           LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
           export ENV_ID LOCATION
-          tar -czf /tmp/scripts.tgz -C scripts/azure seed-data-assets-job.sh -C ../../jad seed-data-assets.sh policies
+          # push-dataplane.sh flat beside seed-data-assets.sh, which looks for it there.
+          tar -czf /tmp/scripts.tgz -C scripts/azure seed-data-assets-job.sh -C ../../jad seed-data-assets.sh policies \
+            -C ../scripts/lib push-dataplane.sh
+          # The push data plane (ADR-095, scripts/azure/23-dataplane.sh), once it
+          # exists: its signaling client's secret reaches the job as a Key Vault
+          # reference, since this identity may not read the vault. Until then the
+          # seed registers siglet alone.
+          PUSH_DP=absent
+          if az containerapp show -n mvhd-dataplane -g "$RESOURCE_GROUP" -o none 2>/dev/null; then PUSH_DP=present; fi
+          DOMAIN=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query properties.defaultDomain -o tsv)
+          KV_IDENTITY=$(az identity show -n id-mvhd-claude-federation -g "$RESOURCE_GROUP" --query id -o tsv)
+          export PUSH_DP DOMAIN KV_IDENTITY
+          echo "push data plane: $PUSH_DP"
           SCRIPTS_TGZ_B64=$(base64 -w0 < /tmp/scripts.tgz)
           export SCRIPTS_TGZ_B64
           python3 - /tmp/job.yaml <<'PY'
@@ -91,14 +105,26 @@ jobs:
           body = ("set -u\napk add --no-cache bash curl jq python3 >/dev/null 2>&1\n"
                   "mkdir -p /tmp/s && echo \"$SCRIPTS_TGZ_B64\" | base64 -d | tar -xz -C /tmp/s\n"
                   "bash /tmp/s/seed-data-assets-job.sh; rc=$?\necho \"=== seed exited with $rc ===\"\nsleep 30\nexit $rc\n")
-          doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
+          secrets = [{"name": "admin-secret", "value": e["ADMIN_SECRET"]}]
+          refs = [{"name": "KC_CLIENT_SECRET", "secretRef": "admin-secret"}]
+          doc = {"location": e["LOCATION"]}
+          if e["PUSH_DP"] == "present":
+              env["PUSH_DATAPLANE_URL"] = "http://mvhd-dataplane"
+              env["PUSH_DATAPLANE_TOKEN_ENDPOINT"] = (
+                  f"https://mvhd-keycloak.internal.{e['DOMAIN']}/realms/edcv/protocol/openid-connect/token")
+              secrets.append({"name": "push-dp-secret", "identity": e["KV_IDENTITY"],
+                  "keyVaultUrl": "https://kv-mvhd-b53a0449.vault.azure.net/secrets/dataplane-signaling-client-secret"})
+              refs.append({"name": "PUSH_DATAPLANE_CLIENT_SECRET", "secretRef": "push-dp-secret"})
+              doc["identity"] = {"type": "UserAssigned", "userAssignedIdentities": {e["KV_IDENTITY"]: {}}}
+          else:
+              env["SKIP_PUSH_DATAPLANE"] = "1"
+          doc["properties"] = {"environmentId": e["ENV_ID"],
             "configuration": {"triggerType": "Manual", "replicaTimeout": 1500, "replicaRetryLimit": 0,
               "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1},
-              "secrets": [{"name": "admin-secret", "value": e["ADMIN_SECRET"]}]},
+              "secrets": secrets},
             "template": {"containers": [{"name": "seed", "image": "docker.io/library/alpine:3.19",
               "command": ["/bin/sh", "-c"], "args": [body], "resources": {"cpu": 0.5, "memory": "1Gi"},
-              "env": [{"name": k, "value": v} for k, v in env.items()]
-                     + [{"name": "KC_CLIENT_SECRET", "secretRef": "admin-secret"}]}]}}}
+              "env": [{"name": k, "value": v} for k, v in env.items()] + refs}]}}
           yaml.safe_dump(doc, open(out, "w"), sort_keys=False)
           PY
           if az containerapp job show -n "$JOB" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then

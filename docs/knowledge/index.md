@@ -57,6 +57,7 @@ frontmatter. Spec:
 [load-and-stress-test](runbooks/load-and-stress-test.md) ·
 [edc-v018-on-azure](runbooks/edc-v018-on-azure.md) (historical) ·
 [edc-1-on-azure](runbooks/edc-1-on-azure.md) (draft) ·
+[dataplane-on-azure](runbooks/dataplane-on-azure.md) (draft) ·
 [spe-attestation-azure](runbooks/spe-attestation-azure.md) ·
 [cfm-fork](runbooks/cfm-fork.md) (draft)
 

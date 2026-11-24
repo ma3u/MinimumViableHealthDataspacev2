@@ -55,3 +55,7 @@
 - 2026-11-23 · Added `services/dataplane.md` (status draft): the hub's own data
   plane on the DataPlane SDK (ADR-095, #888), five transfer types into an
   attested SPE inbox over HTTP and Kafka, its checks and its limits.
+- 2026-11-24 · Added `runbooks/dataplane-on-azure.md` (status draft): the gated
+  steps of `scripts/azure/23-dataplane.sh` that bring the push data plane
+  (ADR-095) to Azure with Event Hubs (ADR-096), the open decision on the proxy's
+  replicas, the gap against ADR-096 decision 3, and the rollback.

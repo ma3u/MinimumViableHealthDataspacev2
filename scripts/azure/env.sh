@@ -66,7 +66,8 @@ export PG_IMAGE="${ACR_NAME}.azurecr.io/postgres:${POSTGRES_VERSION}"
 #   controlplane_v1 identityhub_v1
 #   issuerservice_v1 siglet_v1             create-edc-v1-databases.sh
 #   taskdb                                 wire-task-store.sh
-export PG_DATABASES=(keycloak cfm vault controlplane_v1 identityhub_v1 issuerservice_v1 siglet_v1 taskdb)
+#   dataplane_v1 (owner: role dataplane)   create-dataplane-database.sh
+export PG_DATABASES=(keycloak cfm vault controlplane_v1 identityhub_v1 issuerservice_v1 siglet_v1 taskdb dataplane_v1)
 
 # ── Custom domain (24/7 public demo) ────────────────────────────────────────
 # Empty for a second resource group: 06-post-deploy.sh then binds no hostname,
@@ -86,6 +87,11 @@ export IDENTITYHUB_APP="mvhd-identityhub"
 export ISSUER_APP="mvhd-issuerservice"
 # The FHIR validator behind the proxy's $validate (ADR-097, 22-matchbox.sh).
 export MATCHBOX_APP="mvhd-matchbox"
+# The push data plane beside siglet (ADR-095, 23-dataplane.sh) and its Kafka
+# broker on Azure, an Event Hubs namespace (ADR-096). The namespace is not a
+# Container App: the off-hours schedule cannot stop it.
+export DATAPLANE_APP="mvhd-dataplane"
+export EVENTHUBS_NAMESPACE="${EVENTHUBS_NAMESPACE:-evhns-mvhd-b53a0449}"
 # EDC 0.18's two data planes and the seven apps of the 2026-03 CFM were
 # deleted on 2026-11-09 (#927). CFM 0.0.7's apps (ADR-085) are named in
 # 20-cfm-fork.sh.
