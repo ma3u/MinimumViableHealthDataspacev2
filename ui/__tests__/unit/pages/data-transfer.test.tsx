@@ -714,6 +714,45 @@ describe("DataTransferPage", () => {
       });
     }
 
+    it("sends the data of a contract that forbids extract to an SPE, not the browser (#889)", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/agreements/agr-001")) {
+          return mockResponse({
+            agreementId: "agr-001",
+            policy: {
+              permission: [{ action: "use" }],
+              prohibition: [{ action: "extract" }],
+            },
+          });
+        }
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(
+            NEGOTIATIONS_FINALIZED.map((n) => ({
+              ...n,
+              source: "controlplane",
+            })),
+          );
+        }
+        return mockResponse({});
+      });
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("contracts-list");
+      expect(
+        await within(section).findByTestId("extract-forbidden"),
+      ).toHaveTextContent(/secure processing environment/);
+      expect(within(section).queryByText("Download")).toBeNull();
+      expect(
+        mockFetchApi.mock.calls.some(([u]) =>
+          String(u).startsWith("/api/transfers/tp-live/data"),
+        ),
+      ).toBe(false);
+    });
+
     it("Open fetches the transfer's own data and shows its resources", async () => {
       mocks(() =>
         mockResponse({

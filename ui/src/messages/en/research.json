@@ -305,5 +305,6 @@
   "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
   "CLOSED AFTER IMPORT INTO {spe}": "CLOSED AFTER IMPORT INTO {spe}",
   "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
-  "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again."
+  "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
+  "This contract forbids extracting the data: import it into a secure processing environment below.": "This contract forbids extracting the data: import it into a secure processing environment below."
 }
