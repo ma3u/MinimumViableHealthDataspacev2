@@ -280,7 +280,7 @@ export function attestationChecks(input: {
 }
 
 /** Every text of the light and the checks, for the translation tests. */
-export function allLightTexts(): string[] {
+function allLightTexts(): string[] {
   const out = new Set<string>(Object.values(LIGHT_MEANING));
   for (const verdict of ["none", "fail", "refused", "pass"] as const) {
     for (const simulated of [true, false]) {
