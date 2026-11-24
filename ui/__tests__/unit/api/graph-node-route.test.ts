@@ -128,7 +128,7 @@ describe("GET /api/graph/node", () => {
       {
         labels: ["OMOPPerson"],
         props: {
-          personId: "omop-person-1",
+          personId: 2001,
           yearOfBirth: { low: 1985, high: 0 },
         },
       },

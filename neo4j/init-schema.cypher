@@ -91,11 +91,15 @@ CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (pv:Provenance) REQUIRE pv.pro
 // ============================================================
 // Layer 4: OMOP Research Analytics
 // ============================================================
+// ADR-098: each OMOP label is keyed by its CDM column, an integer derived from
+// the FHIR reference (neo4j/fhir-to-omop-transform.cypher, step 0 and after).
 CREATE CONSTRAINT omop_person_id IF NOT EXISTS FOR (op:OMOPPerson) REQUIRE op.personId IS UNIQUE;
+CREATE CONSTRAINT omop_visit_occurrence_id IF NOT EXISTS FOR (ov:OMOPVisitOccurrence) REQUIRE ov.visitOccurrenceId IS UNIQUE;
 CREATE CONSTRAINT omop_condition_occurrence_id IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) REQUIRE oco.conditionOccurrenceId IS UNIQUE;
 CREATE INDEX omop_condition_concept IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) ON (oco.conditionConceptId);
 CREATE CONSTRAINT omop_measurement_id IF NOT EXISTS FOR (om:OMOPMeasurement) REQUIRE om.measurementId IS UNIQUE;
 CREATE INDEX omop_measurement_concept IF NOT EXISTS FOR (om:OMOPMeasurement) ON (om.measurementConceptId);
+CREATE CONSTRAINT omop_drug_exposure_id IF NOT EXISTS FOR (od:OMOPDrugExposure) REQUIRE od.drugExposureId IS UNIQUE;
 CREATE CONSTRAINT omop_procedure_occurrence_id IF NOT EXISTS FOR (opo:OMOPProcedureOccurrence) REQUIRE opo.procedureOccurrenceId IS UNIQUE;
 CREATE INDEX omop_procedure_concept IF NOT EXISTS FOR (opo:OMOPProcedureOccurrence) ON (opo.procedureConceptId);
 

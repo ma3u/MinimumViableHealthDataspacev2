@@ -30,7 +30,13 @@ const REQUIRED_PROPS: Record<string, string[]> = {
   Patient: ["resourceId"],
   Condition: ["resourceId", "code"],
   Observation: ["resourceId", "code"],
+  // ADR-098: each OMOP label is keyed by its CDM column.
   OMOPPerson: ["personId"],
+  OMOPVisitOccurrence: ["visitOccurrenceId"],
+  OMOPConditionOccurrence: ["conditionOccurrenceId"],
+  OMOPMeasurement: ["measurementId"],
+  OMOPDrugExposure: ["drugExposureId"],
+  OMOPProcedureOccurrence: ["procedureOccurrenceId"],
   SnomedConcept: ["conceptId"],
   LoincCode: ["loincNumber"],
   TrustCenter: ["name", "did"],

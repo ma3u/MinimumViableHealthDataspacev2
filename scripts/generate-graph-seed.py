@@ -23,6 +23,16 @@ import textwrap
 
 random.seed(42)  # reproducible
 
+
+def cdm_id(reference: str) -> int:
+    """ADR-098: an OMOP row's CDM key, 52 bits of the MD5 of its FHIR reference.
+
+    neo4j/fhir-to-omop-transform.cypher derives the same integer with
+    apoc.util.md5, so the transform finds these rows instead of writing them
+    a second time.
+    """
+    return int(hashlib.md5(reference.encode()).hexdigest()[:13], 16)
+
 # ─── Real public ontology codes ──────────────────────────────────────────────
 
 # Every code checked with the SNOMED CT $lookup of r4.ontoserver.csiro.au on
@@ -473,13 +483,16 @@ for i in range(NUM_PATIENTS):
 
         # OMOP Visit Occurrence
         emit(f"""
-            MERGE (vo:OMOPVisitOccurrence {{visitId: '{enc_id}'}})
+            MERGE (vo:OMOPVisitOccurrence {{visitOccurrenceId: {cdm_id('Encounter/' + enc_id)}}})
             SET vo.name = 'Visit {enc_id}',
+                vo.personId = {pid},
                 vo.visitStartDate = '{enc_year}-{enc_month:02d}-01',
                 vo.visitConceptId = {random.choice([9201, 9202, 9203])}
             WITH vo
             MATCH (op:OMOPPerson {{personId: {pid}}})
+            MATCH (enc:Encounter {{id: '{enc_id}'}})
             MERGE (op)-[:HAS_VISIT_OCCURRENCE]->(vo)
+            MERGE (enc)-[:MAPPED_TO]->(vo)
         """)
         node_count += 1
 
@@ -510,13 +523,16 @@ for i in range(NUM_PATIENTS):
 
         # OMOP Condition Occurrence
         emit(f"""
-            MERGE (co:OMOPConditionOccurrence {{conditionId: '{cond_id}'}})
+            MERGE (co:OMOPConditionOccurrence {{conditionOccurrenceId: {cdm_id('Condition/' + cond_id)}}})
             SET co.name = 'OMOP {esc(cond_name)}',
+                co.personId = {pid},
                 co.conditionConceptId = {snomed_id},
                 co.conditionStartDate = '{onset_year}-01-01'
             WITH co
             MATCH (op:OMOPPerson {{personId: {pid}}})
+            MATCH (c:Condition {{id: '{cond_id}'}})
             MERGE (op)-[:HAS_CONDITION_OCCURRENCE]->(co)
+            MERGE (c)-[:MAPPED_TO]->(co)
         """)
         node_count += 1
 
@@ -549,13 +565,16 @@ for i in range(NUM_PATIENTS):
 
             # OMOP Measurement
             emit(f"""
-                MERGE (m:OMOPMeasurement {{measurementId: '{obs_id}'}})
+                MERGE (m:OMOPMeasurement {{measurementId: {cdm_id('Observation/' + obs_id)}}})
                 SET m.name = 'OMOP Meas {loinc_code}',
+                    m.personId = {pid},
                     m.valueAsNumber = {value},
                     m.measurementDate = '{obs_year}-01-01'
                 WITH m
                 MATCH (op:OMOPPerson {{personId: {pid}}})
+                MATCH (o:Observation {{id: '{obs_id}'}})
                 MERGE (op)-[:HAS_MEASUREMENT]->(m)
+                MERGE (o)-[:MAPPED_TO]->(m)
             """)
             node_count += 1
 
@@ -585,12 +604,15 @@ for i in range(NUM_PATIENTS):
 
                 # OMOP Drug Exposure
                 emit(f"""
-                    MERGE (de:OMOPDrugExposure {{drugId: '{rx_id}'}})
+                    MERGE (de:OMOPDrugExposure {{drugExposureId: {cdm_id('MedicationRequest/' + rx_id)}}})
                     SET de.name = 'OMOP {esc(rx_name)}',
+                        de.personId = {pid},
                         de.drugConceptId = {rxcui}
                     WITH de
                     MATCH (op:OMOPPerson {{personId: {pid}}})
+                    MATCH (mr:MedicationRequest {{id: '{rx_id}'}})
                     MERGE (op)-[:HAS_DRUG_EXPOSURE]->(de)
+                    MERGE (mr)-[:MAPPED_TO]->(de)
                 """)
                 node_count += 1
 
@@ -619,12 +641,15 @@ for i in range(NUM_PATIENTS):
 
         # OMOP Procedure Occurrence
         emit(f"""
-            MERGE (po:OMOPProcedureOccurrence {{procedureId: '{proc_id}'}})
+            MERGE (po:OMOPProcedureOccurrence {{procedureOccurrenceId: {cdm_id('Procedure/' + proc_id)}}})
             SET po.name = 'OMOP {esc(proc_name)}',
+                po.personId = {pid},
                 po.procedureConceptId = {proc_code}
             WITH po
             MATCH (op:OMOPPerson {{personId: {pid}}})
+            MATCH (pr:Procedure {{id: '{proc_id}'}})
             MERGE (op)-[:HAS_PROCEDURE_OCCURRENCE]->(po)
+            MERGE (pr)-[:MAPPED_TO]->(po)
         """)
         node_count += 1
 

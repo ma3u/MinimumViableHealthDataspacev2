@@ -208,6 +208,75 @@ describe("Neo4j Proxy API", () => {
     });
   });
 
+  // ── OMOP person timeline (ADR-098) ──────────────────────────────────────
+  describe("GET /omop/person/:id/timeline", () => {
+    const event = {
+      type: "OMOPMeasurement",
+      id: 492964230173955,
+      date: "2024-09-12",
+      name: "HbA1c",
+      conceptId: 0,
+      sourceValue: "4548-4",
+      valueAsNumber: 6.4,
+      unit: "%",
+    };
+    const record = (values: Record<string, unknown>) => ({
+      get: (key: string) => values[key],
+      keys: Object.keys(values),
+    });
+
+    it("finds the person by personId and reads only its OMOP rows", async () => {
+      mockRun.mockResolvedValue({
+        records: [
+          record({
+            personId: 2933907311533648,
+            yearOfBirth: 1971,
+            genderConceptId: 8532,
+            events: [event],
+          }),
+        ],
+      });
+
+      const res = await request.get("/omop/person/2933907311533648/timeline");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        person: {
+          personId: 2933907311533648,
+          yearOfBirth: 1971,
+          genderConceptId: 8532,
+        },
+        timeline: [event],
+      });
+      const [cypher, params] = mockRun.mock.calls[0];
+      expect(cypher).toContain(
+        "(p:(OMOPPerson)&!OptedOut {personId: $personId})",
+      );
+      expect(cypher).toContain("|OMOPProcedureOccurrence)&!OptedOut");
+      expect(cypher).not.toMatch(
+        /Patient|personSourceValue|MAPS_TO_OMOP_PERSON/,
+      );
+      expect(params).toEqual({ personId: "2933907311533648" });
+    });
+
+    it("refuses an id that is not an OMOP personId", async () => {
+      const res = await request.get("/omop/person/omop-person-P1/timeline");
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/personId/);
+      expect(mockRun).not.toHaveBeenCalled();
+    });
+
+    it("answers 404 for a person who is not there or opted out", async () => {
+      mockRun.mockResolvedValue({ records: [] });
+
+      const res = await request.get("/omop/person/12/timeline");
+
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: "OMOP Person 12 not found" });
+    });
+  });
+
   // ── Catalog Datasets ────────────────────────────────────────────────────
   describe("GET /catalog/datasets", () => {
     it("should return HealthDCAT-AP datasets as JSON-LD", async () => {
