@@ -315,7 +315,12 @@ function ItemBody({
     case "e":
       return (
         <>
-          <Stat label="Requests handled" value={items.e.requests} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Stat label="Requests handled" value={items.e.requests} />
+            <Stat label="Opt-outs" value={items.e.optOuts} />
+            <Stat label="Reversals" value={items.e.reversals} />
+            <Stat label="Opted out at the end" value={items.e.openAtEnd} />
+          </div>
           <Note>{items.e.note}</Note>
         </>
       );
