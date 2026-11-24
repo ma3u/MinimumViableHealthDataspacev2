@@ -192,12 +192,19 @@ print(json.dumps({
 done
 
 # The control plane ignores the state on create: every context comes back
-# CREATED whatever the payload asked for, measured on the live control plane
-# on 2026-09-26. That matters twice over — the UI lists only ACTIVATED
-# contexts (ui/src/app/api/participants/route.ts), and a context that was
-# never activated is not a participant anyone can negotiate with. There is no
-# activate endpoint - PUT <v>/participants/{id} is the way, and the transition
-# it asks for is applied asynchronously (see the wait below).
+# CREATED whatever the payload asked for. EDC 1.0 also ignores it on update:
+# `PUT <v>/participants/{id}` stores the new fields but keeps the stored state
+# (ParticipantContextServiceImpl.updateParticipantContext, v1.0.0-RC8), so the
+# PUT this script used to send answered 204 and changed nothing, which is why
+# every context on Azure stayed CREATED (#891). From RC7 on, the transition has
+# its own endpoint, `POST <v>/participants/{id}/activate` (scope
+# management-api:admin), applied at once. Older control planes answer it 404 or
+# 405; for those the PUT stays as the fallback.
+#
+# The state is cosmetic for the connector: EDC 1.0 refuses only DEACTIVATED
+# contexts (DSP dispatch, metadata, catalog crawler, service-principal filter)
+# and treats CREATED like ACTIVATED. The hub prefers ACTIVATED contexts in
+# ui/src/app/api/participants/route.ts, so activation keeps that list honest.
 log "Activating any context that is not ACTIVATED ..."
 AFTER=$(curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" \
   "$CP/$MGMT_V/participants" || echo '[]')
@@ -208,7 +215,13 @@ while IFS='|' read -r CTX_ID CTX_IDENTITY CTX_STATE; do
   [ -n "$CTX_ID" ] || continue
   [ "$CTX_STATE" = "ACTIVATED" ] && continue
 
-  PUT_BODY=$(python3 -c "
+  RESP=$(mktemp)
+  CODE=$(curl -sS --max-time 30 -o "$RESP" -w '%{http_code}' \
+    -X POST -H "Authorization: Bearer $TOKEN" \
+    "$CP/$MGMT_V/participants/$CTX_ID/activate" || echo 000)
+  if [ "$CODE" = "404" ] || [ "$CODE" = "405" ]; then
+    # A control plane before 1.0.0-RC7 has no activate endpoint.
+    PUT_BODY=$(python3 -c "
 import json, sys
 print(json.dumps({
   '@context': [sys.argv[1]],
@@ -217,11 +230,10 @@ print(json.dumps({
   'identity': sys.argv[3],
   'state': 'ACTIVATED',
 }))" "$EDC_CTX" "$CTX_ID" "$CTX_IDENTITY")
-
-  RESP=$(mktemp)
-  CODE=$(curl -sS --max-time 30 -o "$RESP" -w '%{http_code}' \
-    -X PUT -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-    -d "$PUT_BODY" "$CP/$MGMT_V/participants/$CTX_ID" || echo 000)
+    CODE=$(curl -sS --max-time 30 -o "$RESP" -w '%{http_code}' \
+      -X PUT -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+      -d "$PUT_BODY" "$CP/$MGMT_V/participants/$CTX_ID" || echo 000)
+  fi
   case "$CODE" in
     2??|204)
       log "activate $CTX_IDENTITY -> HTTP $CODE"
@@ -245,7 +257,9 @@ for p in d if isinstance(d, list) else []:
 EOF
 log "activate requests accepted: $ACTIVATED, refused: $ACTIVATE_FAILED"
 
-# Activation is asynchronous, so poll for it rather than re-reading once.
+# Poll for the state rather than re-reading once. On EDC 1.0 the activate
+# endpoint applies it at once and the first read shows it; the poll is for the
+# PUT fallback on older control planes, measured below.
 #
 # This script used to take a single immediate re-read as proof that the PUT had
 # been ignored. It had not been. Measured on the local compose stack on
