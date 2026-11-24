@@ -6,7 +6,7 @@ date: "December 2026"
 
 # Who I am
 
-I am an experienced dataspace architect. I built the operating company for Catena-X (<https://catena-x.net>), the dataspace of the global automotive supply chain, so I know what it takes to run a dataspace with many independent participants, not only to specify one. I also contribute to Eclipse Dataspace Components (<https://github.com/eclipse-edc>), the open-source connector that Catena-X runs on. I build the Minimum Viable Health Dataspace, an open-source reference implementation of Regulation (EU) 2025/327.
+I am an experienced dataspace architect. I built the operating company for Catena-X (<https://catena-x.net>), the dataspace of the global automotive supply chain, so I know what it takes to run a dataspace with many independent participants, not only to specify one. I also contribute to Eclipse Tractus-X (<https://eclipse-tractusx.github.io>), the open-source reference implementation of Catena-X, and to Eclipse Dataspace Components (<https://github.com/eclipse-edc>), the connector it builds on. I build the Minimum Viable Health Dataspace, an open-source reference implementation of Regulation (EU) 2025/327.
 
 > **A non-commercial demo.** The Minimum Viable Health Dataspace is not a product and is not for sale. No company stands behind it, nothing is offered as a service, and it holds no real health data: its patients are synthetic and its organisations (AlphaKlinik Berlin, Limburg Medical Centre, PharmaCo Research AG, MedReg DE) are fictional. It exists to show the EHDS standards working together, so that access bodies, data holders and developers can see, test and question them before 2029. Everything is published under an open-source licence.
 
