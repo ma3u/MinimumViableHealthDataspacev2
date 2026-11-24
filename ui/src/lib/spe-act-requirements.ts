@@ -63,8 +63,6 @@ const SPE_GUIDE = page(
 
 export const DRAFT_ACT_URL =
   "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/17192-European-Health-Data-Space-requirements-for-secure-processing-environments_en";
-export const DRAFT_PDF_URL =
-  "https://ec.europa.eu/info/law/better-regulation/api/download/090166e53752f4ab";
 export const OUR_FEEDBACK_URL =
   "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/17192-European-Health-Data-Space-requirements-for-secure-processing-environments/F33583920_en";
 
@@ -356,7 +354,7 @@ export function countByStatus(
 }
 
 /** The interface texts of the page, for the translation test. */
-export const SPE_ACT_UI_TEXTS = [
+const SPE_ACT_UI_TEXTS = [
   "SPE requirements",
   "The draft implementing act on secure processing environments, article by article, against this demo",
   "In November 2026 the Commission published the draft rules that every secure processing environment must follow from 26 March 2029 (EHDS Art. 73(5)). This page lists them in plain words and shows what this demo does about each one. The demo holds synthetic data only: green means the mechanism works here, not that a real operator is compliant.",
