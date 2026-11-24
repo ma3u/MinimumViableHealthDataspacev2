@@ -4,7 +4,6 @@ import {
   EXT_SOURCE_REGION,
   HUB_ORGANIZATION_NAME,
   LOINC,
-  UCUM,
   datePart,
   documentUuid,
   entry,
@@ -18,6 +17,7 @@ import {
   type FhirResource,
   type IdentityView,
 } from "./shared";
+import { ucumQuantity } from "@/lib/ucum";
 
 /**
  * A laboratory report as an HL7 Europe Laboratory Report 2.1.0 document
@@ -26,7 +26,7 @@ import {
  *
  * The resource shapes follow the shared FHIR writer
  * (services/epa-ingest/src/to-fhir.ts and its Swift twin): LOINC codes, UCUM
- * quantities, the range as printed, `preliminary` for a value read off paper,
+ * quantities (ui/src/lib/ucum.ts), the range as printed, `preliminary` for a value read off paper,
  * and the same provenance extensions with the page and line the value came
  * from. What a document adds is the Composition, the identifiers and the
  * references between the entries.
@@ -103,8 +103,13 @@ export interface LabDocumentOptions {
   identity: IdentityView;
 }
 
+/**
+ * The value with its unit as printed, and the UCUM code only when the unit
+ * has one (#1214): a printed `mg/dl` is UCUM `mg/dL`, an unknown unit stays
+ * text with no `system`.
+ */
 function quantity(value: number, unit: string) {
-  return { value, unit, system: UCUM, code: unit };
+  return ucumQuantity(value, unit);
 }
 
 function observationExtensions(r: LabResultRow) {

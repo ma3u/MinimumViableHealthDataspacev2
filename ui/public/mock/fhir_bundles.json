@@ -539,7 +539,7 @@
             "value": 80.3,
             "unit": "mmHg",
             "system": "http://unitsofmeasure.org",
-            "code": "mmHg"
+            "code": "mm[Hg]"
           }
         },
         "search": {
@@ -1353,7 +1353,7 @@
             "value": 70.2,
             "unit": "mmHg",
             "system": "http://unitsofmeasure.org",
-            "code": "mmHg"
+            "code": "mm[Hg]"
           }
         },
         "search": {
@@ -3512,7 +3512,7 @@
             "value": 138.1,
             "unit": "mmHg",
             "system": "http://unitsofmeasure.org",
-            "code": "mmHg"
+            "code": "mm[Hg]"
           }
         },
         "search": {
@@ -3930,7 +3930,7 @@
             "value": 82.9,
             "unit": "mmHg",
             "system": "http://unitsofmeasure.org",
-            "code": "mmHg"
+            "code": "mm[Hg]"
           }
         },
         "search": {
