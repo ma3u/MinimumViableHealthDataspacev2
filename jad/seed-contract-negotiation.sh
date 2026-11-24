@@ -405,6 +405,26 @@ print(d.get('@id', ''))
 
   echo "    Negotiation ID: ${NEG_ID:0:40}..."
 
+  # An offer that asks for an attested purpose (ehds:attestedPurpose, ADR-090)
+  # admits only a consumer holding a DataProcessingPurposeCredential for it.
+  # PharmaCo holds none: AlphaKasse DE does, for the bonus programme that
+  # scripts/seed-second-data-space.sh offers (#934). The connector must refuse
+  # PharmaCo, so TERMINATED is the result to expect, and FINALIZED a failure.
+  if grep -q 'attestedPurpose' "$policy_file"; then
+    echo -n "    Purpose not attested for PharmaCo, waiting for TERMINATED..."
+    FINAL_STATE=$(poll_state \
+      "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
+      "TERMINATED" "$asset_id")
+    echo " $FINAL_STATE"
+    if [ "$FINAL_STATE" = "TERMINATED" ]; then
+      ok "$asset_id: refused, PharmaCo holds no credential for the purpose (ADR-090)"
+    else
+      echo "    ❌ The connector admitted a consumer without the attested purpose: $FINAL_STATE"
+      FAILED=$((FAILED + 1))
+    fi
+    continue
+  fi
+
   # --- 3b: Poll until FINALIZED ---
   echo -n "    Waiting for FINALIZED..."
   FINAL_STATE=$(poll_state \
