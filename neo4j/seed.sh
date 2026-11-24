@@ -68,6 +68,21 @@ run_file() {
   fi
 }
 
+# Issue #1215: every SnomedConcept, LoincCode and RxNormConcept carries the
+# key init-schema.cypher makes unique. migrate-terminology-keys.cypher merges
+# a node keyed by `code` only into its twin and keys the rest; a node left
+# without its key fails the run, so a seed that merges on `code` again is
+# caught here and not by a duplicate on a page.
+check_terminology_keys() {
+  local unkeyed
+  unkeyed=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (n:LoincCode) WHERE n.loincNumber IS NULL } + COUNT { MATCH (n:SnomedConcept) WHERE n.conceptId IS NULL } + COUNT { MATCH (n:RxNormConcept) WHERE n.rxcui IS NULL } AS unkeyed;" \
+    2>/dev/null | tail -1)
+  echo "terminology nodes without their key: ${unkeyed:-unknown}"
+  [ "$unkeyed" = "0" ] || failed+=("terminology nodes without their key: ${unkeyed:-unknown} (#1215)")
+}
+
 finish() {
   echo ""
   if [ "${#failed[@]}" -gt 0 ]; then
@@ -146,6 +161,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
   run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
   run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
+  run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
@@ -163,6 +179,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
     --non-interactive --format plain \
     "MATCH (p:Patient {resourceId: 'P1'})-[:HAS_OBSERVATION]->(o:Observation) WITH count(o) AS observations MATCH (te:TransferEvent {monthly: true}) RETURN observations, count(te) AS monthlyAccessEvents;"
+  check_terminology_keys
   finish
 fi
 
@@ -245,6 +262,13 @@ run_file "$SEED_DIR"/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (i
 # Idempotent: it matches the old codes only.
 run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
 
+# Issue #1215: the loader, seed-study-results.cypher and the graph generator
+# once merged LOINC, SNOMED CT and RxNorm nodes on `code`, beside the keyed
+# nodes the other seeds write, so a concept existed twice. Merges each such
+# node into its keyed twin (relationships moved, the copy removed) and keys
+# the rest. After every seed that writes terminology nodes. Idempotent.
+run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
+
 # Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
 # Requires the graph-data-science plugin; silently no-ops on installs without
 # it (the CALL gds.version() check below logs a warning so the operator sees
@@ -274,5 +298,6 @@ cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
 cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
   --non-interactive --format plain \
   "MATCH ()-[r]->() RETURN count(r) AS relCount;"
+check_terminology_keys
 
 finish

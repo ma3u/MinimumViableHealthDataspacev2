@@ -1,4 +1,5 @@
 import { claimedProfiles } from "./fhir-profiles.js";
+import { ucumQuantity } from "./ucum.js";
 
 // ---------------------------------------------------------------------------
 // A graph node as a FHIR R4 resource (#876, #1144)
@@ -28,7 +29,6 @@ export type Resource = Record<string, unknown>;
 export const LOINC = "http://loinc.org";
 export const SNOMED = "http://snomed.info/sct";
 export const RXNORM = "http://www.nlm.nih.gov/research/umls/rxnorm";
-export const UCUM = "http://unitsofmeasure.org";
 const DATA_ABSENT_REASON =
   "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 /** The shared FHIR writer's extension for where a value came from. */
@@ -144,14 +144,12 @@ function codeable(
   };
 }
 
-/** UCUM codes for the units the seeds print otherwise. */
-const UCUM_CODES: Record<string, string> = { mmHg: "mm[Hg]" };
-
-/** A Quantity in UCUM: the unit as printed, its UCUM code beside it. */
+/**
+ * A Quantity: the unit as printed, and its UCUM code beside it only when the
+ * unit has one (#1214, ./ucum.ts). An unknown unit stays text, no `system`.
+ */
 function quantity(value: number, unit: string | undefined): Resource {
-  return unit
-    ? { value, unit, system: UCUM, code: UCUM_CODES[unit] ?? unit }
-    : { value };
+  return ucumQuantity(value, unit);
 }
 
 /** A reference to a party the graph knows by name only. */
