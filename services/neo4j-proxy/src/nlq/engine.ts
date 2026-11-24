@@ -1584,14 +1584,18 @@ export async function computeCohortDataQuality(
       WITH cohort, cp,
            count(DISTINCT cc) AS cpConditions,
            count(DISTINCT CASE WHEN cs IS NOT NULL THEN cc END) AS cpCodedConds
+      // Per patient first, then summed: summing cpConditions over the
+      // medication rows counted each Condition once per MedicationRequest.
       OPTIONAL MATCH (cp)-[:HAS_MEDICATION_REQUEST]->(cm:MedicationRequest)
       OPTIONAL MATCH (cm)-[:CODED_BY]->(cr:RxNormConcept)
+      WITH cohort, cp, cpConditions, cpCodedConds,
+           count(DISTINCT cm) AS cpMeds,
+           count(DISTINCT CASE WHEN cr IS NOT NULL THEN cm END) AS cpCodedMeds
       WITH size(cohort) AS cohortSize,
            sum(cpConditions) AS cohortConditions,
-           sum(CASE WHEN cs IS NOT NULL THEN cpConditions ELSE 0 END) AS _unused,
            sum(cpCodedConds) AS cohortSnomedConds,
-           count(DISTINCT cm) AS cohortMeds,
-           count(DISTINCT CASE WHEN cr IS NOT NULL THEN cm END) AS cohortCodedMeds
+           sum(cpMeds) AS cohortMeds,
+           sum(cpCodedMeds) AS cohortCodedMeds
       RETURN cohortSize, cohortConditions, cohortSnomedConds, cohortMeds, cohortCodedMeds,
              CASE WHEN cohortConditions > 0
                   THEN round(toFloat(cohortSnomedConds) / cohortConditions * 100, 1)
