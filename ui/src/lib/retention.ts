@@ -15,7 +15,7 @@
  */
 
 export const RETENTION_MONTHS = 12;
-export const RETENTION_MAX_YEARS = 5;
+const RETENTION_MAX_YEARS = 5;
 export const RETENTION_ARTICLE =
   "Regulation (EU) 2025/327, Art. 73(1)(e); draft SPE implementing act, Art. 16(4)";
 
