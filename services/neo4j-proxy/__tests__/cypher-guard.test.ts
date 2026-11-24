@@ -43,7 +43,9 @@ vi.mock("neo4j-driver", () => ({
   },
 }));
 
-const { refusedCypher } = await import("../src/cypher-guard.js");
+const { refusedCypher, withoutComments } = await import(
+  "../src/cypher-guard.js"
+);
 const { auditPermits, buildQueryAuditEvent } = await import(
   "../src/audit-chain.js"
 );
@@ -128,6 +130,21 @@ describe("refusedCypher", () => {
     expect(
       refusedCypher("MATCH (d:Dataset) WHERE d.loadedAt IS NOT NULL RETURN d"),
     ).toBeNull();
+  });
+});
+
+describe("withoutComments", () => {
+  it("removes block and line comments", () => {
+    expect(withoutComments("LOAD/**/CSV // x\nRETURN 1")).toBe(
+      "LOAD CSV  \nRETURN 1",
+    );
+  });
+
+  it("stays linear on an unclosed comment run", () => {
+    const evil = "/*" + "a/*".repeat(200_000);
+    const t0 = performance.now();
+    expect(refusedCypher(evil)).toBeNull();
+    expect(performance.now() - t0).toBeLessThan(1000);
   });
 });
 
