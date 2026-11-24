@@ -18,7 +18,13 @@ import {
 import { app } from "../app.js";
 import { noteSpeQueried } from "../spe-status.js";
 import { auditContext, logTransferEvent } from "../audit.js";
-import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
+import {
+  type AuditPermit,
+  appendQueryAudit,
+  auditPermits,
+  auditUnavailable,
+} from "../audit-chain.js";
+import { refusedCypher } from "../cypher-guard.js";
 import {
   AdverseEventContext,
   CypherSection,
@@ -55,6 +61,7 @@ async function auditRefusal(r: {
   cypher: string | null;
   method: string;
   reason: string;
+  permits?: AuditPermit[];
 }): Promise<void> {
   try {
     await appendQueryAudit({
@@ -245,11 +252,28 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    // Safety check for non-template Cypher (hardened regex)
+    // Safety check for non-template Cypher (#779, src/cypher-guard.ts). The
+    // read-only session is the barrier against writes; reads outside the
+    // graph (LOAD CSV, apoc.load.*) are refused only here.
     if (method === "llm" || method === "graphrag" || method === "fulltext") {
-      const WRITE_PATTERN =
-        /\b(CREATE|MERGE|DELETE|DETACH\s+DELETE|SET|REMOVE|DROP|CALL\s*\{[^}]*(CREATE|MERGE|DELETE|SET|REMOVE))/i;
-      if (WRITE_PATTERN.test(cypher)) {
+      const refused = cypher ? refusedCypher(cypher) : null;
+      if (refused === "outside") {
+        await auditRefusal({
+          participantId: scope?.participantId,
+          question,
+          cypher,
+          method,
+          reason: "reads outside the graph (#779)",
+          permits: auditPermits(scope),
+        });
+        res.status(403).json({
+          error:
+            "Query blocked: it would read files, URLs or server settings outside the graph",
+          cypher,
+        });
+        return;
+      }
+      if (refused === "write") {
         res.status(403).json({
           error: "LLM generated a write query — blocked for safety",
           cypher,
@@ -269,6 +293,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         cypher,
         method,
         reason: "patient identity withheld (#475)",
+        permits: auditPermits(scope),
       });
       res.status(403).json({
         error:
@@ -287,6 +312,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         cypher,
         method,
         reason: "ODRL re-identification prohibition",
+        permits: auditPermits(scope),
       });
       res.status(403).json({
         error:
@@ -396,6 +422,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         resultCount: results.length,
         odrlEnforced,
         outcome: "success",
+        permits: auditPermits(scope),
         ...(kOutcome.minKApplied > 0
           ? {
               federated: {

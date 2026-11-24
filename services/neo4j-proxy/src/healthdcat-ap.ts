@@ -352,11 +352,18 @@ export function toDataset(r: DatasetRecord): Record<string, unknown> {
       ? legislation
       : [EHDS_ELI]
     ).map((l) => ({ "@id": l, "@type": "eli:LegalResource" })),
-    "dct:type": concept(
-      NAL.datasetType,
-      String(ds.hdcatapDctType ?? "SYNTHETIC_DATA"),
-      EU_LABELS,
-    ),
+    // "NONE": the EU dataset-type list has no concept for a description of a
+    // real-world source (ADR-094), and dct:type is only recommended (a SHACL
+    // warning), so such a description names none rather than a wrong one.
+    ...(ds.hdcatapDctType === "NONE"
+      ? {}
+      : {
+          "dct:type": concept(
+            NAL.datasetType,
+            String(ds.hdcatapDctType ?? "SYNTHETIC_DATA"),
+            EU_LABELS,
+          ),
+        }),
     "dcat:theme": concept(NAL.dataTheme, "HEAL", EU_LABELS),
     "dcat:keyword": keywords(ds),
     "dct:provenance": {

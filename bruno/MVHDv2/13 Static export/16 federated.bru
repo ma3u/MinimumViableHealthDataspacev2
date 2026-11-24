@@ -19,6 +19,37 @@ assert {
   res.body: isJson
 }
 
+tests {
+  // ADR-094, #1123: a feasibility count below k is shown as "<k", never as
+  // the number, per SPE and in the totals.
+  // A pull request runs this against the deployed site, which serves main's
+  // fixture until the merge deploys; the old shape has no minKApplied.
+  const body = res.getBody();
+  if (body.minKApplied === undefined) {
+    test("SKIPPED: the deployed site does not serve the suppressed counts yet (#1123)", function () {});
+  } else test("no count below k leaves as a number", function () {
+    const k = body.minKApplied;
+    expect(k).to.be.at.least(5);
+    const counts = [
+      ...Object.values(body.totals),
+      ...body.aggregatedConditions.map((c) => c.count),
+      ...body.aggregatedGenders.map((g) => g.count),
+      ...body.perSpe.flatMap((s) => [
+        s.patients,
+        s.encounters,
+        s.conditions,
+        s.observations,
+        ...s.topConditions.map((c) => c.count),
+        ...s.genderBreakdown.map((g) => g.count),
+      ]),
+    ];
+    for (const c of counts) {
+      if (typeof c === "number") expect(c === 0 || c >= k, String(c)).to.equal(true);
+      else expect(c).to.equal("<" + k);
+    }
+  });
+}
+
 docs {
   ui/public/mock/federated_stats.json stands in for /api/federated in the static build.
 }

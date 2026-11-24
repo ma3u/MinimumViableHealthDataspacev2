@@ -627,5 +627,71 @@
     },
     "accessBody": "Institut de Recherche Santé",
     "accessBodyCountry": "FR"
+  },
+  {
+    "id": "dataset:medreg:national-claims-epa-research",
+    "title": "National Claims and ePA Research Dataset (fictional)",
+    "description": "Access: secure processing environment only, no row-level download. Fictional description of a national research dataset built from statutory health insurance claims and from electronic patient record (ePA) data of insured persons who did not opt out. The data stays at the source: an approved health data user analyses it in the source's secure processing environment under a data permit, and only results the source has checked for re-identification leave it.",
+    "license": "CC-BY-4.0",
+    "conformsTo": "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+    "publisher": "MedReg DE",
+    "theme": "Health Services Research",
+    "datasetType": "RealWorldData",
+    "legalBasis": "EHDS Art. 68 data permit, secure processing environment only (Art. 73)",
+    "recordCount": 1200000000,
+    "healthCategories": ["HRAD", "EHRS"],
+    "populationCoverage": "Fictional: persons insured under statutory health insurance in Germany, and their ePA data where they did not opt out",
+    "numberOfUniqueIndividuals": 73000000,
+    "minTypicalAge": 0,
+    "maxTypicalAge": 105,
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE",
+    "providers": [],
+    "consumers": [],
+    "fhirResources": [],
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "Nationaler Forschungsdatensatz aus Abrechnungs- und ePA-Daten (fiktiv)",
+        "description": "Zugang: nur in der sicheren Verarbeitungsumgebung, kein Herunterladen von Einzeldaten. Fiktive Beschreibung eines nationalen Forschungsdatensatzes aus Abrechnungsdaten der gesetzlichen Krankenversicherung und aus Daten der elektronischen Patientenakte (ePA) von Versicherten, die nicht widersprochen haben. Die Daten bleiben an der Quelle: Ein Gesundheitsdatennutzer mit Datengenehmigung wertet sie in der sicheren Verarbeitungsumgebung der Quelle aus, und nur Ergebnisse, die die Quelle auf Reidentifizierung geprüft hat, verlassen sie."
+      },
+      "es": {
+        "title": "Conjunto nacional de datos de investigación de facturación y ePA (ficticio)",
+        "description": "Acceso: solo en el entorno de tratamiento seguro, sin descarga de datos individuales. Descripción ficticia de un conjunto nacional de datos de investigación a partir de datos de facturación del seguro médico obligatorio y de datos de la historia clínica electrónica (ePA) de asegurados que no ejercieron su derecho de autoexclusión. Los datos permanecen en el origen: un usuario de datos de salud con permiso de datos los analiza en el entorno de tratamiento seguro del origen, y solo salen los resultados que el origen ha comprobado frente a la reidentificación."
+      }
+    }
+  },
+  {
+    "id": "dataset:medreg:university-hospital-fhir",
+    "title": "University Hospital FHIR Core Dataset (fictional)",
+    "description": "Access: secure processing environment only, no row-level download. Fictional description of the FHIR R4 core dataset of a network of university hospitals: patients, encounters, diagnoses, procedures, laboratory values and medication. Feasibility counts answer in real time with small counts suppressed; a data use needs a data permit and an ethics vote, and each hospital keeps its data. Analysis runs in a secure processing environment at the source.",
+    "license": "CC-BY-4.0",
+    "conformsTo": "http://hl7.org/fhir/R4",
+    "publisher": "MedReg DE",
+    "theme": "Clinical Research",
+    "datasetType": "RealWorldData",
+    "legalBasis": "EHDS Art. 68 data permit, secure processing environment only (Art. 73)",
+    "recordCount": 480000000,
+    "healthCategories": ["EHRS"],
+    "populationCoverage": "Fictional: inpatients and outpatients of a network of German university hospitals",
+    "numberOfUniqueIndividuals": 12000000,
+    "minTypicalAge": 0,
+    "maxTypicalAge": 105,
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE",
+    "providers": [],
+    "consumers": [],
+    "fhirResources": [],
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Kerndatensatz der Universitätskliniken (fiktiv)",
+        "description": "Zugang: nur in der sicheren Verarbeitungsumgebung, kein Herunterladen von Einzeldaten. Fiktive Beschreibung des FHIR-R4-Kerndatensatzes eines Verbunds von Universitätskliniken: Patienten, Kontakte, Diagnosen, Prozeduren, Laborwerte und Medikation. Machbarkeitsabfragen liefern sofort Fallzahlen, kleine Zahlen unterdrückt; eine Nutzung braucht eine Datengenehmigung und ein Ethikvotum, und jede Klinik behält ihre Daten. Ausgewertet wird in einer sicheren Verarbeitungsumgebung an der Quelle."
+      },
+      "es": {
+        "title": "Conjunto básico FHIR de hospitales universitarios (ficticio)",
+        "description": "Acceso: solo en el entorno de tratamiento seguro, sin descarga de datos individuales. Descripción ficticia del conjunto básico FHIR R4 de una red de hospitales universitarios: pacientes, contactos, diagnósticos, procedimientos, valores de laboratorio y medicación. Las consultas de viabilidad responden al momento con recuentos, suprimidos los pequeños; un uso necesita un permiso de datos y un dictamen ético, y cada hospital conserva sus datos. El análisis se hace en un entorno de tratamiento seguro en el origen."
+      }
+    }
   }
 ]

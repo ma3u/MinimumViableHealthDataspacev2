@@ -2,7 +2,7 @@
 
 Date: 2026-11-15
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-15
 **Relates to:** [ADR-037](ADR-037-secure-processing-environment-confidential-computing.md), [ADR-052](ADR-052-confidential-spe-on-azure-revisited.md), [ADR-083](ADR-083-what-the-hub-takes-over-from-tehdas2.md)
 **Tracks:** [#1123](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1123)
 
@@ -60,13 +60,21 @@ apply for the data. It does not change where the data may go.
       ([Art. 77](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_77)),
       with access "secure processing environment only". The default build
       carries fictional analogues published by MedReg DE; the real descriptions
-      only behind a demo build flag, as `NEXT_PUBLIC_DEMO_TK` does for live
-      interoperability demos.
+      only behind a build flag of their own, `NEXT_PUBLIC_DEMO_NATIONAL_SOURCES`,
+      kept apart from `NEXT_PUBLIC_DEMO_TK` so either demo can be shown
+      without the other. The EU dataset-type list has no concept for a
+      description of a real-world source, and `dct:type` is only recommended,
+      so these descriptions name none rather than "synthetic data".
    2. _Published aggregate results_: anonymised, released by the source for
       publication, each with its source URL, licence, release date and the
       source's small-count rule.
    3. _Feasibility counts_ from a federated query: a count only, suppressed
-      below the source's threshold, never the rows behind it.
+      below the source's threshold, never the rows behind it. A total across
+      sources leaves out the counts below the threshold unless together they
+      reach it, so no suppressed count can be got back by subtracting the
+      shown ones from the total; a total below the threshold is itself
+      suppressed. A total can therefore understate the truth by less than the
+      threshold.
 3. **Real data work runs at the source, operated by the partner.** The pilot is
    our pipeline (Neo4j, the FHIR loader, the FHIR to OMOP mapping) as a bundle
    the partner runs inside the secure environment it is admitted to, under its
@@ -82,6 +90,14 @@ apply for the data. It does not change where the data may go.
    real bodies appear in the demo only behind the flag of decision 2.1.
 
 ## Consequences
+
+- **Real data needs its own instance, never this one.** Accepting this ADR
+  (2026-11-24) the maintainer added: the hub is a demo system. A deployment
+  that holds or processes real health data is a separate instance, built on a
+  Zero Trust approach in its own landing zone, with secure credentials (no
+  published or default passwords) and multi-factor authentication for every
+  person. Nothing in this repository's live hub, compose stack or GitHub Pages
+  build is that instance.
 
 - A partner conversation starts from what we can offer at once: the pipeline as
   a bundle, the dataspace contract flow, and catalog entries. No conversation

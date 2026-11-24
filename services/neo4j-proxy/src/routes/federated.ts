@@ -9,10 +9,20 @@ import {
   checkOdrlTemporal,
   checkReIdentification,
 } from "../nlq/engine.js";
-import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
+import {
+  type AuditPermit,
+  appendQueryAudit,
+  auditPermits,
+  auditUnavailable,
+} from "../audit-chain.js";
+import { refusedCypher } from "../cypher-guard.js";
 import { logger } from "../logger.js";
 import { secondaryUseSession } from "../opt-out.js";
-import { suppressSmallGroups } from "../k-anonymity.js";
+import {
+  combineCounts,
+  suppressSmallCells,
+  suppressSmallGroups,
+} from "../k-anonymity.js";
 import { noteSpeQueried } from "../spe-status.js";
 
 /** A refused federated query is recorded before the refusal goes out. */
@@ -20,10 +30,12 @@ async function auditFederatedRefusal(
   callerId: string | undefined,
   cypher: string,
   reason: string,
+  permits?: AuditPermit[],
 ): Promise<void> {
   try {
     await appendQueryAudit({
       participantId: callerId,
+      permits,
       question: "(federated)",
       cypher,
       method: "federated",
@@ -78,7 +90,12 @@ app.post(
       if (scope) {
         const temporalViolation = checkOdrlTemporal(scope);
         if (temporalViolation) {
-          await auditFederatedRefusal(callerId, cypher, "ODRL temporal limit");
+          await auditFederatedRefusal(
+            callerId,
+            cypher,
+            "ODRL temporal limit",
+            auditPermits(scope),
+          );
           res
             .status(403)
             .json({ error: temporalViolation, odrlEnforced: true });
@@ -89,6 +106,7 @@ app.post(
             callerId,
             cypher,
             "ODRL re-identification prohibition",
+            auditPermits(scope),
           );
           res.status(403).json({
             error:
@@ -100,11 +118,24 @@ app.post(
         }
       }
 
-      // Safety: reject write operations (hardened regex — catches CALL { CREATE } subqueries)
-      const upperCypher = cypher.toUpperCase().replace(/\s+/g, " ").trim();
-      const WRITE_PATTERN =
-        /\b(CREATE|MERGE|DELETE|DETACH\s+DELETE|SET|REMOVE|DROP|CALL\s*\{[^}]*(CREATE|MERGE|DELETE|SET|REMOVE))/i;
-      if (WRITE_PATTERN.test(upperCypher)) {
+      // Safety (#779, src/cypher-guard.ts): writes meet a read-only session
+      // anyway; reads outside the graph (LOAD CSV, apoc.load.*) are refused
+      // only here.
+      const refused = refusedCypher(cypher);
+      if (refused === "outside") {
+        await auditFederatedRefusal(
+          callerId,
+          cypher,
+          "reads outside the graph (#779)",
+          auditPermits(scope),
+        );
+        res.status(403).json({
+          error:
+            "Reads outside the graph (LOAD CSV, apoc.load.*, dbms.*) are not permitted on the federated endpoint",
+        });
+        return;
+      }
+      if (refused === "write") {
         res.status(403).json({
           error: "Write operations not permitted on federated endpoint",
         });
@@ -177,6 +208,7 @@ app.post(
           resultCount: merged.length,
           odrlEnforced: Boolean(scope),
           outcome: "success",
+          permits: auditPermits(scope),
           federated: {
             contributors: sources,
             aggregateSuppressed,
@@ -218,11 +250,21 @@ app.post(
  * Returns aggregate statistics across all connected SPEs — patient counts,
  * condition distribution, gender breakdown — suitable for a federated
  * analytics dashboard without exposing individual patient data.
+ *
+ * Feasibility counts (ADR-094, #1123): every count below k leaves as "<k",
+ * per SPE and in the totals, and a total never gives a suppressed SPE count
+ * back (combineCounts). k is the server minimum (MIN_COHORT_SIZE) unless the
+ * caller asks for more with ?minK=, as on /federated/query; never less.
  */
 app.get(
   "/federated/stats",
   async (_req: Request, res: Response, next: NextFunction) => {
     try {
+      const requestedMinK = Number(_req.query.minK);
+      const minK = Math.max(
+        Number.isFinite(requestedMinK) ? requestedMinK : MIN_COHORT_SIZE,
+        MIN_COHORT_SIZE,
+      );
       const spes = getSpeDrivers();
       noteSpeQueried(spes.map((s) => s.label));
       const stats: Array<{
@@ -299,35 +341,62 @@ app.get(
         }),
       );
 
-      // Compute aggregated totals
+      // Each SPE's counts as it may release them: a count below k is "<k".
+      let filtered = 0;
+      const cells = (rows: Array<Record<string, unknown>>) => {
+        const out = suppressSmallCells(rows, minK);
+        filtered += out.filtered;
+        return out.rows;
+      };
+      const perSpe = stats.map((s) => ({
+        source: s.source,
+        ...cells([
+          {
+            patients: s.patients,
+            encounters: s.encounters,
+            conditions: s.conditions,
+            observations: s.observations,
+          },
+        ])[0],
+        topConditions: cells(s.topConditions),
+        genderBreakdown: cells(s.genderBreakdown),
+      }));
+
+      // The totals across SPEs, which must not give a suppressed count back.
+      const combine = (counts: number[]) => {
+        const c = combineCounts(counts, minK);
+        if (c !== counts.reduce((n, v) => n + v, 0)) filtered += 1;
+        return c;
+      };
       const totals = {
-        patients: stats.reduce((sum, s) => sum + s.patients, 0),
-        encounters: stats.reduce((sum, s) => sum + s.encounters, 0),
-        conditions: stats.reduce((sum, s) => sum + s.conditions, 0),
-        observations: stats.reduce((sum, s) => sum + s.observations, 0),
+        patients: combine(stats.map((s) => s.patients)),
+        encounters: combine(stats.map((s) => s.encounters)),
+        conditions: combine(stats.map((s) => s.conditions)),
+        observations: combine(stats.map((s) => s.observations)),
       };
 
       // Merge top conditions across SPEs
-      const condMap = new Map<string, number>();
+      const condMap = new Map<string, number[]>();
       stats.forEach((s) =>
         s.topConditions.forEach(({ name, count }) =>
-          condMap.set(name, (condMap.get(name) ?? 0) + count),
+          condMap.set(name, [...(condMap.get(name) ?? []), count]),
         ),
       );
+      const ranked = (c: number | string) => (typeof c === "number" ? c : 0);
       const aggregatedConditions = Array.from(condMap.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([name, count]) => ({ name, count }));
+        .map(([name, counts]) => ({ name, count: combine(counts) }))
+        .sort((a, b) => ranked(b.count) - ranked(a.count))
+        .slice(0, 10);
 
       // Merge gender breakdown
-      const genderMap = new Map<string, number>();
+      const genderMap = new Map<string, number[]>();
       stats.forEach((s) =>
         s.genderBreakdown.forEach(({ gender, count }) =>
-          genderMap.set(gender, (genderMap.get(gender) ?? 0) + count),
+          genderMap.set(gender, [...(genderMap.get(gender) ?? []), count]),
         ),
       );
       const aggregatedGenders = Array.from(genderMap.entries()).map(
-        ([gender, count]) => ({ gender, count }),
+        ([gender, counts]) => ({ gender, count: combine(counts) }),
       );
 
       res.json({
@@ -335,7 +404,10 @@ app.get(
         totals,
         aggregatedConditions,
         aggregatedGenders,
-        perSpe: stats,
+        perSpe,
+        minKApplied: minK,
+        filtered,
+        suppressionReason: filtered > 0 ? "small_cells" : null,
       });
 
       logTransferEvent(

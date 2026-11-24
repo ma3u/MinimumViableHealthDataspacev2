@@ -142,6 +142,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/seed-compliance-matrix.cypher "compliance matrix"
   run_file "$SEED_DIR"/seed-persona-overview.cypher "persona overview (discussion #265)"
   run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
+  run_file "$SEED_DIR"/seed-national-sources.cypher "national sources: descriptions and a published aggregate (ADR-094)"
   run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
   run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
   run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
@@ -186,6 +187,12 @@ run_file "$SEED_DIR"/seed-compliance-matrix.cypher "compliance matrix"
 # scripts/generate-persona-overview-seed.py. Idempotent MERGE.
 run_file "$SEED_DIR"/seed-persona-overview.cypher "persona overview (discussion #265)"
 run_file "$SEED_DIR"/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
+
+# Issue #1123, ADR-094: two fictional national sources published by MedReg DE,
+# described here and kept at the source, and one aggregate a source released
+# for publication. Before register-healthdcat-ap-r8.cypher, which adds the
+# variables. Idempotent MERGE.
+run_file "$SEED_DIR"/seed-national-sources.cypher "national sources: descriptions and a published aggregate (ADR-094)"
 
 # Issue #694: the seeds above now write ehdsArticle as "Art. NN" with the
 # adopted numbers of Regulation (EU) 2025/327. Some of them only SET it ON
