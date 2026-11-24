@@ -50,8 +50,9 @@ So the GDPR gives me a copy, but not the structured export and the write access 
 
 **Request:**
 
-- Add EHDSPatient and EHDSRelatedPerson to `author` in Annex III and the category headers.
-- Add a coded element for the information source, with a Union value set, for example: issued by a provider; digitised by the person from a provider document; measured by the person; device generated; reported by the person.
+- Add a coded element for the information source, with a Union value set, for example: issued by a provider; digitised by the person from a provider document; measured by the person; device generated; reported by the person. This is what Article 5 asks for: information marked as inserted by the person.
+- `performer` = patient, which the draft already allows for an observation, fits a value the person measured. It does not fit a provider's report the person digitised: the provider remains the source of the values, the person only the one who brought them in. The information source element covers both without widening `author`.
+- If the Commission prefers `author`, add EHDSPatient and EHDSRelatedPerson to it in Annex III and the category headers.
 
 # 3. Access to the raw data, study results and supplements
 
@@ -145,7 +146,15 @@ An implementer cannot target a moving draft, and a conformance claim nobody can 
 - Name ICD-11 next to ICD-10 in the binding requirements, with a transition, since WHO and Member States are moving to it.
 - Publish the GPS-to-SNOMED CT and ICD-10-to-ICD-11 relationships through the terminology service of Article 6(5).
 
-# 10. Editorial
+# 10. Consistency and editorial
+
+**Consistency.** Article 9(3) lets the implementation guide rename elements but requires it to "preserve the meaning, cardinalities and binding requirements". Three of them cannot be implemented in FHIR R4 as written, so they need fixing in the act itself:
+
+- `emptyReason` of the Patient Summary sections (Annex IV, e.g. allergies and intolerances) is bound to HL7 Data Absent Reason, with the value `as-text` for unstructured information. FHIR R4 binds `Composition.section.emptyReason` to List Empty Reasons. Please bind it to List Empty Reasons, or say how `as-text` is carried.
+- `date` (date of finalisation or issuance) is 1..1 in the common resource header of Annex III, table 2, but 0..1 in the data groups of Annex X (for example the observation and condition groups). Please align the two.
+- `version` of the document is 1..1 in the document header (Annex IV and the other category headers). FHIR R4 Composition has no version element (it was added in R5); please name the R4 representation, for example an extension or `Bundle.identifier` with a version.
+
+**Editorial.**
 
 - Annex I, data type "EHDS[Name of the data group]": refers to "Annex IX"; the common data groups are in Annex X.
 - Annex III, footnote 4: "BCP 47: Best Current Practice 13, Media Type Specifications and Registration Procedures". BCP 47 is Tags for Identifying Languages; BCP 13 is media types.
