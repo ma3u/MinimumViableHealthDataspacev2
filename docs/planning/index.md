@@ -7,8 +7,8 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## current/
 
+- [issue-triage-2026-11-24](current/issue-triage-2026-11-24.md): all open issues by priority (P1 in work order) and epic; the taxonomy (epic, lane, priority, type); 2 closed, 8 proposed for closing
 - [issue-847-ci-minutes](current/issue-847-ci-minutes.md): CI job-minutes cut by about three quarters; nightly suites per [ADR-074](../ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)
-- [issue-951-e2e-visible](current/issue-951-e2e-visible.md): E2E fails visibly and runs on the pull requests that can break it, per [ADR-079](../ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)
 - [issue-973-cfm-0-0-7-spike](current/issue-973-cfm-0-0-7-spike.md): ADR-085 step 1: a participant registered at `/onboarding` is provisioned through CFM 0.0.7 end to end (token proxy, two activities of our own) and fetches a catalogue over DSP; dispose fails upstream
 - [Roadmap to 2035: EHDS, wallets and Simpl](../planning-health-dataspace-v2.md#roadmap-to-2035-ehds-wallets-and-simpl): the dates, P1 to P3, plan #725 over issues #708 to #724, from the [gap analysis](../simpl-ehds-gap-analysis.md)
 - [issue-182-german-national-wallet-integration](current/issue-182-german-national-wallet-integration.md) — German EUDI Wallet (RP contract, self-hosted verifier, wallet-provider backend) **+ the #72 citizen consent demo** it enables (W7–W9)
@@ -33,6 +33,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## done/
 
+- [issue-951-e2e-visible](done/issue-951-e2e-visible.md): E2E fails visibly and runs on the pull requests that can break it, per [ADR-079](../ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md) (closed)
 - [issue-97-edc-upgrade](done/issue-97-edc-upgrade.md) and [phase B](done/issue-97-phase-b-analysis.md): EDC 0.18 refresh, superseded by #881 (EDC 1.0); closed 2026-11-08. Upstream releases now reach #963 through Dependabot and the upstream watch
 - [issue-19-nlq-researcher](done/issue-19-nlq-researcher.md): NLQ for researchers, every criterion met live (closed 2026-10-04)
 - [issue-11-weekly-demo-reset](done/issue-11-weekly-demo-reset.md): superseded by ADR-053, everything stops off hours (closed 2026-10-04)

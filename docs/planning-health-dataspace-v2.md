@@ -1,5 +1,8 @@
 # Planning: Health Dataspace v2
 
+Open issues triaged on **2026-11-24**: every one has an epic, a lane, a
+priority and a type, and the full list in work order is in
+[`planning/current/issue-triage-2026-11-24.md`](planning/current/issue-triage-2026-11-24.md).
 Status checked against GitHub on **2026-10-28** (the release tables were
 written on 2026-10-04; on 2026-10-28 only whether each issue is open or closed
 was rechecked). The latest release is
@@ -51,6 +54,10 @@ build.
 | 26 March 2035 | Third countries in HealthData@EU                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Out of scope                                                                                                                                                                                                              |
 
 ### P1: now to 26 March 2027
+
+The table holds the roadmap's P1 items. Every P1 issue, bugs and security gaps
+included, in the order to work on them, is in the
+[triage of 2026-11-24](planning/current/issue-triage-2026-11-24.md#open-issues-by-priority).
 
 | Issue                                                                     | What                                                                                                                               | Where it stands (2026-11-08)                                                                                                                                                                                                                                 |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
