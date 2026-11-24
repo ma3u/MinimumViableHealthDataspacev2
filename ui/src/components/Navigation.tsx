@@ -173,6 +173,13 @@ const governanceGroup: NavGroup = {
       icon: ShieldCheck,
       roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
+    // Draft Art. 73(5) implementing act, requirement by requirement (#1225).
+    {
+      href: "/compliance/spe-act",
+      label: "SPE requirements",
+      icon: Scale,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
     {
       href: "/credentials",
       label: "Credentials",

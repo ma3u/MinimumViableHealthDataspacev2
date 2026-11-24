@@ -28,6 +28,7 @@ export const GUIDE_SCREENS: { href: string; persona: string | null }[] = [
   { href: "/docs/klarbefund", persona: "patient1" },
   { href: "/compliance", persona: "regulator" },
   { href: "/compliance/tck", persona: "regulator" },
+  { href: "/compliance/spe-act", persona: "regulator" },
   { href: "/credentials", persona: "regulator" },
   { href: "/applications", persona: "researcher" },
   { href: "/requests", persona: "researcher" },

@@ -421,6 +421,7 @@
     "/catalog",
     "/catalog/editor",
     "/compliance",
+    "/compliance/spe-act",
     "/compliance/tck",
     "/credentials",
     "/data/discover",
@@ -1552,7 +1553,7 @@
   "lastUpdated": {
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-24",
-    "/docs/developer": "2026-11-23",
+    "/docs/developer": "2026-11-24",
     "/docs/developer/quality-gates": "2026-11-23",
     "/docs/developer/api": "2026-11-23",
     "/docs/developer/reference": "2026-11-23",
