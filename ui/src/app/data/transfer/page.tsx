@@ -25,6 +25,7 @@ import {
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import TransferDetails from "@/components/TransferDetails";
+import { forbidsExtract } from "@/lib/agreement";
 import SpeImport from "@/components/SpeImport";
 import {
   closedAfterImportInto,
@@ -1216,6 +1217,54 @@ function DataTransferContent() {
             .includes(q)),
     );
   }, [rows, stageFilter, search]);
+  // Agreements whose policy prohibits `extract` (#889, ADR-077): their data
+  // may only go into a secure processing environment, never into the
+  // browser. Read once per agreement the connector holds and that has data.
+  const [extractForbidden, setExtractForbidden] = useState<
+    Record<string, boolean>
+  >({});
+  useEffect(() => {
+    if (!selectedCtx) return;
+    const ids = rows
+      .filter(
+        (r) =>
+          r.agreement &&
+          !r.sample &&
+          (r.open || r.transfers.length > 0) &&
+          !(r.id in extractForbidden),
+      )
+      .map((r) => r.id);
+    if (ids.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      ids.map(async (id) => {
+        try {
+          const res = await fetchApi(
+            `/api/agreements/${encodeURIComponent(
+              id,
+            )}?participantId=${encodeURIComponent(selectedCtx)}`,
+          );
+          if (!res.ok) return [id, false] as const;
+          const view = (await res.json()) as {
+            policy?: Record<string, unknown>;
+          };
+          return [id, forbidsExtract(view.policy ?? {})] as const;
+        } catch {
+          return [id, false] as const;
+        }
+      }),
+    ).then((pairs) => {
+      if (cancelled) return;
+      setExtractForbidden((prev) => ({
+        ...prev,
+        ...Object.fromEntries(pairs),
+      }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [rows, selectedCtx, extractForbidden]);
+
   // A link to one agreement (?contractId=) shows it even past the first page.
   const pageRows =
     showAll || shownRows.length <= PAGE_SIZE
@@ -1657,7 +1706,18 @@ function DataTransferContent() {
                             {t("Waiting for the provider")}
                           </span>
                         )}
-                        {live && (
+                        {live && extractForbidden[row.id] && (
+                          <span
+                            data-testid="extract-forbidden"
+                            className="flex items-center gap-1 text-xs text-(--text-secondary)"
+                          >
+                            <Box size={12} />
+                            {t(
+                              "This contract forbids extracting the data: import it into a secure processing environment below.",
+                            )}
+                          </span>
+                        )}
+                        {live && !extractForbidden[row.id] && (
                           <>
                             <button
                               type="button"
@@ -1686,24 +1746,26 @@ function DataTransferContent() {
                             </button>
                           </>
                         )}
-                        {!live && row.transfers.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              void openFhirViewer(
-                                (row.started ?? row.transfers[0])["@id"],
-                              )
-                            }
-                            className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
-                              viewing
-                                ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                                : "bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
-                            }`}
-                          >
-                            <FileJson2 size={12} />
-                            {viewing ? t("Hide FHIR") : t("View FHIR")}
-                          </button>
-                        )}
+                        {!live &&
+                          row.transfers.length > 0 &&
+                          !extractForbidden[row.id] && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void openFhirViewer(
+                                  (row.started ?? row.transfers[0])["@id"],
+                                )
+                              }
+                              className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                                viewing
+                                  ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
+                                  : "bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
+                              }`}
+                            >
+                              <FileJson2 size={12} />
+                              {viewing ? t("Hide FHIR") : t("View FHIR")}
+                            </button>
+                          )}
                         <button
                           type="button"
                           aria-expanded={detailsOpen.has(detailsKey)}

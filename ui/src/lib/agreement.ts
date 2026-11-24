@@ -96,3 +96,40 @@ export function toAgreementView(raw: Record<string, unknown>): AgreementView {
     policy,
   };
 }
+
+/** The rules of one kind ("prohibition", "odrl:prohibition" or the IRI) as a list. */
+function rulesOf(policy: Record<string, unknown>, kind: string): unknown[] {
+  for (const [k, v] of Object.entries(policy)) {
+    if (localName(k) !== kind) continue;
+    return Array.isArray(v) ? v : v ? [v] : [];
+  }
+  return [];
+}
+
+/** The action of a rule: "extract", { "@id": "odrl:extract" } or { action: ... }. */
+function actionOf(rule: unknown): string {
+  if (!rule || typeof rule !== "object") return "";
+  for (const [k, v] of Object.entries(rule as Record<string, unknown>)) {
+    if (localName(k) !== "action") continue;
+    const a = Array.isArray(v) ? v[0] : v;
+    // An action with a refinement: { "rdf:value": { "@id": "odrl:extract" }, ... }.
+    if (a && typeof a === "object" && !("@id" in a)) {
+      const inner = Object.entries(a as Record<string, unknown>).find(
+        ([ik]) => localName(ik) === "value",
+      )?.[1];
+      return localName(Array.isArray(inner) ? inner[0] : inner);
+    }
+    return localName(a);
+  }
+  return "";
+}
+
+/**
+ * Whether the agreed policy prohibits `extract` (#889). Under such a policy,
+ * `mvhd-ehds-permit-spe` among them (ADR-077), only anonymised results leave
+ * the secure processing environment (EHDS Art. 73(2)), so the data may not be
+ * shown or downloaded in the browser; it goes into an SPE instead.
+ */
+export function forbidsExtract(policy: Record<string, unknown>): boolean {
+  return rulesOf(policy, "prohibition").some((r) => actionOf(r) === "extract");
+}
