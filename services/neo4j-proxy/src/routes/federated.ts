@@ -9,7 +9,13 @@ import {
   checkOdrlTemporal,
   checkReIdentification,
 } from "../nlq/engine.js";
-import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
+import {
+  type AuditPermit,
+  appendQueryAudit,
+  auditPermits,
+  auditUnavailable,
+} from "../audit-chain.js";
+import { refusedCypher } from "../cypher-guard.js";
 import { logger } from "../logger.js";
 import { secondaryUseSession } from "../opt-out.js";
 import { suppressSmallGroups } from "../k-anonymity.js";
@@ -20,10 +26,12 @@ async function auditFederatedRefusal(
   callerId: string | undefined,
   cypher: string,
   reason: string,
+  permits?: AuditPermit[],
 ): Promise<void> {
   try {
     await appendQueryAudit({
       participantId: callerId,
+      permits,
       question: "(federated)",
       cypher,
       method: "federated",
@@ -78,7 +86,12 @@ app.post(
       if (scope) {
         const temporalViolation = checkOdrlTemporal(scope);
         if (temporalViolation) {
-          await auditFederatedRefusal(callerId, cypher, "ODRL temporal limit");
+          await auditFederatedRefusal(
+            callerId,
+            cypher,
+            "ODRL temporal limit",
+            auditPermits(scope),
+          );
           res
             .status(403)
             .json({ error: temporalViolation, odrlEnforced: true });
@@ -89,6 +102,7 @@ app.post(
             callerId,
             cypher,
             "ODRL re-identification prohibition",
+            auditPermits(scope),
           );
           res.status(403).json({
             error:
@@ -100,11 +114,24 @@ app.post(
         }
       }
 
-      // Safety: reject write operations (hardened regex — catches CALL { CREATE } subqueries)
-      const upperCypher = cypher.toUpperCase().replace(/\s+/g, " ").trim();
-      const WRITE_PATTERN =
-        /\b(CREATE|MERGE|DELETE|DETACH\s+DELETE|SET|REMOVE|DROP|CALL\s*\{[^}]*(CREATE|MERGE|DELETE|SET|REMOVE))/i;
-      if (WRITE_PATTERN.test(upperCypher)) {
+      // Safety (#779, src/cypher-guard.ts): writes meet a read-only session
+      // anyway; reads outside the graph (LOAD CSV, apoc.load.*) are refused
+      // only here.
+      const refused = refusedCypher(cypher);
+      if (refused === "outside") {
+        await auditFederatedRefusal(
+          callerId,
+          cypher,
+          "reads outside the graph (#779)",
+          auditPermits(scope),
+        );
+        res.status(403).json({
+          error:
+            "Reads outside the graph (LOAD CSV, apoc.load.*, dbms.*) are not permitted on the federated endpoint",
+        });
+        return;
+      }
+      if (refused === "write") {
         res.status(403).json({
           error: "Write operations not permitted on federated endpoint",
         });
@@ -177,6 +204,7 @@ app.post(
           resultCount: merged.length,
           odrlEnforced: Boolean(scope),
           outcome: "success",
+          permits: auditPermits(scope),
           federated: {
             contributors: sources,
             aggregateSuppressed,

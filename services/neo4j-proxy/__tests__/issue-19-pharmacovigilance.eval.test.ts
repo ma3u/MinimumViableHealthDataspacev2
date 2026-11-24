@@ -138,8 +138,8 @@ describe("Issue #19 — pharmacovigilance NLQ", () => {
       indicationCohortSize: number;
       drugCohortSize: number;
       cohortWithIndicationAndDrug: number;
-      patientsWithSideEffect: number;
-      frequencyPct: number;
+      patientsWithSideEffect: number | string;
+      frequencyPct: number | string;
     }>;
     expect(rows.length).toBeGreaterThan(0);
     const row = rows[0];
@@ -154,9 +154,11 @@ describe("Issue #19 — pharmacovigilance NLQ", () => {
     expect(row.cohortWithIndicationAndDrug).toBeGreaterThanOrEqual(1);
     // Tendon rupture isn't in the Synthea condition set, so the side-
     // effect count is 0 — that's the *correct* answer, not a bug. This
-    // assertion documents the seed limitation.
-    expect(row.patientsWithSideEffect).toBe(0);
-    expect(row.frequencyPct).toBe(0);
+    // assertion documents the seed limitation. Since the k-anonymity mask
+    // (2026-10-30) a count under 5 is answered "<5", so 0 arrives masked.
+    expect([0, "<5"]).toContain(row.patientsWithSideEffect);
+    // The share computed from a masked count is masked with it.
+    expect([0, "<5"]).toContain(row.frequencyPct);
   });
 
   it("resolves a partial question (drug + side-effect, no indication)", async () => {
