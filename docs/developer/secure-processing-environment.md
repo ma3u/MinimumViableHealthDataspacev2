@@ -200,7 +200,21 @@ appends them to the hub's audit chain `spe` ([ADR-045](../ADRs/ADR-045-observabi
 
 **Where to see it in the UI**, signed in as `edcadmin`:
 
-- `/admin/attestation`: the attestation of each workspace and its label.
+- `/admin/attestation`: a traffic light per workspace and five plain checks.
+  Green means the proof comes from hardware, the report's HOST_DATA equals
+  the permit's policy hash and the key was released; amber means it works
+  but is not fully proven (sample evidence, not compared yet, no key yet);
+  red means blocked (proof failed, key refused, or software the permit does
+  not allow). The checks: confidential hardware, the permit's software, the
+  key released only after the check, where the key is kept (amber on Azure
+  until the access body runs Trustee in a subscription of its own, see
+  section 11), and the audit chain. Each has an info tip; the raw evidence,
+  the chain and the audit events sit under "Technical evidence, for
+  auditors" ([#1232](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1232),
+  [#1233](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1233)).
+
+  ![SPE-1 on Azure, 24 November 2026: green, proven by AMD SEV-SNP hardware](../images/screenshots/spe-attestation-azure-sev-snp.png)
+
 - `/admin/components`: the SPE topology, with a power button per workspace.
 - `/admin/audit`: the `spe` chain.
 - `/admin/policies`: which permit is bound to which policy hash.

@@ -36,11 +36,11 @@ Article 18's paragraphs are numbered 8 to 11 in the draft; I cite them by positi
 
 # The SPE in the demo
 
-The screenshots come from the public demo, viewed as its demo administrator persona (no account is needed). Each page can be opened at the link under it. The public demo is a static build and shows a recorded run from a laptop, which has no confidential hardware, so it is labelled "Simulated attestation": the Trustee, the policy, the key release and the audit record are real, the hardware proof is not. The same flow runs with AMD SEV-SNP evidence in the Azure deployment (ADR-069).
+The first screenshot comes from the Azure deployment on 24 November 2026: SPE-1 running as an ACI confidential container group on AMD SEV-SNP hardware, its evidence checked by the access body's Trustee and its key released. The other two come from the public demo, viewed as its demo administrator persona (no account is needed). The public demo is a static build of a recorded run from a laptop without confidential hardware, so it is labelled "Simulated attestation" and its light shows amber: the Trustee, the policy, the key release and the audit record are real, the hardware proof is not.
 
-![From data permit to released key: who verified the workspace, what the evidence proves and what it does not, and the chain from the permit's policy hash to the loaded workspace (Art. 5(1), (2)).](img/01-spe-attestation.png)
+![A real SPE on Azure: a traffic light (green: proven by hardware) and five plain checks. The processor proved that the workspace runs exactly the software the data permit allows, and only then did the access body release the key (Art. 5(1), (2)). The amber check is honest: the key broker runs in the hub's own subscription, not yet in one of the access body's own. The measurements, the chain from permit to key and the audit events are folded away for auditors.](img/01-spe-attestation.png)
 
-SPE attestation: <https://ma3u.github.io/MinimumViableHealthDataspacev2/admin/attestation>
+SPE attestation in the public demo (amber there, simulated evidence): <https://ma3u.github.io/MinimumViableHealthDataspacev2/admin/attestation>
 
 ![A federated question answered by both workspaces. Each reports aggregates only, and counts below five are shown as "<5" (Art. 18(2)(e), (g)).](img/02-federated-query.png)
 

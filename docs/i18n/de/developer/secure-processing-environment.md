@@ -208,7 +208,24 @@ hängt sie an die Audit-Kette `spe` des Hubs an ([ADR-045](../ADRs/ADR-045-obser
 
 **Wo Sie es in der UI sehen**, angemeldet als `edcadmin`:
 
-- `/admin/attestation`: die Attestierung jedes Workspaces und sein Label.
+- `/admin/attestation`: eine Ampel pro Workspace und fünf einfache Prüfungen.
+  Grün heißt: Der Nachweis kommt aus der Hardware, HOST_DATA im Bericht
+  entspricht dem Richtlinien-Hash der Datengenehmigung, und der Schlüssel
+  wurde herausgegeben; Gelb heißt: Es funktioniert, ist aber nicht ganz
+  nachgewiesen (Beispielnachweis, noch nicht verglichen, noch kein
+  Schlüssel); Rot heißt: gesperrt (Nachweis fehlgeschlagen, Schlüssel
+  verweigert oder Software, die die Datengenehmigung nicht erlaubt). Die
+  Prüfungen: vertrauliche Hardware, die Software der Datengenehmigung, der
+  Schlüssel erst nach der Prüfung, wo der Schlüssel liegt (auf Azure gelb,
+  bis die Zugangsstelle für Gesundheitsdaten Trustee in einem eigenen
+  Abonnement betreibt, siehe Abschnitt 11) und die Audit-Kette. Jede hat
+  einen Infotext; die Rohwerte, die Kette und die Audit-Ereignisse liegen
+  unter „Technische Nachweise, für Prüfer“
+  ([#1232](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1232),
+  [#1233](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1233)).
+
+  ![SPE-1 on Azure, 24 November 2026](../images/screenshots/spe-attestation-azure-sev-snp.png)
+
 - `/admin/components`: die SPE-Topologie, mit einem Ein-/Aus-Schalter je Workspace.
 - `/admin/audit`: die Kette `spe`.
 - `/admin/policies`: welche Datengenehmigung an welchen Policy-Hash gebunden ist.

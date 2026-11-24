@@ -217,7 +217,23 @@ trabajo cada minuto y los añade a la cadena de auditoría `spe` del hub
 
 **Dónde verlo en la UI**, con la sesión iniciada como `edcadmin`:
 
-- `/admin/attestation`: la atestación de cada espacio de trabajo y su etiqueta.
+- `/admin/attestation`: un semáforo por espacio de trabajo y cinco
+  comprobaciones sencillas. Verde: la prueba viene del hardware, el
+  HOST_DATA del informe es igual al hash de política del permiso de datos y
+  la clave se entregó; ámbar: funciona, pero no está probado del todo
+  (prueba de ejemplo, aún no comparado, aún sin clave); rojo: bloqueado
+  (prueba fallida, clave denegada o software que el permiso no permite).
+  Las comprobaciones: hardware confidencial, el software del permiso, la
+  clave entregada solo después de la comprobación, dónde se guarda la clave
+  (ámbar en Azure hasta que el organismo de acceso a datos de salud gestione
+  Trustee en una suscripción propia, véase la sección 11) y la cadena de
+  auditoría. Cada una tiene una ayuda; los valores en bruto, la cadena y los
+  eventos de auditoría están en «Pruebas técnicas, para auditores»
+  ([#1232](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1232),
+  [#1233](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1233)).
+
+  ![SPE-1 on Azure, 24 November 2026](../images/screenshots/spe-attestation-azure-sev-snp.png)
+
 - `/admin/components`: la topología del SPE, con un botón de encendido por espacio de trabajo.
 - `/admin/audit`: la cadena `spe`.
 - `/admin/policies`: qué permiso está vinculado a qué hash de política.
