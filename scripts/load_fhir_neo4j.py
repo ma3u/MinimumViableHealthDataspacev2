@@ -27,6 +27,15 @@ except ImportError:
 
 # ── Bulk UNWIND Cypher (one call per resource type per bundle) ────────────────
 
+# Terminology nodes are merged on the key neo4j/init-schema.cypher makes
+# unique (#1215): SnomedConcept.conceptId, LoincCode.loincNumber,
+# RxNormConcept.rxcui. Merged on `code`, the constraint never saw them and a
+# concept the seeds had already written existed twice. `code` stays as a
+# property for the readers that show it. The seeds write SNOMED CT and RxNorm
+# keys as integers and as strings, so an existing concept is looked up by
+# either before a new one is made; neo4j/migrate-terminology-keys.cypher
+# merges what an earlier run split. test_load_fhir_neo4j.py checks the keys.
+
 UPSERT_PATIENTS = """
 UNWIND $rows AS row
 MERGE (p:Patient {id: row.id})
@@ -71,9 +80,17 @@ MERGE (p)-[:HAS_CONDITION]->(c)
 LINK_CONDITIONS_SNOMED = """
 UNWIND $rows AS row
 MATCH (c:Condition {id: row.id})
-MERGE (s:SnomedConcept {code: row.code})
-  ON CREATE SET s.name = row.display, s.description = row.display
-MERGE (c)-[:CODED_BY]->(s)
+OPTIONAL MATCH (known:SnomedConcept)
+  WHERE known.conceptId IN [row.code, toInteger(row.code)]
+WITH c, row, head(collect(known)) AS known
+FOREACH (k IN CASE WHEN known IS NULL THEN [] ELSE [known] END |
+  MERGE (c)-[:CODED_BY]->(k))
+FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
+  MERGE (s:SnomedConcept {conceptId: row.code})
+    ON CREATE SET s.code = row.code, s.name = row.display,
+                  s.description = row.display
+    ON MATCH SET s.code = coalesce(s.code, row.code)
+  MERGE (c)-[:CODED_BY]->(s))
 """
 
 UPSERT_OBSERVATIONS = """
@@ -95,8 +112,10 @@ MERGE (p)-[:HAS_OBSERVATION]->(o)
 LINK_OBSERVATIONS_LOINC = """
 UNWIND $rows AS row
 MATCH (o:Observation {id: row.id})
-MERGE (l:LoincCode {code: row.code})
-  ON CREATE SET l.name = row.display, l.description = row.display
+MERGE (l:LoincCode {loincNumber: row.code})
+  ON CREATE SET l.code = row.code, l.name = row.display,
+                l.description = row.display
+  ON MATCH SET l.code = coalesce(l.code, row.code)
 MERGE (o)-[:CODED_BY]->(l)
 """
 
@@ -118,9 +137,17 @@ MERGE (p)-[:HAS_MEDICATION]->(m)
 LINK_MEDICATIONS_RXNORM = """
 UNWIND $rows AS row
 MATCH (m:MedicationRequest {id: row.id})
-MERGE (r:RxNormConcept {code: row.code})
-  ON CREATE SET r.name = row.display, r.description = row.display
-MERGE (m)-[:CODED_BY]->(r)
+OPTIONAL MATCH (known:RxNormConcept)
+  WHERE known.rxcui IN [row.code, toInteger(row.code)]
+WITH m, row, head(collect(known)) AS known
+FOREACH (k IN CASE WHEN known IS NULL THEN [] ELSE [known] END |
+  MERGE (m)-[:CODED_BY]->(k))
+FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
+  MERGE (r:RxNormConcept {rxcui: row.code})
+    ON CREATE SET r.code = row.code, r.name = row.display,
+                  r.description = row.display
+    ON MATCH SET r.code = coalesce(r.code, row.code)
+  MERGE (m)-[:CODED_BY]->(r))
 """
 
 UPSERT_PROCEDURES = """
@@ -141,9 +168,17 @@ MERGE (p)-[:HAS_PROCEDURE]->(pr)
 LINK_PROCEDURES_SNOMED = """
 UNWIND $rows AS row
 MATCH (pr:Procedure {id: row.id})
-MERGE (s:SnomedConcept {code: row.code})
-  ON CREATE SET s.name = row.display, s.description = row.display
-MERGE (pr)-[:CODED_BY]->(s)
+OPTIONAL MATCH (known:SnomedConcept)
+  WHERE known.conceptId IN [row.code, toInteger(row.code)]
+WITH pr, row, head(collect(known)) AS known
+FOREACH (k IN CASE WHEN known IS NULL THEN [] ELSE [known] END |
+  MERGE (pr)-[:CODED_BY]->(k))
+FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
+  MERGE (s:SnomedConcept {conceptId: row.code})
+    ON CREATE SET s.code = row.code, s.name = row.display,
+                  s.description = row.display
+    ON MATCH SET s.code = coalesce(s.code, row.code)
+  MERGE (pr)-[:CODED_BY]->(s))
 """
 
 

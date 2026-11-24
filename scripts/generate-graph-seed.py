@@ -343,8 +343,9 @@ for cid, name in SNOMED:
 emit("// ═══ LARGE-SCALE SEED: Ontology backbone (LOINC) ═══")
 for code, name in LOINC:
     emit(f"""
-        MERGE (l:LoincCode {{code: '{code}'}})
-        SET l.display = '{esc(name)}',
+        MERGE (l:LoincCode {{loincNumber: '{code}'}})
+        SET l.code = '{code}',
+            l.display = '{esc(name)}',
             l.system = 'http://loinc.org'
     """)
 
@@ -559,7 +560,7 @@ for i in range(NUM_PATIENTS):
             # Code observation with LOINC
             emit(f"""
                 MATCH (o:Observation {{id: '{obs_id}'}})
-                MATCH (l:LoincCode {{code: '{loinc_code}'}})
+                MATCH (l:LoincCode {{loincNumber: '{loinc_code}'}})
                 MERGE (o)-[:CODED_BY]->(l)
             """)
 

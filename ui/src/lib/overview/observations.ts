@@ -8,6 +8,7 @@
  * fixture generator.
  */
 import type { Range, SeriesPoint } from "./derive";
+import { ucumCoding } from "@/lib/ucum";
 
 export interface ObservationRow {
   id: string;
@@ -154,12 +155,8 @@ export function rowsToBundle(
       },
       effectiveDateTime: toIsoDateTime(r.effective),
       ...(r.performer ? { performer: [{ display: r.performer }] } : {}),
-      valueQuantity: {
-        value: r.value,
-        unit: r.unit,
-        system: "http://unitsofmeasure.org",
-        code: r.unit,
-      },
+      // The unit as stored; its UCUM code only when it has one (#1214).
+      valueQuantity: { value: r.value, unit: r.unit, ...ucumCoding(r.unit) },
       ...(rr ? { referenceRange: rr } : {}),
     };
     return { fullUrl: `urn:uuid:${r.id}`, resource };

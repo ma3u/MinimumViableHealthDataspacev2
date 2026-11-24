@@ -4,7 +4,7 @@ Date: 2026-11-14
 
 ## Status
 
-**Status:** Proposed (draft, nothing built)
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-14 as a draft
 
 Tracks [#1120](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1120).
 Relates to [ADR-045](ADR-045-observability-and-regulatory-audit-trail.md) (the audit

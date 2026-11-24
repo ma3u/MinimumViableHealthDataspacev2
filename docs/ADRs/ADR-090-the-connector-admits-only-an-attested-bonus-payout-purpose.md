@@ -2,7 +2,7 @@
 
 Date: 2026-11-11
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-11
 **Relates to:** [ADR-080](ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md) (decision 5), [ADR-077](ADR-077-a-minimal-set-of-standard-data-sharing-policies.md), [ADR-064](ADR-064-simpl-open-through-the-outside-agent-dcp-path.md), [ADR-087](ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md)
 **Tracks:** [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934), step 5
 

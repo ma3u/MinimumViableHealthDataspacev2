@@ -212,7 +212,24 @@ voegt ze toe aan de auditketen `spe` van de hub ([ADR-045](../ADRs/ADR-045-obser
 
 **Waar u het in de UI ziet**, aangemeld als `edcadmin`:
 
-- `/admin/attestation`: de attestatie van elke werkruimte en haar label.
+- `/admin/attestation`: een verkeerslicht per werkruimte en vijf eenvoudige
+  controles. Groen: het bewijs komt van de hardware, HOST_DATA in het
+  rapport is gelijk aan de beleidshash van de gegevensvergunning en de
+  sleutel is vrijgegeven; oranje: het werkt, maar is niet volledig bewezen
+  (voorbeeldbewijs, nog niet vergeleken, nog geen sleutel); rood:
+  geblokkeerd (bewijs mislukt, sleutel geweigerd of software die de
+  vergunning niet toestaat). De controles: vertrouwelijke hardware, de
+  software van de vergunning, de sleutel pas na de controle, waar de
+  sleutel ligt (oranje op Azure totdat de instantie voor toegang tot
+  gezondheidsgegevens Trustee in een eigen abonnement draait, zie sectie 11)
+  en de auditketen. Elke controle heeft een infotip; de ruwe waarden, de
+  keten en de auditgebeurtenissen staan onder „Technisch bewijs, voor
+  auditors”
+  ([#1232](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1232),
+  [#1233](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/1233)).
+
+  ![SPE-1 on Azure, 24 November 2026](../images/screenshots/spe-attestation-azure-sev-snp.png)
+
 - `/admin/components`: de SPE-topologie, met een aan/uit-knop per werkruimte.
 - `/admin/audit`: de keten `spe`.
 - `/admin/policies`: welke vergunning aan welke beleidshash is gekoppeld.

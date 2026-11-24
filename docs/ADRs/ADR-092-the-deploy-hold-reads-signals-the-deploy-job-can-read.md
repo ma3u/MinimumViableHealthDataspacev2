@@ -2,7 +2,7 @@
 
 Date: 2026-11-12
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-12
 **Relates to:** [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-061](ADR-061-the-ui-scales-out-on-whole-cores.md)
 **Tracks:** [#571](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/571)
 

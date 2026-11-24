@@ -478,3 +478,61 @@ describe("laboratory report", () => {
     ).toThrow(/no results/);
   });
 });
+
+describe("laboratory report units (#1214)", () => {
+  const UCUM = "http://unitsofmeasure.org";
+  const units: [printed: string, ucum: string | null][] = [
+    ["mg/dl", "mg/dL"],
+    ["mg/dL", "mg/dL"],
+    ["g/L", "g/L"],
+    ["g/l", "g/L"],
+    ["%", "%"],
+    ["mmol/mol", "mmol/mol"],
+    ["mmol/mol Hb", "mmol/mol"],
+    ["Tsd/µl", "10*3/uL"],
+    ["10*3/uL", "10*3/uL"],
+    ["G/l", "10*9/L"],
+    ["mmHg", "mm[Hg]"],
+    ["Einheiten", null],
+  ];
+  const [labReport] = groupLabReports(
+    units.map(([unit], i) =>
+      labRow({ id: `u-${i}`, unit, rangeText: null, low: 1, high: 2 }),
+    ),
+    "P9",
+  );
+  const doc = buildLabReportDocument(PATIENT, labReport, {
+    timestamp: T,
+    identity: { kind: "identified" },
+  });
+  const observations = resources(doc, "Observation") as (FhirResource & {
+    identifier: { value: string }[];
+    valueQuantity: Record<string, unknown>;
+    referenceRange: { low: unknown; high: unknown }[];
+  })[];
+  const byRow = (i: number) =>
+    observations.find((o) => o.identifier[0].value === `u-${i}`)!;
+
+  it.each(units.map(([printed, ucum], i) => [printed, ucum, i] as const))(
+    "%s: the printed unit as text, UCUM %s as the code",
+    (printed, ucum, i) => {
+      const obs = byRow(i);
+      const expected =
+        ucum === null
+          ? { value: 6.1, unit: printed }
+          : { value: 6.1, unit: printed, system: UCUM, code: ucum };
+      expect(obs.valueQuantity).toEqual(expected);
+      const { value: _value, ...unitPart } = expected;
+      expect(obs.referenceRange[0].low).toEqual({ value: 1, ...unitPart });
+      expect(obs.referenceRange[0].high).toEqual({ value: 2, ...unitPart });
+    },
+  );
+
+  it("never claims UCUM for a code the table does not hold", () => {
+    for (const obs of observations) {
+      const q = obs.valueQuantity;
+      if (q.system === undefined) expect(q).not.toHaveProperty("code");
+      else expect(units.map(([, u]) => u)).toContain(q.code);
+    }
+  });
+});

@@ -13,7 +13,6 @@ import { createHash } from "crypto";
 export const LOINC = "http://loinc.org";
 export const SNOMED = "http://snomed.info/sct";
 export const RXNORM = "http://www.nlm.nih.gov/research/umls/rxnorm";
-export const UCUM = "http://unitsofmeasure.org";
 const DATA_ABSENT_REASON =
   "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 

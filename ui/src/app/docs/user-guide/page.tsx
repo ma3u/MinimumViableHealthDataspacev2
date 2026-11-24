@@ -2290,7 +2290,7 @@ export default function UserGuidePage() {
           >
             <p className="text-(--text-secondary) text-sm mb-2">
               {t(
-                "The evidence behind each secure processing environment's label, for the operator (EDC_ADMIN): the verdict, who verified it (the access body's Trustee), what was proven and what was not, the measurements, and the chain from the data permit to its policy hash, the Trustee's key release and the loaded workspace, with the SPE's last audit events. Each SPE on the operator dashboard links to it.",
+                "A traffic light for each secure processing environment, for the operator (EDC_ADMIN): green when the processor proved that the workspace runs exactly what the data permit allows and the access body's Trustee released the key, amber when it works but is not fully proven, red when it is blocked. Five plain checks explain the light, including where the key is kept and who can reach it; the measurements, the chain from the permit to the key and the last audit events are folded away for auditors. Each SPE on the operator dashboard links to it.",
               )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">

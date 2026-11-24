@@ -2,13 +2,13 @@
 
 Date: 2026-11-02
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-02
 **Relates to:** [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md) (amended here, not edited), [ADR-072](ADR-072-spe-workspaces-start-on-demand.md)
 **Tracks:** [#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833), [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)
 
 ## Status
 
-Proposed. Amends decision 3 of
+Accepted on 2026-11-24 by the maintainer; proposed 2026-11-02. Amends decision 3 of
 [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)
 (reference values taken from the first attestation) for the four TCB
 components only, and replaces the "TCB values are lists" practice of #801 and

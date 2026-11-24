@@ -32,8 +32,8 @@ describe("GET /api/graph/validate", () => {
 
   it("returns a structured validation report on the happy path", async () => {
     // The route runs 6 queries concurrently. The 4th is itself a
-    // Promise.all of one query per REQUIRED_PROPS label (15 labels).
-    // Mock the first three queries, then 15 missing-prop queries, then
+    // Promise.all of one query per REQUIRED_PROPS label.
+    // Mock the first three queries, then the missing-prop queries, then
     // the remaining two (unknown labels + unexpected edges).
     mockRunQuery.mockImplementation((cypher: string) => {
       if (cypher.includes("UNWIND labels(n) AS lbl")) {
@@ -110,6 +110,29 @@ describe("GET /api/graph/validate", () => {
     ]);
     expect(Array.isArray(data.validEdgeRules)).toBe(true);
     expect(data.validEdgeRules.length).toBeGreaterThan(5);
+  });
+
+  it("flags a terminology node without the key init-schema makes unique (#1215)", async () => {
+    const asked: Record<string, unknown> = {};
+    mockRunQuery.mockImplementation(
+      (cypher: string, params?: { props?: string[] }) => {
+        const label = /MATCH \(n:`(\w+)`\)/.exec(cypher)?.[1];
+        if (label && params?.props) asked[label] = params.props;
+        if (label === "LoincCode") {
+          return Promise.resolve([{ id: "loinc-code-only", name: "4548-4" }]);
+        }
+        return Promise.resolve([]);
+      },
+    );
+    const data = await (await GET()).json();
+    expect(asked).toMatchObject({
+      SnomedConcept: ["conceptId"],
+      LoincCode: ["loincNumber"],
+      RxNormConcept: ["rxcui"],
+    });
+    expect(data.missingProps).toEqual([
+      expect.objectContaining({ label: "LoincCode", count: 1 }),
+    ]);
   });
 
   it("reports issueCount=0 when graph is clean", async () => {

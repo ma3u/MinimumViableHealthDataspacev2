@@ -356,6 +356,53 @@ describe("NlqPage", () => {
     expect(screen.getByText("Patients")).toBeInTheDocument();
   });
 
+  it("shows a suppressed feasibility count as <k, per SPE and in the header (ADR-094)", async () => {
+    mockFetchApiResponses({
+      "/api/federated": {
+        speCount: 2,
+        totals: {
+          patients: 12,
+          encounters: 450,
+          conditions: "<5",
+          observations: 1200,
+        },
+        aggregatedConditions: [],
+        aggregatedGenders: [],
+        perSpe: [
+          {
+            source: "SPE-1",
+            patients: 12,
+            encounters: 450,
+            conditions: 4096,
+            observations: 1200,
+          },
+          {
+            source: "SPE-2",
+            patients: "<5",
+            encounters: 7,
+            conditions: "<5",
+            observations: 9,
+          },
+        ],
+        minKApplied: 5,
+        filtered: 3,
+      },
+    });
+
+    render(<NlqPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("SPE-2")).toBeInTheDocument();
+    });
+    // Header total, SPE-2 patients and SPE-2 conditions: the suppressed form.
+    expect(screen.getAllByText("<5")).toHaveLength(3);
+    // A number is still grouped as before.
+    expect(screen.getByText((4096).toLocaleString())).toBeInTheDocument();
+    expect(screen.getByTestId("stats-k-anonymity-note")).toHaveTextContent(
+      "Counts below 5 are shown as <5",
+    );
+  });
+
   it("should handle query error gracefully", async () => {
     mockFetchApiResponses();
 

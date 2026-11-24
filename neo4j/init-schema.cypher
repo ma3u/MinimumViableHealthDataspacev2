@@ -46,6 +46,11 @@ CREATE CONSTRAINT variables_table_group_id IF NOT EXISTS FOR (tg:VariablesTableG
 CREATE CONSTRAINT variables_table_id IF NOT EXISTS FOR (tb:VariablesTable) REQUIRE tb.tableId IS UNIQUE;
 CREATE CONSTRAINT variables_column_id IF NOT EXISTS FOR (c:VariablesColumn) REQUIRE c.columnId IS UNIQUE;
 CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE org.organizationId IS UNIQUE;
+// A figure a national source released for publication (ADR-094, #1123): the
+// hub may hold it, never the rows behind it. Carries sourceUrl, licence,
+// releaseDate and the source's smallCountRule.
+// (:HealthDataset)-[:HAS_PUBLISHED_AGGREGATE]->(:PublishedAggregate)
+CREATE CONSTRAINT published_aggregate_id IF NOT EXISTS FOR (pa:PublishedAggregate) REQUIRE pa.aggregateId IS UNIQUE;
 
 // ============================================================
 // Layer 2b: EEHRxF Profile Metadata

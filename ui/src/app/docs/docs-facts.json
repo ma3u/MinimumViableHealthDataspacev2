@@ -1260,7 +1260,7 @@
       "id": "ADR-066",
       "file": "ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md",
       "title": "The hub runs its own EUDI verifier, behind a gate that passes the wallet API only",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-067",
@@ -1302,7 +1302,7 @@
       "id": "ADR-073",
       "file": "ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md",
       "title": "The SPE workspaces' SEV-SNP TCB is checked against a minimum, not a list",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-074",
@@ -1326,7 +1326,7 @@
       "id": "ADR-077",
       "file": "ADR-077-a-minimal-set-of-standard-data-sharing-policies.md",
       "title": "A minimal set of standard data-sharing policies",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-078",
@@ -1356,7 +1356,7 @@
       "id": "ADR-082",
       "file": "ADR-082-the-site-search-is-pagefind-built-from-the-sources.md",
       "title": "The site search is Pagefind, indexed from the sources, searched in the browser",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-083",
@@ -1404,31 +1404,31 @@
       "id": "ADR-090",
       "file": "ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md",
       "title": "The connector admits only an attested bonus payout purpose",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-091",
       "file": "ADR-091-the-insurer-collects-the-yes-or-no-under-a-reference-the-hub-issues.md",
       "title": "The insurer collects the yes or no, under a reference the hub issues",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-092",
       "file": "ADR-092-the-deploy-hold-reads-signals-the-deploy-job-can-read.md",
       "title": "The deploy hold reads signals the deploy job can read",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-093",
       "file": "ADR-093-a-professional-reads-what-the-person-has-not-restricted.md",
       "title": "A health professional reads what the person has not restricted, and every read is logged",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-094",
       "file": "ADR-094-national-health-data-stays-at-the-source.md",
       "title": "National health data stays at the source; the hub takes descriptions, aggregates and counts",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-095",
@@ -1452,7 +1452,7 @@
       "id": "ADR-098",
       "file": "ADR-098-omop-rows-are-keyed-by-their-cdm-id.md",
       "title": "OMOP rows are keyed by their CDM id, an integer derived from the FHIR reference",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-099",
@@ -1551,22 +1551,22 @@
   },
   "lastUpdated": {
     "/docs": "2026-11-10",
-    "/docs/user-guide": "2026-11-10",
+    "/docs/user-guide": "2026-11-24",
     "/docs/developer": "2026-11-23",
     "/docs/developer/quality-gates": "2026-11-23",
     "/docs/developer/api": "2026-11-23",
     "/docs/developer/reference": "2026-11-23",
-    "/docs/developer/[slug]": "2026-11-21",
+    "/docs/developer/[slug]": "2026-11-24",
     "/docs/architecture": "2026-11-24",
-    "/docs/security": "2026-11-21",
-    "/docs/security/[slug]": "2026-11-21",
-    "/docs/klarbefund": "2026-11-21",
-    "/docs/ehds": "2026-11-21",
+    "/docs/security": "2026-11-24",
+    "/docs/security/[slug]": "2026-11-24",
+    "/docs/klarbefund": "2026-11-24",
+    "/docs/ehds": "2026-11-24",
     "/docs/ehds/glossary": "2026-11-08",
-    "/docs/ehds/[slug]": "2026-11-21",
+    "/docs/ehds/[slug]": "2026-11-24",
     "/docs/roadmap": "2026-11-10",
-    "/docs/operations": "2026-11-21",
-    "/docs/operations/[slug]": "2026-11-21",
-    "/docs/klarbefund/[slug]": "2026-11-21"
+    "/docs/operations": "2026-11-24",
+    "/docs/operations/[slug]": "2026-11-24",
+    "/docs/klarbefund/[slug]": "2026-11-24"
   }
 }

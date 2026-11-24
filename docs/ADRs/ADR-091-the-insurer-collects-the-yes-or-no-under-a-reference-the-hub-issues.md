@@ -2,7 +2,7 @@
 
 Date: 2026-11-11
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-11
 **Relates to:** [ADR-080](ADR-080-a-bonus-programme-receives-a-yes-or-no-never-the-data.md) (decisions 2, 4 and 6), [ADR-087](ADR-087-the-hub-evaluates-a-bonus-year-once-it-has-ended.md), [ADR-090](ADR-090-the-connector-admits-only-an-attested-bonus-payout-purpose.md), [ADR-064](ADR-064-simpl-open-through-the-outside-agent-dcp-path.md) (decision 6)
 **Tracks:** [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934), step 8 (the hub's half)
 

@@ -144,8 +144,12 @@ SPEs can I access?" to see them.
   `mvhd-spe-2`, once `scripts/azure/21-aci-confidential-spe.sh` has run. Each
   proves its own container group on AMD SEV-SNP hardware, labelled "Attested:
   confidential workload", and the permit's policy hash is checked by hardware.
-- The operator sees the evidence behind each label on `/admin/attestation`
-  (SPE attestation).
+- The operator sees each workspace's attestation on `/admin/attestation`
+  (SPE attestation) as a traffic light: green when the hardware proved that
+  the workspace runs what the permit allows and the key was released, amber
+  when it works but is not fully proven, red when it is blocked. Five plain
+  checks explain the light, including where the key is kept; the raw
+  evidence is folded away for auditors.
 
 The design is
 [ADR-068](ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md);

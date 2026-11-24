@@ -546,6 +546,34 @@ CREATE CONSTRAINT programme_transfer_id IF NOT EXISTS FOR (t:ProgrammeTransfer) 
 
 ---
 
+#### `PublishedAggregate`
+
+A figure a national source released for publication (ADR-094, #1123):
+anonymised by the source, with its source, licence, release date and the
+source's small-count rule. The hub may hold it; the rows behind it stay at
+the source. `neo4j/seed-national-sources.cypher` seeds one fictional example,
+linked to MedReg DE's fictional national claims and ePA dataset.
+
+**Properties:**
+
+- `aggregateId: String!`: identifier
+- `title: String!`, `description: String`: what the figure is
+- `value: Float`, `unit: String`: the figure (e.g. `8.9`, `%`)
+- `population: String`, `period: String`: whom and when it covers
+- `sourceUrl: String!`: where the source published it
+- `licence: String!`: the licence it was published under (e.g. `CC-BY-4.0`)
+- `releaseDate: Date!`: when the source released it
+- `smallCountRule: String!`: the source's own suppression rule
+- `fictional: Boolean`: `true` in every demo seed
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT published_aggregate_id IF NOT EXISTS FOR (pa:PublishedAggregate) REQUIRE pa.aggregateId IS UNIQUE;
+```
+
+---
+
 ### 3.2 Relationships
 
 ```cypher
@@ -564,6 +592,7 @@ CREATE CONSTRAINT programme_transfer_id IF NOT EXISTS FOR (t:ProgrammeTransfer) 
 (:HealthDataset)-[:HAS_CONTACT_POINT]->(:ContactPoint)
 (:HealthDataset)-[:HAS_THEME]->(:EEHRxFCategory)
 (:HealthDataset)-[:SUBJECT_TO_PURPOSE]->(:EhdsPurpose)
+(:HealthDataset)-[:HAS_PUBLISHED_AGGREGATE]->(:PublishedAggregate)
 ```
 
 ---

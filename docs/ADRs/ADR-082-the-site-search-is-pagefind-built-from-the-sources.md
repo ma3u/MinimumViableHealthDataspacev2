@@ -2,13 +2,13 @@
 
 Date: 2026-11-09
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-09
 **Relates to:** [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-071](ADR-071-the-documentation-follows-the-language-picker.md)
 **Tracks:** [#1000](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1000)
 
 ## Status
 
-Proposed with the pull request that adds `ui/scripts/build-search-index.mjs`.
+Accepted on 2026-11-24 by the maintainer; proposed with the pull request that adds `ui/scripts/build-search-index.mjs`.
 
 ## Context
 

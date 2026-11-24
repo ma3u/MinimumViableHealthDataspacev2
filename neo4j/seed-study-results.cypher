@@ -10,7 +10,9 @@
 //
 // Fictional data only, every value invented. Idempotent MERGE throughout;
 // run after seed-persona-overview.cypher. Every LOINC code was checked
-// against the NLM clinical tables API on 2026-10-15.
+// against the NLM clinical tables API on 2026-10-15. LOINC concepts are
+// merged on loincNumber, the key init-schema.cypher makes unique, never on
+// code (#1215).
 //
 // Graph shape (docs/knowledge/datamodels/fhir-r4-nodes.md):
 //   (:Patient)-[:HAS_DIAGNOSTIC_REPORT]->(:DiagnosticReport)-[:HAS_RESULT]->(:Observation)
@@ -85,8 +87,9 @@ SET obs.code = o.code,
     obs.fictional = true
 MERGE (p)-[:HAS_OBSERVATION]->(obs)
 MERGE (dr)-[:HAS_RESULT]->(obs)
-MERGE (lc:LoincCode {code: o.code})
-  ON CREATE SET lc.display = o.display, lc.system = 'http://loinc.org'
+MERGE (lc:LoincCode {loincNumber: o.code})
+  ON CREATE SET lc.code = o.code, lc.display = o.display, lc.system = 'http://loinc.org'
+  ON MATCH SET lc.code = coalesce(lc.code, o.code)
 MERGE (obs)-[:CODED_BY]->(lc);
 
 // ── 2. Imaging reports: a DiagnosticReport per study (category RAD), with
@@ -143,8 +146,9 @@ SET obs.code = o.code,
     obs.fictional = true
 MERGE (p)-[:HAS_OBSERVATION]->(obs)
 MERGE (dr)-[:HAS_RESULT]->(obs)
-MERGE (lc:LoincCode {code: o.code})
-  ON CREATE SET lc.display = o.display, lc.system = 'http://loinc.org'
+MERGE (lc:LoincCode {loincNumber: o.code})
+  ON CREATE SET lc.code = o.code, lc.display = o.display, lc.system = 'http://loinc.org'
+  ON MATCH SET lc.code = coalesce(lc.code, o.code)
 MERGE (obs)-[:CODED_BY]->(lc);
 
 // ── 3. Vaccination record (FHIR Immunization, CVX codes) ────────────────────

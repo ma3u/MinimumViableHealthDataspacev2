@@ -37,8 +37,10 @@ const REQUIRED_PROPS: Record<string, string[]> = {
   OMOPMeasurement: ["measurementId"],
   OMOPDrugExposure: ["drugExposureId"],
   OMOPProcedureOccurrence: ["procedureOccurrenceId"],
+  // The keys init-schema.cypher makes unique (#1215).
   SnomedConcept: ["conceptId"],
   LoincCode: ["loincNumber"],
+  RxNormConcept: ["rxcui"],
   TrustCenter: ["name", "did"],
   SPESession: ["sessionId", "studyId"],
   ResearchPseudonym: ["rpsnId", "studyId"],

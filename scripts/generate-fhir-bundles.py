@@ -42,6 +42,28 @@ observations = [
     {"code": "33914-3", "display": "eGFR", "unit": "mL/min/{1.73_m2}", "range": (30, 120)},
 ]
 
+# The UCUM code of each unit above (#1214): the unit is the printed text, the
+# code is UCUM. A unit missing here is written as text, with no system and
+# no code, rather than claimed as UCUM. ui/src/lib/ucum.ts is the hub's table.
+UCUM_CODES = {
+    "Cel": "Cel",
+    "/min": "/min",
+    "mmHg": "mm[Hg]",
+    "mg/dL": "mg/dL",
+    "%": "%",
+    "10*3/uL": "10*3/uL",
+    "g/dL": "g/dL",
+    "mL/min/{1.73_m2}": "mL/min/{1.73_m2}",
+}
+
+
+def ucum_quantity(value, unit):
+    code = UCUM_CODES.get(unit)
+    if code is None:
+        return {"value": value, "unit": unit}
+    return {"value": value, "unit": unit, "system": "http://unitsofmeasure.org", "code": code}
+
+
 medications = [
     {"code": "860975", "display": "Metformin hydrochloride 500 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
     {"code": "314076", "display": "Lisinopril 10 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
@@ -127,7 +149,7 @@ def make_observation(pid, oid):
         "code": {"coding": [{"system": "http://loinc.org", "code": o["code"], "display": o["display"]}], "text": o["display"]},
         "subject": {"reference": f"Patient/{pid}"},
         "effectiveDateTime": eff.isoformat() + "Z",
-        "valueQuantity": {"value": val, "unit": o["unit"], "system": "http://unitsofmeasure.org", "code": o["unit"]},
+        "valueQuantity": ucum_quantity(val, o["unit"]),
     }
 
 

@@ -2,7 +2,7 @@
 
 Date: 2026-11-05
 
-**Status:** Proposed (2026-11-05)
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-11-05
 **Relates to:** [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-073](ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)
 **Tracks:** [#876](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/876)
 
