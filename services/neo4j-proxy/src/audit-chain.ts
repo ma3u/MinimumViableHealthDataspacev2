@@ -69,6 +69,28 @@ export function sha256Hex(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");
 }
 
+/** The permit a query ran under (Art. 68): its id and stated purpose (#779). */
+export interface AuditPermit {
+  permitId: string;
+  purpose: string | null;
+}
+
+/**
+ * The permits in the caller's ODRL scope, as the audit records them. The UI
+ * puts the participant's valid permits in the scope (resolveOdrlScope); a
+ * caller without a scope, or a data holder querying its own data, has none.
+ */
+export function auditPermits(
+  scope: { permits?: AuditPermit[] } | undefined,
+): AuditPermit[] | undefined {
+  const permits = (scope?.permits ?? []).filter(
+    (p) => typeof p?.permitId === "string" && p.permitId.length > 0,
+  );
+  return permits.length
+    ? permits.map((p) => ({ permitId: p.permitId, purpose: p.purpose ?? null }))
+    : undefined;
+}
+
 export interface QueryAuditInput {
   participantId?: string;
   question: string;
@@ -86,6 +108,8 @@ export interface QueryAuditInput {
   };
   /** The k6 run that sent this query (X-Load-Test), so test traffic stays told apart (#571). */
   loadTest?: string;
+  /** The permits the query ran under, so each agent query is tied to one (#779). */
+  permits?: AuditPermit[];
 }
 
 /** FHIR R4 AuditEvent, BALP Query pattern, with no plaintext query. */
@@ -117,6 +141,15 @@ export function buildQueryAuditEvent(
         detail("suppressionReason", input.federated.suppressionReason),
       );
     }
+  }
+  if (input.permits?.length) {
+    details.push(
+      detail("permitIds", input.permits.map((p) => p.permitId).join(",")),
+      detail(
+        "permitPurposes",
+        input.permits.map((p) => p.purpose ?? "").join(","),
+      ),
+    );
   }
   if (input.loadTest) details.push(detail("loadTest", input.loadTest));
   return {
