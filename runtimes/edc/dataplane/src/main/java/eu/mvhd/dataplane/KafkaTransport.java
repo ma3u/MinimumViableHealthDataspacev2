@@ -44,34 +44,35 @@ public final class KafkaTransport implements StreamTransport {
     private final int batchRecords;
     private final ObjectMapper mapper;
     private final String securityProtocol;
-    private final String username;
-    private final String password;
+    private final KafkaLogins logins;
 
     public KafkaTransport(String bootstrap, int batchRecords, ObjectMapper mapper) {
-        this(bootstrap, batchRecords, mapper, "PLAINTEXT", "", "");
+        this(bootstrap, batchRecords, mapper, "PLAINTEXT", KafkaLogins.none());
     }
 
     /**
-     * With SASL PLAIN, over TLS or not. The one login is used for every
-     * broker this process talks to, so the two sides of a transfer share a
-     * broker or a login for now.
+     * With SASL PLAIN, over TLS or not, and a login per job: the admin client,
+     * the writer and the reader each log in with their own (ADR-096, decision
+     * 3). The logins hold for every broker this process talks to, so the two
+     * sides of a transfer share a broker for now.
      */
     public KafkaTransport(String bootstrap, int batchRecords, ObjectMapper mapper, String securityProtocol,
-                          String username, String password) {
+                          KafkaLogins logins) {
         this.bootstrap = bootstrap;
         this.batchRecords = Math.max(1, batchRecords);
         this.mapper = mapper;
         this.securityProtocol = securityProtocol;
-        this.username = username;
-        this.password = password;
-        if (securityProtocol.startsWith("SASL") && (username.isBlank() || password.isBlank())) {
-            throw new IllegalArgumentException("the Kafka security protocol " + securityProtocol + " needs a user and a password");
+        this.logins = logins;
+        if (securityProtocol.startsWith("SASL")
+                && !(logins.admin().complete() && logins.send().complete() && logins.listen().complete())) {
+            throw new IllegalArgumentException("the Kafka security protocol " + securityProtocol
+                    + " needs a user and a password for the admin client, the writer and the reader");
         }
     }
 
     @Override
     public void deleteTopic(String bootstrap, String topic) throws Exception {
-        try (var admin = AdminClient.create(common(bootstrap))) {
+        try (var admin = AdminClient.create(adminProperties(bootstrap))) {
             admin.deleteTopics(List.of(topic)).all().get(30, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
             if (!(e.getCause() instanceof org.apache.kafka.common.errors.UnknownTopicOrPartitionException)) {
@@ -87,7 +88,7 @@ public final class KafkaTransport implements StreamTransport {
 
     @Override
     public void createTopic(String bootstrap, String topic) throws Exception {
-        try (var admin = AdminClient.create(common(bootstrap))) {
+        try (var admin = AdminClient.create(adminProperties(bootstrap))) {
             admin.createTopics(List.of(new NewTopic(topic, 1, (short) 1))).all().get(30, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
             if (!(e.getCause() instanceof TopicExistsException)) {
@@ -98,7 +99,7 @@ public final class KafkaTransport implements StreamTransport {
 
     @Override
     public Writer writer(String bootstrap, String topic) {
-        var properties = common(bootstrap);
+        var properties = writerProperties(bootstrap);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         // every record acknowledged and none sent twice: the receiver counts them
@@ -130,7 +131,7 @@ public final class KafkaTransport implements StreamTransport {
     @SuppressWarnings("unchecked")
     public End read(String bootstrap, String topic, String group, Sink sink,
                     java.util.function.BooleanSupplier stopped) throws Exception {
-        var properties = common(bootstrap);
+        var properties = readerProperties(bootstrap);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, group);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -181,7 +182,7 @@ public final class KafkaTransport implements StreamTransport {
     @Override
     public boolean consumed(String bootstrap, String topic, String group) throws Exception {
         var partition = new TopicPartition(topic, 0);
-        try (var admin = AdminClient.create(common(bootstrap))) {
+        try (var admin = AdminClient.create(adminProperties(bootstrap))) {
             var end = admin.listOffsets(Map.of(partition, OffsetSpec.latest())).all().get(30, TimeUnit.SECONDS)
                     .get(partition).offset();
             var committed = admin.listConsumerGroupOffsets(group).partitionsToOffsetAndMetadata()
@@ -190,7 +191,22 @@ public final class KafkaTransport implements StreamTransport {
         }
     }
 
-    private Properties common(String bootstrap) {
+    /** The admin client's: it creates and deletes topics and reads a group's offsets. */
+    Properties adminProperties(String bootstrap) {
+        return common(bootstrap, logins.admin());
+    }
+
+    /** The writer's base settings, before the producer's own. */
+    Properties writerProperties(String bootstrap) {
+        return common(bootstrap, logins.send());
+    }
+
+    /** The reader's base settings, before the consumer's own. */
+    Properties readerProperties(String bootstrap) {
+        return common(bootstrap, logins.listen());
+    }
+
+    private Properties common(String bootstrap, KafkaLogins.Login login) {
         var properties = new Properties();
         properties.put("bootstrap.servers", bootstrap);
         properties.put("client.id", "mvhd-dataplane");
@@ -199,7 +215,7 @@ public final class KafkaTransport implements StreamTransport {
             properties.put("sasl.mechanism", "PLAIN");
             properties.put("sasl.jaas.config",
                     "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";"
-                            .formatted(jaas(username), jaas(password)));
+                            .formatted(jaas(login.username()), jaas(login.password())));
         }
         return properties;
     }

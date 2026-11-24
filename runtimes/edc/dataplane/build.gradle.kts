@@ -13,9 +13,22 @@ dependencies {
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
-    testRuntimeOnly(libs.junit.platform.launcher)
+    // the DPS TCK runs as a test (DpsTckTest); it needs the launcher at compile time for its tag filter
+    testImplementation(libs.junit.platform.launcher)
+    testImplementation(libs.tck.dps)
 }
 
 application {
     mainClass.set("eu.mvhd.dataplane.Main")
+}
+
+// The image build runs Gradle with -q (runtimes/edc/Dockerfile), which hides
+// which test failed; a failure is printed at the quiet level too.
+tasks.withType<Test>().configureEach {
+    testLogging {
+        quiet {
+            events("failed")
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
+    }
 }

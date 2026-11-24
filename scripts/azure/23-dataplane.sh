@@ -49,30 +49,20 @@ set -euo pipefail
 # Needed before `register`: the Keycloak client (`keycloak`), the app healthy,
 # and the control plane's port 8182 (`wire`, controlplane).
 #
-# The Event Hubs login, and the gap against ADR-096 decision 3
-# ------------------------------------------------------------
-# ADR-096 decides a Send policy for providers and a Listen policy for
-# consumers. The data plane cannot run on those two today, for two reasons in
-# its code, not in this script:
-#   1. it creates and deletes one topic per transfer through the Kafka admin
-#      API (KafkaTransport.createTopic, deleteTopic). On Event Hubs a topic is
-#      an event hub, and creating or deleting one needs the Manage claim on
-#      the namespace. The consumer's side creates the topic of a Kafka-PUSH,
-#      the provider's side that of a Kafka-PULL, and the provider deletes
-#      both, so each side needs Manage, whichever policy it holds;
-#   2. Config.java has one DATAPLANE_KAFKA_SASL_USERNAME and one password,
-#      and one process serves every participant context, providers and
-#      consumers alike.
-# So `eventhubs` creates three policies: mvhd-dataplane-send (Send) and
-# mvhd-dataplane-listen (Listen), as ADR-096 decides, which nothing uses yet,
-# and mvhd-dataplane-manage (Manage, Send, Listen), which is the one login the
-# app runs with. That login can read and write every topic in the namespace
-# and delete any of them: there is no separation between participants at the
-# broker. It is acceptable only while one operator runs one data plane for
-# all the demo participants, and it must not be handed to a second
-# organisation's data plane. The smallest change that closes it is described
-# in the runbook (three logins in Config.java: admin, send, listen); it is
-# not made here.
+# The Event Hubs logins (ADR-096 decision 3)
+# -----------------------------------------
+# One shared access policy per job of the data plane, each a Kafka login:
+#   mvhd-dataplane-manage (Manage, Send, Listen)  the admin client: it creates
+#       and deletes a transfer's topic (on Event Hubs a topic is an event hub,
+#       and that needs Manage) and reads how far a reader has come;
+#   mvhd-dataplane-send (Send)                    the writer of a stream;
+#   mvhd-dataplane-listen (Listen)                the reader of a stream.
+# The writer and the reader hold no Manage. What stays: the admin login can
+# still read, write and delete every topic in the namespace, and one process
+# serves every participant context, so there is no separation between
+# participants at the broker. That is acceptable while one operator runs one
+# data plane for the demo participants; it must not be handed to a second
+# organisation's data plane, which needs a namespace or policies of its own.
 #
 # Off hours (ADR-053): offhours.sh stops and starts mvhd-dataplane with the
 # stack once it exists. The Event Hubs namespace cannot be stopped: it bills
@@ -113,7 +103,7 @@ KV_PSEUDONYM_KEY="patient-pseudonym-key"
 KV_KAFKA_MANAGE="eventhubs-dataplane-manage-connection"
 KV_KAFKA_SEND="eventhubs-dataplane-send-connection"
 KV_KAFKA_LISTEN="eventhubs-dataplane-listen-connection"
-# policy|rights|Key Vault secret. The app logs in with the first (see the header).
+# policy|rights|Key Vault secret: the admin client, the writer, the reader (see the header).
 RULES=(
   "mvhd-dataplane-manage|Manage Send Listen|${KV_KAFKA_MANAGE}"
   "mvhd-dataplane-send|Send|${KV_KAFKA_SEND}"
@@ -170,7 +160,8 @@ render() {
   mkdir -p "$dir"
   LOCATION="$LOCATION" ENV_ID="$ENV_ID" ACR_LOGIN_SERVER="$ACR_LOGIN_SERVER" ACR_NAME="$ACR_NAME" \
     IMAGE="$IMAGE" KV_URI="$KV_URI" KV_READER_ID="$KV_READER_ID" \
-    KV_DB_PASSWORD="$KV_DB_PASSWORD" KV_KAFKA_CONNECTION="$KV_KAFKA_MANAGE" KV_SIGNING_KEY="$KV_SIGNING_KEY" \
+    KV_DB_PASSWORD="$KV_DB_PASSWORD" KV_KAFKA_ADMIN="$KV_KAFKA_MANAGE" \
+    KV_KAFKA_SEND="$KV_KAFKA_SEND" KV_KAFKA_LISTEN="$KV_KAFKA_LISTEN" KV_SIGNING_KEY="$KV_SIGNING_KEY" \
     CPU="$DATAPLANE_CPU" MEMORY="$DATAPLANE_MEMORY" PUBLIC_URL="$PUBLIC_URL" \
     CP_SIGNALING_URL="$CP_SIGNALING_URL" KC_JWKS_URL="${KC_REALM_URL}/certs" \
     SIGNALING_CLIENT_ID="$CLIENT_ID" PROXY_URL="$PROXY_URL" ATTESTATION_FLOOR="$ATTESTATION_FLOOR" \
@@ -483,7 +474,7 @@ cmd_eventhubs() {
     unset conn
     ok "${kv} in ${KEY_VAULT_NAME} (not displayed)"
   done
-  warn "the app logs in with mvhd-dataplane-manage: every topic of the namespace, for every participant (see the header)"
+  warn "the admin client's login (manage) reaches every topic of the namespace, for every participant (see the header)"
 }
 
 cmd_keycloak() {
@@ -550,7 +541,7 @@ cmd_app() {
     { err "DATAPLANE_AZURE_GO does not name ${APP}; nothing is created without a go"; exit 1; }
   local missing=0 name existed rev
   image_in_acr || { err "${IMAGE} is not in ${ACR_NAME} (23-dataplane.sh images)"; missing=1; }
-  for name in "$KV_DB_PASSWORD" "$KV_SIGNING_KEY" "$KV_KAFKA_MANAGE"; do
+  for name in "$KV_DB_PASSWORD" "$KV_SIGNING_KEY" "$KV_KAFKA_MANAGE" "$KV_KAFKA_SEND" "$KV_KAFKA_LISTEN"; do
     kv_has "$name" || { err "Key Vault has no ${name}"; missing=1; }
   done
   az postgres flexible-server db show --server-name "$PG_FLEX_NAME" --resource-group "$RG" \

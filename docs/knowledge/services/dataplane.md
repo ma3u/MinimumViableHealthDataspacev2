@@ -35,6 +35,14 @@ for every participant context as `mvhd-dp-<context>`.
   `dataplane_v1`, the client, the container, the registrations);
   `jad/seed-data-assets.sh` and the hub's onboarding register it for
   participants (`scripts/lib/push-dataplane.sh`).
+- **Kafka logins:** one per job (`KafkaLogins.java`): the admin client
+  (topics, a reader's offsets), the writer and the reader, from
+  `DATAPLANE_KAFKA_{ADMIN,SEND,LISTEN}_SASL_*`, each falling back to
+  `DATAPLANE_KAFKA_SASL_*`. On Azure they are the three Event Hubs policies
+  (ADR-096 decision 3).
+- **DPS TCK:** `DpsTckTest` runs dps-tck 1.3.3 against the data plane's own
+  HTTP layer in every build: 23 tests, push and pull, both sides (the HTTP
+  profile's tests are left out).
 - **Checks:** `scripts/run-ehds-dataspace-checks.sh` PUSH-4b.1 to 4b.5;
   `scripts/check-streaming-transfer.sh` streams a synthetic long-term ECG
   (`ecg-holter-hour`, or `ASSET=ecg-holter-stream` for the 24 hours) through a

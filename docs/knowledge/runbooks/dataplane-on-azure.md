@@ -60,8 +60,7 @@ line "OK: dataplane logs in".
 
 **5. Event Hubs.** `23-dataplane.sh eventhubs`: three shared access policies on
 `evhns-mvhd-b53a0449` and their connection strings in Key Vault. The app logs
-in with `mvhd-dataplane-manage` (Manage, Send, Listen); `-send` and `-listen`
-are made as ADR-096 decides and nothing uses them yet. See "The gap" below.
+in with all three, one per job (see "The Event Hubs logins" below).
 Gate: three policies and three secret names present.
 
 **6. Keycloak.** `23-dataplane.sh keycloak`: the client `dataplane-signaling` in
@@ -106,24 +105,20 @@ AlphaKlinik Berlin's one-hour ECG and has it pushed over Event Hubs into SPE-1.
 Gate: `Kafka-PUSH: COMPLETED`, 121 records, and "event hubs in use: 0 of 10"
 afterwards.
 
-## The gap against ADR-096 decision 3
+## The Event Hubs logins (ADR-096 decision 3)
 
-ADR-096 decides one Send policy for providers and one Listen policy for
-consumers. The data plane cannot run on those today:
+The data plane logs in with one policy per job: `mvhd-dataplane-manage` for
+the admin client only (it creates and deletes a transfer's topic, which on
+Event Hubs needs Manage, and reads a reader's offsets), `mvhd-dataplane-send`
+for the writer, `mvhd-dataplane-listen` for the reader
+(`DATAPLANE_KAFKA_{ADMIN,SEND,LISTEN}_SASL_*`, `KafkaLogins.java`). Each falls
+back to `DATAPLANE_KAFKA_SASL_*`, so one login still works.
 
-- it creates and deletes a topic per transfer through the Kafka admin API, and
-  on Event Hubs that needs the Manage claim on the namespace;
-- `Config.java` has one Kafka user and password, and one process serves every
-  participant context.
-
-So the app runs with one Manage login. It can read, write and delete every
-topic in the namespace; there is no separation between participants at the
-broker. That is acceptable while one operator runs one data plane for the demo
-participants, and it must not be handed to a second organisation. The smallest
-change that closes it: three logins in `Config.java`
-(`DATAPLANE_KAFKA_ADMIN_*` for creating and deleting topics, `_SEND_*` for the
-writer, `_LISTEN_*` for the reader), each used by the one Kafka client that
-needs it.
+What stays open: the admin login reaches every topic in the namespace, and one
+process serves every participant context, so there is no separation between
+participants at the broker. Acceptable while one operator runs one data plane
+for the demo participants; a second organisation's data plane needs a
+namespace or policies of its own.
 
 ## ADR-096 level 3: the local data plane against Event Hubs
 

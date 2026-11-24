@@ -19,6 +19,8 @@ postgresql = "42.7.13"
 slf4j = "2.0.20"
 # the Kafka transfer types of the push data plane
 kafkaClients = "4.3.2"
+# the Data Plane Signaling TCK, the release EDC 1.0.0-RC8 runs
+dpsTck = "1.3.3"
 
 [libraries]
 # control plane: the virtual (multi-participant) control plane, merged from EDC-V
@@ -63,6 +65,7 @@ nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimb
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafkaClients" }
+tck-dps = { module = "org.eclipse.dataspacetck.dps:dps-tck", version.ref = "dpsTck" }
 
 # tests of the hub's own extensions
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
