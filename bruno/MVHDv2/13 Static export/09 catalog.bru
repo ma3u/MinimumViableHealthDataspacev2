@@ -27,6 +27,18 @@ tests {
     const german = res.getBody().filter((d) => d.translations && d.translations.de);
     expect(german.length).to.be.above(0);
   });
+  // #1123, ADR-094: the two fictional national sources, SPE access only.
+  test("the national sources of MedReg DE are there, SPE only", function () {
+    for (const id of [
+      "dataset:medreg:national-claims-epa-research",
+      "dataset:medreg:university-hospital-fhir",
+    ]) {
+      const d = res.getBody().find((s) => s.id === id);
+      expect(d, id).to.be.an("object");
+      expect(d.publisher, id).to.equal("MedReg DE");
+      expect(d.legalBasis, id).to.include("secure processing environment only");
+    }
+  });
 }
 
 docs {

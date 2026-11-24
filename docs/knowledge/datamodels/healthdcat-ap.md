@@ -69,6 +69,17 @@ export is the proxy's JSON-LD written as Turtle (`ui/src/lib/healthdcat-ap.ts`);
 CI validates the Turtle and checks it is the same graph
 (`validate.py --same-as`).
 
+National sources (ADR-094, #1123): `neo4j/seed-national-sources.cypher`
+describes two fictional national datasets published by MedReg DE, a claims
+and ePA research dataset and a university hospital FHIR dataset. Both say
+"secure processing environment only" (`hdcatapLegalBasisForAccess`,
+`accessMode`, `rowLevelDownload = false`) and their one distribution has an
+access URL and no download URL: the rows stay at the source. Their
+`PUBLISHED_BY` points at the `:Participant`, which `/api/catalog` and the
+proxy's `/catalog/datasets` both read (#514). A figure a source released for
+publication is a `(:HealthDataset)-[:HAS_PUBLISHED_AGGREGATE]->(:PublishedAggregate)`
+with its `sourceUrl`, `licence`, `releaseDate` and `smallCountRule`.
+
 Languages (#782): English is the source language. A translation is the same
 property with the language as suffix (`titleDe`, `descriptionDe`,
 `hdcatapKeywordsDe`, and `Fr`, `Nl`, `Es`), set by

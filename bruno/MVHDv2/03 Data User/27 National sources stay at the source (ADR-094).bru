@@ -1,0 +1,53 @@
+meta {
+  name: 27 National sources stay at the source (ADR-094)
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/api/catalog
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  // #1123, ADR-094: the catalogue describes national health data without
+  // holding it. Two fictional entries, published by MedReg DE, each saying the
+  // data is analysed only in the source's secure processing environment.
+  const sets = res.getBody();
+  const NATIONAL = [
+    "dataset:medreg:national-claims-epa-research",
+    "dataset:medreg:university-hospital-fhir",
+  ];
+  test("both national entries are in the catalogue", function () {
+    const ids = sets.map((d) => d.id);
+    for (const id of NATIONAL) expect(ids, id).to.include(id);
+  });
+  test("each is published by MedReg DE and governed by it", function () {
+    for (const id of NATIONAL) {
+      const d = sets.find((s) => s.id === id);
+      expect(d.publisher, id).to.equal("MedReg DE");
+      expect(d.accessBody, id).to.equal("MedReg DE");
+    }
+  });
+  test("each says secure processing environment only, no row-level download", function () {
+    for (const id of NATIONAL) {
+      const d = sets.find((s) => s.id === id);
+      expect(d.legalBasis, id).to.include("secure processing environment only");
+      expect(d.description, id).to.include("no row-level download");
+    }
+  });
+}
+
+docs {
+  The two fictional national sources of ADR-094 (#1123): a claims and ePA research dataset and a university hospital FHIR dataset. The hub holds their descriptions only; the rows stay at the source and are analysed in its secure processing environment (Art. 73) under a data permit (Art. 68). Seeded by neo4j/seed-national-sources.cypher and present in ui/public/mock/catalog.json, which /api/catalog merges in, so they answer on every stack.
+}
