@@ -1,6 +1,6 @@
 # ADR-066: The hub runs its own EUDI verifier, behind a gate that passes the wallet API only
 
-**Status:** Proposed (2026-10-28)
+**Status:** Accepted (2026-11-24, by the maintainer); proposed 2026-10-28
 **Date:** 2026-10-28
 **Refines:** decision 2 of [ADR-028](ADR-028-patient-qr-login-eudi-wallet.md) ("verifier engine = the hosted EU reference verifier")
 **Relates to:** [ADR-065](ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), #182 (W1), #708
