@@ -46,8 +46,8 @@ properties:
     containers:
       - name: dataplane
         image: ${IMAGE}
-        # block style: a flow mapping holding ${...} is not YAML before the
-        # values are substituted, and the check-yaml hook reads it then
+        # block style: a flow mapping holding a placeholder is not YAML before
+        # the values are substituted, and the check-yaml hook reads it then
         resources:
           cpu: ${CPU}
           memory: ${MEMORY}
