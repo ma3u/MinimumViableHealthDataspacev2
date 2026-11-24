@@ -156,7 +156,7 @@ MERGE (appPharma:AccessApplication {applicationId: 'app-pharmaco-medreg-2026-002
       appPharma.processingPeriodMonths = 12,
       // The eleven items of Art. 67(2) (issue #206, M1)
       appPharma.applicantCategory = 'COMMERCIAL',
-      appPharma.namedPersons = 'PharmaCo Research AG (did:web:pharmaco.de:research); Dr A. Weber, principal investigator; M. Costa, data scientist',
+      appPharma.namedPersons = 'PharmaCo Research AG (did:web:pharmaco.de:research); Dr A. Weber, principal investigator; M. Costa, data scientist; Research Analyst (researcher@pharmaco.de)',
       appPharma.intendedUse = 'Compare HbA1c trajectories and cardiovascular events between second-line therapies; expected benefit: evidence for treatment guidelines and post-marketing safety.',
       appPharma.requestedData = 'Adults with a type 2 diabetes diagnosis: encounters, conditions, HbA1c and lipid observations, medication requests; sources AlphaKlinik Berlin and Limburg Medical Centre; coverage: the full synthetic cohort.',
       appPharma.dataTimeRange = '2019-01-01 to 2026-08-31',
@@ -287,6 +287,8 @@ MERGE (appPharma:AccessApplication {applicationId: 'app-pharmaco-medreg-omop-sta
       appPharma.submittedAt = datetime('2026-01-15T09:00:00'),
       appPharma.applicantCategory = 'COMMERCIAL',
       appPharma.dataMinimisationStatement = 'OMOP condition, measurement and drug tables only; aggregate output.',
+      // Art. 67(2)(a), checked at every query (draft SPE act Art. 5(3), #1236)
+      appPharma.namedPersons = 'Research Analyst (researcher@pharmaco.de), data scientist',
       appPharma.ehdsArticle = 'Art. 67'
 MERGE (pharmaco)-[:SUBMITTED]->(appPharma)
 MERGE (medreg)-[:REVIEWED]->(appPharma)

@@ -784,7 +784,8 @@ describe("CompliancePage", () => {
     it("shows Loading… for credentials during fetch", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<CompliancePage />);
-      expect(screen.getByText("Loading…")).toBeInTheDocument();
+      // The credentials and the import review (#1236) both wait.
+      expect(screen.getAllByText("Loading…").length).toBeGreaterThan(0);
     });
   });
 

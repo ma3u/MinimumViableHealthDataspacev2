@@ -165,5 +165,18 @@
   "Met in the demo": "Met in the demo",
   "Partly met": "Partly met",
   "Not yet": "Not yet",
-  "Not offered": "Not offered"
+  "Not offered": "Not offered",
+  "Approved: the data is in {spe}.": "Approved: the data is in {spe}.",
+  "Refused: the staged data was removed from {spe}.": "Refused: the staged data was removed from {spe}.",
+  "Imports waiting for review": "Imports waiting for review",
+  "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.": "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.",
+  "No import waits for review.": "No import waits for review.",
+  "{records} records for {spe}": "{records} records for {spe}",
+  "Transfer {transfer} from {provider}, imported by {who}": "Transfer {transfer} from {provider}, imported by {who}",
+  "pseudonymised": "pseudonymised",
+  "replaces an earlier import": "replaces an earlier import",
+  "Reason for the refusal": "Reason for the refusal",
+  "Refuse": "Refuse",
+  "Cancel": "Cancel",
+  "Approve": "Approve"
 }

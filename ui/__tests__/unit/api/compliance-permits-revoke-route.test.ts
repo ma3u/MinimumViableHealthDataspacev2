@@ -2,6 +2,15 @@
  * POST /api/compliance/permits/revoke: revocation (Art. 63(3)). Issue #206, M4.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+// Admin actions go on the audit chain first (#1236); the chain is not under test here.
+const adminAudit = vi.hoisted(() => ({
+  recordAdminEvent: vi.fn(async () => undefined),
+  recordAdminEventAfter: vi.fn(async () => undefined),
+}));
+vi.mock("@/lib/admin-audit", async (orig) => ({
+  ...(await orig<typeof import("@/lib/admin-audit")>()),
+  ...adminAudit,
+}));
 import { NextRequest, NextResponse } from "next/server";
 
 vi.mock("@/lib/neo4j", () => ({
@@ -84,6 +93,27 @@ describe("POST /api/compliance/permits/revoke", () => {
       revokedBy: "did:web:medreg.de:hdab",
     });
     expect((params as { reason: string }).reason).toContain("Art. 61(2)");
+  });
+
+  it("puts the revocation on the admin audit chain before it takes effect (#1236)", async () => {
+    mockRunQuery.mockResolvedValue([{ permitId: "permit-app-1" }]);
+    await POST(post({ permitId: "permit-app-1", reason: "Breach." }));
+    expect(adminAudit.recordAdminEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: "permit-revoke",
+        target: "permit-app-1",
+        actorRole: "HDAB_AUTHORITY",
+      }),
+    );
+  });
+
+  it("revokes nothing when the audit chain cannot record it", async () => {
+    adminAudit.recordAdminEvent.mockRejectedValueOnce(new Error("down"));
+    const res = await POST(
+      post({ permitId: "permit-app-1", reason: "Breach." }),
+    );
+    expect(res.status).toBe(503);
+    expect(mockRunQuery).not.toHaveBeenCalled();
   });
 
   it("answers 404 when there is no approved permit under that id", async () => {

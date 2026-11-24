@@ -4,6 +4,15 @@
  * offers; the request fee (Art. 62) lands on an approval. Issue #206, M7.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+// Admin actions go on the audit chain first (#1236); the chain is not under test here.
+const adminAudit = vi.hoisted(() => ({
+  recordAdminEvent: vi.fn(async () => undefined),
+  recordAdminEventAfter: vi.fn(async () => undefined),
+}));
+vi.mock("@/lib/admin-audit", async (orig) => ({
+  ...(await orig<typeof import("@/lib/admin-audit")>()),
+  ...adminAudit,
+}));
 import { NextRequest, NextResponse } from "next/server";
 
 vi.mock("@/lib/neo4j", () => ({

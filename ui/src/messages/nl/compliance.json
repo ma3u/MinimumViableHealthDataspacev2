@@ -165,5 +165,18 @@
   "Met in the demo": "In de demo voldaan",
   "Partly met": "Deels voldaan",
   "Not yet": "Nog niet",
-  "Not offered": "Niet aangeboden"
+  "Not offered": "Niet aangeboden",
+  "Approved: the data is in {spe}.": "Goedgekeurd: de gegevens staan in {spe}.",
+  "Refused: the staged data was removed from {spe}.": "Geweigerd: de klaargezette gegevens zijn uit {spe} verwijderd.",
+  "Imports waiting for review": "Invoer die op beoordeling wacht",
+  "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.": "Wat een gebruiker van gezondheidsgegevens in een beveiligde verwerkingsomgeving inbrengt, wacht in haar voorbereidingsruimte tot u het aan de gegevensvergunning hebt getoetst. Keur het goed om het in de werkruimte te plaatsen, of weiger het met een reden om het te verwijderen. Elk besluit wordt in de auditketen vastgelegd.",
+  "No import waits for review.": "Geen invoer wacht op beoordeling.",
+  "{records} records for {spe}": "{records} records voor {spe}",
+  "Transfer {transfer} from {provider}, imported by {who}": "Overdracht {transfer} van {provider}, ingevoerd door {who}",
+  "pseudonymised": "gepseudonimiseerd",
+  "replaces an earlier import": "vervangt een eerdere invoer",
+  "Reason for the refusal": "Reden van de weigering",
+  "Refuse": "Weigeren",
+  "Cancel": "Annuleren",
+  "Approve": "Goedkeuren"
 }

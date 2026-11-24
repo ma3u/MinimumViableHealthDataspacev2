@@ -38,6 +38,8 @@ export interface PermitRow {
   revocationReason?: string | null;
   /** The application invoked the Art. 71(4) exception (ADR-062). */
   art71Exception?: boolean | null;
+  /** Art. 67(2)(a): the natural persons who will access the data. */
+  namedPersons?: string | null;
 }
 
 export interface PermitCheck {
@@ -50,6 +52,8 @@ export interface PermitCheck {
   purpose: string | null;
   reason: string;
   article: string;
+  /** Art. 67(2)(a): the persons the permit's application names. */
+  namedPersons?: string | null;
 }
 
 /** Every decision the access bodies have taken on this consumer's applications. */
@@ -68,7 +72,8 @@ export async function findPermits(consumerDid: string): Promise<PermitRow[]> {
             app.applicationId                                       AS applicationId,
             toString(permit.revokedAt)                              AS revokedAt,
             permit.revocationReason                                 AS revocationReason,
-            app.art71Exception = true                               AS art71Exception
+            app.art71Exception = true                               AS art71Exception,
+            app.namedPersons                                        AS namedPersons
      ORDER BY permit.validUntil DESC`,
     { consumerDid },
   );
@@ -203,6 +208,7 @@ export async function checkPermit(input: {
       datasetMatched: true,
       validUntil: hit.validUntil,
       purpose: hit.purpose,
+      namedPersons: hit.namedPersons ?? null,
       reason: `Covered by data permit ${hit.permitId} for ${hit.datasetId}.`,
     };
   }
@@ -219,6 +225,7 @@ export async function checkPermit(input: {
     datasetMatched: Boolean(byAsset),
     validUntil: chosen.validUntil,
     purpose: chosen.purpose,
+    namedPersons: chosen.namedPersons ?? null,
     reason: byAsset
       ? `Covered by data permit ${chosen.permitId} for ${chosen.datasetId}.`
       : `Covered by data permit ${chosen.permitId}; the asset ${
@@ -274,6 +281,38 @@ export function needsPermit(roles: string[]): boolean {
   );
 }
 
+/** The signed-in person, as the gate compares them with a permit's named persons. */
+export interface GatePerson {
+  email?: string | null;
+  username?: string | null;
+  name?: string | null;
+}
+
+/**
+ * Whether the person is one of those the permit's application names (draft
+ * SPE implementing act Art. 5(3); Regulation (EU) 2025/327 Art. 67(2)(a),
+ * #1236). The application names them in free text; a person is named when
+ * their e-mail address or login appears in it as a whole word.
+ */
+export function personIsNamed(
+  namedPersons: string | null | undefined,
+  person: GatePerson,
+): boolean {
+  const text = norm(namedPersons);
+  if (!text) return false;
+  return [person.email, person.username]
+    .map(norm)
+    .filter((k) => k.length >= 3)
+    .some((k) =>
+      new RegExp(
+        `(^|[^a-z0-9@._-])${k.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&",
+        )}($|[^a-z0-9@._-])`,
+      ).test(text),
+    );
+}
+
 export type SecondaryUseGate =
   | {
       allowed: true;
@@ -310,6 +349,8 @@ export async function gateSecondaryUse(input: {
   datasetId?: string | null;
   /** The word the refusal uses: "query", "analysis". */
   what: string;
+  /** The signed-in person; a data user must be named in the permit (#1236). */
+  person?: GatePerson;
   now?: Date;
 }): Promise<SecondaryUseGate> {
   if (!needsPermit(input.roles)) {
@@ -348,6 +389,24 @@ export async function gateSecondaryUse(input: {
         error: `No data permit covers this ${input.what}`,
         reason: check.reason,
         article: check.article,
+        consumerDid: input.consumerDid,
+        permitId: check.permitId,
+        odrlEnforced: true,
+      },
+    };
+  }
+  // Only the persons the permit names may use it (draft SPE act Art. 5(3)).
+  if (input.person && !personIsNamed(check.namedPersons, input.person)) {
+    return {
+      allowed: false,
+      status: 403,
+      body: {
+        error: `You are not one of the persons named in data permit ${check.permitId}`,
+        reason: check.namedPersons
+          ? `The application for data permit ${check.permitId} names who may access the data (Art. 67(2)(a)); your account is not among them. The applicant can ask the health data access body to amend the permit.`
+          : `The application for data permit ${check.permitId} names no person who may access the data (Art. 67(2)(a)), so no one can use it until the health data access body amends it.`,
+        article:
+          "Regulation (EU) 2025/327, Art. 67(2)(a); draft SPE implementing act, Art. 5(3)",
         consumerDid: input.consumerDid,
         permitId: check.permitId,
         odrlEnforced: true,

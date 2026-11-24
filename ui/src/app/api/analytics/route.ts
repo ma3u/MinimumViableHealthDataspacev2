@@ -20,6 +20,10 @@ export async function GET() {
     session.roles,
   );
   const gate = await gateSecondaryUse({
+    person: {
+      email: session.user.email,
+      username: session.user.name,
+    },
     consumerDid: participantId,
     roles: session.roles,
     what: "analysis",

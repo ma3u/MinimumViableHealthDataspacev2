@@ -129,6 +129,7 @@ export default function SpeImport({
         untilStopped: body.untilStopped ?? false,
         closed: body.closed ?? false,
         graphUrl: body.graphUrl ?? importViewUrl(transferId, speId),
+        staged: body.staged ?? false,
       });
       loadExisting();
       onImported?.();
@@ -314,14 +315,19 @@ export default function SpeImport({
         >
           <CheckCircle2 size={14} className="text-green-500" />
           <span>
-            {t(
-              "Imported {records} records with {relationships} references into {spe}.",
-              {
-                records: String(result.records),
-                relationships: String(result.relationships),
-                spe: result.speId,
-              },
-            )}
+            {result.staged
+              ? t(
+                  "{records} records are in the staging area of {spe}. They join the workspace's data once the health data access body has checked them against the data permit.",
+                  { records: String(result.records), spe: result.speId },
+                )
+              : t(
+                  "Imported {records} records with {relationships} references into {spe}.",
+                  {
+                    records: String(result.records),
+                    relationships: String(result.relationships),
+                    spe: result.speId,
+                  },
+                )}
             {result.pseudonymised && ` ${t("Patients are pseudonymised.")}`}
             {result.untilStopped &&
               ` ${t(
@@ -332,14 +338,16 @@ export default function SpeImport({
                 "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
               )}`}
           </span>
-          <Link
-            href={result.graphUrl}
-            data-testid="spe-import-graph"
-            className="flex items-center gap-1 underline text-(--accent)"
-          >
-            <Box size={12} />
-            {t("Show in 3D")}
-          </Link>
+          {!result.staged && (
+            <Link
+              href={result.graphUrl}
+              data-testid="spe-import-graph"
+              className="flex items-center gap-1 underline text-(--accent)"
+            >
+              <Box size={12} />
+              {t("Show in 3D")}
+            </Link>
+          )}
         </div>
       )}
     </div>

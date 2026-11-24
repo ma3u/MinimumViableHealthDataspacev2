@@ -75,7 +75,10 @@ def documented(spec):
 
 
 # Role lists a route passes to requireAuth() by name instead of as a literal.
-ROLE_CONSTANTS = {"SPE_POWER_ROLES": ["EDC_ADMIN", "HDAB_AUTHORITY"]}
+ROLE_CONSTANTS = {
+    "SPE_POWER_ROLES": ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    "IMPORT_REVIEW_ROLES": ["HDAB_AUTHORITY", "EDC_ADMIN"],
+}
 ANY_SESSION = "any session"
 
 

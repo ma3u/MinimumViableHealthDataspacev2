@@ -24,6 +24,7 @@ body:json {
 tests {
   const body = res.getBody() || {};
   bru.setVar("dspImported", "");
+  bru.setVar("dspStagedImportId", "");
   bru.setVar("dspImportClosed", "");
   if (bru.getEnvVar("dspLiveFlow") !== "true") {
     test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
@@ -34,19 +35,19 @@ tests {
     // The SPE workspaces start on demand (ADR-072); a stopped one answers 503.
     test("SKIPPED: " + body.error, function () {});
   } else {
-    test("the transfer's data is in SPE-1", function () {
+    test("the transfer's data waits in SPE-1's staging area for the access body (#1236)", function () {
       expect(res.getStatus(), `${body.step || ""} ${body.detail || body.error || ""}`).to.equal(200);
       expect(body.speId).to.equal("SPE-1");
       expect(body.datasetId).to.equal(bru.getVar("dspTransferId"));
-      expect(body.records, "nothing imported").to.be.above(0);
-      expect(body.graphUrl).to.equal(
-        `/overview?import=${encodeURIComponent(body.datasetId)}&spe=SPE-1`,
-      );
+      expect(body.records, "nothing staged").to.be.above(0);
+      expect(body.staged).to.equal(true);
+      expect(body.importId, "no staged import id").to.be.a("string");
     });
     test("a data user's import is pseudonymised (#475)", function () {
       expect(body.pseudonymised).to.equal(true);
     });
-    bru.setVar("dspImported", body.datasetId);
+    bru.setVar("dspStagedImportId", body.importId);
+    bru.setVar("dspStagedDatasetId", body.datasetId);
     // The import closes the transfer it came from (#924); 26 needs to know.
     bru.setVar("dspImportClosed", body.closed === true ? "true" : "");
   }
@@ -55,7 +56,8 @@ tests {
 docs {
   A transfer ends in a secure processing environment (EHDS Art. 73, #876): the hub pulls the data
   of the STARTED transfer as 21 does, pseudonymised for a data user, and the neo4j-proxy writes it
-  into the chosen SPE's graph (`services/neo4j-proxy/src/spe-import.ts`), SPE-1 by default. Then it
+  into the chosen SPE's staging area (`services/neo4j-proxy/src/spe-staging.ts`), SPE-1 by default,
+  where it waits for the access body (24, #1236, draft SPE implementing act Art. 4). Then it
   terminates the transfer, so the access to the provider's data ends with the import (#924), and
   answers `closed: true`.
 }

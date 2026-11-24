@@ -1,5 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import {
+  auditRole,
+  auditUnavailableResponse,
+  recordAdminEvent,
+  recordAdminEventAfter,
+} from "@/lib/admin-audit";
 import { IS_STATIC } from "@/lib/static-export";
 import { SPE_COLD_START_SECONDS } from "@/lib/spe";
 import {
@@ -86,8 +92,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  // On the admin audit chain before it happens (#1236, draft Art. 16(3)(f)).
+  const actor = {
+    actorId:
+      auth.session.user.email ?? auth.session.user.name ?? auth.session.user.id,
+    actorRole: auditRole(auth.session.roles),
+  };
+  const event = action === "start" ? "spe-start" : "spe-stop";
+  try {
+    for (const id of ids) {
+      await recordAdminEvent({
+        event,
+        outcome: "success",
+        target: id,
+        ...actor,
+      });
+    }
+  } catch {
+    return auditUnavailableResponse();
+  }
+
   // Side by side: each may wait a few seconds for ARM (powerGroup).
   const outcomes = await Promise.all(ids.map((id) => powerGroup(action, id)));
+  for (const o of outcomes) {
+    if (!o.ok) {
+      await recordAdminEventAfter({
+        event,
+        outcome: "failure",
+        target: o.id,
+        reason: `ARM ${o.status}`,
+        ...actor,
+      });
+    }
+  }
   const failed = outcomes.find((o) => !o.ok);
   if (failed && !failed.ok) {
     if (failed.status === 403) {

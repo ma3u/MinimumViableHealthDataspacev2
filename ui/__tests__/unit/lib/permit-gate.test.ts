@@ -14,6 +14,7 @@ import {
   didFromCounterParty,
   gateSecondaryUse,
   needsPermit,
+  personIsNamed,
   recordPermittedTransfer,
   type PermitRow,
 } from "@/lib/permit-gate";
@@ -361,5 +362,84 @@ describe("gateSecondaryUse (issue #206, M3)", () => {
     expect(g.allowed).toBe(true);
     if (!g.allowed) return;
     expect(g.headers).toEqual({});
+  });
+});
+
+describe("the persons a permit names (#1236, draft SPE act Art. 5(3))", () => {
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+  });
+  const NAMED =
+    "Dr A. Weber, principal investigator; Research Analyst (researcher@pharmaco.de)";
+
+  it("finds a person by e-mail or login as a whole word", () => {
+    expect(personIsNamed(NAMED, { email: "researcher@pharmaco.de" })).toBe(
+      true,
+    );
+    expect(personIsNamed(NAMED, { email: "RESEARCHER@pharmaco.de" })).toBe(
+      true,
+    );
+    expect(personIsNamed(NAMED, { email: "other@pharmaco.de" })).toBe(false);
+    expect(personIsNamed(NAMED, { email: "searcher@pharmaco.de" })).toBe(false);
+    expect(
+      personIsNamed("researcher, analyst", { username: "researcher" }),
+    ).toBe(true);
+    expect(personIsNamed(null, { email: "researcher@pharmaco.de" })).toBe(
+      false,
+    );
+  });
+
+  it("lets a named data user through", async () => {
+    mockRunQuery.mockResolvedValue([permit({ namedPersons: NAMED })]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      what: "query",
+      person: { email: "researcher@pharmaco.de" },
+      now: NOW,
+    });
+    expect(g.allowed).toBe(true);
+  });
+
+  it("refuses a data user of the same organisation who is not named", async () => {
+    mockRunQuery.mockResolvedValue([permit({ namedPersons: NAMED })]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      what: "query",
+      person: { email: "intern@pharmaco.de" },
+      now: NOW,
+    });
+    expect(g.allowed).toBe(false);
+    if (!g.allowed) {
+      expect(g.status).toBe(403);
+      expect(g.body.error).toContain("not one of the persons named");
+      expect(g.body.article).toContain("Art. 67(2)(a)");
+    }
+  });
+
+  it("refuses everyone under a permit that names no person", async () => {
+    mockRunQuery.mockResolvedValue([permit({ namedPersons: null })]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      what: "query",
+      person: { email: "researcher@pharmaco.de" },
+      now: NOW,
+    });
+    expect(g.allowed).toBe(false);
+    if (!g.allowed) expect(g.body.reason).toContain("names no person");
+  });
+
+  it("does not ask an exempt role to be named", async () => {
+    mockRunQuery.mockResolvedValue([]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["HDAB_AUTHORITY"],
+      what: "query",
+      person: { email: "regulator@health-dataspace.local" },
+      now: NOW,
+    });
+    expect(g.allowed).toBe(true);
   });
 });

@@ -22,6 +22,11 @@ import {
   appendRecordAudit,
   recordAuditInput,
 } from "../record-audit.js";
+import {
+  ADMIN_CHAIN,
+  adminAuditInput,
+  appendAdminAudit,
+} from "../admin-audit.js";
 
 // ---- Contract and transfer audit (ADR-045 plane 2, #418) --------------------
 
@@ -164,9 +169,55 @@ app.post("/audit/record", auditLimiter, async (req: Request, res: Response) => {
   }
 });
 
+// ---- Administrative actions on the SPEs (#1236) -----------------------------
+
+/**
+ * POST /audit/admin
+ *
+ * The hub UI, before an administrative action on the secure processing
+ * environments takes effect (start or stop a workspace, revoke a permit,
+ * decide a statistical request, review an import): {event, outcome,
+ * actorId, actorRole, target, detail?, reason?}. 201 with seq and hash once
+ * committed; 503 when it could not be written, and the hub then does not act
+ * (fail closed). Draft SPE implementing act Art. 16(3)(c), (f). Same token
+ * rule as /audit/dsp.
+ */
+app.post("/audit/admin", auditLimiter, async (req: Request, res: Response) => {
+  if (!authorised(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const input = adminAuditInput((req.body ?? {}) as Record<string, unknown>);
+  if (!input) {
+    res.status(400).json({ error: "Not an admin audit event" });
+    return;
+  }
+  try {
+    const event = await appendAdminAudit(input);
+    res
+      .status(201)
+      .json({ chain: event.chain, seq: event.seq, hash: event.hash });
+  } catch (err) {
+    logger.error(
+      { err, event: input.event, outcome: input.outcome },
+      "admin audit write failed",
+    );
+    res.status(503).json({
+      error:
+        "The audit record could not be written. Every administrative action on a secure processing environment must be on the audit trail.",
+    });
+  }
+});
+
 // ---- Reading the trail (operators, Grafana) ---------------------------------
 
-const CHAINS = new Set([QUERY_CHAIN, DSP_CHAIN, SPE_CHAIN, RECORD_CHAIN]);
+const CHAINS = new Set([
+  QUERY_CHAIN,
+  DSP_CHAIN,
+  SPE_CHAIN,
+  RECORD_CHAIN,
+  ADMIN_CHAIN,
+]);
 
 /**
  * GET /audit/chains/:chain/verify

@@ -1,3 +1,4 @@
+import type { Role } from "@/lib/auth";
 import {
   LABEL_LAYER,
   LAYER_COLORS,
@@ -46,6 +47,13 @@ export interface SpeImportResult {
   closed: boolean;
   /** The 3D overview of the import (/overview?import=…). */
   graphUrl: string;
+  /**
+   * The data waits in the workspace's staging area until the access body
+   * approves it (#1236, draft SPE act Art. 4); it is not in the graph yet.
+   */
+  staged?: boolean;
+  /** The staged import's id, for the review. */
+  importId?: string;
 }
 
 /**
@@ -111,4 +119,24 @@ export function toGraphNodes(nodes: ProxyNode[]) {
       properties: n.properties ?? {},
     };
   });
+}
+
+/** Who reviews what users import into a workspace (#1236, draft SPE act Art. 4(2)). */
+export const IMPORT_REVIEW_ROLES: Role[] = ["HDAB_AUTHORITY", "EDC_ADMIN"];
+
+/** A staged import as the review list shows it; never the data itself. */
+export interface StagedImport {
+  importId: string;
+  speId: string;
+  datasetId: string;
+  transferId: string;
+  assetId: string;
+  provider: string;
+  consumer: string;
+  importedBy: string;
+  pseudonymised: boolean;
+  overwrite: boolean;
+  records: number;
+  byType: Record<string, number>;
+  stagedAt: string;
 }

@@ -165,5 +165,18 @@
   "Met in the demo": "Rempli dans la démo",
   "Partly met": "En partie rempli",
   "Not yet": "Pas encore",
-  "Not offered": "Non proposé"
+  "Not offered": "Non proposé",
+  "Approved: the data is in {spe}.": "Approuvé : les données sont dans {spe}.",
+  "Refused: the staged data was removed from {spe}.": "Refusé : les données en préparation ont été retirées de {spe}.",
+  "Imports waiting for review": "Imports en attente d’examen",
+  "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.": "Ce qu’un utilisateur de données de santé apporte dans un environnement de traitement sécurisé attend dans sa zone de préparation jusqu’à ce que vous l’ayez vérifié au regard de l’autorisation de traitement de données. Approuvez-le pour le placer dans l’espace de travail, ou refusez-le avec une raison pour le retirer. Chaque décision est consignée dans la chaîne d’audit.",
+  "No import waits for review.": "Aucun import n’attend d’examen.",
+  "{records} records for {spe}": "{records} enregistrements pour {spe}",
+  "Transfer {transfer} from {provider}, imported by {who}": "Transfert {transfer} de {provider}, importé par {who}",
+  "pseudonymised": "pseudonymisé",
+  "replaces an earlier import": "remplace un import antérieur",
+  "Reason for the refusal": "Raison du refus",
+  "Refuse": "Refuser",
+  "Cancel": "Annuler",
+  "Approve": "Approuver"
 }

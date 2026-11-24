@@ -1,0 +1,24 @@
+{
+  "staged": [
+    {
+      "importId": "3c9f2b1e-7d4a-4e21-9b8f-1a2b3c4d5e6f",
+      "speId": "SPE-1",
+      "datasetId": "tp-demo-0001",
+      "transferId": "tp-demo-0001",
+      "assetId": "fhir-patient-search",
+      "provider": "did:web:alpha-klinik.de:participant",
+      "consumer": "did:web:pharmaco.de:research",
+      "importedBy": "researcher@pharmaco.de",
+      "pseudonymised": true,
+      "overwrite": false,
+      "records": 42,
+      "byType": {
+        "Patient": 6,
+        "Condition": 18,
+        "Observation": 18
+      },
+      "stagedAt": "2026-11-24T10:15:00.000Z"
+    }
+  ],
+  "unreachable": []
+}

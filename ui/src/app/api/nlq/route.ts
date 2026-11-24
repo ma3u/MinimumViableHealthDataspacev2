@@ -26,6 +26,10 @@ export async function POST(request: NextRequest) {
     // query here, with the article (issue #206, M3). A dataset named in the
     // body is checked strictly, as for a transfer.
     const gate = await gateSecondaryUse({
+      person: {
+        email: session.user.email,
+        username: session.user.name,
+      },
       consumerDid: participantId,
       roles: session.roles,
       datasetId: typeof body.datasetId === "string" ? body.datasetId : null,
