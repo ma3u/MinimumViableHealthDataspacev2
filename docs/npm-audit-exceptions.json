@@ -1,12 +1,4 @@
 {
   "_comment": "Read by scripts/check-npm-audit.py (pre-push hook and Dependency Audit). One entry per advisory, never per package. An expired entry fails the gate; renew it only with a reason that is still true.",
-  "exceptions": [
-    {
-      "advisory": "GHSA-fc5q-39xc-vjpf",
-      "package": "picomatch",
-      "reason": "No patched version exists (picomatch <= 4.0.7, advisory of 2026-10-19). The production path is @scalar/api-reference -> @unhead/vue 3.4.3 -> @unhead/bundler / unhead -> unplugin / vite -> picomatch, and in those packages only the build-plugin entries (@unhead/vue/vite, @unhead/vue/bundler, unhead/stream/unplugin, unhead/stream/vite) import it. Scalar loads @unhead/vue and @unhead/vue/client only, and no request reaches a glob pattern.",
-      "issue": 1140,
-      "expires": "2026-12-17"
-    }
-  ]
+  "exceptions": []
 }
