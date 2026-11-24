@@ -73,7 +73,7 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 3",
     requirement:
       "A separate instance for each data permit, cut off from other instances and networks, set up as the permit says.",
-    demo: "One confidential workspace per data holder, not yet one per permit.",
+    demo: "One confidential workspace per data holder, not yet one per permit; the workspaces are reached over TLS on public addresses, not inside a private network.",
     status: "partial",
     evidence: [ATTESTATION, ADR_069, issue(1132)],
   },
@@ -83,7 +83,7 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 4",
     requirement:
       "A separate staging area where holders and users import data and code, checked and prepared by the access body first.",
-    demo: "Holders' data arrives encrypted and its fingerprint is part of the permit; there is no staging area for users yet.",
+    demo: "Holders' data arrives encrypted and its fingerprint is part of the permit; a user's transfer can be imported into a workspace, checked for shape and size only, with no review by the access body.",
     status: "partial",
     evidence: [ADR_068, issue(915)],
   },
@@ -103,8 +103,8 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 5(3), (4)",
     requirement:
       "Only the persons named in the permit get in, through a secure interface, kept apart when one person holds several permits.",
-    demo: "Access by role through the web interface; one key per workspace, not per permit.",
-    status: "partial",
+    demo: "Access is decided by role and by the user's organisation; the persons named in an application are recorded but not checked.",
+    status: "gap",
     evidence: [issue(1132)],
   },
   {
@@ -113,9 +113,14 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 6",
     requirement:
       "Data-science and statistics tools, and tools to work together, inside each instance.",
-    demo: "Query only: questions in plain language or Cypher, answered with aggregates.",
-    status: "gap",
-    evidence: [QUERY, issue(1132)],
+    demo: "Statistical requests (Art. 69), OMOP analytics and plain-language queries, all with small counts hidden; they run on the hub's graph, not inside a workspace, and there is no notebook or shared workspace.",
+    status: "partial",
+    evidence: [
+      page("Statistical requests", "/requests"),
+      page("OMOP analytics", "/analytics"),
+      QUERY,
+      issue(1132),
+    ],
   },
   {
     id: "export",
@@ -133,7 +138,7 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 8",
     requirement:
       "When the permit ends, access stops at once and the instance is deleted within six months, verifiably.",
-    demo: "Data lives only in encrypted memory and is gone when a workspace stops; stopping is not yet tied to the permit's end.",
+    demo: "A revoked or expired permit stops a data user's access at once; the workspace and its data are not yet stopped or deleted with it, and a deletion is inferred, not verified.",
     status: "partial",
     evidence: [ADR_072, issue(833)],
   },
@@ -212,9 +217,9 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 14(3)",
     requirement:
       "Batch jobs with the same output checks as interactive work, and a way to follow their status.",
-    demo: "Queries run on demand with the same checks; there is no queue for long jobs.",
-    status: "partial",
-    evidence: [QUERY],
+    demo: "A statistical request is submitted, approved by the access body and then answered, with its status shown at every step and the same small-count checks as an interactive query.",
+    status: "met",
+    evidence: [page("Statistical requests", "/requests"), QUERY],
   },
   {
     id: "supervision",
@@ -232,7 +237,7 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 16(1) to (3)",
     requirement:
       "Tamper-evident, write-once logs of sign-in, access, imports, processing, exports and administration.",
-    demo: "A hash-chained audit log of attestation, key release, loading and deletion; not yet in write-once storage.",
+    demo: "A hash-chained audit log of queries, attestation, key release, loading and deletion; sign-in, imports and administrative actions are not yet on it, and it is not in write-once storage.",
     status: "partial",
     evidence: [AUDIT, ADR_045],
   },
@@ -242,9 +247,16 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 16(4)",
     requirement:
       "Keep logs five years, or one year after the permit ends if that is shorter.",
-    demo: "Log entries are kept 12 months.",
-    status: "gap",
-    evidence: [issue(1236)],
+    demo: "Under a data permit, entries are kept until one year after it ends, at most five years and never less than one; without a permit, one year.",
+    status: "met",
+    evidence: [
+      AUDIT,
+      page(
+        "Retention policy",
+        `${REPO}/blob/main/docs/audit-retention-policy.md`,
+      ),
+      issue(1236),
+    ],
   },
   {
     id: "audits",
@@ -291,9 +303,16 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 18(2)(e), (g)",
     requirement:
       "Run the analysis where the data is, and never move source data between instances.",
-    demo: "Each workspace runs the query itself, but row-level answers can still reach the coordinator.",
-    status: "partial",
-    evidence: [QUERY, issue(1236)],
+    demo: "Each workspace runs the query itself; a list of records about persons is never asked of a workspace, and only counts, masked per workspace, reach the coordinator.",
+    status: "met",
+    evidence: [
+      QUERY,
+      page(
+        "Federation rules",
+        `${REPO}/blob/main/docs/architecture/federation.md#privacy-rules-on-the-federated-query-path`,
+      ),
+      issue(1236),
+    ],
   },
   {
     id: "federation-logs",
