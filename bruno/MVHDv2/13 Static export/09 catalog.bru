@@ -27,6 +27,26 @@ tests {
     const german = res.getBody().filter((d) => d.translations && d.translations.de);
     expect(german.length).to.be.above(0);
   });
+  // #1123, ADR-094: the two fictional national sources, SPE access only.
+  // A pull request runs this against the deployed site, which serves main's
+  // fixtures until the merge deploys; before that the entries cannot be there.
+  const nationalIds = [
+    "dataset:medreg:national-claims-epa-research",
+    "dataset:medreg:university-hospital-fhir",
+  ];
+  const national = res.getBody().filter((s) => nationalIds.includes(s.id));
+  if (national.length === 0) {
+    test("SKIPPED: the deployed site does not serve the national sources yet (#1123)", function () {});
+  } else {
+    test("the national sources of MedReg DE are there, SPE only", function () {
+      for (const id of nationalIds) {
+        const d = res.getBody().find((s) => s.id === id);
+        expect(d, id).to.be.an("object");
+        expect(d.publisher, id).to.equal("MedReg DE");
+        expect(d.legalBasis, id).to.include("secure processing environment only");
+      }
+    });
+  }
 }
 
 docs {

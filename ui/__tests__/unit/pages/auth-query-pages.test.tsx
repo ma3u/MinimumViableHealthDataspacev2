@@ -79,16 +79,16 @@ describe("QueryPage (Natural Language Query)", () => {
     },
     aggregatedConditions: [{ name: "Diabetes", count: 200 }],
     aggregatedGenders: [{ gender: "Male", count: 800 }],
-    spes: [
+    perSpe: [
       {
-        label: "SPE-Alpha",
+        source: "SPE-Alpha",
         patients: 500,
         encounters: 2000,
         conditions: 1000,
         observations: 3000,
       },
       {
-        label: "SPE-Beta",
+        source: "SPE-Beta",
         patients: 1000,
         encounters: 3000,
         conditions: 2000,

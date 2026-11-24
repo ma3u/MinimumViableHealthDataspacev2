@@ -13,6 +13,8 @@
  *
  * `/federated/query` applies the first rule to the Cypher a caller sends;
  * `/nlq` applies whichever fits the answer, from one SPE as from several.
+ * `/federated/stats` applies the second to each SPE's feasibility counts and
+ * adds them up with `combineCounts` (ADR-094, #1123).
  * Only an answer about persons is filtered: a count of datasets identifies
  * nobody.
  */
@@ -130,6 +132,28 @@ export function suppressSmallCells(rows: Row[], k: number): KOutcome {
     aggregateSuppressed: false,
     suppressionReason: filtered > 0 ? "small_cells" : null,
   };
+}
+
+/**
+ * One count across several sources, when each source's own count is shown
+ * next to it with `suppressSmallCells` (ADR-094: every source applies its
+ * small-count rule).
+ *
+ * The plain sum would give a suppressed count back: subtract the counts that
+ * are shown and what is left is the one that was not. So the sum leaves out
+ * the counts below k, unless those add up to k or more, in which case what a
+ * reader can work out is itself a count of at least k. A total below k, or
+ * one made only of suppressed counts, comes back as "<k".
+ */
+export function combineCounts(counts: number[], k: number): number | string {
+  const total = counts.reduce((sum, c) => sum + c, 0);
+  if (k <= 0) return total;
+  const small = counts
+    .filter((c) => c > 0 && c < k)
+    .reduce((sum, c) => sum + c, 0);
+  if (small === 0 || small >= k) return total;
+  const shown = total - small;
+  return shown > 0 ? shown : `<${k}`;
 }
 
 /** The rule that fits an NLQ answer, or none if it is not about persons. */

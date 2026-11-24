@@ -64,6 +64,8 @@ export const LABEL_LAYER: Record<string, number> = {
   BonusProgramme: 2,
   Distribution: 2,
   ContactPoint: 2,
+  // ADR-094: a figure a national source released for publication
+  PublishedAggregate: 2,
   EhdsPurpose: 2,
   EEHRxFProfile: 2,
   EEHRxFCategory: 2,
@@ -242,6 +244,7 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   BonusProgramme: "Bonus Program",
   Distribution: "Data Format",
   ContactPoint: "Contact",
+  PublishedAggregate: "Published Aggregate",
   EhdsPurpose: "Research Purpose",
   EEHRxFProfile: "Data Profile",
   EEHRxFCategory: "Profile Category",
@@ -308,6 +311,8 @@ export const NODE_TOOLTIPS: Record<string, string> = {
   OMOPMeasurement: "OMOP CDM — measurement mapped for research analytics",
   HealthDataset:
     "HealthDCAT-AP Dataset — metadata describing a shareable dataset",
+  PublishedAggregate:
+    "A figure a source released for publication, with its source, licence, release date and small-count rule (ADR-094)",
   SnomedConcept: "SNOMED CT — standardised clinical terminology concept",
   ICD10Code: "ICD-10 — international classification of diseases code",
   LoincCode: "LOINC — logical observation identifiers for lab tests",
@@ -352,6 +357,7 @@ export const LABEL_SORT_ORDER: Record<string, number> = {
   EEHRxFProfile: 3,
   EEHRxFCategory: 4,
   ContactPoint: 5,
+  PublishedAggregate: 6,
   // L3 — patients → clinical events
   Patient: 0,
   Encounter: 1,
@@ -407,6 +413,7 @@ export const LABEL_GROUP: Record<string, string> = {
   EEHRxFProfile: "dataset",
   EEHRxFCategory: "dataset",
   ContactPoint: "dataset",
+  PublishedAggregate: "dataset",
   Patient: "clinical",
   ImportedRecord: "clinical",
   Encounter: "clinical",

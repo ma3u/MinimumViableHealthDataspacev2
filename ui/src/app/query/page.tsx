@@ -136,23 +136,35 @@ interface NlqTemplate {
   examplePatterns: string[];
 }
 
+/** A feasibility count: a number, or "<k" when it is below k (ADR-094). */
+type Count = number | string;
+
+/** /api/federated, as the proxy's /federated/stats answers it. */
 interface FederatedStats {
   speCount: number;
   totals: {
-    patients: number;
-    encounters: number;
-    conditions: number;
-    observations: number;
+    patients: Count;
+    encounters: Count;
+    conditions: Count;
+    observations: Count;
   };
-  aggregatedConditions: { name: string; count: number }[];
-  aggregatedGenders: { gender: string; count: number }[];
-  spes: {
-    label: string;
-    patients: number;
-    encounters: number;
-    conditions: number;
-    observations: number;
+  aggregatedConditions: { name: string; count: Count }[];
+  aggregatedGenders: { gender: string; count: Count }[];
+  perSpe?: {
+    source: string;
+    patients: Count;
+    encounters: Count;
+    conditions: Count;
+    observations: Count;
   }[];
+  minKApplied?: number;
+  /** How many counts were suppressed. */
+  filtered?: number;
+}
+
+/** A count as the page shows it: grouped digits, or "<k" as it came. */
+function formatCount(value: Count): string {
+  return typeof value === "number" ? value.toLocaleString() : value;
 }
 
 // The example questions stay English in every language: the query engine
@@ -349,7 +361,7 @@ export default function NlqPage() {
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-(--accent-l3)">
-                    {stats.totals.patients.toLocaleString()}
+                    {formatCount(stats.totals.patients)}
                   </div>
                   <div className="text-(--text-secondary) text-xs">
                     {t("Patients")}
@@ -357,7 +369,7 @@ export default function NlqPage() {
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-(--accent-l4)">
-                    {stats.totals.encounters.toLocaleString()}
+                    {formatCount(stats.totals.encounters)}
                   </div>
                   <div className="text-(--text-secondary) text-xs">
                     {t("Encounters")}
@@ -365,7 +377,7 @@ export default function NlqPage() {
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-(--accent-l5)">
-                    {stats.totals.conditions.toLocaleString()}
+                    {formatCount(stats.totals.conditions)}
                   </div>
                   <div className="text-(--text-secondary) text-xs">
                     {t("Conditions")}
@@ -1158,20 +1170,20 @@ export default function NlqPage() {
         )}
 
         {/* SPE breakdown */}
-        {stats && stats.spes && (
+        {stats?.perSpe && (
           <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
             <h3 className="text-sm font-medium text-(--text-primary) mb-3 flex items-center gap-1.5">
               <Globe size={14} className="text-(--accent-l1)" />
               {t("Secure Processing Environments")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {stats.spes.map((spe) => (
+              {stats.perSpe.map((spe) => (
                 <div
-                  key={spe.label}
+                  key={spe.source}
                   className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3"
                 >
                   <div className="text-sm font-semibold text-(--text-primary) mb-2">
-                    {spe.label}
+                    {spe.source}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -1179,7 +1191,7 @@ export default function NlqPage() {
                         {t("Patients:")}{" "}
                       </span>
                       <span className="text-(--accent-l3)">
-                        {spe.patients.toLocaleString()}
+                        {formatCount(spe.patients)}
                       </span>
                     </div>
                     <div>
@@ -1187,7 +1199,7 @@ export default function NlqPage() {
                         {t("Encounters:")}{" "}
                       </span>
                       <span className="text-(--accent-l4)">
-                        {spe.encounters.toLocaleString()}
+                        {formatCount(spe.encounters)}
                       </span>
                     </div>
                     <div>
@@ -1195,7 +1207,7 @@ export default function NlqPage() {
                         {t("Conditions:")}{" "}
                       </span>
                       <span className="text-(--accent-l5)">
-                        {spe.conditions.toLocaleString()}
+                        {formatCount(spe.conditions)}
                       </span>
                     </div>
                     <div>
@@ -1203,13 +1215,24 @@ export default function NlqPage() {
                         {t("Observations:")}{" "}
                       </span>
                       <span className="text-(--accent-l1)">
-                        {spe.observations.toLocaleString()}
+                        {formatCount(spe.observations)}
                       </span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+            {(stats.filtered ?? 0) > 0 && (
+              <p
+                className="text-xs text-(--text-secondary) mt-3"
+                data-testid="stats-k-anonymity-note"
+              >
+                {t(
+                  "Counts below {k} are shown as <{k}, and a share computed from one goes with it, so no one can be singled out (k-anonymity).",
+                  { k: stats.minKApplied ?? 0 },
+                )}
+              </p>
+            )}
           </div>
         )}
 
