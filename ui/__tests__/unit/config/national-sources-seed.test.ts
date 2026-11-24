@@ -89,7 +89,9 @@ describe("seed-national-sources.cypher", () => {
       'run_file "$SEED_DIR"/seed-national-sources.cypher',
     ]) {
       const at = [
-        ...seedSh.matchAll(new RegExp(marker.replace(/[$/.]/g, "\\$&"), "g")),
+        ...seedSh.matchAll(
+          new RegExp(marker.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"), "g"),
+        ),
       ].map((m) => m.index ?? 0);
       const r8 = [
         ...seedSh.matchAll(/run_file "\$SEED_DIR"\/register-healthdcat-ap-r8/g),
