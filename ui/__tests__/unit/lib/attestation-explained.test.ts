@@ -52,11 +52,6 @@ describe("attestation in plain words", () => {
   });
 });
 
-import {
-  attestationChecks,
-  attestationLight,
-} from "@/lib/attestation-explained";
-
 describe("the attestation traffic light", () => {
   const base = {
     verdict: "pass" as const,
