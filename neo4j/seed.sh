@@ -83,6 +83,16 @@ check_terminology_keys() {
   [ "$unkeyed" = "0" ] || failed+=("terminology nodes without their key: ${unkeyed:-unknown} (#1215)")
 }
 
+check_dataset_publishers() {
+  local unpublished
+  unpublished=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (d:HealthDataset) WHERE NOT EXISTS { MATCH (d)-[:PUBLISHED_BY]->(:Participant) } } AS unpublished;" \
+    2>/dev/null | tail -1)
+  echo "datasets without a publisher: ${unpublished:-unknown}"
+  [ "$unpublished" = "0" ] || failed+=("datasets without a PUBLISHED_BY Participant: ${unpublished:-unknown} (#514)")
+}
+
 finish() {
   echo ""
   if [ "${#failed[@]}" -gt 0 ]; then
@@ -163,6 +173,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
   run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
+  run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
   echo ""
@@ -180,6 +191,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
     --non-interactive --format plain \
     "MATCH (p:Patient {resourceId: 'P1'})-[:HAS_OBSERVATION]->(o:Observation) WITH count(o) AS observations MATCH (te:TransferEvent {monthly: true}) RETURN observations, count(te) AS monthlyAccessEvents;"
   check_terminology_keys
+  check_dataset_publishers
   finish
 fi
 
@@ -221,6 +233,7 @@ run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to 
 # match datasets by id. Idempotent, and a no-op on a graph it never loaded.
 run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
 run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
+run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
 run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
@@ -299,5 +312,6 @@ cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
   --non-interactive --format plain \
   "MATCH ()-[r]->() RETURN count(r) AS relCount;"
 check_terminology_keys
+check_dataset_publishers
 
 finish
