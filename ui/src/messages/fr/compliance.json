@@ -165,5 +165,18 @@
   "Met in the demo": "Rempli dans la démo",
   "Partly met": "En partie rempli",
   "Not yet": "Pas encore",
-  "Not offered": "Non proposé"
+  "Not offered": "Non proposé",
+  "One confidential workspace per data holder, not yet one per permit; the workspaces are reached over TLS on public addresses, not inside a private network.": "Un espace de travail confidentiel par détenteur de données de santé, pas encore un par autorisation ; les espaces de travail sont joints en TLS sur des adresses publiques, pas dans un réseau privé.",
+  "Holders' data arrives encrypted and its fingerprint is part of the permit; a user's transfer can be imported into a workspace, checked for shape and size only, with no review by the access body.": "Les données des détenteurs arrivent chiffrées et leur empreinte fait partie de l’autorisation ; le transfert d’un utilisateur peut être importé dans un espace de travail, vérifié seulement pour sa forme et sa taille, sans examen par l’organisme responsable de l’accès aux données de santé.",
+  "Access is decided by role and by the user's organisation; the persons named in an application are recorded but not checked.": "L’accès dépend du rôle et de l’organisation de l’utilisateur ; les personnes nommées dans une demande sont enregistrées mais pas vérifiées.",
+  "Statistical requests (Art. 69), OMOP analytics and plain-language queries, all with small counts hidden; they run on the hub's graph, not inside a workspace, and there is no notebook or shared workspace.": "Demandes statistiques (art. 69), analyses OMOP et requêtes en langage naturel, toutes avec masquage des petits nombres ; elles s’exécutent sur le graphe du hub, pas dans un espace de travail, et il n’y a ni notebook ni espace partagé.",
+  "Statistical requests": "Demandes statistiques",
+  "OMOP analytics": "Analyses OMOP",
+  "A revoked or expired permit stops a data user's access at once; the workspace and its data are not yet stopped or deleted with it, and a deletion is inferred, not verified.": "Une autorisation révoquée ou expirée coupe aussitôt l’accès d’un utilisateur ; l’espace de travail et ses données ne sont pas encore arrêtés ni supprimés avec elle, et une suppression est déduite, non vérifiée.",
+  "A statistical request is submitted, approved by the access body and then answered, with its status shown at every step and the same small-count checks as an interactive query.": "Une demande statistique est déposée, approuvée par l’organisme responsable de l’accès aux données de santé puis traitée, avec son état affiché à chaque étape et les mêmes contrôles des petits nombres qu’une requête interactive.",
+  "A hash-chained audit log of queries, attestation, key release, loading and deletion; sign-in, imports and administrative actions are not yet on it, and it is not in write-once storage.": "Un journal d’audit chaîné des requêtes, de l’attestation, de la remise de clé, du chargement et de la suppression ; la connexion, les imports et les actions d’administration n’y figurent pas encore, et il n’est pas en stockage à écriture unique.",
+  "Under a data permit, entries are kept until one year after it ends, at most five years and never less than one; without a permit, one year.": "Sous une autorisation, les entrées sont conservées jusqu’à un an après sa fin, au plus cinq ans et jamais moins d’un ; sans autorisation, un an.",
+  "Retention policy": "Politique de conservation",
+  "Each workspace runs the query itself; a list of records about persons is never asked of a workspace, and only counts, masked per workspace, reach the coordinator.": "Chaque espace de travail exécute lui-même la requête ; une liste d’enregistrements sur des personnes n’est jamais demandée à un espace de travail, et seuls des nombres, masqués par espace, parviennent au coordinateur.",
+  "Federation rules": "Règles de la fédération"
 }
