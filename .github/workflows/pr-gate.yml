@@ -89,6 +89,14 @@ jobs:
           set -euo pipefail
           python3 scripts/gen-docs-facts.py --check --base "origin/${{ github.base_ref || 'main' }}"
 
+      # Terminology nodes are merged on the key init-schema.cypher makes
+      # unique (#1215): the loader's Cypher, every seed and generator, and
+      # neo4j/seed.sh running the migration that repairs an earlier split.
+      - name: Terminology nodes merged on their key
+        run: |
+          set -euo pipefail
+          python3 -m unittest scripts/test_load_fhir_neo4j.py -v
+
       # The persona-organised API collection must cover every route and every
       # request must be able to fail (ADR-032, ADR-031).
       - name: API collection covers every route
