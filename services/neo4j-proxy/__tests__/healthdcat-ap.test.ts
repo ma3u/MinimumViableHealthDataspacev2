@@ -162,6 +162,26 @@ describe("toDataset", () => {
     expect(ds["healthdcatap:populationCoverage"]).toBeUndefined();
   });
 
+  it("names no EU dataset type for a real-world source (ADR-094)", () => {
+    const base = {
+      distributions: [],
+      publisher: null,
+      contact: null,
+      hdab: null,
+      variables: [],
+    };
+    const real = toDataset({
+      ...base,
+      ds: { datasetId: "n", title: "N", hdcatapDctType: "NONE" },
+    }) as Record<string, any>;
+    expect(real["dct:type"]).toBeUndefined();
+    const plain = toDataset({
+      ...base,
+      ds: { datasetId: "s", title: "S" },
+    }) as Record<string, any>;
+    expect(plain["dct:type"]["@id"]).toMatch(/SYNTHETIC_DATA$/);
+  });
+
   it("falls back to the Regulation and to non-public access", () => {
     const bare = toDataset({
       ds: { datasetId: "x", title: "X" },

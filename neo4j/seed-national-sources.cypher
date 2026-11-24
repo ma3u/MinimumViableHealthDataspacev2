@@ -94,6 +94,9 @@ SET d.id = row.id,
     d.dctTemporalStart = row.start,
     d.dctTemporalEnd = row.end,
     d.hdcatapDatasetType = row.kind,
+    // No EU dataset-type concept fits a real-world source (ADR-094);
+    // NONE keeps the Release 8 seed from defaulting it to SYNTHETIC_DATA.
+    d.hdcatapDctType = 'NONE',
     d.hdcatapAccessRights = 'NON_PUBLIC',
     d.hdcatapApplicableLegislation = ['http://data.europa.eu/eli/reg/2025/327/oj'],
     d.hdcatapLegalBasisForAccess = 'EHDS Art. 68 data permit, secure processing environment only (Art. 73)',
