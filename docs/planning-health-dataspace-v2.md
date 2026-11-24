@@ -1,5 +1,8 @@
 # Planning: Health Dataspace v2
 
+Open issues triaged on **2026-11-24**: every one has an epic, a lane, a
+priority and a type, and the full list in work order is in
+[`planning/current/issue-triage-2026-11-24.md`](planning/current/issue-triage-2026-11-24.md).
 Status checked against GitHub on **2026-10-28** (the release tables were
 written on 2026-10-04; on 2026-10-28 only whether each issue is open or closed
 was rechecked). The latest release is
@@ -51,6 +54,10 @@ build.
 | 26 March 2035 | Third countries in HealthData@EU                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Out of scope                                                                                                                                                                                                              |
 
 ### P1: now to 26 March 2027
+
+The table holds the roadmap's P1 items. Every P1 issue, bugs and security gaps
+included, in the order to work on them, is in the
+[triage of 2026-11-24](planning/current/issue-triage-2026-11-24.md#open-issues-by-priority).
 
 | Issue                                                                     | What                                                                                                                               | Where it stands (2026-11-08)                                                                                                                                                                                                                                 |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -126,8 +133,9 @@ Exchange, mdoc-only requests, cleartext wallet responses; HealthDCAT-AP before
 Release 8, DCAT-AP 2; Gaia-X self-descriptions before Innsbruck. Remaining
 EHDS items stay in
 [#696](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/696) (opt-out),
-[#697](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/697) (2026 implementing acts) and
-[#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698) (Chapter II rights, Art. 5 to 10).
+[#697](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/697) (2026 implementing acts),
+[#760](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/760) (Art. 5 and 6) and
+[#1120](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1120) (Art. 8 to 10).
 
 ---
 
@@ -226,8 +234,8 @@ Not started, waiting on an outside party, or larger than one release.
 | [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)   | Specifications as oracles: API drift                                     | 6 of 24                                                                                                                                                                                                                      |
 | [#375](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/375)   | API checks that pass on an empty answer                                  | 2 of 4                                                                                                                                                                                                                       |
 | [#5](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/5)       | Pentest checklist, the items that need a harness                         | Reopened; J840–J848 automated, 25 boxes open ([plan](planning/current/issue-5-pentest-completion.md))                                                                                                                        |
-| [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)     | Spanish HDAB 30-minute demo                                              | 13 of 18; three items settled elsewhere on 2026-10-04                                                                                                                                                                        |
-| [#26](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)     | SHACL and ShEx validation of HealthDCAT-AP                               | Inventory done 2026-07-17, no work since ([plan](planning/future/issue-26-healthdcat-ap-validation.md))                                                                                                                      |
+| [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)     | Spanish HDAB 30-minute demo                                              | Closed 2026-11-24: the demo was held, the rest settled elsewhere                                                                                                                                                             |
+| [#26](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)     | SHACL and ShEx validation of HealthDCAT-AP                               | Closed 2026-11-24: SHACL done in #700, ShEx not planned ([plan](planning/done/issue-26-healthdcat-ap-validation.md))                                                                                                         |
 | [#20](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/20)     | AWMF Leitlinien as Layer 6 (Docling, ADR-021)                            | Branches merged April; 0 of 8 boxes, no activity since 2026-04-29                                                                                                                                                            |
 | [#16](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/16)     | CDISC SDTM export                                                        | Plan only, no activity since 2026-04-29                                                                                                                                                                                      |
 
