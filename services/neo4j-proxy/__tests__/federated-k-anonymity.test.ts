@@ -64,46 +64,61 @@ beforeEach(() => {
   mockRun.mockReset();
 });
 
-describe("POST /federated/query — contributor-side k-anonymity", () => {
-  it("suppresses the aggregate when a contributor is below minK", async () => {
-    // 3 identical rows from the only SPE — below the default minK of 5.
-    mockRun.mockResolvedValue(
-      fakeResult([{ cohort: 42 }, { cohort: 42 }, { cohort: 42 }]),
-    );
+describe("POST /federated/query — only aggregates leave the federation (#1236)", () => {
+  it("masks a count below minK in each SPE's answer", async () => {
+    mockRun.mockResolvedValue(fakeResult([{ cohort: 3 }]));
 
     const res = await request
       .post("/federated/query")
       .send({ cypher: "MATCH (p:Patient) RETURN count(p) AS cohort" });
 
     expect(res.status).toBe(200);
-    expect(res.body.aggregateSuppressed).toBe(true);
-    expect(res.body.suppressionReason).toBe("contributor_k_violation");
-    expect(res.body.results).toEqual([]);
+    expect(res.body.suppressionReason).toBe("small_cells");
+    expect(res.body.aggregateSuppressed).toBe(false);
+    expect(res.body.results.length).toBeGreaterThan(0);
+    for (const row of res.body.results) expect(row.cohort).toBe("<5");
   });
 
-  it("returns results when every contributor meets minK", async () => {
-    mockRun.mockResolvedValue(
-      fakeResult(Array.from({ length: 6 }, () => ({ cohort: 42 }))),
-    );
+  it("returns counts of at least minK as they are, one row per SPE", async () => {
+    mockRun.mockResolvedValue(fakeResult([{ cohort: 42 }]));
 
     const res = await request
       .post("/federated/query")
       .send({ cypher: "MATCH (p:Patient) RETURN count(p) AS cohort" });
 
     expect(res.status).toBe(200);
-    expect(res.body.aggregateSuppressed).toBe(false);
     expect(res.body.suppressionReason).toBeNull();
-    expect(res.body.results).toHaveLength(6);
+    expect(res.body.results.map((r: { cohort: number }) => r.cohort)).toEqual(
+      res.body.sources.map(() => 42),
+    );
     expect(res.body.minKApplied).toBeGreaterThanOrEqual(5);
+  });
+
+  it("withholds a list of records about persons (draft Art. 18(2)(g))", async () => {
+    mockRun.mockResolvedValue(
+      fakeResult(Array.from({ length: 6 }, () => ({ gender: "female" }))),
+    );
+
+    const res = await request
+      .post("/federated/query")
+      .send({ cypher: "MATCH (p:Patient) RETURN p.gender AS gender" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.results).toEqual([]);
+    expect(res.body.aggregateSuppressed).toBe(true);
+    expect(res.body.suppressionReason).toBe("row_level_in_federation");
+    // Never asked: no SPE ran the query, so nothing left any of them.
+    expect(mockRun).not.toHaveBeenCalled();
   });
 
   it("never lowers minK below the server minimum", async () => {
     mockRun.mockResolvedValue(fakeResult([{ cohort: 1 }]));
-    const res = await request
-      .post("/federated/query")
-      .send({ cypher: "MATCH (p) RETURN count(p) AS cohort", minK: 1 });
+    const res = await request.post("/federated/query").send({
+      cypher: "MATCH (p:Patient) RETURN count(p) AS cohort",
+      minK: 1,
+    });
     expect(res.body.minKApplied).toBeGreaterThanOrEqual(5);
-    expect(res.body.aggregateSuppressed).toBe(true);
+    expect(res.body.results[0].cohort).toBe("<5");
   });
 });
 

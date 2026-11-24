@@ -306,5 +306,6 @@
   "CLOSED AFTER IMPORT INTO {spe}": "GESLOTEN NA IMPORT IN {spe}",
   "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "{records} records staan in {spe}. De overdracht is gesloten: de toegang tot de gegevens van de aanbieder is beëindigd. Start een nieuwe overdracht om ze opnieuw te importeren.",
   "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "De gegevens staan in {spe}. De overdracht is gesloten: de toegang tot de gegevens van de aanbieder is beëindigd. Start een nieuwe overdracht om ze opnieuw te importeren.",
-  "This contract forbids extracting the data: import it into a secure processing environment below.": "Dit contract verbiedt de gegevens te extraheren: importeer ze hieronder in een beveiligde verwerkingsomgeving."
+  "This contract forbids extracting the data: import it into a secure processing environment below.": "Dit contract verbiedt de gegevens te extraheren: importeer ze hieronder in een beveiligde verwerkingsomgeving.",
+  "Across several secure processing environments only counts are shared, so a list of records about persons is withheld. Ask for a count, or ask one environment.": "Tussen meerdere beveiligde verwerkingsomgevingen worden alleen aantallen gedeeld, dus een lijst van records over personen wordt achtergehouden. Vraag om een aantal, of vraag één omgeving."
 }

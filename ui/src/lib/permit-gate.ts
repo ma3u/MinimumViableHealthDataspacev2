@@ -19,6 +19,7 @@
  * that, any valid permit of the consumer; the result says which happened.
  */
 import { runQuery } from "@/lib/neo4j";
+import { retentionCypher } from "@/lib/retention";
 import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { parseGraphTime } from "@/lib/permits";
 
@@ -423,6 +424,8 @@ export async function recordPermittedTransfer(t: {
        OPTIONAL MATCH (permit:HDABApproval {approvalId: $permitId})
        FOREACH (_ IN CASE WHEN permit IS NOT NULL THEN [1] ELSE [] END |
          MERGE (t)-[:UNDER_PERMIT]->(permit))
+       WITH t, permit
+       ${retentionCypher("t", "permit")}
        WITH t
        OPTIONAL MATCH (ds:HealthDataset)
          WHERE $datasetId IS NOT NULL AND coalesce(ds.datasetId, ds.id) = $datasetId

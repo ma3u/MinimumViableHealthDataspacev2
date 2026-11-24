@@ -306,5 +306,6 @@
   "CLOSED AFTER IMPORT INTO {spe}": "CLOS APRÈS IMPORT DANS {spe}",
   "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "{records} enregistrements sont dans {spe}. Le transfert est clos : l'accès aux données du fournisseur a pris fin. Démarrez un nouveau transfert pour les importer à nouveau.",
   "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "Les données sont dans {spe}. Le transfert est clos : l'accès aux données du fournisseur a pris fin. Démarrez un nouveau transfert pour les importer à nouveau.",
-  "This contract forbids extracting the data: import it into a secure processing environment below.": "Ce contrat interdit d'extraire les données : importez-les ci-dessous dans un environnement de traitement sécurisé."
+  "This contract forbids extracting the data: import it into a secure processing environment below.": "Ce contrat interdit d'extraire les données : importez-les ci-dessous dans un environnement de traitement sécurisé.",
+  "Across several secure processing environments only counts are shared, so a list of records about persons is withheld. Ask for a count, or ask one environment.": "Entre plusieurs environnements de traitement sécurisés, seuls des nombres sont partagés : une liste d’enregistrements sur des personnes est donc retenue. Demandez un nombre, ou interrogez un seul environnement."
 }

@@ -42,6 +42,28 @@ export function auditContext(req: Request, res: Response): AuditExtras {
   };
 }
 
+/**
+ * How long an access event is kept, draft implementing act on secure
+ * processing environments, Art. 16(4) (#1236): five years, or one year after
+ * the data permit ends if that is shorter, and never less than the one year
+ * of Regulation (EU) 2025/327 Art. 73(1)(e). An event under no permit, or
+ * under one with no end date, keeps the one year it was created with.
+ *
+ * A Cypher fragment for a query that has the event as `event` and the
+ * permit (an `HDABApproval`, possibly null) as `permit` in scope.
+ */
+export function retentionCypher(event: string, permit: string): string {
+  return `FOREACH (_ IN CASE WHEN ${permit} IS NOT NULL AND ${permit}.validUntil IS NOT NULL THEN [1] ELSE [] END |
+        SET ${event}.retainUntil = CASE
+          WHEN datetime(toString(${permit}.validUntil)) + duration({years: 1}) < datetime(toString(${event}.timestamp)) + duration({years: 1})
+            THEN datetime(toString(${event}.timestamp)) + duration({years: 1})
+          WHEN datetime(toString(${permit}.validUntil)) + duration({years: 1}) < datetime(toString(${event}.timestamp)) + duration({years: 5})
+            THEN datetime(toString(${permit}.validUntil)) + duration({years: 1})
+          ELSE datetime(toString(${event}.timestamp)) + duration({years: 5})
+        END
+      )`;
+}
+
 export async function logTransferEvent(
   endpoint: string,
   method: string,
@@ -66,8 +88,9 @@ export async function logTransferEvent(
       CREATE (te:TransferEvent {
         eventId: randomUUID(),
         timestamp: datetime(),
-        // Art. 73(1)(e): kept for at least one year; nothing deletes it before
-        retainUntil: datetime() + duration({months: 12}),
+        // Art. 73(1)(e): kept for at least one year; under a permit the
+        // draft Art. 16(4) rule below replaces this (retentionCypher).
+        retainUntil: datetime() + duration({years: 1}),
         endpoint: $endpoint,
         method: $method,
         participant: $participant,
@@ -121,6 +144,8 @@ export async function logTransferEvent(
       FOREACH (_ IN CASE WHEN permit IS NOT NULL THEN [1] ELSE [] END |
         MERGE (te)-[:UNDER_PERMIT]->(permit)
       )
+      WITH te, permit
+      ${retentionCypher("te", "permit")}
       RETURN te.eventId AS eventId
       `,
       {

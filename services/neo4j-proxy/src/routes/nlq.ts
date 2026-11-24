@@ -47,6 +47,9 @@ import { logger } from "../logger.js";
 import { forSecondaryUse, secondaryUseSession } from "../opt-out.js";
 import {
   anonymiseAnswer,
+  federatedAnswer,
+  isRowLevelAboutPersons,
+  withheldRowLevel,
   type Contribution,
   type KOutcome,
 } from "../k-anonymity.js";
@@ -339,7 +342,12 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     };
     const contributions: Contribution[] = [];
 
-    if (federated && federationAvailable()) {
+    const withholdList =
+      federated && federationAvailable() && isRowLevelAboutPersons(cypher);
+    if (withholdList) {
+      // A list of records about persons is never asked of a federation
+      // (#1236, draft Art. 18(2)(g)): no SPE runs it, nothing leaves.
+    } else if (federated && federationAvailable()) {
       // Federated execution across all SPEs
       const spes = getSpeDrivers();
       // When each workspace was last asked, for the idle stop (ADR-072).
@@ -375,13 +383,17 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         await session.close();
       }
     }
-    // What leaves an SPE is k-anonymous, from one SPE as from several, as on
-    // /federated/query.
-    const kOutcome: KOutcome = anonymiseAnswer(
-      cypher,
-      contributions,
-      MIN_COHORT_SIZE,
-    );
+    // What leaves an SPE is k-anonymous. Across several SPEs only counts
+    // move, each SPE's masked on its own, as on /federated/query (#1236);
+    // from one SPE the rule that fits the answer applies.
+    const acrossSpes = federated && federationAvailable();
+    const kOutcome: KOutcome = withholdList
+      ? withheldRowLevel(MIN_COHORT_SIZE)
+      : (acrossSpes ? federatedAnswer : anonymiseAnswer)(
+          cypher,
+          contributions,
+          MIN_COHORT_SIZE,
+        );
     const results = kOutcome.rows;
 
     const participantId =

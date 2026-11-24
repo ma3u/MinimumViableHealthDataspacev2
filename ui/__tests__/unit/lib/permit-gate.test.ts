@@ -216,6 +216,10 @@ describe("recordPermittedTransfer", () => {
     expect(cypher).toContain("MERGE (t:DataTransfer {id: $transferId})");
     expect(cypher).toContain("UNDER_PERMIT");
     expect(params).toMatchObject({ permitId: "permit-app-1", demo: true });
+    // Draft SPE act Art. 16(4) (#1236): kept until one year after the
+    // permit ends, at most five years.
+    expect(cypher).toContain("permit.validUntil");
+    expect(cypher).toContain("duration({years: 5})");
   });
 
   it("never throws: an audit write must not undo a transfer", async () => {

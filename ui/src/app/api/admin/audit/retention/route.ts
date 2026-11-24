@@ -65,7 +65,7 @@ async function counts(): Promise<{ events: Counts; transfers: Counts }> {
 const policy = {
   months: RETENTION_MONTHS,
   article: RETENTION_ARTICLE,
-  rule: "Every access event and recorded transfer carries retainUntil, one year after it was recorded. Nothing is deleted before that date, and nothing without it.",
+  rule: "Every access event and recorded transfer carries retainUntil. Under a data permit that is one year after the permit ends, at most five years after the event; otherwise one year after it was recorded, and never less. Nothing is deleted before that date, and nothing without it.",
 };
 
 export async function GET() {
