@@ -10,7 +10,12 @@ import {
 } from "lucide-react";
 import { InfoTip } from "@/components/ui/InfoTip";
 import {
+  attestationChecks,
   attestationInShort,
+  attestationLight,
+  LIGHT_MEANING,
+  type CheckState,
+  type Light,
   EVIDENCE_INTRO,
   EVIDENCE_SUMMARY,
   FIELD_INFO,
@@ -52,6 +57,43 @@ const VERDICT_ICONS = {
   refused: XCircle,
   none: CircleSlash,
 } as const;
+
+const LAMP_ON: Record<Light, string> = {
+  red: "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]",
+  amber: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]",
+  green: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]",
+};
+
+/** A traffic light: three lamps, the one that applies lit. */
+function TrafficLight({ light }: { light: Light }) {
+  const t = useT("admin");
+  return (
+    <div
+      role="img"
+      aria-label={t("Attestation light: {meaning}", {
+        meaning: t(LIGHT_MEANING[light]),
+      })}
+      data-testid="attestation-light"
+      data-light={light}
+      className="flex flex-col gap-1 rounded-lg bg-gray-900 p-1.5 shrink-0"
+    >
+      {(["red", "amber", "green"] as const).map((l) => (
+        <span
+          key={l}
+          className={`block h-4 w-4 rounded-full ${
+            l === light ? LAMP_ON[l] : "bg-gray-700"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+const CHECK_DOT: Record<CheckState, string> = {
+  ok: "bg-emerald-500",
+  warn: "bg-amber-400",
+  fail: "bg-red-500",
+};
 
 /** The English labels of the chain steps, in order, for their explanations. */
 const CHAIN_KEYS = [
@@ -141,6 +183,20 @@ export function AttestationCard({
   const inShort = attestationInShort(verdict.verdict, simulated);
   const custody = keyCustody(simulated);
   const hostMatch = hostDataMatchesPolicy(claims?.hostData, spe.policyHash);
+  const keyReleased = Boolean(spe.keyReleasedAt);
+  const light = attestationLight({
+    verdict: verdict.verdict,
+    simulated,
+    hostMatch,
+    keyReleased,
+  });
+  const checks = attestationChecks({
+    verdict: verdict.verdict,
+    simulated,
+    hostMatch,
+    keyReleased,
+    audited: events.length > 0,
+  });
 
   const chain: { label: string; value: React.ReactNode }[] = [
     {
@@ -221,263 +277,303 @@ export function AttestationCard({
 
       <div
         data-testid="attestation-in-short"
-        className="rounded-lg border border-(--border) bg-(--surface-2) px-4 py-3"
+        className="flex items-start gap-4 rounded-lg border border-(--border) bg-(--surface-2) px-4 py-3"
       >
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-(--text-secondary)">
-          {t("In short")}
-        </h3>
-        <p className="mt-1 text-sm font-semibold text-(--text-primary)">
-          {t(inShort.headline)}
-        </p>
-        <p className="mt-1 text-xs text-(--text-secondary)">
-          {t(inShort.detail)}
-        </p>
-      </div>
-
-      <div data-testid="key-custody">
-        <h3 className="flex items-center gap-1.5 text-sm font-semibold text-(--text-primary) mb-2">
-          <KeyRound size={14} aria-hidden="true" />
-          {t(custody.title)}
-        </h3>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-2">
-          {custody.rows.map((r) => (
-            <div key={r.label}>
-              <dt className="text-xs font-semibold text-(--text-primary)">
-                {t(r.label)}
-              </dt>
-              <dd className="text-xs text-(--text-secondary)">{t(r.text)}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <TrafficLight light={light} />
         <div>
-          <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-            {t("Who verified")}
-          </h3>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <Field label={t("Trustee operator")} info="Trustee operator">
-              {trustee?.operator ?? notReported}
-            </Field>
-            <Field label={t("Verifier")} info="Verifier">
-              <span className="font-mono">
-                {a?.verifier ?? trustee?.verifier ?? notReported}
-              </span>
-            </Field>
-            <Field label={t("Attestation policy")} info="Attestation policy">
-              <span className="font-mono">{a?.policyId ?? notReported}</span>
-            </Field>
-            <Field label={t("Token valid")} info="Token valid">
-              {a?.tokenIssuedAt || a?.tokenExpiresAt
-                ? t("{from} to {to}", {
-                    from: when(a?.tokenIssuedAt),
-                    to: when(a?.tokenExpiresAt),
-                  })
-                : notReported}
-            </Field>
-          </dl>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-            {t("What was proven")}
-          </h3>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <Field label={t("Scope")} info="Scope">
-              {spe.attestationScope}
-              <span className="block text-[11px] text-(--text-secondary)">
-                {SCOPE_TEXT[spe.attestationScope]
-                  ? t(SCOPE_TEXT[spe.attestationScope])
-                  : ""}
-              </span>
-            </Field>
-            <Field label={t("TEE")} info="TEE">
-              {claims?.tee ?? spe.teeType}
-            </Field>
-            <Field label={t("Residual trust")} info="Residual trust">
-              {residualTrust.length > 0
-                ? residualTrust.join(", ")
-                : simulated
-                  ? t("everything: no hardware proof")
-                  : notReported}
-            </Field>
-            <Field label={t("Last attestation")} info="Last attestation">
-              {when(spe.attestedAt)}
-            </Field>
-          </dl>
+          <p className="text-xs font-semibold text-(--text-secondary)">
+            {t(LIGHT_MEANING[light])}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-(--text-primary)">
+            {t(inShort.headline)}
+          </p>
+          <p className="mt-1 text-xs text-(--text-secondary)">
+            {t(inShort.detail)}
+          </p>
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-          {t("Evidence")}
-        </h3>
-        {a ? (
-          <details data-testid="attestation-evidence">
-            <summary className="cursor-pointer text-xs font-semibold text-(--accent)">
-              {t(EVIDENCE_SUMMARY)}
-            </summary>
-            <p className="mt-2 mb-2 text-xs text-(--text-secondary)">
-              {t(EVIDENCE_INTRO)}
-            </p>
-            <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-              <Field label={t("Measurement")} info="Measurement">
-                <Hex value={claims?.measurement} />
-              </Field>
-              <Field label={t("Reported TCB")} info="Reported TCB">
-                {claims?.reportedTcb ?? (
-                  <span className="text-(--text-secondary)">{notReported}</span>
-                )}
-              </Field>
-              <Field label={t("Host data")} info="Host data">
-                <Hex value={claims?.hostData} />
-                {hostMatch !== null && (
-                  <span
-                    data-testid="host-data-match"
-                    className={`block mt-0.5 text-[11px] font-semibold ${
-                      hostMatch
-                        ? "text-(--success-text)"
-                        : "text-(--danger-text)"
-                    }`}
-                  >
-                    {hostMatch ? "✓ " : "✗ "}
-                    {t(hostMatch ? HOST_DATA_MATCH : HOST_DATA_MISMATCH)}
-                  </span>
-                )}
-              </Field>
-              <Field label={t("Report data")} info="Report data">
-                <Hex value={claims?.reportData} />
-              </Field>
-              <Field label={t("VM id")} info="VM id">
-                {claims?.vmId ?? (
-                  <span className="text-(--text-secondary)">{notReported}</span>
-                )}
-              </Field>
-              <Field label={t("Evidence digest")} info="Evidence digest">
-                <PolicyHash hash={a.evidenceDigest} />
-              </Field>
+      <ul
+        aria-label={t("{id} checks", { id: spe.id })}
+        className="space-y-1.5 text-sm"
+      >
+        {checks.map((c) => (
+          <li
+            key={c.text}
+            className="flex items-center gap-2"
+            data-state={c.state}
+          >
+            <span
+              aria-hidden="true"
+              className={`block h-2.5 w-2.5 shrink-0 rounded-full ${
+                CHECK_DOT[c.state]
+              }`}
+            />
+            <span className="text-(--text-primary)">{t(c.text)}</span>
+            <InfoTip label={t(c.text)} text={t(c.info)} />
+          </li>
+        ))}
+      </ul>
+
+      <details data-testid="attestation-details" className="group">
+        <summary className="cursor-pointer text-xs font-semibold text-(--accent)">
+          {t(EVIDENCE_SUMMARY)}
+        </summary>
+        <div className="mt-4 space-y-5">
+          <div data-testid="key-custody">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-(--text-primary) mb-2">
+              <KeyRound size={14} aria-hidden="true" />
+              {t(custody.title)}
+            </h3>
+            <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-2">
+              {custody.rows.map((r) => (
+                <div key={r.label}>
+                  <dt className="text-xs font-semibold text-(--text-primary)">
+                    {t(r.label)}
+                  </dt>
+                  <dd className="text-xs text-(--text-secondary)">
+                    {t(r.text)}
+                  </dd>
+                </div>
+              ))}
             </dl>
-            {pcrs.length > 0 ? (
-              <details className="mt-3">
-                <summary className="cursor-pointer text-xs font-semibold text-(--accent)">
-                  {t("PCRs ({n})", { n: pcrs.length })}
-                </summary>
-                <table
-                  aria-label={t("{id} PCRs", { id: spe.id })}
-                  className="mt-2 w-full text-left text-[11px]"
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
+                {t("Who verified")}
+              </h3>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <Field label={t("Trustee operator")} info="Trustee operator">
+                  {trustee?.operator ?? notReported}
+                </Field>
+                <Field label={t("Verifier")} info="Verifier">
+                  <span className="font-mono">
+                    {a?.verifier ?? trustee?.verifier ?? notReported}
+                  </span>
+                </Field>
+                <Field
+                  label={t("Attestation policy")}
+                  info="Attestation policy"
                 >
-                  <thead>
-                    <tr className="border-b border-(--border)">
-                      <th className="py-1 pr-3 font-medium text-(--text-secondary)">
-                        PCR
-                      </th>
-                      <th className="py-1 font-medium text-(--text-secondary)">
-                        {t("Value")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pcrs.map(([k, v]) => (
-                      <tr key={k} className="border-b border-(--border)">
-                        <td className="py-1 pr-3 font-mono">{k}</td>
-                        <td className="py-1 font-mono break-all">{v}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </details>
+                  <span className="font-mono">
+                    {a?.policyId ?? notReported}
+                  </span>
+                </Field>
+                <Field label={t("Token valid")} info="Token valid">
+                  {a?.tokenIssuedAt || a?.tokenExpiresAt
+                    ? t("{from} to {to}", {
+                        from: when(a?.tokenIssuedAt),
+                        to: when(a?.tokenExpiresAt),
+                      })
+                    : notReported}
+                </Field>
+              </dl>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
+                {t("What was proven")}
+              </h3>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <Field label={t("Scope")} info="Scope">
+                  {spe.attestationScope}
+                  <span className="block text-[11px] text-(--text-secondary)">
+                    {SCOPE_TEXT[spe.attestationScope]
+                      ? t(SCOPE_TEXT[spe.attestationScope])
+                      : ""}
+                  </span>
+                </Field>
+                <Field label={t("TEE")} info="TEE">
+                  {claims?.tee ?? spe.teeType}
+                </Field>
+                <Field label={t("Residual trust")} info="Residual trust">
+                  {residualTrust.length > 0
+                    ? residualTrust.join(", ")
+                    : simulated
+                      ? t("everything: no hardware proof")
+                      : notReported}
+                </Field>
+                <Field label={t("Last attestation")} info="Last attestation">
+                  {when(spe.attestedAt)}
+                </Field>
+              </dl>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
+              {t("Evidence")}
+            </h3>
+            {a ? (
+              <div data-testid="attestation-evidence">
+                <p className="mt-2 mb-2 text-xs text-(--text-secondary)">
+                  {t(EVIDENCE_INTRO)}
+                </p>
+                <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                  <Field label={t("Measurement")} info="Measurement">
+                    <Hex value={claims?.measurement} />
+                  </Field>
+                  <Field label={t("Reported TCB")} info="Reported TCB">
+                    {claims?.reportedTcb ?? (
+                      <span className="text-(--text-secondary)">
+                        {notReported}
+                      </span>
+                    )}
+                  </Field>
+                  <Field label={t("Host data")} info="Host data">
+                    <Hex value={claims?.hostData} />
+                    {hostMatch !== null && (
+                      <span
+                        data-testid="host-data-match"
+                        className={`block mt-0.5 text-[11px] font-semibold ${
+                          hostMatch
+                            ? "text-(--success-text)"
+                            : "text-(--danger-text)"
+                        }`}
+                      >
+                        {hostMatch ? "✓ " : "✗ "}
+                        {t(hostMatch ? HOST_DATA_MATCH : HOST_DATA_MISMATCH)}
+                      </span>
+                    )}
+                  </Field>
+                  <Field label={t("Report data")} info="Report data">
+                    <Hex value={claims?.reportData} />
+                  </Field>
+                  <Field label={t("VM id")} info="VM id">
+                    {claims?.vmId ?? (
+                      <span className="text-(--text-secondary)">
+                        {notReported}
+                      </span>
+                    )}
+                  </Field>
+                  <Field label={t("Evidence digest")} info="Evidence digest">
+                    <PolicyHash hash={a.evidenceDigest} />
+                  </Field>
+                </dl>
+                {pcrs.length > 0 ? (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-xs font-semibold text-(--accent)">
+                      {t("PCRs ({n})", { n: pcrs.length })}
+                    </summary>
+                    <table
+                      aria-label={t("{id} PCRs", { id: spe.id })}
+                      className="mt-2 w-full text-left text-[11px]"
+                    >
+                      <thead>
+                        <tr className="border-b border-(--border)">
+                          <th className="py-1 pr-3 font-medium text-(--text-secondary)">
+                            PCR
+                          </th>
+                          <th className="py-1 font-medium text-(--text-secondary)">
+                            {t("Value")}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pcrs.map(([k, v]) => (
+                          <tr key={k} className="border-b border-(--border)">
+                            <td className="py-1 pr-3 font-mono">{k}</td>
+                            <td className="py-1 font-mono break-all">{v}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </details>
+                ) : (
+                  <p className="mt-3 text-xs text-(--text-secondary)">
+                    {simulated
+                      ? t("No PCRs reported (the sample attester has no vTPM)")
+                      : t("No PCRs reported")}
+                  </p>
+                )}
+              </div>
             ) : (
-              <p className="mt-3 text-xs text-(--text-secondary)">
-                {simulated
-                  ? t("No PCRs reported (the sample attester has no vTPM)")
-                  : t("No PCRs reported")}
+              <p className="text-sm text-(--text-secondary)">
+                {t("No attestation recorded")}
               </p>
             )}
-          </details>
-        ) : (
-          <p className="text-sm text-(--text-secondary)">
-            {t("No attestation recorded")}
-          </p>
-        )}
-      </div>
+          </div>
 
-      <div>
-        <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-          {t("From permit to workspace")}
-        </h3>
-        <ol
-          aria-label={t("{id} chain", { id: spe.id })}
-          className="space-y-1 text-xs"
-        >
-          {chain.map((step, i) => (
-            <li key={step.label}>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="w-36 shrink-0 text-(--text-secondary)">
-                  {step.label}
-                  {FIELD_INFO[CHAIN_KEYS[i]] && (
-                    <InfoTip
-                      label={step.label}
-                      text={t(FIELD_INFO[CHAIN_KEYS[i]])}
+          <div>
+            <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
+              {t("From permit to workspace")}
+            </h3>
+            <ol
+              aria-label={t("{id} chain", { id: spe.id })}
+              className="space-y-1 text-xs"
+            >
+              {chain.map((step, i) => (
+                <li key={step.label}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="w-36 shrink-0 text-(--text-secondary)">
+                      {step.label}
+                      {FIELD_INFO[CHAIN_KEYS[i]] && (
+                        <InfoTip
+                          label={step.label}
+                          text={t(FIELD_INFO[CHAIN_KEYS[i]])}
+                        />
+                      )}
+                    </span>
+                    <span className="text-(--text-primary)">{step.value}</span>
+                  </div>
+                  {i < chain.length - 1 && (
+                    <ArrowDown
+                      size={11}
+                      className="ml-12 my-0.5 text-(--text-secondary)"
+                      aria-hidden="true"
                     />
                   )}
-                </span>
-                <span className="text-(--text-primary)">{step.value}</span>
-              </div>
-              {i < chain.length - 1 && (
-                <ArrowDown
-                  size={11}
-                  className="ml-12 my-0.5 text-(--text-secondary)"
-                  aria-hidden="true"
-                />
-              )}
-            </li>
-          ))}
-        </ol>
-      </div>
+                </li>
+              ))}
+            </ol>
+          </div>
 
-      <div>
-        <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-          {t("Last audit events")}
-        </h3>
-        {events.length === 0 ? (
-          <p className="text-xs text-(--text-secondary)">
-            {t("No secure processing events recorded for {id}", {
-              id: spe.id,
-            })}
-          </p>
-        ) : (
-          <ul
-            aria-label={t("{id} audit events", { id: spe.id })}
-            className="text-xs space-y-1"
-          >
-            {events.slice(0, 5).map((e) => (
-              <li key={e.id} className="flex gap-3">
-                <span className="w-40 shrink-0 text-(--text-secondary)">
-                  {when(e.recorded)}
-                </span>
-                <span className="text-(--text-primary)">
-                  {t(speEventLabel(e.eventType))}
-                  {e.optOut && (
-                    <span className="text-(--text-secondary)">
-                      {" "}
-                      · {optOutText(e.optOut)}
+          <div>
+            <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
+              {t("Last audit events")}
+            </h3>
+            {events.length === 0 ? (
+              <p className="text-xs text-(--text-secondary)">
+                {t("No secure processing events recorded for {id}", {
+                  id: spe.id,
+                })}
+              </p>
+            ) : (
+              <ul
+                aria-label={t("{id} audit events", { id: spe.id })}
+                className="text-xs space-y-1"
+              >
+                {events.slice(0, 5).map((e) => (
+                  <li key={e.id} className="flex gap-3">
+                    <span className="w-40 shrink-0 text-(--text-secondary)">
+                      {when(e.recorded)}
                     </span>
-                  )}
-                </span>
-                {e.outcome && e.outcome !== "success" && (
-                  <span className="text-(--danger-text)">{e.outcome}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        <Link
-          href="/admin/audit"
-          className="inline-block mt-2 text-xs text-(--accent) hover:underline"
-        >
-          {t("All events in Audit & Provenance, tab Secure processing")}
-        </Link>
-      </div>
+                    <span className="text-(--text-primary)">
+                      {t(speEventLabel(e.eventType))}
+                      {e.optOut && (
+                        <span className="text-(--text-secondary)">
+                          {" "}
+                          · {optOutText(e.optOut)}
+                        </span>
+                      )}
+                    </span>
+                    {e.outcome && e.outcome !== "success" && (
+                      <span className="text-(--danger-text)">{e.outcome}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link
+              href="/admin/audit"
+              className="inline-block mt-2 text-xs text-(--accent) hover:underline"
+            >
+              {t("All events in Audit & Provenance, tab Secure processing")}
+            </Link>
+          </div>
+        </div>
+      </details>
     </section>
   );
 }
