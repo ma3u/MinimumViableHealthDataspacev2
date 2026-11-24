@@ -293,6 +293,49 @@ describe("NlqPage", () => {
     );
   });
 
+  it("says why a federated list of records about persons is withheld (#1236)", async () => {
+    mockFetchApiResponses();
+    mockFetchApi.mockImplementation(
+      (url: string, opts?: { method?: string }) => {
+        if (url === "/api/nlq" && opts?.method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                question: "Show me patients by gender",
+                cypher: "MATCH (p:Patient) RETURN p.gender AS gender",
+                method: "template",
+                federated: true,
+                results: [],
+                totalRows: 0,
+                minKApplied: 5,
+                filtered: 0,
+                aggregateSuppressed: true,
+                suppressionReason: "row_level_in_federation",
+              }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ templates: [] }),
+        });
+      },
+    );
+
+    render(<NlqPage />);
+    await userEvent.type(
+      screen.getByPlaceholderText(/ask a question about the health data/i),
+      "Show me patients by gender",
+    );
+    await userEvent.click(screen.getByText("Ask"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("k-anonymity-note")).toHaveTextContent(
+        "only counts are shared",
+      );
+    });
+  });
+
   it("should show GraphRAG badge for graphrag method results", async () => {
     mockFetchApiResponses();
 

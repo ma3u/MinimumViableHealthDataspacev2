@@ -21,7 +21,9 @@ import { secondaryUseSession } from "../opt-out.js";
 import {
   combineCounts,
   suppressSmallCells,
-  suppressSmallGroups,
+  federatedAnswer,
+  isRowLevelAboutPersons,
+  withheldRowLevel,
 } from "../k-anonymity.js";
 import { noteSpeQueried } from "../spe-status.js";
 
@@ -143,6 +145,42 @@ app.post(
       }
 
       const spes = getSpeDrivers();
+      // A list of records about persons is never asked for (#1236, draft
+      // Art. 18(2)(g)): it would be source data leaving the SPEs.
+      if (isRowLevelAboutPersons(cypher)) {
+        const withheld = withheldRowLevel(minK);
+        try {
+          await appendQueryAudit({
+            participantId: callerId,
+            question: "(federated)",
+            cypher,
+            method: "federated",
+            resultCount: 0,
+            odrlEnforced: Boolean(scope),
+            outcome: "success",
+            permits: auditPermits(scope),
+            federated: {
+              contributors: [],
+              aggregateSuppressed: true,
+              suppressionReason: withheld.suppressionReason,
+            },
+          });
+        } catch (err) {
+          auditUnavailable(res, err);
+          return;
+        }
+        res.json({
+          results: [],
+          sources: [],
+          totalRows: 0,
+          filtered: 0,
+          speCount: spes.length,
+          minKApplied: minK,
+          aggregateSuppressed: true,
+          suppressionReason: withheld.suppressionReason,
+        });
+        return;
+      }
       // When each workspace was last asked, for the idle stop (ADR-072).
       noteSpeQueried(spes.map((s) => s.label));
       const allResults: Array<{ source: string; records: any[] }> = [];
@@ -179,22 +217,17 @@ app.post(
         }),
       );
 
-      // k-anonymity on both sides (issue #8): small groups and a
-      // contributor below minK are suppressed (src/k-anonymity.ts).
+      // Only aggregates leave the federation (#1236, draft Art. 18(2)(g)):
+      // a list of records about persons is withheld, and each SPE's counts
+      // are masked on their own before they are put side by side.
       const totalRows = allResults.reduce((n, r) => n + r.records.length, 0);
+      allResults.sort((a, b) => a.source.localeCompare(b.source));
       const {
         rows: merged,
         filtered,
         aggregateSuppressed,
         suppressionReason,
-      } = minK > 0
-        ? suppressSmallGroups(allResults, minK)
-        : {
-            rows: allResults.flatMap((r) => r.records),
-            filtered: 0,
-            aggregateSuppressed: false,
-            suppressionReason: null,
-          };
+      } = federatedAnswer(cypher, allResults, minK);
 
       const sources = allResults.map((r) => r.source);
 

@@ -52,14 +52,19 @@ Enforced in `services/neo4j-proxy/src/routes/federated.ts` (`POST /federated/que
 2. **Caller-side ODRL** — the caller's `odrlScope` is evaluated first:
    temporal validity (`checkOdrlTemporal`) and the re-identification
    prohibition heuristic (`checkReIdentification`, name × birth × geo).
-3. **Row k-anonymity** — result groups smaller than
-   `max(minK, MIN_COHORT_SIZE)` (default 5) are dropped (`filtered` count in
-   the response).
-4. **Contributor k-anonymity (dual-side)** — any contributor whose row count
-   is non-zero but below `minK` is suppressed entirely, and because a missing
-   contributor is itself identifying, the **global aggregate is suppressed
-   with it**: `{ aggregateSuppressed: true, suppressionReason:
-"contributor_k_violation" }`.
+3. **Only aggregates across the federation** (#1236; draft SPE implementing
+   act Art. 2(12), 18(2)(e), (g)) — a query that would return a list of
+   records about persons (it reads `Patient`, `OMOPPerson` or a clinical
+   label and does not `count` or `sum`) is **not sent to any SPE**: no source
+   data leaves an instance. The answer is empty with `{ aggregateSuppressed:
+true, suppressionReason: "row_level_in_federation" }`, and `/query` says
+   why (`isRowLevelAboutPersons`, `withheldRowLevel` in
+   `src/k-anonymity.ts`).
+4. **Counts masked per SPE** — each SPE's counts below
+   `max(minK, MIN_COHORT_SIZE)` (default 5) become `"<5"` on their own,
+   before the answers are put side by side, so no SPE's small count reaches
+   the caller (`federatedAnswer`). Totals across SPEs use `combineCounts`
+   (`/federated/stats`), which never gives a hidden count back.
 5. **Audit** — every federated query writes a `:QueryAuditEvent` with
    `federated: true`, `contributors: [labels]`, `aggregateSuppressed`, and
    `suppressionReason`, so EHDS Art. 53 transparency reports show _who we
@@ -80,7 +85,8 @@ answer, from one SPE or from several, and `/federated/query` now share
 - An aggregate answer (the Cypher counts) has every count below k shown as
   `"<5"`, and a percentage in the same row with it, as the Art. 69 statistics
   do (`ui/src/lib/statistics.ts`). `suppressionReason` is `"small_cells"`.
-- A row-level answer gets rules 3 and 4 above.
+- A row-level answer about persons is not asked of a federation (rule 3);
+  from one SPE it keeps the earlier group rule (`suppressSmallGroups`).
 
 The response carries `minKApplied`, `filtered`, `aggregateSuppressed` and
 `suppressionReason`, the audit record the suppression, and `/query` shows it

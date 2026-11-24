@@ -33,8 +33,12 @@ vi.mock("neo4j-driver", () => ({
 
 const { app, main } = await import("../src/index.js");
 const { setSpe2Driver } = await import("../src/db.js");
-const { anonymiseAnswer, suppressSmallCells, suppressSmallGroups } =
-  await import("../src/k-anonymity.js");
+const {
+  anonymiseAnswer,
+  federatedAnswer,
+  suppressSmallCells,
+  suppressSmallGroups,
+} = await import("../src/k-anonymity.js");
 import supertest from "supertest";
 
 const request = supertest(app);
@@ -267,5 +271,53 @@ describe("the k-anonymity rules", () => {
     );
     expect(outcome.rows[0].count).toBe(2);
     expect(outcome.minKApplied).toBe(0);
+  });
+});
+
+describe("federatedAnswer (#1236)", () => {
+  it("masks each SPE's counts on their own and keeps the source", () => {
+    const out = federatedAnswer(
+      "MATCH (p:Patient) RETURN count(p) AS n",
+      [
+        { source: "SPE-1", records: [{ _source: "SPE-1", n: 40 }] },
+        { source: "SPE-2", records: [{ _source: "SPE-2", n: 3 }] },
+      ],
+      5,
+    );
+    expect(out.rows).toEqual([
+      { _source: "SPE-1", n: 40 },
+      { _source: "SPE-2", n: "<5" },
+    ]);
+    expect(out.suppressionReason).toBe("small_cells");
+  });
+
+  it("withholds records about persons, keeps an SPE's error", () => {
+    const out = federatedAnswer(
+      "MATCH (p:Patient) RETURN p.city AS city",
+      [
+        { source: "SPE-1", records: [{ _source: "SPE-1", city: "Berlin" }] },
+        {
+          source: "SPE-2",
+          records: [{ _source: "SPE-2", _error: "SPE query failed" }],
+        },
+      ],
+      5,
+    );
+    expect(out.rows).toEqual([
+      { _source: "SPE-2", _error: "SPE query failed" },
+    ]);
+    expect(out.filtered).toBe(1);
+    expect(out.suppressionReason).toBe("row_level_in_federation");
+  });
+
+  it("lets an answer that is not about persons through", () => {
+    const rows = [{ _source: "SPE-1", title: "Synthea cohort" }];
+    const out = federatedAnswer(
+      "MATCH (d:HealthDataset) RETURN d.title AS title",
+      [{ source: "SPE-1", records: rows }],
+      5,
+    );
+    expect(out.rows).toEqual(rows);
+    expect(out.suppressionReason).toBeNull();
   });
 });

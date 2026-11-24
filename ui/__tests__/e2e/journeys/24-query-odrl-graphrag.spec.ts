@@ -765,18 +765,30 @@ test.describe("D · Federated Search with Policy Scoping", () => {
     expect(r).toBeDefined();
   });
 
-  test("J364 federated results include _source provenance", async () => {
-    const r = await proxyFetch("/federated/query", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        cypher: "MATCH (p:Patient) RETURN p.name AS name LIMIT 5",
-      }),
-    });
-    const data = await r.json();
-    if (data.results?.length > 0) {
-      expect(data.results[0]).toHaveProperty("_source");
+  test("J364 federated counts carry _source; a list about persons is not asked (#1236)", async () => {
+    const counts = await (
+      await proxyFetch("/federated/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cypher: "MATCH (p:Patient) RETURN count(p) AS n",
+        }),
+      })
+    ).json();
+    for (const row of counts.results ?? []) {
+      expect(row).toHaveProperty("_source");
     }
+    const list = await (
+      await proxyFetch("/federated/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cypher: "MATCH (p:Patient) RETURN p.gender AS gender LIMIT 5",
+        }),
+      })
+    ).json();
+    expect(list.results).toEqual([]);
+    expect(list.suppressionReason).toBe("row_level_in_federation");
   });
 
   test("J365 federated results include _policyId tag", async () => {

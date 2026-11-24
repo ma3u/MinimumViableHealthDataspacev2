@@ -117,7 +117,11 @@ interface NlqResult {
   minKApplied?: number;
   filtered?: number;
   aggregateSuppressed?: boolean;
-  suppressionReason?: "contributor_k_violation" | "small_cells" | null;
+  suppressionReason?:
+    | "contributor_k_violation"
+    | "small_cells"
+    | "row_level_in_federation"
+    | null;
 }
 
 const LAYER_ACCENT: Record<GraphLayerId, string> = {
@@ -663,20 +667,25 @@ export default function NlqPage() {
               </button>
             </div>
 
-            {(result.filtered ?? 0) > 0 && (
+            {((result.filtered ?? 0) > 0 ||
+              result.suppressionReason === "row_level_in_federation") && (
               <p
                 className="text-xs text-(--text-secondary)"
                 data-testid="k-anonymity-note"
               >
-                {result.aggregateSuppressed
+                {result.suppressionReason === "row_level_in_federation"
                   ? t(
-                      "One secure processing environment returned fewer than {k} records, so the whole answer is withheld: a missing contributor would identify people.",
-                      { k: result.minKApplied ?? 0 },
+                      "Across several secure processing environments only counts are shared, so a list of records about persons is withheld. Ask for a count, or ask one environment.",
                     )
-                  : t(
-                      "Counts below {k} are shown as <{k}, and a share computed from one goes with it, so no one can be singled out (k-anonymity).",
-                      { k: result.minKApplied ?? 0 },
-                    )}
+                  : result.aggregateSuppressed
+                    ? t(
+                        "One secure processing environment returned fewer than {k} records, so the whole answer is withheld: a missing contributor would identify people.",
+                        { k: result.minKApplied ?? 0 },
+                      )
+                    : t(
+                        "Counts below {k} are shown as <{k}, and a share computed from one goes with it, so no one can be singled out (k-anonymity).",
+                        { k: result.minKApplied ?? 0 },
+                      )}
               </p>
             )}
 

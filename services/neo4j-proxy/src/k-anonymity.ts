@@ -11,8 +11,13 @@
  *   "<k", as the Art. 69 statistics do (ui/src/lib/statistics.ts), and a
  *   percentage in the same row goes too, or it would give the count back.
  *
- * `/federated/query` applies the first rule to the Cypher a caller sends;
- * `/nlq` applies whichever fits the answer, from one SPE as from several.
+ * Across a federation of SPEs (`federatedAnswer`, draft implementing act on
+ * secure processing environments, Art. 2(12) and 18(2)(g), #1236) only
+ * aggregates move: an answer about persons that is not a count is withheld,
+ * and each SPE's counts are masked on their own, before they are put side
+ * by side, so no SPE's small count reaches the caller. `/federated/query`
+ * and a federated `/nlq` use it; `/nlq` on one SPE applies whichever rule
+ * fits the answer (`anonymiseAnswer`).
  * `/federated/stats` applies the second to each SPE's feasibility counts and
  * adds them up with `combineCounts` (ADR-094, #1123).
  * Only an answer about persons is filtered: a count of datasets identifies
@@ -32,7 +37,11 @@ export interface KOutcome {
   filtered: number;
   minKApplied: number;
   aggregateSuppressed: boolean;
-  suppressionReason: "contributor_k_violation" | "small_cells" | null;
+  suppressionReason:
+    | "contributor_k_violation"
+    | "small_cells"
+    | "row_level_in_federation"
+    | null;
 }
 
 /**
@@ -54,6 +63,26 @@ const SHARE_KEY = /(pct|percent|share|ratio|rate)$/i;
 
 export function readsPersonData(cypher: string): boolean {
   return PERSON_DATA.test(cypher);
+}
+
+/**
+ * A list of records about persons: source data, which no SPE in a
+ * federation sends out (draft SPE act Art. 18(2)(g), #1236). The
+ * coordinator does not ask for it at all.
+ */
+export function isRowLevelAboutPersons(cypher: string): boolean {
+  return readsPersonData(cypher) && !AGGREGATE.test(cypher);
+}
+
+/** The answer when a federation was not asked for a list about persons. */
+export function withheldRowLevel(k: number): KOutcome {
+  return {
+    rows: [],
+    filtered: 0,
+    minKApplied: k,
+    aggregateSuppressed: true,
+    suppressionReason: "row_level_in_federation",
+  };
 }
 
 const isError = (row: Row) => row._error !== undefined;
@@ -178,4 +207,53 @@ export function anonymiseAnswer(
     );
   }
   return suppressSmallGroups(contributions, k);
+}
+
+/**
+ * The rule for an answer put together from several SPEs (#1236): counts
+ * only, each SPE's masked on its own. A list of records about persons is
+ * source data, and the draft act (Art. 18(2)(g)) lets no source data move
+ * between the instances of a federation, so it is withheld whole.
+ */
+export function federatedAnswer(
+  cypher: string,
+  contributions: Contribution[],
+  k: number,
+): KOutcome {
+  if (!readsPersonData(cypher)) {
+    return {
+      rows: contributions.flatMap((c) => c.records),
+      filtered: 0,
+      minKApplied: 0,
+      aggregateSuppressed: false,
+      suppressionReason: null,
+    };
+  }
+  if (!AGGREGATE.test(cypher)) {
+    const withheld = contributions.reduce(
+      (n, c) => n + c.records.filter((r) => !isError(r)).length,
+      0,
+    );
+    return {
+      rows: contributions.flatMap((c) => c.records.filter(isError)),
+      filtered: withheld,
+      minKApplied: k,
+      aggregateSuppressed: true,
+      suppressionReason: "row_level_in_federation",
+    };
+  }
+  let filtered = 0;
+  const rows: Row[] = [];
+  for (const c of contributions) {
+    const out = suppressSmallCells(c.records, k);
+    filtered += out.filtered;
+    rows.push(...out.rows);
+  }
+  return {
+    rows,
+    filtered,
+    minKApplied: k,
+    aggregateSuppressed: false,
+    suppressionReason: filtered > 0 ? "small_cells" : null,
+  };
 }

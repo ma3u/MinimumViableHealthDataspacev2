@@ -16,17 +16,17 @@ Every data access event must produce an audit record. The Neo4j proxy creates a
 
 Each record contains, among others:
 
-| Field         | Description                                           |
-| ------------- | ----------------------------------------------------- |
-| `eventId`     | Unique UUID per event                                 |
-| `timestamp`   | ISO-8601 datetime in UTC                              |
-| `retainUntil` | `timestamp` plus 12 months; nothing deletes it before |
-| `endpoint`    | API path accessed (e.g. `/omop/cohort`)               |
-| `method`      | HTTP method                                           |
-| `participant` | DID of the requesting organisation                    |
-| `statusCode`  | HTTP response status                                  |
-| `resultCount` | Number of records returned                            |
-| `permitId`    | The data permit the access ran under, when known      |
+| Field         | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `eventId`     | Unique UUID per event                            |
+| `timestamp`   | ISO-8601 datetime in UTC                         |
+| `retainUntil` | see section 2; nothing deletes it before         |
+| `endpoint`    | API path accessed (e.g. `/omop/cohort`)          |
+| `method`      | HTTP method                                      |
+| `participant` | DID of the requesting organisation               |
+| `statusCode`  | HTTP response status                             |
+| `resultCount` | Number of records returned                       |
+| `permitId`    | The data permit the access ran under, when known |
 
 Recorded transfers (`DataTransfer` nodes) carry `retainUntil` the same way.
 Additionally, all HTTP access logs from Traefik (JSON format) are retained.
@@ -38,18 +38,24 @@ Additionally, all HTTP access logs from Traefik (JSON format) are retained.
 Art. 73(1)(e) requires the secure processing environment to keep identifiable logs
 of access and of all activities in it for the period necessary to verify and audit
 all processing operations, and at least one year. TEHDAS2 D7.4 (SPE specification,
-v1.2) repeats the one-year floor. The hub keeps **12 months** as that floor:
-`RETENTION_MONTHS` in `ui/src/lib/retention.ts` and `duration({months: 12})` in
-`services/neo4j-proxy/src/audit.ts`.
+v1.2) repeats the one-year floor. The draft implementing act on secure processing
+environments (Ares(2026)10903532, Art. 16(4), applies from 26 March 2029) sets the
+period: five years, or one year after the data permit ends if that is shorter.
 
-| Log type                                   | Minimum retention | Basis                     |
-| ------------------------------------------ | ----------------- | ------------------------- |
-| Data access events (`TransferEvent` nodes) | **12 months**     | EHDS Art. 73(1)(e)        |
-| Recorded transfers (`DataTransfer` nodes)  | **12 months**     | EHDS Art. 73(1)(e)        |
-| Contract negotiations                      | not set           | no EHDS period of its own |
-| Traefik HTTP access logs                   | **2 years**       | Internal operations       |
-| Keycloak authentication logs               | **2 years**       | Internal operations       |
-| Application error logs                     | **1 year**        | Internal operations       |
+The hub applies both (#1236): an event under a data permit with an end date
+(`HDABApproval.validUntil`) is kept until one year after the permit ends, at most
+five years after the event and never less than one year after it; an event under
+no permit keeps the one-year floor. `retainUntilFor` and `retentionCypher` in
+`ui/src/lib/retention.ts`, `retentionCypher` in `services/neo4j-proxy/src/audit.ts`.
+
+| Log type                                   | Retention                                         | Basis                                        |
+| ------------------------------------------ | ------------------------------------------------- | -------------------------------------------- |
+| Data access events (`TransferEvent` nodes) | permit end + 1 year, 1 to 5 years; else 12 months | EHDS Art. 73(1)(e); draft SPE act Art. 16(4) |
+| Recorded transfers (`DataTransfer` nodes)  | permit end + 1 year, 1 to 5 years; else 12 months | EHDS Art. 73(1)(e); draft SPE act Art. 16(4) |
+| Contract negotiations                      | not set                                           | no EHDS period of its own                    |
+| Traefik HTTP access logs                   | **2 years**                                       | Internal operations                          |
+| Keycloak authentication logs               | **2 years**                                       | Internal operations                          |
+| Application error logs                     | **1 year**                                        | Internal operations                          |
 
 Twelve months is a floor, not a ceiling. An access body that needs a record for
 longer to finish an audit (a supervision case under Art. 63, a complaint) keeps it
@@ -69,7 +75,7 @@ cite that source next to the number before quoting it.
 ### 3a. Neo4j: TransferEvent and DataTransfer nodes
 
 Both are stored in the primary Neo4j instance with a persistent volume, and both
-carry `retainUntil`, 12 months after they were recorded.
+carry `retainUntil`, set by the rule in section 2.
 
 **Backup schedule:** Daily snapshot to object storage (StackIT Object Storage or S3-compatible).
 
