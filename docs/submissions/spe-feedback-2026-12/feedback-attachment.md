@@ -1,12 +1,12 @@
 ---
 title: "Feedback on the draft Implementing Regulation on secure processing environments, Ares(2026)10903532"
-subtitle: "From an open-source developer, with a non-commercial EHDS demo that runs a confidential, federated SPE"
+subtitle: "From a dataspace architect, with a non-commercial EHDS demo that runs a confidential, federated SPE"
 date: "December 2026"
 ---
 
 # Who I am
 
-I am an open-source developer and a contributor to Eclipse Dataspace Components (<https://github.com/eclipse-edc>). I build the Minimum Viable Health Dataspace, an open-source reference implementation of Regulation (EU) 2025/327.
+I am an experienced dataspace architect. I built the operating company for Catena-X (<https://catena-x.net>), the dataspace of the global automotive supply chain, so I know what it takes to run a dataspace with many independent participants, not only to specify one. I also contribute to Eclipse Dataspace Components (<https://github.com/eclipse-edc>), the open-source connector that Catena-X runs on. I build the Minimum Viable Health Dataspace, an open-source reference implementation of Regulation (EU) 2025/327.
 
 > **A non-commercial demo.** The Minimum Viable Health Dataspace is not a product and is not for sale. No company stands behind it, nothing is offered as a service, and it holds no real health data: its patients are synthetic and its organisations (AlphaKlinik Berlin, Limburg Medical Centre, PharmaCo Research AG, MedReg DE) are fictional. It exists to show the EHDS standards working together, so that access bodies, data holders and developers can see, test and question them before 2029. Everything is published under an open-source licence.
 
@@ -109,7 +109,7 @@ Model updates carry the known risks of membership inference and gradient inversi
 
 **Draft:** Art. 18(2)(a) to (c) require common data models, metadata standards, query languages, remote execution interfaces and interoperable user management within a federation, and Art. 20 leaves their choice to each federation's agreement.
 
-**Experience:** the hub's two workspaces federate because they share OMOP CDM 5.4, FHIR R4, LOINC and SNOMED CT, and describe themselves in HealthDCAT-AP. Two federations that choose differently cannot later join, and a cross-border request through HealthData@EU would meet as many choices as there are federations.
+**Experience:** the hub's two workspaces federate because they share OMOP CDM 5.4, FHIR R4, LOINC and SNOMED CT, and describe themselves in HealthDCAT-AP. Two federations that choose differently cannot later join, and a cross-border request through HealthData@EU would meet as many choices as there are federations. Catena-X shows the alternative: its participants interoperate because they implement published, versioned standards and are checked against them before they join, while an operating company runs the shared services. Art. 20 leaves exactly these choices to each federation.
 
 **Request:** refer to the specifications under Art. 75 (HealthData@EU) and Art. 77 (HealthDCAT-AP), to OMOP CDM and HL7 FHIR as common data models, and to organisation identities based on the European Digital Identity framework, as the default a federation departs from only with a reason.
 
