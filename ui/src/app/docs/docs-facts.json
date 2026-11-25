@@ -1468,6 +1468,12 @@
       "file": "ADR-099-the-proxy-runs-one-replica-while-spe-inboxes-are-in-memory.md",
       "title": "The proxy runs one replica while SPE inboxes are held in memory",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-100",
+      "file": "ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md",
+      "title": "The proxy coordinates a federation of attested workspaces, each answering through its own gateway",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1566,7 +1572,7 @@
     "/docs/developer/api": "2026-11-24",
     "/docs/developer/reference": "2026-11-24",
     "/docs/developer/[slug]": "2026-11-24",
-    "/docs/architecture": "2026-11-24",
+    "/docs/architecture": "2026-11-25",
     "/docs/security": "2026-11-24",
     "/docs/security/[slug]": "2026-11-24",
     "/docs/klarbefund": "2026-11-24",
