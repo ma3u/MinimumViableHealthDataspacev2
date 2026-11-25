@@ -319,9 +319,15 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     chapter: "federation",
     article: "Art. 18(2)(f)",
     requirement: "Logging across the federation, joining each instance's logs.",
-    demo: "The coordinator collects every workspace's events into one audit chain.",
+    demo: "The coordinator collects every workspace's events into one audit chain, and every federated query carries one id into its audit record and into each workspace's transaction (ADR-100).",
     status: "met",
-    evidence: [AUDIT],
+    evidence: [
+      AUDIT,
+      adr(
+        "100",
+        "ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md",
+      ),
+    ],
   },
   {
     id: "federated-learning",
