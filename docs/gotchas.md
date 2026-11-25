@@ -5,9 +5,9 @@ entry at the top when you hit something that cost you more than 30 minutes.
 
 ## 2026-11-25: Event Hubs answers a consumer group's offsets to a consumer, not to the admin client
 
-The first Kafka-PUSH on Azure moved all 121 records of the one-hour ECG over
-`evhns-mvhd-b53a0449` into SPE-1's inbox in 4 s, and the transfer stayed
-`STARTED`. The provider reports completion only once the consumer's group has
+The first Kafka-PUSH on Azure wrote all 121 records of the one-hour ECG to
+`evhns-mvhd-b53a0449`, the consumer had read them into SPE-1's inbox 4 s
+later, and the transfer stayed `STARTED`. The provider reports completion only once the consumer's group has
 committed the end of the topic, and it read that offset with
 `AdminClient.listConsumerGroupOffsets`. Event Hubs answers that call with
 nothing, for each of the three logins; `kafka-consumer-groups.sh --list` and
