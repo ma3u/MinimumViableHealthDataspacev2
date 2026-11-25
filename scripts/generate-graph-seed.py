@@ -82,48 +82,54 @@ SNOMED = [
 # Deduplicate by concept ID
 SNOMED = list({c[0]: c for c in SNOMED}.values())
 
+# (code, name, UCUM unit, low, high, decimals). Each code and name checked
+# against the NLM LOINC table (clinicaltables.nlm.nih.gov) on 2026-11-25; six
+# names here used to name another test (14937-7 is urea nitrogen, not uric
+# acid; 30313-1 arterial haemoglobin, not "Hemoglobin A1"). A value is drawn
+# between low and high, in the unit, so no result is a pH of 150 (#1222).
 LOINC = [
-    ("4548-4",  "HbA1c"),
-    ("2345-7",  "Glucose [Mass/vol] in Serum"),
-    ("2160-0",  "Creatinine [Mass/vol] in Serum"),
-    ("33914-3", "eGFR CKD-EPI"),
-    ("2093-3",  "Total Cholesterol [Mass/vol]"),
-    ("2571-8",  "Triglycerides [Mass/vol]"),
-    ("2085-9",  "HDL Cholesterol"),
-    ("13457-7", "LDL Cholesterol (calc)"),
-    ("8480-6",  "Systolic Blood Pressure"),
-    ("8462-4",  "Diastolic Blood Pressure"),
-    ("39156-5", "BMI"),
-    ("718-7",   "Hemoglobin [Mass/vol]"),
-    ("4544-3",  "Hematocrit"),
-    ("6690-2",  "WBC Count"),
-    ("777-3",   "Platelet Count"),
-    ("2823-3",  "Potassium [Moles/vol]"),
-    ("2951-2",  "Sodium [Moles/vol]"),
-    ("1742-6",  "ALT [U/L]"),
-    ("1920-8",  "AST [U/L]"),
-    ("1975-2",  "Total Bilirubin [Mass/vol]"),
-    ("2532-0",  "LDH [U/L]"),
-    ("14959-1", "Microalbumin [Mass/vol] Urine"),
-    ("5902-2",  "Prothrombin Time"),
-    ("3016-3",  "TSH [Milli-int-unit/L]"),
-    ("3026-2",  "Free T4 [Mass/vol]"),
-    ("2276-4",  "Ferritin [Mass/vol]"),
-    ("49765-1", "Calcium [Mass/vol]"),
-    ("14627-4", "Bicarbonate [Moles/vol]"),
-    ("6768-6",  "Alkaline Phosphatase [U/L]"),
-    ("30313-1", "Hemoglobin A1"),
-    ("2028-9",  "CO2 Total"),
-    ("26464-8", "WBC differential"),
-    ("48065-7", "D-Dimer"),
-    ("1751-7",  "Albumin [Mass/vol]"),
-    ("2157-6",  "CK (Creatine Kinase)"),
-    ("30341-2", "ESR (Erythrocyte Sed Rate)"),
-    ("71426-1", "CRP [Mass/vol] High Sensitivity"),
-    ("14937-7", "Uric Acid"),
-    ("2744-1",  "Blood pH"),
-    ("33762-6", "NT-proBNP"),
+    ("4548-4", "HbA1c", "%", 4.5, 11, 1),
+    ("2345-7", "Glucose [Mass/vol] in Serum", "mg/dL", 70, 250, 0),
+    ("2160-0", "Creatinine [Mass/vol] in Serum", "mg/dL", 0.5, 3.5, 2),
+    ("33914-3", "eGFR (MDRD)/1.73 sq M", "mL/min/{1.73_m2}", 15, 110, 0),
+    ("2093-3", "Total Cholesterol [Mass/vol]", "mg/dL", 130, 300, 0),
+    ("2571-8", "Triglycerides [Mass/vol]", "mg/dL", 50, 400, 0),
+    ("2085-9", "HDL Cholesterol", "mg/dL", 25, 90, 0),
+    ("13457-7", "LDL Cholesterol (calc)", "mg/dL", 50, 220, 0),
+    ("8480-6", "Systolic Blood Pressure", "mm[Hg]", 100, 180, 0),
+    ("8462-4", "Diastolic Blood Pressure", "mm[Hg]", 60, 110, 0),
+    ("39156-5", "BMI", "kg/m2", 18, 42, 1),
+    ("718-7", "Hemoglobin [Mass/vol]", "g/dL", 9, 17.5, 1),
+    ("4544-3", "Hematocrit", "%", 30, 52, 1),
+    ("6690-2", "WBC Count", "10*3/uL", 3, 15, 1),
+    ("777-3", "Platelet Count", "10*3/uL", 100, 450, 0),
+    ("2823-3", "Potassium [Moles/vol]", "mmol/L", 3.2, 5.8, 1),
+    ("2951-2", "Sodium [Moles/vol]", "mmol/L", 128, 148, 0),
+    ("1742-6", "ALT [U/L]", "U/L", 8, 120, 0),
+    ("1920-8", "AST [U/L]", "U/L", 8, 110, 0),
+    ("1975-2", "Total Bilirubin [Mass/vol]", "mg/dL", 0.2, 2.5, 1),
+    ("2532-0", "LDH [U/L]", "U/L", 120, 400, 0),
+    ("14959-1", "Microalbumin/Creatinine [Mass Ratio] Urine", "mg/g", 2, 300, 0),
+    ("5902-2", "Prothrombin Time", "s", 10, 20, 1),
+    ("3016-3", "TSH [Milli-int-unit/L]", "m[IU]/L", 0.2, 8, 2),
+    ("3026-2", "Thyroxine (T4) [Mass/vol]", "ug/dL", 4.5, 12.5, 1),
+    ("2276-4", "Ferritin [Mass/vol]", "ng/mL", 15, 400, 0),
+    ("49765-1", "Calcium [Mass/vol] in Blood", "mg/dL", 8.4, 10.6, 1),
+    ("14627-4", "Bicarbonate [Moles/vol] Venous", "mmol/L", 20, 30, 0),
+    ("6768-6", "Alkaline Phosphatase [U/L]", "U/L", 40, 200, 0),
+    ("30313-1", "Hemoglobin [Mass/vol] Arterial", "g/dL", 10, 17, 1),
+    ("2028-9", "CO2 Total", "mmol/L", 20, 31, 0),
+    ("26464-8", "Leukocytes [#/vol] in Blood", "10*3/uL", 3, 15, 1),
+    ("48065-7", "D-Dimer FEU", "ug/mL{FEU}", 0.1, 3, 2),
+    ("1751-7", "Albumin [Mass/vol]", "g/dL", 2.8, 5.2, 1),
+    ("2157-6", "CK (Creatine Kinase)", "U/L", 30, 600, 0),
+    ("30341-2", "ESR (Erythrocyte Sed Rate)", "mm/h", 2, 60, 0),
+    ("71426-1", "CRP [Mass/vol] High Sensitivity", "mg/L", 0.2, 15, 1),
+    ("14937-7", "Urea Nitrogen [Moles/vol]", "mmol/L", 2.5, 12, 1),
+    ("2744-1", "Blood pH (arterial)", "[pH]", 7.25, 7.5, 2),
+    ("33762-6", "NT-proBNP", "pg/mL", 20, 3000, 0),
 ]
+LOINC_BY_CODE = {r[0]: r for r in LOINC}
 
 ICD10 = [
     ("E11",   "Type 2 Diabetes Mellitus"),
@@ -346,7 +352,7 @@ for cid, name in SNOMED:
     """)
 
 emit("// ═══ LARGE-SCALE SEED: Ontology backbone (LOINC) ═══")
-for code, name in LOINC:
+for code, name, *_ in LOINC:
     emit(f"""
         MERGE (l:LoincCode {{loincNumber: '{code}'}})
         SET l.code = '{code}',
@@ -443,7 +449,8 @@ for i in range(NUM_PATIENTS):
     # Patient node
     emit(f"""
         MERGE (p:Patient {{id: 'patient-{pid}'}})
-        SET p.name = '{esc(name)}',
+        SET p.resourceId = 'patient-{pid}',
+            p.name = '{esc(name)}',
             p.birthDate = '{birth_year}-{random.randint(1,12):02d}-{random.randint(1,28):02d}',
             p.gender = '{gender}'
     """)
@@ -477,7 +484,8 @@ for i in range(NUM_PATIENTS):
         enc_class = random.choice(["ambulatory", "inpatient", "emergency"])
         emit(f"""
             MERGE (enc:Encounter {{id: '{enc_id}'}})
-            SET enc.name = '{enc_class.title()} Visit {enc_year}-{enc_month:02d}',
+            SET enc.resourceId = '{enc_id}',
+                enc.name = '{enc_class.title()} Visit {enc_year}-{enc_month:02d}',
                 enc.date = '{enc_year}-{enc_month:02d}-{random.randint(1,28):02d}',
                 enc.class = '{enc_class}',
                 enc.status = 'finished'
@@ -510,7 +518,8 @@ for i in range(NUM_PATIENTS):
         # Condition node
         emit(f"""
             MERGE (c:Condition {{id: '{cond_id}'}})
-            SET c.display = '{esc(cond_name)}',
+            SET c.resourceId = '{cond_id}',
+                c.display = '{esc(cond_name)}',
                 c.onsetDate = '{onset_year}-{random.randint(1,12):02d}-01',
                 c.status = 'active',
                 c.code = '{snomed_id}'
@@ -550,11 +559,17 @@ for i in range(NUM_PATIENTS):
         for loinc_code in random.sample(loinc_tests, num_obs):
             obs_id = f"obs-{pid}-{loinc_code}"
             obs_year = random.randint(onset_year, 2026)
-            # Generate realistic values
-            value = round(random.uniform(3.0, 200.0), 1)
+            # A value in the test's unit and range. One draw, as the former
+            # uniform(3, 200) took, so every later draw is the same as before.
+            _, loinc_name, unit, low, high, decimals = LOINC_BY_CODE[loinc_code]
+            value = round(low + (high - low) * random.random(), decimals)
+            if decimals == 0:
+                value = int(value)
             emit(f"""
                 MERGE (o:Observation {{id: '{obs_id}'}})
-                SET o.display = '{loinc_code} result',
+                SET o.resourceId = '{obs_id}',
+                    o.display = '{esc(loinc_name)}',
+                    o.unit = '{unit}',
                     o.code = '{loinc_code}',
                     o.value = {value},
                     o.date = '{obs_year}-{random.randint(1,12):02d}-{random.randint(1,28):02d}',
@@ -578,6 +593,7 @@ for i in range(NUM_PATIENTS):
                 SET m.name = 'OMOP Meas {loinc_code}',
                     m.personId = {pid},
                     m.valueAsNumber = {value},
+                    m.unit = '{unit}',
                     m.measurementDate = '{obs_year}-01-01'
                 WITH m
                 MATCH (op:OMOPPerson {{personId: {pid}}})
@@ -595,7 +611,8 @@ for i in range(NUM_PATIENTS):
                 rx_name = next((n for r, n in RXNORM if r == rxcui), "Medication")
                 emit(f"""
                     MERGE (mr:MedicationRequest {{id: '{rx_id}'}})
-                    SET mr.display = '{esc(rx_name)}',
+                    SET mr.resourceId = '{rx_id}',
+                        mr.display = '{esc(rx_name)}',
                         mr.status = 'active',
                         mr.code = '{rxcui}'
                     WITH mr
@@ -633,7 +650,8 @@ for i in range(NUM_PATIENTS):
         proc_id = f"proc-{pid}-{proc_code}"
         emit(f"""
             MERGE (pr:Procedure {{id: '{proc_id}'}})
-            SET pr.display = '{esc(proc_name)}',
+            SET pr.resourceId = '{proc_id}',
+                pr.display = '{esc(proc_name)}',
                 pr.code = '{proc_code}',
                 pr.status = 'completed',
                 pr.date = '{random.randint(2022,2026)}-{random.randint(1,12):02d}-{random.randint(1,28):02d}'

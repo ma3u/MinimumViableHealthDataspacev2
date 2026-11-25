@@ -356,7 +356,7 @@ The labels below run the hub around the marketplace: credentials, connector tena
 | `VPA`                  | `vpaId`        | `vpaType` (`cfm.connector`, `cfm.credentialservice`, `cfm.dataplane`), `state`, `stateTimestamp`, `cellId`, `version` | CFM virtual participant agent; `(vpa)-[:OF_PROFILE]->(:ParticipantProfile)`        |
 | `OdrlPolicy`           | `policyId`     | `name`, `odrlAction`, `ehdsPermissions`, `ehdsProhibitions`, `temporalLimit`, `createdAt`                             | `neo4j/register-dsp-marketplace.cypher`; `(:DataProduct)-[:GOVERNED_BY]->(pol)`    |
 
-`ui/src/app/api/admin/policies/route.ts` merges the policies it registers on `id`, not `policyId`, with `participantId`, `policyJson`, `source: 'local-registry'` and `(pol)-[:BELONGS_TO]->(:Participant)`, so the constraint does not cover them.
+`ui/src/app/api/admin/policies/route.ts` registers policies while the control plane is offline, keyed by `policyId` with `id` set to the same value, and with `participantId`, `policyJson`, `source: 'local-registry'` and `(pol)-[:BELONGS_TO]->(:Participant)`. Before #1222 it merged on `id` alone; `neo4j/migrate-clinical-keys.cypher` keys those.
 
 #### Trust Center, pseudonyms and secure processing (Art. 66, 73, 75)
 
@@ -822,7 +822,7 @@ CREATE INDEX condition_code IF NOT EXISTS FOR (c:Condition) ON (c.code);
 - `issued: DateTime`
 - `interpretation: String[]` — (normal, abnormal, critical, high, low)
 
-The writers do not agree on the key or the date yet: the constraint is on `resourceId`, while the Synthea loader and `scripts/generate-graph-seed.py` merge on `id` and write `dateTime` or `date` instead of `effectiveDate`. The graph seed's laboratory values (`obs-<patient>-<loinc>`) carry no unit at all. Readers coalesce the variants.
+Every writer sets `resourceId`, the key of the constraint. The Synthea loader and `scripts/generate-graph-seed.py` merge on `id` and set `resourceId` to the same value, on Patient, Encounter, Condition, MedicationRequest and Procedure too; `neo4j/migrate-clinical-keys.cypher` keys nodes they wrote before #1222 and gives the graph seed's laboratory values (`obs-<patient>-<loinc>`) their unit and a value in the test's range. The date is still `dateTime` or `date` there rather than `effectiveDate`; readers coalesce the variants.
 
 **Indexes:**
 
