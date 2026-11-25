@@ -3232,15 +3232,16 @@ paths:
   /api/eehrxf/national:
     get:
       tags: [EEHRxF]
-      summary: German FHIR profiles (gematik ePA, KBV MIO, MII Kerndatensatz) and their validation results
+      summary: German FHIR profiles (MII Kerndatensatz) and their validation results
       description: >
         The German guides the hub validates the same FHIR resources against,
-        in the same HL7 FHIR Validator run as the EEHRxF profiles: the gematik
-        ePA, the KBV MIO and the MII core data set (Kerndatensatz) of the
-        university hospitals' data integration centres. Never counted as
+        in the same HL7 FHIR Validator run as the EEHRxF profiles: the MII
+        core data set (Kerndatensatz) of the university hospitals' data
+        integration centres. Never counted as
         EEHRxF coverage (#1172). Each profile names the EEHRxF profile it
         corresponds to, or null. A guide with `gate` true fails the CI run on
-        a new failure; a draft or ballot guide only reports.
+        a new failure; a draft or ballot guide only reports. The other
+        German guides the validator checks stay in the committed report.
       responses:
         "200":
           description: German guides with their profiles and totals

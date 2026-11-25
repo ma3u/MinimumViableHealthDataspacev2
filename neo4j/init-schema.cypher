@@ -64,7 +64,7 @@ CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidation
 CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
 // The EEHRxF implementing act (Art. 15(1)) whose annexes define the categories (#1205)
 CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImplementingAct) REQUIRE a.reference IS UNIQUE;
-// German profiles (gematik ePA, KBV MIO, MII Kerndatensatz) with their validation results,
+// German profiles (MII Kerndatensatz) with their validation results,
 // never counted as EEHRxF coverage; (:NationalProfile)-[:CORRESPONDS_TO]->(:EEHRxFProfile)
 CREATE CONSTRAINT national_profile_id IF NOT EXISTS FOR (p:NationalProfile) REQUIRE p.profileId IS UNIQUE;
 CREATE CONSTRAINT national_profile_guide_id IF NOT EXISTS FOR (g:NationalProfileGuide) REQUIRE g.guideId IS UNIQUE;

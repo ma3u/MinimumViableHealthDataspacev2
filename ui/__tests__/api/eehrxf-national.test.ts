@@ -1,6 +1,6 @@
 /**
- * API route tests for GET /api/eehrxf/national: the German profiles (gematik
- * ePA, KBV MIO, MII Kerndatensatz) with their validation results and the
+ * API route tests for GET /api/eehrxf/national: the German profiles of the
+ * MII Kerndatensatz with their validation results and the
  * EEHRxF profile each one corresponds to. They are grouped by guide and kept
  * apart from /api/eehrxf, so they never count as EEHRxF coverage (#1172).
  */

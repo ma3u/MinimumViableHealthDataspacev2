@@ -69,7 +69,7 @@ export const LABEL_LAYER: Record<string, number> = {
   EhdsPurpose: 2,
   EEHRxFProfile: 2,
   EEHRxFCategory: 2,
-  // German profiles (gematik ePA, KBV MIO, MII Kerndatensatz) next to the EEHRxF ones
+  // German profiles (MII Kerndatensatz) next to the EEHRxF ones
   NationalProfile: 2,
   NationalProfileGuide: 2,
   // L3: FHIR R4 Clinical

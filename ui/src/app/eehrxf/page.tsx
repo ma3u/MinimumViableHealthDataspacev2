@@ -97,8 +97,8 @@ interface EEHRxFData {
   } | null;
 }
 
-// German profiles (gematik ePA, KBV MIO, MII Kerndatensatz), validated in
-// the same run but never counted as EEHRxF coverage (#1172).
+// German profiles (the MII Kerndatensatz), validated in the same run but
+// never counted as EEHRxF coverage (#1172).
 interface NationalProfile {
   profileId: string;
   name: string;
@@ -786,7 +786,7 @@ export default function EEHRxFPage() {
                 </h2>
                 <p className="text-xs text-(--text-secondary) mb-3">
                   {t(
-                    "Not EEHRxF coverage. The same resources, validated against the German guides: the gematik ePA, the KBV MIO and the MII core data set the university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.",
+                    "Not EEHRxF coverage. The same resources, validated against the core data set of the Medical Informatics Initiative (MII), which the German university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.",
                   )}
                 </p>
                 <div className="flex flex-col gap-3">

@@ -21,8 +21,8 @@ assert {
 }
 
 tests {
-  // gematik ePA, KBV MIO and the MII Kerndatensatz, validated in the same
-  // run as the EEHRxF profiles and never counted as EEHRxF coverage.
+  // The MII Kerndatensatz, validated in the same run as the EEHRxF profiles
+  // and never counted as EEHRxF coverage.
   test("the MII Kerndatensatz is among the guides", function () {
     const packages = res.getBody().guides.map((g) => g.igPackage.split("#")[0]);
     expect(packages).to.include("de.medizininformatikinitiative.kerndatensatz.base");

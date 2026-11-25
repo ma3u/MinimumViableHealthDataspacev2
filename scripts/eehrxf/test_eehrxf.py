@@ -289,18 +289,27 @@ class NationalStaysOffTheEehrxfPage(unittest.TestCase):
 
 
 class NationalOutputs(unittest.TestCase):
-    """The German profiles get a seed and a mock of their own (MII Kerndatensatz, ePA, MIO)."""
+    """The German guides marked onPage (the MII Kerndatensatz) get a seed and a mock of their own."""
 
     def setUp(self):
         self.cfg = validate.load_config()
         self.report = json.loads(build.REPORT.read_text(encoding="utf-8"))
         self.n = build.national_model(self.cfg, self.report)
 
-    def test_every_national_profile_is_in_the_national_outputs(self):
+    def test_every_on_page_profile_and_no_other_is_in_the_national_outputs(self):
         text = build.national_cypher(self.n) + json.dumps(build.national_mock(self.n))
-        for p in validate.national(self.cfg)["profiles"]:
-            self.assertIn(p["profileId"], text)
-            self.assertIn(p["canonical"], text)
+        nat = validate.national(self.cfg)
+        for p in nat["profiles"]:
+            if nat["igs"][p["ig"]].get("onPage"):
+                self.assertIn(p["profileId"], text)
+                self.assertIn(p["canonical"], text)
+            else:
+                self.assertNotIn(p["profileId"], text)
+
+    def test_the_national_outputs_name_no_real_organisation_of_the_flag_policy(self):
+        # .claude/rules/code-style.md: gematik only behind NEXT_PUBLIC_DEMO_TK.
+        text = build.national_cypher(self.n) + json.dumps(build.national_mock(self.n))
+        self.assertNotIn("gematik", text.lower())
 
     def test_every_counterpart_is_an_eehrxf_profile_of_the_same_resource(self):
         eehrxf = {p["profileId"]: p for p in self.cfg["profiles"]}
@@ -331,7 +340,9 @@ class NationalOutputs(unittest.TestCase):
 
     def test_an_unknown_counterpart_stops_the_build(self):
         cfg = json.loads(json.dumps(self.cfg))
-        cfg["national"]["profiles"][0]["eehrxfCounterpart"] = "no-such-profile"
+        nat = cfg["national"]
+        on_page = next(p for p in nat["profiles"] if nat["igs"][p["ig"]].get("onPage"))
+        on_page["eehrxfCounterpart"] = "no-such-profile"
         with self.assertRaises(SystemExit):
             build.national_model(cfg, self.report)
 

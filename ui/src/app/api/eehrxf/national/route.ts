@@ -5,9 +5,9 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/eehrxf/national: the German FHIR profiles the hub validates its
- * data against (gematik ePA, KBV MIO, MII Kerndatensatz), with the result of
- * the HL7 FHIR Validator run and the EEHRxF profile each one corresponds to.
+ * GET /api/eehrxf/national: the German FHIR profiles of the MII
+ * Kerndatensatz the hub validates its data against, with the result of the
+ * HL7 FHIR Validator run and the EEHRxF profile each one corresponds to.
  *
  * Kept apart from GET /api/eehrxf on purpose (#1172): a German result is
  * never counted as EEHRxF coverage. The nodes come from

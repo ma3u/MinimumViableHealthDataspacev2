@@ -5,9 +5,9 @@
 // (national section) and scripts/eehrxf/validation-report.json. Do not
 // edit by hand.
 //
-// gematik ePA and KBV MIO (#1172), and the MII Kerndatensatz, the core
-// data set the data integration centres of the German university
-// hospitals deliver for research. Not EEHRxF: these never count as
+// The MII Kerndatensatz, the core data set the data integration
+// centres of the German university hospitals deliver for research.
+// Not EEHRxF: these never count as
 // EEHRxF coverage. CORRESPONDS_TO links a German profile to the EEHRxF
 // profile that covers the same ground, so the graph shows which German
 // profile a resource needs next to the European one.
@@ -16,84 +16,8 @@
 // ============================================================
 
 // Guides and profiles the config no longer lists
-MATCH (g:NationalProfileGuide) WHERE NOT g.guideId IN ['epa-laboratory', 'epa-medication', 'mii-kds-base', 'mii-kds-laborbefund', 'mii-kds-medikation', 'mio-laborbefund'] DETACH DELETE g;
-MATCH (p:NationalProfile) WHERE NOT p.profileId IN ['epa-lab-bundle-de', 'epa-lab-diagnostic-report-de', 'epa-lab-observation-de', 'epa-medication-request-de', 'kds-condition-de', 'kds-encounter-de', 'kds-patient-de', 'kds-procedure-de', 'kds-lab-diagnostic-report-de', 'kds-lab-observation-de', 'kds-medication-request-de', 'kds-medication-statement-de', 'mio-lab-bundle-de', 'mio-lab-diagnostic-report-de', 'mio-lab-observation-de'] DETACH DELETE p;
-
-MERGE (g:NationalProfileGuide {guideId: 'epa-laboratory'})
-SET g.name = 'gematik ePA Laboratory Report',
-    g.publisher = 'gematik',
-    g.country = 'DE',
-    g.igPackage = 'de.gematik.epa.laboratory#1.0.0-ballot.1',
-    g.status = 'ballot',
-    g.home = 'https://gemspec.gematik.de/ig/fhir/epa-laboratory/1.0.0-ballot.1/',
-    g.gate = false,
-    g.checkedOn = '2026-11-20';
-
-MERGE (p:NationalProfile {profileId: 'epa-lab-bundle-de'})
-SET p.name = 'Bundle (ePA Laboratory Report)',
-    p.country = 'DE',
-    p.canonical = 'https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp',
-    p.baseResource = 'Bundle',
-    p.fhirVersion = 'R4',
-    p.tested = 5,
-    p.passed = 0,
-    p.failed = 5,
-    p.topIssues = ['5x Bundle: Constraint failed: dr-comp-category: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '5x Bundle: Slice \'...\': a matching slice is required, but not found (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp|1.0.0). Note that other slices are allowed in addition to this required slice', '4x entry: Unable to find a match for the specified profile among choices: https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-image-attachment-dglp, https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-labo', '3x entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0)', '3x entry/*Composition/<uuid>*/.identifier.system: Value is \'...\' but is fixed to \'urn:ietf:rfc:3986\' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0#Composition.identifier.system'],
-    p.coverage = 'none';
-MATCH (p:NationalProfile {profileId: 'epa-lab-bundle-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'epa-lab-bundle-de'}), (g:NationalProfileGuide {guideId: 'epa-laboratory'}) MERGE (p)-[:PUBLISHED_IN]->(g);
-
-MERGE (p:NationalProfile {profileId: 'epa-lab-diagnostic-report-de'})
-SET p.name = 'DiagnosticReport (ePA Laboratory Report)',
-    p.country = 'DE',
-    p.canonical = 'https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp',
-    p.baseResource = 'DiagnosticReport',
-    p.fhirVersion = 'R4',
-    p.tested = 2,
-    p.passed = 0,
-    p.failed = 2,
-    p.topIssues = ['2x DiagnosticReport.code.coding[n].version: Value is \'2.83\' but is fixed to \'2.82\' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code', '2x DiagnosticReport.code.coding[n].version: Value is \'2.83\' but is fixed to \'2.82\' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code.coding', '2x DiagnosticReport.effective.ofType(dateTime): This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.', '2x DiagnosticReport.performer[n]: DiagnosticReport.performer.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)', '2x DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)'],
-    p.coverage = 'none';
-MATCH (p:NationalProfile {profileId: 'epa-lab-diagnostic-report-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'epa-lab-diagnostic-report-de'}), (g:NationalProfileGuide {guideId: 'epa-laboratory'}) MERGE (p)-[:PUBLISHED_IN]->(g);
-
-MERGE (p:NationalProfile {profileId: 'epa-lab-observation-de'})
-SET p.name = 'Observation laboratory study (ePA Laboratory Report)',
-    p.country = 'DE',
-    p.canonical = 'https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp',
-    p.baseResource = 'Observation',
-    p.fhirVersion = 'R4',
-    p.tested = 37,
-    p.passed = 5,
-    p.failed = 32,
-    p.topIssues = ['26x Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)', '20x Observation: Observation.encounter: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)', '20x Observation: Observation.performer: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)', '9x Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)', '6x Observation.code.coding[n]: Observation.code.coding.display: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)'],
-    p.coverage = 'partial';
-MATCH (p:NationalProfile {profileId: 'epa-lab-observation-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'epa-lab-observation-de'}), (g:NationalProfileGuide {guideId: 'epa-laboratory'}) MERGE (p)-[:PUBLISHED_IN]->(g);
-
-MERGE (g:NationalProfileGuide {guideId: 'epa-medication'})
-SET g.name = 'gematik ePA Medication Service',
-    g.publisher = 'gematik',
-    g.country = 'DE',
-    g.igPackage = 'de.gematik.epa.medication#1.3.5',
-    g.status = 'published',
-    g.home = 'https://gemspec.gematik.de/ig/fhir/epa-medication/1.3.5/',
-    g.gate = true,
-    g.checkedOn = '2026-11-20';
-
-MERGE (p:NationalProfile {profileId: 'epa-medication-request-de'})
-SET p.name = 'MedicationRequest (ePA Medication, prescription)',
-    p.country = 'DE',
-    p.canonical = 'https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request',
-    p.baseResource = 'MedicationRequest',
-    p.fhirVersion = 'R4',
-    p.tested = 31,
-    p.passed = 0,
-    p.failed = 31,
-    p.topIssues = ['31x MedicationRequest.subject: MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)', '19x MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1', '19x MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2', '19x MedicationRequest.medication.ofType(CodeableConcept): The Profile \'...\' definition allows for the type Reference but found type CodeableConcept', '17x MedicationRequest.medication.ofType(CodeableConcept).coding[n]: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1'],
-    p.coverage = 'none';
-MATCH (p:NationalProfile {profileId: 'epa-medication-request-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'epa-medication-request-de'}), (g:NationalProfileGuide {guideId: 'epa-medication'}) MERGE (p)-[:PUBLISHED_IN]->(g);
+MATCH (g:NationalProfileGuide) WHERE NOT g.guideId IN ['mii-kds-base', 'mii-kds-laborbefund', 'mii-kds-medikation'] DETACH DELETE g;
+MATCH (p:NationalProfile) WHERE NOT p.profileId IN ['kds-condition-de', 'kds-encounter-de', 'kds-patient-de', 'kds-procedure-de', 'kds-lab-diagnostic-report-de', 'kds-lab-observation-de', 'kds-medication-request-de', 'kds-medication-statement-de'] DETACH DELETE p;
 
 MERGE (g:NationalProfileGuide {guideId: 'mii-kds-base'})
 SET g.name = 'MII Kerndatensatz Basis (Person, Fall, Diagnose, Prozedur)',
@@ -242,55 +166,3 @@ SET p.name = 'MedicationStatement (MII KDS Medikation)',
     p.coverage = 'none';
 MATCH (p:NationalProfile {profileId: 'kds-medication-statement-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-medication-statement-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-medikation'}) MERGE (p)-[:PUBLISHED_IN]->(g);
-
-MERGE (g:NationalProfileGuide {guideId: 'mio-laborbefund'})
-SET g.name = 'KBV MIO Laborbefund',
-    g.publisher = 'KBV (mio42)',
-    g.country = 'DE',
-    g.igPackage = 'kbv.mio.laborbefund#1.0.0-update',
-    g.status = 'draft',
-    g.home = 'https://mio42-gmbh.github.io/MIO-Laborbefund-IG/site/',
-    g.gate = false,
-    g.checkedOn = '2026-11-20';
-
-MERGE (p:NationalProfile {profileId: 'mio-lab-bundle-de'})
-SET p.name = 'Bundle (MIO Laborbefund)',
-    p.country = 'DE',
-    p.canonical = 'https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Bundle',
-    p.baseResource = 'Bundle',
-    p.fhirVersion = 'R4',
-    p.tested = 5,
-    p.passed = 0,
-    p.failed = 5,
-    p.topIssues = ['5x Bundle: Slice \'...\': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Bundle|1.0.0-update). Note that other slices are allowed in addition to this required slice', '5x entry: Unable to find a match for the specified profile among choices: https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Image_Attachment, https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study,', '3x entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update)', '3x entry/*Composition/<uuid>*/.identifier.system: Value is \'...\' but is fixed to \'urn:ietf:rfc:3986\' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update#Composition.identifier.system', '3x entry/*Composition/<uuid>*/.subject: Composition.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update)'],
-    p.coverage = 'none';
-MATCH (p:NationalProfile {profileId: 'mio-lab-bundle-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'mio-lab-bundle-de'}), (g:NationalProfileGuide {guideId: 'mio-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);
-
-MERGE (p:NationalProfile {profileId: 'mio-lab-diagnostic-report-de'})
-SET p.name = 'DiagnosticReport (MIO Laborbefund)',
-    p.country = 'DE',
-    p.canonical = 'https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport',
-    p.baseResource = 'DiagnosticReport',
-    p.fhirVersion = 'R4',
-    p.tested = 2,
-    p.passed = 0,
-    p.failed = 2,
-    p.topIssues = ['2x DiagnosticReport.code.coding[n].version: Value is \'2.83\' but is fixed to \'2.82\' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code', '2x DiagnosticReport.code.coding[n].version: Value is \'2.83\' but is fixed to \'2.82\' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code.coding', '2x DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)', '2x DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.data: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)', '2x DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)'],
-    p.coverage = 'none';
-MATCH (p:NationalProfile {profileId: 'mio-lab-diagnostic-report-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'mio-lab-diagnostic-report-de'}), (g:NationalProfileGuide {guideId: 'mio-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);
-
-MERGE (p:NationalProfile {profileId: 'mio-lab-observation-de'})
-SET p.name = 'Observation laboratory study (MIO Laborbefund)',
-    p.country = 'DE',
-    p.canonical = 'https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study',
-    p.baseResource = 'Observation',
-    p.fhirVersion = 'R4',
-    p.tested = 37,
-    p.passed = 0,
-    p.failed = 37,
-    p.topIssues = ['37x Observation.category[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update and slicing is CLOSED: Observation.category[n]: Doe', '37x Observation.subject: Observation.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)', '37x Observation: Slice \'...\': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update). Note that other slices are allowed in addition to this required s', '26x Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)', '20x Observation: Observation.encounter: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)'],
-    p.coverage = 'none';
-MATCH (p:NationalProfile {profileId: 'mio-lab-observation-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
-MATCH (p:NationalProfile {profileId: 'mio-lab-observation-de'}), (g:NationalProfileGuide {guideId: 'mio-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);

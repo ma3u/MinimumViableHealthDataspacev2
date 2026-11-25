@@ -20,10 +20,11 @@ Outputs, both generated, never edited by hand:
   config's extensions into a $validate; see matchbox_config).
 
 - neo4j/register-national-profiles.cypher and ui/public/mock/eehrxf_national.json:
-  the German profiles of profiles.json's national section (gematik ePA, KBV
-  MIO, MII Kerndatensatz) with their validation results and the EEHRxF
-  profile each one corresponds to. Kept apart from the EEHRxF outputs, so a
-  German result is never counted as EEHRxF coverage (#1172).
+  the German guides of profiles.json's national section marked onPage (the
+  MII Kerndatensatz) with their validation results and the EEHRxF profile
+  each one corresponds to. Kept apart from the EEHRxF outputs, so a German
+  result is never counted as EEHRxF coverage (#1172). The ePA and MIO guides
+  stay in the report only: the default build names no real organisation.
 
     python3 scripts/eehrxf/build.py          # write all six
     python3 scripts/eehrxf/build.py --check  # exit 1 if any is out of date
@@ -280,13 +281,15 @@ def cypher(m: dict) -> str:
 
 
 def national_model(cfg: dict, report: dict) -> dict:
-    """The German guides and profiles with their results, grouped by guide."""
+    """The German guides marked onPage and their profiles with results, grouped by guide."""
     nat = cfg.get("national", {"igs": {}, "profiles": []})
     results = report.get("national", {}).get("profiles", {})
     eehrxf = {p["profileId"]: p["name"] for p in cfg["profiles"]}
     guides = []
     for key in sorted(nat["igs"]):
         ig = nat["igs"][key]
+        if not ig.get("onPage"):
+            continue
         profiles = []
         for prof in sorted((p for p in nat["profiles"] if p["ig"] == key), key=lambda p: p["profileId"]):
             r = results.get(prof["profileId"])
@@ -335,9 +338,9 @@ def national_cypher(n: dict) -> str:
         "// (national section) and scripts/eehrxf/validation-report.json. Do not",
         "// edit by hand.",
         "//",
-        "// gematik ePA and KBV MIO (#1172), and the MII Kerndatensatz, the core",
-        "// data set the data integration centres of the German university",
-        "// hospitals deliver for research. Not EEHRxF: these never count as",
+        "// The MII Kerndatensatz, the core data set the data integration",
+        "// centres of the German university hospitals deliver for research.",
+        "// Not EEHRxF: these never count as",
         "// EEHRxF coverage. CORRESPONDS_TO links a German profile to the EEHRxF",
         "// profile that covers the same ground, so the graph shows which German",
         "// profile a resource needs next to the European one.",

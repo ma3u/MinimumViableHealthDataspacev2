@@ -216,7 +216,7 @@
   "Annexes (PDF)": "Anexos (PDF)",
   "Have your say": "Dé su opinión",
   "German profiles": "Perfiles alemanes",
-  "Not EEHRxF coverage. The same resources, validated against the German guides: the gematik ePA, the KBV MIO and the MII core data set the university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.": "No es cobertura EEHRxF. Los mismos recursos, validados frente a las guías alemanas: la ePA de gematik, los MIO de la KBV y el conjunto de datos básico de la MII que los hospitales universitarios aportan a la investigación. Cada perfil indica el perfil EEHRxF al que corresponde.",
+  "Not EEHRxF coverage. The same resources, validated against the core data set of the Medical Informatics Initiative (MII), which the German university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.": "No es cobertura EEHRxF. Los mismos recursos, validados frente al conjunto de datos básico de la Medical Informatics Initiative (MII), que los hospitales universitarios alemanes aportan a la investigación. Cada perfil indica el perfil EEHRxF al que corresponde.",
   "Gates CI": "Bloquea la CI",
   "Report only": "Solo informe",
   "Published by {publisher}": "Publicado por {publisher}",

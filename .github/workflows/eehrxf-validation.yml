@@ -13,7 +13,7 @@ name: EEHRxF validation
 #
 # The same run checks the German profiles in profiles.json's national
 # section (#1172): gematik ePA, KBV MIO and the MII Kerndatensatz. build.py
-# writes them to their own seed and mock, never to the EEHRxF ones. A draft or
+# writes the MII ones to their own seed and mock, never to the EEHRxF ones. A draft or
 # ballot guide is report-only; a published one gates: validate.py exits 1
 # when a gating profile fails more resources than the committed report
 # records for it.
