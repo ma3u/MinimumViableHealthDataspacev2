@@ -50,6 +50,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "dr-img-p1-2026-01-22",
@@ -133,6 +134,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "dr-img-1002-2025-11-18",
@@ -226,6 +228,7 @@
           "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "report-1",

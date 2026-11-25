@@ -845,7 +845,15 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "authoredOn": "2009-02-27"
+        "authoredOn": "2009-02-27",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -879,7 +887,15 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "authoredOn": "2015-11-02"
+        "authoredOn": "2015-11-02",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -913,7 +929,15 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "authoredOn": "2018-04-10"
+        "authoredOn": "2018-04-10",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -947,7 +971,15 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "authoredOn": "2024-09-12"
+        "authoredOn": "2024-09-12",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {

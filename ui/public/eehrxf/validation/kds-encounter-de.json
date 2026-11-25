@@ -7,7 +7,7 @@
   "baseResource": "Encounter",
   "tested": 31,
   "passed": 21,
-  "warnings": 32,
+  "warnings": 33,
   "resources": [
     {
       "source": "facade",
@@ -25,6 +25,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "checkup-p1-2025-03-14",
@@ -77,6 +78,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "checkup-p2-2025-10-07",
@@ -129,6 +131,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "enc-p2-2025-03-04",
@@ -175,6 +178,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "enc-p1-2024-09-12",
@@ -221,6 +225,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "fhir-enc-2002",
@@ -269,6 +274,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "enc-2000-0",
@@ -307,6 +313,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "enc-2000-1",
@@ -345,6 +352,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "enc-2008-0",
@@ -388,6 +396,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "enc-2008-1",
@@ -426,6 +435,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "loader-enc-0001",
@@ -469,6 +479,7 @@
           "message": "Constraint failed: mii-enc-7: 'Kontakte mit unbekannten Status SOLLTEN einen Start-Zeitpunkt angeben' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "sparse-enc-0001",
@@ -488,6 +499,71 @@
         },
         "subject": {
           "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    },
+    {
+      "source": "reference",
+      "origin": "hospital-discharge-report.json#entry[2]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ref-encounter-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9"
+        },
+        "period": {
+          "start": "2026-03-02T08:00:00+01:00",
+          "end": "2026-03-09T11:00:00+01:00"
+        },
+        "serviceProvider": {
+          "reference": "urn:uuid:299fca76-c5f8-544f-9d04-8b0decec34bf"
+        },
+        "hospitalization": {
+          "admitSource": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/admit-source",
+                "code": "emd",
+                "display": "From accident/emergency department"
+              }
+            ]
+          },
+          "dischargeDisposition": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                "code": "home",
+                "display": "Home"
+              }
+            ]
+          }
         }
       }
     },
@@ -520,6 +596,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "484024be-e131-dfae-aaeb-330d4bdcb87b",
@@ -627,6 +704,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "75cfcd73-d1e4-d1b5-d1c9-5f4f4ab4946c",
@@ -745,6 +823,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "9c15e2f6-d97b-d267-375a-ed9030946079",
@@ -852,6 +931,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "f1b3655a-9155-ff62-ffc0-9c5b7335492d",
@@ -959,6 +1039,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "fb99658c-1c1a-140b-37ce-bbad9f8579bf",
@@ -1077,6 +1158,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "2175053f-98c6-8148-d703-175371bba219",
@@ -1195,6 +1277,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "610f09c1-7432-e7c7-1afb-2b69218d44d6",
@@ -1302,6 +1385,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "9185c480-4f26-450d-f438-ec52fbf48125",
@@ -1409,6 +1493,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "53c67d64-594c-24e6-e82e-bc32f9495818",
@@ -1516,6 +1601,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "09e99d0a-e5ba-49b0-4c19-8be905300de7",
@@ -1623,6 +1709,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "1218a5ad-ec3a-fb32-0638-04edc70e148e",
@@ -1730,6 +1817,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "bad02022-83e2-2d86-9146-07044d319834",
@@ -1837,6 +1925,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "9d9876e3-2288-bb8f-bef9-28f7c038e813",
@@ -1955,6 +2044,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "1b0a7269-d371-7b0a-7603-159518db7491",
@@ -2073,6 +2163,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "c9525d96-bddf-53ee-d49c-66c6953b9131",
@@ -2180,6 +2271,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "2b807d6d-09d1-c2f8-46f6-23b7f0e9e2a8",
@@ -2298,6 +2390,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "2178263e-eca0-61eb-9042-b312786f521d",
@@ -2405,6 +2498,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "d4dbdade-6204-52a4-a1cf-753f3a4921c5",
@@ -2512,6 +2606,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "4aa5991d-b071-c70a-22f2-447ea7865010",
@@ -2619,6 +2714,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Encounter",
         "id": "cc8b124b-1612-ed51-715a-64706c34bc88",

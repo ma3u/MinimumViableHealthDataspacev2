@@ -315,7 +315,29 @@ export function buildPatientSummaryDocument(
             m.display,
           ),
           subject,
-          ...(m.date ? { authoredOn: m.date } : {}),
+          // The EU prescription (MPD) wants the date and the prescriber. The
+          // graph keeps no prescriber and not always a date, so the document
+          // says it does not know, as the FHIR facade does.
+          ...(m.date
+            ? { authoredOn: m.date }
+            : {
+                _authoredOn: {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      valueCode: "unknown",
+                    },
+                  ],
+                },
+              }),
+          requester: {
+            extension: [
+              {
+                url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                valueCode: "unknown",
+              },
+            ],
+          },
           ...(m.dosage ? { dosageInstruction: [{ text: m.dosage }] } : {}),
         },
   );

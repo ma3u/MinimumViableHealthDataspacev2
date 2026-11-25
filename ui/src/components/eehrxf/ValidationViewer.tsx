@@ -26,6 +26,8 @@ export interface ViewerResource {
   source: string;
   origin: string;
   passed: boolean;
+  /** False for a reference example: shown, never counted in coverage. */
+  counted?: boolean;
   issues: ViewerIssue[];
   resource: Record<string, unknown>;
 }
@@ -315,6 +317,7 @@ export default function ValidationViewer({
                         </span>
                         <span className="block text-(--text-secondary)">
                           {r.source}
+                          {r.counted === false && ` · ${t("not counted")}`}
                         </span>
                       </span>
                     </button>
@@ -337,6 +340,13 @@ export default function ValidationViewer({
                     >
                       {current.passed ? t("Passes") : t("Fails")}
                     </span>
+                    {current.counted === false && (
+                      <span className="text-(--text-secondary) italic">
+                        {t(
+                          "A fictional reference example, validated but never counted in coverage",
+                        )}
+                      </span>
+                    )}
                     <span className="text-(--text-secondary)">
                       {t("{n} errors", { n: errors })}
                     </span>

@@ -15,12 +15,12 @@
           "name": "Condition (MII KDS Diagnose)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
           "baseResource": "Condition",
-          "tested": 32,
+          "tested": 52,
           "passed": 20,
-          "failed": 12,
+          "failed": 32,
           "coverage": "partial",
           "topIssues": [
-            "12x Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
+            "32x Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
             "1x Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
           ],
           "eehrxfCounterpart": {
@@ -52,8 +52,8 @@
           "name": "Patient (MII KDS Person)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
           "baseResource": "Patient",
-          "tested": 29,
-          "passed": 25,
+          "tested": 38,
+          "passed": 34,
           "failed": 4,
           "coverage": "partial",
           "topIssues": [
@@ -71,8 +71,8 @@
           "name": "Procedure (MII KDS Prozedur)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
           "baseResource": "Procedure",
-          "tested": 24,
-          "passed": 23,
+          "tested": 25,
+          "passed": 24,
           "failed": 1,
           "coverage": "partial",
           "topIssues": [
@@ -99,11 +99,14 @@
           "name": "DiagnosticReport (MII KDS Laborbefund)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
           "baseResource": "DiagnosticReport",
-          "tested": 1,
+          "tested": 4,
           "passed": 1,
-          "failed": 0,
-          "coverage": "full",
-          "topIssues": [],
+          "failed": 3,
+          "coverage": "partial",
+          "topIssues": [
+            "3x DiagnosticReport: DiagnosticReport.basedOn: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)",
+            "3x DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi"
+          ],
           "eehrxfCounterpart": {
             "profileId": "diagnostic-report-lab-eu",
             "name": "DiagnosticReport (EU Lab)"
@@ -114,15 +117,15 @@
           "name": "Observation (MII KDS Laboruntersuchung)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
           "baseResource": "Observation",
-          "tested": 37,
+          "tested": 49,
           "passed": 16,
-          "failed": 21,
+          "failed": 33,
           "coverage": "partial",
           "topIssues": [
-            "20x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
-            "20x Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
+            "32x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "32x Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
+            "32x Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
             "20x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
-            "20x Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
             "1x Observation.effective.ofType(Period): The Profile '...' definition allows for the type dateTime but found type Period"
           ],
           "eehrxfCounterpart": {
@@ -147,8 +150,8 @@
           "name": "MedicationRequest (MII KDS Medikation)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
           "baseResource": "MedicationRequest",
-          "tested": 31,
-          "passed": 29,
+          "tested": 47,
+          "passed": 45,
           "failed": 2,
           "coverage": "partial",
           "topIssues": [
@@ -164,10 +167,10 @@
           "name": "MedicationStatement (MII KDS Medikation)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
           "baseResource": "MedicationStatement",
-          "tested": 5,
-          "passed": 0,
+          "tested": 16,
+          "passed": 11,
           "failed": 5,
-          "coverage": "none",
+          "coverage": "partial",
           "topIssues": [
             "4x MedicationStatement.dosage[n]: Constraint failed: DosageStructuredRequiresBoth: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)",
             "1x MedicationStatement: MedicationStatement.effective[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement|2026.0.1)"
@@ -180,8 +183,8 @@
   "summary": {
     "guides": 3,
     "profiles": 8,
-    "resourcesTested": 190,
-    "resourcesPassed": 135,
-    "passRatePercent": 71
+    "resourcesTested": 262,
+    "resourcesPassed": 172,
+    "passRatePercent": 66
   }
 }

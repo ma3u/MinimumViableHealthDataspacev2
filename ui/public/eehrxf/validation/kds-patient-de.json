@@ -5,10 +5,320 @@
   "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
   "baseResource": "Patient",
-  "tested": 29,
-  "passed": 25,
-  "warnings": 44,
+  "tested": 38,
+  "passed": 34,
+  "warnings": 53,
   "resources": [
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "80ba9a7f-1428-80e7-887e-ecbdf01ddaa9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "P1"
+          }
+        ],
+        "name": [
+          {
+            "text": "Maria Schmidt"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1979-03-15"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[1]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "9fcadfa3-8101-830a-b36f-0c0f274143d4",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "name": [
+          {
+            "text": "Patient 0a1b2c3d"
+          }
+        ],
+        "gender": "female",
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "9fcadfa3-8101-830a-b36f-0c0f274143d4",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "P1"
+          }
+        ],
+        "name": [
+          {
+            "text": "Maria Schmidt"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1979-03-15"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "362d1f07-b528-8327-b4ac-4a44daf5fd67",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "P2"
+          }
+        ],
+        "name": [
+          {
+            "text": "Jan de Vries"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1965-06-02"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "P2"
+          }
+        ],
+        "name": [
+          {
+            "text": "Jan de Vries"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1965-06-02"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "fhir-pat-1002-patient-summary.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "0829c29f-b70e-8540-a8b3-166783ac1e56",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "fhir-pat-1002"
+          }
+        ],
+        "name": [
+          {
+            "text": "Patient fhir-pat-1002"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1958-11-03"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "patient-2000-patient-summary.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "ddebefac-7d41-82d6-83ed-2e04ca55a4e2",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "patient-2000"
+          }
+        ],
+        "name": [
+          {
+            "text": "Hartmut Becker"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "2001-03-24"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "sandbox-klarbefund-lab-report.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "ebb03ed5-7977-8661-a16e-2e631d750b65",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "sandbox-demo"
+          }
+        ],
+        "name": [
+          {
+            "text": "Klarbefund sandbox (fictional)"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1984-05-17"
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "sandbox-patient-summary-with-allergy.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "1ab9a457-8220-84ca-937b-80e0c6976bcd",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+            "value": "sandbox-demo"
+          }
+        ],
+        "name": [
+          {
+            "text": "Klarbefund sandbox (fictional)"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1984-05-17"
+      }
+    },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[0]",
@@ -20,6 +330,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "P1",
@@ -54,6 +365,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "P2",
@@ -88,6 +400,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "fhir-pat-1002",
@@ -116,6 +429,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "patient-2000",
@@ -144,6 +458,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "patient-2008",
@@ -172,6 +487,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "pv-pat-001",
@@ -206,6 +522,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "loader-pat-0001",
@@ -234,6 +551,7 @@
       "origin": "facade-sample.json#entry[81]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "sparse-pat-0001",
@@ -267,6 +585,7 @@
       "origin": "fhir-golden-bundle-cgm.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -300,6 +619,7 @@
       "origin": "fhir-golden-bundle-cpet.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -333,6 +653,7 @@
       "origin": "fhir-golden-bundle-dxa.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -366,6 +687,7 @@
       "origin": "fhir-golden-bundle-ecg.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -399,6 +721,7 @@
       "origin": "fhir-golden-bundle-exercise.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -432,6 +755,7 @@
       "origin": "fhir-golden-bundle-holter.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -465,6 +789,7 @@
       "origin": "fhir-golden-bundle-lactate.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -498,6 +823,7 @@
       "origin": "fhir-golden-bundle-spirometry.json#entry[0]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -531,6 +857,7 @@
       "origin": "fhir-golden-bundle.json#entry[1]",
       "passed": true,
       "issues": [],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
@@ -560,6 +887,49 @@
       }
     },
     {
+      "source": "reference",
+      "origin": "hospital-discharge-report.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Patient",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "Patient",
+        "id": "P1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient",
+            "value": "P1"
+          }
+        ],
+        "name": [
+          {
+            "family": "Schmidt",
+            "given": ["Maria"]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1968-04-02"
+      }
+    },
+    {
       "source": "synthea",
       "origin": "synthea-sample.json#entry[151]",
       "passed": true,
@@ -580,6 +950,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
@@ -809,6 +1180,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "e59c1699-3ab4-5846-5645-f7064766d879",
@@ -1042,6 +1414,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "cfde7264-b159-b733-72c8-c0037a78a58d",
@@ -1271,6 +1644,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "e094d546-0b62-9329-136f-f7802cb72e1b",
@@ -1499,6 +1873,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "1e4b2b15-44f9-24c5-2a7d-437ecef49799",
@@ -1722,6 +2097,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "ead2076d-450a-1248-c27b-f51db7f0282d",
@@ -1945,6 +2321,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "cf170cb1-4eb1-526c-55f1-c4efd67b703a",
@@ -2179,6 +2556,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "c2233b5c-316a-531a-58ec-bbba2582ff7f",
@@ -2408,6 +2786,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "298b7a66-8057-1dda-a0c9-120cfb786652",
@@ -2631,6 +3010,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "2e773555-eecd-ccbe-73ad-3d81f8b0aea0",
@@ -2825,6 +3205,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "e0e52caf-e609-2385-d110-2802ad5a7f82",
@@ -3058,6 +3439,7 @@
           "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#SS)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Patient",
         "id": "50d30173-2788-5c2a-68e4-f1c6b8939cfc",

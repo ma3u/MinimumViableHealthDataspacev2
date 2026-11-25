@@ -238,5 +238,8 @@
   "No errors or warnings": "Geen fouten of waarschuwingen",
   "line {n}": "regel {n}",
   "Ignored by a configured rule": "Genegeerd door een ingestelde regel",
-  "No resources match the filter": "Geen resources voldoen aan het filter"
+  "No resources match the filter": "Geen resources voldoen aan het filter",
+  "Reference example: {passed}/{tested} pass, not counted": "Referentievoorbeeld: {passed}/{tested} geslaagd, niet meegeteld",
+  "A fictional reference example, validated but never counted in coverage": "Een fictief referentievoorbeeld, gevalideerd maar nooit meegeteld in de dekking",
+  "not counted": "niet meegeteld"
 }

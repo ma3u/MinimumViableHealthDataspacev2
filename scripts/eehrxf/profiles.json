@@ -39,6 +39,12 @@
       "data": "Patient Summaries and laboratory reports the hub builds from the graph for its seeded fictional personas.",
       "generatedBy": "ui/scripts/export-fhir-document-samples.ts"
     },
+    "reference": {
+      "label": "Reference examples",
+      "role": "Not hub data, never counted",
+      "data": "Fictional resources written to show what a conforming Practitioner, PractitionerRole, MedicationDispense, ImagingStudy and hospital discharge report look like, for the profiles the hub produces nothing for. They are validated and shown, and stay out of every coverage figure.",
+      "generatedBy": "scripts/eehrxf/reference_examples.py"
+    },
     "facade": {
       "label": "Hub FHIR facade",
       "role": "Hub output",

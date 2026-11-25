@@ -31,6 +31,9 @@ interface EEHRxFProfile {
   passed: number;
   failed: number;
   topIssues: string[];
+  /** Reference examples (scripts/eehrxf/reference_examples.py): shown, never counted. */
+  referenceTested: number;
+  referencePassed: number;
   resourceCount: number;
 }
 
@@ -127,6 +130,8 @@ export async function GET() {
               coalesce(p.passed, 0) AS passed,
               coalesce(p.failed, 0) AS failed,
               coalesce(p.topIssues, []) AS topIssues,
+              coalesce(p.referenceTested, 0) AS referenceTested,
+              coalesce(p.referencePassed, 0) AS referencePassed,
               coalesce(p.resourceCount, 0) AS resourceCount,
               c.categoryId AS categoryId
        ORDER BY c.ehdsGroup, c.categoryId, p.profileId`,

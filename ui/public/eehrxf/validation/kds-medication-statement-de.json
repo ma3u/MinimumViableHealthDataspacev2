@@ -5,10 +5,670 @@
   "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
   "baseResource": "MedicationStatement",
-  "tested": 5,
-  "passed": 0,
-  "warnings": 21,
+  "tested": 16,
+  "passed": 11,
+  "warnings": 43,
   "resources": [
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[10]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "1a553224-d065-8bc5-bc78-5f51f9a283a8",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-R03AC02"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "R03AC02",
+              "display": "Salbutamol 100 mcg inhaler"
+            }
+          ],
+          "text": "Salbutamol 100 mcg inhaler"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2009-02-27"
+        },
+        "reasonCode": [
+          {
+            "text": "Asthma"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "as needed, at most 8 puffs a day"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[11]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "a93e3faf-4c60-8c17-8e42-815ead2c039e",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-C09AA03"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA03",
+              "display": "Lisinopril 10 mg"
+            }
+          ],
+          "text": "Lisinopril 10 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2015-11-02"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[12]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "63598485-ed45-8a63-a873-b91a5803bb95",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-A10BA02"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "A10BA02",
+              "display": "Metformin 500 mg"
+            }
+          ],
+          "text": "Metformin 500 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2018-04-10"
+        },
+        "reasonCode": [
+          {
+            "text": "Diabetes mellitus type 2"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-1"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[13]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "de07231c-26d0-86ad-be96-d5fb28017874",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-C10AA05"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C10AA05",
+              "display": "Atorvastatin 20 mg"
+            }
+          ],
+          "text": "Atorvastatin 20 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2024-09-12"
+        },
+        "reasonCode": [
+          {
+            "text": "LDL cholesterol above target"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "0-0-1"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[10]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "1a553224-d065-8bc5-bc78-5f51f9a283a8",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-R03AC02"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "R03AC02",
+              "display": "Salbutamol 100 mcg inhaler"
+            }
+          ],
+          "text": "Salbutamol 100 mcg inhaler"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2009-02-27"
+        },
+        "reasonCode": [
+          {
+            "text": "Asthma"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "as needed, at most 8 puffs a day"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[11]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "a93e3faf-4c60-8c17-8e42-815ead2c039e",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-C09AA03"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA03",
+              "display": "Lisinopril 10 mg"
+            }
+          ],
+          "text": "Lisinopril 10 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2015-11-02"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[12]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "63598485-ed45-8a63-a873-b91a5803bb95",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-A10BA02"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "A10BA02",
+              "display": "Metformin 500 mg"
+            }
+          ],
+          "text": "Metformin 500 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2018-04-10"
+        },
+        "reasonCode": [
+          {
+            "text": "Diabetes mellitus type 2"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-1"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[13]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "de07231c-26d0-86ad-be96-d5fb28017874",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-p1-C10AA05"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C10AA05",
+              "display": "Atorvastatin 20 mg"
+            }
+          ],
+          "text": "Atorvastatin 20 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "effectivePeriod": {
+          "start": "2024-09-12"
+        },
+        "reasonCode": [
+          {
+            "text": "LDL cholesterol above target"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "0-0-1"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "fhir-pat-1002-patient-summary.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "f4dbcb67-3aad-85fd-a792-2bb584508171",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-1002-C09AA03"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA03",
+              "display": "Lisinopril 10 mg"
+            }
+          ],
+          "text": "Lisinopril 10 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+        },
+        "effectivePeriod": {
+          "start": "2023-10-01"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "fhir-pat-1002-patient-summary.json#entry[5]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "fd6a76fc-9627-871d-8026-f3d2d6348127",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-1002-B01AC06"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "B01AC06",
+              "display": "Acetylsalicylic acid 100 mg"
+            }
+          ],
+          "text": "Acetylsalicylic acid 100 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+        },
+        "effectivePeriod": {
+          "start": "2025-11-18"
+        },
+        "reasonCode": [
+          {
+            "text": "Cardiovascular prevention"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "fhir-pat-1002-patient-summary.json#entry[6]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "6b12a2cc-ac0e-87f6-be2e-c139b40d82b8",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "ms-1002-C07AB07"
+          }
+        ],
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C07AB07",
+              "display": "Bisoprolol 2.5 mg"
+            }
+          ],
+          "text": "Bisoprolol 2.5 mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+        },
+        "effectivePeriod": {
+          "start": "2025-11-18"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0"
+          }
+        ]
+      }
+    },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[19]",
@@ -45,6 +705,7 @@
           "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-p1-A10BA02",
@@ -131,6 +792,7 @@
           "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-p1-C09AA03",
@@ -217,6 +879,7 @@
           "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-1002-B01AC06",
@@ -303,6 +966,7 @@
           "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-1002-C07AB07",
@@ -369,6 +1033,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "sparse-ms-0001",

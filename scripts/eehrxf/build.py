@@ -109,6 +109,9 @@ def model(cfg: dict, report: dict) -> dict:
                 "passed": r["passed"],
                 "failed": r["failed"],
                 "bySource": r["bySource"],
+                # Reference examples: validated and shown, never counted (reference_examples.py).
+                "referenceTested": r["bySource"].get("reference", {}).get("tested", 0),
+                "referencePassed": r["bySource"].get("reference", {}).get("passed", 0),
                 "topIssues": issue_lines(r),
                 "coverage": coverage(r["tested"], r["passed"]),
             }
@@ -210,6 +213,8 @@ def cypher(m: dict) -> str:
             f"    p.passed = {q(p['passed'])},",
             f"    p.failed = {q(p['failed'])},",
             f"    p.topIssues = {q(p['topIssues'])},",
+            f"    p.referenceTested = {q(p['referenceTested'])},",
+            f"    p.referencePassed = {q(p['referencePassed'])},",
             f"    p.coverage = {q(p['coverage'])};",
             "",
         ]
@@ -447,7 +452,13 @@ def viewer_files(cfg: dict, report: dict, details: dict) -> dict[Path, str]:
                 raise SystemExit(f"validation-details.json is stale for {fname}: rerun validate.py")
             r = json.loads(json.dumps(resource))
             r.setdefault("meta", {})["profile"] = [prof["canonical"]]
-            resources.append({**{k: entry[k] for k in ("source", "origin", "passed", "issues")}, "resource": r})
+            resources.append(
+                {
+                    **{k: entry[k] for k in ("source", "origin", "passed", "issues")},
+                    "counted": sid not in validate.UNCOUNTED_SOURCES,
+                    "resource": r,
+                }
+            )
         r = results[pid]
         summary = {
             "profileId": pid,
@@ -590,6 +601,8 @@ def mock(m: dict, previous: dict | None) -> dict:
             "passed": p["passed"],
             "failed": p["failed"],
             "topIssues": p["topIssues"],
+            "referenceTested": p["referenceTested"],
+            "referencePassed": p["referencePassed"],
             "resourceCount": counts.get(p["baseResource"], 0),
         }
 

@@ -5,10 +5,53 @@
   "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
   "baseResource": "Procedure",
-  "tested": 24,
-  "passed": 23,
-  "warnings": 24,
+  "tested": 25,
+  "passed": 24,
+  "warnings": 25,
   "resources": [
+    {
+      "source": "documents",
+      "origin": "patient-2000-patient-summary.json#entry[5]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "0355b8e9-025f-8e04-8bf8-849c49667d01",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "proc-2000-173160006"
+          }
+        ],
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "173160006",
+              "display": "Diabetic Eye Screening"
+            }
+          ],
+          "text": "Diabetic Eye Screening"
+        },
+        "subject": {
+          "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+        },
+        "performedDateTime": "2024-06-20"
+      }
+    },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[55]",
@@ -20,6 +63,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "proc-2000-173160006",
@@ -55,6 +99,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "proc-2008-173160006",
@@ -90,6 +135,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "loader-proc-0001",
@@ -143,6 +189,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "sparse-proc-0001",
@@ -177,6 +224,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "a80697c1-887f-41ab-8e42-2465c815fdef",
@@ -229,6 +277,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "85369cf6-40c3-abbd-466e-58795bab72c8",
@@ -281,6 +330,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "68076ea8-e5ad-2637-dac7-3acc2be73f5f",
@@ -333,6 +383,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "ae684b1a-c306-4454-9960-61d0059a5dae",
@@ -385,6 +436,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "92c9bd9f-77ec-aaa5-dc81-4850b00b4fb8",
@@ -437,6 +489,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "4038c198-0871-9cb0-0c3c-f4d9db7b21db",
@@ -489,6 +542,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "4477e630-7e9a-2657-3ff8-1e027afba478",
@@ -541,6 +595,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "ca43d9e6-3e31-1e99-f06a-5c099b92f2a9",
@@ -593,6 +648,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "8fe535d9-74b2-fe77-f031-86e606b99343",
@@ -645,6 +701,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "f9748562-4071-ee0d-f0d7-3caf59b482f7",
@@ -697,6 +754,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "90d58246-f087-7ff5-b035-1e64c4a2cafd",
@@ -749,6 +807,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "1f59f775-db43-a190-cbf7-0d6452dbc722",
@@ -801,6 +860,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "0f6df6fd-4af7-cb78-8710-00ee632ed5b9",
@@ -853,6 +913,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "a9486b0c-b24a-ca56-7d9c-ddbbc30a85f7",
@@ -905,6 +966,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "84c01f20-cb6b-f5e3-d1d3-8a5b405a29de",
@@ -957,6 +1019,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "cbe1a189-e836-558c-2af7-4ae75b385817",
@@ -1009,6 +1072,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "10837831-386a-8912-b7cf-0e006839fcba",
@@ -1061,6 +1125,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "b01d5119-7f6e-0546-efdd-cd2033d5d69d",
@@ -1113,6 +1178,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "dc3f7d7c-8243-21ad-9759-61dd3fa61ab3",
@@ -1165,6 +1231,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Procedure",
         "id": "be25621b-3574-ab33-c359-15259fe0236c",

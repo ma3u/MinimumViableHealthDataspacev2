@@ -223,6 +223,27 @@ class LabReportFilter(unittest.TestCase):
         self.assertFalse(validate.matches_filter(dr("EC", "11502-2"), "laboratory-report"))
 
 
+class ReferenceExamples(unittest.TestCase):
+    def test_a_reference_example_is_reported_but_never_counted(self):
+        cfg = {"validator": {}}
+        profile = {"profileId": "practitioner-eu-core", "ig": "base", "canonical": "c"}
+        igs = {"base": {"package": "hl7.fhir.eu.base", "version": "2.0.1", "status": "STU 2"}}
+        sources = {"reference": {}, "facade": {}}
+        index = {"a.json": ("practitioner-eu-core", "reference", "x"), "b.json": ("practitioner-eu-core", "facade", "y")}
+        outcomes = {"a.json": [], "b.json": [{"severity": "error", "details": {"text": "boom"}}]}
+        r = validate.profile_results(cfg, igs, [profile], sources, index, outcomes)["practitioner-eu-core"]
+        self.assertEqual((r["tested"], r["passed"], r["failed"]), (1, 0, 1))
+        self.assertEqual(r["bySource"]["reference"], {"tested": 1, "passed": 1})
+
+    def test_the_committed_examples_are_current(self):
+        import subprocess
+
+        rc = subprocess.run(
+            [sys.executable, str(Path(validate.HERE) / "reference_examples.py"), "--check"], capture_output=True
+        ).returncode
+        self.assertEqual(rc, 0, "run python3 scripts/eehrxf/reference_examples.py")
+
+
 class FacadeSource(unittest.TestCase):
     """#1144: what the neo4j-proxy FHIR facade serves is a source of its own."""
 
