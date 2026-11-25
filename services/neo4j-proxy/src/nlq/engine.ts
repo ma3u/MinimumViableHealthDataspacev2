@@ -560,16 +560,19 @@ Layer 3 - FHIR R4 Clinical:
 
 Layer 4 - OMOP CDM Research:
   (:OMOPPerson {personId, yearOfBirth, genderConceptId})
-  (:OMOPConditionOccurrence {conditionOccurrenceId, conditionConceptId, startDate})
+  (:OMOPConditionOccurrence {conditionOccurrenceId, conditionConceptId, conditionSourceValue, startDate})
+    conditionConceptId is the OMOP standard concept id (201826 = type 2 diabetes);
+    conditionSourceValue the SNOMED CT code as a string ('44054006').
   (:OMOPMeasurement {measurementId, measurementConceptId, valueAsNumber, unit})
-  (:OMOPDrugExposure {drugExposureId, drugConceptId, startDate})
+  (:OMOPDrugExposure {drugExposureId, drugConceptId, drugSourceValue, startDate})
+    drugConceptId is the OMOP standard concept id; drugSourceValue the RxCUI as a string.
   (:OMOPProcedureOccurrence {procedureOccurrenceId, procedureConceptId})
 
 Layer 5 - Ontology:
-  (:SnomedConcept {conceptId, display})
+  (:SnomedConcept {conceptId, display, omopConceptId})
   (:LoincCode {loincNumber, display})
   (:ICD10Code {code, display})
-  (:RxNormConcept {rxcui, display})
+  (:RxNormConcept {rxcui, display, omopConceptId})
 
 Key relationships:
   (:Patient)-[:HAS_ENCOUNTER]->(:Encounter)

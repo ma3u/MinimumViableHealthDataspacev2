@@ -158,37 +158,42 @@ ICD10 = [
     ("E66.01","Morbid Obesity, BMI ≥40"),
 ]
 
+# Every RxCUI checked with RxNav (rxnav.nlm.nih.gov/REST/rxcui/<id>/properties)
+# on 2026-11-24 (#1167): its name is the drug next to it. 27 of 30 used to name
+# another drug (316672 is simvastatin, 197884 lisinopril 40 mg, 1861634 and
+# 1245689 do not exist); a graph seeded before is corrected by
+# neo4j/migrate-rxnorm-codes.cypher. 860975 is the extended-release tablet.
 RXNORM = [
     (860975,  "Metformin 500 mg Oral Tab"),
-    (316672,  "Lisinopril 10 mg Oral Tab"),
+    (314076,  "Lisinopril 10 mg Oral Tab"),
     (197361,  "Amlodipine 5 mg Oral Tab"),
-    (259255,  "Atorvastatin 20 mg Oral Tab"),
-    (198211,  "Omeprazole 20 mg Oral Cap"),
-    (310798,  "Metoprolol Succinate 50 mg Tab"),
-    (1861634, "Empagliflozin 10 mg Oral Tab"),
-    (1598339, "Dapagliflozin 10 mg Oral Tab"),
-    (213169,  "Rosuvastatin 10 mg Tab"),
-    (352272,  "Clopidogrel 75 mg Tab"),
+    (617310,  "Atorvastatin 20 mg Oral Tab"),
+    (198051,  "Omeprazole 20 mg Oral Cap"),
+    (866436,  "Metoprolol Succinate 50 mg Tab"),
+    (1545658, "Empagliflozin 10 mg Oral Tab"),
+    (1488569, "Dapagliflozin 10 mg Oral Tab"),
+    (859747,  "Rosuvastatin 10 mg Tab"),
+    (309362,  "Clopidogrel 75 mg Tab"),
     (855332,  "Warfarin 5 mg Oral Tab"),
-    (1049630, "Apixaban 5 mg Oral Tab"),
-    (197381,  "Levothyroxine 50 mcg Tab"),
-    (312938,  "Sertraline 50 mg Oral Tab"),
-    (197591,  "Furosemide 40 mg Oral Tab"),
-    (197770,  "Hydrochlorothiazide 25 mg Tab"),
-    (198405,  "Prednisone 10 mg Oral Tab"),
-    (311671,  "Gabapentin 300 mg Oral Cap"),
-    (198240,  "Pantoprazole 40 mg Tab"),
-    (197696,  "Glipizide 5 mg Oral Tab"),
-    (197884,  "Insulin Glargine 100 U/mL"),
-    (261222,  "Semaglutide 0.5 mg Inj"),
-    (1546356, "Tirzepatide 5 mg Inj"),
-    (198013,  "Losartan 50 mg Tab"),
-    (308136,  "Simvastatin 20 mg Tab"),
-    (562251,  "Ramipril 5 mg Cap"),
-    (197807,  "Ibuprofen 400 mg Tab"),
-    (310429,  "Acetaminophen 500 mg Tab"),
-    (897122,  "Salbutamol 100 mcg Inhaler"),
-    (1245689, "Budesonide/Formoterol Inhaler"),
+    (1364445, "Apixaban 5 mg Oral Tab"),
+    (966221,  "Levothyroxine 50 mcg Tab"),
+    (312941,  "Sertraline 50 mg Oral Tab"),
+    (313988,  "Furosemide 40 mg Oral Tab"),
+    (310798,  "Hydrochlorothiazide 25 mg Tab"),
+    (198145,  "Prednisone 10 mg Oral Tab"),
+    (310431,  "Gabapentin 300 mg Oral Cap"),
+    (314200,  "Pantoprazole 40 mg Tab"),
+    (310490,  "Glipizide 5 mg Oral Tab"),
+    (311041,  "Insulin Glargine 100 U/mL"),
+    (2553601, "Semaglutide 0.5 mg Inj"),
+    (2601743, "Tirzepatide 5 mg Inj"),
+    (979492,  "Losartan 50 mg Tab"),
+    (312961,  "Simvastatin 20 mg Tab"),
+    (198189,  "Ramipril 5 mg Cap"),
+    (197805,  "Ibuprofen 400 mg Tab"),
+    (198440,  "Acetaminophen 500 mg Tab"),
+    (2123111, "Salbutamol 100 mcg Inhaler"),
+    (1246304, "Budesonide/Formoterol Inhaler"),
 ]
 
 # Procedures (SNOMED procedure codes)
@@ -250,27 +255,27 @@ LAST_NAMES = [
 # ── Condition-to-ontology mapping ───────────────────────────────────────────
 # Each condition profile: (name, snomed_id, icd10, common_loinc_tests, common_rx)
 CONDITION_PROFILES = [
-    ("Type 2 Diabetes", 44054006, "E11", ["4548-4","2345-7","33914-3","2160-0"], [860975,1861634,197696,197884]),
-    ("Essential Hypertension", 38341003, "I10", ["8480-6","8462-4","2160-0","2823-3"], [316672,197361,198013,197770]),
-    ("Asthma", 195967001, "J45.20", ["71426-1","6690-2","718-7"], [897122,1245689]),
-    ("COPD", 13645005, "J44.1", ["2744-1","71426-1","718-7","2028-9"], [897122,1245689,198405]),
-    ("Heart Failure", 84114007, "I50.9", ["33762-6","2093-3","2823-3","2951-2"], [197591,310798,1049630]),
-    ("CKD Stage 3", 433144002, "N18.3", ["2160-0","33914-3","14959-1","2823-3"], [316672,197361]),
-    ("Atrial Fibrillation", 49436004, "I48.91", ["33762-6","5902-2","48065-7"], [855332,1049630,310798]),
-    ("Hypothyroidism", 40930008, "E03.9", ["3016-3","3026-2","2093-3"], [197381]),
-    ("Depression", 35489007, "F32.1", ["3016-3","718-7","2276-4"], [312938]),
-    ("Anxiety Disorder", 197480006, "F41.1", ["3016-3","718-7"], [312938]),
+    ("Type 2 Diabetes", 44054006, "E11", ["4548-4","2345-7","33914-3","2160-0"], [860975,1545658,310490,311041]),
+    ("Essential Hypertension", 38341003, "I10", ["8480-6","8462-4","2160-0","2823-3"], [314076,197361,979492,310798]),
+    ("Asthma", 195967001, "J45.20", ["71426-1","6690-2","718-7"], [2123111,1246304]),
+    ("COPD", 13645005, "J44.1", ["2744-1","71426-1","718-7","2028-9"], [2123111,1246304,198145]),
+    ("Heart Failure", 84114007, "I50.9", ["33762-6","2093-3","2823-3","2951-2"], [313988,866436,1364445]),
+    ("CKD Stage 3", 433144002, "N18.3", ["2160-0","33914-3","14959-1","2823-3"], [314076,197361]),
+    ("Atrial Fibrillation", 49436004, "I48.91", ["33762-6","5902-2","48065-7"], [855332,1364445,866436]),
+    ("Hypothyroidism", 40930008, "E03.9", ["3016-3","3026-2","2093-3"], [966221]),
+    ("Depression", 35489007, "F32.1", ["3016-3","718-7","2276-4"], [312941]),
+    ("Anxiety Disorder", 197480006, "F41.1", ["3016-3","718-7"], [312941]),
     ("Iron Deficiency Anaemia", 87522002, "D50.9", ["718-7","4544-3","2276-4"], []),
-    ("Osteoarthritis", 396275006, "M17.11", ["30341-2","71426-1"], [197807,311671]),
-    ("Ischemic Heart Disease", 414545008, "I25.10", ["2093-3","2571-8","2085-9","13457-7"], [259255,352272,310798]),
-    ("Hyperlipidaemia", 55822004, "E78.5", ["2093-3","2571-8","2085-9","13457-7"], [259255,213169,308136]),
-    ("Obesity", 414916001, "E66.01", ["39156-5","4548-4","2093-3","2571-8"], [860975,261222,1546356]),
+    ("Osteoarthritis", 396275006, "M17.11", ["30341-2","71426-1"], [197805,310431]),
+    ("Ischemic Heart Disease", 414545008, "I25.10", ["2093-3","2571-8","2085-9","13457-7"], [617310,309362,866436]),
+    ("Hyperlipidaemia", 55822004, "E78.5", ["2093-3","2571-8","2085-9","13457-7"], [617310,859747,312961]),
+    ("Obesity", 414916001, "E66.01", ["39156-5","4548-4","2093-3","2571-8"], [860975,2553601,2601743]),
     ("Prostate Cancer", 399068003, "C61", ["14937-7","718-7","1751-7","71426-1"], []),
     ("Breast Cancer", 254837009, "C50.911", ["718-7","777-3","6690-2","71426-1"], []),
     ("Colon Cancer", 93761005, "C18.9", ["718-7","777-3","48065-7","1751-7"], []),
-    ("Rheumatoid Arthritis", 69896004, "M05.79", ["71426-1","30341-2","6690-2"], [198405,197807]),
+    ("Rheumatoid Arthritis", 69896004, "M05.79", ["71426-1","30341-2","6690-2"], [198145,197805]),
     ("Hepatitis C", 50711007, "B18.2", ["1742-6","1920-8","1975-2","777-3"], []),
-    ("Crohn Disease", 34000006, "K50.90", ["71426-1","718-7","1751-7","30341-2"], [198405]),
+    ("Crohn Disease", 34000006, "K50.90", ["71426-1","718-7","1751-7","30341-2"], [198145]),
 ]
 
 # ── Dataset specifications ──────────────────────────────────────────────────
@@ -522,12 +527,15 @@ for i in range(NUM_PATIENTS):
             MERGE (c)-[:CODED_BY]->(s)
         """)
 
-        # OMOP Condition Occurrence
+        # OMOP Condition Occurrence. The SNOMED code is the source value; the
+        # standard concept id is set by neo4j/seed-omop-concept-ids.cypher, as
+        # for the rows neo4j/fhir-to-omop-transform.cypher writes (#1167).
         emit(f"""
             MERGE (co:OMOPConditionOccurrence {{conditionOccurrenceId: {cdm_id('Condition/' + cond_id)}}})
             SET co.name = 'OMOP {esc(cond_name)}',
                 co.personId = {pid},
-                co.conditionConceptId = {snomed_id},
+                co.conditionSourceValue = '{snomed_id}',
+                co.conditionConceptId = 0,
                 co.conditionStartDate = '{onset_year}-01-01'
             WITH co
             MATCH (op:OMOPPerson {{personId: {pid}}})
@@ -603,12 +611,14 @@ for i in range(NUM_PATIENTS):
                     MERGE (mr)-[:CODED_BY]->(r)
                 """)
 
-                # OMOP Drug Exposure
+                # OMOP Drug Exposure: the RxCUI as source value, the concept id
+                # from neo4j/seed-omop-concept-ids.cypher (#1167).
                 emit(f"""
                     MERGE (de:OMOPDrugExposure {{drugExposureId: {cdm_id('MedicationRequest/' + rx_id)}}})
                     SET de.name = 'OMOP {esc(rx_name)}',
                         de.personId = {pid},
-                        de.drugConceptId = {rxcui}
+                        de.drugSourceValue = '{rxcui}',
+                        de.drugConceptId = 0
                     WITH de
                     MATCH (op:OMOPPerson {{personId: {pid}}})
                     MATCH (mr:MedicationRequest {{id: '{rx_id}'}})

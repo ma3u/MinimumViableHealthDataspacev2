@@ -463,7 +463,7 @@ MERGE (ov5:OMOPVisitOccurrence {visitOccurrenceId: 88005})
 MERGE (op5)-[:HAS_VISIT_OCCURRENCE]->(ov5)
 MERGE (enc5)-[:MAPPED_TO]->(ov5)
 MERGE (oc5:OMOPConditionOccurrence {conditionOccurrenceId: 77005})
-  SET oc5.name = 'CKD Stage 3 (OMOP)', oc5.conditionConceptId = 443611
+  SET oc5.name = 'CKD Stage 3 (OMOP)', oc5.conditionConceptId = 443597
 MERGE (op5)-[:HAS_CONDITION_OCCURRENCE]->(oc5)
 MERGE (oc5)-[:STANDARD_CONCEPT]->(scCKD)
 MERGE (cond5)-[:MAPPED_TO]->(oc5)
@@ -558,7 +558,7 @@ MERGE (op7)-[:HAS_CONDITION_OCCURRENCE]->(oc7a)
 MERGE (oc7a)-[:STANDARD_CONCEPT]->(scHTN)
 MERGE (cond7a)-[:MAPPED_TO]->(oc7a)
 MERGE (oc7b:OMOPConditionOccurrence {conditionOccurrenceId: 77107})
-  SET oc7b.name = 'CKD Stage 3 (OMOP)', oc7b.conditionConceptId = 443611
+  SET oc7b.name = 'CKD Stage 3 (OMOP)', oc7b.conditionConceptId = 443597
 MERGE (op7)-[:HAS_CONDITION_OCCURRENCE]->(oc7b)
 MERGE (oc7b)-[:STANDARD_CONCEPT]->(scCKD)
 MERGE (cond7b)-[:MAPPED_TO]->(oc7b)
