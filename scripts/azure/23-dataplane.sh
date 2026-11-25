@@ -115,15 +115,18 @@ RULES=(
 TAG="${DATAPLANE_TAG:-$("$SCRIPT_DIR/push-edc1-images.sh" tag)}"
 IMAGE="${ACR_LOGIN_SERVER}/mvhd-edc-dataplane:${TAG}"
 
-# How the control plane and the proxy reach the data plane: the short app
-# name, HTTP, port 80 to 8090 (the ingress allows plain HTTP for it).
-PUBLIC_URL="http://${APP}"
+# How the control plane, the proxy and the UI reach the data plane: its
+# internal HTTPS address. The tenant's policy denies allowInsecure on an
+# ingress, and plain HTTP would be redirected, which turns a POST into a GET.
+# azure_values fills in the environment's domain.
+PUBLIC_URL="https://${APP}.internal.<aca-domain>"
 
 # ── values ──────────────────────────────────────────────────────────────────
 # The addresses the definition needs, from what runs in the environment now.
 azure_values() {
   eval "$(get_aca_fqdns)"
   [ -n "${ACA_DOMAIN:-}" ] || { err "no Container Apps environment ${ACA_ENV} in ${RG}"; exit 1; }
+  PUBLIC_URL="https://${APP}.internal.${ACA_DOMAIN}"
   ENV_ID="$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" --query id -o tsv)"
   KV_URI="$(dp_kv_uri)"
   KV_READER_ID="$(az identity show --name "$KV_READER_IDENTITY" --resource-group "$RG" --query id -o tsv)"

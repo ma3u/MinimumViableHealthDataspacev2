@@ -3,9 +3,10 @@
 # Rendered by scripts/azure/23-dataplane.sh; the $${NAME} placeholders are filled there.
 # One replica: SPE inboxes and Kafka flows are held in memory
 # (docs/knowledge/services/dataplane.md).
-# allowInsecure: the control plane POSTs its signals to http://mvhd-dataplane
-# inside the environment, and a redirect to HTTPS would turn a POST into a GET
-# (as for mvhd-matchbox, 22-matchbox.sh).
+# allowInsecure is false: the tenant's policy "Container Apps should only be
+# accessible over HTTPS" denies true. Everything inside the environment calls
+# https://mvhd-dataplane.internal.<domain> (PUBLIC_URL), never plain HTTP,
+# whose redirect would turn a POST into a GET.
 # Every secret but the registry password is a Key Vault reference read through
 # the identity below (ADR-036), so no value passes through the definition.
 # $$ConnectionString is a literal dollar sign for the renderer: the SASL user
@@ -26,7 +27,7 @@ properties:
       external: false
       targetPort: 8090
       transport: http
-      allowInsecure: true
+      allowInsecure: false
     registries:
       - server: ${ACR_LOGIN_SERVER}
         username: ${ACR_NAME}
