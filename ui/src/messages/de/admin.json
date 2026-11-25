@@ -984,5 +984,9 @@
   "The key broker did not hand out the key, so the workspace cannot read its data.": "Der Schlüsseldienst hat den Schlüssel nicht herausgegeben, daher kann der Arbeitsbereich seine Daten nicht lesen.",
   "Attestation light: {meaning}": "Attestierungsampel: {meaning}",
   "{id} checks": "Prüfungen von {id}",
-  "More about attestation": "Mehr über Attestierung"
+  "More about attestation": "Mehr über Attestierung",
+  "To connect a wallet, sign in with your account first. You connect it on the next page.": "Um eine Wallet zu verbinden, melden Sie sich zuerst mit Ihrem Konto an. Verbunden wird sie auf der nächsten Seite.",
+  "Sign in with your account": "Mit Ihrem Konto anmelden",
+  "Already have an account?": "Sie haben schon ein Konto?",
+  "Sign in with your password, then connect your wallet.": "Melden Sie sich mit Ihrem Passwort an und verbinden Sie dann Ihre Wallet."
 }

@@ -18,3 +18,24 @@ export const CITIZEN_WALLET = {
   /** the honest footnote: we accept every certified wallet, not only this one */
   alternatives: "or any other certified EUDI wallet",
 } as const;
+
+/** The page where a signed-in person connects their wallet to the account (#708). */
+export const WALLET_LINK_PATH = "/patient/wallet";
+
+/**
+ * Whether a sign-in is on its way to connecting a wallet. Connecting needs the
+ * account first, so the sign-in pages point to the password sign-in instead
+ * of the wallet's own, which only opens a record already linked (#708).
+ */
+export function connectsWallet(
+  callbackUrl: string | null | undefined,
+): boolean {
+  if (!callbackUrl) return false;
+  let path = callbackUrl;
+  try {
+    path = new URL(callbackUrl, "http://hub.local").pathname;
+  } catch {
+    /* not a URL: compare it as it is */
+  }
+  return path === WALLET_LINK_PATH || path.startsWith(`${WALLET_LINK_PATH}/`);
+}

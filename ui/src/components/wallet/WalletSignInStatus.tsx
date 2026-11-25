@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import {
   RefreshCw,
   CheckCircle2,
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import { EudiQrPanel } from "@/components/wallet/EudiQrPanel";
 import { BASE_PATH } from "@/lib/static-export";
-import { CITIZEN_WALLET } from "@/lib/wallet-config";
+import { CITIZEN_WALLET, WALLET_LINK_PATH } from "@/lib/wallet-config";
 import type { WalletSignIn } from "@/lib/use-wallet-sign-in";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -164,6 +165,21 @@ export function WalletSignInStatus({ flow }: { flow: WalletSignIn }) {
                 ? t("Creating your account…")
                 : t("Create an account with this PID")}
             </button>
+            <p
+              data-testid="wallet-link-existing-account"
+              className="text-xs text-(--text-secondary) mt-3"
+            >
+              {t("Already have an account?")}{" "}
+              <button
+                type="button"
+                onClick={() =>
+                  void signIn("keycloak", { callbackUrl: WALLET_LINK_PATH })
+                }
+                className="text-(--accent) underline"
+              >
+                {t("Sign in with your password, then connect your wallet.")}
+              </button>
+            </p>
             {registerError && (
               <p
                 role="alert"

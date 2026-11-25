@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { CITIZEN_WALLET } from "@/lib/wallet-config";
+import { CITIZEN_WALLET, connectsWallet } from "@/lib/wallet-config";
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -38,6 +38,7 @@ function SignInContent() {
   const error = searchParams.get("error");
   const t = useT("signin");
   const tc = useT("common");
+  const linkingWallet = connectsWallet(callbackUrl);
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-8 py-10 px-4">
@@ -64,6 +65,18 @@ function SignInContent() {
           <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-sm p-3 mb-4 text-sm text-red-800 dark:text-red-300">
             {oauthErrorMessage(error, t)}
           </div>
+        )}
+
+        {linkingWallet && (
+          <p
+            role="note"
+            data-testid="wallet-link-hint"
+            className="bg-(--accent)/10 border border-(--accent)/30 rounded-sm p-3 mb-4 text-sm text-(--text-primary)"
+          >
+            {t(
+              "To connect a wallet, sign in with your account first. You connect it on the next page.",
+            )}
+          </p>
         )}
 
         <button

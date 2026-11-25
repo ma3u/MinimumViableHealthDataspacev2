@@ -984,5 +984,9 @@
   "The key broker did not hand out the key, so the workspace cannot read its data.": "El servicio de claves no entregó la clave, así que el espacio de trabajo no puede leer sus datos.",
   "Attestation light: {meaning}": "Semáforo de atestación: {meaning}",
   "{id} checks": "Comprobaciones de {id}",
-  "More about attestation": "Más sobre la atestación"
+  "More about attestation": "Más sobre la atestación",
+  "To connect a wallet, sign in with your account first. You connect it on the next page.": "Para conectar una cartera, inicie sesión primero con su cuenta. La conecta en la página siguiente.",
+  "Sign in with your account": "Iniciar sesión con su cuenta",
+  "Already have an account?": "¿Ya tiene una cuenta?",
+  "Sign in with your password, then connect your wallet.": "Inicie sesión con su contraseña y luego conecte su cartera."
 }

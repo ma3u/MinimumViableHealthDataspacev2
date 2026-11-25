@@ -984,5 +984,9 @@
   "The key broker did not hand out the key, so the workspace cannot read its data.": "The key broker did not hand out the key, so the workspace cannot read its data.",
   "Attestation light: {meaning}": "Attestation light: {meaning}",
   "{id} checks": "{id} checks",
-  "More about attestation": "More about attestation"
+  "More about attestation": "More about attestation",
+  "To connect a wallet, sign in with your account first. You connect it on the next page.": "To connect a wallet, sign in with your account first. You connect it on the next page.",
+  "Sign in with your account": "Sign in with your account",
+  "Already have an account?": "Already have an account?",
+  "Sign in with your password, then connect your wallet.": "Sign in with your password, then connect your wallet."
 }

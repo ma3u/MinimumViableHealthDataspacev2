@@ -984,5 +984,9 @@
   "The key broker did not hand out the key, so the workspace cannot read its data.": "De sleuteldienst heeft de sleutel niet vrijgegeven, dus de werkomgeving kan haar gegevens niet lezen.",
   "Attestation light: {meaning}": "Attestatielicht: {meaning}",
   "{id} checks": "Controles van {id}",
-  "More about attestation": "Meer over attestatie"
+  "More about attestation": "Meer over attestatie",
+  "To connect a wallet, sign in with your account first. You connect it on the next page.": "Om een wallet te koppelen, meldt u zich eerst aan met uw account. U koppelt hem op de volgende pagina.",
+  "Sign in with your account": "Aanmelden met uw account",
+  "Already have an account?": "Heeft u al een account?",
+  "Sign in with your password, then connect your wallet.": "Meld u aan met uw wachtwoord en koppel daarna uw wallet."
 }
