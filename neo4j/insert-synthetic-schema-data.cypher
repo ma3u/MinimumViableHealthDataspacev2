@@ -13,12 +13,12 @@
 // LAYER 5: CLINICAL ONTOLOGY BACKBONE
 // ==============================================================================
 // SNOMED CT Concepts
-MERGE (scDM:SnomedConcept {conceptId: 44054006})
+MERGE (scDM:SnomedConcept {conceptId: '44054006'})
   SET scDM.name = 'Type 2 Diabetes (SNOMED)',
       scDM.fsn = 'Diabetes mellitus type 2 (disorder)',
       scDM.preferredTerm = 'Type 2 diabetes',
       scDM.active = true
-MERGE (scDisease:SnomedConcept {conceptId: 64572001})
+MERGE (scDisease:SnomedConcept {conceptId: '64572001'})
   SET scDisease.name = 'Disease (SNOMED)',
       scDisease.fsn = 'Disease (disorder)',
       scDisease.preferredTerm = 'Disease',
@@ -255,27 +255,27 @@ MERGE (medReq)-[:MAPPED_TO]->(omopDrug)
 // ==============================================================================
 
 // ── Re-bind existing ontology nodes from first statement ──
-MERGE (scDisease:SnomedConcept {conceptId: 64572001})
-MERGE (scDM:SnomedConcept {conceptId: 44054006})
+MERGE (scDisease:SnomedConcept {conceptId: '64572001'})
+MERGE (scDM:SnomedConcept {conceptId: '44054006'})
 MERGE (icdDM:ICD10Code {code: 'E11.9'})
 MERGE (loincHbA1c:LoincCode {loincNumber: '4548-4'})
 MERGE (rxMetformin:RxNormConcept {rxcui: '860975'})
 MERGE (ds:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
 
 // ── Additional Ontology Backbone ──
-MERGE (scHTN:SnomedConcept {conceptId: 38341003})
+MERGE (scHTN:SnomedConcept {conceptId: '38341003'})
   SET scHTN.name = 'Hypertension (SNOMED)',
       scHTN.fsn = 'Hypertensive disorder (disorder)',
       scHTN.active = true
 MERGE (scHTN)-[:IS_A]->(scDisease)
 
-MERGE (scAsthma:SnomedConcept {conceptId: 195967001})
+MERGE (scAsthma:SnomedConcept {conceptId: '195967001'})
   SET scAsthma.name = 'Asthma (SNOMED)',
       scAsthma.fsn = 'Asthma (disorder)',
       scAsthma.active = true
 MERGE (scAsthma)-[:IS_A]->(scDisease)
 
-MERGE (scCKD:SnomedConcept {conceptId: 433144002})
+MERGE (scCKD:SnomedConcept {conceptId: '433144002'})
   SET scCKD.name = 'CKD Stage 3 (SNOMED)',
       scCKD.fsn = 'Chronic kidney disease stage 3 (disorder)',
       scCKD.active = true

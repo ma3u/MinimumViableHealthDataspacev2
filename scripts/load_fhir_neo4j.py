@@ -84,12 +84,12 @@ LINK_CONDITIONS_SNOMED = """
 UNWIND $rows AS row
 MATCH (c:Condition {id: row.id})
 OPTIONAL MATCH (known:SnomedConcept)
-  WHERE known.conceptId IN [row.code, toInteger(row.code)]
+  WHERE known.conceptId = toString(row.code)
 WITH c, row, head(collect(known)) AS known
 FOREACH (k IN CASE WHEN known IS NULL THEN [] ELSE [known] END |
   MERGE (c)-[:CODED_BY]->(k))
 FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
-  MERGE (s:SnomedConcept {conceptId: row.code})
+  MERGE (s:SnomedConcept {conceptId: toString(row.code)})
     ON CREATE SET s.code = row.code, s.name = row.display,
                   s.description = row.display
     ON MATCH SET s.code = coalesce(s.code, row.code)
@@ -143,12 +143,12 @@ LINK_MEDICATIONS_RXNORM = """
 UNWIND $rows AS row
 MATCH (m:MedicationRequest {id: row.id})
 OPTIONAL MATCH (known:RxNormConcept)
-  WHERE known.rxcui IN [row.code, toInteger(row.code)]
+  WHERE known.rxcui = toString(row.code)
 WITH m, row, head(collect(known)) AS known
 FOREACH (k IN CASE WHEN known IS NULL THEN [] ELSE [known] END |
   MERGE (m)-[:CODED_BY]->(k))
 FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
-  MERGE (r:RxNormConcept {rxcui: row.code})
+  MERGE (r:RxNormConcept {rxcui: toString(row.code)})
     ON CREATE SET r.code = row.code, r.name = row.display,
                   r.description = row.display
     ON MATCH SET r.code = coalesce(r.code, row.code)
@@ -175,12 +175,12 @@ LINK_PROCEDURES_SNOMED = """
 UNWIND $rows AS row
 MATCH (pr:Procedure {id: row.id})
 OPTIONAL MATCH (known:SnomedConcept)
-  WHERE known.conceptId IN [row.code, toInteger(row.code)]
+  WHERE known.conceptId = toString(row.code)
 WITH pr, row, head(collect(known)) AS known
 FOREACH (k IN CASE WHEN known IS NULL THEN [] ELSE [known] END |
   MERGE (pr)-[:CODED_BY]->(k))
 FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
-  MERGE (s:SnomedConcept {conceptId: row.code})
+  MERGE (s:SnomedConcept {conceptId: toString(row.code)})
     ON CREATE SET s.code = row.code, s.name = row.display,
                   s.description = row.display
     ON MATCH SET s.code = coalesce(s.code, row.code)
