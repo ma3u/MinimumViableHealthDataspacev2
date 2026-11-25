@@ -119,6 +119,12 @@ CREATE CONSTRAINT snomed_concept_id IF NOT EXISTS FOR (sc:SnomedConcept) REQUIRE
 CREATE CONSTRAINT loinc_code IF NOT EXISTS FOR (lc:LoincCode) REQUIRE lc.loincNumber IS UNIQUE;
 CREATE CONSTRAINT icd10_code IF NOT EXISTS FOR (icd:ICD10Code) REQUIRE icd.code IS UNIQUE;
 CREATE CONSTRAINT rxnorm_rxcui IF NOT EXISTS FOR (rx:RxNormConcept) REQUIRE rx.rxcui IS UNIQUE;
+// NeDRex (REPO4EU) disorders, drugs and the release they come from: the subset
+// scripts/nedrex/import_nedrex.py writes to neo4j/seed-nedrex.cypher (#1167).
+CREATE CONSTRAINT nedrex_release_version IF NOT EXISTS FOR (nr:NeDRexRelease) REQUIRE nr.version IS UNIQUE;
+CREATE CONSTRAINT nedrex_disorder_id IF NOT EXISTS FOR (nd:NeDRexDisorder) REQUIRE nd.nedrexId IS UNIQUE;
+CREATE INDEX nedrex_disorder_mondo IF NOT EXISTS FOR (nd:NeDRexDisorder) ON (nd.mondoId);
+CREATE CONSTRAINT nedrex_drug_id IF NOT EXISTS FOR (ndr:NeDRexDrug) REQUIRE ndr.nedrexId IS UNIQUE;
 
 // ============================================================
 // Layer 1b: Verifiable Credentials (DCP v1.0 + EHDS)

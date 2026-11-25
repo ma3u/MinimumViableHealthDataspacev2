@@ -97,6 +97,14 @@ jobs:
           set -euo pipefail
           python3 -m unittest scripts/test_load_fhir_neo4j.py -v
 
+      # The NeDRex importer's matching (SNOMED CT xref, then the ICD-10
+      # route) and the committed seed it generated (#1167). No download:
+      # the tests build a small invented dump.
+      - name: NeDRex importer
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts/nedrex -p "test_*.py" -v
+
       # The persona-organised API collection must cover every route and every
       # request must be able to fail (ADR-032, ADR-031).
       - name: API collection covers every route

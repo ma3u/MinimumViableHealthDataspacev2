@@ -1253,6 +1253,51 @@ CREATE CONSTRAINT rxnorm_rxcui IF NOT EXISTS FOR (rx:RxNormConcept) REQUIRE rx.r
 
 ---
 
+#### `NeDRexRelease`, `NeDRexDisorder`, `NeDRexDrug` (#1167)
+
+The subset of the NeDRex drug repurposing graph the hub's conditions reach:
+the REPO4EU open dump of NeDRex 2.2.13
+([doi:10.5281/zenodo.23940639](https://doi.org/10.5281/zenodo.23940639),
+CC BY 4.0). `scripts/nedrex/import_nedrex.py` reads the downloaded dump (never
+committed, checksums pinned) and writes `neo4j/seed-nedrex.cypher`: the MONDO
+disorder each hub SNOMED CT code maps to, every MONDO ancestor of those, and
+the drugs indicated for a matched disorder. `neo4j/seed.sh` loads it after the
+terminology seeds.
+
+**`NeDRexRelease`**: one node per release, the attribution the licence asks for:
+
+- `version: String!`: `2.2.13`
+- `title`, `doi`, `url`, `licence` (`CC-BY-4.0`), `licenceUrl`, `publisher`, `attribution: String`
+- `sourceVersions: [String]`: the version of each source database, from the dump's metadata
+
+**`NeDRexDisorder`**: a MONDO disorder as NeDRex holds it:
+
+- `nedrexId: String!`: the NeDRex id, `mondo.0008383`
+- `mondoId: String`: the CURIE, `MONDO:0008383`
+- `name`, `description: String`: MONDO's label and definition
+- `icd10: [String]`, `snomedCodes: [String]`: the disorder's cross-references
+- `hubMatch: Boolean`: true when a hub SNOMED CT code maps to it, false for an ancestor
+- `nedrexRelease: String`: `2.2.13`
+
+**`NeDRexDrug`**: a drug with an indication for a matched disorder:
+
+- `nedrexId: String!`: the NeDRex id, still a DrugBank id: `drugbank.DB00051`
+- `drugbankId: String`: `DB00051`
+- `name: String`, `casNumber: String`, `drugGroups: [String]`
+- `drugCentralIds: [String]`: DrugCentral ids where NeDRex has one; no RxNorm or ATC code
+- `nedrexRelease: String`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT nedrex_release_version IF NOT EXISTS FOR (nr:NeDRexRelease) REQUIRE nr.version IS UNIQUE;
+CREATE CONSTRAINT nedrex_disorder_id IF NOT EXISTS FOR (nd:NeDRexDisorder) REQUIRE nd.nedrexId IS UNIQUE;
+CREATE INDEX nedrex_disorder_mondo IF NOT EXISTS FOR (nd:NeDRexDisorder) ON (nd.mondoId);
+CREATE CONSTRAINT nedrex_drug_id IF NOT EXISTS FOR (ndr:NeDRexDrug) REQUIRE ndr.nedrexId IS UNIQUE;
+```
+
+---
+
 ### 6.2 Ontology Relationships
 
 #### SNOMED CT Hierarchy
@@ -1278,6 +1323,18 @@ CREATE CONSTRAINT rxnorm_rxcui IF NOT EXISTS FOR (rx:RxNormConcept) REQUIRE rx.r
 (:RxNormConcept)-[:HAS_DOSE_FORM]->(:RxNormConcept)
 ```
 
+#### NeDRex Disorders and Indications (#1167)
+
+```cypher
+(:NeDRexDisorder)-[:SUBTYPE_OF {nedrexRelease}]->(:NeDRexDisorder)   // MONDO hierarchy
+(:NeDRexDrug)-[:INDICATED_FOR {sources, drugCentral, nedrexRelease}]->(:NeDRexDisorder)
+```
+
+`sources` lists where NeDRex has the indication from: `drugcentral` (approved
+use) or `ctd` (curated from the literature, mostly hypotheses), or both;
+`drugCentral` is true when DrugCentral is among them. A cohort definition
+should start from the DrugCentral ones.
+
 ---
 
 ### 6.3 Clinical Data → Ontology Relationships
@@ -1294,6 +1351,23 @@ CREATE CONSTRAINT rxnorm_rxcui IF NOT EXISTS FOR (rx:RxNormConcept) REQUIRE rx.r
 (:OMOPConditionOccurrence)-[:STANDARD_CONCEPT]->(:SnomedConcept)
 (:OMOPMeasurement)-[:STANDARD_CONCEPT]->(:LoincCode)
 (:OMOPDrugExposure)-[:STANDARD_CONCEPT]->(:RxNormConcept)
+
+(:SnomedConcept)-[:MAPS_TO_DISORDER {route, via, nedrexRelease}]->(:NeDRexDisorder)
+```
+
+`route` is `snomedct` when the disorder carries the SNOMED CT code as a
+cross-reference (`via: 'snomedct.69896004'`), `icd10` when the code has none and
+the ICD-10 code the hub pairs it with led there (`via: 'J45'`). A Condition
+reaches its disorder through `CODED_BY`. A disease module cohort walks the MONDO
+hierarchy down from its root:
+
+```cypher
+MATCH (root:NeDRexDisorder {nedrexId: 'mondo.0008383'})
+MATCH (d:NeDRexDisorder)-[:SUBTYPE_OF*0..]->(root)
+MATCH (s:SnomedConcept)-[:MAPS_TO_DISORDER]->(d)
+MATCH (op:OMOPPerson)-[:HAS_CONDITION_OCCURRENCE]->(oco:OMOPConditionOccurrence)
+WHERE oco.conditionSourceValue = s.conceptId
+RETURN count(DISTINCT op) AS persons, collect(DISTINCT oco.conditionConceptId) AS conceptIds
 ```
 
 ---

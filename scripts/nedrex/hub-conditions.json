@@ -1,0 +1,65 @@
+{
+  "description": "The SNOMED CT codes on the hub's Condition nodes, with the ICD-10 codes the graph pairs them with ((:SnomedConcept)-[:STANDARD_CONCEPT]->(:ICD10Code) and (:Condition)-[:CODED_BY]->(:ICD10Code)). Read from the local graph on 2026-11-25 with the query below; scripts/nedrex/import_nedrex.py matches each code to a NeDRex disorder (#1167).",
+  "query": "MATCH (:Patient)-[:HAS_CONDITION]->(c:Condition) WITH DISTINCT c.code AS code OPTIONAL MATCH (:SnomedConcept {conceptId: code})-[:STANDARD_CONCEPT]->(i1:ICD10Code) OPTIONAL MATCH (:Condition {code: code})-[:CODED_BY]->(i2:ICD10Code) RETURN code, collect(DISTINCT i1.code) + collect(DISTINCT i2.code) AS icd10",
+  "conditions": [
+    { "code": "414916001", "display": "Obesity", "icd10": ["E66.01"] },
+    {
+      "code": "414545008",
+      "display": "Ischemic Heart Disease",
+      "icd10": ["I25.10"]
+    },
+    { "code": "40930008", "display": "Hypothyroidism", "icd10": ["E03.9"] },
+    {
+      "code": "38341003",
+      "display": "Essential Hypertension",
+      "icd10": ["I10"]
+    },
+    { "code": "84114007", "display": "Heart Failure", "icd10": ["I50.9"] },
+    { "code": "195967001", "display": "Asthma", "icd10": ["J45.20", "J45.9"] },
+    { "code": "396275006", "display": "Osteoarthritis", "icd10": ["M17.11"] },
+    { "code": "399068003", "display": "Prostate Cancer", "icd10": ["C61"] },
+    { "code": "433144002", "display": "CKD Stage 3", "icd10": ["N18.3"] },
+    {
+      "code": "87522002",
+      "display": "Iron Deficiency Anaemia",
+      "icd10": ["D50.9"]
+    },
+    {
+      "code": "44054006",
+      "display": "Type 2 Diabetes",
+      "icd10": ["E11", "E11.9"]
+    },
+    {
+      "code": "69896004",
+      "display": "Rheumatoid Arthritis",
+      "icd10": ["M05.79"]
+    },
+    { "code": "13645005", "display": "COPD", "icd10": ["J44.1"] },
+    { "code": "197480006", "display": "Anxiety Disorder", "icd10": ["F41.1"] },
+    { "code": "34000006", "display": "Crohn Disease", "icd10": ["K50.90"] },
+    { "code": "35489007", "display": "Depression", "icd10": ["F32.1"] },
+    { "code": "93761005", "display": "Colon Cancer", "icd10": ["C18.9"] },
+    {
+      "code": "49436004",
+      "display": "Atrial Fibrillation",
+      "icd10": ["I48.91"]
+    },
+    { "code": "50711007", "display": "Hepatitis C", "icd10": ["B18.2"] },
+    { "code": "55822004", "display": "Hyperlipidaemia", "icd10": ["E78.5"] },
+    { "code": "254837009", "display": "Breast Cancer", "icd10": ["C50.911"] },
+    {
+      "code": "68566005",
+      "display": "Urinary tract infectious disease",
+      "icd10": ["N39.0"]
+    },
+    { "code": "415749005", "display": "Rupture of tendon", "icd10": ["M66.9"] },
+    { "code": "73595000", "display": "Stress (finding)", "icd10": [] },
+    { "code": "13644009", "display": "Hypercholesterolaemia", "icd10": [] },
+    { "code": "271825005", "display": "Respiratory distress", "icd10": [] },
+    { "code": "40055000", "display": "Chronic sinusitis", "icd10": [] },
+    { "code": "53741008", "display": "Coronary artery disease", "icd10": [] },
+    { "code": "73430006", "display": "Sleep apnea", "icd10": [] },
+    { "code": "77176002", "display": "Smoker", "icd10": [] },
+    { "code": "90560007", "display": "Gout", "icd10": [] }
+  ]
+}
