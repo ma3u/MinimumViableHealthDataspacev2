@@ -346,7 +346,7 @@ def esc(s: str) -> str:
 emit("// ═══ LARGE-SCALE SEED: Ontology backbone (SNOMED) ═══")
 for cid, name in SNOMED:
     emit(f"""
-        MERGE (s:SnomedConcept {{conceptId: {cid}}})
+        MERGE (s:SnomedConcept {{conceptId: '{cid}'}})
         SET s.name = '{esc(name)} (SNOMED)',
             s.active = true
     """)
@@ -371,7 +371,7 @@ for code, name in ICD10:
 emit("// ═══ LARGE-SCALE SEED: Ontology backbone (RxNorm) ═══")
 for rxcui, name in RXNORM:
     emit(f"""
-        MERGE (r:RxNormConcept {{rxcui: {rxcui}}})
+        MERGE (r:RxNormConcept {{rxcui: '{rxcui}'}})
         SET r.display = '{esc(name)}',
             r.system = 'http://www.nlm.nih.gov/research/umls/rxnorm'
     """)
@@ -381,8 +381,8 @@ emit("// ═══ Ontology IS_A hierarchy ═══")
 for cid, name in SNOMED:
     if cid != 64572001:
         emit(f"""
-            MATCH (c:SnomedConcept {{conceptId: {cid}}}),
-                  (parent:SnomedConcept {{conceptId: 64572001}})
+            MATCH (c:SnomedConcept {{conceptId: '{cid}'}}),
+                  (parent:SnomedConcept {{conceptId: '64572001'}})
             MERGE (c)-[:IS_A]->(parent)
         """)
 
@@ -399,7 +399,7 @@ SNOMED_ICD_MAP = [
 emit("// ═══ SNOMED → ICD-10 STANDARD_CONCEPT mappings ═══")
 for sid, icd in SNOMED_ICD_MAP:
     emit(f"""
-        MATCH (s:SnomedConcept {{conceptId: {sid}}}),
+        MATCH (s:SnomedConcept {{conceptId: '{sid}'}}),
               (i:ICD10Code {{code: '{icd}'}})
         MERGE (s)-[:STANDARD_CONCEPT]->(i)
     """)
@@ -407,7 +407,7 @@ for sid, icd in SNOMED_ICD_MAP:
 emit("// ═══ Procedure codes ═══")
 for pid, name in PROCEDURES:
     emit(f"""
-        MERGE (p:SnomedConcept {{conceptId: {pid}}})
+        MERGE (p:SnomedConcept {{conceptId: '{pid}'}})
         SET p.name = '{esc(name)} (SNOMED)',
             p.active = true
     """)
@@ -532,7 +532,7 @@ for i in range(NUM_PATIENTS):
         # Code condition with SNOMED
         emit(f"""
             MATCH (c:Condition {{id: '{cond_id}'}})
-            MATCH (s:SnomedConcept {{conceptId: {snomed_id}}})
+            MATCH (s:SnomedConcept {{conceptId: '{snomed_id}'}})
             MERGE (c)-[:CODED_BY]->(s)
         """)
 
@@ -624,7 +624,7 @@ for i in range(NUM_PATIENTS):
                 # Code with RxNorm
                 emit(f"""
                     MATCH (mr:MedicationRequest {{id: '{rx_id}'}})
-                    MATCH (r:RxNormConcept {{rxcui: {rxcui}}})
+                    MATCH (r:RxNormConcept {{rxcui: '{rxcui}'}})
                     MERGE (mr)-[:CODED_BY]->(r)
                 """)
 
@@ -664,7 +664,7 @@ for i in range(NUM_PATIENTS):
         # Code with SNOMED procedure
         emit(f"""
             MATCH (pr:Procedure {{id: '{proc_id}'}})
-            MATCH (s:SnomedConcept {{conceptId: {proc_code}}})
+            MATCH (s:SnomedConcept {{conceptId: '{proc_code}'}})
             MERGE (pr)-[:CODED_BY]->(s)
         """)
 

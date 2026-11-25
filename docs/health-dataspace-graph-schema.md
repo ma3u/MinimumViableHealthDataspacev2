@@ -1179,7 +1179,7 @@ These relationships preserve bidirectional traceability and transformation prove
 
 **Properties:**
 
-- `conceptId: Long!` — SNOMED CT concept ID
+- `conceptId: String!` — SNOMED CT concept ID, a string like every terminology key (#1231): a uniqueness constraint treats 38341003 and "38341003" as two values
 - `fsn: String!` — Fully Specified Name
 - `preferredTerm: String!`
 - `active: Boolean!`
@@ -1308,7 +1308,7 @@ Traverse from marketplace → metadata → clinical → research → ontology in
 MATCH (dp:DataProduct {productId: 'cardio-cohort-2024'})-[:DESCRIBED_BY]->(hd:HealthDataset)
 MATCH (p:Patient)-[:FROM_DATASET]->(hd)
 MATCH (p)-[:HAS_CONDITION]->(c:Condition)-[:CODED_BY]->(sc:SnomedConcept)
-WHERE sc.conceptId = 38341003  // Hypertensive disorder
+WHERE sc.conceptId = '38341003'  // Hypertensive disorder
 MATCH (c)-[:MAPPED_TO]->(oco:OMOPConditionOccurrence)
 RETURN p.resourceId, c.onsetDateTime, sc.preferredTerm, oco.conditionOccurrenceId
 ```
@@ -1336,7 +1336,7 @@ MATCH (hd:HealthDataset)
 WHERE hd.permittedPurpose CONTAINS 'SCIENTIFIC_RESEARCH'
 MATCH (p:Patient)-[:FROM_DATASET]->(hd)
 MATCH (p)-[:HAS_CONDITION]->(c:Condition)-[:CODED_BY]->(sc:SnomedConcept)
-WHERE sc.conceptId IN [73211009, 44054006]  // Type 2 diabetes
+WHERE sc.conceptId IN ['73211009', '44054006']  // Type 2 diabetes
 MATCH (p)-[:HAS_OBSERVATION]->(o:Observation)-[:CODED_BY]->(lc:LoincCode)
 WHERE lc.loincNumber = '4548-4'  // HbA1c
   AND o.valueQuantity >= 6.5
@@ -1451,7 +1451,7 @@ RETURN op.personId, oco.conditionStartDate, om.valueAsNumber, om.measurementDate
 ```cypher
 MATCH (hd:HealthDataset)<-[:FROM_DATASET]-(p:Patient)-[:HAS_CONDITION]->(c:Condition)
 MATCH (c)-[:CODED_BY]->(sc:SnomedConcept)
-WHERE sc.conceptId = 13645005  // Chronic obstructive pulmonary disease
+WHERE sc.conceptId = '13645005'  // Chronic obstructive pulmonary disease
 WITH hd.title AS dataset, count(DISTINCT p) AS patientCount
 RETURN dataset, patientCount
 ORDER BY patientCount DESC
@@ -1460,7 +1460,7 @@ ORDER BY patientCount DESC
 ### 9.5 Ontology: Find All Descendants of a SNOMED Concept
 
 ```cypher
-MATCH (parent:SnomedConcept {conceptId: 64572001})  // Disease (disorder)
+MATCH (parent:SnomedConcept {conceptId: '64572001'})  // Disease (disorder)
 MATCH (descendant:SnomedConcept)-[:IS_A*1..]->(parent)
 RETURN descendant.conceptId, descendant.preferredTerm
 LIMIT 100

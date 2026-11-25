@@ -35,7 +35,7 @@
 
 // ── 1. The right concepts exist, named after their SNOMED CT display ──────────
 // Where the backfill or the issue #19 seed already made one with a string id,
-// that one is reused; otherwise a numeric id, as the graph generator writes.
+// that one is reused; otherwise a string id, the one type every key has (#1231).
 UNWIND [
   {code: 44054006,  name: 'Type 2 Diabetes Mellitus', display: 'Type 2 diabetes'},
   {code: 433144002, name: 'CKD Stage 3',              display: 'Chronic kidney disease stage 3'},
@@ -52,7 +52,7 @@ UNWIND [
 OPTIONAL MATCH (e:SnomedConcept) WHERE e.conceptId IN [m.code, toString(m.code)]
 WITH m, count(e) AS have
 FOREACH (_ IN CASE WHEN have = 0 THEN [1] ELSE [] END |
-  MERGE (:SnomedConcept {conceptId: m.code}))
+  MERGE (:SnomedConcept {conceptId: toString(m.code)}))
 WITH m
 MATCH (s:SnomedConcept) WHERE s.conceptId IN [m.code, toString(m.code)]
 SET s.name = m.name + ' (SNOMED)',
@@ -134,7 +134,7 @@ SET s.name = m.name + ' (SNOMED)',
     s.display = m.name,
     s.active = m.active
 WITH s, m WHERE m.finding
-OPTIONAL MATCH (s)-[r:IS_A]->(:SnomedConcept {conceptId: 64572001})
+OPTIONAL MATCH (s)-[r:IS_A]->(p:SnomedConcept) WHERE toString(p.conceptId) = '64572001'
 DELETE r;
 
 // ── 6. Codes SNOMED CT does not have go, once nothing is coded by them ──────
