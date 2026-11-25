@@ -182,7 +182,7 @@ MERGE (obs:Observation {resourceId: 'fhir-obs-4001'})
       obs.status = 'final',
       obs.code = '4548-4',
       obs.valueQuantity = 8.1,
-      obs.valueUnit = '%',
+      obs.unit = '%', obs.valueUnit = '%',
       obs.dateTime = '2023-06-15T10:15:00Z',
       obs.display = 'HbA1c 8.1%'
 MERGE (patient)-[:HAS_OBSERVATION]->(obs)
@@ -323,7 +323,7 @@ MERGE (cond2)-[:RECORDED_DURING]->(enc2)
 MERGE (cond2)-[:CODED_BY]->(scHTN)
 MERGE (cond2)-[:CODED_BY]->(icdHTN)
 MERGE (obs2:Observation {resourceId: 'fhir-obs-4002'})
-  SET obs2.name = 'BP 145/92 (FHIR)', obs2.status = 'final', obs2.code = '55284-4', obs2.valueQuantity = 145, obs2.valueUnit = 'mmHg',
+  SET obs2.name = 'BP 145/92 (FHIR)', obs2.status = 'final', obs2.code = '55284-4', obs2.valueQuantity = 145, obs2.unit = 'mmHg', obs2.valueUnit = 'mmHg',
       obs2.dateTime = '2023-09-12T11:45:00Z', obs2.display = 'Blood pressure 145/92 mmHg'
 MERGE (p2)-[:HAS_OBSERVATION]->(obs2)
 MERGE (obs2)-[:PART_OF]->(enc2)
@@ -366,7 +366,7 @@ MERGE (p3)-[:HAS_CONDITION]->(cond3)
 MERGE (cond3)-[:CODED_BY]->(scAsthma)
 MERGE (cond3)-[:CODED_BY]->(icdAsthma)
 MERGE (obs3:Observation {resourceId: 'fhir-obs-4003'})
-  SET obs3.name = 'FEV1 72% (FHIR)', obs3.status = 'final', obs3.code = '20150-9', obs3.valueQuantity = 72, obs3.valueUnit = '%',
+  SET obs3.name = 'FEV1 72% (FHIR)', obs3.status = 'final', obs3.code = '20150-9', obs3.valueQuantity = 72, obs3.unit = '%', obs3.valueUnit = '%',
       obs3.dateTime = '2024-02-05T14:45:00Z', obs3.display = 'FEV1 72%'
 MERGE (p3)-[:HAS_OBSERVATION]->(obs3)
 MERGE (obs3)-[:CODED_BY]->(loincFEV1)
@@ -411,7 +411,7 @@ MERGE (cond4b:Condition {resourceId: 'fhir-cond-3004b'})
 MERGE (p4)-[:HAS_CONDITION]->(cond4b)
 MERGE (cond4b)-[:CODED_BY]->(scHTN)
 MERGE (obs4:Observation {resourceId: 'fhir-obs-4004'})
-  SET obs4.name = 'HbA1c 7.2% (FHIR)', obs4.status = 'final', obs4.code = '4548-4', obs4.valueQuantity = 7.2, obs4.valueUnit = '%',
+  SET obs4.name = 'HbA1c 7.2% (FHIR)', obs4.status = 'final', obs4.code = '4548-4', obs4.valueQuantity = 7.2, obs4.unit = '%', obs4.valueUnit = '%',
       obs4.dateTime = '2024-04-18T09:00:00Z', obs4.display = 'HbA1c 7.2%'
 MERGE (p4)-[:HAS_OBSERVATION]->(obs4)
 MERGE (obs4)-[:CODED_BY]->(loincHbA1c)
@@ -451,7 +451,7 @@ MERGE (cond5:Condition {resourceId: 'fhir-cond-3005'})
 MERGE (p5)-[:HAS_CONDITION]->(cond5)
 MERGE (cond5)-[:CODED_BY]->(scCKD)
 MERGE (obs5:Observation {resourceId: 'fhir-obs-4005'})
-  SET obs5.name = 'Creatinine 1.8 (FHIR)', obs5.status = 'final', obs5.code = '2160-0', obs5.valueQuantity = 1.8, obs5.valueUnit = 'mg/dL',
+  SET obs5.name = 'Creatinine 1.8 (FHIR)', obs5.status = 'final', obs5.code = '2160-0', obs5.valueQuantity = 1.8, obs5.unit = 'mg/dL', obs5.valueUnit = 'mg/dL',
       obs5.dateTime = '2024-05-10T14:00:00Z', obs5.display = 'Serum creatinine 1.8 mg/dL'
 MERGE (p5)-[:HAS_OBSERVATION]->(obs5)
 MERGE (obs5)-[:CODED_BY]->(loincCreat)
@@ -487,7 +487,7 @@ MERGE (p6)-[:HAS_CONDITION]->(cond6)
 MERGE (cond6)-[:CODED_BY]->(scDM)
 MERGE (cond6)-[:CODED_BY]->(icdDM)
 MERGE (obs6:Observation {resourceId: 'fhir-obs-4006'})
-  SET obs6.name = 'HbA1c 9.3% (FHIR)', obs6.status = 'final', obs6.code = '4548-4', obs6.valueQuantity = 9.3, obs6.valueUnit = '%',
+  SET obs6.name = 'HbA1c 9.3% (FHIR)', obs6.status = 'final', obs6.code = '4548-4', obs6.valueQuantity = 9.3, obs6.unit = '%', obs6.valueUnit = '%',
       obs6.dateTime = '2024-08-22T15:30:00Z', obs6.display = 'HbA1c 9.3%'
 MERGE (p6)-[:HAS_OBSERVATION]->(obs6)
 MERGE (obs6)-[:CODED_BY]->(loincHbA1c)
@@ -536,7 +536,7 @@ MERGE (cond7b:Condition {resourceId: 'fhir-cond-3007b'})
 MERGE (p7)-[:HAS_CONDITION]->(cond7b)
 MERGE (cond7b)-[:CODED_BY]->(scCKD)
 MERGE (obs7:Observation {resourceId: 'fhir-obs-4007'})
-  SET obs7.name = 'BP 160/98 (FHIR)', obs7.status = 'final', obs7.code = '55284-4', obs7.valueQuantity = 160, obs7.valueUnit = 'mmHg',
+  SET obs7.name = 'BP 160/98 (FHIR)', obs7.status = 'final', obs7.code = '55284-4', obs7.valueQuantity = 160, obs7.unit = 'mmHg', obs7.valueUnit = 'mmHg',
       obs7.dateTime = '2024-10-05T10:30:00Z', obs7.display = 'Blood pressure 160/98 mmHg'
 MERGE (p7)-[:HAS_OBSERVATION]->(obs7)
 MERGE (obs7)-[:CODED_BY]->(loincBP)
@@ -585,7 +585,7 @@ MERGE (cond8:Condition {resourceId: 'fhir-cond-3008'})
 MERGE (p8)-[:HAS_CONDITION]->(cond8)
 MERGE (cond8)-[:CODED_BY]->(scAsthma)
 MERGE (obs8:Observation {resourceId: 'fhir-obs-4008'})
-  SET obs8.name = 'FEV1 85% (FHIR)', obs8.status = 'final', obs8.code = '20150-9', obs8.valueQuantity = 85, obs8.valueUnit = '%',
+  SET obs8.name = 'FEV1 85% (FHIR)', obs8.status = 'final', obs8.code = '20150-9', obs8.valueQuantity = 85, obs8.unit = '%', obs8.valueUnit = '%',
       obs8.dateTime = '2024-11-12T10:00:00Z', obs8.display = 'FEV1 85%'
 MERGE (p8)-[:HAS_OBSERVATION]->(obs8)
 MERGE (obs8)-[:CODED_BY]->(loincFEV1)

@@ -343,6 +343,62 @@ CREATE CONSTRAINT jurisdiction_milestone_id IF NOT EXISTS FOR (m:JurisdictionMil
 (:Participant)-[:UNDER_JURISDICTION]->(:Jurisdiction)
 ```
 
+### 2.3 Operational Node Labels
+
+The labels below run the hub around the marketplace: credentials, connector tenants, pseudonyms and secure processing, the audit trail, studies, and the patient's app. Each table names the key the constraint in `neo4j/init-schema.cypher` is on and the file that writes the node.
+
+#### Credentials, tenants and policies
+
+| Label                  | Key            | Properties                                                                                                            | Written by                                                                         |
+| ---------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `VerifiableCredential` | `credentialId` | `credentialType`, `format`, `issuerDid`, `subjectDid`, `issuedAt`, `expiresAt`, `status`                              | DCP v1.0 credentials; `(vc)-[:ISSUED_TO]->(:Participant)`                          |
+| `ParticipantProfile`   | `profileId`    | `tenantId`, `identifier`, `displayName`, `role`, `version`, `createdAt`                                               | CFM tenant, one per participant and dataspace; `(pp)-[:OF_TENANT]->(:Participant)` |
+| `VPA`                  | `vpaId`        | `vpaType` (`cfm.connector`, `cfm.credentialservice`, `cfm.dataplane`), `state`, `stateTimestamp`, `cellId`, `version` | CFM virtual participant agent; `(vpa)-[:OF_PROFILE]->(:ParticipantProfile)`        |
+| `OdrlPolicy`           | `policyId`     | `name`, `odrlAction`, `ehdsPermissions`, `ehdsProhibitions`, `temporalLimit`, `createdAt`                             | `neo4j/register-dsp-marketplace.cypher`; `(:DataProduct)-[:GOVERNED_BY]->(pol)`    |
+
+`ui/src/app/api/admin/policies/route.ts` merges the policies it registers on `id`, not `policyId`, with `participantId`, `policyJson`, `source: 'local-registry'` and `(pol)-[:BELONGS_TO]->(:Participant)`, so the constraint does not cover them.
+
+#### Trust Center, pseudonyms and secure processing (Art. 66, 73, 75)
+
+| Label               | Key         | Properties                                                                                                                                                                                                       | Notes                                                                                                                                                                        |
+| ------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TrustCenter`       | `name`      | `did`, `country`, `operatedBy`, `protocol`, `endpoint`, `status`, `description`, `createdAt`                                                                                                                     | `(tc)-[:GOVERNED_BY]->(:HDABApproval)`, `(tc)-[:RESOLVES_PSEUDONYMS_FOR]->(:HealthDataset)`, `(tc)-[:MANAGES]->(:SPESession)`, `(tc)-[:MUTUALLY_RECOGNISES]->(:TrustCenter)` |
+| `ProviderPseudonym` | `psnId`     | `providerId`, `studyId`, `createdAt`                                                                                                                                                                             | Per provider; never shared with researchers                                                                                                                                  |
+| `ResearchPseudonym` | `rpsnId`    | `studyId`, `mode`, `issuedBy`, `issuedAt`, `revoked`                                                                                                                                                             | Issued by the Trust Center, visible only inside the SPE; `(rp)-[:LINKED_FROM]->(:ProviderPseudonym)`, `(rp)-[:USED_IN]->(:SPESession)`                                       |
+| `SPESession`        | `sessionId` | `studyId`, `status`, `teeType`, `attestation`, `attestedAt`, `verifiedBy`, `policyHash`, `approvedCodeHash`, `outputPolicy`, `kAnonymityThreshold`, `coordinatorEndpoint`, `createdBy`, `createdAt`, `simulated` | Created by the access body, not the researcher                                                                                                                               |
+| `ImportedDataset`   | `datasetId` | `transferId`, `agreementId`, `assetId`, `provider`, `consumer`, `speId`, `name`, `records`, `pseudonymised`, `complete`, `refused`, `importedBy`, `importedAt`, `updatedAt`, `closedAt`                          | A transfer imported into an SPE workspace (#876, `services/neo4j-proxy/src/spe-import.ts`); `(d)-[:LOADED_INTO]->(:SpeWorkspace)`                                            |
+| `ImportedRecord`    | `recordKey` | `datasetId`, `resourceType`, `resourceId`, `name`, `resource`                                                                                                                                                    | `(:ImportedDataset)-[:CONTAINS]->(r)`                                                                                                                                        |
+| `ImportedFile`      | `fileKey`   | `datasetId`, `name`, `mediaType`, `bytes`, `sha256`, `content`                                                                                                                                                   | One per HttpFile-PUSH flow (ADR-095); `(:ImportedDataset)-[:CONTAINS]->(f)`                                                                                                  |
+
+#### Transfers and the audit trail (Art. 73(1)(e))
+
+| Label             | Key       | Properties                                                                                                                                                                                                                                                                 | Notes                                                               |
+| ----------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `DataTransfer`    | `id`      | `transferId`, `contractId`, `permitId`, `assetId`, `status`, `protocol`, `providerDid`, `consumerDid`, `providerCountry`, `consumerCountry`, `crossBorder`, `byteSize`, `transferDate`, `timestamp`, `retainUntil`, `errorMessage`, `demo`                                 | Contract-level transfer; relationships in 2.2                       |
+| `TransferEvent`   | `eventId` | `timestamp`, `endpoint`, `method`, `protocol`, `participant`, `providerDid`, `consumerDid`, `contractId`, `permitId`, `datasetId`, `purpose`, `statusCode`, `resultCount`, `responseBytes`, `contentType`, `duration`, `patientIds`, `retainUntil`, `errorMessage`, `demo` | One data access event; relationships in 2.2                         |
+| `QueryAuditEvent` | `eventId` | `timestamp`, `participantId`, `question`, `cypher`, `method`, `resultCount`, `odrlEnforced`, `aggregateSuppressed`, `federated`, `contributors`                                                                                                                            | Superseded for new records by `AuditEvent` (#418); kept for history |
+| `AuditEvent`      | `id`      | `chain`, `seq`, `prevHash`, `hash`, `recorded`, `eventType`, `outcome`, `participantId`, `resource`, `dedupeKey`                                                                                                                                                           | FHIR AuditEvent, hash-chained per chain (ADR-045 plane 2)           |
+| `AuditChain`      | `id`      | `head`, `seq`, `lockedAt`                                                                                                                                                                                                                                                  | One head node per chain, which serialises writes                    |
+
+#### Studies, quality and the patient's research view
+
+| Label               | Key            | Properties                                                                                                                                              | Notes                                                                                                                      |
+| ------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `ResearchStudy`     | `studyId`      | `name`, `studyName`, `institutionDid`, `status`, `purpose`, `dataNeeded`, `countries`, `participantCount`, `ethicsApproval`, `ehdsArticle`, `fictional` | `(:Participant)-[:CONDUCTS]->(rs)`, `(:PatientConsent)-[:FOR_STUDY]->(rs)`; seeded by `neo4j/seed-persona-overview.cypher` |
+| `StudyEnrolment`    | `enrolmentId`  | `studyId`, `asOf`, `participants`                                                                                                                       | `(:ResearchStudy)-[:HAS_ENROLMENT]->(se)`                                                                                  |
+| `QualityAssessment` | `assessmentId` | `period`, `assessedAt`, `assessor`, `completeness`, `conformance`, `timeliness`, `renewalBandLow`, `renewalBandHigh`, `ehdsArticle`, `fictional`        | Data quality label per quarter (Art. 78)                                                                                   |
+| `PatientConsent`    | `consentId`    | `patientId`, `studyId`, `revoked`                                                                                                                       | Consent to join a study (GDPR Art. 9(2)(a)), withdrawable (Art. 7(3))                                                      |
+| `ResearchInsight`   | `insightId`    | `studyId`, `finding`, `relevantConditions`, `recommendation`, `evidenceLevel`                                                                           | Read by `/api/patient/insights`; no seed writes one yet                                                                    |
+| `OptOutRecord`      | `optOutId`     | `patientId`, `optedOutAt`, `source`, `reversedAt`, `reversalSource`                                                                                     | Art. 71 opt-out (ADR-062), never deleted; `(:Patient)-[:OPTED_OUT]->(o)`                                                   |
+
+#### The patient's app (Klarbefund)
+
+| Label           | Key        | Properties                                                      | Notes                                                                                                                                                           |
+| --------------- | ---------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppConnection` | `deviceId` | `username`, `deviceName`, `client`, `connectedAt`, `lastSeenAt` | A connected phone (#473, ADR-049); `(:Patient)-[:HAS_APP_CONNECTION]->(a)`                                                                                      |
+| `AppPairing`    | `id`       | `username`, `expiresAt`, `deviceId`, `deviceName`               | The pairing QR code, two minutes plus five of grace; in Neo4j because the UI runs more than one replica                                                         |
+| `AppAttestKey`  | `keyId`    | `username`, `createdBy`, `environment`, `createdAt`             | The App Attest key an app-created account was attested with (ADR-054); one key, one account, and the record outlives the account (`ui/src/lib/app-accounts.ts`) |
+
 ---
 
 ## 3. Layer 2: HealthDCAT-AP Metadata
@@ -426,6 +482,21 @@ A dataset described using HealthDCAT-AP (`healthdcatap:Dataset` extending `dcat:
 
 ```cypher
 CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
+```
+
+#### `VariablesTableGroup`, `VariablesTable`, `VariablesColumn`
+
+The variables a dataset holds, HealthDCAT-AP Release 8 `healthdcatap:hasVariables` as a CSVW table group (#700, `neo4j/register-healthdcat-ap-r8.cypher`):
+
+- `VariablesTableGroup`: `groupId` (key), `title`
+- `VariablesTable`: `tableId` (key), `name`, `title`
+- `VariablesColumn`: `columnId` (key), `name`, `title`, `description`, `datatype`
+
+```cypher
+(:HealthDataset)-[:HAS_VARIABLES]->(:VariablesTableGroup)-[:HAS_TABLE]->(:VariablesTable)-[:HAS_COLUMN]->(:VariablesColumn)
+CREATE CONSTRAINT variables_table_group_id IF NOT EXISTS FOR (tg:VariablesTableGroup) REQUIRE tg.groupId IS UNIQUE;
+CREATE CONSTRAINT variables_table_id IF NOT EXISTS FOR (tb:VariablesTable) REQUIRE tb.tableId IS UNIQUE;
+CREATE CONSTRAINT variables_column_id IF NOT EXISTS FOR (c:VariablesColumn) REQUIRE c.columnId IS UNIQUE;
 ```
 
 ---
@@ -653,6 +724,10 @@ The validator run the profile results come from, one node with `runId: 'current'
 
 An HL7 Europe draft the hub plans to track but does not validate yet, such as the Common Cancer Model (#1145): `guideId`, `name`, `igPackage`, `status`, `url`, `issue`, `scope`. Not linked to a category: the Cancer Model is not an Art. 14 priority category.
 
+#### `EEHRxFImplementingAct`
+
+The implementing act that lays down the EEHRxF (Art. 15(1)), whose annexes define the categories (#1205). One node, keyed by its Commission `reference` (`Ares(2026)10884928`, the draft): `title`, `status`, `legalBasis`, `fhirVersion`, `url`, `actUrl`, `annexUrl`, `feedbackFrom`, `feedbackUntil`, `implementationGuideDue`. Each `EEHRxFCategory` names its annex in `annex` and links to the act with `DEFINED_IN`.
+
 **Indexes:**
 
 ```cypher
@@ -660,6 +735,7 @@ CREATE CONSTRAINT eehrxf_profile_id IF NOT EXISTS FOR (p:EEHRxFProfile) REQUIRE 
 CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseResource);
 CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidationRun) REQUIRE v.runId IS UNIQUE;
 CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
+CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImplementingAct) REQUIRE a.reference IS UNIQUE;
 ```
 
 #### EEHRxF Relationships
@@ -667,6 +743,7 @@ CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuid
 ```cypher
 (:EEHRxFProfile)-[:PART_OF_CATEGORY]->(:EEHRxFCategory)
 (:EEHRxFProfile)-[:DEPENDS_ON]->(:EEHRxFProfile)
+(:EEHRxFCategory)-[:DEFINED_IN]->(:EEHRxFImplementingAct)
 ```
 
 - `PART_OF_CATEGORY`: Links a profile to its EHDS priority category
@@ -738,11 +815,14 @@ CREATE INDEX condition_code IF NOT EXISTS FOR (c:Condition) ON (c.code);
 - `codeSystem: String!`
 - `codeDisplay: String`
 - `valueQuantity: Float`
-- `valueUnit: String`
+- `unit: String`: the unit of the value. Every writer sets it: the Synthea loader (`scripts/load_fhir_neo4j.py`, with the value in `value`), the study-result and persona seeds, and the synthetic schema data
+- `valueUnit: String`: the same unit under an older name. The seeds still write it beside `unit`; read `coalesce(o.unit, o.valueUnit)` as `neo4j/fhir-to-omop-transform.cypher` does, and never write `valueUnit` alone
 - `valueCodeableConcept: String` — Coded result
 - `effectiveDateTime: DateTime`
 - `issued: DateTime`
 - `interpretation: String[]` — (normal, abnormal, critical, high, low)
+
+The writers do not agree on the key or the date yet: the constraint is on `resourceId`, while the Synthea loader and `scripts/generate-graph-seed.py` merge on `id` and write `dateTime` or `date` instead of `effectiveDate`. The graph seed's laboratory values (`obs-<patient>-<loinc>`) carry no unit at all. Readers coalesce the variants.
 
 **Indexes:**
 
@@ -813,6 +893,45 @@ CREATE CONSTRAINT encounter_id IF NOT EXISTS FOR (e:Encounter) REQUIRE e.resourc
 
 ---
 
+#### `DiagnosticReport`
+
+A study result beyond a single laboratory value (ADR-059), and the report a FHIR document import groups its Observations under (#1173). Seeded by `neo4j/seed-study-results.cypher`; written on import by `ui/src/lib/fhir-documents/store.ts`.
+
+**Properties:** `resourceId` (key), `status`, `code`, `codeSystem`, `display`, `name`, `category`, `categoryDisplay`, `modality`, `effectiveDate`, `issued`, `performer`, `conclusion`, `fictional`.
+
+#### `Immunization`
+
+A vaccination (ADR-059): `resourceId` (key), `status`, `vaccineCode`, `codeSystem`, `display`, `name`, `occurrenceDate`, `lotNumber`, `performer`, `fictional`.
+
+#### `MedicationStatement`
+
+A line of the medication plan (ADR-059), or a statement a Patient Summary carries: `resourceId` (key), `status`, `medicationCode`, `codeSystem`, `display`, `name`, `dose`, `doseUnit`, `dosageText`, `effectiveStart`, `reason`, `planId`, `planPrinted`, `source`, `fictional`.
+
+#### `AllergyIntolerance`
+
+An allergy an imported Patient Summary carries (#1173): `resourceId` (key), `code`, `codeSystem`, `display`, `name`, `clinicalStatus`, `verificationStatus`, `type`, `category`, `criticality`, `onsetDate`.
+
+#### `DocumentReference`
+
+A FHIR document read back into the record (#1173). It holds the document's metadata and its SHA-256, never its content: `documentId` (key), `identifierSystem`, `identifierValue`, `timestamp`, `typeCode`, `title`, `name`, `authors`, `custodian`, `profile`, `contentSha256`, `size`, `importCount`, `createdAt`, `lastImportedAt`.
+
+The `Provenance` of each import (`provenanceId`, `recorded`, `activity`, `agentRole`, `agentId`, `documentId`) points to the document with `SOURCE` and to every node the import touched.
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT diagnostic_report_id IF NOT EXISTS FOR (dr:DiagnosticReport) REQUIRE dr.resourceId IS UNIQUE;
+CREATE INDEX diagnostic_report_category IF NOT EXISTS FOR (dr:DiagnosticReport) ON (dr.category);
+CREATE CONSTRAINT immunization_id IF NOT EXISTS FOR (im:Immunization) REQUIRE im.resourceId IS UNIQUE;
+CREATE CONSTRAINT medication_statement_id IF NOT EXISTS FOR (ms:MedicationStatement) REQUIRE ms.resourceId IS UNIQUE;
+CREATE INDEX medication_statement_plan IF NOT EXISTS FOR (ms:MedicationStatement) ON (ms.planId);
+CREATE CONSTRAINT allergy_intolerance_id IF NOT EXISTS FOR (a:AllergyIntolerance) REQUIRE a.resourceId IS UNIQUE;
+CREATE CONSTRAINT document_reference_id IF NOT EXISTS FOR (d:DocumentReference) REQUIRE d.documentId IS UNIQUE;
+CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (pv:Provenance) REQUIRE pv.provenanceId IS UNIQUE;
+```
+
+---
+
 ### 4.2 FHIR Relationships
 
 ```cypher
@@ -821,6 +940,13 @@ CREATE CONSTRAINT encounter_id IF NOT EXISTS FOR (e:Encounter) REQUIRE e.resourc
 (:Patient)-[:HAS_MEDICATION_REQUEST]->(:MedicationRequest)
 (:Patient)-[:HAS_ENCOUNTER]->(:Encounter)
 (:Patient)-[:HAS_PROCEDURE]->(:Procedure)
+(:Patient)-[:HAS_DIAGNOSTIC_REPORT]->(:DiagnosticReport)
+(:DiagnosticReport)-[:HAS_RESULT]->(:Observation)
+(:Patient)-[:HAS_IMMUNIZATION]->(:Immunization)
+(:Patient)-[:HAS_MEDICATION_STATEMENT]->(:MedicationStatement)
+(:Patient)-[:HAS_ALLERGY_INTOLERANCE]->(:AllergyIntolerance)
+(:Patient)-[:HAS_DOCUMENT_REFERENCE]->(:DocumentReference)
+(:Provenance)-[:SOURCE]->(:DocumentReference)
 
 (:Condition)-[:RECORDED_DURING]->(:Encounter)
 (:Observation)-[:PART_OF]->(:Encounter)
