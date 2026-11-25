@@ -728,6 +728,14 @@ An HL7 Europe draft the hub plans to track but does not validate yet, such as th
 
 The implementing act that lays down the EEHRxF (Art. 15(1)), whose annexes define the categories (#1205). One node, keyed by its Commission `reference` (`Ares(2026)10884928`, the draft): `title`, `status`, `legalBasis`, `fhirVersion`, `url`, `actUrl`, `annexUrl`, `feedbackFrom`, `feedbackUntil`, `implementationGuideDue`. Each `EEHRxFCategory` names its annex in `annex` and links to the act with `DEFINED_IN`.
 
+#### `NationalProfileGuide`
+
+A German implementation guide the validator checks the same resources against, kept apart from the EEHRxF coverage (#1172, #1261). Only guides marked `onPage` in `scripts/eehrxf/profiles.json` reach the graph, today the three MII Kerndatensatz modules (Basis, Laborbefund, Medikation): `guideId`, `name`, `publisher`, `country` (`DE`), `igPackage`, `status`, `home`, `gate` (whether a new failure fails CI), `checkedOn`. Written by `neo4j/register-national-profiles.cypher`, which `scripts/eehrxf/build.py` generates.
+
+#### `NationalProfile`
+
+One profile of a `NationalProfileGuide` with its validation result: `profileId`, `name`, `country`, `canonical`, `baseResource`, `fhirVersion`, `tested`, `passed`, `failed`, `topIssues`, `coverage`. Never counted as EEHRxF coverage.
+
 **Indexes:**
 
 ```cypher
@@ -736,6 +744,8 @@ CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseR
 CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidationRun) REQUIRE v.runId IS UNIQUE;
 CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
 CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImplementingAct) REQUIRE a.reference IS UNIQUE;
+CREATE CONSTRAINT national_profile_id IF NOT EXISTS FOR (p:NationalProfile) REQUIRE p.profileId IS UNIQUE;
+CREATE CONSTRAINT national_profile_guide_id IF NOT EXISTS FOR (g:NationalProfileGuide) REQUIRE g.guideId IS UNIQUE;
 ```
 
 #### EEHRxF Relationships
@@ -744,10 +754,14 @@ CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImpleme
 (:EEHRxFProfile)-[:PART_OF_CATEGORY]->(:EEHRxFCategory)
 (:EEHRxFProfile)-[:DEPENDS_ON]->(:EEHRxFProfile)
 (:EEHRxFCategory)-[:DEFINED_IN]->(:EEHRxFImplementingAct)
+(:NationalProfile)-[:PUBLISHED_IN]->(:NationalProfileGuide)
+(:NationalProfile)-[:CORRESPONDS_TO]->(:EEHRxFProfile)
 ```
 
 - `PART_OF_CATEGORY`: Links a profile to its EHDS priority category
 - `DEPENDS_ON`: Every profile except Bundles builds on the EU core Patient
+- `PUBLISHED_IN`: Links a German profile to its guide
+- `CORRESPONDS_TO`: Links a German profile to the EEHRxF profile that covers the same ground
 
 No relationship links a profile to FHIR nodes: the `PROFILES_RESOURCE` this section used to describe was never created. Coverage comes from validation (#1144).
 
