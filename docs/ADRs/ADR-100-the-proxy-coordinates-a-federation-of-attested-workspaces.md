@@ -2,7 +2,7 @@
 
 Date: 2026-11-25
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-25, by the maintainer); proposed 2026-11-25
 **Relates to:** [ADR-045](ADR-045-observability-and-regulatory-audit-trail.md), [ADR-062](ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md), [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md), [ADR-072](ADR-072-spe-workspaces-start-on-demand.md), [ADR-094](ADR-094-national-health-data-stays-at-the-source.md), [ADR-044](ADR-044-every-api-route-needs-a-session.md)
 **Tracks:** [#1236](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1236), gap table in [#1225](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1225)
 
