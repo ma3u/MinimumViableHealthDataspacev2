@@ -41,6 +41,10 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 CONFIG = HERE / "profiles.json"
 REPORT = HERE / "validation-report.json"
+DETAILS = HERE / "validation-details.json"
+# One file per profile for the resource viewer on /eehrxf, plus an index that
+# says what was validated. Static files, so the GitHub Pages build has them.
+VIEWER_DIR = ROOT / "ui" / "public" / "eehrxf" / "validation"
 CYPHER = ROOT / "neo4j" / "register-eehrxf-profiles.cypher"
 MOCK = ROOT / "ui" / "public" / "mock" / "eehrxf.json"
 MATCHBOX = ROOT / "services" / "matchbox" / "application.yaml"
@@ -410,6 +414,78 @@ def national_mock(n: dict) -> dict:
     }
 
 
+def viewer_files(cfg: dict, report: dict, details: dict) -> dict[Path, str]:
+    """{path: text} for the viewer: every tested resource as validated, with its errors and warnings.
+
+    The resources are rebuilt from the sources the way validate.py wrote them
+    (same candidates, same order, meta.profile set to the profile under test),
+    and joined with validation-details.json by file name. German profiles go in
+    only when their guide is onPage, as for the seed and mock.
+    """
+    sys.path.insert(0, str(HERE))
+    import validate  # noqa: E402  (standard library only, same directory)
+
+    nat = validate.national(cfg)
+    shown = [(p, cfg["igs"][p["ig"]], "eehrxf") for p in cfg["profiles"]] + [
+        (p, nat["igs"][p["ig"]], "national") for p in nat["profiles"] if nat["igs"][p["ig"]].get("onPage")
+    ]
+    sources = validate.collect_sources()
+    results = validate.all_profiles(report)
+    by_file = {e["file"]: e for entries in details["profiles"].values() for e in entries}
+    files: dict[Path, str] = {}
+    index = []
+    for prof, ig, section in shown:
+        pid = prof["profileId"]
+        resources = []
+        counter: dict[str, int] = {}
+        for sid, origin, resource in validate.candidates(prof, sources):
+            n = counter.get(sid, 0)
+            counter[sid] = n + 1
+            fname = validate.file_name(pid, sid, n)
+            entry = by_file.get(fname)
+            if entry is None:
+                raise SystemExit(f"validation-details.json is stale for {fname}: rerun validate.py")
+            r = json.loads(json.dumps(resource))
+            r.setdefault("meta", {})["profile"] = [prof["canonical"]]
+            resources.append({**{k: entry[k] for k in ("source", "origin", "passed", "issues")}, "resource": r})
+        r = results[pid]
+        summary = {
+            "profileId": pid,
+            "name": prof["name"],
+            "section": section,
+            "canonical": prof["canonical"],
+            "igPackage": f"{ig['package']}#{ig['version']}",
+            "baseResource": prof["baseResource"],
+            "tested": r["tested"],
+            "passed": r["passed"],
+            "warnings": sum(1 for x in resources for i in x["issues"] if i["severity"] == "warning"),
+        }
+        index.append(summary)
+        files[VIEWER_DIR / f"{pid}.json"] = json.dumps({**summary, "resources": resources}, indent=1, ensure_ascii=False) + "\n"
+    srcs = cfg.get("sources", {})
+    files[VIEWER_DIR / "index.json"] = (
+        json.dumps(
+            {
+                "validator": report["validator"],
+                "sources": [
+                    {
+                        "sourceId": sid,
+                        **{k: v for k, v in srcs.get(sid, {}).items() if not k.startswith("$")},
+                        "files": s["files"],
+                        "resources": s["resources"],
+                    }
+                    for sid, s in report["sources"].items()
+                ],
+                "profiles": index,
+            },
+            indent=1,
+            ensure_ascii=False,
+        )
+        + "\n"
+    )
+    return files
+
+
 def matchbox_config(cfg: dict) -> str:
     """Matchbox's application.yaml: FHIR R4 core and every IG of profiles.json, pinned.
 
@@ -577,6 +653,7 @@ def main() -> int:
         EXTENSION_DOMAINS: extension_domains_ts(cfg),
         NATIONAL_CYPHER: national_cypher(nm),
         NATIONAL_MOCK: json.dumps(national_mock(nm), indent=2, ensure_ascii=False) + "\n",
+        **viewer_files(cfg, report, json.loads(DETAILS.read_text(encoding="utf-8"))),
     }
     def same(p: Path, text: str) -> bool:
         if not p.exists():
@@ -587,10 +664,16 @@ def main() -> int:
         return p.read_text(encoding="utf-8") == text
 
     stale = [p for p, text in want.items() if not same(p, text)]
+    # A viewer file of a profile the config no longer lists.
+    orphans = [p for p in VIEWER_DIR.glob("*.json") if p not in want] if VIEWER_DIR.exists() else []
+    stale += orphans
     if args.check:
         for p in stale:
             print(f"out of date: {p.relative_to(ROOT)} (run python3 scripts/eehrxf/build.py)", file=sys.stderr)
         return 1 if stale else 0
+    for p in orphans:
+        p.unlink()
+        print(f"removed {p.relative_to(ROOT)}")
     for p, text in want.items():
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text, encoding="utf-8")

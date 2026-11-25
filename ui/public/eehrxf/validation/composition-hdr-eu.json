@@ -1,0 +1,12 @@
+{
+  "profileId": "composition-hdr-eu",
+  "name": "Composition (EU HDR)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/composition-eu-hdr",
+  "igPackage": "hl7.fhir.eu.hdr#1.0.0",
+  "baseResource": "Composition",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 0,
+  "resources": []
+}

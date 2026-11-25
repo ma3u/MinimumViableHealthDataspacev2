@@ -1,0 +1,2781 @@
+{
+  "profileId": "encounter-hdr-eu",
+  "name": "Encounter (EU HDR)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr",
+  "igPackage": "hl7.fhir.eu.hdr#1.0.0",
+  "baseResource": "Encounter",
+  "tested": 31,
+  "passed": 31,
+  "warnings": 60,
+  "resources": [
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "checkup-p1-2025-03-14",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003"
+              }
+            ],
+            "text": "Encounter for check up"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "period": {
+          "start": "2025-03-14T09:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "AlphaKlinik Berlin"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[22]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "checkup-p2-2025-10-07",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003"
+              }
+            ],
+            "text": "Encounter for check up"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "period": {
+          "start": "2025-10-07T09:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "Limburg Medical Centre"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[23]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-p2-2025-03-04",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Laboratory visit, Limburg Medical Centre (fictional)"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "period": {
+          "start": "2025-03-04T08:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "Limburg Medical Centre"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[2]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-p1-2024-09-12",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Laboratory visit, AlphaKlinik Berlin (fictional)"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "period": {
+          "start": "2024-09-12T08:00:00Z"
+        },
+        "serviceProvider": {
+          "display": "AlphaKlinik Berlin"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[35]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "fhir-enc-2002",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Cardiology consultation"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "period": {
+          "start": "2023-09-12T11:00:00Z"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[49]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSys"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2000-0",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "emergency"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "period": {
+          "start": "2025-12-03"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[50]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2000-1",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "period": {
+          "start": "2023-01-03"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[58]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2008-0",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "period": {
+          "start": "2025-05-24"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[59]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-2008-1",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "period": {
+          "start": "2024-12-18"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[75]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "loader-enc-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "period": {
+          "start": "2019-04-02T10:00:00+02:00"
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[82]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "sparse-enc-0001",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "status": "unknown",
+        "class": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[20]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "484024be-e131-dfae-aaeb-330d4bdcb87b",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "484024be-e131-dfae-aaeb-330d4bdcb87b"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1960-08-20T06:33:09+01:00",
+              "end": "1960-08-20T07:03:46+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1960-08-20T06:33:09+01:00",
+          "end": "1960-08-20T07:03:46+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[21]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "75cfcd73-d1e4-d1b5-d1c9-5f4f4ab4946c",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "75cfcd73-d1e4-d1b5-d1c9-5f4f4ab4946c"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185345009",
+                "display": "Encounter for symptom"
+              }
+            ],
+            "text": "Encounter for symptom"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1965-06-07T06:33:09+01:00",
+              "end": "1965-06-07T06:48:09+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1965-06-07T06:33:09+01:00",
+          "end": "1965-06-07T06:48:09+01:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "75498004",
+                "display": "Acute bacterial sinusitis (disorder)"
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[22]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "9c15e2f6-d97b-d267-375a-ed9030946079",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "9c15e2f6-d97b-d267-375a-ed9030946079"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1970-09-05T06:33:09+01:00",
+              "end": "1970-09-05T07:25:09+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1970-09-05T06:33:09+01:00",
+          "end": "1970-09-05T07:25:09+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[23]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "f1b3655a-9155-ff62-ffc0-9c5b7335492d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "f1b3655a-9155-ff62-ffc0-9c5b7335492d"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1973-09-08T06:33:09+01:00",
+              "end": "1973-09-08T07:21:05+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1973-09-08T06:33:09+01:00",
+          "end": "1973-09-08T07:21:05+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[24]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "fb99658c-1c1a-140b-37ce-bbad9f8579bf",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "fb99658c-1c1a-140b-37ce-bbad9f8579bf"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185347001",
+                "display": "Encounter for problem"
+              }
+            ],
+            "text": "Encounter for problem"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1973-09-15T06:33:09+01:00",
+              "end": "1973-09-15T07:43:53+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1973-09-15T06:33:09+01:00",
+          "end": "1973-09-15T07:43:53+01:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "271737000",
+                "display": "Anemia (disorder)"
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[25]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "2175053f-98c6-8148-d703-175371bba219",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "2175053f-98c6-8148-d703-175371bba219"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1975-10-04T06:33:09+01:00",
+              "end": "1975-10-04T08:41:33+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1975-10-04T06:33:09+01:00",
+          "end": "1975-10-04T08:41:33+01:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "103697008",
+                "display": "Patient referral for dental care (procedure)"
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[26]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "610f09c1-7432-e7c7-1afb-2b69218d44d6",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "610f09c1-7432-e7c7-1afb-2b69218d44d6"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1980-10-18T06:33:09+01:00",
+              "end": "1980-10-18T07:06:34+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1980-10-18T06:33:09+01:00",
+          "end": "1980-10-18T07:06:34+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[27]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "9185c480-4f26-450d-f438-ec52fbf48125",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "9185c480-4f26-450d-f438-ec52fbf48125"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1989-12-09T06:33:09+01:00",
+              "end": "1989-12-09T07:29:57+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1989-12-09T06:33:09+01:00",
+          "end": "1989-12-09T07:29:57+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[28]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "53c67d64-594c-24e6-e82e-bc32f9495818",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "53c67d64-594c-24e6-e82e-bc32f9495818"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1990-12-15T06:33:09+01:00",
+              "end": "1990-12-15T07:31:33+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1990-12-15T06:33:09+01:00",
+          "end": "1990-12-15T07:31:33+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[29]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "09e99d0a-e5ba-49b0-4c19-8be905300de7",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "09e99d0a-e5ba-49b0-4c19-8be905300de7"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1992-07-25T07:33:09+02:00",
+              "end": "1992-07-25T08:06:40+02:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1992-07-25T07:33:09+02:00",
+          "end": "1992-07-25T08:06:40+02:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[30]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "1218a5ad-ec3a-fb32-0638-04edc70e148e",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "1218a5ad-ec3a-fb32-0638-04edc70e148e"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1995-01-07T06:33:09+01:00",
+              "end": "1995-01-07T07:24:15+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1995-01-07T06:33:09+01:00",
+          "end": "1995-01-07T07:24:15+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[31]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "bad02022-83e2-2d86-9146-07044d319834",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "bad02022-83e2-2d86-9146-07044d319834"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1995-01-14T06:33:09+01:00",
+              "end": "1995-01-14T06:48:09+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1995-01-14T06:33:09+01:00",
+          "end": "1995-01-14T06:48:09+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[32]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "9d9876e3-2288-bb8f-bef9-28f7c038e813",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "9d9876e3-2288-bb8f-bef9-28f7c038e813"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185347001",
+                "display": "Encounter for problem (procedure)"
+              }
+            ],
+            "text": "Encounter for problem (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1995-01-30T22:18:23+01:00",
+              "end": "1995-01-31T03:51:51+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591",
+              "display": "Dr. Ted955 Reilly981"
+            }
+          }
+        ],
+        "period": {
+          "start": "1995-01-30T22:18:23+01:00",
+          "end": "1995-01-31T03:51:51+01:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "414545008",
+                "display": "Ischemic heart disease (disorder)"
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869",
+              "display": "Fitchburg Outpatient Clinic"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa",
+          "display": "Fitchburg Outpatient Clinic"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[33]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "1b0a7269-d371-7b0a-7603-159518db7491",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "1b0a7269-d371-7b0a-7603-159518db7491"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "32485007",
+                "display": "Hospital admission (procedure)"
+              }
+            ],
+            "text": "Hospital admission (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1995-02-23T05:27:41+01:00",
+              "end": "1995-02-23T11:20:57+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591",
+              "display": "Dr. Ted955 Reilly981"
+            }
+          }
+        ],
+        "period": {
+          "start": "1995-02-23T05:27:41+01:00",
+          "end": "1995-02-23T11:20:57+01:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "274531002",
+                "display": "Abnormal findings diagnostic imaging heart+coronary circulat (finding)"
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869",
+              "display": "Fitchburg Outpatient Clinic"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa",
+          "display": "Fitchburg Outpatient Clinic"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[34]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "c9525d96-bddf-53ee-d49c-66c6953b9131",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "c9525d96-bddf-53ee-d49c-66c6953b9131"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1997-09-27T07:33:09+02:00",
+              "end": "1997-09-27T08:14:42+02:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1997-09-27T07:33:09+02:00",
+          "end": "1997-09-27T08:14:42+02:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[35]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "2b807d6d-09d1-c2f8-46f6-23b7f0e9e2a8",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "2b807d6d-09d1-c2f8-46f6-23b7f0e9e2a8"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1998-01-03T06:33:09+01:00",
+              "end": "1998-01-03T07:20:10+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1998-01-03T06:33:09+01:00",
+          "end": "1998-01-03T07:20:10+01:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "66383009",
+                "display": "Gingivitis (disorder)"
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[36]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "2178263e-eca0-61eb-9042-b312786f521d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "2178263e-eca0-61eb-9042-b312786f521d"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1998-11-21T06:33:09+01:00",
+              "end": "1998-11-21T07:19:46+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1998-11-21T06:33:09+01:00",
+          "end": "1998-11-21T07:19:46+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[37]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "d4dbdade-6204-52a4-a1cf-753f3a4921c5",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "d4dbdade-6204-52a4-a1cf-753f3a4921c5"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "162673000",
+                "display": "General examination of patient (procedure)"
+              }
+            ],
+            "text": "General examination of patient (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1999-01-30T06:33:09+01:00",
+              "end": "1999-01-30T07:13:07+01:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194",
+              "display": "Dr. Josephine273 Collier206"
+            }
+          }
+        ],
+        "period": {
+          "start": "1999-01-30T06:33:09+01:00",
+          "end": "1999-01-30T07:13:07+01:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9",
+              "display": "BRAINTREE FAMILY PHYSICIAN INC"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06",
+          "display": "BRAINTREE FAMILY PHYSICIAN INC"
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[38]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "4aa5991d-b071-c70a-22f2-447ea7865010",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "4aa5991d-b071-c70a-22f2-447ea7865010"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up (procedure)"
+              }
+            ],
+            "text": "Encounter for check up (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1999-04-17T07:33:09+02:00",
+              "end": "1999-04-17T08:24:03+02:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1999-04-17T07:33:09+02:00",
+          "end": "1999-04-17T08:24:03+02:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[39]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Encounter.location[0].location",
+          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.participant[0].individual",
+          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "error",
+          "expression": "Encounter.serviceProvider",
+          "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
+          "ignored": true
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Encounter.class",
+          "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#AMB) was not found in the value set 'Encounter Class Value Set' (http://hl7.eu/fhir/hdr/ValueSet/encounter-class-eu-hdr|1.0.0), and a code SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable).  (error message = The provided code 'http://terminology.hl7.org/CodeSyst"
+        }
+      ],
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "cc8b124b-1612-ed51-715a-64706c34bc88",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "cc8b124b-1612-ed51-715a-64706c34bc88"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185347001",
+                "display": "Encounter for problem (procedure)"
+              }
+            ],
+            "text": "Encounter for problem (procedure)"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58",
+          "display": "Mr. Alfonso758 Loyd638 Bergstrom287"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "PPRF",
+                    "display": "primary performer"
+                  }
+                ],
+                "text": "primary performer"
+              }
+            ],
+            "period": {
+              "start": "1999-07-13T07:33:09+02:00",
+              "end": "1999-07-13T10:52:09+02:00"
+            },
+            "individual": {
+              "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
+              "display": "Dr. January966 Roberts511"
+            }
+          }
+        ],
+        "period": {
+          "start": "1999-07-13T07:33:09+02:00",
+          "end": "1999-07-13T10:52:09+02:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+              "display": "SOUTH SHORE HOSPITAL INC."
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    }
+  ]
+}

@@ -578,7 +578,7 @@
     }
   },
   "national": {
-    "$comment": "German ePA profiles (#1172). Not EEHRxF: build.py does not read this section, so /eehrxf never shows it as coverage.",
+    "$comment": "German profiles (#1172): gematik ePA, KBV MIO, MII Kerndatensatz. Not EEHRxF: build.py writes the onPage ones to a seed and mock of their own, never counted as EEHRxF coverage.",
     "igs": {
       "epa-laboratory": {
         "package": "de.gematik.epa.laboratory#1.0.0-ballot.1",

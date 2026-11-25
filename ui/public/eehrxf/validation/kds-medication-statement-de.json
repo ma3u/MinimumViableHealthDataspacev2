@@ -1,0 +1,390 @@
+{
+  "profileId": "kds-medication-statement-de",
+  "name": "MedicationStatement (MII KDS Medikation)",
+  "section": "national",
+  "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+  "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
+  "baseResource": "MedicationStatement",
+  "tested": 5,
+  "passed": 0,
+  "warnings": 21,
+  "resources": [
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[19]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredRequiresBoth: 'Wenn eine strukturierte Dosierungsangabe erfolgt, müssen sowohl timing als auch doseAndRate angegeben werden.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredOrFreeTextWarning: 'Die Dosierungsangabe darf entweder nur als Freitext oder nur als vollständige strukturierte Information erfolgen — eine Mischung ist nicht erlaubt.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-p1-A10BA02",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "A10BA02"
+            }
+          ],
+          "text": "Metformin 500 mg"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectivePeriod": {
+          "start": "2018-04-10"
+        },
+        "dateAsserted": "2026-08-21",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Diabetes mellitus type 2"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-1",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 500,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[20]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredRequiresBoth: 'Wenn eine strukturierte Dosierungsangabe erfolgt, müssen sowohl timing als auch doseAndRate angegeben werden.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredOrFreeTextWarning: 'Die Dosierungsangabe darf entweder nur als Freitext oder nur als vollständige strukturierte Information erfolgen — eine Mischung ist nicht erlaubt.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-p1-C09AA03",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA03"
+            }
+          ],
+          "text": "Lisinopril 10 mg"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectivePeriod": {
+          "start": "2015-11-02"
+        },
+        "dateAsserted": "2026-08-21",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 10,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[46]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredRequiresBoth: 'Wenn eine strukturierte Dosierungsangabe erfolgt, müssen sowohl timing als auch doseAndRate angegeben werden.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredOrFreeTextWarning: 'Die Dosierungsangabe darf entweder nur als Freitext oder nur als vollständige strukturierte Information erfolgen — eine Mischung ist nicht erlaubt.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-1002-B01AC06",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "B01AC06"
+            }
+          ],
+          "text": "Acetylsalicylic acid 100 mg"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectivePeriod": {
+          "start": "2025-11-18"
+        },
+        "dateAsserted": "2025-12-01",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Cardiovascular prevention"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 100,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[47]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredRequiresBoth: 'Wenn eine strukturierte Dosierungsangabe erfolgt, müssen sowohl timing als auch doseAndRate angegeben werden.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0]",
+          "message": "Constraint failed: DosageStructuredOrFreeTextWarning: 'Die Dosierungsangabe darf entweder nur als Freitext oder nur als vollständige strukturierte Information erfolgen — eine Mischung ist nicht erlaubt.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code 'mg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.dosage[0].doseAndRate[0].dose.ofType(Quantity)",
+          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ms-1002-C07AB07",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C07AB07"
+            }
+          ],
+          "text": "Bisoprolol 2.5 mg"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectivePeriod": {
+          "start": "2025-11-18"
+        },
+        "dateAsserted": "2025-12-01",
+        "informationSource": {
+          "display": "Bundeseinheitlicher Medikationsplan (fictional)"
+        },
+        "reasonCode": [
+          {
+            "text": "Hypertension"
+          }
+        ],
+        "dosage": [
+          {
+            "text": "1-0-0",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 2.5,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[91]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "MedicationStatement",
+          "message": "MedicationStatement.effective[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement|2026.0.1)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationStatement",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "sparse-ms-0001",
+        "status": "unknown",
+        "medicationCodeableConcept": {
+          "text": "Colecalciferol"
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        }
+      }
+    }
+  ]
+}
