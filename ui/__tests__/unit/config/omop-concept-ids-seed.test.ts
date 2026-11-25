@@ -21,6 +21,7 @@ const seedSh = read("neo4j/seed.sh");
 const graphGenerator = read("scripts/generate-graph-seed.py");
 const bundleGenerator = read("scripts/generate-fhir-bundles.py");
 const syntheticSeed = read("neo4j/insert-synthetic-schema-data.cypher");
+const personaGenerator = read("scripts/generate-persona-overview-seed.py");
 
 type Row = { code: string; omop: number; name: string };
 
@@ -79,7 +80,24 @@ describe("OMOP concept ids (#1167)", () => {
       ),
     ].map((m) => [m[1], m[2]] as [string, string]);
     expect(bundleDrugs.length).toBeGreaterThan(5);
-    const wrong = [...pythonTable("RXNORM"), ...bundleDrugs]
+    // P1's and P2's lists in the persona overview: ("rxcui", "label", "since")
+    const personaLists = ["\nMEDICATIONS = [", "\nP2_MEDICATIONS = ["]
+      .map((name) => {
+        const start = personaGenerator.indexOf(name);
+        expect(start, name).toBeGreaterThan(-1);
+        return personaGenerator.slice(
+          start,
+          personaGenerator.indexOf("\n]", start),
+        );
+      })
+      .join("\n");
+    const personaDrugs = [
+      ...personaLists.matchAll(
+        /\(\s*"(\d+)",\s*"([^"]+)",\s*"\d{4}-\d{2}-\d{2}"\)/g,
+      ),
+    ].map((m) => [m[1], m[2]] as [string, string]);
+    expect(personaDrugs.length).toBe(10);
+    const wrong = [...pythonTable("RXNORM"), ...bundleDrugs, ...personaDrugs]
       .filter(([code, label]) => {
         const row = DRUGS.get(code);
         return !row || !row.name.toLowerCase().includes(ingredient(label));
@@ -125,6 +143,11 @@ describe("RxNorm recode migration (#1167)", () => {
       "AND toLower(coalesce(mr.display, mr.name, '')) = m.label",
     );
     expect(migration).toContain("= 'omop ' + m.label");
+    // P1's requests are keyed by their code: the old-id copy goes once the
+    // seed wrote the new one.
+    expect(migration).toContain(
+      "WHERE EXISTS { MATCH (p)-[:HAS_MEDICATION_REQUEST]->(:MedicationRequest {resourceId: 'med-p1-' + m.new}) }",
+    );
     expect(migration).not.toMatch(/\bCREATE \(/);
   });
 

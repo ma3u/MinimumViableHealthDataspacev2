@@ -120,8 +120,8 @@
       "kind": "statement"
      },
      {
-      "id": "med-p1-308460",
-      "code": "308460",
+      "id": "med-p1-2123111",
+      "code": "2123111",
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "display": "Salbutamol 100 mcg inhaler",
       "status": "active",
@@ -131,8 +131,8 @@
       "reason": null
      },
      {
-      "id": "med-p1-197361",
-      "code": "197361",
+      "id": "med-p1-314076",
+      "code": "314076",
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "display": "Lisinopril 10 mg oral tablet",
       "status": "active",
@@ -153,8 +153,8 @@
       "reason": null
      },
      {
-      "id": "med-p1-209459",
-      "code": "209459",
+      "id": "med-p1-617310",
+      "code": "617310",
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "display": "Atorvastatin 20 mg oral tablet",
       "status": "active",
@@ -535,7 +535,7 @@
     "medications": [
      {
       "id": "rx-2000-197381",
-      "code": "197381",
+      "code": "966221",
       "system": null,
       "display": "Levothyroxine 50 mcg Tab",
       "status": "active",
@@ -677,8 +677,8 @@
       "kind": "statement"
      },
      {
-      "id": "med-p1-308460",
-      "code": "308460",
+      "id": "med-p1-2123111",
+      "code": "2123111",
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "display": "Salbutamol 100 mcg inhaler",
       "status": "active",
@@ -688,8 +688,8 @@
       "reason": null
      },
      {
-      "id": "med-p1-197361",
-      "code": "197361",
+      "id": "med-p1-314076",
+      "code": "314076",
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "display": "Lisinopril 10 mg oral tablet",
       "status": "active",
@@ -710,8 +710,8 @@
       "reason": null
      },
      {
-      "id": "med-p1-209459",
-      "code": "209459",
+      "id": "med-p1-617310",
+      "code": "617310",
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "display": "Atorvastatin 20 mg oral tablet",
       "status": "active",

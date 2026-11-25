@@ -638,10 +638,10 @@
       }
     },
     {
-      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p1-197361",
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p1-2123111",
       "resource": {
         "resourceType": "MedicationRequest",
-        "id": "med-p1-197361",
+        "id": "med-p1-2123111",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
@@ -653,15 +653,15 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "197361"
+              "code": "2123111"
             }
           ],
-          "text": "Lisinopril 10 mg oral tablet"
+          "text": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
           "reference": "Patient/P1"
         },
-        "authoredOn": "2015-11-02",
+        "authoredOn": "2009-02-27",
         "requester": {
           "extension": [
             {
@@ -673,10 +673,10 @@
       }
     },
     {
-      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p1-209459",
+      "fullUrl": "http://neo4j-proxy:9090/fhir/MedicationRequest/med-p1-314076",
       "resource": {
         "resourceType": "MedicationRequest",
-        "id": "med-p1-209459",
+        "id": "med-p1-314076",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
@@ -688,15 +688,15 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "209459"
+              "code": "314076"
             }
           ],
-          "text": "Atorvastatin 20 mg oral tablet"
+          "text": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
           "reference": "Patient/P1"
         },
-        "authoredOn": "2024-09-12",
+        "authoredOn": "2015-11-02",
         "requester": {
           "extension": [
             {
@@ -2323,7 +2323,7 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "197381"
+              "code": "966221"
             }
           ],
           "text": "Levothyroxine 50 mcg Tab"
@@ -2701,7 +2701,7 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "1861634"
+              "code": "1545658"
             }
           ],
           "text": "Empagliflozin 10 mg Oral Tab"
@@ -2743,7 +2743,7 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "197884"
+              "code": "311041"
             }
           ],
           "text": "Insulin Glargine 100 U/mL"

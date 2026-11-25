@@ -67,9 +67,9 @@ MERGE (p)-[:HAS_CONDITION]->(cond);
 MATCH (p:Patient {resourceId: 'P1'})
 UNWIND [
   {id: 'med-p1-860975', code: '860975', display: 'Metformin 500 mg oral tablet', since: '2018-04-10'},
-  {id: 'med-p1-197361', code: '197361', display: 'Lisinopril 10 mg oral tablet', since: '2015-11-02'},
-  {id: 'med-p1-308460', code: '308460', display: 'Salbutamol 100 mcg inhaler', since: '2009-02-27'},
-  {id: 'med-p1-209459', code: '209459', display: 'Atorvastatin 20 mg oral tablet', since: '2024-09-12'}
+  {id: 'med-p1-314076', code: '314076', display: 'Lisinopril 10 mg oral tablet', since: '2015-11-02'},
+  {id: 'med-p1-2123111', code: '2123111', display: 'Salbutamol 100 mcg inhaler', since: '2009-02-27'},
+  {id: 'med-p1-617310', code: '617310', display: 'Atorvastatin 20 mg oral tablet', since: '2024-09-12'}
 ] AS m
 MERGE (med:MedicationRequest {resourceId: m.id})
 SET med.medicationCode = m.code,

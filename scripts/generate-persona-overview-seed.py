@@ -95,11 +95,15 @@ CONDITIONS = [
     ("195967001", "http://snomed.info/sct", "Asthma", "2009-02-27"),
 ]
 
+# RxCUIs checked with RxNav on 2026-11-24 (#1167). 197361 (amlodipine),
+# 308460 (azithromycin) and 209459 (a Tylenol product) used to stand here for
+# lisinopril, salbutamol and atorvastatin; neo4j/migrate-rxnorm-codes.cypher
+# corrects a graph seeded before. 860975 is the extended-release tablet.
 MEDICATIONS = [
     ("860975", "Metformin 500 mg oral tablet", "2018-04-10"),
-    ("197361", "Lisinopril 10 mg oral tablet", "2015-11-02"),
-    ("308460", "Salbutamol 100 mcg inhaler", "2009-02-27"),
-    ("209459", "Atorvastatin 20 mg oral tablet", "2024-09-12"),
+    ("314076", "Lisinopril 10 mg oral tablet", "2015-11-02"),
+    ("2123111", "Salbutamol 100 mcg inhaler", "2009-02-27"),
+    ("617310", "Atorvastatin 20 mg oral tablet", "2024-09-12"),
 ]
 
 # ── 1b. The second demo patient (P2, the patient2 login), #708 ──────────────
