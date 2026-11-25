@@ -78,7 +78,7 @@
       "totalResources": 2588,
       "profileCount": 7,
       "tested": 76,
-      "passed": 66,
+      "passed": 67,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -160,12 +160,11 @@
           "baseResource": "Patient",
           "coverage": "partial",
           "tested": 29,
-          "passed": 19,
-          "failed": 10,
+          "passed": 20,
+          "failed": 9,
           "topIssues": [
             "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
+            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)"
           ],
           "resourceCount": 167
         },
@@ -217,7 +216,7 @@
       "totalResources": 5628,
       "profileCount": 3,
       "tested": 60,
-      "passed": 50,
+      "passed": 51,
       "profiles": [
         {
           "profileId": "composition-hdr-eu",
@@ -265,12 +264,11 @@
           "baseResource": "Patient",
           "coverage": "partial",
           "tested": 29,
-          "passed": 19,
-          "failed": 10,
+          "passed": 20,
+          "failed": 9,
           "topIssues": [
             "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
+            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)"
           ],
           "resourceCount": 167
         }
@@ -288,7 +286,7 @@
       "totalResources": 37880,
       "profileCount": 4,
       "tested": 80,
-      "passed": 39,
+      "passed": 40,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -364,12 +362,11 @@
           "baseResource": "Patient",
           "coverage": "partial",
           "tested": 29,
-          "passed": 19,
-          "failed": 10,
+          "passed": 20,
+          "failed": 9,
           "topIssues": [
             "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
+            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)"
           ],
           "resourceCount": 167
         }
@@ -438,8 +435,8 @@
     "testedProfiles": 10,
     "passingProfiles": 5,
     "resourcesTested": 192,
-    "resourcesPassed": 148,
-    "passRatePercent": 77,
+    "resourcesPassed": 149,
+    "passRatePercent": 78,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,

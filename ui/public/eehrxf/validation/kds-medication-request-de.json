@@ -552,12 +552,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -613,12 +607,6 @@
       "origin": "synthea-sample.json#entry[41]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -676,12 +664,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -738,12 +720,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -799,12 +775,6 @@
       "origin": "synthea-sample.json#entry[44]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -871,12 +841,6 @@
           "severity": "error",
           "expression": "MedicationRequest.dosageInstruction[0]",
           "message": "Constraint failed: DosageDoseUnitSameCode: 'Die Dosiereinheit muss über alle Dosierungen gleich sein.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
-        },
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
         },
         {
           "severity": "warning",
@@ -975,12 +939,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1046,12 +1004,6 @@
           "severity": "error",
           "expression": "MedicationRequest.dosageInstruction[0]",
           "message": "Constraint failed: DosageDoseUnitSameCode: 'Die Dosiereinheit muss über alle Dosierungen gleich sein.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
-        },
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
         },
         {
           "severity": "warning",
@@ -1150,12 +1102,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1210,12 +1156,6 @@
       "origin": "synthea-sample.json#entry[49]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -1272,12 +1212,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1332,12 +1266,6 @@
       "origin": "synthea-sample.json#entry[51]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -1394,12 +1322,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1454,12 +1376,6 @@
       "origin": "synthea-sample.json#entry[53]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -1516,12 +1432,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1576,12 +1486,6 @@
       "origin": "synthea-sample.json#entry[55]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -1638,12 +1542,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1698,12 +1596,6 @@
       "origin": "synthea-sample.json#entry[57]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",
@@ -1760,12 +1652,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "MedicationRequest",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1820,12 +1706,6 @@
       "origin": "synthea-sample.json#entry[59]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.requester",
-          "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest",

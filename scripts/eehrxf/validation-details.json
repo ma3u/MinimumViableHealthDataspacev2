@@ -4182,24 +4182,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4217,24 +4199,6 @@
         "origin": "synthea-sample.json#entry[21]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4254,24 +4218,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4289,24 +4235,6 @@
         "origin": "synthea-sample.json#entry[23]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4326,24 +4254,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4361,24 +4271,6 @@
         "origin": "synthea-sample.json#entry[25]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4398,24 +4290,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4433,24 +4307,6 @@
         "origin": "synthea-sample.json#entry[27]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4470,24 +4326,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4505,24 +4343,6 @@
         "origin": "synthea-sample.json#entry[29]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4542,24 +4362,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4577,24 +4379,6 @@
         "origin": "synthea-sample.json#entry[31]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4614,24 +4398,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4649,24 +4415,6 @@
         "origin": "synthea-sample.json#entry[33]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4686,24 +4434,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4721,24 +4451,6 @@
         "origin": "synthea-sample.json#entry[35]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4758,24 +4470,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4793,24 +4487,6 @@
         "origin": "synthea-sample.json#entry[37]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -4830,24 +4506,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -4865,24 +4523,6 @@
         "origin": "synthea-sample.json#entry[39]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -15831,12 +15471,6 @@
           },
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.subject",
             "message": "MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)"
           },
@@ -15882,12 +15516,6 @@
             "severity": "error",
             "expression": "MedicationRequest.medication.ofType(CodeableConcept).text",
             "message": "This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2"
-          },
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
           },
           {
             "severity": "error",
@@ -15939,12 +15567,6 @@
           },
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.subject",
             "message": "MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)"
           },
@@ -15993,12 +15615,6 @@
           },
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.subject",
             "message": "MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)"
           },
@@ -16044,12 +15660,6 @@
             "severity": "error",
             "expression": "MedicationRequest.medication.ofType(CodeableConcept).text",
             "message": "This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2"
-          },
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
           },
           {
             "severity": "error",
@@ -16181,12 +15791,6 @@
           },
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16247,12 +15851,6 @@
             "severity": "error",
             "expression": "MedicationRequest.medication.ofType(CodeableConcept).text",
             "message": "This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2"
-          },
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
           },
           {
             "severity": "error",
@@ -16384,12 +15982,6 @@
           },
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16428,12 +16020,6 @@
         "issues": [
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16460,12 +16046,6 @@
         "origin": "synthea-sample.json#entry[49]",
         "passed": false,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "error",
             "expression": "MedicationRequest.status",
@@ -16496,12 +16076,6 @@
         "issues": [
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16528,12 +16102,6 @@
         "origin": "synthea-sample.json#entry[51]",
         "passed": false,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "error",
             "expression": "MedicationRequest.status",
@@ -16564,12 +16132,6 @@
         "issues": [
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16596,12 +16158,6 @@
         "origin": "synthea-sample.json#entry[53]",
         "passed": false,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "error",
             "expression": "MedicationRequest.status",
@@ -16632,12 +16188,6 @@
         "issues": [
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16664,12 +16214,6 @@
         "origin": "synthea-sample.json#entry[55]",
         "passed": false,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "error",
             "expression": "MedicationRequest.status",
@@ -16700,12 +16244,6 @@
         "issues": [
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16732,12 +16270,6 @@
         "origin": "synthea-sample.json#entry[57]",
         "passed": false,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "error",
             "expression": "MedicationRequest.status",
@@ -16768,12 +16300,6 @@
         "issues": [
           {
             "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
             "expression": "MedicationRequest.status",
             "message": "The System URI could not be determined for the code 'stopped' in the ValueSet 'https://gematik.de/fhir/terminology/ValueSet/ti-medication-request-status-vs|1.0.9'"
           },
@@ -16800,12 +16326,6 @@
         "origin": "synthea-sample.json#entry[59]",
         "passed": false,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "error",
             "expression": "MedicationRequest.status",
@@ -17528,24 +17048,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17558,24 +17060,6 @@
         "origin": "synthea-sample.json#entry[21]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17590,24 +17074,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17620,24 +17086,6 @@
         "origin": "synthea-sample.json#entry[23]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17652,24 +17100,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17682,24 +17112,6 @@
         "origin": "synthea-sample.json#entry[25]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17714,24 +17126,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17744,24 +17138,6 @@
         "origin": "synthea-sample.json#entry[27]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17776,24 +17152,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17806,24 +17164,6 @@
         "origin": "synthea-sample.json#entry[29]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17838,24 +17178,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17868,24 +17190,6 @@
         "origin": "synthea-sample.json#entry[31]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17900,24 +17204,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17930,24 +17216,6 @@
         "origin": "synthea-sample.json#entry[33]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|81c75a54-2b95-3fdf-9327-b74df8630869' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999984591' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|74ab949d-17ac-3309-83a0-13b4405c66aa' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -17962,24 +17230,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -17992,24 +17242,6 @@
         "origin": "synthea-sample.json#entry[35]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -18024,24 +17256,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -18054,24 +17268,6 @@
         "origin": "synthea-sample.json#entry[37]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|6c5d4f1f-e9c0-385e-a2bb-93c1f77926e9' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999970194' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|31e00f85-6909-3d9f-afc6-5ae507ab0c06' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -18086,24 +17282,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Encounter",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -18116,24 +17294,6 @@
         "origin": "synthea-sample.json#entry[39]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Encounter.location[0].location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.participant[0].individual",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
-            "severity": "error",
-            "expression": "Encounter.serviceProvider",
-            "message": "The reference 'Organization?identifier=https://github.com/synthetichealth/synthea|e2eab39c-5195-34aa-b35f-e89e37cfed01' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Encounter",
@@ -19809,12 +18969,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -19827,12 +18981,6 @@
         "origin": "synthea-sample.json#entry[41]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -19847,12 +18995,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -19866,12 +19008,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -19884,12 +19020,6 @@
         "origin": "synthea-sample.json#entry[44]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -19907,12 +19037,6 @@
             "severity": "error",
             "expression": "MedicationRequest.dosageInstruction[0]",
             "message": "Constraint failed: DosageDoseUnitSameCode: 'Die Dosiereinheit muss \u00fcber alle Dosierungen gleich sein.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
-          },
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
           },
           {
             "severity": "warning",
@@ -19933,12 +19057,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -19955,12 +19073,6 @@
             "severity": "error",
             "expression": "MedicationRequest.dosageInstruction[0]",
             "message": "Constraint failed: DosageDoseUnitSameCode: 'Die Dosiereinheit muss \u00fcber alle Dosierungen gleich sein.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
-          },
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
           },
           {
             "severity": "warning",
@@ -19981,12 +19093,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -19999,12 +19105,6 @@
         "origin": "synthea-sample.json#entry[49]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -20019,12 +19119,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -20037,12 +19131,6 @@
         "origin": "synthea-sample.json#entry[51]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -20057,12 +19145,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -20075,12 +19157,6 @@
         "origin": "synthea-sample.json#entry[53]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -20095,12 +19171,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -20113,12 +19183,6 @@
         "origin": "synthea-sample.json#entry[55]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -20133,12 +19197,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -20151,12 +19209,6 @@
         "origin": "synthea-sample.json#entry[57]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -20171,12 +19223,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -20189,12 +19235,6 @@
         "origin": "synthea-sample.json#entry[59]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -20702,13 +19742,8 @@
         "file": "kds-patient-de__synthea__004.json",
         "source": "synthea",
         "origin": "synthea-sample.json#entry[155]",
-        "passed": false,
+        "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Patient.extension[0]",
-            "message": "The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-          },
           {
             "severity": "warning",
             "expression": "Patient.communication[0].language.coding[0].system",
@@ -20983,12 +20018,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21001,12 +20030,6 @@
         "origin": "synthea-sample.json#entry[164]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21021,12 +20044,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21039,12 +20056,6 @@
         "origin": "synthea-sample.json#entry[166]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21059,12 +20070,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21077,12 +20082,6 @@
         "origin": "synthea-sample.json#entry[168]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21097,12 +20096,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21115,12 +20108,6 @@
         "origin": "synthea-sample.json#entry[170]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21135,12 +20122,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21153,12 +20134,6 @@
         "origin": "synthea-sample.json#entry[172]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21173,12 +20148,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21191,12 +20160,6 @@
         "origin": "synthea-sample.json#entry[174]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21211,12 +20174,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21229,12 +20186,6 @@
         "origin": "synthea-sample.json#entry[176]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21249,12 +20200,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21267,12 +20212,6 @@
         "origin": "synthea-sample.json#entry[178]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21287,12 +20226,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21305,12 +20238,6 @@
         "origin": "synthea-sample.json#entry[180]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21325,12 +20252,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "Procedure",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21343,12 +20264,6 @@
         "origin": "synthea-sample.json#entry[182]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Procedure.location",
-            "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "Procedure",
@@ -21538,12 +20453,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21556,12 +20465,6 @@
         "origin": "synthea-sample.json#entry[41]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21576,12 +20479,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21594,12 +20491,6 @@
         "origin": "synthea-sample.json#entry[43]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21614,12 +20505,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21632,12 +20517,6 @@
         "origin": "synthea-sample.json#entry[45]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21657,12 +20536,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21675,12 +20548,6 @@
         "origin": "synthea-sample.json#entry[47]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21700,12 +20567,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21718,12 +20579,6 @@
         "origin": "synthea-sample.json#entry[49]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21738,12 +20593,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21756,12 +20605,6 @@
         "origin": "synthea-sample.json#entry[51]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21776,12 +20619,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21794,12 +20631,6 @@
         "origin": "synthea-sample.json#entry[53]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21814,12 +20645,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21832,12 +20657,6 @@
         "origin": "synthea-sample.json#entry[55]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21852,12 +20671,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21870,12 +20683,6 @@
         "origin": "synthea-sample.json#entry[57]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -21890,12 +20697,6 @@
         "passed": true,
         "issues": [
           {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
-          {
             "severity": "warning",
             "expression": "MedicationRequest",
             "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -21908,12 +20709,6 @@
         "origin": "synthea-sample.json#entry[59]",
         "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "MedicationRequest.requester",
-            "message": "The reference 'Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-            "ignored": true
-          },
           {
             "severity": "warning",
             "expression": "MedicationRequest",
@@ -33656,13 +32451,8 @@
         "file": "patient-eu-core__synthea__003.json",
         "source": "synthea",
         "origin": "synthea-sample.json#entry[154]",
-        "passed": false,
+        "passed": true,
         "issues": [
-          {
-            "severity": "error",
-            "expression": "Patient.extension[0]",
-            "message": "The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-          },
           {
             "severity": "warning",
             "expression": "Patient.communication[0].language.coding[0].system",
