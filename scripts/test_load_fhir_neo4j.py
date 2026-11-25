@@ -83,13 +83,16 @@ class LoaderCypher(unittest.TestCase):
                 cypher = getattr(self.loader, name)
                 self.assertRegex(cypher, r"ON CREATE SET \w+\.code = row\.code")
 
-    def test_snomed_and_rxnorm_reuse_a_concept_keyed_by_an_integer(self):
-        # The seeds write these keys as integers and as strings; a string
-        # MERGE alone would make a second node beside an integer one.
+    def test_snomed_and_rxnorm_keys_are_strings(self):
+        # #1231: a uniqueness constraint treats 415749005 and "415749005" as
+        # two values. Every key is a string, so the loader matches and merges
+        # on toString(row.code) and never on an integer.
         for name in ("LINK_CONDITIONS_SNOMED", "LINK_PROCEDURES_SNOMED", "LINK_MEDICATIONS_RXNORM"):
             with self.subTest(statement=name):
                 cypher = getattr(self.loader, name)
-                self.assertIn("IN [row.code, toInteger(row.code)]", cypher)
+                self.assertNotIn("toInteger", cypher)
+                self.assertRegex(cypher, r"WHERE known\.(conceptId|rxcui) = toString\(row\.code\)")
+                self.assertRegex(cypher, r"MERGE \(\w+:(SnomedConcept|RxNormConcept) \{(conceptId|rxcui): toString\(row\.code\)\}\)")
 
     def test_parse_bundle_hands_the_links_the_code(self):
         import json

@@ -36,6 +36,8 @@ tests {
       expect(res.getStatus()).to.equal(200);
       expect(body.speCount).to.be.above(0);
       expect(body.totals).to.have.property("patients");
+      // One id for the query in every workspace's log (ADR-100 decision 4).
+      expect(body.federationQueryId).to.match(/^[0-9a-f-]{36}$/);
     }
   });
 }

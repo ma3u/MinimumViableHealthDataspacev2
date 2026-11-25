@@ -194,9 +194,12 @@ export async function POST(request: NextRequest) {
         `policy:local:${Date.now()}`;
       const now = new Date().toISOString();
 
+      // Keyed by policyId, the key init-schema.cypher makes unique; `id` is
+      // kept for readers of the older nodes (#1222).
       await runQuery(
-        `MERGE (pol:OdrlPolicy {id: $policyId})
-         SET pol.participantId = $participantId,
+        `MERGE (pol:OdrlPolicy {policyId: $policyId})
+         SET pol.id            = $policyId,
+             pol.participantId = $participantId,
              pol.policyJson    = $policyJson,
              pol.createdAt     = $createdAt,
              pol.source        = 'local-registry'
@@ -274,8 +277,9 @@ export async function PUT(request: NextRequest) {
       const now = new Date().toISOString();
 
       await runQuery(
-        `MERGE (pol:OdrlPolicy {id: $policyId})
-         SET pol.participantId = $participantId,
+        `MERGE (pol:OdrlPolicy {policyId: $policyId})
+         SET pol.id            = $policyId,
+             pol.participantId = $participantId,
              pol.policyJson    = $policyJson,
              pol.updatedAt     = $updatedAt,
              pol.source        = 'local-registry'`,
@@ -331,7 +335,8 @@ export async function DELETE(request: NextRequest) {
       // EDC-V offline — delete from Neo4j
       console.warn("EDC-V offline, deleting policy from Neo4j local registry");
       await runQuery(
-        `MATCH (pol:OdrlPolicy {id: $policyId})
+        `MATCH (pol:OdrlPolicy)
+         WHERE pol.policyId = $policyId OR pol.id = $policyId
          DETACH DELETE pol`,
         { policyId },
       );
