@@ -14,6 +14,7 @@ import gzip
 import importlib.util
 import json
 import re
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,6 +25,9 @@ ROOT = HERE.parents[1]
 _spec = importlib.util.spec_from_file_location("import_nedrex", HERE / "import_nedrex.py")
 nx = importlib.util.module_from_spec(_spec)
 assert _spec.loader is not None
+# Registered before it runs: on Python 3.12 a @dataclass looks its module up
+# in sys.modules, and CI runs 3.12.
+sys.modules[_spec.name] = nx
 _spec.loader.exec_module(nx)
 
 
