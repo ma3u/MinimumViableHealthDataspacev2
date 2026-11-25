@@ -2011,7 +2011,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "198211",
+                "code": "243670",
                 "display": "Aspirin 81 MG Oral Tablet"
               }
             ],
@@ -2651,7 +2651,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "198211",
+                "code": "243670",
                 "display": "Aspirin 81 MG Oral Tablet"
               }
             ],
@@ -2988,7 +2988,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "835829",
+                "code": "311041",
                 "display": "Insulin Glargine 100 UNT/ML Injectable Solution"
               }
             ],
@@ -3308,7 +3308,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "259255",
+                "code": "617310",
                 "display": "Atorvastatin 20 MG Oral Tablet"
               }
             ],
@@ -3628,7 +3628,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "313782",
+                "code": "198051",
                 "display": "Omeprazole 20 MG Delayed Release Oral Capsule"
               }
             ],
@@ -5191,7 +5191,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "259255",
+                "code": "617310",
                 "display": "Atorvastatin 20 MG Oral Tablet"
               }
             ],
@@ -5267,7 +5267,7 @@
             "coding": [
               {
                 "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code": "835829",
+                "code": "311041",
                 "display": "Insulin Glargine 100 UNT/ML Injectable Solution"
               }
             ],

@@ -102,9 +102,13 @@ CREATE CONSTRAINT omop_person_id IF NOT EXISTS FOR (op:OMOPPerson) REQUIRE op.pe
 CREATE CONSTRAINT omop_visit_occurrence_id IF NOT EXISTS FOR (ov:OMOPVisitOccurrence) REQUIRE ov.visitOccurrenceId IS UNIQUE;
 CREATE CONSTRAINT omop_condition_occurrence_id IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) REQUIRE oco.conditionOccurrenceId IS UNIQUE;
 CREATE INDEX omop_condition_concept IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) ON (oco.conditionConceptId);
+// The source code (SNOMED CT, RxNorm) beside the OMOP standard concept id; neo4j/seed-omop-concept-ids.cypher maps one to the other (#1167).
+CREATE INDEX omop_condition_source IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) ON (oco.conditionSourceValue);
 CREATE CONSTRAINT omop_measurement_id IF NOT EXISTS FOR (om:OMOPMeasurement) REQUIRE om.measurementId IS UNIQUE;
 CREATE INDEX omop_measurement_concept IF NOT EXISTS FOR (om:OMOPMeasurement) ON (om.measurementConceptId);
 CREATE CONSTRAINT omop_drug_exposure_id IF NOT EXISTS FOR (od:OMOPDrugExposure) REQUIRE od.drugExposureId IS UNIQUE;
+CREATE INDEX omop_drug_concept IF NOT EXISTS FOR (od:OMOPDrugExposure) ON (od.drugConceptId);
+CREATE INDEX omop_drug_source IF NOT EXISTS FOR (od:OMOPDrugExposure) ON (od.drugSourceValue);
 CREATE CONSTRAINT omop_procedure_occurrence_id IF NOT EXISTS FOR (opo:OMOPProcedureOccurrence) REQUIRE opo.procedureOccurrenceId IS UNIQUE;
 CREATE INDEX omop_procedure_concept IF NOT EXISTS FOR (opo:OMOPProcedureOccurrence) ON (opo.procedureConceptId);
 

@@ -171,6 +171,8 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
   run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
   run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
+  run_file "$SEED_DIR"/migrate-rxnorm-codes.cypher "RxNorm codes that named another drug (#1167)"
+  run_file "$SEED_DIR"/seed-omop-concept-ids.cypher "OMOP standard concept ids for conditions and drugs (#1167)"
   run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
@@ -274,6 +276,8 @@ run_file "$SEED_DIR"/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (i
 # Recodes what an earlier run left, after the persona and issue #19 seeds.
 # Idempotent: it matches the old codes only.
 run_file "$SEED_DIR"/migrate-snomed-condition-codes.cypher "SNOMED CT codes that named another disease (#1167)"
+run_file "$SEED_DIR"/migrate-rxnorm-codes.cypher "RxNorm codes that named another drug (#1167)"
+run_file "$SEED_DIR"/seed-omop-concept-ids.cypher "OMOP standard concept ids for conditions and drugs (#1167)"
 
 # Issue #1215: the loader, seed-study-results.cypher and the graph generator
 # once merged LOINC, SNOMED CT and RxNorm nodes on `code`, beside the keyed

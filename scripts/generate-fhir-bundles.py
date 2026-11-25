@@ -69,10 +69,10 @@ medications = [
     {"code": "314076", "display": "Lisinopril 10 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
     {"code": "197361", "display": "Amlodipine 5 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
     {"code": "310798", "display": "Hydrochlorothiazide 25 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
-    {"code": "259255", "display": "Atorvastatin 20 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
-    {"code": "313782", "display": "Omeprazole 20 MG Delayed Release Oral Capsule", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
-    {"code": "198211", "display": "Aspirin 81 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
-    {"code": "835829", "display": "Insulin Glargine 100 UNT/ML Injectable Solution", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
+    {"code": "617310", "display": "Atorvastatin 20 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
+    {"code": "198051", "display": "Omeprazole 20 MG Delayed Release Oral Capsule", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
+    {"code": "243670", "display": "Aspirin 81 MG Oral Tablet", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
+    {"code": "311041", "display": "Insulin Glargine 100 UNT/ML Injectable Solution", "system": "http://www.nlm.nih.gov/research/umls/rxnorm"},
 ]
 
 immunizations = [
