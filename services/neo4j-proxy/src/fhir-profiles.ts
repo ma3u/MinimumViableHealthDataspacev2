@@ -52,6 +52,20 @@ export const PROFILE_CLAIMS: readonly ProfileClaim[] = [
     canonical: "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr",
     resourceType: "Encounter",
   },
+  // German profiles of the MII Kerndatensatz (profiles.json, national), by
+  // the same rule: claimed where every facade resource of the class passed.
+  {
+    profileId: "kds-patient-de",
+    canonical:
+      "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
+    resourceType: "Patient",
+  },
+  {
+    profileId: "kds-medication-request-de",
+    canonical:
+      "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
+    resourceType: "MedicationRequest",
+  },
 ];
 
 function categoryCodes(resource: Record<string, unknown>): string[] {

@@ -307,9 +307,10 @@
     }
   ],
   "national": {
-    "$comment": "German ePA profiles (#1172, step 2 of discussion #1169). Not EEHRxF: validate.py writes their results to the report's national section, which build.py does not read, so /eehrxf never counts them as coverage. Each IG is validated in a run of its own, because each pins other versions of the HL7 Europe and German base packages than the EEHRxF run does. Mapped by what we produce: lab Observation, DiagnosticReport and Bundle to the lab guides, MedicationRequest to the ePA prescription profile. Versions checked on the date and at the URL each IG records.",
+    "$comment": "German profiles: gematik ePA and KBV MIO (#1172, step 2 of discussion #1169), and the MII Kerndatensatz (core data set) the university hospitals' data integration centres deliver for research. eehrxfCounterpart names the EEHRxF profile a German profile covers the same ground as. build.py writes the guides marked onPage to neo4j/register-national-profiles.cypher and ui/public/mock/eehrxf_national.json, never to the EEHRxF outputs; the ePA and MIO guides stay in the report only, because real organisation names are kept out of the default build's graph and mocks (fictional organisation policy, .claude/rules/code-style.md). Not EEHRxF: validate.py writes their results to the report's national section, and /eehrxf shows the onPage ones in a section of their own, never counted as EEHRxF coverage. Each IG is validated in a run of its own, because each pins other versions of the HL7 Europe and German base packages than the EEHRxF run does. Mapped by what we produce: lab Observation, DiagnosticReport and Bundle to the lab guides, MedicationRequest to the ePA prescription profile, and Patient, Condition, Procedure, Encounter, MedicationRequest and MedicationStatement to the MII modules Person, Diagnose, Prozedur, Fall and Medikation. Versions checked on the date and at the URL each IG records.",
     "igs": {
       "epa-medication": {
+        "publisher": "gematik",
         "name": "gematik ePA Medication Service",
         "package": "de.gematik.epa.medication",
         "version": "1.3.5",
@@ -319,7 +320,44 @@
         "checkedOn": "2026-11-20",
         "checkNote": "1.3.5 is the newest release (2026-07-15) and the registry's latest dist-tag; 1.4.0-ballot.1 is listed as a ballot dated 2026-12-08."
       },
+      "mii-kds-base": {
+        "onPage": true,
+        "publisher": "Medizininformatik-Initiative (MII)",
+        "name": "MII Kerndatensatz Basis (Person, Fall, Diagnose, Prozedur)",
+        "package": "de.medizininformatikinitiative.kerndatensatz.base",
+        "version": "2026.0.1",
+        "status": "published",
+        "home": "https://medizininformatik-initiative.github.io/kerndatensatz-basis/2026.0.1/",
+        "checkedAt": "https://packages.simplifier.net/de.medizininformatikinitiative.kerndatensatz.base",
+        "checkedOn": "2026-11-25",
+        "checkNote": "2026.0.1 is the registry's latest dist-tag (2026-07-22); 2027.0.0-ballot is in the MII comment phase until end of November (KDS governance v4.0, section 4.5)."
+      },
+      "mii-kds-laborbefund": {
+        "onPage": true,
+        "publisher": "Medizininformatik-Initiative (MII)",
+        "name": "MII Kerndatensatz Laborbefund",
+        "package": "de.medizininformatikinitiative.kerndatensatz.laborbefund",
+        "version": "2026.0.3",
+        "status": "published",
+        "home": "https://www.medizininformatik-initiative.de/Kerndatensatz/KDS_Laborbefund_2026/",
+        "checkedAt": "https://packages.simplifier.net/de.medizininformatikinitiative.kerndatensatz.laborbefund",
+        "checkedOn": "2026-11-25",
+        "checkNote": "2026.0.3 is the registry's latest dist-tag (2026-06-11), a technical correction of 2026.0.2; 2027.0.0-ballot is dated 2026-09-14."
+      },
+      "mii-kds-medikation": {
+        "onPage": true,
+        "publisher": "Medizininformatik-Initiative (MII)",
+        "name": "MII Kerndatensatz Medikation",
+        "package": "de.medizininformatikinitiative.kerndatensatz.medikation",
+        "version": "2026.0.1",
+        "status": "published",
+        "home": "https://www.medizininformatik-initiative.de/Kerndatensatz/KDS_Medikation_2026/",
+        "checkedAt": "https://packages.simplifier.net/de.medizininformatikinitiative.kerndatensatz.medikation",
+        "checkedOn": "2026-11-25",
+        "checkNote": "2026.0.1 is the registry's latest dist-tag."
+      },
       "mio-laborbefund": {
+        "publisher": "KBV (mio42)",
         "name": "KBV MIO Laborbefund",
         "package": "kbv.mio.laborbefund",
         "version": "1.0.0-update",
@@ -330,6 +368,7 @@
         "checkNote": "No published version: the registry lists 1.0.0-kommentierung (deprecated), 1.0.0-kommentierung.2 and 1.0.0-update and no latest dist-tag. The StructureDefinitions of 1.0.0-update say status draft, date 2026-06-11."
       },
       "epa-laboratory": {
+        "publisher": "gematik",
         "name": "gematik ePA Laboratory Report",
         "package": "de.gematik.epa.laboratory",
         "version": "1.0.0-ballot.1",
@@ -395,6 +434,70 @@
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp",
         "baseResource": "Bundle",
         "sourceFilter": "laboratory-bundle"
+      },
+      {
+        "profileId": "kds-patient-de",
+        "name": "Patient (MII KDS Person)",
+        "ig": "mii-kds-base",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
+        "baseResource": "Patient",
+        "eehrxfCounterpart": "patient-eu-core"
+      },
+      {
+        "profileId": "kds-condition-de",
+        "name": "Condition (MII KDS Diagnose)",
+        "ig": "mii-kds-base",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
+        "baseResource": "Condition",
+        "eehrxfCounterpart": "condition-eu-core"
+      },
+      {
+        "profileId": "kds-procedure-de",
+        "name": "Procedure (MII KDS Prozedur)",
+        "ig": "mii-kds-base",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
+        "baseResource": "Procedure"
+      },
+      {
+        "profileId": "kds-encounter-de",
+        "name": "Encounter (MII KDS Fall, Kontakt Gesundheitseinrichtung)",
+        "ig": "mii-kds-base",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
+        "baseResource": "Encounter",
+        "eehrxfCounterpart": "encounter-hdr-eu"
+      },
+      {
+        "profileId": "kds-lab-observation-de",
+        "name": "Observation (MII KDS Laboruntersuchung)",
+        "ig": "mii-kds-laborbefund",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
+        "baseResource": "Observation",
+        "sourceFilter": "laboratory",
+        "eehrxfCounterpart": "observation-results-lab-eu"
+      },
+      {
+        "profileId": "kds-lab-diagnostic-report-de",
+        "name": "DiagnosticReport (MII KDS Laborbefund)",
+        "ig": "mii-kds-laborbefund",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
+        "baseResource": "DiagnosticReport",
+        "sourceFilter": "laboratory",
+        "eehrxfCounterpart": "diagnostic-report-lab-eu"
+      },
+      {
+        "profileId": "kds-medication-request-de",
+        "name": "MedicationRequest (MII KDS Medikation)",
+        "ig": "mii-kds-medikation",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
+        "baseResource": "MedicationRequest",
+        "eehrxfCounterpart": "medication-request-eu"
+      },
+      {
+        "profileId": "kds-medication-statement-de",
+        "name": "MedicationStatement (MII KDS Medikation)",
+        "ig": "mii-kds-medikation",
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+        "baseResource": "MedicationStatement"
       }
     ]
   }

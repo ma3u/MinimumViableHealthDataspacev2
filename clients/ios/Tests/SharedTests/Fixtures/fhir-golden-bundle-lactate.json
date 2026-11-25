@@ -83,6 +83,34 @@
         "resource": {
           "resourceType": "DiagnosticReport",
           "id": "report-1",
+          "identifier": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "FILL",
+                    "display": "Filler Identifier"
+                  }
+                ]
+              },
+              "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+              "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
+              "assigner": {
+                "display": "epa-ingest (tesseract)"
+              }
+            }
+          ],
+          "basedOn": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
           "status": "preliminary",
           "category": [
             {
@@ -137,6 +165,24 @@
         "resource": {
           "resourceType": "Observation",
           "id": "obs-1",
+          "identifier": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "OBI",
+                    "display": "Observation Instance Identifier"
+                  }
+                ]
+              },
+              "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+              "value": "ab67914e-9f57-5640-8367-fcd83bd0d9fa",
+              "assigner": {
+                "display": "epa-ingest (tesseract)"
+              }
+            }
+          ],
           "status": "preliminary",
           "extension": [
             {
@@ -204,6 +250,24 @@
         "resource": {
           "resourceType": "Observation",
           "id": "obs-2",
+          "identifier": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "OBI",
+                    "display": "Observation Instance Identifier"
+                  }
+                ]
+              },
+              "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+              "value": "c6cfe21c-25c2-5cba-b186-5e25b216d501",
+              "assigner": {
+                "display": "epa-ingest (tesseract)"
+              }
+            }
+          ],
           "status": "preliminary",
           "extension": [
             {

@@ -34,3 +34,6 @@
 13 Static export/30 graph.bru
 13 Static export/31 admin-spe.bru
 13 Static export/32 jurisdictions.bru
+# 13 Static export/33 eehrxf-national.bru joins this list once GitHub Pages
+# serves ui/public/mock/eehrxf_national.json (#1261): this run checks the
+# published site, which has no fixture before the PR that adds it deploys.

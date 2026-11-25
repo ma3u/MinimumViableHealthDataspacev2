@@ -1,0 +1,39 @@
+meta {
+  name: 29 The German profiles next to the EEHRxF ones
+  type: http
+  seq: 29
+}
+
+get {
+  url: {{baseUrl}}/api/eehrxf/national
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.guides: isArray
+  res.body.summary.passRatePercent: isNumber
+}
+
+tests {
+  // The MII Kerndatensatz, validated in the same run as the EEHRxF profiles
+  // and never counted as EEHRxF coverage.
+  test("the MII Kerndatensatz is among the guides", function () {
+    const packages = res.getBody().guides.map((g) => g.igPackage.split("#")[0]);
+    expect(packages).to.include("de.medizininformatikinitiative.kerndatensatz.base");
+  });
+
+  test("every profile carries a validation result", function () {
+    for (const g of res.getBody().guides) {
+      for (const p of g.profiles) {
+        expect(p.passed + p.failed).to.equal(p.tested);
+        expect(["full", "partial", "none", "untested"]).to.include(p.coverage);
+      }
+    }
+  });
+}

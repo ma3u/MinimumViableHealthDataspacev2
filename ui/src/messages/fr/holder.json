@@ -214,5 +214,12 @@
   "The first EEHRxF implementation guide is due on {due}.": "Le premier guide de mise en œuvre de l’EEHRxF est attendu pour le {due}.",
   "Draft act (PDF)": "Projet d’acte (PDF)",
   "Annexes (PDF)": "Annexes (PDF)",
-  "Have your say": "Donnez votre avis"
+  "Have your say": "Donnez votre avis",
+  "German profiles": "Profils allemands",
+  "Not EEHRxF coverage. The same resources, validated against the core data set of the Medical Informatics Initiative (MII), which the German university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.": "Pas de couverture EEHRxF. Les mêmes ressources, validées par rapport au jeu de données de base de la Medical Informatics Initiative (MII), que les hôpitaux universitaires allemands fournissent à la recherche. Chaque profil indique le profil EEHRxF auquel il correspond.",
+  "Gates CI": "Bloque la CI",
+  "Report only": "Rapport seulement",
+  "Published by {publisher}": "Publié par {publisher}",
+  "EEHRxF counterpart: {name}": "Équivalent EEHRxF : {name}",
+  "No EEHRxF counterpart": "Pas d'équivalent EEHRxF"
 }

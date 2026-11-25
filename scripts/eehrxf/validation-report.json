@@ -73,7 +73,7 @@
       "resources": 183
     }
   },
-  "inputsDigest": "26375b21a2059694",
+  "inputsDigest": "5dbbe162b35ede24",
   "profiles": {
     "patient-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
@@ -393,16 +393,16 @@
           "resources": 3
         },
         {
-          "issue": "DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-          "resources": 3
-        },
-        {
           "issue": "DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t",
           "resources": 3
         },
         {
           "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice",
           "resources": 3
+        },
+        {
+          "issue": "DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
+          "resources": 2
         }
       ]
     },
@@ -505,6 +505,10 @@
           "resources": 9
         },
         {
+          "issue": "Bundle: Constraint failed: dr-comp-identifier: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
+          "resources": 9
+        },
+        {
           "issue": "Bundle: Constraint failed: dr-comp-type: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
           "resources": 9
         },
@@ -514,10 +518,6 @@
         },
         {
           "issue": "Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice",
-          "resources": 9
-        },
-        {
-          "issue": "entry/*DiagnosticReport/report-1*/: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)",
           "resources": 9
         }
       ]
@@ -587,6 +587,21 @@
       },
       "epa-medication": {
         "package": "de.gematik.epa.medication#1.3.5",
+        "status": "published",
+        "gate": true
+      },
+      "mii-kds-base": {
+        "package": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+        "status": "published",
+        "gate": true
+      },
+      "mii-kds-laborbefund": {
+        "package": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
+        "status": "published",
+        "gate": true
+      },
+      "mii-kds-medikation": {
+        "package": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
         "status": "published",
         "gate": true
       },
@@ -720,6 +735,10 @@
         },
         "topIssues": [
           {
+            "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "resources": 2
+          },
+          {
             "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code",
             "resources": 2
           },
@@ -728,15 +747,11 @@
             "resources": 2
           },
           {
+            "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update and slicing is CLOSED: DiagnosticReport.identifier[n]: D",
+            "resources": 2
+          },
+          {
             "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 2
-          },
-          {
-            "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.data: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 2
-          },
-          {
-            "issue": "DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
             "resources": 2
           }
         ]
@@ -794,8 +809,8 @@
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
         "tested": 37,
-        "passed": 5,
-        "failed": 32,
+        "passed": 0,
+        "failed": 37,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -807,7 +822,7 @@
           },
           "klarbefund": {
             "tested": 11,
-            "passed": 5
+            "passed": 0
           },
           "synthea": {
             "tested": 20,
@@ -828,12 +843,12 @@
             "resources": 20
           },
           {
-            "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 9
+            "issue": "Observation.identifier[n].type.coding[n]: Observation.identifier:resultID.type.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "resources": 17
           },
           {
-            "issue": "Observation.code.coding[n]: Observation.code.coding.display: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 6
+            "issue": "Observation.identifier[n]: Observation.identifier:resultID.assigner: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "resources": 17
           }
         ]
       },
@@ -864,6 +879,10 @@
         },
         "topIssues": [
           {
+            "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "resources": 2
+          },
+          {
             "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code",
             "resources": 2
           },
@@ -876,11 +895,7 @@
             "resources": 2
           },
           {
-            "issue": "DiagnosticReport.performer[n]: DiagnosticReport.performer.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
-            "resources": 2
-          },
-          {
-            "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.identifier[n]",
             "resources": 2
           }
         ]
@@ -921,7 +936,7 @@
           },
           {
             "issue": "entry: Unable to find a match for the specified profile among choices: https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-image-attachment-dglp, https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-labo",
-            "resources": 4
+            "resources": 5
           },
           {
             "issue": "entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0)",
@@ -930,6 +945,314 @@
           {
             "issue": "entry/*Composition/<uuid>*/.identifier.system: Value is '...' but is fixed to 'urn:ietf:rfc:3986' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0#Composition.identifier.system",
             "resources": 3
+          }
+        ]
+      },
+      "kds-patient-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+        "gate": true,
+        "tested": 29,
+        "passed": 25,
+        "failed": 4,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 8,
+            "passed": 8
+          },
+          "klarbefund": {
+            "tested": 9,
+            "passed": 9
+          },
+          "synthea": {
+            "tested": 12,
+            "passed": 8
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
+            "resources": 3
+          },
+          {
+            "issue": "Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
+            "resources": 3
+          },
+          {
+            "issue": "Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here",
+            "resources": 1
+          }
+        ]
+      },
+      "kds-condition-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+        "gate": true,
+        "tested": 32,
+        "passed": 20,
+        "failed": 12,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 12,
+            "passed": 0
+          },
+          "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "synthea": {
+            "tested": 20,
+            "passed": 20
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
+            "resources": 12
+          },
+          {
+            "issue": "Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
+            "resources": 1
+          }
+        ]
+      },
+      "kds-procedure-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+        "gate": true,
+        "tested": 24,
+        "passed": 23,
+        "failed": 1,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 4,
+            "passed": 3
+          },
+          "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "synthea": {
+            "tested": 20,
+            "passed": 20
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "Procedure.code: Constraint failed: sct-ops-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure)",
+            "resources": 1
+          },
+          {
+            "issue": "Procedure.code: Procedure.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)",
+            "resources": 1
+          },
+          {
+            "issue": "Procedure: Procedure.performed[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)",
+            "resources": 1
+          }
+        ]
+      },
+      "kds-encounter-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+        "gate": true,
+        "tested": 31,
+        "passed": 21,
+        "failed": 10,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 11,
+            "passed": 1
+          },
+          "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "synthea": {
+            "tested": 20,
+            "passed": 20
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "Encounter: Constraint failed: mii-enc-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)",
+            "resources": 10
+          },
+          {
+            "issue": "Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE'...'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')'...'http://fhir.de/ValueSe",
+            "resources": 1
+          },
+          {
+            "issue": "Encounter: Constraint failed: mii-enc-2: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)",
+            "resources": 1
+          }
+        ]
+      },
+      "kds-lab-observation-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
+        "gate": true,
+        "tested": 37,
+        "passed": 16,
+        "failed": 21,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 6,
+            "passed": 5
+          },
+          "klarbefund": {
+            "tested": 11,
+            "passed": 11
+          },
+          "synthea": {
+            "tested": 20,
+            "passed": 0
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "resources": 20
+          },
+          {
+            "issue": "Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
+            "resources": 20
+          },
+          {
+            "issue": "Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "resources": 20
+          },
+          {
+            "issue": "Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
+            "resources": 20
+          },
+          {
+            "issue": "Observation.effective.ofType(Period): The Profile '...' definition allows for the type dateTime but found type Period",
+            "resources": 1
+          }
+        ]
+      },
+      "kds-lab-diagnostic-report-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
+        "gate": true,
+        "tested": 2,
+        "passed": 1,
+        "failed": 1,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 0,
+            "passed": 0
+          },
+          "klarbefund": {
+            "tested": 2,
+            "passed": 1
+          },
+          "synthea": {
+            "tested": 0,
+            "passed": 0
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "DiagnosticReport.code: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in",
+            "resources": 1
+          },
+          {
+            "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi",
+            "resources": 1
+          }
+        ]
+      },
+      "kds-medication-request-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
+        "gate": true,
+        "tested": 31,
+        "passed": 29,
+        "failed": 2,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 11,
+            "passed": 11
+          },
+          "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "synthea": {
+            "tested": 20,
+            "passed": 18
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "MedicationRequest.dosageInstruction[n]: Constraint failed: DosageDoseUnitSameCode: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)",
+            "resources": 2
+          }
+        ]
+      },
+      "kds-medication-statement-de": {
+        "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+        "ig": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
+        "gate": true,
+        "tested": 5,
+        "passed": 0,
+        "failed": 5,
+        "bySource": {
+          "documents": {
+            "tested": 0,
+            "passed": 0
+          },
+          "facade": {
+            "tested": 5,
+            "passed": 0
+          },
+          "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "synthea": {
+            "tested": 0,
+            "passed": 0
+          }
+        },
+        "topIssues": [
+          {
+            "issue": "MedicationStatement.dosage[n]: Constraint failed: DosageStructuredRequiresBoth: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)",
+            "resources": 4
+          },
+          {
+            "issue": "MedicationStatement: MedicationStatement.effective[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement|2026.0.1)",
+            "resources": 1
           }
         ]
       }
