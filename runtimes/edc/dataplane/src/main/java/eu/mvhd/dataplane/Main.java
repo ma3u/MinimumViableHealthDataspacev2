@@ -40,14 +40,15 @@ public final class Main {
         var mapper = mapper();
         StreamTransport transport = config.kafkaBootstrap().isBlank()
                 ? null : new KafkaTransport(config.kafkaBootstrap(), config.chunkRecords(), mapper,
-                        config.kafkaSecurityProtocol(), config.kafkaUsername(), config.kafkaPassword());
+                        config.kafkaSecurityProtocol(), config.kafkaLogins());
         var api = assemble(config, keys, auth, transport, executor, log);
         api.start(config.port(), executor);
         log.accept("mvhd-dataplane listens on %d; attestation floor '%s'; store %s; Kafka %s"
                 .formatted(config.port(), config.attestationFloor().wire(),
                         config.dbUrl().isBlank() ? "in memory" : "Postgres",
                         transport == null ? "not configured"
-                                : config.kafkaBootstrap() + " (" + config.kafkaSecurityProtocol() + ")"));
+                                : config.kafkaBootstrap() + " (" + config.kafkaSecurityProtocol()
+                                        + (config.kafkaLogins().shared() ? ", one login" : ", a login per job") + ")"));
     }
 
     /** Everything but the listening socket, so a test can put it together too. */

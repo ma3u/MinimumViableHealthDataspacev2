@@ -929,8 +929,15 @@ services:
       # needs on Azure (ADR-096) runs here every day. Compose-only credentials.
       DATAPLANE_KAFKA_BOOTSTRAP: "kafka:9094"
       DATAPLANE_KAFKA_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
-      DATAPLANE_KAFKA_SASL_USERNAME: "dataplane"
-      DATAPLANE_KAFKA_SASL_PASSWORD: "dataplane-local" # compose only
+      # One login per job, as on Event Hubs (ADR-096 decision 3): the admin
+      # client, the writer and the reader. The compose broker has no ACLs, so
+      # this proves the plumbing, not the separation.
+      DATAPLANE_KAFKA_ADMIN_SASL_USERNAME: "dataplane-admin"
+      DATAPLANE_KAFKA_ADMIN_SASL_PASSWORD: "dataplane-admin-local" # compose only
+      DATAPLANE_KAFKA_SEND_SASL_USERNAME: "dataplane-send"
+      DATAPLANE_KAFKA_SEND_SASL_PASSWORD: "dataplane-send-local" # compose only
+      DATAPLANE_KAFKA_LISTEN_SASL_USERNAME: "dataplane-listen"
+      DATAPLANE_KAFKA_LISTEN_SASL_PASSWORD: "dataplane-listen-local" # compose only
       DATAPLANE_DB_URL: "jdbc:postgresql://postgres:5432/dataplane_v1"
       DATAPLANE_DB_USER: "dataplane"
       DATAPLANE_DB_PASSWORD: "dataplane" # compose only
@@ -977,7 +984,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SASL:SASL_PLAINTEXT"
       KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN"
-      KAFKA_LISTENER_NAME_SASL_PLAIN_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required user_dataplane="dataplane-local";'
+      KAFKA_LISTENER_NAME_SASL_PLAIN_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required user_dataplane-admin="dataplane-admin-local" user_dataplane-send="dataplane-send-local" user_dataplane-listen="dataplane-listen-local";'
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"

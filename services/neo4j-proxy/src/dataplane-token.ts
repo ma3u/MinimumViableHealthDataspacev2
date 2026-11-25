@@ -56,12 +56,24 @@ export function requireDataplane(
 
 // The JWKS is fetched once per URL and kept: jose's remote set caches the
 // keys and fetches again only for an unknown kid (as the siglet check does).
+// jose waits 30 s between two such fetches by default. A data plane that
+// started with a new key (compose: a key per start) then had every token
+// refused for up to 30 s, and the transfers in that window ended TERMINATED
+// (docs/gotchas.md, 2026-11-24). Two seconds is short enough for that and
+// still bounds what a stream of tokens with unknown kids can make the proxy
+// fetch; the routes' rate limits bound the rest.
+export const JWKS_REFETCH_COOLDOWN_MS = 2_000;
 let cached: { url: string; keys: JWTVerifyGetKey } | undefined;
 function dataplaneJwks(): JWTVerifyGetKey {
   const url = dataplaneJwksUrl();
   if (!url) throw new DataplaneNotConfiguredError();
   if (cached?.url !== url) {
-    cached = { url, keys: createRemoteJWKSet(new URL(url)) };
+    cached = {
+      url,
+      keys: createRemoteJWKSet(new URL(url), {
+        cooldownDuration: JWKS_REFETCH_COOLDOWN_MS,
+      }),
+    };
   }
   return cached.keys;
 }

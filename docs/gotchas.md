@@ -3,6 +3,24 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-24: after a restart of the data plane the proxy refused its tokens for up to 30 s
+
+On compose the push data plane generates its signing key at each start
+(`DATAPLANE_SIGNING_KEY_JWK` is set on Azure only). Right after a restart two
+Kafka-PULL prepares ended `TERMINATED` with `Data-plane responded with 409 ...
+"The data plane token is not valid"`. The proxy keeps the data plane's key set
+with `jose`'s `createRemoteJWKSet`, which fetches again for an unknown `kid`,
+but at most once every 30 s by default (`cooldownDuration`). Until then every
+token signed with the new key was refused.
+
+Fix: the proxy waits 2 s, not 30, before it fetches again
+(`JWKS_REFETCH_COOLDOWN_MS` in `services/neo4j-proxy/src/dataplane-token.ts`,
+tested by rotating the key). A stream that was in flight during the restart
+is still lost: it lives in the data plane's memory.
+
+Rule: a cached remote key set needs a refetch wait shorter than the time a
+restart of the signer may take to matter. Read the library's default.
+
 ## 2026-11-20: a day of ECG was 1,440 requests, and the proxy allows a participant 200 heavy ones a minute
 
 The first 24 hour stream over Kafka (ADR-095, `ecg-holter-stream`) stopped

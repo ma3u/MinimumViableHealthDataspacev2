@@ -36,8 +36,16 @@ properties:
       - name: dataplane-db-password
         keyVaultUrl: ${KV_URI}/secrets/${KV_DB_PASSWORD}
         identity: ${KV_READER_ID}
-      - name: dataplane-kafka-password
-        keyVaultUrl: ${KV_URI}/secrets/${KV_KAFKA_CONNECTION}
+      # one Event Hubs policy per job (ADR-096 decision 3): Manage only for
+      # the admin client, which creates and deletes a transfer's topic
+      - name: dataplane-kafka-admin-password
+        keyVaultUrl: ${KV_URI}/secrets/${KV_KAFKA_ADMIN}
+        identity: ${KV_READER_ID}
+      - name: dataplane-kafka-send-password
+        keyVaultUrl: ${KV_URI}/secrets/${KV_KAFKA_SEND}
+        identity: ${KV_READER_ID}
+      - name: dataplane-kafka-listen-password
+        keyVaultUrl: ${KV_URI}/secrets/${KV_KAFKA_LISTEN}
         identity: ${KV_READER_ID}
       - name: dataplane-signing-key-jwk
         keyVaultUrl: ${KV_URI}/secrets/${KV_SIGNING_KEY}
@@ -69,8 +77,16 @@ properties:
           - { name: DATAPLANE_KAFKA_SECURITY_PROTOCOL, value: "SASL_SSL" }
           - { name: DATAPLANE_KAFKA_SASL_USERNAME, value: "$$ConnectionString" }
           - {
-              name: DATAPLANE_KAFKA_SASL_PASSWORD,
-              secretRef: dataplane-kafka-password,
+              name: DATAPLANE_KAFKA_ADMIN_SASL_PASSWORD,
+              secretRef: dataplane-kafka-admin-password,
+            }
+          - {
+              name: DATAPLANE_KAFKA_SEND_SASL_PASSWORD,
+              secretRef: dataplane-kafka-send-password,
+            }
+          - {
+              name: DATAPLANE_KAFKA_LISTEN_SASL_PASSWORD,
+              secretRef: dataplane-kafka-listen-password,
             }
           - { name: DATAPLANE_DB_URL, value: "${DB_URL}" }
           - { name: DATAPLANE_DB_USER, value: "${DB_USER}" }

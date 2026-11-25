@@ -20,8 +20,8 @@ import java.util.function.Function;
  * @param settleMillis a pause after that report, for the consumer's control plane to save its state
  * @param kafkaBootstrap the broker for the Kafka transfer types; empty offers none of them
  * @param kafkaSecurityProtocol PLAINTEXT, SASL_PLAINTEXT or SASL_SSL (Event Hubs, ADR-096)
- * @param kafkaUsername the SASL PLAIN user; on Event Hubs the literal $ConnectionString
- * @param kafkaPassword the SASL PLAIN password; on Event Hubs a connection string. Never logged
+ * @param kafkaLogins one SASL PLAIN login per job (KafkaLogins); on Event Hubs the user is the
+ *        literal $ConnectionString and the password a policy's connection string. Never logged
  * @param dbUrl JDBC address of the store; empty keeps flows in memory (tests only)
  * @param dbUser the store's user
  * @param dbPassword the store's password
@@ -40,8 +40,7 @@ public record Config(
         int settleMillis,
         String kafkaBootstrap,
         String kafkaSecurityProtocol,
-        String kafkaUsername,
-        String kafkaPassword,
+        KafkaLogins kafkaLogins,
         String dbUrl,
         String dbUser,
         String dbPassword,
@@ -70,8 +69,7 @@ public record Config(
                 Integer.parseInt(value(env, "DATAPLANE_SETTLE_MILLIS", "1000")),
                 value(env, "DATAPLANE_KAFKA_BOOTSTRAP", ""),
                 value(env, "DATAPLANE_KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
-                value(env, "DATAPLANE_KAFKA_SASL_USERNAME", ""),
-                value(env, "DATAPLANE_KAFKA_SASL_PASSWORD", ""),
+                KafkaLogins.from(env),
                 value(env, "DATAPLANE_DB_URL", ""),
                 value(env, "DATAPLANE_DB_USER", ""),
                 value(env, "DATAPLANE_DB_PASSWORD", ""),
