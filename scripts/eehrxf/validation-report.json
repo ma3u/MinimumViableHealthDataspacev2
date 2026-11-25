@@ -63,7 +63,7 @@
         "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-spirometry.json",
         "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle.json"
       ],
-      "resources": 84
+      "resources": 85
     },
     "synthea": {
       "description": "Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads",
@@ -73,15 +73,15 @@
       "resources": 183
     }
   },
-  "inputsDigest": "5dbbe162b35ede24",
+  "inputsDigest": "8d4434abe7d14bab",
   "profiles": {
     "patient-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
       "tested": 29,
-      "passed": 19,
-      "failed": 10,
+      "passed": 28,
+      "failed": 1,
       "bySource": {
         "documents": {
           "tested": 0,
@@ -93,7 +93,7 @@
         },
         "klarbefund": {
           "tested": 9,
-          "passed": 0
+          "passed": 9
         },
         "synthea": {
           "tested": 12,
@@ -101,14 +101,6 @@
         }
       },
       "topIssues": [
-        {
-          "issue": "Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-          "resources": 9
-        },
-        {
-          "issue": "Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-          "resources": 9
-        },
         {
           "issue": "Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here",
           "resources": 1
@@ -410,9 +402,9 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
       "ig": "hl7.fhir.eu.laboratory#2.1.0",
       "gate": true,
-      "tested": 2,
-      "passed": 0,
-      "failed": 2,
+      "tested": 1,
+      "passed": 1,
+      "failed": 0,
       "bySource": {
         "documents": {
           "tested": 0,
@@ -423,24 +415,15 @@
           "passed": 0
         },
         "klarbefund": {
-          "tested": 2,
-          "passed": 0
+          "tested": 1,
+          "passed": 1
         },
         "synthea": {
           "tested": 0,
           "passed": 0
         }
       },
-      "topIssues": [
-        {
-          "issue": "DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)",
-          "resources": 2
-        },
-        {
-          "issue": "DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0). Note that other slices are allowed in addition to this re",
-          "resources": 2
-        }
-      ]
+      "topIssues": []
     },
     "observation-results-lab-eu": {
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
@@ -478,9 +461,9 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
       "ig": "hl7.fhir.eu.laboratory#2.1.0",
       "gate": true,
-      "tested": 12,
-      "passed": 3,
-      "failed": 9,
+      "tested": 4,
+      "passed": 4,
+      "failed": 0,
       "bySource": {
         "documents": {
           "tested": 3,
@@ -491,36 +474,15 @@
           "passed": 0
         },
         "klarbefund": {
-          "tested": 9,
-          "passed": 0
+          "tested": 1,
+          "passed": 1
         },
         "synthea": {
           "tested": 0,
           "passed": 0
         }
       },
-      "topIssues": [
-        {
-          "issue": "Bundle.type: Value is 'collection' but is fixed to 'document' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type",
-          "resources": 9
-        },
-        {
-          "issue": "Bundle: Constraint failed: dr-comp-identifier: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-          "resources": 9
-        },
-        {
-          "issue": "Bundle: Constraint failed: dr-comp-type: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-          "resources": 9
-        },
-        {
-          "issue": "Bundle: Constraint failed: one-comp: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-          "resources": 9
-        },
-        {
-          "issue": "Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice",
-          "resources": 9
-        }
-      ]
+      "topIssues": []
     },
     "composition-hdr-eu": {
       "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/composition-eu-hdr",
@@ -712,9 +674,9 @@
         "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport",
         "ig": "kbv.mio.laborbefund#1.0.0-update",
         "gate": false,
-        "tested": 2,
+        "tested": 1,
         "passed": 0,
-        "failed": 2,
+        "failed": 1,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -725,7 +687,7 @@
             "passed": 0
           },
           "klarbefund": {
-            "tested": 2,
+            "tested": 1,
             "passed": 0
           },
           "synthea": {
@@ -736,23 +698,23 @@
         "topIssues": [
           {
             "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code.coding",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update and slicing is CLOSED: DiagnosticReport.identifier[n]: D",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 2
+            "resources": 1
           }
         ]
       },
@@ -760,9 +722,9 @@
         "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Bundle",
         "ig": "kbv.mio.laborbefund#1.0.0-update",
         "gate": false,
-        "tested": 5,
+        "tested": 4,
         "passed": 0,
-        "failed": 5,
+        "failed": 4,
         "bySource": {
           "documents": {
             "tested": 3,
@@ -773,7 +735,7 @@
             "passed": 0
           },
           "klarbefund": {
-            "tested": 2,
+            "tested": 1,
             "passed": 0
           },
           "synthea": {
@@ -784,11 +746,11 @@
         "topIssues": [
           {
             "issue": "Bundle: Slice '...': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Bundle|1.0.0-update). Note that other slices are allowed in addition to this required slice",
-            "resources": 5
+            "resources": 4
           },
           {
             "issue": "entry: Unable to find a match for the specified profile among choices: https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Image_Attachment, https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study,",
-            "resources": 5
+            "resources": 4
           },
           {
             "issue": "entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update)",
@@ -856,9 +818,9 @@
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp",
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
-        "tested": 2,
+        "tested": 1,
         "passed": 0,
-        "failed": 2,
+        "failed": 1,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -869,7 +831,7 @@
             "passed": 0
           },
           "klarbefund": {
-            "tested": 2,
+            "tested": 1,
             "passed": 0
           },
           "synthea": {
@@ -880,23 +842,23 @@
         "topIssues": [
           {
             "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code.coding",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.effective.ofType(dateTime): This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.",
-            "resources": 2
+            "resources": 1
           },
           {
             "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.identifier[n]",
-            "resources": 2
+            "resources": 1
           }
         ]
       },
@@ -904,9 +866,9 @@
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp",
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
-        "tested": 5,
+        "tested": 4,
         "passed": 0,
-        "failed": 5,
+        "failed": 4,
         "bySource": {
           "documents": {
             "tested": 3,
@@ -917,7 +879,7 @@
             "passed": 0
           },
           "klarbefund": {
-            "tested": 2,
+            "tested": 1,
             "passed": 0
           },
           "synthea": {
@@ -928,15 +890,15 @@
         "topIssues": [
           {
             "issue": "Bundle: Constraint failed: dr-comp-category: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-            "resources": 5
+            "resources": 4
           },
           {
             "issue": "Bundle: Slice '...': a matching slice is required, but not found (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp|1.0.0). Note that other slices are allowed in addition to this required slice",
-            "resources": 5
+            "resources": 4
           },
           {
             "issue": "entry: Unable to find a match for the specified profile among choices: https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-image-attachment-dglp, https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-labo",
-            "resources": 5
+            "resources": 4
           },
           {
             "issue": "entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0)",
@@ -1156,9 +1118,9 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
         "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
         "gate": true,
-        "tested": 2,
+        "tested": 1,
         "passed": 1,
-        "failed": 1,
+        "failed": 0,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -1169,7 +1131,7 @@
             "passed": 0
           },
           "klarbefund": {
-            "tested": 2,
+            "tested": 1,
             "passed": 1
           },
           "synthea": {
@@ -1177,16 +1139,7 @@
             "passed": 0
           }
         },
-        "topIssues": [
-          {
-            "issue": "DiagnosticReport.code: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in",
-            "resources": 1
-          },
-          {
-            "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi",
-            "resources": 1
-          }
-        ]
+        "topIssues": []
       },
       "kds-medication-request-de": {
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",

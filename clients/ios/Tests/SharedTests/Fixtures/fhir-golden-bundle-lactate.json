@@ -54,7 +54,25 @@
         "fullUrl": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57",
         "resource": {
           "resourceType": "Patient",
-          "id": "example-patient"
+          "id": "example-patient",
+          "name": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "masked"
+                }
+              ]
+            }
+          ],
+          "_birthDate": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
         }
       },
       {

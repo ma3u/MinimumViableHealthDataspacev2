@@ -63,6 +63,9 @@ const resources = (bundle: ReturnType<typeof build>): Resource[] =>
   bundle.entry.map((e) => e.resource as Resource);
 const ofType = (bundle: ReturnType<typeof build>, type: string) =>
   resources(bundle).filter((r) => r.resourceType === type);
+/** The fullUrl of the one entry of a type: what a document's references name. */
+const fullUrlOf = (bundle: ReturnType<typeof build>, type: string) =>
+  bundle.entry.find((e) => e.resource.resourceType === type)?.fullUrl;
 
 describe("statusForSource", () => {
   it("only calls a value final when the lab's own characters carried it", () => {
@@ -75,9 +78,11 @@ describe("statusForSource", () => {
 describe("buildBundle", () => {
   const bundle = build(digitalSource);
 
-  it("emits a collection bundle with patient, document, report, observations, provenance and performer", () => {
+  it("emits a laboratory report as an EU lab document: Composition first, then patient, document, report, observations, provenance and performer", () => {
     expect(bundle.resourceType).toBe("Bundle");
-    expect(bundle.type).toBe("collection");
+    expect(bundle.type).toBe("document");
+    expect(bundle.entry[0].resource.resourceType).toBe("Composition");
+    expect(ofType(bundle, "Composition")).toHaveLength(1);
     expect(ofType(bundle, "Patient")).toHaveLength(1);
     expect(ofType(bundle, "DocumentReference")).toHaveLength(1);
     expect(ofType(bundle, "DiagnosticReport")).toHaveLength(1);
@@ -86,11 +91,47 @@ describe("buildBundle", () => {
     expect(ofType(bundle, "Observation").length).toBeGreaterThan(10);
   });
 
-  it("carries no identifying data about the patient", () => {
+  it("carries no identifying data about the patient, and says the name and birth date are withheld", () => {
     const [patient] = ofType(bundle, "Patient");
-    expect(patient.name).toBeUndefined();
+    const masked = {
+      extension: [
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          valueCode: "masked",
+        },
+      ],
+    };
+    expect(patient.name).toEqual([masked]);
     expect(patient.birthDate).toBeUndefined();
+    expect(patient._birthDate).toEqual(masked);
     expect(patient.identifier).toBeUndefined();
+  });
+
+  it("links the report and its Composition both ways, with one identifier and one type", () => {
+    const [composition] = ofType(bundle, "Composition");
+    const [report] = ofType(bundle, "DiagnosticReport");
+    const ids = report.identifier as { system: string; value: string }[];
+    expect(composition.identifier).toEqual({
+      system: ids[0].system,
+      value: ids[0].value,
+    });
+    expect((composition.type as { coding: unknown[] }).coding[0]).toEqual(
+      (report.code as { coding: unknown[] }).coding[0],
+    );
+    expect(report.extension).toEqual([
+      {
+        url: "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+        valueReference: { reference: bundle.entry[0].fullUrl },
+      },
+    ]);
+  });
+
+  it("resolves every reference in the document to an entry's fullUrl", () => {
+    const urls = new Set(bundle.entry.map((e) => e.fullUrl));
+    const refs =
+      JSON.stringify(bundle.entry).match(/"reference":"[^"]+"/g) ?? [];
+    expect(refs.length).toBeGreaterThan(10);
+    for (const r of refs) expect(urls.has(r.slice(13, -1)), r).toBe(true);
   });
 
   it("codes an observation with LOINC and UCUM and keeps the printed label", () => {
@@ -165,7 +206,7 @@ describe("buildBundle", () => {
     expect(prov.entity).toMatchObject([
       {
         role: "source",
-        what: { reference: "DocumentReference/source-document" },
+        what: { reference: fullUrlOf(bundle, "DocumentReference") },
       },
     ]);
     expect((prov.target as { reference: string }[]).length).toBe(
@@ -217,7 +258,7 @@ describe("what the German lab profiles ask of the writer (#1172)", () => {
     });
     const performer = [
       {
-        reference: "Organization/performer-1",
+        reference: fullUrlOf(bundle, "Organization"),
         display: "AlphaKlinik Berlin CPC",
       },
     ];

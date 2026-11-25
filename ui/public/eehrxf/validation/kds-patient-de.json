@@ -7,7 +7,7 @@
   "baseResource": "Patient",
   "tested": 29,
   "passed": 25,
-  "warnings": 53,
+  "warnings": 44,
   "resources": [
     {
       "source": "facade",
@@ -266,16 +266,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-cgm.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -287,16 +299,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-cpet.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -308,16 +332,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-dxa.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -329,16 +365,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-ecg.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -350,16 +398,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-exercise.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -371,16 +431,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-holter.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -392,16 +464,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-lactate.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -413,16 +497,28 @@
       "source": "klarbefund",
       "origin": "fhir-golden-bundle-spirometry.json#entry[0]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -432,18 +528,30 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[0]",
+      "origin": "fhir-golden-bundle.json#entry[1]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Patient",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "resource": {
         "resourceType": "Patient",
         "id": "example-patient",
+        "name": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        ],
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "masked"
+            }
+          ]
+        },
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"

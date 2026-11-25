@@ -263,7 +263,7 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
       "baseResource": "DiagnosticReport",
       "categories": ["laboratory-results"],
-      "sourceFilter": "laboratory"
+      "sourceFilter": "laboratory-report"
     },
     {
       "profileId": "observation-results-lab-eu",
@@ -428,7 +428,7 @@
         "ig": "mio-laborbefund",
         "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport",
         "baseResource": "DiagnosticReport",
-        "sourceFilter": "laboratory"
+        "sourceFilter": "laboratory-report"
       },
       {
         "profileId": "mio-lab-bundle-de",
@@ -452,7 +452,7 @@
         "ig": "epa-laboratory",
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp",
         "baseResource": "DiagnosticReport",
-        "sourceFilter": "laboratory"
+        "sourceFilter": "laboratory-report"
       },
       {
         "profileId": "epa-lab-bundle-de",
@@ -508,7 +508,7 @@
         "ig": "mii-kds-laborbefund",
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
         "baseResource": "DiagnosticReport",
-        "sourceFilter": "laboratory",
+        "sourceFilter": "laboratory-report",
         "eehrxfCounterpart": "diagnostic-report-lab-eu"
       },
       {

@@ -99,14 +99,11 @@
           "name": "DiagnosticReport (MII KDS Laborbefund)",
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
           "baseResource": "DiagnosticReport",
-          "tested": 2,
+          "tested": 1,
           "passed": 1,
-          "failed": 1,
-          "coverage": "partial",
-          "topIssues": [
-            "1x DiagnosticReport.code: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in",
-            "1x DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi"
-          ],
+          "failed": 0,
+          "coverage": "full",
+          "topIssues": [],
           "eehrxfCounterpart": {
             "profileId": "diagnostic-report-lab-eu",
             "name": "DiagnosticReport (EU Lab)"
@@ -183,7 +180,7 @@
   "summary": {
     "guides": 3,
     "profiles": 8,
-    "resourcesTested": 191,
+    "resourcesTested": 190,
     "resourcesPassed": 135,
     "passRatePercent": 71
   }

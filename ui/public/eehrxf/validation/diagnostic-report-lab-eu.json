@@ -5,144 +5,15 @@
   "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
   "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
   "baseResource": "DiagnosticReport",
-  "tested": 2,
-  "passed": 0,
-  "warnings": 6,
+  "tested": 1,
+  "passed": 1,
+  "warnings": 3,
   "resources": [
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle-cgm.json#entry[2]",
-      "passed": false,
+      "origin": "fhir-golden-bundle.json#entry[3]",
+      "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "DiagnosticReport",
-          "message": "DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)"
-        },
-        {
-          "severity": "error",
-          "expression": "DiagnosticReport",
-          "message": "Slice 'DiagnosticReport.extension:DiagnosticReportCompositionR5' for extension 'http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice"
-        },
-        {
-          "severity": "warning",
-          "expression": "DiagnosticReport",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
-          "expression": "DiagnosticReport.basedOn[0]",
-          "message": "A Reference without an actual reference or identifier should have a display"
-        },
-        {
-          "severity": "warning",
-          "expression": "DiagnosticReport.presentedForm[0]",
-          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
-        }
-      ],
-      "resource": {
-        "resourceType": "DiagnosticReport",
-        "id": "report-1",
-        "identifier": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                  "code": "FILL",
-                  "display": "Filler Identifier"
-                }
-              ]
-            },
-            "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
-            "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
-            "assigner": {
-              "display": "epa-ingest (tesseract)"
-            }
-          }
-        ],
-        "basedOn": [
-          {
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                "valueCode": "unknown"
-              }
-            ]
-          }
-        ],
-        "status": "preliminary",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
-                "code": "LAB",
-                "display": "Laboratory"
-              }
-            ]
-          }
-        ],
-        "code": {
-          "coding": [
-            {
-              "system": "http://loinc.org",
-              "version": "2.83",
-              "code": "107930-0",
-              "display": "Continuous glucose monitoring summary report Document"
-            }
-          ],
-          "text": "Glukoseprofil (Sensor)"
-        },
-        "subject": {
-          "reference": "Patient/example-patient"
-        },
-        "effectiveDateTime": "2026-08-26",
-        "issued": "2026-09-13T12:00:00.000Z",
-        "performer": [
-          {
-            "reference": "Organization/performer-1",
-            "display": "Praxis Dr. Muster"
-          }
-        ],
-        "result": [
-          {
-            "reference": "Observation/obs-1"
-          },
-          {
-            "reference": "Observation/obs-2"
-          },
-          {
-            "reference": "Observation/obs-3"
-          }
-        ],
-        "presentedForm": [
-          {
-            "title": "laborbefund-2026-09-04.pdf"
-          }
-        ],
-        "meta": {
-          "profile": [
-            "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
-          ]
-        }
-      }
-    },
-    {
-      "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[2]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "DiagnosticReport",
-          "message": "DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)"
-        },
-        {
-          "severity": "error",
-          "expression": "DiagnosticReport",
-          "message": "Slice 'DiagnosticReport.extension:DiagnosticReportCompositionR5' for extension 'http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice"
-        },
         {
           "severity": "warning",
           "expression": "DiagnosticReport",
@@ -220,42 +91,47 @@
           "text": "Laborbefund"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],
         "result": [
           {
-            "reference": "Observation/obs-1"
+            "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
           },
           {
-            "reference": "Observation/obs-2"
+            "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
           },
           {
-            "reference": "Observation/obs-3"
+            "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
           },
           {
-            "reference": "Observation/obs-4"
+            "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
           },
           {
-            "reference": "Observation/obs-5"
+            "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
           },
           {
-            "reference": "Observation/obs-6"
-          },
-          {
-            "reference": "Observation/obs-7"
+            "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
           }
         ],
         "presentedForm": [
           {
             "title": "laborbefund-2026-09-04.pdf"
+          }
+        ],
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+            "valueReference": {
+              "reference": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57"
+            }
           }
         ],
         "meta": {
