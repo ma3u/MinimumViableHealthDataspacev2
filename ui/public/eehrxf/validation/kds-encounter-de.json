@@ -6,25 +6,14 @@
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
   "baseResource": "Encounter",
   "tested": 31,
-  "passed": 21,
-  "warnings": 33,
+  "passed": 30,
+  "warnings": 23,
   "resources": [
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[1]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -55,7 +44,15 @@
           "reference": "Patient/P1"
         },
         "period": {
-          "start": "2025-03-14T09:00:00Z"
+          "start": "2025-03-14T09:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "AlphaKlinik Berlin"
@@ -65,19 +62,8 @@
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[22]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -108,7 +94,15 @@
           "reference": "Patient/P2"
         },
         "period": {
-          "start": "2025-10-07T09:00:00Z"
+          "start": "2025-10-07T09:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "Limburg Medical Centre"
@@ -118,19 +112,8 @@
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[23]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -155,7 +138,15 @@
           "reference": "Patient/P2"
         },
         "period": {
-          "start": "2025-03-04T08:00:00Z"
+          "start": "2025-03-04T08:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "Limburg Medical Centre"
@@ -165,19 +156,8 @@
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[2]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -202,7 +182,15 @@
           "reference": "Patient/P1"
         },
         "period": {
-          "start": "2024-09-12T08:00:00Z"
+          "start": "2024-09-12T08:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "AlphaKlinik Berlin"
@@ -212,19 +200,8 @@
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[35]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -249,7 +226,15 @@
           "reference": "Patient/fhir-pat-1002"
         },
         "period": {
-          "start": "2023-09-12T11:00:00Z"
+          "start": "2023-09-12T11:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -260,18 +245,8 @@
       "issues": [
         {
           "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "error",
           "expression": "Encounter.class",
           "message": "The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE' (http://fhir.de/ValueSet/EncounterClassDE|1.5.4), and a code is required from this value set.  (error message = The provided code 'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')' was not found in the value set 'http://fhir.de/ValueSet/EncounterClassDE|1"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
       "counted": true,
@@ -293,26 +268,23 @@
           "reference": "Patient/patient-2000"
         },
         "period": {
-          "start": "2025-12-03"
+          "start": "2025-12-03",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[50]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -332,26 +304,23 @@
           "reference": "Patient/patient-2000"
         },
         "period": {
-          "start": "2023-01-03"
+          "start": "2023-01-03",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[58]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -371,31 +340,23 @@
           "reference": "Patient/patient-2008"
         },
         "period": {
-          "start": "2025-05-24"
+          "start": "2025-05-24",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[59]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-2: 'Abgeschlossene, stationäre Kontakte MÜSSEN einen Start- und End-Zeitpunkt angeben' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -415,26 +376,23 @@
           "reference": "Patient/patient-2008"
         },
         "period": {
-          "start": "2024-12-18"
+          "start": "2024-12-18",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[75]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Encounter",
-          "message": "Constraint failed: mii-enc-1: 'Falls der Encounter abgeschlossen wurde, MUSS ein Enddatum bekannt sein' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -459,7 +417,15 @@
           "reference": "Patient/loader-pat-0001"
         },
         "period": {
-          "start": "2019-04-02T10:00:00+02:00"
+          "start": "2019-04-02T10:00:00+02:00",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },

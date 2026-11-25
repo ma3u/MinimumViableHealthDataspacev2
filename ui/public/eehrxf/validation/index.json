@@ -143,7 +143,7 @@
       "baseResource": "Condition",
       "tested": 52,
       "passed": 52,
-      "warnings": 106
+      "warnings": 74
     },
     {
       "profileId": "composition-eps-eu",
@@ -165,7 +165,7 @@
       "baseResource": "Bundle",
       "tested": 6,
       "passed": 6,
-      "warnings": 153
+      "warnings": 125
     },
     {
       "profileId": "medication-request-eu",
@@ -220,7 +220,7 @@
       "baseResource": "DiagnosticReport",
       "tested": 4,
       "passed": 4,
-      "warnings": 6
+      "warnings": 9
     },
     {
       "profileId": "observation-results-lab-eu",
@@ -231,7 +231,7 @@
       "baseResource": "Observation",
       "tested": 49,
       "passed": 29,
-      "warnings": 174
+      "warnings": 186
     },
     {
       "profileId": "bundle-lab-report-eu",
@@ -242,7 +242,7 @@
       "baseResource": "Bundle",
       "tested": 4,
       "passed": 4,
-      "warnings": 112
+      "warnings": 127
     },
     {
       "profileId": "composition-hdr-eu",
@@ -264,7 +264,7 @@
       "baseResource": "Encounter",
       "tested": 31,
       "passed": 31,
-      "warnings": 61
+      "warnings": 51
     },
     {
       "profileId": "kds-patient-de",
@@ -285,8 +285,8 @@
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Condition",
       "tested": 52,
-      "passed": 20,
-      "warnings": 53
+      "passed": 51,
+      "warnings": 21
     },
     {
       "profileId": "kds-procedure-de",
@@ -307,8 +307,8 @@
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Encounter",
       "tested": 31,
-      "passed": 21,
-      "warnings": 33
+      "passed": 30,
+      "warnings": 23
     },
     {
       "profileId": "kds-lab-observation-de",
@@ -318,7 +318,7 @@
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
       "baseResource": "Observation",
       "tested": 49,
-      "passed": 16,
+      "passed": 28,
       "warnings": 206
     },
     {
@@ -329,8 +329,8 @@
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
       "baseResource": "DiagnosticReport",
       "tested": 4,
-      "passed": 1,
-      "warnings": 6
+      "passed": 4,
+      "warnings": 9
     },
     {
       "profileId": "kds-medication-request-de",
@@ -351,8 +351,8 @@
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
       "baseResource": "MedicationStatement",
       "tested": 16,
-      "passed": 11,
-      "warnings": 43
+      "passed": 16,
+      "warnings": 30
     }
   ]
 }

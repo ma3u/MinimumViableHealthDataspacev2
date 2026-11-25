@@ -7,7 +7,7 @@
   "baseResource": "Bundle",
   "tested": 6,
   "passed": 6,
-  "warnings": 153,
+  "warnings": 125,
   "resources": [
     {
       "source": "documents",
@@ -146,18 +146,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[3].resource/*Condition/8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[3].resource/*Condition/8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[4].resource/*Condition/b70112cd-9b39-889a-b466-d103ff71c95c*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -166,18 +156,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[5].resource/*Condition/493293e4-649c-8d83-a804-7f4f366b9557*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[5].resource/*Condition/493293e4-649c-8d83-a804-7f4f366b9557*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[6].resource/*Condition/f6fd10fa-461c-8167-bae5-5adf56ccf941*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -186,28 +166,13 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[7].resource/*Condition/e2a775cd-ee2c-80ea-9be5-1cb0326db1a9*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[7].resource/*Condition/e2a775cd-ee2c-80ea-9be5-1cb0326db1a9*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[8].resource/*Condition/049288e3-b192-874c-85a0-b6d986a40bc5*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[8].resource/*Condition/049288e3-b192-874c-85a0-b6d986a40bc5*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[9].resource/*Condition/b882100d-8d51-86ec-80ca-bfae743d2dc9*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -546,7 +511,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2009-02-27"
+              "onsetDateTime": "2009-02-27",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -597,7 +570,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2013-09-14"
+              "onsetDateTime": "2013-09-14",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -648,7 +629,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2015-11-02"
+              "onsetDateTime": "2015-11-02",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -699,7 +688,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2017-06-20"
+              "onsetDateTime": "2017-06-20",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -750,7 +747,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2018-04-10"
+              "onsetDateTime": "2018-04-10",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -801,7 +806,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2020-01-15"
+              "onsetDateTime": "2020-01-15",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -852,7 +865,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2021-03-08"
+              "onsetDateTime": "2021-03-08",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1512,18 +1533,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[3].resource/*Condition/8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[3].resource/*Condition/8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[4].resource/*Condition/b70112cd-9b39-889a-b466-d103ff71c95c*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -1532,18 +1543,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[5].resource/*Condition/493293e4-649c-8d83-a804-7f4f366b9557*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[5].resource/*Condition/493293e4-649c-8d83-a804-7f4f366b9557*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[6].resource/*Condition/f6fd10fa-461c-8167-bae5-5adf56ccf941*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -1552,28 +1553,13 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[7].resource/*Condition/e2a775cd-ee2c-80ea-9be5-1cb0326db1a9*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[7].resource/*Condition/e2a775cd-ee2c-80ea-9be5-1cb0326db1a9*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[8].resource/*Condition/049288e3-b192-874c-85a0-b6d986a40bc5*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[8].resource/*Condition/049288e3-b192-874c-85a0-b6d986a40bc5*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[9].resource/*Condition/b882100d-8d51-86ec-80ca-bfae743d2dc9*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -1911,7 +1897,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2009-02-27"
+              "onsetDateTime": "2009-02-27",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1962,7 +1956,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2013-09-14"
+              "onsetDateTime": "2013-09-14",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2013,7 +2015,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2015-11-02"
+              "onsetDateTime": "2015-11-02",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2064,7 +2074,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2017-06-20"
+              "onsetDateTime": "2017-06-20",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2115,7 +2133,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2018-04-10"
+              "onsetDateTime": "2018-04-10",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2166,7 +2192,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2020-01-15"
+              "onsetDateTime": "2020-01-15",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2217,7 +2251,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "onsetDateTime": "2021-03-08"
+              "onsetDateTime": "2021-03-08",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2747,18 +2789,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[10].resource/*Condition/f50711d2-afb4-8ba5-b969-8ad25d05ec29*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[10].resource/*Condition/f50711d2-afb4-8ba5-b969-8ad25d05ec29*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[11].resource/*Condition/b8306fd6-5408-8bda-a44a-84779f2b89c3*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -2767,28 +2799,13 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[12].resource/*Condition/92a40ccb-bd7e-8bc5-a582-4d1ec32a66e0*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[12].resource/*Condition/92a40ccb-bd7e-8bc5-a582-4d1ec32a66e0*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[13].resource/*Condition/ce82b985-d790-8efe-8504-cf8b20f13cee*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[13].resource/*Condition/ce82b985-d790-8efe-8504-cf8b20f13cee*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[14].resource/*Condition/d16f278d-f080-8764-a47f-18b5b9094b0f*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -2867,18 +2884,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[3].resource/*Condition/a4ef4f3a-44ca-8e16-9e5d-53882becbcf3*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[3].resource/*Condition/a4ef4f3a-44ca-8e16-9e5d-53882becbcf3*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[4].resource/*Condition/eb4285f3-a97e-80b5-b45e-95c1a79c4300*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -2887,18 +2894,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[5].resource/*Condition/f3e0df45-49a2-8ead-9d14-f5ffdfe6a69d*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[5].resource/*Condition/f3e0df45-49a2-8ead-9d14-f5ffdfe6a69d*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[6].resource/*Condition/c295fc94-29bd-81f7-b55f-44e4ddb5d0c7*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -2907,28 +2904,13 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[7].resource/*Condition/32bebd56-b408-8587-a40f-403fd9edad5e*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[7].resource/*Condition/32bebd56-b408-8587-a40f-403fd9edad5e*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[8].resource/*Condition/01d45331-26c8-8f06-b467-b05d0da663a5*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[8].resource/*Condition/01d45331-26c8-8f06-b467-b05d0da663a5*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[9].resource/*Condition/51c751fe-bb24-8bf1-b8a1-42bbcf800b1c*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
@@ -3270,7 +3252,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "1985-01-01"
+              "onsetDateTime": "1985-01-01",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3321,7 +3311,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2010-05-17"
+              "onsetDateTime": "2010-05-17",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3372,7 +3370,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2014-07-09"
+              "onsetDateTime": "2014-07-09",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3423,7 +3429,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2016-03-22"
+              "onsetDateTime": "2016-03-22",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3474,7 +3488,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2017-04-01"
+              "onsetDateTime": "2017-04-01",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3525,7 +3547,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2018-10-05"
+              "onsetDateTime": "2018-10-05",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3576,7 +3606,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2019-08-03"
+              "onsetDateTime": "2019-08-03",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3627,7 +3665,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2020-11-30"
+              "onsetDateTime": "2020-11-30",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3678,7 +3724,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2021-06-18"
+              "onsetDateTime": "2021-06-18",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3729,7 +3783,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2022-01-11"
+              "onsetDateTime": "2022-01-11",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3780,7 +3842,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2022-09-27"
+              "onsetDateTime": "2022-09-27",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3831,7 +3901,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "onsetDateTime": "2023-02-14"
+              "onsetDateTime": "2023-02-14",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -4127,11 +4205,6 @@
         {
           "severity": "warning",
           "expression": "Bundle.entry[2].resource/*Organization/945d79b4-372f-85a5-8208-ecced6437eb2*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Bundle.entry[3].resource/*Condition/cd52d786-1357-8022-a541-6ebe2d539757*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
@@ -4500,7 +4573,15 @@
               "subject": {
                 "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
               },
-              "onsetDateTime": "2023-09-12T11:30:00Z"
+              "onsetDateTime": "2023-09-12T11:30:00Z",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -4862,11 +4943,6 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[3].resource/*Condition/3fb76caf-2475-8feb-94be-b80e46ac42e6*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "Bundle.entry[3].resource/*Condition/3fb76caf-2475-8feb-94be-b80e46ac42e6*/.code",
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         },
@@ -5163,7 +5239,15 @@
               "subject": {
                 "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
               },
-              "onsetDateTime": "2020-09-01"
+              "onsetDateTime": "2020-09-01",
+              "_recordedDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {

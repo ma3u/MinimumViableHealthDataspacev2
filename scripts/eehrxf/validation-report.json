@@ -85,7 +85,7 @@
       "resources": 183
     }
   },
-  "inputsDigest": "1c534981831ec0a4",
+  "inputsDigest": "06787a03b6b987ac",
   "profiles": {
     "patient-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
@@ -749,8 +749,8 @@
             "resources": 38
           },
           {
-            "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 21
+            "issue": "Observation.identifier[n].type.coding[n]: Observation.identifier:resultID.type.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
+            "resources": 29
           }
         ]
       },
@@ -785,6 +785,10 @@
         },
         "topIssues": [
           {
+            "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "resources": 4
+          },
+          {
             "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update and slicing is CLOSED: DiagnosticReport.identifier[n]: D",
             "resources": 4
           },
@@ -798,10 +802,6 @@
           },
           {
             "issue": "DiagnosticReport.subject: DiagnosticReport.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 4
-          },
-          {
-            "issue": "DiagnosticReport: DiagnosticReport.category: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
             "resources": 4
           }
         ]
@@ -893,20 +893,20 @@
             "resources": 38
           },
           {
+            "issue": "Observation.identifier[n].type.coding[n]: Observation.identifier:resultID.type.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "resources": 29
+          },
+          {
+            "issue": "Observation.identifier[n]: Observation.identifier:resultID.assigner: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "resources": 29
+          },
+          {
             "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
             "resources": 21
           },
           {
             "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
             "resources": 20
-          },
-          {
-            "issue": "Observation: Observation.performer: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 20
-          },
-          {
-            "issue": "Observation.identifier[n].type.coding[n]: Observation.identifier:resultID.type.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 17
           }
         ]
       },
@@ -941,6 +941,10 @@
         },
         "topIssues": [
           {
+            "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "resources": 4
+          },
+          {
             "issue": "DiagnosticReport.effective.ofType(dateTime): This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.",
             "resources": 4
           },
@@ -954,10 +958,6 @@
           },
           {
             "issue": "DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
-            "resources": 4
-          },
-          {
-            "issue": "DiagnosticReport.result[n]: Slice '...' for extension '...': a matching slice is required, but not found (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0). Note that other slices are allowed in a",
             "resources": 4
           }
         ]
@@ -997,6 +997,10 @@
             "resources": 4
           },
           {
+            "issue": "Bundle: Constraint failed: dr-comp-identifier: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
+            "resources": 4
+          },
+          {
             "issue": "Bundle: Slice '...': a matching slice is required, but not found (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp|1.0.0). Note that other slices are allowed in addition to this required slice",
             "resources": 4
           },
@@ -1006,10 +1010,6 @@
           },
           {
             "issue": "entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0)",
-            "resources": 3
-          },
-          {
-            "issue": "entry/*Composition/<uuid>*/.identifier.system: Value is '...' but is fixed to 'urn:ietf:rfc:3986' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0#Composition.identifier.system",
             "resources": 3
           }
         ]
@@ -1063,16 +1063,16 @@
         "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
         "gate": true,
         "tested": 52,
-        "passed": 20,
-        "failed": 32,
+        "passed": 51,
+        "failed": 1,
         "bySource": {
           "documents": {
             "tested": 20,
-            "passed": 0
+            "passed": 20
           },
           "facade": {
             "tested": 12,
-            "passed": 0
+            "passed": 11
           },
           "klarbefund": {
             "tested": 0,
@@ -1088,10 +1088,6 @@
           }
         },
         "topIssues": [
-          {
-            "issue": "Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
-            "resources": 32
-          },
           {
             "issue": "Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
             "resources": 1
@@ -1147,8 +1143,8 @@
         "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
         "gate": true,
         "tested": 31,
-        "passed": 21,
-        "failed": 10,
+        "passed": 30,
+        "failed": 1,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -1156,7 +1152,7 @@
           },
           "facade": {
             "tested": 11,
-            "passed": 1
+            "passed": 10
           },
           "klarbefund": {
             "tested": 0,
@@ -1173,15 +1169,7 @@
         },
         "topIssues": [
           {
-            "issue": "Encounter: Constraint failed: mii-enc-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)",
-            "resources": 10
-          },
-          {
             "issue": "Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE'...'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')'...'http://fhir.de/ValueSe",
-            "resources": 1
-          },
-          {
-            "issue": "Encounter: Constraint failed: mii-enc-2: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)",
             "resources": 1
           }
         ]
@@ -1191,12 +1179,12 @@
         "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
         "gate": true,
         "tested": 49,
-        "passed": 16,
-        "failed": 33,
+        "passed": 28,
+        "failed": 21,
         "bySource": {
           "documents": {
             "tested": 12,
-            "passed": 0
+            "passed": 12
           },
           "facade": {
             "tested": 6,
@@ -1218,18 +1206,18 @@
         "topIssues": [
           {
             "issue": "Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
-            "resources": 32
+            "resources": 20
           },
           {
             "issue": "Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
-            "resources": 32
-          },
-          {
-            "issue": "Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
-            "resources": 32
+            "resources": 20
           },
           {
             "issue": "Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "resources": 20
+          },
+          {
+            "issue": "Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
             "resources": 20
           },
           {
@@ -1243,12 +1231,12 @@
         "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
         "gate": true,
         "tested": 4,
-        "passed": 1,
-        "failed": 3,
+        "passed": 4,
+        "failed": 0,
         "bySource": {
           "documents": {
             "tested": 3,
-            "passed": 0
+            "passed": 3
           },
           "facade": {
             "tested": 0,
@@ -1267,16 +1255,7 @@
             "passed": 0
           }
         },
-        "topIssues": [
-          {
-            "issue": "DiagnosticReport: DiagnosticReport.basedOn: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)",
-            "resources": 3
-          },
-          {
-            "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi",
-            "resources": 3
-          }
-        ]
+        "topIssues": []
       },
       "kds-medication-request-de": {
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
@@ -1319,8 +1298,8 @@
         "ig": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
         "gate": true,
         "tested": 16,
-        "passed": 11,
-        "failed": 5,
+        "passed": 16,
+        "failed": 0,
         "bySource": {
           "documents": {
             "tested": 11,
@@ -1328,7 +1307,7 @@
           },
           "facade": {
             "tested": 5,
-            "passed": 0
+            "passed": 5
           },
           "klarbefund": {
             "tested": 0,
@@ -1343,16 +1322,7 @@
             "passed": 0
           }
         },
-        "topIssues": [
-          {
-            "issue": "MedicationStatement.dosage[n]: Constraint failed: DosageStructuredRequiresBoth: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)",
-            "resources": 4
-          },
-          {
-            "issue": "MedicationStatement: MedicationStatement.effective[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement|2026.0.1)",
-            "resources": 1
-          }
-        ]
+        "topIssues": []
       }
     }
   }

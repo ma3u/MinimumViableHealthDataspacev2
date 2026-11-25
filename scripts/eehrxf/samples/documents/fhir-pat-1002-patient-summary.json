@@ -297,7 +297,15 @@
     "subject": {
      "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
     },
-    "onsetDateTime": "2023-09-12T11:30:00Z"
+    "onsetDateTime": "2023-09-12T11:30:00Z",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {

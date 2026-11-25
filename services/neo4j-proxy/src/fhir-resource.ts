@@ -334,8 +334,9 @@ function encounter(p: Props, subject: Resource | undefined): Resource {
     typeText,
   );
   const start = fhirDateTime(p.date ?? p.period);
+  const status = pick(p.status, ENCOUNTER_STATUS, "unknown");
   return {
-    status: pick(p.status, ENCOUNTER_STATUS, "unknown"),
+    status,
     class: cls
       ? {
           system: "http://terminology.hl7.org/CodeSystem/v3-ActCode",
@@ -345,7 +346,11 @@ function encounter(p: Props, subject: Resource | undefined): Resource {
       : absent(),
     type: type ? [type] : undefined,
     subject,
-    period: start ? { start } : undefined,
+    // A finished contact has an end (MII Kerndatensatz mii-enc-1); the graph
+    // keeps the day it began, so the end is stated as unknown, not guessed.
+    period: start
+      ? { start, ...(status === "finished" ? { _end: absent() } : {}) }
+      : undefined,
     serviceProvider: named(first(p, "serviceProvider")),
   };
 }
@@ -377,6 +382,9 @@ function condition(p: Props, subject: Resource | undefined): Resource {
       ) ?? absent(),
     subject,
     onsetDateTime: fhirDateTime(p.onsetDate ?? p.onset),
+    // When the diagnosis was recorded (MII Kerndatensatz Diagnose). The graph
+    // keeps the onset, which is a different date, so this one is unknown.
+    _recordedDate: absent(),
   };
 }
 
@@ -666,20 +674,31 @@ function medicationStatement(
       ) ?? absent(),
     subject,
     effectivePeriod: start ? { start } : undefined,
+    // The MII Kerndatensatz requires a time; one the graph does not hold is unknown.
+    _effectiveDateTime: start ? undefined : absent(),
     // The date the medication plan was printed is when it said so.
     dateAsserted: fhirDateTime(p.planPrinted),
     informationSource: named(first(p, "source")),
     reasonCode: reason ? [{ text: reason }] : undefined,
+    // The graph keeps a dose and the plan's text, but no structured schedule.
+    // A structured dose without its timing breaks the German dosage rule
+    // (DosageStructuredRequiresBoth), so the dose travels in the text, ahead
+    // of the plan's own wording ("500 mg, 1-0-1").
     dosage:
       text || dose !== undefined
         ? [
-            compact({
-              text,
-              doseAndRate:
+            {
+              text: [
                 dose === undefined
                   ? undefined
-                  : [{ doseQuantity: quantity(dose, first(p, "doseUnit")) }],
-            }),
+                  : [dose, first(p, "doseUnit")]
+                      .filter((x) => x !== undefined)
+                      .join(" "),
+                text,
+              ]
+                .filter((x) => x !== undefined)
+                .join(", "),
+            },
           ]
         : undefined,
   };

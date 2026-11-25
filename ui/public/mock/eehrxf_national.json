@@ -16,11 +16,10 @@
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
           "baseResource": "Condition",
           "tested": 52,
-          "passed": 20,
-          "failed": 32,
+          "passed": 51,
+          "failed": 1,
           "coverage": "partial",
           "topIssues": [
-            "32x Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
             "1x Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
           ],
           "eehrxfCounterpart": {
@@ -34,13 +33,11 @@
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
           "baseResource": "Encounter",
           "tested": 31,
-          "passed": 21,
-          "failed": 10,
+          "passed": 30,
+          "failed": 1,
           "coverage": "partial",
           "topIssues": [
-            "10x Encounter: Constraint failed: mii-enc-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)",
-            "1x Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE'...'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')'...'http://fhir.de/ValueSe",
-            "1x Encounter: Constraint failed: mii-enc-2: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
+            "1x Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE'...'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')'...'http://fhir.de/ValueSe"
           ],
           "eehrxfCounterpart": {
             "profileId": "encounter-hdr-eu",
@@ -100,13 +97,10 @@
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
           "baseResource": "DiagnosticReport",
           "tested": 4,
-          "passed": 1,
-          "failed": 3,
-          "coverage": "partial",
-          "topIssues": [
-            "3x DiagnosticReport: DiagnosticReport.basedOn: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)",
-            "3x DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi"
-          ],
+          "passed": 4,
+          "failed": 0,
+          "coverage": "full",
+          "topIssues": [],
           "eehrxfCounterpart": {
             "profileId": "diagnostic-report-lab-eu",
             "name": "DiagnosticReport (EU Lab)"
@@ -118,14 +112,14 @@
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
           "baseResource": "Observation",
           "tested": 49,
-          "passed": 16,
-          "failed": 33,
+          "passed": 28,
+          "failed": 21,
           "coverage": "partial",
           "topIssues": [
-            "32x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
-            "32x Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
-            "32x Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
+            "20x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "20x Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
             "20x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "20x Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
             "1x Observation.effective.ofType(Period): The Profile '...' definition allows for the type dateTime but found type Period"
           ],
           "eehrxfCounterpart": {
@@ -168,13 +162,10 @@
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
           "baseResource": "MedicationStatement",
           "tested": 16,
-          "passed": 11,
-          "failed": 5,
-          "coverage": "partial",
-          "topIssues": [
-            "4x MedicationStatement.dosage[n]: Constraint failed: DosageStructuredRequiresBoth: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)",
-            "1x MedicationStatement: MedicationStatement.effective[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement|2026.0.1)"
-          ],
+          "passed": 16,
+          "failed": 0,
+          "coverage": "full",
+          "topIssues": [],
           "eehrxfCounterpart": null
         }
       ]
@@ -184,7 +175,7 @@
     "guides": 3,
     "profiles": 8,
     "resourcesTested": 262,
-    "resourcesPassed": 172,
-    "passRatePercent": 66
+    "resourcesPassed": 232,
+    "passRatePercent": 89
   }
 }

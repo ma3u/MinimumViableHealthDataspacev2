@@ -507,7 +507,7 @@
       "reference: Reference examples with fictional data for profiles the hub produces nothing for; validated, never counted",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "1c534981831ec0a4"
+    "inputsDigest": "06787a03b6b987ac"
   },
   "planned": [
     {
