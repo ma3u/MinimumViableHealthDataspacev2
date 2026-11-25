@@ -47,6 +47,8 @@ function post(body: unknown) {
 describe("POST /api/compliance/permits/revoke", () => {
   beforeEach(() => {
     mockRunQuery.mockReset();
+    adminAudit.recordAdminEvent.mockClear();
+    adminAudit.recordAdminEventAfter.mockClear();
     mockRequireAuth.mockResolvedValue(HDAB_SESSION as never);
   });
 
@@ -85,7 +87,7 @@ describe("POST /api/compliance/permits/revoke", () => {
     expect(body.revokedBy).toBe("did:web:medreg.de:hdab");
     expect(body.article).toContain("Art. 63(3)");
 
-    const [cypher, params] = mockRunQuery.mock.calls[0];
+    const [cypher, params] = mockRunQuery.mock.calls[1];
     expect(cypher).toContain("= 'APPROVED'");
     expect(cypher).toContain("permit.status            = 'REVOKED'");
     expect(params).toMatchObject({
@@ -109,16 +111,34 @@ describe("POST /api/compliance/permits/revoke", () => {
 
   it("revokes nothing when the audit chain cannot record it", async () => {
     adminAudit.recordAdminEvent.mockRejectedValueOnce(new Error("down"));
+    mockRunQuery.mockResolvedValue([{ permitId: "permit-app-1" }]);
     const res = await POST(
       post({ permitId: "permit-app-1", reason: "Breach." }),
     );
     expect(res.status).toBe(503);
-    expect(mockRunQuery).not.toHaveBeenCalled();
+    // Only the read that checks the permit ran; nothing was written.
+    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+    expect(String(mockRunQuery.mock.calls[0][0])).not.toContain("REVOKED");
   });
 
   it("answers 404 when there is no approved permit under that id", async () => {
     mockRunQuery.mockResolvedValue([]);
     const res = await POST(post({ permitId: "permit-gone", reason: "r" }));
     expect(res.status).toBe(404);
+  });
+
+  it("never records a revocation of a permit that is not there as a success", async () => {
+    mockRunQuery.mockResolvedValue([]);
+    await POST(post({ permitId: "permit-gone", reason: "r" }));
+    expect(adminAudit.recordAdminEvent).not.toHaveBeenCalled();
+    expect(adminAudit.recordAdminEventAfter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: "permit-revoke",
+        outcome: "failure",
+        target: "permit-gone",
+      }),
+    );
+    // Nothing but the check ran: no write was attempted.
+    expect(mockRunQuery).toHaveBeenCalledTimes(1);
   });
 });
