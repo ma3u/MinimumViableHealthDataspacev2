@@ -2,6 +2,7 @@
 import Link from "next/link";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Suspense, useEffect } from "react";
 import { ShieldCheck } from "lucide-react";
 import { WalletFlow } from "@/components/wallet/PhoneFrame";
@@ -10,7 +11,7 @@ import { EudiApprovalFlow } from "@/components/wallet/EudiApprovalFlow";
 import { WalletSignInStatus } from "@/components/wallet/WalletSignInStatus";
 import { setDemoPersona } from "@/lib/use-demo-persona";
 import { useWalletSignIn } from "@/lib/use-wallet-sign-in";
-import { CITIZEN_WALLET } from "@/lib/wallet-config";
+import { CITIZEN_WALLET, connectsWallet } from "@/lib/wallet-config";
 import { useT } from "@/lib/i18n/translate";
 
 const WALLET = CITIZEN_WALLET;
@@ -24,6 +25,7 @@ function EudiQrContent() {
   const router = useRouter();
   const callbackUrl = searchParams.get("callbackUrl") || "/overview";
   const mode = searchParams.get("mode") === "login" ? "login" : "register";
+  const linkingWallet = connectsWallet(callbackUrl);
 
   const flow = useWalletSignIn({ callbackUrl });
   const { start } = flow.presentation;
@@ -114,6 +116,25 @@ function EudiQrContent() {
             </span>
           </p>
 
+          {linkingWallet && (
+            <div
+              role="note"
+              data-testid="wallet-link-hint"
+              className="bg-(--accent)/10 border border-(--accent)/30 rounded-sm p-3 mb-4 text-sm text-(--text-primary)"
+            >
+              <p className="mb-2">
+                {t(
+                  "To connect a wallet, sign in with your account first. You connect it on the next page.",
+                )}
+              </p>
+              <button
+                onClick={() => void signIn("keycloak", { callbackUrl })}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg text-sm font-medium transition-colors"
+              >
+                {t("Sign in with your account")}
+              </button>
+            </div>
+          )}
           <WalletSignInStatus flow={flow} />
         </div>
 
