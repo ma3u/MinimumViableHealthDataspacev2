@@ -83,6 +83,21 @@ check_terminology_keys() {
   [ "$unkeyed" = "0" ] || failed+=("terminology nodes without their key: ${unkeyed:-unknown} (#1215)")
 }
 
+# Issue #1222: every Patient, Encounter, Condition, Observation,
+# MedicationRequest and Procedure carries resourceId, the key init-schema.cypher
+# makes unique, and every OdrlPolicy its policyId. migrate-clinical-keys.cypher
+# keys the nodes older loaders wrote under `id` only; one left without its key
+# fails the run.
+check_clinical_keys() {
+  local unkeyed
+  unkeyed=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (n) WHERE (n:Patient OR n:Encounter OR n:Condition OR n:Observation OR n:MedicationRequest OR n:Procedure) AND n.resourceId IS NULL AND n.id IS NOT NULL } + COUNT { MATCH (p:OdrlPolicy) WHERE p.policyId IS NULL } AS unkeyed;" \
+    2>/dev/null | tail -1)
+  echo "clinical nodes and policies without their key: ${unkeyed:-unknown}"
+  [ "$unkeyed" = "0" ] || failed+=("clinical nodes and policies without their key: ${unkeyed:-unknown} (#1222)")
+}
+
 check_dataset_publishers() {
   local unpublished
   unpublished=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -176,6 +191,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
+  run_file "$SEED_DIR"/migrate-clinical-keys.cypher "clinical nodes keyed by resourceId, lab values with a unit (#1222)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
   echo ""
@@ -194,6 +210,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
     "MATCH (p:Patient {resourceId: 'P1'})-[:HAS_OBSERVATION]->(o:Observation) WITH count(o) AS observations MATCH (te:TransferEvent {monthly: true}) RETURN observations, count(te) AS monthlyAccessEvents;"
   check_terminology_keys
   check_dataset_publishers
+  check_clinical_keys
   finish
 fi
 
@@ -236,6 +253,7 @@ run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to 
 run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
 run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
 run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
+run_file "$SEED_DIR"/migrate-clinical-keys.cypher "clinical nodes keyed by resourceId, lab values with a unit (#1222)"
 run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
@@ -317,5 +335,6 @@ cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
   "MATCH ()-[r]->() RETURN count(r) AS relCount;"
 check_terminology_keys
 check_dataset_publishers
+check_clinical_keys
 
 finish

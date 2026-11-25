@@ -39,7 +39,8 @@ except ImportError:
 UPSERT_PATIENTS = """
 UNWIND $rows AS row
 MERGE (p:Patient {id: row.id})
-SET p.name      = row.name,
+SET p.resourceId = row.id,
+    p.name      = row.name,
     p.birthDate = row.birthDate,
     p.gender    = row.gender,
     p.deceased  = row.deceased,
@@ -53,7 +54,8 @@ MERGE (p)-[:FROM_DATASET]->(hd)
 UPSERT_ENCOUNTERS = """
 UNWIND $rows AS row
 MERGE (e:Encounter {id: row.id})
-SET e.name   = row.name,
+SET e.resourceId = row.id,
+    e.name   = row.name,
     e.date   = row.date,
     e.class  = row.encClass,
     e.type   = row.type,
@@ -66,7 +68,8 @@ MERGE (p)-[:HAS_ENCOUNTER]->(e)
 UPSERT_CONDITIONS = """
 UNWIND $rows AS row
 MERGE (c:Condition {id: row.id})
-SET c.name      = row.name,
+SET c.resourceId = row.id,
+    c.name      = row.name,
     c.onsetDate = row.onsetDate,
     c.code      = row.code,
     c.display   = row.display,
@@ -96,7 +99,8 @@ FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
 UPSERT_OBSERVATIONS = """
 UNWIND $rows AS row
 MERGE (o:Observation {id: row.id})
-SET o.name     = row.name,
+SET o.resourceId = row.id,
+    o.name     = row.name,
     o.dateTime = row.dateTime,
     o.code     = row.code,
     o.display  = row.display,
@@ -122,7 +126,8 @@ MERGE (o)-[:CODED_BY]->(l)
 UPSERT_MEDICATIONS = """
 UNWIND $rows AS row
 MERGE (m:MedicationRequest {id: row.id})
-SET m.name    = row.name,
+SET m.resourceId = row.id,
+    m.name    = row.name,
     m.date    = row.date,
     m.code    = row.code,
     m.display = row.display,
@@ -153,7 +158,8 @@ FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
 UPSERT_PROCEDURES = """
 UNWIND $rows AS row
 MERGE (pr:Procedure {id: row.id})
-SET pr.name            = row.name,
+SET pr.resourceId = row.id,
+    pr.name            = row.name,
     pr.performedStart  = row.performedStart,
     pr.performedEnd    = row.performedEnd,
     pr.code            = row.code,
