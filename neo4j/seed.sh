@@ -81,6 +81,31 @@ check_terminology_keys() {
     2>/dev/null | tail -1)
   echo "terminology nodes without their key: ${unkeyed:-unknown}"
   [ "$unkeyed" = "0" ] || failed+=("terminology nodes without their key: ${unkeyed:-unknown} (#1215)")
+  # Issue #1231: the key is a string. A constraint treats 415749005 and
+  # "415749005" as two values, so a seed that writes an integer again makes a
+  # second node; migrate-terminology-key-types.cypher merges and converts.
+  local untyped
+  untyped=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (n:SnomedConcept) WHERE n.conceptId IS NOT NULL AND NOT n.conceptId IS :: STRING } + COUNT { MATCH (n:RxNormConcept) WHERE n.rxcui IS NOT NULL AND NOT n.rxcui IS :: STRING } + COUNT { MATCH (n:LoincCode) WHERE n.loincNumber IS NOT NULL AND NOT n.loincNumber IS :: STRING } + COUNT { MATCH (n:ICD10Code) WHERE n.code IS NOT NULL AND NOT n.code IS :: STRING } AS untyped;" \
+    2>/dev/null | tail -1)
+  echo "terminology keys that are not strings: ${untyped:-unknown}"
+  [ "$untyped" = "0" ] || failed+=("terminology keys that are not strings: ${untyped:-unknown} (#1231)")
+}
+
+# Issue #1222: every Patient, Encounter, Condition, Observation,
+# MedicationRequest and Procedure carries resourceId, the key init-schema.cypher
+# makes unique, and every OdrlPolicy its policyId. migrate-clinical-keys.cypher
+# keys the nodes older loaders wrote under `id` only; one left without its key
+# fails the run.
+check_clinical_keys() {
+  local unkeyed
+  unkeyed=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (n) WHERE (n:Patient OR n:Encounter OR n:Condition OR n:Observation OR n:MedicationRequest OR n:Procedure) AND n.resourceId IS NULL AND n.id IS NOT NULL } + COUNT { MATCH (p:OdrlPolicy) WHERE p.policyId IS NULL } AS unkeyed;" \
+    2>/dev/null | tail -1)
+  echo "clinical nodes and policies without their key: ${unkeyed:-unknown}"
+  [ "$unkeyed" = "0" ] || failed+=("clinical nodes and policies without their key: ${unkeyed:-unknown} (#1222)")
 }
 
 check_dataset_publishers() {
@@ -175,8 +200,10 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/migrate-rxnorm-codes.cypher "RxNorm codes that named another drug (#1167)"
   run_file "$SEED_DIR"/seed-omop-concept-ids.cypher "OMOP standard concept ids for conditions and drugs (#1167)"
   run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
+  run_file "$SEED_DIR"/migrate-terminology-key-types.cypher "terminology keys as strings, integer twins merged (#1231)"
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
+  run_file "$SEED_DIR"/migrate-clinical-keys.cypher "clinical nodes keyed by resourceId, lab values with a unit (#1222)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
   echo ""
@@ -195,6 +222,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
     "MATCH (p:Patient {resourceId: 'P1'})-[:HAS_OBSERVATION]->(o:Observation) WITH count(o) AS observations MATCH (te:TransferEvent {monthly: true}) RETURN observations, count(te) AS monthlyAccessEvents;"
   check_terminology_keys
   check_dataset_publishers
+  check_clinical_keys
   finish
 fi
 
@@ -238,6 +266,7 @@ run_file "$SEED_DIR"/migrate-ehds-article-labels.cypher "EHDS article labels to 
 run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations from the graph generator to fictional ones"
 run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
 run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
+run_file "$SEED_DIR"/migrate-clinical-keys.cypher "clinical nodes keyed by resourceId, lab values with a unit (#1222)"
 run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
@@ -287,6 +316,8 @@ run_file "$SEED_DIR"/seed-omop-concept-ids.cypher "OMOP standard concept ids for
 # node into its keyed twin (relationships moved, the copy removed) and keys
 # the rest. After every seed that writes terminology nodes. Idempotent.
 run_file "$SEED_DIR"/migrate-terminology-keys.cypher "terminology nodes keyed by their constrained key (#1215)"
+# Issue #1231: one type per key, a string; integer twins merged into it.
+run_file "$SEED_DIR"/migrate-terminology-key-types.cypher "terminology keys as strings, integer twins merged (#1231)"
 
 # Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
 # Requires the graph-data-science plugin; silently no-ops on installs without
@@ -319,5 +350,6 @@ cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
   "MATCH ()-[r]->() RETURN count(r) AS relCount;"
 check_terminology_keys
 check_dataset_publishers
+check_clinical_keys
 
 finish

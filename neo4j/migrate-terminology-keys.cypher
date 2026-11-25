@@ -11,8 +11,8 @@
 // file repairs a graph an earlier run split.
 //
 // For each label, every node without its key but with a `code`:
-//   - with a keyed twin (key = code; for SNOMED CT and RxNorm, whose keys the
-//     seeds write as integers and as strings, either form), it is merged into
+//   - with a keyed twin (key = code, a string; an integer twin is merged by
+//     migrate-terminology-key-types.cypher, which runs next, #1231), it is merged into
 //     the twin: its relationships move to the twin, a relationship the twin
 //     already has is not doubled, a property the twin lacks is kept, one it
 //     has stays the twin's, and the node is removed;
@@ -48,9 +48,8 @@ MATCH (n:SnomedConcept)
 WHERE n.conceptId IS NULL AND n.code IS NOT NULL AND trim(toString(n.code)) <> ''
 WITH trim(toString(n.code)) AS code, collect(n) AS loose
 OPTIONAL MATCH (twin:SnomedConcept)
-  WHERE twin.conceptId IN [code, toInteger(code)]
+  WHERE twin.conceptId = code
 WITH code, loose, twin
-ORDER BY twin.conceptId = code DESC
 WITH code, loose, head(collect(twin)) AS twin
 WITH code, CASE WHEN twin IS NULL THEN loose ELSE [twin] + loose END AS nodes
 CALL apoc.refactor.mergeNodes(nodes, {properties: 'discard', mergeRels: true})
@@ -63,9 +62,8 @@ MATCH (n:RxNormConcept)
 WHERE n.rxcui IS NULL AND n.code IS NOT NULL AND trim(toString(n.code)) <> ''
 WITH trim(toString(n.code)) AS code, collect(n) AS loose
 OPTIONAL MATCH (twin:RxNormConcept)
-  WHERE twin.rxcui IN [code, toInteger(code)]
+  WHERE twin.rxcui = code
 WITH code, loose, twin
-ORDER BY twin.rxcui = code DESC
 WITH code, loose, head(collect(twin)) AS twin
 WITH code, CASE WHEN twin IS NULL THEN loose ELSE [twin] + loose END AS nodes
 CALL apoc.refactor.mergeNodes(nodes, {properties: 'discard', mergeRels: true})
