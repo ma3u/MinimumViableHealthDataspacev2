@@ -836,6 +836,13 @@ CREATE INDEX condition_code IF NOT EXISTS FOR (c:Condition) ON (c.code);
 - `issued: DateTime`
 - `interpretation: String[]` — (normal, abnormal, critical, high, low)
 
+What the Synthea loader keeps of a FHIR Observation (#1218):
+
+- `value: Float` and `valueQuantity: Float`: the number, never a string; absent when the source sent none (`neo4j/migrate-observation-values.cypher` converts what an older loader stored)
+- `unit: String`: as the source printed it; `ucumCode: String`: the UCUM code, only when the source marked the unit as UCUM (`system` unitsofmeasure.org). The FHIR facade serves `ucumCode` when present and otherwise maps the printed unit (#1214)
+- `codingSystems`, `codingCodes`, `codingDisplays: String[]`: every coding of `code`, aligned, LOINC first. `code`, `system` and `display` are the first; each LOINC and SNOMED CT coding is also a `CODED_BY` edge
+- `componentCodes`, `componentDisplays`, `componentUnits`, `componentUcumCodes: String[]` and `componentValues: Float[]`: the components, aligned, such as the systolic (8480-6) and diastolic (8462-4) values of a blood pressure panel (85354-9), which has no value of its own. A component sent without a value is named in `componentAbsentCodes`, since a Neo4j list holds no null. The facade serves them as `component`, and the OMOP transform writes one `OMOPMeasurement` per component (step 4b)
+
 Every writer sets `resourceId`, the key of the constraint. The Synthea loader and `scripts/generate-graph-seed.py` merge on `id` and set `resourceId` to the same value, on Patient, Encounter, Condition, MedicationRequest and Procedure too; `neo4j/migrate-clinical-keys.cypher` keys nodes they wrote before #1222 and gives the graph seed's laboratory values (`obs-<patient>-<loinc>`) their unit and a value in the test's range. The date is still `dateTime` or `date` there rather than `effectiveDate`; readers coalesce the variants.
 
 **Indexes:**

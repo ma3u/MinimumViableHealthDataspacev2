@@ -69,6 +69,7 @@ class LoaderCypher(unittest.TestCase):
         "LINK_OBSERVATIONS_LOINC": "LoincCode",
         "LINK_MEDICATIONS_RXNORM": "RxNormConcept",
         "LINK_PROCEDURES_SNOMED": "SnomedConcept",
+        "LINK_OBSERVATIONS_SNOMED": "SnomedConcept",
     }
 
     def test_every_link_merges_on_the_constrained_key(self):
@@ -121,6 +122,109 @@ class LoaderCypher(unittest.TestCase):
             {k: [r["code"] for r in data[k]] for k in ("snomed_rows", "loinc_rows", "rxnorm_rows", "proc_snomed_rows")},
             {"snomed_rows": ["44054006"], "loinc_rows": ["4548-4"], "rxnorm_rows": ["860975"], "proc_snomed_rows": ["73761001"]},
         )
+
+
+class ObservationFidelity(unittest.TestCase):
+    """#1218: an Observation keeps every coding, a numeric value with its UCUM
+    code and printed unit, and its components. A Synthea blood pressure panel
+    has no value of its own and two components; the loader kept neither."""
+
+    loader = load_loader()
+
+    def parse(self, *resources):
+        import json
+        import tempfile
+
+        bundle = {"resourceType": "Bundle", "entry": [
+            {"resource": {"resourceType": "Patient", "id": "p-1218"}},
+            *({"resource": r} for r in resources),
+        ]}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            json.dump(bundle, f)
+        try:
+            return self.loader.parse_bundle(f.name, "")
+        finally:
+            Path(f.name).unlink()
+
+    # As Synthea writes it (vital-signs, LOINC 85354-9, two components).
+    BP_PANEL = {
+        "resourceType": "Observation", "id": "bp-1218", "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                  "code": "vital-signs"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "85354-9",
+                             "display": "Blood pressure panel with all children optional"}],
+                 "text": "Blood pressure panel with all children optional"},
+        "effectiveDateTime": "2024-05-06T08:00:00+02:00",
+        "component": [
+            {"code": {"coding": [{"system": "http://loinc.org", "code": "8462-4", "display": "Diastolic Blood Pressure"}]},
+             "valueQuantity": {"value": 82, "unit": "mm[Hg]", "system": "http://unitsofmeasure.org", "code": "mm[Hg]"}},
+            {"code": {"coding": [{"system": "http://loinc.org", "code": "8480-6", "display": "Systolic Blood Pressure"}]},
+             "valueQuantity": {"value": 131, "unit": "mm[Hg]", "system": "http://unitsofmeasure.org", "code": "mm[Hg]"}},
+        ],
+    }
+
+    def test_a_blood_pressure_panel_keeps_both_values(self):
+        row = self.parse(self.BP_PANEL)["observations"][0]
+        self.assertEqual(row["code"], "85354-9")
+        self.assertIsNone(row["value"])
+        self.assertEqual(row["componentCodes"], ["8462-4", "8480-6"])
+        self.assertEqual(row["componentValues"], [82.0, 131.0])
+        self.assertEqual(row["componentUnits"], ["mm[Hg]", "mm[Hg]"])
+        self.assertEqual(row["componentUcumCodes"], ["mm[Hg]", "mm[Hg]"])
+        self.assertEqual(row["componentAbsentCodes"], [])
+
+    def test_a_component_without_a_value_is_named_not_dropped(self):
+        panel = dict(self.BP_PANEL, component=[
+            self.BP_PANEL["component"][1],
+            {"code": {"coding": [{"system": "http://loinc.org", "code": "8462-4"}]},
+             "dataAbsentReason": {"coding": [{"code": "unknown"}]}},
+        ])
+        row = self.parse(panel)["observations"][0]
+        self.assertEqual(row["componentCodes"], ["8480-6"])
+        self.assertEqual(row["componentAbsentCodes"], ["8462-4"])
+
+    def test_the_value_is_a_number_with_its_ucum_code_and_printed_unit(self):
+        row = self.parse({
+            "resourceType": "Observation", "id": "hb",
+            "code": {"coding": [{"system": "http://loinc.org", "code": "718-7"}]},
+            "valueQuantity": {"value": 13.9, "unit": "g/dL", "system": "http://unitsofmeasure.org", "code": "g/dL"},
+        })["observations"][0]
+        self.assertEqual(row["value"], 13.9)
+        self.assertIsInstance(row["value"], float)
+        self.assertEqual((row["unit"], row["ucumCode"]), ("g/dL", "g/dL"))
+
+    def test_a_printed_unit_is_not_called_ucum(self):
+        row = self.parse({
+            "resourceType": "Observation", "id": "x",
+            "code": {"coding": [{"system": "http://loinc.org", "code": "2339-0"}]},
+            "valueQuantity": {"value": "5,5", "unit": "mmol/l"},
+        })["observations"][0]
+        self.assertIsNone(row["value"])
+        self.assertEqual(row["unit"], "mmol/l")
+        self.assertIsNone(row["ucumCode"])
+
+    def test_every_coding_is_kept_loinc_first(self):
+        data = self.parse({
+            "resourceType": "Observation", "id": "multi",
+            "code": {"coding": [
+                {"system": "http://snomed.info/sct", "code": "271649006", "display": "Systolic blood pressure"},
+                {"system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure"},
+                {"system": "urn:oid:1.2.276.0.76.5.409", "code": "RR-SYS"},
+            ]},
+            "valueQuantity": {"value": 120, "unit": "mm[Hg]"},
+        })
+        row = data["observations"][0]
+        self.assertEqual(row["code"], "8480-6")
+        self.assertEqual(row["codingCodes"], ["8480-6", "271649006", "RR-SYS"])
+        self.assertEqual(row["codingSystems"][0], "http://loinc.org")
+        self.assertEqual([r["code"] for r in data["loinc_rows"]], ["8480-6"])
+        self.assertEqual([r["code"] for r in data["obs_snomed_rows"]], ["271649006"])
+
+    def test_the_upsert_writes_what_the_parser_keeps(self):
+        cypher = self.loader.UPSERT_OBSERVATIONS
+        for prop in ("valueQuantity", "ucumCode", "codingCodes", "componentCodes",
+                     "componentValues", "componentUcumCodes", "componentAbsentCodes"):
+            self.assertIn(f"o.{prop}", cypher)
 
 
 class EveryMergeOnTheKey(unittest.TestCase):
