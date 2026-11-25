@@ -7,10 +7,10 @@
 // nedrexRelease on every node and relationship this file writes.
 //
 // 31 hub SNOMED CT codes: 20 matched through the
-// disorder's SNOMED CT xref, 2 through ICD-10, 9 not at all.
-// 22 matched disorders, 111 with their MONDO ancestors,
-// 148 SUBTYPE_OF edges, 892 drugs,
-// 1350 indications: 504 from DrugCentral, 846 from CTD only.
+// disorder's SNOMED CT xref, 3 through ICD-10, 8 not at all.
+// 23 matched disorders, 113 with their MONDO ancestors,
+// 150 SUBTYPE_OF edges, 897 drugs,
+// 1370 indications: 506 from DrugCentral, 864 from CTD only.
 //
 // code       route     via                    disorder
 // 13644009   none      -                      no SNOMED CT xref, no ICD-10 code in the hub
@@ -22,7 +22,7 @@
 // 40930008   snomedct  snomedct.40930008      mondo.0005420 hypothyroidism
 // 44054006   snomedct  snomedct.44054006      mondo.0005148 type 2 diabetes mellitus
 // 49436004   snomedct  snomedct.49436004      mondo.0004981 atrial fibrillation
-// 50711007   none      -                      no SNOMED CT xref; 2 disorder(s) carry B18, B18.2, none with MONDO subtypes
+// 50711007   none      -                      no SNOMED CT xref; 2 disorder(s) carry a code in B18, none with MONDO subtypes
 // 53741008   none      -                      no SNOMED CT xref, no ICD-10 code in the hub
 // 55822004   snomedct  snomedct.55822004      mondo.0021187 hyperlipidemia
 // 68566005   snomedct  snomedct.68566005      mondo.0005247 bacterial urinary tract infection
@@ -42,8 +42,8 @@
 // 399068003  snomedct  snomedct.399068003     mondo.0008315 prostate cancer
 // 414545008  snomedct  snomedct.414545008     mondo.0024644 myocardial ischemia
 // 414916001  snomedct  snomedct.414916001     mondo.0011122 obesity disorder
-// 415749005  none      -                      no SNOMED CT xref; no disorder carries M66, M66.9
-// 433144002  none      -                      no SNOMED CT xref; no disorder carries N18, N18.3
+// 415749005  none      -                      no SNOMED CT xref; no disorder carries a code in M66
+// 433144002  icd10     N18.9                  mondo.0005300 chronic kidney disease
 //
 // Idempotent, MERGE only. neo4j/seed.sh runs it after the terminology seeds.
 // By hand:
@@ -118,12 +118,14 @@ UNWIND [
   {nedrexId: 'mondo.0005151', mondoId: 'MONDO:0005151', name: 'endocrine system disorder', description: 'A disease involving the endocrine system.', icd10: [], snomedCodes: ['362969004'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005172', mondoId: 'MONDO:0005172', name: 'skeletal system disorder', description: 'A disease involving the skeletal system.', icd10: [], snomedCodes: ['88230002'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005178', mondoId: 'MONDO:0005178', name: 'osteoarthritis', description: 'A noninflammatory degenerative joint disease occurring chiefly in older persons, characterized by degeneration of the articular cartilage, hypertrophy of bone at the margins and changes in the synovial membrane. It is accompanied by pain and stiffness, particularly after prolonged activity.', icd10: [], snomedCodes: ['396275006'], hubMatch: true, nedrexRelease: '2.2.13'},
+  {nedrexId: 'mondo.0005240', mondoId: 'MONDO:0005240', name: 'kidney disorder', description: 'A disease involving the kidney.', icd10: [], snomedCodes: ['90708001'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005247', mondoId: 'MONDO:0005247', name: 'bacterial urinary tract infection', description: 'A bacterial infectious process affecting any part of the urinary tract, most commonly the bladder and the urethra. Symptoms include urinary urgency and frequency, burning sensation during urination, lower abdominal discomfort, and cloudy urine.', icd10: [], snomedCodes: ['68566005'], hubMatch: true, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005252', mondoId: 'MONDO:0005252', name: 'heart failure', description: 'Inability of the heart to pump blood at an adequate rate to meet tissue metabolic requirements. Clinical symptoms of heart failure include: unusual dyspnea on light exertion, recurrent dyspnea occurring in the supine position, fluid retention or rales, jugular venous distension, pulmonary edema on physical exam, or pulmonary edema on chest x-ray presumed to be cardiac dysfunction.', icd10: ['I50'], snomedCodes: ['84114007'], hubMatch: true, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005265', mondoId: 'MONDO:0005265', name: 'inflammatory bowel disease', description: 'A spectrum of small and large bowel inflammatory diseases of unknown etiology. It includes Crohn\'s disease, ulcerative colitis, and colitis of indeterminate type.', icd10: [], snomedCodes: ['24526004'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005267', mondoId: 'MONDO:0005267', name: 'heart disorder', description: 'A disease involving the heart and/or pericardium.', icd10: [], snomedCodes: ['56265001'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005275', mondoId: 'MONDO:0005275', name: 'lung disorder', description: 'A disease involving the lung.', icd10: [], snomedCodes: ['19829001'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005296', mondoId: 'MONDO:0005296', name: 'sleep apnea syndrome', description: 'A disorder characterized by multiple cessations of respirations during sleep that induce partial arousals and interfere with the maintenance of sleep.', icd10: ['G47.3'], snomedCodes: ['111489007', '73430006'], hubMatch: true, nedrexRelease: '2.2.13'},
+  {nedrexId: 'mondo.0005300', mondoId: 'MONDO:0005300', name: 'chronic kidney disease', description: 'Impairment of the renal function secondary to chronic kidney damage persisting for three or more months.', icd10: ['N18.9'], snomedCodes: ['709044004'], hubMatch: true, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005335', mondoId: 'MONDO:0005335', name: 'colorectal neoplasm', description: 'A benign or malignant neoplasm that affects the colon or rectum. Representative examples of benign neoplasms include lipoma and leiomyoma. Representative examples of malignant neoplasms include carcinoma, lymphoma, and sarcoma. Colorectal adenomas always exhibit epithelial dysplasia and are considered premalignant neoplasms.', icd10: [], snomedCodes: [], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005371', mondoId: 'MONDO:0005371', name: 'mood disorder', description: 'A cognitive disorder a disturbance in which the person\'s mood is hypothesized to be the main underlying feature.', icd10: [], snomedCodes: ['46206005'], hubMatch: false, nedrexRelease: '2.2.13'},
   {nedrexId: 'mondo.0005381', mondoId: 'MONDO:0005381', name: 'bone disorder', description: 'Diseases of bones.', icd10: [], snomedCodes: ['76069003'], hubMatch: false, nedrexRelease: '2.2.13'},
@@ -249,6 +251,7 @@ UNWIND [
   ['mondo.0005151', 'mondo.0700096'],
   ['mondo.0005172', 'mondo.0002081'],
   ['mondo.0005178', 'mondo.0005578'],
+  ['mondo.0005240', 'mondo.0002118'],
   ['mondo.0005247', 'mondo.0005113'],
   ['mondo.0005247', 'mondo.0100338'],
   ['mondo.0005252', 'mondo.0005267'],
@@ -259,6 +262,7 @@ UNWIND [
   ['mondo.0005275', 'mondo.0000270'],
   ['mondo.0005296', 'mondo.0003406'],
   ['mondo.0005296', 'mondo.0005087'],
+  ['mondo.0005300', 'mondo.0005240'],
   ['mondo.0005335', 'mondo.0021118'],
   ['mondo.0005335', 'mondo.0024634'],
   ['mondo.0005371', 'mondo.0005084'],
@@ -700,6 +704,7 @@ UNWIND [
   {nedrexId: 'drugbank.DB01024', drugbankId: 'DB01024', name: 'Mycophenolic acid', drugCentralIds: ['1859', '1860'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '24280-93-1'},
   {nedrexId: 'drugbank.DB01026', drugbankId: 'DB01026', name: 'Ketoconazole', drugCentralIds: ['1527'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '65277-42-1'},
   {nedrexId: 'drugbank.DB01029', drugbankId: 'DB01029', name: 'Irbesartan', drugCentralIds: ['1481'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '138402-11-6'},
+  {nedrexId: 'drugbank.DB01032', drugbankId: 'DB01032', name: 'Probenecid', drugCentralIds: ['2268'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '57-66-9'},
   {nedrexId: 'drugbank.DB01035', drugbankId: 'DB01035', name: 'Procainamide', drugCentralIds: ['2270'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '51-06-9'},
   {nedrexId: 'drugbank.DB01039', drugbankId: 'DB01039', name: 'Fenofibrate', drugCentralIds: ['1152'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '49562-28-9'},
   {nedrexId: 'drugbank.DB01041', drugbankId: 'DB01041', name: 'Thalidomide', drugCentralIds: ['2616'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '50-35-1'},
@@ -738,14 +743,14 @@ UNWIND [
   {nedrexId: 'drugbank.DB01142', drugbankId: 'DB01142', name: 'Doxepin', drugCentralIds: ['956'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '1668-19-5'},
   {nedrexId: 'drugbank.DB01149', drugbankId: 'DB01149', name: 'Nefazodone', drugCentralIds: ['1890'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '83366-66-9'},
   {nedrexId: 'drugbank.DB01151', drugbankId: 'DB01151', name: 'Desipramine', drugCentralIds: ['812'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '50-47-5'},
-  {nedrexId: 'drugbank.DB01156', drugbankId: 'DB01156', name: 'Bupropion', drugCentralIds: ['435'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '34911-55-2'},
-  {nedrexId: 'drugbank.DB01159', drugbankId: 'DB01159', name: 'Halothane', drugCentralIds: ['1356'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '151-67-7'}
+  {nedrexId: 'drugbank.DB01156', drugbankId: 'DB01156', name: 'Bupropion', drugCentralIds: ['435'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '34911-55-2'}
 ] AS row
 MERGE (dr:NeDRexDrug {nedrexId: row.nedrexId})
 ON CREATE SET dr += row
 ON MATCH SET dr += row;
 
 UNWIND [
+  {nedrexId: 'drugbank.DB01159', drugbankId: 'DB01159', name: 'Halothane', drugCentralIds: ['1356'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '151-67-7'},
   {nedrexId: 'drugbank.DB01162', drugbankId: 'DB01162', name: 'Terazosin', drugCentralIds: ['3584'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '63590-64-7'},
   {nedrexId: 'drugbank.DB01164', drugbankId: 'DB01164', name: 'Calcium chloride', drugCentralIds: ['4201', '5682'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '10043-52-4'},
   {nedrexId: 'drugbank.DB01165', drugbankId: 'DB01165', name: 'Ofloxacin', drugCentralIds: ['1981'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '82419-36-1'},
@@ -816,6 +821,7 @@ UNWIND [
   {nedrexId: 'drugbank.DB01380', drugbankId: 'DB01380', name: 'Cortisone acetate', drugCentralIds: ['734'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '50-04-4'},
   {nedrexId: 'drugbank.DB01382', drugbankId: 'DB01382', name: 'Glymidine', drugCentralIds: ['1321'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '339-44-6'},
   {nedrexId: 'drugbank.DB01388', drugbankId: 'DB01388', name: 'Mibefradil', drugCentralIds: ['1797'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '116644-53-2'},
+  {nedrexId: 'drugbank.DB01390', drugbankId: 'DB01390', name: 'Sodium bicarbonate', drugCentralIds: ['4205'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '144-55-8'},
   {nedrexId: 'drugbank.DB01392', drugbankId: 'DB01392', name: 'Yohimbine', drugCentralIds: ['3659'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '146-48-5'},
   {nedrexId: 'drugbank.DB01393', drugbankId: 'DB01393', name: 'Bezafibrate', drugCentralIds: ['362'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '41859-67-0'},
   {nedrexId: 'drugbank.DB01396', drugbankId: 'DB01396', name: 'Digitoxin', drugCentralIds: ['881'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '71-63-6'},
@@ -861,6 +867,7 @@ UNWIND [
   {nedrexId: 'drugbank.DB01708', drugbankId: 'DB01708', name: 'Prasterone', drugCentralIds: ['795', '796', '4049'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '53-43-0'},
   {nedrexId: 'drugbank.DB01718', drugbankId: 'DB01718', name: 'Cetrimonium', drugCentralIds: ['3082'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '6899-10-1'},
   {nedrexId: 'drugbank.DB01852', drugbankId: 'DB01852', name: 'Kaempherol', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '520-18-3'},
+  {nedrexId: 'drugbank.DB01914', drugbankId: 'DB01914', name: 'D-glucose', drugCentralIds: ['845'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '50-99-7'},
   {nedrexId: 'drugbank.DB01956', drugbankId: 'DB01956', name: 'Taurine', drugCentralIds: ['4486'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '107-35-7'},
   {nedrexId: 'drugbank.DB02021', drugbankId: 'DB02021', name: 'Fidarestat', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '136087-85-9'},
   {nedrexId: 'drugbank.DB02079', drugbankId: 'DB02079', name: 'Aminooxyacetic acid', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '645-88-5'},
@@ -910,6 +917,7 @@ UNWIND [
   {nedrexId: 'drugbank.DB04880', drugbankId: 'DB04880', name: 'Enoximone', drugCentralIds: ['1014'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '77671-31-9'},
   {nedrexId: 'drugbank.DB04920', drugbankId: 'DB04920', name: 'Clevidipine', drugCentralIds: ['674'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '167221-71-8'},
   {nedrexId: 'drugbank.DB04942', drugbankId: 'DB04942', name: 'Tamibarotene', drugCentralIds: ['3580'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '94497-51-5'},
+  {nedrexId: 'drugbank.DB04951', drugbankId: 'DB04951', name: 'Pirfenidone', drugCentralIds: ['4224'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '53179-13-8'},
   {nedrexId: 'drugbank.DB05076', drugbankId: 'DB05076', name: 'Fenretinide', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '65646-68-6'},
   {nedrexId: 'drugbank.DB05381', drugbankId: 'DB05381', name: 'Histamine', drugCentralIds: ['1375'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '51-45-6'},
   {nedrexId: 'drugbank.DB05383', drugbankId: 'DB05383', name: 'Pimagedine', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '79-17-4'},
@@ -937,21 +945,22 @@ UNWIND [
   {nedrexId: 'drugbank.DB06674', drugbankId: 'DB06674', name: 'Golimumab', drugCentralIds: ['4967'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '476181-74-5'},
   {nedrexId: 'drugbank.DB06710', drugbankId: 'DB06710', name: 'Methyltestosterone', drugCentralIds: ['3356'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '58-18-4'},
   {nedrexId: 'drugbank.DB06719', drugbankId: 'DB06719', name: 'Buserelin', drugCentralIds: ['436'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '57982-77-1'},
+  {nedrexId: 'drugbank.DB06724', drugbankId: 'DB06724', name: 'Calcium carbonate', drugCentralIds: ['4239'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '471-34-1'},
   {nedrexId: 'drugbank.DB06736', drugbankId: 'DB06736', name: 'Aceclofenac', drugCentralIds: ['43'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '89796-99-6'},
   {nedrexId: 'drugbank.DB06753', drugbankId: 'DB06753', name: 'Triclofos', drugCentralIds: ['2735'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '306-52-5'},
   {nedrexId: 'drugbank.DB06756', drugbankId: 'DB06756', name: 'Betaine', drugCentralIds: ['347'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '107-43-7'},
-  {nedrexId: 'drugbank.DB06762', drugbankId: 'DB06762', name: 'Pinacidil', drugCentralIds: ['2173'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '60560-33-0'},
-  {nedrexId: 'drugbank.DB06763', drugbankId: 'DB06763', name: 'Saralasin', drugCentralIds: ['3542'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '34273-10-4'},
-  {nedrexId: 'drugbank.DB06774', drugbankId: 'DB06774', name: 'Capsaicin', drugCentralIds: ['3064'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '404-86-4'},
-  {nedrexId: 'drugbank.DB06777', drugbankId: 'DB06777', name: 'Chenodeoxycholic acid', drugCentralIds: ['4361'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '474-25-9'},
-  {nedrexId: 'drugbank.DB06778', drugbankId: 'DB06778', name: 'Cupric sulfate', drugCentralIds: ['4282'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '7758-98-7'},
-  {nedrexId: 'drugbank.DB06779', drugbankId: 'DB06779', name: 'Dalteparin', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '9005-49-6'}
+  {nedrexId: 'drugbank.DB06762', drugbankId: 'DB06762', name: 'Pinacidil', drugCentralIds: ['2173'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '60560-33-0'}
 ] AS row
 MERGE (dr:NeDRexDrug {nedrexId: row.nedrexId})
 ON CREATE SET dr += row
 ON MATCH SET dr += row;
 
 UNWIND [
+  {nedrexId: 'drugbank.DB06763', drugbankId: 'DB06763', name: 'Saralasin', drugCentralIds: ['3542'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '34273-10-4'},
+  {nedrexId: 'drugbank.DB06774', drugbankId: 'DB06774', name: 'Capsaicin', drugCentralIds: ['3064'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '404-86-4'},
+  {nedrexId: 'drugbank.DB06777', drugbankId: 'DB06777', name: 'Chenodeoxycholic acid', drugCentralIds: ['4361'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '474-25-9'},
+  {nedrexId: 'drugbank.DB06778', drugbankId: 'DB06778', name: 'Cupric sulfate', drugCentralIds: ['4282'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '7758-98-7'},
+  {nedrexId: 'drugbank.DB06779', drugbankId: 'DB06779', name: 'Dalteparin', drugCentralIds: [], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '9005-49-6'},
   {nedrexId: 'drugbank.DB06799', drugbankId: 'DB06799', name: 'Methenamine', drugCentralIds: ['3344'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '100-97-0'},
   {nedrexId: 'drugbank.DB06803', drugbankId: 'DB06803', name: 'Niclosamide', drugCentralIds: ['1912'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '50-65-7'},
   {nedrexId: 'drugbank.DB06819', drugbankId: 'DB06819', name: 'Phenylbutyric acid', drugCentralIds: ['24'], drugGroups: ['approved'], nedrexRelease: '2.2.13', casNumber: '1821-12-1'},
@@ -1146,18 +1155,18 @@ UNWIND [
   {nedrexId: 'drugbank.DB13245', drugbankId: 'DB13245', name: 'Thiram', drugCentralIds: ['3601'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '137-26-8'},
   {nedrexId: 'drugbank.DB13261', drugbankId: 'DB13261', name: 'Sitafloxacin', drugCentralIds: ['2449'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '163253-35-8'},
   {nedrexId: 'drugbank.DB13275', drugbankId: 'DB13275', name: 'Clorindione', drugCentralIds: ['3111'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '1146-99-2'},
-  {nedrexId: 'drugbank.DB13279', drugbankId: 'DB13279', name: 'Carbocromen', drugCentralIds: ['3098'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '804-10-4'},
-  {nedrexId: 'drugbank.DB13284', drugbankId: 'DB13284', name: 'Meticrane', drugCentralIds: ['1777'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '1084-65-7'},
-  {nedrexId: 'drugbank.DB13312', drugbankId: 'DB13312', name: 'Delapril', drugCentralIds: ['798'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '83435-66-9'},
-  {nedrexId: 'drugbank.DB13316', drugbankId: 'DB13316', name: 'Ibopamine', drugCentralIds: ['1405'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '66195-31-1'},
-  {nedrexId: 'drugbank.DB13317', drugbankId: 'DB13317', name: 'Flunoxaprofen', drugCentralIds: ['1203'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '66934-18-7'},
-  {nedrexId: 'drugbank.DB13345', drugbankId: 'DB13345', name: 'Dihydroergocristine', drugCentralIds: ['887'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '17479-19-5'}
+  {nedrexId: 'drugbank.DB13279', drugbankId: 'DB13279', name: 'Carbocromen', drugCentralIds: ['3098'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '804-10-4'}
 ] AS row
 MERGE (dr:NeDRexDrug {nedrexId: row.nedrexId})
 ON CREATE SET dr += row
 ON MATCH SET dr += row;
 
 UNWIND [
+  {nedrexId: 'drugbank.DB13284', drugbankId: 'DB13284', name: 'Meticrane', drugCentralIds: ['1777'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '1084-65-7'},
+  {nedrexId: 'drugbank.DB13312', drugbankId: 'DB13312', name: 'Delapril', drugCentralIds: ['798'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '83435-66-9'},
+  {nedrexId: 'drugbank.DB13316', drugbankId: 'DB13316', name: 'Ibopamine', drugCentralIds: ['1405'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '66195-31-1'},
+  {nedrexId: 'drugbank.DB13317', drugbankId: 'DB13317', name: 'Flunoxaprofen', drugCentralIds: ['1203'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '66934-18-7'},
+  {nedrexId: 'drugbank.DB13345', drugbankId: 'DB13345', name: 'Dihydroergocristine', drugCentralIds: ['887'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '17479-19-5'},
   {nedrexId: 'drugbank.DB13358', drugbankId: 'DB13358', name: 'Cibenzoline', drugCentralIds: ['630'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '53267-01-9'},
   {nedrexId: 'drugbank.DB13363', drugbankId: 'DB13363', name: 'Oxaceprol', drugCentralIds: ['2005'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '33996-33-7'},
   {nedrexId: 'drugbank.DB13387', drugbankId: 'DB13387', name: 'Hematin', drugCentralIds: ['4565'], drugGroups: [], nedrexRelease: '2.2.13', casNumber: '15489-90-4'},
@@ -1288,6 +1297,7 @@ UNWIND [
   {drug: 'drugbank.DB00126', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00132', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00136', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00136', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00136', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00139', disorder: 'mondo.0001356', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00143', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
@@ -1310,6 +1320,7 @@ UNWIND [
   {drug: 'drugbank.DB00177', disorder: 'mondo.0005044', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00178', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00178', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00178', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00181', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00182', disorder: 'mondo.0011122', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00186', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
@@ -1454,9 +1465,7 @@ UNWIND [
   {drug: 'drugbank.DB00432', disorder: 'mondo.0021063', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00434', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00435', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00435', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00436', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB00436', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false}
+  {drug: 'drugbank.DB00435', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false}
 ] AS row
 MATCH (dr:NeDRexDrug {nedrexId: row.drug})
 MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
@@ -1465,6 +1474,9 @@ ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrex
 ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
 
 UNWIND [
+  {drug: 'drugbank.DB00436', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB00436', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00437', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00437', disorder: 'mondo.0021187', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00440', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00443', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
@@ -1526,6 +1538,7 @@ UNWIND [
   {drug: 'drugbank.DB00542', disorder: 'mondo.0004981', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00542', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00542', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00542', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00542', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00543', disorder: 'mondo.0002050', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00544', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
@@ -1573,6 +1586,7 @@ UNWIND [
   {drug: 'drugbank.DB00584', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00584', disorder: 'mondo.0005148', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00584', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00584', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00586', disorder: 'mondo.0005178', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00586', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00589', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
@@ -1586,6 +1600,7 @@ UNWIND [
   {drug: 'drugbank.DB00598', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00603', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00605', disorder: 'mondo.0005178', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB00605', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00605', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00606', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00608', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
@@ -1624,6 +1639,7 @@ UNWIND [
   {drug: 'drugbank.DB00641', disorder: 'mondo.0005002', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00641', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00641', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00641', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00641', disorder: 'mondo.0021187', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00644', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00651', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
@@ -1645,6 +1661,7 @@ UNWIND [
   {drug: 'drugbank.DB00675', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00678', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00678', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00678', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00679', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00679', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00681', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
@@ -1656,15 +1673,7 @@ UNWIND [
   {drug: 'drugbank.DB00685', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00690', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00691', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB00692', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00692', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00692', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00695', disorder: 'mondo.0004981', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00695', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB00695', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00699', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB00700', disorder: 'mondo.0005044', sources: ['drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB00704', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false}
+  {drug: 'drugbank.DB00692', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false}
 ] AS row
 MATCH (dr:NeDRexDrug {nedrexId: row.drug})
 MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
@@ -1673,6 +1682,15 @@ ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrex
 ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
 
 UNWIND [
+  {drug: 'drugbank.DB00692', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00692', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00695', disorder: 'mondo.0004981', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00695', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB00695', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00695', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00699', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB00700', disorder: 'mondo.0005044', sources: ['drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB00704', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00704', disorder: 'mondo.0011122', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB00711', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB00712', disorder: 'mondo.0005178', sources: ['drugcentral'], drugCentral: true},
@@ -1863,16 +1881,7 @@ UNWIND [
   {drug: 'drugbank.DB01000', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01001', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01001', disorder: 'mondo.0005002', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01001', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01001', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01005', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01009', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01009', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01009', disorder: 'mondo.0005178', sources: ['ctd', 'drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB01009', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB01011', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01016', disorder: 'mondo.0005148', sources: ['ctd', 'drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB01016', disorder: 'mondo.0021187', sources: ['ctd'], drugCentral: false}
+  {drug: 'drugbank.DB01001', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false}
 ] AS row
 MATCH (dr:NeDRexDrug {nedrexId: row.drug})
 MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
@@ -1881,6 +1890,16 @@ ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrex
 ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
 
 UNWIND [
+  {drug: 'drugbank.DB01001', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01001', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01005', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01009', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01009', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01009', disorder: 'mondo.0005178', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB01009', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB01011', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01016', disorder: 'mondo.0005148', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB01016', disorder: 'mondo.0021187', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01017', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01017', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01017', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
@@ -1897,6 +1916,8 @@ UNWIND [
   {drug: 'drugbank.DB01029', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01029', disorder: 'mondo.0005148', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01029', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01029', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01032', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01035', disorder: 'mondo.0004981', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01039', disorder: 'mondo.0021187', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01041', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
@@ -1967,6 +1988,7 @@ UNWIND [
   {drug: 'drugbank.DB01136', disorder: 'mondo.0004981', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01136', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01136', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01136', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01136', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01139', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01140', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
@@ -2067,7 +2089,15 @@ UNWIND [
   {drug: 'drugbank.DB01291', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01295', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01296', disorder: 'mondo.0005178', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB01297', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01297', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false}
+] AS row
+MATCH (dr:NeDRexDrug {nedrexId: row.drug})
+MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
+MERGE (dr)-[i:INDICATED_FOR]->(d)
+ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13'
+ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
+
+UNWIND [
   {drug: 'drugbank.DB01324', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01326', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01328', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
@@ -2080,15 +2110,7 @@ UNWIND [
   {drug: 'drugbank.DB01356', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01356', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01359', disorder: 'mondo.0005044', sources: ['drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB01364', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false}
-] AS row
-MATCH (dr:NeDRexDrug {nedrexId: row.drug})
-MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
-MERGE (dr)-[i:INDICATED_FOR]->(d)
-ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13'
-ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
-
-UNWIND [
+  {drug: 'drugbank.DB01364', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01364', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01366', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01373', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
@@ -2096,6 +2118,7 @@ UNWIND [
   {drug: 'drugbank.DB01380', disorder: 'mondo.0009960', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01382', disorder: 'mondo.0005148', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB01388', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB01390', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01392', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01392', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01393', disorder: 'mondo.0005148', sources: ['ctd'], drugCentral: false},
@@ -2163,6 +2186,7 @@ UNWIND [
   {drug: 'drugbank.DB01708', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01718', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01852', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB01914', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB01956', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB02021', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB02079', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
@@ -2230,6 +2254,7 @@ UNWIND [
   {drug: 'drugbank.DB04920', disorder: 'mondo.0005044', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB04942', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB04942', disorder: 'mondo.0008383', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB04951', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB05076', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB05381', disorder: 'mondo.0005178', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB05383', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
@@ -2251,6 +2276,7 @@ UNWIND [
   {drug: 'drugbank.DB06228', disorder: 'mondo.0004981', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06273', disorder: 'mondo.0008383', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06292', disorder: 'mondo.0005148', sources: ['drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB06292', disorder: 'mondo.0005300', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06335', disorder: 'mondo.0005148', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06366', disorder: 'mondo.0021063', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06374', disorder: 'mondo.0007254', sources: ['drugcentral'], drugCentral: true},
@@ -2263,6 +2289,7 @@ UNWIND [
   {drug: 'drugbank.DB06674', disorder: 'mondo.0008383', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06710', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB06719', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB06724', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB06736', disorder: 'mondo.0005178', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06736', disorder: 'mondo.0008383', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06753', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
@@ -2270,7 +2297,15 @@ UNWIND [
   {drug: 'drugbank.DB06762', disorder: 'mondo.0005044', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB06763', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB06774', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB06774', disorder: 'mondo.0005178', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB06774', disorder: 'mondo.0005178', sources: ['ctd'], drugCentral: false}
+] AS row
+MATCH (dr:NeDRexDrug {nedrexId: row.drug})
+MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
+MERGE (dr)-[i:INDICATED_FOR]->(d)
+ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13'
+ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
+
+UNWIND [
   {drug: 'drugbank.DB06774', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB06774', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB06774', disorder: 'mondo.0021187', sources: ['ctd'], drugCentral: false},
@@ -2288,15 +2323,7 @@ UNWIND [
   {drug: 'drugbank.DB07352', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB07352', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB07402', disorder: 'mondo.0005178', sources: ['drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB07402', disorder: 'mondo.0008383', sources: ['drugcentral'], drugCentral: true}
-] AS row
-MATCH (dr:NeDRexDrug {nedrexId: row.drug})
-MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
-MERGE (dr)-[i:INDICATED_FOR]->(d)
-ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13'
-ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
-
-UNWIND [
+  {drug: 'drugbank.DB07402', disorder: 'mondo.0008383', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB07477', disorder: 'mondo.0005178', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB07615', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB07715', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false},
@@ -2424,6 +2451,7 @@ UNWIND [
   {drug: 'drugbank.DB11672', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB11672', disorder: 'mondo.0005148', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB11672', disorder: 'mondo.0005178', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB11672', disorder: 'mondo.0005300', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB11672', disorder: 'mondo.0005420', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB11672', disorder: 'mondo.0005618', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB11672', disorder: 'mondo.0008315', sources: ['ctd'], drugCentral: false},
@@ -2477,7 +2505,15 @@ UNWIND [
   {drug: 'drugbank.DB12243', disorder: 'mondo.0008383', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12248', disorder: 'mondo.0004979', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12286', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
-  {drug: 'drugbank.DB12286', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false},
+  {drug: 'drugbank.DB12286', disorder: 'mondo.0005252', sources: ['ctd'], drugCentral: false}
+] AS row
+MATCH (dr:NeDRexDrug {nedrexId: row.drug})
+MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
+MERGE (dr)-[i:INDICATED_FOR]->(d)
+ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13'
+ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
+
+UNWIND [
   {drug: 'drugbank.DB12286', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12290', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12290', disorder: 'mondo.0021187', sources: ['ctd'], drugCentral: false},
@@ -2496,15 +2532,7 @@ UNWIND [
   {drug: 'drugbank.DB12465', disorder: 'mondo.0005044', sources: ['ctd', 'drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB12478', disorder: 'mondo.0002050', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12509', disorder: 'mondo.0005148', sources: ['drugcentral'], drugCentral: true},
-  {drug: 'drugbank.DB12510', disorder: 'mondo.0008383', sources: ['ctd'], drugCentral: false}
-] AS row
-MATCH (dr:NeDRexDrug {nedrexId: row.drug})
-MATCH (d:NeDRexDisorder {nedrexId: row.disorder})
-MERGE (dr)-[i:INDICATED_FOR]->(d)
-ON CREATE SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13'
-ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexRelease = '2.2.13';
-
-UNWIND [
+  {drug: 'drugbank.DB12510', disorder: 'mondo.0008383', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12551', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12615', disorder: 'mondo.0005247', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB12618', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
@@ -2512,6 +2540,7 @@ UNWIND [
   {drug: 'drugbank.DB12625', disorder: 'mondo.0005148', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB12713', disorder: 'mondo.0005148', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB12713', disorder: 'mondo.0005252', sources: ['drugcentral'], drugCentral: true},
+  {drug: 'drugbank.DB12713', disorder: 'mondo.0005300', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB12923', disorder: 'mondo.0024644', sources: ['ctd'], drugCentral: false},
   {drug: 'drugbank.DB12930', disorder: 'mondo.0002050', sources: ['drugcentral'], drugCentral: true},
   {drug: 'drugbank.DB12945', disorder: 'mondo.0005044', sources: ['ctd'], drugCentral: false},
@@ -2665,7 +2694,7 @@ ON MATCH SET i.sources = row.sources, i.drugCentral = row.drugCentral, i.nedrexR
 // ── The hub's SNOMED CT concepts to their NeDRex disorder ────────────────────
 // A mapping an earlier run wrote and this one does not.
 MATCH (s:SnomedConcept)-[m:MAPS_TO_DISORDER]->(d:NeDRexDisorder)
-WHERE NOT [s.conceptId, d.nedrexId] IN [['13645005', 'mondo.0005002'], ['34000006', 'mondo.0009960'], ['35489007', 'mondo.0002050'], ['38341003', 'mondo.0005044'], ['40055000', 'mondo.0006031'], ['40930008', 'mondo.0005420'], ['44054006', 'mondo.0005148'], ['49436004', 'mondo.0004981'], ['55822004', 'mondo.0021187'], ['68566005', 'mondo.0005247'], ['69896004', 'mondo.0008383'], ['73430006', 'mondo.0005296'], ['84114007', 'mondo.0005252'], ['87522002', 'mondo.0001356'], ['93761005', 'mondo.0021063'], ['195967001', 'mondo.0004979'], ['197480006', 'mondo.0005618'], ['254837009', 'mondo.0007254'], ['396275006', 'mondo.0005178'], ['399068003', 'mondo.0008315'], ['414545008', 'mondo.0024644'], ['414916001', 'mondo.0011122']]
+WHERE NOT [s.conceptId, d.nedrexId] IN [['13645005', 'mondo.0005002'], ['34000006', 'mondo.0009960'], ['35489007', 'mondo.0002050'], ['38341003', 'mondo.0005044'], ['40055000', 'mondo.0006031'], ['40930008', 'mondo.0005420'], ['44054006', 'mondo.0005148'], ['49436004', 'mondo.0004981'], ['55822004', 'mondo.0021187'], ['68566005', 'mondo.0005247'], ['69896004', 'mondo.0008383'], ['73430006', 'mondo.0005296'], ['84114007', 'mondo.0005252'], ['87522002', 'mondo.0001356'], ['93761005', 'mondo.0021063'], ['195967001', 'mondo.0004979'], ['197480006', 'mondo.0005618'], ['254837009', 'mondo.0007254'], ['396275006', 'mondo.0005178'], ['399068003', 'mondo.0008315'], ['414545008', 'mondo.0024644'], ['414916001', 'mondo.0011122'], ['433144002', 'mondo.0005300']]
 DELETE m;
 
 UNWIND [
@@ -2690,7 +2719,8 @@ UNWIND [
   {code: '396275006', disorder: 'mondo.0005178', route: 'snomedct', via: 'snomedct.396275006'},
   {code: '399068003', disorder: 'mondo.0008315', route: 'snomedct', via: 'snomedct.399068003'},
   {code: '414545008', disorder: 'mondo.0024644', route: 'snomedct', via: 'snomedct.414545008'},
-  {code: '414916001', disorder: 'mondo.0011122', route: 'snomedct', via: 'snomedct.414916001'}
+  {code: '414916001', disorder: 'mondo.0011122', route: 'snomedct', via: 'snomedct.414916001'},
+  {code: '433144002', disorder: 'mondo.0005300', route: 'icd10', via: 'N18.9'}
 ] AS row
 MATCH (s:SnomedConcept {conceptId: row.code})
 MATCH (d:NeDRexDisorder {nedrexId: row.disorder})

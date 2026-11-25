@@ -8,14 +8,14 @@ hub's conditions reach:
 
 1. The NeDRex (MONDO) disorder each hub SNOMED CT code maps to. First through
    the disorder's own cross-reference (`snomedct.<code>` in domainIds). A code
-   with none goes the ICD-10 route: the disorders that carry one of the ICD-10
-   codes the hub pairs with it (scripts/nedrex/hub-conditions.json), or its
-   three-character category, and of those the one with the most MONDO
-   subtypes, when it has any and no other candidate has as many. An ICD-10
-   category is shared by rare syndromes and "susceptibility to" entries
-   (J45.9 names seven asthma susceptibility traits), so the most general
-   disorder is the one a cohort starts from, and a tie or a set of leaves is
-   no match rather than a guess.
+   with none goes the ICD-10 route: the disorders that carry a code in the
+   three-character category of an ICD-10 code the hub pairs with it
+   (scripts/nedrex/hub-conditions.json; the hub's N18.3 meets a disorder's
+   N18.9), and of those the one with the most MONDO subtypes, when it has any
+   and no other candidate has as many. An ICD-10 category is shared by rare
+   syndromes and "susceptibility to" entries (J45.9 names seven asthma
+   susceptibility traits), so the most general disorder is the one a cohort
+   starts from, and a tie or a set of leaves is no match rather than a guess.
 2. Every ancestor of those disorders up the MONDO hierarchy, with the
    SUBTYPE_OF edges between them, so a cohort can start from any level.
 3. The drugs NeDRex lists as indicated for a matched disorder, with the
@@ -146,7 +146,7 @@ class Dump:
         default_factory=lambda: defaultdict(lambda: defaultdict(set))
     )
     by_snomed: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
-    by_icd10: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
+    by_icd10_category: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
 
 
 def load_dump(dump_dir: Path) -> Dump:
@@ -170,7 +170,7 @@ def load_dump(dump_dir: Path) -> Dump:
         for code in d.snomed:
             dump.by_snomed[code].add(d.nedrex_id)
         for code in d.icd10:
-            dump.by_icd10[code].add(d.nedrex_id)
+            dump.by_icd10_category[icd10_category(code)].add(d.nedrex_id)
     for row in read_rows(dump_dir, "disorder_is_subtype_of_disorder.csv.gz"):
         child, parent = row["sourceDomainId"], row["targetDomainId"]
         dump.parents[child].add(parent)
@@ -237,12 +237,14 @@ def match_condition(dump: Dump, code: str, display: str, icd10: Iterable[str]) -
     hub_icd = sorted({c.strip().upper() for c in icd10 if c.strip()})
     if not hub_icd:
         return Match(code, display, (), "none", "no SNOMED CT xref, no ICD-10 code in the hub")
-    keys = sorted({k for c in hub_icd for k in (c, icd10_category(c))})
-    candidates = sorted({d for k in keys for d in dump.by_icd10.get(k, ())})
+    # The category on both sides: the hub's N18.3 meets a disorder's N18.9.
+    categories = sorted({icd10_category(c) for c in hub_icd})
+    within = ", ".join(categories)
+    candidates = sorted({d for k in categories for d in dump.by_icd10_category.get(k, ())})
     if not candidates:
         return Match(
             code, display, (), "none",
-            f"no SNOMED CT xref; no disorder carries {', '.join(keys)}",
+            f"no SNOMED CT xref; no disorder carries a code in {within}",
         )
     subtypes = {d: len(closure(d, dump.children)) for d in candidates}
     best = max(subtypes.values())
@@ -250,16 +252,18 @@ def match_condition(dump: Dump, code: str, display: str, icd10: Iterable[str]) -
     if best == 0:
         return Match(
             code, display, (), "none",
-            f"no SNOMED CT xref; {len(candidates)} disorder(s) carry {', '.join(keys)}, "
+            f"no SNOMED CT xref; {len(candidates)} disorder(s) carry a code in {within}, "
             "none with MONDO subtypes",
         )
     if len(winners) > 1:
         return Match(
             code, display, (), "none",
-            f"no SNOMED CT xref; {len(winners)} disorders tie on {', '.join(keys)}",
+            f"no SNOMED CT xref; {len(winners)} disorders tie in {within}",
         )
     winner = winners[0]
-    via = ",".join(k for k in keys if k in dump.disorders[winner].icd10)
+    via = ",".join(
+        c for c in dump.disorders[winner].icd10 if icd10_category(c) in categories
+    )
     return Match(code, display, (winner,), "icd10", via)
 
 

@@ -58,6 +58,8 @@ DISORDERS = [
     disorder("mondo.9000010", "test grouping B", icd10=["W10"]),
     disorder("mondo.9000011", "child of grouping A"),
     disorder("mondo.9000012", "child of grouping B"),
+    disorder("mondo.9000013", "test kidney disease", icd10=["T18.9"]),
+    disorder("mondo.9000014", "test kidney disease, stage 1"),
 ]
 SUBTYPES = [
     ("mondo.9000002", "mondo.9000001"),
@@ -66,6 +68,7 @@ SUBTYPES = [
     ("mondo.9000006", "mondo.9000001"),
     ("mondo.9000011", "mondo.9000009"),
     ("mondo.9000012", "mondo.9000010"),
+    ("mondo.9000014", "mondo.9000013"),
 ]
 DRUGS = [
     {"primaryDomainId": "drugbank.DB90001", "displayName": "Testamab",
@@ -88,6 +91,7 @@ HUB = [
     {"code": "444444", "display": "Two groupings", "icd10": ["W10.1"]},
     {"code": "555555", "display": "Nothing", "icd10": ["V01.1"]},
     {"code": "666666", "display": "No ICD-10", "icd10": []},
+    {"code": "777777", "display": "Kidney disease stage 3", "icd10": ["T18.3"]},
 ]
 
 
@@ -132,6 +136,11 @@ class Matching(FixtureCase):
         m = self.matches["222222"]
         self.assertEqual((m.route, m.disorders, m.via), ("icd10", ("mondo.9000002",), "X45"))
 
+    def test_icd10_route_compares_categories_on_both_sides(self) -> None:
+        # The hub's T18.3 and the disorder's T18.9 share the category T18.
+        m = self.matches["777777"]
+        self.assertEqual((m.route, m.disorders, m.via), ("icd10", ("mondo.9000013",), "T18.9"))
+
     def test_icd10_candidates_without_subtypes_are_no_match(self) -> None:
         m = self.matches["333333"]
         self.assertEqual((m.route, m.disorders), ("none", ()))
@@ -143,7 +152,7 @@ class Matching(FixtureCase):
         self.assertIn("tie", m.via)
 
     def test_unknown_icd10_and_no_icd10_are_no_match(self) -> None:
-        self.assertIn("no disorder carries V01, V01.1", self.matches["555555"].via)
+        self.assertIn("no disorder carries a code in V01", self.matches["555555"].via)
         self.assertIn("no ICD-10 code in the hub", self.matches["666666"].via)
 
     def test_icd10_category(self) -> None:
@@ -161,8 +170,11 @@ class Subset(FixtureCase):
         self.subset = nx.select_subset(self.dump, list(self.matches.values()))
 
     def test_keeps_matched_disorders_and_their_ancestors_only(self) -> None:
-        self.assertEqual(self.subset.matched, ["mondo.9000002", "mondo.9000006"])
-        self.assertEqual(self.subset.disorders, ["mondo.9000001", "mondo.9000002", "mondo.9000006"])
+        self.assertEqual(self.subset.matched, ["mondo.9000002", "mondo.9000006", "mondo.9000013"])
+        self.assertEqual(
+            self.subset.disorders,
+            ["mondo.9000001", "mondo.9000002", "mondo.9000006", "mondo.9000013"],
+        )
         self.assertEqual(
             self.subset.subtype_edges,
             [("mondo.9000002", "mondo.9000001"), ("mondo.9000006", "mondo.9000001")],
@@ -212,7 +224,8 @@ class Rendering(FixtureCase):
 
     def test_removes_mappings_this_run_does_not_write(self) -> None:
         self.assertIn(
-            "WHERE NOT [s.conceptId, d.nedrexId] IN [['111111', 'mondo.9000006'], ['222222', 'mondo.9000002']]",
+            "WHERE NOT [s.conceptId, d.nedrexId] IN "
+            "[['111111', 'mondo.9000006'], ['222222', 'mondo.9000002'], ['777777', 'mondo.9000013']]",
             self.render(),
         )
 
@@ -247,6 +260,8 @@ class CommittedSeed(unittest.TestCase):
     def test_asthma_and_colon_cancer_go_the_icd10_route(self) -> None:
         self.assertIn("{code: '195967001', disorder: 'mondo.0004979', route: 'icd10', via: 'J45'}", self.seed)
         self.assertIn("{code: '93761005', disorder: 'mondo.0021063', route: 'icd10', via: 'C18'}", self.seed)
+        # CKD stage 3 (N18.3) lands on chronic kidney disease, which carries N18.9.
+        self.assertIn("{code: '433144002', disorder: 'mondo.0005300', route: 'icd10', via: 'N18.9'}", self.seed)
 
     def test_hub_codes_are_strings(self) -> None:
         # SnomedConcept.conceptId is a string (#1231); an integer links nothing.
