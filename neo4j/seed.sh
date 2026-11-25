@@ -160,6 +160,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   # Generated from the validator's report (#1144); a few hundred statements,
   # so a change to /eehrxf reaches Azure without the full pipeline.
   run_file "$SEED_DIR"/register-eehrxf-profiles.cypher "EEHRxF categories, profiles and validation results (#1144)"
+  run_file "$SEED_DIR"/register-national-profiles.cypher "German profiles (ePA, MIO, MII KDS) and validation results"
   run_file "$SEED_DIR"/seed-audit-provenance.cypher "audit provenance"
   run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"
   run_file "$SEED_DIR"/seed-trust-center.cypher "trust center"
@@ -203,6 +204,7 @@ run_file "$SEED_DIR"/register-dsp-marketplace.cypher "DSP marketplace"
 run_file "$SEED_DIR"/register-fhir-dataset-hdcatap.cypher "FHIR DCAT-AP"
 run_file "$SEED_DIR"/register-fhir-dataset-hdcatap-spe2.cypher "FHIR DCAT-AP SPE2"
 run_file "$SEED_DIR"/register-eehrxf-profiles.cypher "EEHRxF profiles"
+run_file "$SEED_DIR"/register-national-profiles.cypher "German profiles (ePA, MIO, MII KDS)"
 run_file "$SEED_DIR"/register-ehds-credentials.cypher "EHDS credentials"
 run_file "$SEED_DIR"/fhir-to-omop-transform.cypher "FHIR→OMOP transform"
 run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"

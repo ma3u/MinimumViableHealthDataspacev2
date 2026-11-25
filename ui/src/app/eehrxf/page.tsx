@@ -97,6 +97,32 @@ interface EEHRxFData {
   } | null;
 }
 
+// German profiles (gematik ePA, KBV MIO, MII Kerndatensatz), validated in
+// the same run but never counted as EEHRxF coverage (#1172).
+interface NationalProfile {
+  profileId: string;
+  name: string;
+  canonical: string;
+  baseResource: string;
+  tested: number;
+  passed: number;
+  failed: number;
+  coverage: string;
+  topIssues: string[];
+  eehrxfCounterpart: { profileId: string; name: string } | null;
+}
+
+interface NationalGuide {
+  guideId: string;
+  name: string;
+  publisher: string;
+  igPackage: string;
+  status: string;
+  home: string;
+  gate: boolean;
+  profiles: NationalProfile[];
+}
+
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const BLOB = `${REPO}/blob/main`;
 
@@ -273,6 +299,81 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
   );
 }
 
+function NationalGuideCard({ guide }: { guide: NationalGuide }) {
+  const t = useT("holder");
+  return (
+    <div
+      className="bg-(--surface) border border-(--border) rounded-xl p-4"
+      data-testid={`national-guide-${guide.guideId}`}
+    >
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-semibold text-sm text-(--text-primary)">
+          {guide.name}
+        </span>
+        <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm font-mono">
+          {guide.igPackage}
+        </span>
+        <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
+          {guide.gate ? t("Gates CI") : t("Report only")}
+        </span>
+        <a
+          href={guide.home}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300"
+        >
+          <ExternalLink size={12} />
+          {t("Implementation guide")}
+        </a>
+      </div>
+      <p className="text-xs text-(--text-secondary) mt-0.5">
+        {t("Published by {publisher}", { publisher: guide.publisher })}
+      </p>
+      <div className="mt-2 divide-y divide-(--border)">
+        {guide.profiles.map((p) => (
+          <div key={p.profileId} className="py-2">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-(--text-primary) truncate">
+                  {p.name}
+                </div>
+                <div className="text-xs text-(--text-secondary) truncate">
+                  {p.eehrxfCounterpart
+                    ? t("EEHRxF counterpart: {name}", {
+                        name: p.eehrxfCounterpart.name,
+                      })
+                    : t("No EEHRxF counterpart")}
+                </div>
+              </div>
+              {p.tested > 0 && (
+                <span className="text-xs text-(--text-primary) tabular-nums">
+                  {t("{passed}/{tested} pass", {
+                    passed: p.passed,
+                    tested: p.tested,
+                  })}
+                </span>
+              )}
+              <StatusBadge status={p.coverage} />
+            </div>
+            {p.topIssues.length > 0 && (
+              <details className="mt-1">
+                <summary className="text-xs text-(--text-secondary) cursor-pointer">
+                  {t("Why resources fail")}
+                </summary>
+                <ul className="mt-1 ml-4 list-disc text-[11px] text-(--text-secondary) break-words">
+                  {p.topIssues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CategoryCard({ category }: { category: EEHRxFCategory }) {
   const t = useT("holder");
   const [expanded, setExpanded] = useState(category.status !== "none");
@@ -373,6 +474,15 @@ export default function EEHRxFPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [unauthenticated, setUnauthenticated] = useState(false);
+  const [national, setNational] = useState<NationalGuide[]>([]);
+
+  useEffect(() => {
+    // A section of its own; the page works without it.
+    fetchApi("/api/eehrxf/national")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setNational(d?.guides ?? []))
+      .catch(() => setNational([]));
+  }, []);
 
   useEffect(() => {
     fetchApi("/api/eehrxf")
@@ -663,6 +773,28 @@ export default function EEHRxFPage() {
                   <CategoryCard key={cat.categoryId} category={cat} />
                 ))}
               </div>
+            )}
+
+            {/* German profiles: same resources, never EEHRxF coverage */}
+            {!loading && national.length > 0 && (
+              <section className="mt-8" aria-labelledby="eehrxf-national">
+                <h2
+                  id="eehrxf-national"
+                  className="font-semibold text-sm text-(--text-primary) mb-1"
+                >
+                  {t("German profiles")}
+                </h2>
+                <p className="text-xs text-(--text-secondary) mb-3">
+                  {t(
+                    "Not EEHRxF coverage. The same resources, validated against the German guides: the gematik ePA, the KBV MIO and the MII core data set the university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.",
+                  )}
+                </p>
+                <div className="flex flex-col gap-3">
+                  {national.map((g) => (
+                    <NationalGuideCard key={g.guideId} guide={g} />
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* Planned guides: tracked, not validated yet */}

@@ -3229,6 +3229,85 @@ paths:
                         scope: { type: string }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /api/eehrxf/national:
+    get:
+      tags: [EEHRxF]
+      summary: German FHIR profiles (gematik ePA, KBV MIO, MII Kerndatensatz) and their validation results
+      description: >
+        The German guides the hub validates the same FHIR resources against,
+        in the same HL7 FHIR Validator run as the EEHRxF profiles: the gematik
+        ePA, the KBV MIO and the MII core data set (Kerndatensatz) of the
+        university hospitals' data integration centres. Never counted as
+        EEHRxF coverage (#1172). Each profile names the EEHRxF profile it
+        corresponds to, or null. A guide with `gate` true fails the CI run on
+        a new failure; a draft or ballot guide only reports.
+      responses:
+        "200":
+          description: German guides with their profiles and totals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  guides:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        guideId: { type: string, example: "mii-kds-base" }
+                        name: { type: string }
+                        publisher:
+                          {
+                            type: string,
+                            example: "Medizininformatik-Initiative (MII)",
+                          }
+                        igPackage:
+                          type: string
+                          example: "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1"
+                        status:
+                          { type: string, enum: [published, ballot, draft] }
+                        home: { type: string }
+                        gate: { type: boolean }
+                        checkedOn: { type: string, format: date }
+                        profiles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              profileId:
+                                { type: string, example: "kds-condition-de" }
+                              name: { type: string }
+                              canonical: { type: string }
+                              baseResource:
+                                { type: string, example: "Condition" }
+                              tested: { type: integer }
+                              passed: { type: integer }
+                              failed: { type: integer }
+                              coverage:
+                                type: string
+                                enum: [full, partial, none, untested]
+                              topIssues:
+                                { type: array, items: { type: string } }
+                              eehrxfCounterpart:
+                                type: object
+                                nullable: true
+                                properties:
+                                  profileId:
+                                    {
+                                      type: string,
+                                      example: "condition-eu-core",
+                                    }
+                                  name: { type: string }
+                  summary:
+                    type: object
+                    properties:
+                      guides: { type: integer }
+                      profiles: { type: integer }
+                      resourcesTested: { type: integer }
+                      resourcesPassed: { type: integer }
+                      passRatePercent: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /api/analytics:
     get:
       tags: [Analytics]

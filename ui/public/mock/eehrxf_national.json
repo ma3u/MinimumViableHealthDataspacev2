@@ -1,0 +1,354 @@
+{
+  "guides": [
+    {
+      "guideId": "epa-laboratory",
+      "name": "gematik ePA Laboratory Report",
+      "publisher": "gematik",
+      "igPackage": "de.gematik.epa.laboratory#1.0.0-ballot.1",
+      "status": "ballot",
+      "home": "https://gemspec.gematik.de/ig/fhir/epa-laboratory/1.0.0-ballot.1/",
+      "gate": false,
+      "checkedOn": "2026-11-20",
+      "profiles": [
+        {
+          "profileId": "epa-lab-bundle-de",
+          "name": "Bundle (ePA Laboratory Report)",
+          "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp",
+          "baseResource": "Bundle",
+          "tested": 5,
+          "passed": 0,
+          "failed": 5,
+          "coverage": "none",
+          "topIssues": [
+            "5x Bundle: Constraint failed: dr-comp-category: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
+            "5x Bundle: Slice '...': a matching slice is required, but not found (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/bundle-dglp|1.0.0). Note that other slices are allowed in addition to this required slice",
+            "4x entry: Unable to find a match for the specified profile among choices: https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-image-attachment-dglp, https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-labo",
+            "3x entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0)",
+            "3x entry/*Composition/<uuid>*/.identifier.system: Value is '...' but is fixed to 'urn:ietf:rfc:3986' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/composition-dglp|1.0.0#Composition.identifier.system"
+          ],
+          "eehrxfCounterpart": null
+        },
+        {
+          "profileId": "epa-lab-diagnostic-report-de",
+          "name": "DiagnosticReport (ePA Laboratory Report)",
+          "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp",
+          "baseResource": "DiagnosticReport",
+          "tested": 2,
+          "passed": 0,
+          "failed": 2,
+          "coverage": "none",
+          "topIssues": [
+            "2x DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code",
+            "2x DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code.coding",
+            "2x DiagnosticReport.effective.ofType(dateTime): This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.",
+            "2x DiagnosticReport.performer[n]: DiagnosticReport.performer.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "2x DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)"
+          ],
+          "eehrxfCounterpart": null
+        },
+        {
+          "profileId": "epa-lab-observation-de",
+          "name": "Observation laboratory study (ePA Laboratory Report)",
+          "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp",
+          "baseResource": "Observation",
+          "tested": 37,
+          "passed": 5,
+          "failed": 32,
+          "coverage": "partial",
+          "topIssues": [
+            "26x Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "20x Observation: Observation.encounter: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "20x Observation: Observation.performer: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "9x Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "6x Observation.code.coding[n]: Observation.code.coding.display: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)"
+          ],
+          "eehrxfCounterpart": null
+        }
+      ]
+    },
+    {
+      "guideId": "epa-medication",
+      "name": "gematik ePA Medication Service",
+      "publisher": "gematik",
+      "igPackage": "de.gematik.epa.medication#1.3.5",
+      "status": "published",
+      "home": "https://gemspec.gematik.de/ig/fhir/epa-medication/1.3.5/",
+      "gate": true,
+      "checkedOn": "2026-11-20",
+      "profiles": [
+        {
+          "profileId": "epa-medication-request-de",
+          "name": "MedicationRequest (ePA Medication, prescription)",
+          "canonical": "https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request",
+          "baseResource": "MedicationRequest",
+          "tested": 31,
+          "passed": 0,
+          "failed": 31,
+          "coverage": "none",
+          "topIssues": [
+            "31x MedicationRequest.subject: MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)",
+            "19x MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1",
+            "19x MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2",
+            "19x MedicationRequest.medication.ofType(CodeableConcept): The Profile '...' definition allows for the type Reference but found type CodeableConcept",
+            "17x MedicationRequest.medication.ofType(CodeableConcept).coding[n]: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1"
+          ],
+          "eehrxfCounterpart": null
+        }
+      ]
+    },
+    {
+      "guideId": "mii-kds-base",
+      "name": "MII Kerndatensatz Basis (Person, Fall, Diagnose, Prozedur)",
+      "publisher": "Medizininformatik-Initiative (MII)",
+      "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+      "status": "published",
+      "home": "https://medizininformatik-initiative.github.io/kerndatensatz-basis/2026.0.1/",
+      "gate": true,
+      "checkedOn": "2026-11-25",
+      "profiles": [
+        {
+          "profileId": "kds-condition-de",
+          "name": "Condition (MII KDS Diagnose)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
+          "baseResource": "Condition",
+          "tested": 32,
+          "passed": 20,
+          "failed": 12,
+          "coverage": "partial",
+          "topIssues": [
+            "12x Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
+            "1x Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "condition-eu-core",
+            "name": "Condition (EU core)"
+          }
+        },
+        {
+          "profileId": "kds-encounter-de",
+          "name": "Encounter (MII KDS Fall, Kontakt Gesundheitseinrichtung)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
+          "baseResource": "Encounter",
+          "tested": 31,
+          "passed": 21,
+          "failed": 10,
+          "coverage": "partial",
+          "topIssues": [
+            "10x Encounter: Constraint failed: mii-enc-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)",
+            "1x Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE'...'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')'...'http://fhir.de/ValueSe",
+            "1x Encounter: Constraint failed: mii-enc-2: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung)"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "encounter-hdr-eu",
+            "name": "Encounter (EU HDR)"
+          }
+        },
+        {
+          "profileId": "kds-patient-de",
+          "name": "Patient (MII KDS Person)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
+          "baseResource": "Patient",
+          "tested": 29,
+          "passed": 25,
+          "failed": 4,
+          "coverage": "partial",
+          "topIssues": [
+            "3x Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
+            "3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
+            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "patient-eu-core",
+            "name": "Patient (EU core)"
+          }
+        },
+        {
+          "profileId": "kds-procedure-de",
+          "name": "Procedure (MII KDS Prozedur)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
+          "baseResource": "Procedure",
+          "tested": 24,
+          "passed": 23,
+          "failed": 1,
+          "coverage": "partial",
+          "topIssues": [
+            "1x Procedure.code: Constraint failed: sct-ops-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure)",
+            "1x Procedure.code: Procedure.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)",
+            "1x Procedure: Procedure.performed[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)"
+          ],
+          "eehrxfCounterpart": null
+        }
+      ]
+    },
+    {
+      "guideId": "mii-kds-laborbefund",
+      "name": "MII Kerndatensatz Laborbefund",
+      "publisher": "Medizininformatik-Initiative (MII)",
+      "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
+      "status": "published",
+      "home": "https://www.medizininformatik-initiative.de/Kerndatensatz/KDS_Laborbefund_2026/",
+      "gate": true,
+      "checkedOn": "2026-11-25",
+      "profiles": [
+        {
+          "profileId": "kds-lab-diagnostic-report-de",
+          "name": "DiagnosticReport (MII KDS Laborbefund)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
+          "baseResource": "DiagnosticReport",
+          "tested": 2,
+          "passed": 0,
+          "failed": 2,
+          "coverage": "none",
+          "topIssues": [
+            "2x DiagnosticReport: DiagnosticReport.basedOn: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)",
+            "2x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)",
+            "2x DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi",
+            "1x DiagnosticReport.code: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "diagnostic-report-lab-eu",
+            "name": "DiagnosticReport (EU Lab)"
+          }
+        },
+        {
+          "profileId": "kds-lab-observation-de",
+          "name": "Observation (MII KDS Laboruntersuchung)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
+          "baseResource": "Observation",
+          "tested": 37,
+          "passed": 0,
+          "failed": 37,
+          "coverage": "none",
+          "topIssues": [
+            "37x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "37x Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
+            "37x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "37x Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
+            "1x Observation.effective.ofType(Period): The Profile '...' definition allows for the type dateTime but found type Period"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "observation-results-lab-eu",
+            "name": "Observation results (EU Lab)"
+          }
+        }
+      ]
+    },
+    {
+      "guideId": "mii-kds-medikation",
+      "name": "MII Kerndatensatz Medikation",
+      "publisher": "Medizininformatik-Initiative (MII)",
+      "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
+      "status": "published",
+      "home": "https://www.medizininformatik-initiative.de/Kerndatensatz/KDS_Medikation_2026/",
+      "gate": true,
+      "checkedOn": "2026-11-25",
+      "profiles": [
+        {
+          "profileId": "kds-medication-request-de",
+          "name": "MedicationRequest (MII KDS Medikation)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
+          "baseResource": "MedicationRequest",
+          "tested": 31,
+          "passed": 29,
+          "failed": 2,
+          "coverage": "partial",
+          "topIssues": [
+            "2x MedicationRequest.dosageInstruction[n]: Constraint failed: DosageDoseUnitSameCode: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "medication-request-eu",
+            "name": "MedicationRequest (EU MPD)"
+          }
+        },
+        {
+          "profileId": "kds-medication-statement-de",
+          "name": "MedicationStatement (MII KDS Medikation)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+          "baseResource": "MedicationStatement",
+          "tested": 5,
+          "passed": 0,
+          "failed": 5,
+          "coverage": "none",
+          "topIssues": [
+            "4x MedicationStatement.dosage[n]: Constraint failed: DosageStructuredRequiresBoth: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)",
+            "1x MedicationStatement: MedicationStatement.effective[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement|2026.0.1)"
+          ],
+          "eehrxfCounterpart": null
+        }
+      ]
+    },
+    {
+      "guideId": "mio-laborbefund",
+      "name": "KBV MIO Laborbefund",
+      "publisher": "KBV (mio42)",
+      "igPackage": "kbv.mio.laborbefund#1.0.0-update",
+      "status": "draft",
+      "home": "https://mio42-gmbh.github.io/MIO-Laborbefund-IG/site/",
+      "gate": false,
+      "checkedOn": "2026-11-20",
+      "profiles": [
+        {
+          "profileId": "mio-lab-bundle-de",
+          "name": "Bundle (MIO Laborbefund)",
+          "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Bundle",
+          "baseResource": "Bundle",
+          "tested": 5,
+          "passed": 0,
+          "failed": 5,
+          "coverage": "none",
+          "topIssues": [
+            "5x Bundle: Slice '...': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Bundle|1.0.0-update). Note that other slices are allowed in addition to this required slice",
+            "5x entry: Unable to find a match for the specified profile among choices: https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Image_Attachment, https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study,",
+            "3x entry/*Composition/<uuid>*/.author[n]: Composition.author.display: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update)",
+            "3x entry/*Composition/<uuid>*/.identifier.system: Value is '...' but is fixed to 'urn:ietf:rfc:3986' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update#Composition.identifier.system",
+            "3x entry/*Composition/<uuid>*/.subject: Composition.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Composition|1.0.0-update)"
+          ],
+          "eehrxfCounterpart": null
+        },
+        {
+          "profileId": "mio-lab-diagnostic-report-de",
+          "name": "DiagnosticReport (MIO Laborbefund)",
+          "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport",
+          "baseResource": "DiagnosticReport",
+          "tested": 2,
+          "passed": 0,
+          "failed": 2,
+          "coverage": "none",
+          "topIssues": [
+            "2x DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code",
+            "2x DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code.coding",
+            "2x DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "2x DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.data: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "2x DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)"
+          ],
+          "eehrxfCounterpart": null
+        },
+        {
+          "profileId": "mio-lab-observation-de",
+          "name": "Observation laboratory study (MIO Laborbefund)",
+          "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study",
+          "baseResource": "Observation",
+          "tested": 37,
+          "passed": 0,
+          "failed": 37,
+          "coverage": "none",
+          "topIssues": [
+            "37x Observation.category[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update and slicing is CLOSED: Observation.category[n]: Doe",
+            "37x Observation.subject: Observation.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
+            "37x Observation: Slice '...': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update). Note that other slices are allowed in addition to this required s",
+            "26x Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
+            "20x Observation: Observation.encounter: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)"
+          ],
+          "eehrxfCounterpart": null
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "guides": 6,
+    "profiles": 15,
+    "resourcesTested": 310,
+    "resourcesPassed": 123,
+    "passRatePercent": 40
+  }
+}

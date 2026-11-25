@@ -214,5 +214,12 @@
   "The first EEHRxF implementation guide is due on {due}.": "De eerste EEHRxF-implementatiegids moet er uiterlijk {due} zijn.",
   "Draft act (PDF)": "Ontwerp (PDF)",
   "Annexes (PDF)": "Bijlagen (PDF)",
-  "Have your say": "Geef uw mening"
+  "Have your say": "Geef uw mening",
+  "German profiles": "Duitse profielen",
+  "Not EEHRxF coverage. The same resources, validated against the German guides: the gematik ePA, the KBV MIO and the MII core data set the university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.": "Geen EEHRxF-dekking. Dezelfde resources, gevalideerd tegen de Duitse gidsen: het ePA van gematik, de MIO van de KBV en de kernset van de MII die de universitaire ziekenhuizen voor onderzoek leveren. Elk profiel noemt het EEHRxF-profiel waarmee het overeenkomt.",
+  "Gates CI": "Blokkeert CI",
+  "Report only": "Alleen rapport",
+  "Published by {publisher}": "Uitgegeven door {publisher}",
+  "EEHRxF counterpart: {name}": "EEHRxF-tegenhanger: {name}",
+  "No EEHRxF counterpart": "Geen EEHRxF-tegenhanger"
 }

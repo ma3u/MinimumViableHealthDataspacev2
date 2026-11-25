@@ -69,6 +69,9 @@ export const LABEL_LAYER: Record<string, number> = {
   EhdsPurpose: 2,
   EEHRxFProfile: 2,
   EEHRxFCategory: 2,
+  // German profiles (gematik ePA, KBV MIO, MII Kerndatensatz) next to the EEHRxF ones
+  NationalProfile: 2,
+  NationalProfileGuide: 2,
   // L3: FHIR R4 Clinical
   Patient: 3,
   ImportedRecord: 3,
@@ -248,6 +251,8 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   EhdsPurpose: "Research Purpose",
   EEHRxFProfile: "Data Profile",
   EEHRxFCategory: "Profile Category",
+  NationalProfile: "German Profile",
+  NationalProfileGuide: "German Profile Guide",
   // L3 Clinical
   Patient: "My Data",
   ImportedRecord: "Imported Record",
@@ -356,6 +361,8 @@ export const LABEL_SORT_ORDER: Record<string, number> = {
   EhdsPurpose: 2,
   EEHRxFProfile: 3,
   EEHRxFCategory: 4,
+  NationalProfile: 4,
+  NationalProfileGuide: 4,
   ContactPoint: 5,
   PublishedAggregate: 6,
   // L3 — patients → clinical events
@@ -412,6 +419,8 @@ export const LABEL_GROUP: Record<string, string> = {
   EhdsPurpose: "dataset",
   EEHRxFProfile: "dataset",
   EEHRxFCategory: "dataset",
+  NationalProfile: "dataset",
+  NationalProfileGuide: "dataset",
   ContactPoint: "dataset",
   PublishedAggregate: "dataset",
   Patient: "clinical",
@@ -503,6 +512,7 @@ export const FILTER_PRESETS = [
       "DataProduct",
       "Catalog",
       "EEHRxFProfile",
+      "NationalProfile",
       "EhdsPurpose",
     ],
   },
