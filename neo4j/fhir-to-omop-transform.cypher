@@ -267,6 +267,10 @@ MATCH (p:Patient)-[:HAS_OBSERVATION]->(o:Observation)
 MATCH (p)-[:MAPPED_TO]->(op:OMOPPerson)
 WHERE NOT (o)-[:MAPPED_TO]->(:OMOPMeasurement)
   AND coalesce(o.category, '') IN ['laboratory', 'vital-signs', '']
+  // A panel with components and no value of its own is measured per
+  // component, in 4b (#1218).
+  AND (size(coalesce(o.componentCodes, [])) = 0
+       OR coalesce(o.value, o.valueQuantity) IS NOT NULL)
 WITH o, op, p:OptedOut AS optedOut, toString(coalesce(o.fhirId, o.id, o.resourceId)) AS key,
      left(toString(coalesce(o.dateTime, o.effectiveDate, o.date)), 10) AS day,
      toFloat(coalesce(o.value, o.valueQuantity, '0')) AS value,
@@ -298,6 +302,43 @@ MATCH (o:Observation)-[:CODED_BY]->(lc:LoincCode)
 MATCH (o)-[:MAPPED_TO]->(om:OMOPMeasurement)
 MERGE (om)-[:CODED_BY]->(lc)
 RETURN count(lc) AS loinc_links_on_omop_measurements;
+
+// ── 4b. One OMOPMeasurement per component (#1218) ─────────────────────────
+// A blood pressure panel holds its systolic and diastolic values as
+// components (scripts/load_fhir_neo4j.py keeps them as aligned lists); OMOP
+// has one row per value, so each component becomes its own measurement, keyed
+// by the CDM id of "Observation/<id>/component/<LOINC>" and coded by its own
+// LOINC code.
+MATCH (p:Patient)-[:HAS_OBSERVATION]->(o:Observation)
+MATCH (p)-[:MAPPED_TO]->(op:OMOPPerson)
+WHERE size(coalesce(o.componentCodes, [])) > 0
+  AND coalesce(o.category, '') IN ['laboratory', 'vital-signs', '']
+WITH o, op, p:OptedOut AS optedOut, toString(coalesce(o.fhirId, o.id, o.resourceId)) AS key,
+     left(toString(coalesce(o.dateTime, o.effectiveDate, o.date)), 10) AS day
+WHERE key IS NOT NULL
+UNWIND range(0, size(o.componentCodes) - 1) AS i
+WITH o, op, optedOut, key, day, o.componentCodes[i] AS code,
+     toFloat(o.componentValues[i]) AS value,
+     coalesce(o.componentUnits[i], '') AS unit,
+     coalesce(o.componentDisplays[i], o.componentCodes[i]) AS name
+WITH o, op, optedOut, day, code, value, unit, name,
+     reduce(n = 0, h IN split(left(apoc.util.md5(['Observation/' + key + '/component/' + code]), 13), '') |
+       n * 16 + size(split('0123456789abcdef', h)[0])) AS cdmId
+MERGE (om:OMOPMeasurement {measurementId: cdmId})
+  ON CREATE SET om.name                   = name,
+                  om.measurementConceptId   = 0
+SET om.measurementDate        = coalesce(day, ''),
+    om.measurementSourceValue = code,
+    om.valueAsNumber          = value,
+    om.unit                   = unit,
+    om.personId               = op.personId
+MERGE (o)-[:MAPPED_TO]->(om)
+MERGE (op)-[:HAS_MEASUREMENT]->(om)
+FOREACH (_o IN CASE WHEN optedOut THEN [1] ELSE [] END | SET om:OptedOut)
+WITH om, code
+OPTIONAL MATCH (lc:LoincCode {loincNumber: code})
+FOREACH (_ IN CASE WHEN lc IS NULL THEN [] ELSE [1] END | MERGE (om)-[:CODED_BY]->(lc))
+RETURN count(om) AS omop_component_measurements_mapped;
 
 // ── 5. OMOPDrugExposure from MedicationRequest ───────────────────────────
 
