@@ -29,6 +29,7 @@ describe("POST /api/spe-imports/staged/[importId]/review", () => {
   beforeEach(() => {
     adminAudit.recordAdminEvent.mockReset();
     adminAudit.recordAdminEvent.mockResolvedValue(undefined);
+    adminAudit.recordAdminEventAfter.mockClear();
     fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);
   });
@@ -52,6 +53,25 @@ describe("POST /api/spe-imports/staged/[importId]/review", () => {
     );
     expect(String(fetchMock.mock.calls[0][0])).toMatch(
       new RegExp(`/spe/SPE-1/staged/${ID}/approve$`),
+    );
+  });
+
+  it("records a review that did not take effect as a failure", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ error: "not staged" }), { status: 404 }),
+    );
+    const res = await POST(
+      post({ speId: "SPE-1", decision: "approve" }),
+      params,
+    );
+    expect(res.status).toBe(404);
+    expect(adminAudit.recordAdminEventAfter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: "import-review",
+        outcome: "failure",
+        target: ID,
+        reason: "not staged",
+      }),
     );
   });
 

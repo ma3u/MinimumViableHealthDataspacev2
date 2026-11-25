@@ -152,19 +152,21 @@ describe("Art. 72 trusted data holder", () => {
         accessToken: "",
       },
     } as never);
-    mockRunQuery.mockResolvedValueOnce([
-      {
-        requestId: "req-1",
-        applicantId: "x",
-        question: "q",
-        purpose: "p",
-        datasetId: null,
-      },
-    ]);
+    mockRunQuery
+      .mockResolvedValueOnce([{ requestId: "req-1" }])
+      .mockResolvedValueOnce([
+        {
+          requestId: "req-1",
+          applicantId: "x",
+          question: "q",
+          purpose: "p",
+          datasetId: null,
+        },
+      ]);
     const res = await decide(
       post({ requestId: "req-1", decision: "REJECTED", justification: "x" }),
     );
     expect((await res.json()).decidedUnder).toBe("Art. 69(3)");
-    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+    expect(mockRunQuery).toHaveBeenCalledTimes(2);
   });
 });

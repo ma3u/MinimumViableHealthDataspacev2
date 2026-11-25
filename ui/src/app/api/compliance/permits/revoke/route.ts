@@ -57,6 +57,16 @@ export async function POST(req: NextRequest) {
     actorId: session.user.email ?? session.user.name ?? session.user.id,
     actorRole: auditRole(session.roles),
   };
+  // Only an action that can happen is recorded as one: a permit that is not
+  // an approved one is refused before anything reaches the chain as a success.
+  const open = await runQuery<{ permitId: string }>(
+    `MATCH (permit:HDABApproval {approvalId: $permitId})
+     WHERE toUpper(coalesce(permit.status, '')) = 'APPROVED'
+     RETURN permit.approvalId AS permitId LIMIT 1`,
+    { permitId },
+  );
+  if (open.length === 0) return notRevocable(permitId, actor);
+
   try {
     await recordAdminEvent({
       event: "permit-revoke",
@@ -101,19 +111,7 @@ export async function POST(req: NextRequest) {
     },
   );
 
-  if (rows.length === 0) {
-    await recordAdminEventAfter({
-      event: "permit-revoke",
-      outcome: "failure",
-      target: permitId,
-      reason: "no approved permit with this id",
-      ...actor,
-    });
-    return NextResponse.json(
-      { error: `No approved data permit ${permitId} to revoke` },
-      { status: 404 },
-    );
-  }
+  if (rows.length === 0) return notRevocable(permitId, actor);
   const row = rows[0];
   return NextResponse.json({
     permitId,
@@ -127,4 +125,22 @@ export async function POST(req: NextRequest) {
     reason,
     article: "Regulation (EU) 2025/327, Art. 63(3): data permit revoked",
   });
+}
+
+/** No approved permit with this id: recorded as a failure, answered 404. */
+async function notRevocable(
+  permitId: string,
+  actor: { actorId: string; actorRole: string },
+): Promise<NextResponse> {
+  await recordAdminEventAfter({
+    event: "permit-revoke",
+    outcome: "failure",
+    target: permitId,
+    reason: "no approved permit with this id",
+    ...actor,
+  });
+  return NextResponse.json(
+    { error: `No approved data permit ${permitId} to revoke` },
+    { status: 404 },
+  );
 }

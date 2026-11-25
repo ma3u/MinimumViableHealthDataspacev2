@@ -189,6 +189,7 @@ describe("POST /api/compliance/requests/decide", () => {
 
   it("on approval runs the question in the applicant's name and keeps only the statistic", async () => {
     mockRunQuery
+      .mockResolvedValueOnce([{ requestId: "req-1" }])
       .mockResolvedValueOnce([
         {
           requestId: "req-1",
@@ -226,13 +227,14 @@ describe("POST /api/compliance/requests/decide", () => {
       "X-Request": "req-1",
       "X-Dataset": "dataset:synthea-fhir-r4-mvd",
     });
-    const stored = mockRunQuery.mock.calls[1][1] as Record<string, unknown>;
+    const stored = mockRunQuery.mock.calls[2][1] as Record<string, unknown>;
     expect(stored.status).toBe("ANSWERED");
     expect(stored.answer).toBe(JSON.stringify([{ patientCount: 214 }]));
   });
 
   it("keeps no answer when the question yields records", async () => {
     mockRunQuery
+      .mockResolvedValueOnce([{ requestId: "req-2" }])
       .mockResolvedValueOnce([
         {
           requestId: "req-2",
@@ -261,21 +263,23 @@ describe("POST /api/compliance/requests/decide", () => {
     expect(body.answered).toBe(false);
     expect(body.answer).toBeNull();
     expect(body.answerError).toContain("returns records");
-    const stored = mockRunQuery.mock.calls[1][1] as Record<string, unknown>;
+    const stored = mockRunQuery.mock.calls[2][1] as Record<string, unknown>;
     expect(stored.status).toBe("APPROVED");
     expect(stored.answer).toBeNull();
   });
 
   it("records a refusal without running anything", async () => {
-    mockRunQuery.mockResolvedValueOnce([
-      {
-        requestId: "req-3",
-        applicantId: "did:web:irs.fr:hdab",
-        question: "x",
-        purpose: null,
-        datasetId: null,
-      },
-    ]);
+    mockRunQuery
+      .mockResolvedValueOnce([{ requestId: "req-3" }])
+      .mockResolvedValueOnce([
+        {
+          requestId: "req-3",
+          applicantId: "did:web:irs.fr:hdab",
+          question: "x",
+          purpose: null,
+          datasetId: null,
+        },
+      ]);
     const body = await (
       await DECIDE(
         post("/api/compliance/requests/decide", {
@@ -287,7 +291,7 @@ describe("POST /api/compliance/requests/decide", () => {
     ).json();
     expect(body.decision).toBe("REJECTED");
     expect(mockFetch).not.toHaveBeenCalled();
-    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+    expect(mockRunQuery).toHaveBeenCalledTimes(2);
   });
 
   it("answers 404 for an unknown request", async () => {

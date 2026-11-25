@@ -5,6 +5,7 @@ import {
   auditRole,
   auditUnavailableResponse,
   recordAdminEvent,
+  recordAdminEventAfter,
 } from "@/lib/admin-audit";
 import { IMPORT_REVIEW_ROLES } from "@/lib/spe-import";
 
@@ -51,6 +52,23 @@ export async function POST(
       { status: 400 },
     );
   }
+  const actor = {
+    actorId:
+      auth.session.user.email ?? auth.session.user.name ?? auth.session.user.id,
+    actorRole: auditRole(auth.session.roles),
+  };
+  // A review that does not take effect is recorded as a failure after it.
+  const failed = (why: string) =>
+    recordAdminEventAfter({
+      event: "import-review",
+      outcome: "failure",
+      target: importId,
+      detail: `${speId} ${
+        decision === "approve" ? "APPROVE" : "REJECT"
+      } FAILED`,
+      reason: why,
+      ...actor,
+    });
   try {
     await recordAdminEvent({
       event: "import-review",
@@ -58,11 +76,7 @@ export async function POST(
       target: importId,
       detail: `${speId} ${decision === "approve" ? "APPROVED" : "REJECTED"}`,
       ...(reason ? { reason } : {}),
-      actorId:
-        auth.session.user.email ??
-        auth.session.user.name ??
-        auth.session.user.id,
-      actorRole: auditRole(auth.session.roles),
+      ...actor,
     });
   } catch {
     return auditUnavailableResponse();
@@ -84,6 +98,7 @@ export async function POST(
       },
     );
   } catch (err) {
+    await failed(`${speId} did not answer`);
     return NextResponse.json(
       { error: `${speId} did not answer`, detail: String(err) },
       { status: 502 },
@@ -94,6 +109,7 @@ export async function POST(
     unknown
   >;
   if (!res.ok) {
+    await failed(String(answer.error ?? `${speId} answered ${res.status}`));
     return NextResponse.json(
       { error: String(answer.error ?? `${speId} answered ${res.status}`) },
       { status: [404, 409, 503].includes(res.status) ? res.status : 502 },

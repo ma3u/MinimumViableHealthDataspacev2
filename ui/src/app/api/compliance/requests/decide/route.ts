@@ -10,6 +10,7 @@ import {
   auditRole,
   auditUnavailableResponse,
   recordAdminEvent,
+  recordAdminEventAfter,
 } from "@/lib/admin-audit";
 
 export const dynamic = "force-dynamic";
@@ -100,6 +101,22 @@ export async function POST(req: NextRequest) {
     decidedUnder = "Art. 72";
   }
 
+  const actor = {
+    actorId:
+      auth.session.user.email ?? auth.session.user.name ?? auth.session.user.id,
+    actorRole: auditRole(auth.session.roles),
+  };
+  // Only a decision that can take effect is recorded as one. For a trusted
+  // holder the Art. 72 lookup above has found the request already.
+  if (isBody) {
+    const exists = await runQuery<{ requestId: string }>(
+      `MATCH (r:HealthDataRequest {requestId: $requestId})
+       RETURN r.requestId AS requestId LIMIT 1`,
+      { requestId },
+    );
+    if (exists.length === 0) return requestNotFound(requestId, actor);
+  }
+
   // On the admin audit chain before it takes effect (#1236, draft Art. 16(3)(f)).
   try {
     await recordAdminEvent({
@@ -108,11 +125,7 @@ export async function POST(req: NextRequest) {
       target: requestId,
       detail: decision,
       ...(justification ? { reason: String(justification) } : {}),
-      actorId:
-        auth.session.user.email ??
-        auth.session.user.name ??
-        auth.session.user.id,
-      actorRole: auditRole(auth.session.roles),
+      ...actor,
     });
   } catch {
     return auditUnavailableResponse();
@@ -155,12 +168,7 @@ export async function POST(req: NextRequest) {
       publishBy,
     },
   );
-  if (found.length === 0) {
-    return NextResponse.json(
-      { error: `Health data request ${requestId} is not in the graph` },
-      { status: 404 },
-    );
-  }
+  if (found.length === 0) return requestNotFound(requestId, actor);
   const request = found[0];
 
   if (decision === "REJECTED") {
@@ -265,4 +273,22 @@ export async function POST(req: NextRequest) {
         }`
       : "Regulation (EU) 2025/327, Art. 69(1): approved, but the question yields no statistical answer",
   });
+}
+
+/** The request is not in the graph: recorded as a failure, answered 404. */
+async function requestNotFound(
+  requestId: string,
+  actor: { actorId: string; actorRole: string },
+): Promise<NextResponse> {
+  await recordAdminEventAfter({
+    event: "request-decision",
+    outcome: "failure",
+    target: requestId,
+    reason: "no health data request with this id",
+    ...actor,
+  });
+  return NextResponse.json(
+    { error: `Health data request ${requestId} is not in the graph` },
+    { status: 404 },
+  );
 }
