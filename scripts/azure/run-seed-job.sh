@@ -133,8 +133,8 @@ else:
     secrets = {"admin-secret": e["ADMIN_SECRET"]}
     refs = {"KC_CLIENT_SECRET": "admin-secret"}
     if e["PUSH_DP_SECRET"]:
-        # as 23-dataplane.sh register: the app's short name, Keycloak's internal address
-        env["PUSH_DATAPLANE_URL"] = f"http://{e['DP_APP']}"
+        # as 23-dataplane.sh register: the internal HTTPS addresses of both apps
+        env["PUSH_DATAPLANE_URL"] = f"https://{e['DP_APP']}.internal.{e['ACA_DOMAIN']}"
         env["PUSH_DATAPLANE_TOKEN_ENDPOINT"] = (
             f"https://{e['KC_APP']}.internal.{e['ACA_DOMAIN']}/realms/edcv/protocol/openid-connect/token")
         secrets["push-dp-secret"] = e["PUSH_DP_SECRET"]

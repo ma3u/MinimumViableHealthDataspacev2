@@ -109,7 +109,7 @@ jobs:
           refs = [{"name": "KC_CLIENT_SECRET", "secretRef": "admin-secret"}]
           doc = {"location": e["LOCATION"]}
           if e["PUSH_DP"] == "present":
-              env["PUSH_DATAPLANE_URL"] = "http://mvhd-dataplane"
+              env["PUSH_DATAPLANE_URL"] = f"https://mvhd-dataplane.internal.{e['DOMAIN']}"
               env["PUSH_DATAPLANE_TOKEN_ENDPOINT"] = (
                   f"https://mvhd-keycloak.internal.{e['DOMAIN']}/realms/edcv/protocol/openid-connect/token")
               secrets.append({"name": "push-dp-secret", "identity": e["KV_IDENTITY"],
