@@ -5,7 +5,8 @@
 // another drug: "Lisinopril 10 mg Oral Tab" carried 316672 (simvastatin 10 MG),
 // "Insulin Glargine 100 U/mL" 197884 (lisinopril 40 MG), and 1861634 and
 // 1245689 are no RxCUI at all. scripts/generate-fhir-bundles.py had four more
-// (198211 "Aspirin 81 MG" is simvastatin 40 MG). Mapped to OMOP or NeDRex,
+// (198211 "Aspirin 81 MG" is simvastatin 40 MG), scripts/generate-persona-
+// overview-seed.py three on P1's list. Mapped to OMOP or NeDRex,
 // those prescriptions landed on the wrong drug. The generators now write the
 // right codes; this file corrects a graph an earlier run loaded.
 //
@@ -62,7 +63,10 @@ UNWIND [
   {old: '259255', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'atorvastatin 80 MG Oral Tablet', newName: 'atorvastatin 20 MG Oral Tablet'},
   {old: '313782', new: '198051', label: 'omeprazole 20 mg delayed release oral capsule', oldName: 'acetaminophen 325 MG Oral Tablet', newName: 'omeprazole 20 MG Delayed Release Oral Capsule'},
   {old: '198211', new: '243670', label: 'aspirin 81 mg oral tablet', oldName: 'simvastatin 40 MG Oral Tablet', newName: 'aspirin 81 MG Oral Tablet'},
-  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'}
+  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'},
+  {old: '197361', new: '314076', label: 'lisinopril 10 mg oral tablet', oldName: 'amlodipine 5 MG Oral Tablet', newName: 'lisinopril 10 MG Oral Tablet'},
+  {old: '308460', new: '2123111', label: 'salbutamol 100 mcg inhaler', oldName: 'azithromycin 250 MG Oral Tablet', newName: 'NDA020503 200 ACTUAT albuterol 0.09 MG/ACTUAT Metered Dose Inhaler'},
+  {old: '209459', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'acetaminophen 500 MG Oral Tablet [Tylenol]', newName: 'atorvastatin 20 MG Oral Tablet'}
 ] AS m
 OPTIONAL MATCH (have:RxNormConcept) WHERE toString(have.rxcui) = m.new
 WITH m, count(have) AS existing
@@ -103,7 +107,10 @@ UNWIND [
   {old: '259255', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'atorvastatin 80 MG Oral Tablet', newName: 'atorvastatin 20 MG Oral Tablet'},
   {old: '313782', new: '198051', label: 'omeprazole 20 mg delayed release oral capsule', oldName: 'acetaminophen 325 MG Oral Tablet', newName: 'omeprazole 20 MG Delayed Release Oral Capsule'},
   {old: '198211', new: '243670', label: 'aspirin 81 mg oral tablet', oldName: 'simvastatin 40 MG Oral Tablet', newName: 'aspirin 81 MG Oral Tablet'},
-  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'}
+  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'},
+  {old: '197361', new: '314076', label: 'lisinopril 10 mg oral tablet', oldName: 'amlodipine 5 MG Oral Tablet', newName: 'lisinopril 10 MG Oral Tablet'},
+  {old: '308460', new: '2123111', label: 'salbutamol 100 mcg inhaler', oldName: 'azithromycin 250 MG Oral Tablet', newName: 'NDA020503 200 ACTUAT albuterol 0.09 MG/ACTUAT Metered Dose Inhaler'},
+  {old: '209459', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'acetaminophen 500 MG Oral Tablet [Tylenol]', newName: 'atorvastatin 20 MG Oral Tablet'}
 ] AS m
 MATCH (mr:MedicationRequest)
 WHERE coalesce(mr.code, mr.medicationCode) = m.old
@@ -155,13 +162,30 @@ UNWIND [
   {old: '259255', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'atorvastatin 80 MG Oral Tablet', newName: 'atorvastatin 20 MG Oral Tablet'},
   {old: '313782', new: '198051', label: 'omeprazole 20 mg delayed release oral capsule', oldName: 'acetaminophen 325 MG Oral Tablet', newName: 'omeprazole 20 MG Delayed Release Oral Capsule'},
   {old: '198211', new: '243670', label: 'aspirin 81 mg oral tablet', oldName: 'simvastatin 40 MG Oral Tablet', newName: 'aspirin 81 MG Oral Tablet'},
-  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'}
+  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'},
+  {old: '197361', new: '314076', label: 'lisinopril 10 mg oral tablet', oldName: 'amlodipine 5 MG Oral Tablet', newName: 'lisinopril 10 MG Oral Tablet'},
+  {old: '308460', new: '2123111', label: 'salbutamol 100 mcg inhaler', oldName: 'azithromycin 250 MG Oral Tablet', newName: 'NDA020503 200 ACTUAT albuterol 0.09 MG/ACTUAT Metered Dose Inhaler'},
+  {old: '209459', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'acetaminophen 500 MG Oral Tablet [Tylenol]', newName: 'atorvastatin 20 MG Oral Tablet'}
 ] AS m
 MATCH (de:OMOPDrugExposure)
 WHERE (de.drugSourceValue = m.old
        OR (de.drugSourceValue IS NULL AND toString(de.drugConceptId) = m.old))
   AND toLower(coalesce(de.name, '')) = 'omop ' + m.label
 SET de.drugSourceValue = m.new, de.drugConceptId = 0;
+
+// ── 2c. P1's request under its old id, once the seed wrote the new one ────────
+// scripts/generate-persona-overview-seed.py keys P1's requests by their code
+// (med-p1-<rxcui>), so a corrected code is a new node. The old one, recoded by
+// step 2, would be a second copy; it goes with the OMOP row mapped from it.
+UNWIND [
+  {old: '197361', new: '314076'},
+  {old: '308460', new: '2123111'},
+  {old: '209459', new: '617310'}
+] AS m
+MATCH (p:Patient)-[:HAS_MEDICATION_REQUEST]->(stale:MedicationRequest {resourceId: 'med-p1-' + m.old})
+WHERE EXISTS { MATCH (p)-[:HAS_MEDICATION_REQUEST]->(:MedicationRequest {resourceId: 'med-p1-' + m.new}) }
+OPTIONAL MATCH (stale)-[:MAPPED_TO]->(row)
+DETACH DELETE stale, row;
 
 // ── 3. Old concepts carry their real name; codes that do not exist go ─────────
 UNWIND [
@@ -195,7 +219,10 @@ UNWIND [
   {old: '259255', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'atorvastatin 80 MG Oral Tablet', newName: 'atorvastatin 20 MG Oral Tablet'},
   {old: '313782', new: '198051', label: 'omeprazole 20 mg delayed release oral capsule', oldName: 'acetaminophen 325 MG Oral Tablet', newName: 'omeprazole 20 MG Delayed Release Oral Capsule'},
   {old: '198211', new: '243670', label: 'aspirin 81 mg oral tablet', oldName: 'simvastatin 40 MG Oral Tablet', newName: 'aspirin 81 MG Oral Tablet'},
-  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'}
+  {old: '835829', new: '311041', label: 'insulin glargine 100 unt/ml injectable solution', oldName: 'testosterone cypionate 100 MG/ML Injectable Solution', newName: 'insulin glargine 100 UNT/ML Injectable Solution'},
+  {old: '197361', new: '314076', label: 'lisinopril 10 mg oral tablet', oldName: 'amlodipine 5 MG Oral Tablet', newName: 'lisinopril 10 MG Oral Tablet'},
+  {old: '308460', new: '2123111', label: 'salbutamol 100 mcg inhaler', oldName: 'azithromycin 250 MG Oral Tablet', newName: 'NDA020503 200 ACTUAT albuterol 0.09 MG/ACTUAT Metered Dose Inhaler'},
+  {old: '209459', new: '617310', label: 'atorvastatin 20 mg oral tablet', oldName: 'acetaminophen 500 MG Oral Tablet [Tylenol]', newName: 'atorvastatin 20 MG Oral Tablet'}
 ] AS m
 MATCH (o:RxNormConcept) WHERE toString(o.rxcui) = m.old
   AND toLower(coalesce(o.display, '')) = m.label

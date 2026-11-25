@@ -283,7 +283,7 @@
       "facts": [["RxNorm", "860975"]]
     },
     {
-      "id": "med:197361",
+      "id": "med:314076",
       "label": "Lisinopril",
       "layer": "me",
       "kind": "Medication",
@@ -291,10 +291,10 @@
       "color": "#c4b5fd",
       "title": "Lisinopril 10 mg oral tablet",
       "sub": "FHIR R4 MedicationRequest",
-      "facts": [["RxNorm", "197361"]]
+      "facts": [["RxNorm", "314076"]]
     },
     {
-      "id": "med:308460",
+      "id": "med:2123111",
       "label": "Salbutamol",
       "layer": "me",
       "kind": "Medication",
@@ -302,10 +302,10 @@
       "color": "#c4b5fd",
       "title": "Salbutamol 100 mcg inhaler",
       "sub": "FHIR R4 MedicationRequest",
-      "facts": [["RxNorm", "308460"]]
+      "facts": [["RxNorm", "2123111"]]
     },
     {
-      "id": "med:209459",
+      "id": "med:617310",
       "label": "Atorvastatin",
       "layer": "me",
       "kind": "Medication",
@@ -313,7 +313,7 @@
       "color": "#c4b5fd",
       "title": "Atorvastatin 20 mg oral tablet",
       "sub": "FHIR R4 MedicationRequest",
-      "facts": [["RxNorm", "209459"]]
+      "facts": [["RxNorm", "617310"]]
     },
     {
       "id": "rec:0",
@@ -2886,21 +2886,21 @@
       "distance": 45
     },
     {
-      "source": "med:197361",
+      "source": "med:314076",
       "target": "cond:38341003",
       "kind": "treats",
       "color": "#a78bfa",
       "distance": 45
     },
     {
-      "source": "med:308460",
+      "source": "med:2123111",
       "target": "cond:195967001",
       "kind": "treats",
       "color": "#a78bfa",
       "distance": 45
     },
     {
-      "source": "med:209459",
+      "source": "med:617310",
       "target": "risk:cardiovascular",
       "kind": "treats",
       "color": "#a78bfa",

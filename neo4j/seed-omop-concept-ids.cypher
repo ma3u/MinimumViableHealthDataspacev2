@@ -158,7 +158,12 @@ UNWIND [
   {code: '1598339', omop: 45892703, name: 'ethanol 0.523 ML/ML Topical Gel'},
   {code: '2123111', omop: 1511248, name: 'NDA020503 200 ACTUAT albuterol 0.09 MG/ACTUAT Metered Dose Inhaler'},
   {code: '2553601', omop: 1537598, name: '0.5 ML semaglutide 1 MG/ML Auto-Injector'},
-  {code: '2601743', omop: 780255, name: '0.5 ML tirzepatide 10 MG/ML Auto-Injector'}
+  {code: '2601743', omop: 780255, name: '0.5 ML tirzepatide 10 MG/ML Auto-Injector'},
+  {code: '314077', omop: 19080129, name: 'lisinopril 20 MG Oral Tablet'},
+  {code: '854905', omop: 40162878, name: 'bisoprolol fumarate 5 MG Oral Tablet'},
+  {code: '617311', omop: 1545996, name: 'atorvastatin 40 MG Oral Tablet'},
+  {code: '861004', omop: 40164897, name: 'metformin hydrochloride 1000 MG Oral Tablet'}
+
 ] AS m
 CALL (m) {
   MATCH (r:RxNormConcept) WHERE toString(r.rxcui) = m.code

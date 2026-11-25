@@ -143,16 +143,16 @@
                 "reference": "urn:uuid:de07231c-26d0-86ad-be96-d5fb28017874"
               },
               {
-                "reference": "urn:uuid:03490597-c854-88c8-a3e6-0252a7763d53"
+                "reference": "urn:uuid:146cf1a1-f42f-8719-a0be-5c5936cb5856"
               },
               {
-                "reference": "urn:uuid:1fd066e9-80d7-8b56-90df-3da90ed80157"
+                "reference": "urn:uuid:775987a4-2e88-80e1-be15-9524ca83a10a"
               },
               {
                 "reference": "urn:uuid:282d9411-e911-87a5-a147-2671b6780629"
               },
               {
-                "reference": "urn:uuid:45108799-eba6-88f1-90dd-75f3313030d7"
+                "reference": "urn:uuid:68ed8e40-d803-842b-a234-811b140152b3"
               }
             ]
           },
@@ -815,10 +815,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:03490597-c854-88c8-a3e6-0252a7763d53",
+      "fullUrl": "urn:uuid:146cf1a1-f42f-8719-a0be-5c5936cb5856",
       "resource": {
         "resourceType": "MedicationRequest",
-        "id": "03490597-c854-88c8-a3e6-0252a7763d53",
+        "id": "146cf1a1-f42f-8719-a0be-5c5936cb5856",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
@@ -827,7 +827,7 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "med-p1-308460"
+            "value": "med-p1-2123111"
           }
         ],
         "status": "active",
@@ -836,7 +836,7 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "308460",
+              "code": "2123111",
               "display": "Salbutamol 100 mcg inhaler"
             }
           ],
@@ -849,10 +849,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1fd066e9-80d7-8b56-90df-3da90ed80157",
+      "fullUrl": "urn:uuid:775987a4-2e88-80e1-be15-9524ca83a10a",
       "resource": {
         "resourceType": "MedicationRequest",
-        "id": "1fd066e9-80d7-8b56-90df-3da90ed80157",
+        "id": "775987a4-2e88-80e1-be15-9524ca83a10a",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
@@ -861,7 +861,7 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "med-p1-197361"
+            "value": "med-p1-314076"
           }
         ],
         "status": "active",
@@ -870,7 +870,7 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "197361",
+              "code": "314076",
               "display": "Lisinopril 10 mg oral tablet"
             }
           ],
@@ -917,10 +917,10 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:45108799-eba6-88f1-90dd-75f3313030d7",
+      "fullUrl": "urn:uuid:68ed8e40-d803-842b-a234-811b140152b3",
       "resource": {
         "resourceType": "MedicationRequest",
-        "id": "45108799-eba6-88f1-90dd-75f3313030d7",
+        "id": "68ed8e40-d803-842b-a234-811b140152b3",
         "meta": {
           "profile": [
             "http://hl7.eu/fhir/eps/StructureDefinition/medicationrequest-obl-eu-eps"
@@ -929,7 +929,7 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "med-p1-209459"
+            "value": "med-p1-617310"
           }
         ],
         "status": "active",
@@ -938,7 +938,7 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "209459",
+              "code": "617310",
               "display": "Atorvastatin 20 mg oral tablet"
             }
           ],

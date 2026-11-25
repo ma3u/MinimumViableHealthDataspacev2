@@ -16,7 +16,7 @@
           "cardiology",
           "sleep"
         ],
-        "interestsChosenAt": "2026-11-19T16:25:33.946000000Z",
+        "interestsChosenAt": "2026-11-23T10:33:53.221000000Z",
         "name": "Maria Schmidt",
         "resourceId": "P1"
       },
@@ -261,30 +261,30 @@
         {
           "type": "MedicationRequest",
           "properties": {
-            "code": "197361",
+            "code": "2123111",
             "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
-            "date": "2015-11-02",
-            "display": "Lisinopril 10 mg oral tablet",
+            "date": "2009-02-27",
+            "display": "Salbutamol 100 mcg inhaler",
             "fictional": true,
             "intent": "order",
-            "medicationCode": "197361",
-            "name": "Lisinopril 10 mg oral tablet",
-            "resourceId": "med-p1-197361",
+            "medicationCode": "2123111",
+            "name": "Salbutamol 100 mcg inhaler",
+            "resourceId": "med-p1-2123111",
             "status": "active"
           }
         },
         {
           "type": "MedicationRequest",
           "properties": {
-            "code": "209459",
+            "code": "314076",
             "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
-            "date": "2024-09-12",
-            "display": "Atorvastatin 20 mg oral tablet",
+            "date": "2015-11-02",
+            "display": "Lisinopril 10 mg oral tablet",
             "fictional": true,
             "intent": "order",
-            "medicationCode": "209459",
-            "name": "Atorvastatin 20 mg oral tablet",
-            "resourceId": "med-p1-209459",
+            "medicationCode": "314076",
+            "name": "Lisinopril 10 mg oral tablet",
+            "resourceId": "med-p1-314076",
             "status": "active"
           }
         },
@@ -949,7 +949,7 @@
         {
           "type": "MedicationRequest",
           "properties": {
-            "code": "197381",
+            "code": "966221",
             "display": "Levothyroxine 50 mcg Tab",
             "id": "rx-2000-197381",
             "status": "active"
@@ -1073,7 +1073,7 @@
         {
           "type": "MedicationRequest",
           "properties": {
-            "code": "1861634",
+            "code": "1545658",
             "display": "Empagliflozin 10 mg Oral Tab",
             "id": "rx-2008-1861634",
             "status": "active"
@@ -1082,7 +1082,7 @@
         {
           "type": "MedicationRequest",
           "properties": {
-            "code": "197884",
+            "code": "311041",
             "display": "Insulin Glargine 100 U/mL",
             "id": "rx-2008-197884",
             "status": "active"
