@@ -2707,6 +2707,106 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "503": { description: The SPE workspace is not connected }
 
+  /api/spe-imports/staged:
+    get:
+      tags: [Transfers]
+      summary: Imports waiting for the access body's review
+      x-required-roles: [HDAB_AUTHORITY, EDC_ADMIN]
+      description: >-
+        #1236, draft SPE implementing act Art. 4. What data users imported
+        into a workspace waits in its staging area until the health data
+        access body approves it: which transfer, from which provider, by whom,
+        how many records of which type. Never the data. A workspace that does
+        not answer is listed in `unreachable`.
+      responses:
+        "200":
+          description: The staged imports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  staged:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        importId: { type: string }
+                        speId: { type: string }
+                        datasetId: { type: string }
+                        transferId: { type: string }
+                        assetId: { type: string }
+                        provider: { type: string }
+                        consumer: { type: string }
+                        importedBy: { type: string }
+                        pseudonymised: { type: boolean }
+                        overwrite: { type: boolean }
+                        records: { type: integer }
+                        byType:
+                          type: object
+                          additionalProperties: { type: integer }
+                        stagedAt: { type: string, format: date-time }
+                  unreachable: { type: array, items: { type: string } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "502": { description: The SPE workspaces did not answer }
+
+  /api/spe-imports/staged/{importId}/review:
+    post:
+      tags: [Transfers]
+      summary: Approve or refuse a staged import
+      x-required-roles: [HDAB_AUTHORITY, EDC_ADMIN]
+      description: >-
+        #1236, draft SPE implementing act Art. 4(2), (3). The review is
+        written on the admin audit chain first (fail closed, 503 when it
+        cannot be); approval places the data in the workspace as an import,
+        a refusal removes it and needs a reason.
+      parameters:
+        - name: importId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [speId, decision]
+              properties:
+                speId: { type: string, enum: [SPE-1, SPE-2] }
+                decision: { type: string, enum: [approve, reject] }
+                reason: { type: string }
+      responses:
+        "200":
+          description: Approved (the import's outcome) or refused
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  approved: { type: boolean }
+                  rejected: { type: boolean }
+                  importId: { type: string }
+                  speId: { type: string }
+                  datasetId: { type: string }
+                  records: { type: integer }
+                  relationships: { type: integer }
+        "400":
+          {
+            description: Unknown SPE,
+            import id or decision,
+            or a refusal without reason,
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { description: No such staged import }
+        "409": { description: The workspace holds this transfer already }
+        "503":
+          {
+            description: The review could not be audited,
+            or the workspace does not answer,
+          }
   /api/agreements/{id}:
     get:
       tags: [Transfers]

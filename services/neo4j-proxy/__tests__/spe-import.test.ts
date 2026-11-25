@@ -40,6 +40,13 @@ vi.mock("neo4j-driver", () => ({
   },
 }));
 
+const appendAdminAudit = vi.fn();
+vi.mock("../src/admin-audit.js", () => ({
+  ADMIN_CHAIN: "admin",
+  appendAdminAudit: (...a: unknown[]) => appendAdminAudit(...a),
+  adminAuditInput: () => null,
+}));
+
 const { app } = await import("../src/index.js");
 import supertest from "supertest";
 const request = supertest(app);
@@ -172,9 +179,11 @@ describe("POST /spe/:speId/import", () => {
   beforeEach(() => {
     speDrivers.mockReset();
     resetSpeActivity();
+    appendAdminAudit.mockReset();
+    appendAdminAudit.mockResolvedValue({ chain: "admin", seq: 1, hash: "h" });
   });
 
-  it("writes the dataset into the chosen SPE and says what it holds", async () => {
+  it("stages the data in the chosen SPE for the access body, audited first (#1236)", async () => {
     const spe1 = fakeDriver();
     const spe2 = fakeDriver();
     speDrivers.mockReturnValue([
@@ -186,27 +195,49 @@ describe("POST /spe/:speId/import", () => {
       datasetId: "tp-1",
       transferId: "tp-1",
       assetId: "fhir-patient-search",
+      importedBy: "researcher@pharmaco.de",
+      actorRole: "DATA_USER",
       pseudonymised: true,
       bundle: BUNDLE,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     expect(res.body).toMatchObject({
+      staged: true,
       datasetId: "tp-1",
       speId: "SPE-2",
       records: 3,
-      relationships: 2,
       byType: { Patient: 1, Condition: 1, Observation: 1 },
     });
     expect(spe1.run).not.toHaveBeenCalled();
-    // The first call is the duplicate check, then the write.
-    const [cypher, params] = spe2.run.mock.calls[1];
-    expect(cypher).toContain("MERGE (d)-[:LOADED_INTO]->(w)");
-    expect(params.meta).toMatchObject({ speId: "SPE-2", pseudonymised: true });
-    expect(spe2.session.close).toHaveBeenCalled();
-    // The import counts as use, so the idle stop (ADR-072) waits for it.
+    const cyphers = spe2.run.mock.calls.map(([c]: [string]) => c);
+    expect(
+      cyphers.some((c: string) => c.includes("CREATE (s:StagedImport")),
+    ).toBe(true);
+    // Nothing joins the workspace's graph before the review.
+    expect(cyphers.some((c: string) => c.includes("LOADED_INTO"))).toBe(false);
+    expect(appendAdminAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: "spe-import",
+        outcome: "success",
+        actorId: "researcher@pharmaco.de",
+        actorRole: "DATA_USER",
+        target: res.body.importId,
+      }),
+    );
     expect(speLastQueriedAt("SPE-2")).not.toBeNull();
     expect(speLastQueriedAt("SPE-1")).toBeNull();
+  });
+
+  it("stages nothing when the import cannot be audited", async () => {
+    const spe1 = fakeDriver();
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+    appendAdminAudit.mockRejectedValueOnce(new Error("chain down"));
+    const res = await request
+      .post("/spe/SPE-1/import")
+      .send({ datasetId: "tp-1", bundle: BUNDLE });
+    expect(res.status).toBe(503);
+    expect(spe1.run).not.toHaveBeenCalled();
   });
 
   it("refuses a second import into the same SPE unless asked to overwrite", async () => {
@@ -237,27 +268,70 @@ describe("POST /spe/:speId/import", () => {
       records: 3,
       importedAt: "2026-11-05T19:00:00Z",
     });
-    expect(
-      spe1.run.mock.calls.some(([c]: [string]) =>
-        c.includes("MERGE (d)-[:LOADED_INTO]"),
-      ),
-    ).toBe(false);
 
     spe1.run.mockClear();
     const replaced = await request
       .post("/spe/SPE-1/import")
       .send({ datasetId: "tp-1", bundle: BUNDLE, overwrite: true });
+    expect(replaced.status).toBe(202);
+    expect(replaced.body.overwrite).toBe(true);
+  });
 
-    expect(replaced.status).toBe(200);
+  it("writes a staged import into the workspace once the access body approves it", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockImplementation(async (cypher: string) =>
+      cypher.includes("RETURN s {.*} AS s")
+        ? {
+            records: [
+              row({
+                s: {
+                  importId: "imp-12345678",
+                  speId: "SPE-1",
+                  datasetId: "tp-1",
+                  transferId: "tp-1",
+                  pseudonymised: true,
+                  overwrite: false,
+                  bundle: JSON.stringify(BUNDLE),
+                },
+              }),
+            ],
+          }
+        : { records: [] },
+    );
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+
+    const res = await request.post("/spe/SPE-1/staged/imp-12345678/approve");
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      approved: true,
+      records: 3,
+      speId: "SPE-1",
+    });
     const cyphers = spe1.run.mock.calls.map(([c]: [string]) => c);
-    const deleted = cyphers.findIndex((c: string) =>
-      c.includes("DETACH DELETE x"),
+    expect(cyphers.some((c: string) => c.includes("LOADED_INTO"))).toBe(true);
+    expect(cyphers.some((c: string) => /DELETE s/.test(c))).toBe(true);
+  });
+
+  it("removes a staged import the access body refuses, and answers 404 for an unknown one", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockImplementation(async (cypher: string) =>
+      cypher.includes("RETURN s {.*} AS s")
+        ? { records: [row({ s: { importId: "imp-12345678" } })] }
+        : { records: [] },
     );
-    const written = cyphers.findIndex((c: string) =>
-      c.includes("MERGE (d)-[:LOADED_INTO]"),
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+    const res = await request.post("/spe/SPE-1/staged/imp-12345678/reject");
+    expect(res.status).toBe(200);
+    expect(res.body.rejected).toBe(true);
+    expect(
+      spe1.run.mock.calls.some(([c]: [string]) => c.includes("LOADED_INTO")),
+    ).toBe(false);
+
+    spe1.run.mockResolvedValue({ records: [] });
+    const missing = await request.post(
+      "/spe/SPE-1/staged/imp-87654321/approve",
     );
-    expect(deleted).toBeGreaterThan(-1);
-    expect(written).toBeGreaterThan(deleted);
+    expect(missing.status).toBe(404);
   });
 
   it("answers 422 when the data is not a bundle, and writes nothing", async () => {

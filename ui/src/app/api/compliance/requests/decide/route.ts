@@ -6,6 +6,11 @@ import { PUBLISH_WORKING_DAYS, addWorkingDays } from "@/lib/permits";
 import { REQUEST_FEE_EUR } from "@/lib/fees";
 import { toStatisticalAnswer, type NlqAnswer } from "@/lib/statistics";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
+import {
+  auditRole,
+  auditUnavailableResponse,
+  recordAdminEvent,
+} from "@/lib/admin-audit";
 
 export const dynamic = "force-dynamic";
 
@@ -93,6 +98,24 @@ export async function POST(req: NextRequest) {
       );
     }
     decidedUnder = "Art. 72";
+  }
+
+  // On the admin audit chain before it takes effect (#1236, draft Art. 16(3)(f)).
+  try {
+    await recordAdminEvent({
+      event: "request-decision",
+      outcome: "success",
+      target: requestId,
+      detail: decision,
+      ...(justification ? { reason: String(justification) } : {}),
+      actorId:
+        auth.session.user.email ??
+        auth.session.user.name ??
+        auth.session.user.id,
+      actorRole: auditRole(auth.session.roles),
+    });
+  } catch {
+    return auditUnavailableResponse();
   }
 
   const found = await runQuery<{

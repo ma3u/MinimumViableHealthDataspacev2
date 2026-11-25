@@ -4,6 +4,7 @@ import { EDC_CONTEXT } from "@/lib/edc/client";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
+import { auditRole } from "@/lib/admin-audit";
 import {
   speColdStartGate,
   spePowerAvailable,
@@ -166,7 +167,8 @@ export async function POST(
           assetId: String(transfer.assetId ?? ""),
           provider,
           consumer: participantId,
-          importedBy: auth.session.user.name ?? "",
+          importedBy: auth.session.user.email ?? auth.session.user.name ?? "",
+          actorRole: auditRole(auth.session.roles),
           pseudonymised,
           // The SPE refuses a transfer it holds already unless told to replace it.
           overwrite: body.overwrite === true,
@@ -244,11 +246,13 @@ export async function POST(
     records: Number(answer.records ?? 0),
     relationships: Number(answer.relationships ?? 0),
     byType: (answer.byType as Record<string, number>) ?? {},
-    importedAt: String(answer.importedAt ?? ""),
+    importedAt: String(answer.importedAt ?? answer.stagedAt ?? ""),
     pseudonymised,
     untilStopped: spePowerAvailable(),
     closed,
     graphUrl: importViewUrl(id, speId),
+    staged: answer.staged === true,
+    ...(answer.importId ? { importId: String(answer.importId) } : {}),
   };
   return NextResponse.json(result);
 }

@@ -58,6 +58,8 @@ test.describe("Issue #206 · revocation and the public register", () => {
           purpose: "SCIENTIFIC_RESEARCH",
           justification: "Journey 41: cohort analysis, aggregate output only.",
           periodMonths: 6,
+          // The persons who will access the data, checked at every query (#1236).
+          namedPersons: "Research Analyst (researcher@pharmaco.de)",
         },
       },
     );

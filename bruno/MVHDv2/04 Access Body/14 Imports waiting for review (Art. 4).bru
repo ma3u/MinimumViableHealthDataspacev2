@@ -1,0 +1,34 @@
+meta {
+  name: 14 Imports waiting for review (Art. 4)
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/spe-imports/staged
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+tests {
+  const body = res.getBody() || {};
+  test("lists the staged imports, never their data (#1236)", function () {
+    expect(res.getStatus(), body.error || "").to.equal(200);
+    expect(body.staged).to.be.an("array");
+    expect(body.unreachable).to.be.an("array");
+    for (const s of body.staged) {
+      expect(s).to.have.property("importId");
+      expect(s).to.not.have.property("bundle");
+    }
+  });
+}
+
+docs {
+  The access body's review list (#1236, draft SPE implementing act Art. 4): the imports that wait
+  in a workspace's staging area, with who imported what, from which provider, and how many
+  records of which type. The data itself stays in the workspace.
+}

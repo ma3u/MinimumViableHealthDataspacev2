@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import { userToParticipantId } from "@/lib/odrl-engine";
+import {
+  auditRole,
+  auditUnavailableResponse,
+  recordAdminEvent,
+  recordAdminEventAfter,
+} from "@/lib/admin-audit";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +52,24 @@ export async function POST(req: NextRequest) {
   const officer = session.user.name ?? session.user.email ?? session.user.id;
   const revokedAt = new Date();
 
+  // On the admin audit chain before it happens (#1236, draft Art. 16(3)(f)).
+  const actor = {
+    actorId: session.user.email ?? session.user.name ?? session.user.id,
+    actorRole: auditRole(session.roles),
+  };
+  try {
+    await recordAdminEvent({
+      event: "permit-revoke",
+      outcome: "success",
+      target: permitId,
+      detail: "REVOKED",
+      reason,
+      ...actor,
+    });
+  } catch {
+    return auditUnavailableResponse();
+  }
+
   const rows = await runQuery<{
     permitId: string;
     applicationId: string | null;
@@ -78,6 +102,13 @@ export async function POST(req: NextRequest) {
   );
 
   if (rows.length === 0) {
+    await recordAdminEventAfter({
+      event: "permit-revoke",
+      outcome: "failure",
+      target: permitId,
+      reason: "no approved permit with this id",
+      ...actor,
+    });
     return NextResponse.json(
       { error: `No approved data permit ${permitId} to revoke` },
       { status: 404 },

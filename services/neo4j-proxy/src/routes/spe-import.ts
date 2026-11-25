@@ -12,9 +12,19 @@ import {
   ImportShapeError,
   readExisting,
   readImportGraph,
-  writeImport,
   type ImportRequest,
 } from "../spe-import.js";
+import { randomUUID } from "node:crypto";
+import {
+  AlreadyStagedError,
+  NotStagedError,
+  approveStaged,
+  listStaged,
+  rejectStaged,
+  stageImport,
+} from "../spe-staging.js";
+import { appendAdminAudit } from "../admin-audit.js";
+import { logger } from "../logger.js";
 
 // ---- A transfer's data into an SPE workspace (#876) -------------------------
 // The target checks and the answers for a workspace that does not answer are
@@ -78,9 +88,13 @@ const text = (v: unknown, max = 512) =>
  * POST /spe/:speId/import
  *
  * Body {datasetId, transferId, agreementId, assetId, provider, consumer,
- * importedBy, pseudonymised, bundle}. The UI's
+ * importedBy, actorRole, pseudonymised, overwrite, bundle}. The UI's
  * POST /api/transfers/[id]/import sends it after pulling the transfer's
- * data; answers {datasetId, speId, records, relationships, byType, importedAt}.
+ * data. The data is checked (shape, size, not held already) and kept in the
+ * workspace's staging area until the access body approves it (#1236, draft
+ * SPE act Art. 4); the import is on the admin audit chain first (Art.
+ * 16(3)(c)). Answers 202 {staged: true, importId, datasetId, speId, records,
+ * byType, stagedAt}.
  */
 app.post(
   "/spe/:speId/import",
@@ -101,21 +115,162 @@ app.post(
       importedBy: text(body.importedBy),
       pseudonymised: body.pseudonymised === true,
     };
+    const importId = randomUUID();
+    const actor = {
+      actorId: meta.importedBy || meta.consumer || "unknown",
+      actorRole: [
+        "EDC_ADMIN",
+        "HDAB_AUTHORITY",
+        "DATA_USER",
+        "DATA_HOLDER",
+      ].includes(String(body.actorRole))
+        ? String(body.actorRole)
+        : "DATA_USER",
+    };
+    try {
+      await appendAdminAudit({
+        event: "spe-import",
+        outcome: "success",
+        target: importId,
+        detail: `${speId} ${datasetId}`.slice(0, 200),
+        ...actor,
+      });
+    } catch (err) {
+      logger.error({ err, speId }, "import audit write failed");
+      res.status(503).json({
+        error:
+          "The audit record could not be written, so the import was not staged.",
+      });
+      return;
+    }
     const session = driver.session({ database: "neo4j" });
     try {
-      const written = await writeImport(
+      const staged = await stageImport(
         session,
         meta,
         body.bundle,
-        undefined,
         body.overwrite === true,
+        undefined,
+        importId,
       );
       // An import is use: the idle stop (ADR-072) counts it as a query.
       noteSpeQueried([speId]);
-      res.json(written);
+      res.status(202).json({ staged: true, ...staged });
     } catch (err) {
+      await appendAdminAudit({
+        event: "spe-import",
+        outcome: "failure",
+        target: importId,
+        reason: err instanceof Error ? err.message : String(err),
+        ...actor,
+      }).catch(() => undefined);
       if (err instanceof ImportShapeError) {
         res.status(422).json({ error: err.message });
+        return;
+      }
+      if (err instanceof AlreadyImportedError) {
+        res.status(409).json({ error: err.message, existing: err.existing });
+        return;
+      }
+      if (err instanceof AlreadyStagedError) {
+        res.status(409).json({ error: err.message, staged: err.existing });
+        return;
+      }
+      if (notAnswering(err)) {
+        unavailable(res, `${speId} does not answer; it may be starting`);
+        return;
+      }
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+/**
+ * GET /spe/staged
+ *
+ * The imports that wait for the access body's review, from every connected
+ * workspace: what, from whom, how many records of which type. Never the data.
+ * {staged: [...], unreachable: [speIds]}.
+ */
+app.get("/spe/staged", async (_req: Request, res: Response) => {
+  const reads = await Promise.all(
+    getSpeDrivers()
+      .filter(({ label }) => SPE_IDS.has(label))
+      .map(async ({ label, driver }) => {
+        const session = driver.session({
+          database: "neo4j",
+          defaultAccessMode: "READ",
+        });
+        try {
+          return {
+            label,
+            staged: await withTimeout(
+              listStaged(session),
+              SPE_CONNECT_TIMEOUT_MS,
+              `${label} staged imports`,
+            ),
+          };
+        } catch {
+          return { label, staged: null };
+        } finally {
+          await withTimeout(session.close(), 2000, "SPE session close").catch(
+            () => undefined,
+          );
+        }
+      }),
+  );
+  res.json({
+    staged: reads.flatMap((r) => r.staged ?? []),
+    unreachable: reads.filter((r) => !r.staged).map((r) => r.label),
+  });
+});
+
+/**
+ * POST /spe/:speId/staged/:importId/approve | /reject
+ *
+ * The access body's decision on a staged import. The UI writes the review on
+ * the admin audit chain before it calls (fail closed). Approve writes the
+ * data into the workspace as an import and answers the import's outcome;
+ * reject removes the staged data and answers {rejected: true}.
+ */
+app.post(
+  "/spe/:speId/staged/:importId/:decision",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const speId = String(req.params.speId);
+    const importId = String(req.params.importId);
+    const decision = String(req.params.decision);
+    if (!["approve", "reject"].includes(decision)) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+    if (!SPE_IDS.has(speId) || !/^[A-Za-z0-9-]{8,64}$/.test(importId)) {
+      res
+        .status(400)
+        .json({ error: "A known SPE and a staged import id are required" });
+      return;
+    }
+    const driver = workspace(speId);
+    if (!driver) {
+      unavailable(res, `${speId} is not connected to the hub`);
+      return;
+    }
+    const session = driver.session({ database: "neo4j" });
+    try {
+      if (decision === "approve") {
+        const outcome = await approveStaged(session, importId);
+        noteSpeQueried([speId]);
+        res.json({ approved: true, ...outcome });
+      } else {
+        await rejectStaged(session, importId);
+        res.json({ rejected: true, importId, speId });
+      }
+    } catch (err) {
+      if (err instanceof NotStagedError) {
+        res
+          .status(404)
+          .json({ error: `No staged import ${importId} in ${speId}` });
         return;
       }
       if (err instanceof AlreadyImportedError) {

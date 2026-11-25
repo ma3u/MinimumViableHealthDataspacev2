@@ -18,6 +18,15 @@
  * stubbed: it answers the managed identity endpoint, ARM and the proxy.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+// Admin actions go on the audit chain first (#1236); the chain is not under test here.
+const adminAudit = vi.hoisted(() => ({
+  recordAdminEvent: vi.fn(async () => undefined),
+  recordAdminEventAfter: vi.fn(async () => undefined),
+}));
+vi.mock("@/lib/admin-audit", async (orig) => ({
+  ...(await orig<typeof import("@/lib/admin-audit")>()),
+  ...adminAudit,
+}));
 import { getServerSession } from "next-auth/next";
 import { NextRequest } from "next/server";
 

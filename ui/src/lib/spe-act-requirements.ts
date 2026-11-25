@@ -83,9 +83,9 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 4",
     requirement:
       "A separate staging area where holders and users import data and code, checked and prepared by the access body first.",
-    demo: "Holders' data arrives encrypted and its fingerprint is part of the permit; a user's transfer can be imported into a workspace, checked for shape and size only, with no review by the access body.",
-    status: "partial",
-    evidence: [ADR_068, issue(915)],
+    demo: "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.",
+    status: "met",
+    evidence: [page("EHDS Approval", "/compliance"), ADR_068, issue(1236)],
   },
   {
     id: "verify-instance",
@@ -103,9 +103,9 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 5(3), (4)",
     requirement:
       "Only the persons named in the permit get in, through a secure interface, kept apart when one person holds several permits.",
-    demo: "Access is decided by role and by the user's organisation; the persons named in an application are recorded but not checked.",
-    status: "gap",
-    evidence: [issue(1132)],
+    demo: "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.",
+    status: "partial",
+    evidence: [page("EHDS Approval", "/compliance"), issue(1132)],
   },
   {
     id: "tools",
@@ -237,7 +237,7 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 16(1) to (3)",
     requirement:
       "Tamper-evident, write-once logs of sign-in, access, imports, processing, exports and administration.",
-    demo: "A hash-chained audit log of queries, attestation, key release, loading and deletion; sign-in, imports and administrative actions are not yet on it, and it is not in write-once storage.",
+    demo: "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.",
     status: "partial",
     evidence: [AUDIT, ADR_045],
   },

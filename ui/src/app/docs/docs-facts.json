@@ -378,6 +378,14 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/spe-imports/staged/[importId]/review",
+      "methods": ["POST"]
+    },
+    {
+      "path": "/api/spe-imports/staged",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/tasks",
       "methods": ["GET"]
     },
@@ -1498,8 +1506,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 99,
-    "operations": 129
+    "paths": 101,
+    "operations": 131
   },
   "workflowJobs": {
     "test.yml": [
@@ -1554,9 +1562,9 @@
     "/docs": "2026-11-10",
     "/docs/user-guide": "2026-11-24",
     "/docs/developer": "2026-11-24",
-    "/docs/developer/quality-gates": "2026-11-23",
-    "/docs/developer/api": "2026-11-23",
-    "/docs/developer/reference": "2026-11-23",
+    "/docs/developer/quality-gates": "2026-11-24",
+    "/docs/developer/api": "2026-11-24",
+    "/docs/developer/reference": "2026-11-24",
     "/docs/developer/[slug]": "2026-11-24",
     "/docs/architecture": "2026-11-24",
     "/docs/security": "2026-11-24",

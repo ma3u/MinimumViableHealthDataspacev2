@@ -178,5 +178,22 @@
   "Under a data permit, entries are kept until one year after it ends, at most five years and never less than one; without a permit, one year.": "Under a data permit, entries are kept until one year after it ends, at most five years and never less than one; without a permit, one year.",
   "Retention policy": "Retention policy",
   "Each workspace runs the query itself; a list of records about persons is never asked of a workspace, and only counts, masked per workspace, reach the coordinator.": "Each workspace runs the query itself; a list of records about persons is never asked of a workspace, and only counts, masked per workspace, reach the coordinator.",
-  "Federation rules": "Federation rules"
+  "Federation rules": "Federation rules",
+  "Approved: the data is in {spe}.": "Approved: the data is in {spe}.",
+  "Refused: the staged data was removed from {spe}.": "Refused: the staged data was removed from {spe}.",
+  "Imports waiting for review": "Imports waiting for review",
+  "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.": "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.",
+  "No import waits for review.": "No import waits for review.",
+  "{records} records for {spe}": "{records} records for {spe}",
+  "Transfer {transfer} from {provider}, imported by {who}": "Transfer {transfer} from {provider}, imported by {who}",
+  "pseudonymised": "pseudonymised",
+  "replaces an earlier import": "replaces an earlier import",
+  "Reason for the refusal": "Reason for the refusal",
+  "Refuse": "Refuse",
+  "Cancel": "Cancel",
+  "Approve": "Approve",
+  "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.",
+  "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.",
+  "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.",
+  "EHDS Approval": "EHDS Approval"
 }

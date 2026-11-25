@@ -17,6 +17,7 @@ import { IS_STATIC } from "@/lib/static-export";
 import { ApplicationPanel } from "./_components/ApplicationPanel";
 import { DecisionClock } from "./_components/DecisionClock";
 import { TrustedIssuers } from "./_components/TrustedIssuers";
+import { StagedImports } from "./_components/StagedImports";
 import { COMPLIANCE_LABELS } from "./_components/constants";
 import { complianceLevel, isUndecided, rowKey } from "./_components/helpers";
 import type {
@@ -750,6 +751,9 @@ export default function CompliancePage() {
           </div>
           <TrustedIssuers />
         </div>
+
+        {/* ── Imports waiting for the access body (#1236, draft SPE act Art. 4) ── */}
+        <StagedImports />
 
         {/* ── Phase 18: Trust Center Section ── */}
         <div

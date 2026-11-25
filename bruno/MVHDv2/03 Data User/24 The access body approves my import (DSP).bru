@@ -1,0 +1,44 @@
+meta {
+  name: 24 The access body approves my import (DSP)
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{baseUrl}}/api/spe-imports/staged/{{dspStagedImportId}}/review
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "speId": "SPE-1",
+    "decision": "approve"
+  }
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (!bru.getVar("dspStagedImportId")) {
+    test("SKIPPED: 23 staged nothing on this run, so there is nothing to review", function () {});
+  } else {
+    test("the access body's approval places the data in SPE-1 (#1236)", function () {
+      expect(res.getStatus(), body.error || "").to.equal(200);
+      expect(body.approved).to.equal(true);
+      expect(body.records, "nothing written").to.be.above(0);
+      expect(body.datasetId).to.equal(bru.getVar("dspStagedDatasetId"));
+    });
+    bru.setVar("dspImported", body.datasetId);
+  }
+}
+
+docs {
+  The access body's step in the data user's import (#1236, draft SPE implementing act Art. 4(2),
+  (3)): what a data user imports waits in the workspace's staging area until the health data
+  access body has checked it against the permit. Sent by the regulator; the review goes on the
+  admin audit chain first, then the workspace writes the data. 25 to 27 read the import after it.
+}

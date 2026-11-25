@@ -178,5 +178,22 @@
   "Under a data permit, entries are kept until one year after it ends, at most five years and never less than one; without a permit, one year.": "Unter einer Datengenehmigung werden Einträge bis ein Jahr nach ihrem Ende aufbewahrt, höchstens fünf Jahre und nie weniger als eines; ohne Datengenehmigung ein Jahr.",
   "Retention policy": "Aufbewahrungsrichtlinie",
   "Each workspace runs the query itself; a list of records about persons is never asked of a workspace, and only counts, masked per workspace, reach the coordinator.": "Jeder Workspace führt die Abfrage selbst aus; eine Liste von Datensätzen über Personen wird nie bei einem Workspace angefragt, und beim Koordinator kommen nur Zahlen an, pro Workspace maskiert.",
-  "Federation rules": "Föderationsregeln"
+  "Federation rules": "Föderationsregeln",
+  "Approved: the data is in {spe}.": "Freigegeben: Die Daten sind in {spe}.",
+  "Refused: the staged data was removed from {spe}.": "Abgelehnt: Die bereitgestellten Daten wurden aus {spe} entfernt.",
+  "Imports waiting for review": "Importe, die auf Prüfung warten",
+  "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.": "Was ein Gesundheitsdatennutzer in eine sichere Verarbeitungsumgebung einbringt, wartet in deren Bereitstellungsbereich, bis Sie es mit der Datengenehmigung abgeglichen haben. Geben Sie es frei, um es in den Workspace zu übernehmen, oder lehnen Sie es mit Begründung ab, um es zu entfernen. Jede Entscheidung wird in der Audit-Kette festgehalten.",
+  "No import waits for review.": "Kein Import wartet auf Prüfung.",
+  "{records} records for {spe}": "{records} Datensätze für {spe}",
+  "Transfer {transfer} from {provider}, imported by {who}": "Übertragung {transfer} von {provider}, importiert von {who}",
+  "pseudonymised": "pseudonymisiert",
+  "replaces an earlier import": "ersetzt einen früheren Import",
+  "Reason for the refusal": "Grund der Ablehnung",
+  "Refuse": "Ablehnen",
+  "Cancel": "Abbrechen",
+  "Approve": "Freigeben",
+  "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "Der Import eines Nutzers wartet im Bereitstellungsbereich des Workspaces, außerhalb seiner Daten, bis die Zugangsstelle für Gesundheitsdaten ihn auf der Seite EHDS-Genehmigung freigibt; eine Ablehnung entfernt ihn. Die Daten der Gesundheitsdateninhaber kommen verschlüsselt an, ihr Fingerabdruck ist Teil der Datengenehmigung.",
+  "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Nur die im Antrag zur Datengenehmigung genannten Personen dürfen unter ihr abfragen oder analysieren; ein Schlüssel pro Workspace dient noch mehreren Datengenehmigungen.",
+  "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "Ein verkettetes Audit-Protokoll von Abfragen, Attestierung, Schlüsselherausgabe, Laden, Löschen, Importen und Verwaltungsaktionen (Start, Stopp, Widerruf, Entscheidungen, Prüfungen); die Anmeldung steht noch nicht darin, und es liegt nicht in nur einmal beschreibbarem Speicher.",
+  "EHDS Approval": "EHDS-Genehmigung"
 }

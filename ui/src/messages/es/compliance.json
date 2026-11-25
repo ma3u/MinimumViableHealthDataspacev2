@@ -178,5 +178,22 @@
   "Under a data permit, entries are kept until one year after it ends, at most five years and never less than one; without a permit, one year.": "Con un permiso de datos, las entradas se conservan hasta un año después de su fin, como máximo cinco años y nunca menos de uno; sin permiso, un año.",
   "Retention policy": "Política de conservación",
   "Each workspace runs the query itself; a list of records about persons is never asked of a workspace, and only counts, masked per workspace, reach the coordinator.": "Cada espacio de trabajo ejecuta la consulta por sí mismo; nunca se pide a un espacio de trabajo una lista de registros sobre personas, y al coordinador solo llegan cifras, enmascaradas por espacio.",
-  "Federation rules": "Reglas de la federación"
+  "Federation rules": "Reglas de la federación",
+  "Approved: the data is in {spe}.": "Aprobado: los datos están en {spe}.",
+  "Refused: the staged data was removed from {spe}.": "Rechazado: los datos preparados se retiraron de {spe}.",
+  "Imports waiting for review": "Importaciones pendientes de revisión",
+  "What a data user brings into a secure processing environment waits in its staging area until you have checked it against the data permit. Approve it to place it in the workspace, or refuse it with a reason to remove it. Every decision is recorded on the audit chain.": "Lo que un usuario de datos de salud introduce en un entorno de tratamiento seguro espera en su zona de preparación hasta que usted lo haya comprobado frente al permiso de datos. Apruébelo para colocarlo en el espacio de trabajo, o recházelo con un motivo para retirarlo. Cada decisión queda registrada en la cadena de auditoría.",
+  "No import waits for review.": "Ninguna importación espera revisión.",
+  "{records} records for {spe}": "{records} registros para {spe}",
+  "Transfer {transfer} from {provider}, imported by {who}": "Transferencia {transfer} de {provider}, importada por {who}",
+  "pseudonymised": "seudonimizado",
+  "replaces an earlier import": "sustituye a una importación anterior",
+  "Reason for the refusal": "Motivo del rechazo",
+  "Refuse": "Rechazar",
+  "Cancel": "Cancelar",
+  "Approve": "Aprobar",
+  "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "La importación de un usuario espera en la zona de preparación del espacio de trabajo, fuera de sus datos, hasta que el organismo de acceso a datos de salud la aprueba en la página Aprobación EEDS; un rechazo la retira. Los datos de los tenedores llegan cifrados y su huella forma parte del permiso.",
+  "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Solo las personas nombradas en la solicitud del permiso pueden consultar o analizar con él; una clave por espacio de trabajo aún sirve a varios permisos.",
+  "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "Un registro de auditoría encadenado de consultas, atestación, entrega de clave, carga, borrado, importaciones y acciones de administración (arranque, parada, revocación, decisiones, revisiones); el inicio de sesión aún no figura, y no está en almacenamiento de escritura única.",
+  "EHDS Approval": "Aprobación EEDS"
 }

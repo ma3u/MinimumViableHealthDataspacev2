@@ -5,6 +5,8 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/graph": "/mock/graph.json",
   "/api/compliance": "/mock/compliance.json",
   "/api/compliance/tck": "/mock/compliance_tck.json",
+  // Imports waiting for the access body's review (#1236)
+  "/api/spe-imports/staged": "/mock/spe_imports_staged.json",
   "/api/permits": "/mock/permits.json",
   "/api/activity-report": "/mock/activity_report.json",
   "/api/compliance/requests": "/mock/requests.json",
