@@ -3,6 +3,29 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-25: Event Hubs answers a consumer group's offsets to a consumer, not to the admin client
+
+The first Kafka-PUSH on Azure moved all 121 records of the one-hour ECG over
+`evhns-mvhd-b53a0449` into SPE-1's inbox in 4 s, and the transfer stayed
+`STARTED`. The provider reports completion only once the consumer's group has
+committed the end of the topic, and it read that offset with
+`AdminClient.listConsumerGroupOffsets`. Event Hubs answers that call with
+nothing, for each of the three logins; `kafka-consumer-groups.sh --list` and
+`--describe` show no group at all. After 13 minutes the provider gave up,
+reported the flow errored and deleted the topic. On compose Apache Kafka
+answers the call, so every compose run had passed.
+
+A probe on a throwaway topic showed what does work: a `KafkaConsumer` of the
+same group, never subscribed, gets the offset back from `committed()`, also
+with a login other than the one that committed.
+
+Fix: `KafkaTransport.consumed()` asks through such a consumer, never through
+`AdminClient`.
+
+Rule: Event Hubs speaks the Kafka protocol for producing and consuming, not
+all of the admin API. Before the provider relies on a broker call, run it
+once against the namespace (runbook dataplane-on-azure, "ADR-096 level 3").
+
 ## 2026-11-24: after a restart of the data plane the proxy refused its tokens for up to 30 s
 
 On compose the push data plane generates its signing key at each start
