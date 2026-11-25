@@ -105,10 +105,10 @@ SET p.name = 'DiagnosticReport (MII KDS Laborbefund)',
     p.baseResource = 'DiagnosticReport',
     p.fhirVersion = 'R4',
     p.tested = 2,
-    p.passed = 0,
-    p.failed = 2,
-    p.topIssues = ['2x DiagnosticReport: DiagnosticReport.basedOn: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)', '2x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)', '2x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi', '1x DiagnosticReport.code: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in'],
-    p.coverage = 'none';
+    p.passed = 1,
+    p.failed = 1,
+    p.topIssues = ['1x DiagnosticReport.code: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in', '1x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi'],
+    p.coverage = 'partial';
 MATCH (p:NationalProfile {profileId: 'kds-lab-diagnostic-report-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-lab-diagnostic-report-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);
 MATCH (p:NationalProfile {profileId: 'kds-lab-diagnostic-report-de'}), (e:EEHRxFProfile {profileId: 'diagnostic-report-lab-eu'}) MERGE (p)-[:CORRESPONDS_TO]->(e);
@@ -120,10 +120,10 @@ SET p.name = 'Observation (MII KDS Laboruntersuchung)',
     p.baseResource = 'Observation',
     p.fhirVersion = 'R4',
     p.tested = 37,
-    p.passed = 0,
-    p.failed = 37,
-    p.topIssues = ['37x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '37x Observation.category[n]: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad', '37x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '37x Observation: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th', '1x Observation.effective.ofType(Period): The Profile \'...\' definition allows for the type dateTime but found type Period'],
-    p.coverage = 'none';
+    p.passed = 16,
+    p.failed = 21,
+    p.topIssues = ['20x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '20x Observation.category[n]: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad', '20x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '20x Observation: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th', '1x Observation.effective.ofType(Period): The Profile \'...\' definition allows for the type dateTime but found type Period'],
+    p.coverage = 'partial';
 MATCH (p:NationalProfile {profileId: 'kds-lab-observation-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-lab-observation-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);
 MATCH (p:NationalProfile {profileId: 'kds-lab-observation-de'}), (e:EEHRxFProfile {profileId: 'observation-results-lab-eu'}) MERGE (p)-[:CORRESPONDS_TO]->(e);

@@ -9,7 +9,8 @@
         "id": "P1",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -174,6 +175,24 @@
             "valueCode": "device-weekly-mean"
           }
         ],
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "act-p1-2025-01-05",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -226,6 +245,24 @@
             "valueCode": "device-weekly-mean"
           }
         ],
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "act-p1-2025-01-12",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -272,6 +309,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "dr-ecg-p1-2026-03-04-8625-6",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "dr-ecg-p1-2026-03-04-8625-6",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -332,6 +387,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "dr-ecg-p1-2026-03-04-8632-2",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "dr-ecg-p1-2026-03-04-8632-2",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -392,6 +465,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "dr-ecg-p1-2026-03-04-8867-4",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "dr-ecg-p1-2026-03-04-8867-4",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -457,6 +548,24 @@
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
           ]
         },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p1-2089-1-2024-09-12",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -465,6 +574,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -522,6 +636,24 @@
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
           ]
         },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p1-2089-1-2025-01-20",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -530,6 +662,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -582,6 +719,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2024-09-12",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p1-39156-5-2024-09-12",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -644,7 +799,8 @@
         "id": "med-p1-2123111",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -679,7 +835,8 @@
         "id": "med-p1-314076",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -944,7 +1101,8 @@
         "id": "P2",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -1109,6 +1267,24 @@
             "valueCode": "device-weekly-mean"
           }
         ],
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "act-p2-2025-01-05",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1159,6 +1335,24 @@
           {
             "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
             "valueCode": "device-weekly-mean"
+          }
+        ],
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "act-p2-2025-01-12",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
           }
         ],
         "status": "final",
@@ -1212,6 +1406,24 @@
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
           ]
         },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p2-22748-8-2025-03-04",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1220,6 +1432,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -1277,6 +1494,24 @@
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
           ]
         },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p2-22748-8-2025-09-16",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1285,6 +1520,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -1337,6 +1577,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p2-39156-5-2025-03-04",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p2-39156-5-2025-03-04",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1397,6 +1655,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p2-39156-5-2025-09-16",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-p2-39156-5-2025-09-16",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1459,7 +1735,8 @@
         "id": "med-p2-313988",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -1494,7 +1771,8 @@
         "id": "med-p2-314077",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -1529,7 +1807,8 @@
         "id": "fhir-pat-1002",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -1608,6 +1887,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "dr-ecg-1002-2025-11-18-8625-6",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "dr-ecg-1002-2025-11-18-8625-6",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1668,6 +1965,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "dr-ecg-1002-2025-11-18-8632-2",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "dr-ecg-1002-2025-11-18-8632-2",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1728,6 +2043,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "dr-ecg-1002-2025-11-18-8867-4",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "dr-ecg-1002-2025-11-18-8867-4",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1788,6 +2121,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "fhir-obs-4002",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "fhir-obs-4002",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -1862,7 +2213,8 @@
         "id": "fhir-med-5002",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -2121,7 +2473,8 @@
         "id": "patient-2000",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -2219,6 +2572,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2000-2093-3",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2000-2093-3",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "code": {
           "coding": [
@@ -2243,6 +2614,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2000-3016-3",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2000-3016-3",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "code": {
           "coding": [
@@ -2267,6 +2656,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2000-3026-2",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2000-3026-2",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "code": {
           "coding": [
@@ -2314,7 +2721,8 @@
         "id": "rx-2000-197381",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -2356,7 +2764,8 @@
         "id": "patient-2008",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -2487,6 +2896,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2008-2160-0",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2008-2160-0",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "code": {
           "coding": [
@@ -2511,6 +2938,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2008-2345-7",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2008-2345-7",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "code": {
           "coding": [
@@ -2535,6 +2980,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2008-4548-4",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2008-4548-4",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "code": {
           "coding": [
@@ -2559,6 +3022,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2008-8462-4",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2008-8462-4",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -2597,6 +3078,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2008-8480-6",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "obs-2008-8480-6",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -2692,7 +3191,8 @@
         "id": "rx-2008-1861634",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -2734,7 +3234,8 @@
         "id": "rx-2008-197884",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "active",
@@ -2776,7 +3277,8 @@
         "id": "pv-pat-001",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -2867,7 +3369,8 @@
         "id": "pv-pat-001-cipro",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "completed",
@@ -2909,7 +3412,8 @@
         "id": "loader-pat-0001",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -2994,6 +3498,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "loader-obs-0001",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "loader-obs-0001",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "unknown",
         "category": [
           {
@@ -3037,6 +3559,24 @@
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
           ]
         },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "loader-obs-0002",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "unknown",
         "category": [
           {
@@ -3045,6 +3585,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -3087,7 +3632,8 @@
         "id": "loader-med-0001",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "stopped",
@@ -3146,7 +3692,8 @@
         "id": "sparse-pat-0001",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+            "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
           ]
         },
         "name": [
@@ -3226,6 +3773,24 @@
             "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
           ]
         },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "sparse-obs-0001",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "unknown",
         "category": [
           {
@@ -3234,6 +3799,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -3277,6 +3847,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "sparse-obs-0002",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "sparse-obs-0002",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "unknown",
         "category": [
           {
@@ -3321,6 +3909,24 @@
       "resource": {
         "resourceType": "Observation",
         "id": "sparse-obs-0003",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-observation",
+            "value": "sparse-obs-0003",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "unknown",
         "category": [
           {
@@ -3403,7 +4009,8 @@
         "id": "sparse-med-0001",
         "meta": {
           "profile": [
-            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
         "status": "unknown",

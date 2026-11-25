@@ -415,6 +415,33 @@ const BP_PANELS = new Set([BP_PANEL, "55284-4", "8480-6"]);
 const loincCoding = (code: string) => ({ system: LOINC, code });
 
 /**
+ * Where the facade's own identifiers live. The MII Kerndatensatz lab profile
+ * wants an Observation identifier of type OBI with a system, a value and an
+ * assigner; the graph's resource id is that value, assigned by this hub.
+ */
+export const FACADE_IDENTIFIER_SYSTEM =
+  "https://ehds.mabu.red/fhir/sid/graph-observation";
+const observationIdentifier = (id: string | undefined) =>
+  id
+    ? [
+        {
+          type: {
+            coding: [
+              {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                code: "OBI",
+                display: "Observation Instance Identifier",
+              },
+            ],
+          },
+          system: FACADE_IDENTIFIER_SYSTEM,
+          value: id,
+          assigner: { display: "Minimum Viable Health Dataspace FHIR facade" },
+        },
+      ]
+    : undefined;
+
+/**
  * A blood pressure the graph holds one value of (the seeds write "BP 145/92"
  * as 145 mmHg, the generated seed a systolic value alone): the value is the
  * systolic component and the diastolic is absent, which `bp` allows.
@@ -475,6 +502,7 @@ function observation(p: Props, subject: Resource | undefined): Resource {
     extension: sourceKind
       ? [{ url: EXT_SOURCE_KIND, valueCode: sourceKind }]
       : undefined,
+    identifier: observationIdentifier(fhirIdOf(p)),
     status: pick(p.status, OBSERVATION_STATUS, "unknown"),
     category: categoryDisplay
       ? [
@@ -486,6 +514,16 @@ function observation(p: Props, subject: Resource | undefined): Resource {
                 code: category,
                 display: categoryDisplay,
               },
+              // LOINC's class for laboratory results, which the MII lab
+              // profile wants next to FHIR's `laboratory`.
+              ...(category === "laboratory"
+                ? [
+                    {
+                      ...loincCoding("26436-6"),
+                      display: "Laboratory studies (set)",
+                    },
+                  ]
+                : []),
             ],
           },
         ]

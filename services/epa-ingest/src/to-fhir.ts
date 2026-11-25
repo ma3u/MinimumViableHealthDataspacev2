@@ -94,6 +94,19 @@ const ORGANISM_IDENTIFIED: Coding = loinc(
   "41852-5",
   "Microorganism or agent identified in Specimen",
 );
+/**
+ * LOINC's class for laboratory results. The MII Kerndatensatz Laborbefund
+ * wants it next to FHIR's `laboratory` on every lab Observation, and next to
+ * v2-0074 `LAB` on a laboratory report.
+ */
+const LAB_STUDIES = (): Coding => loinc("26436-6", "Laboratory studies (set)");
+/**
+ * Where the identifiers this writer assigns live. They name this
+ * transcription of a result or report, not the lab's own numbers, which are
+ * not on what we read.
+ */
+export const IDENTIFIER_BASE = "https://ehds.mabu.red/fhir/sid";
+const V2_0203 = "http://terminology.hl7.org/CodeSystem/v2-0203";
 
 /**
  * Observation status by provenance.
@@ -273,6 +286,18 @@ export function buildBundle(
 ): FhirBundle {
   const { meta, source } = options;
   const now = options.now ?? new Date().toISOString();
+  const name = (part: string) => `${now}|${source.sourceDocument}|${part}`;
+  // Who assigned the identifiers below: this writer, named as the Provenance
+  // names it. The MII lab profiles require an assigner on each.
+  const assigner = { display: `epa-ingest (${source.extractor})` };
+  const identifier = (type: string, display: string, part: string) => [
+    {
+      type: { coding: [{ system: V2_0203, code: type, display }] },
+      system: `${IDENTIFIER_BASE}/epa-ingest-${part.split("/")[0]}`,
+      value: uuidV5(name(part)),
+      assigner,
+    },
+  ];
   const status = statusForSource(source.kind);
   const subject: Reference = { reference: `Patient/${meta.patientId}` };
 
@@ -320,6 +345,12 @@ export function buildBundle(
   const observations: FhirResource[] = values.map((v, i) => ({
     resourceType: "Observation",
     id: `obs-${i + 1}`,
+    // One per transcribed value (v2-0203 OBI), required by the MII lab profile.
+    identifier: identifier(
+      "OBI",
+      "Observation Instance Identifier",
+      `observation/${i + 1}`,
+    ),
     status,
     extension: provenanceExtensions(source, v.line, v.region, v.verification),
     category: [
@@ -331,6 +362,7 @@ export function buildBundle(
             code: categoryOf(v),
             display: CATEGORY_DISPLAY[categoryOf(v)],
           } satisfies Coding,
+          ...(categoryOf(v) === "laboratory" ? [LAB_STUDIES()] : []),
         ],
       },
     ],
@@ -427,9 +459,27 @@ export function buildBundle(
 
   const ecg = isElectrocardiogram(values);
   const kind = ecg ? undefined : reportKind(values);
+  // A laboratory report proper: no ECG and none of the other report kinds.
+  const labReport = !ecg && kind === undefined;
   const report: FhirResource = {
     resourceType: "DiagnosticReport",
     id: "report-1",
+    // The report as this writer issued it (v2-0203 FILL, the filler's number):
+    // the lab's own report number is not on what we read.
+    identifier: identifier("FILL", "Filler Identifier", "report/1"),
+    // The order the report answers. A printed report does not carry it, so
+    // the reference says it is unknown rather than inventing one; the MII lab
+    // profile requires the element.
+    basedOn: [
+      {
+        extension: [
+          {
+            url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+            valueCode: "unknown",
+          },
+        ],
+      },
+    ],
     status,
     category: [
       {
@@ -447,6 +497,7 @@ export function buildBundle(
                 code: kind?.section ?? "LAB",
                 display: kind?.sectionDisplay ?? "Laboratory",
               }) satisfies Coding,
+          ...(labReport ? [LAB_STUDIES()] : []),
         ],
       },
     ],
@@ -528,7 +579,6 @@ export function buildBundle(
     provenance,
     ...(organization ? [organization] : []),
   ];
-  const name = (part: string) => `${now}|${source.sourceDocument}|${part}`;
   return {
     resourceType: "Bundle",
     // The bundle's own identity, named like its entries.

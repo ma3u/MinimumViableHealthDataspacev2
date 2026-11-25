@@ -267,7 +267,7 @@ SET p.name = 'DiagnosticReport (EU Imaging)',
     p.tested = 3,
     p.passed = 0,
     p.failed = 3,
-    p.topIssues = ['3x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: Slice \'...\' for extension \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t', '3x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice'],
+    p.topIssues = ['3x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: Slice \'...\' for extension \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t', '3x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice', '2x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)'],
     p.coverage = 'none';
 
 MERGE (p:EEHRxFProfile {profileId: 'diagnostic-report-lab-eu'})
@@ -315,7 +315,7 @@ SET p.name = 'Bundle (EU Lab Report)',
     p.tested = 12,
     p.passed = 3,
     p.failed = 9,
-    p.topIssues = ['9x Bundle.type: Value is \'collection\' but is fixed to \'document\' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type', '9x Bundle: Constraint failed: dr-comp-type: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Constraint failed: one-comp: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice', '9x entry/*DiagnosticReport/report-1*/: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)'],
+    p.topIssues = ['9x Bundle.type: Value is \'collection\' but is fixed to \'document\' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type', '9x Bundle: Constraint failed: dr-comp-identifier: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Constraint failed: dr-comp-type: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Constraint failed: one-comp: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice'],
     p.coverage = 'partial';
 
 MERGE (p:EEHRxFProfile {profileId: 'composition-hdr-eu'})
@@ -422,7 +422,7 @@ MERGE (c)-[:DEFINED_IN]->(a);
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
     v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
-    v.inputsDigest = '26375b21a2059694',
+    v.inputsDigest = '5dbbe162b35ede24',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
     v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'facade: Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],

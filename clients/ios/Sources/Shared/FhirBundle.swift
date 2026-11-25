@@ -52,6 +52,18 @@ public enum FhirWriter {
   /// uses the same database.
   public static let ncbiTaxonomySystem = "http://www.ncbi.nlm.nih.gov/taxonomy"
 
+  /// LOINC's class for laboratory results. The MII Kerndatensatz Laborbefund
+  /// wants it next to FHIR's `laboratory` on every lab Observation, and next
+  /// to v2-0074 `LAB` on a laboratory report. Same as `LAB_STUDIES` in
+  /// services/epa-ingest.
+  static func labStudies() -> JSON { loinc("26436-6", "Laboratory studies (set)") }
+
+  /// Where the identifiers this writer assigns live, as `IDENTIFIER_BASE` in
+  /// services/epa-ingest. They name this transcription of a result or
+  /// report, not the lab's own numbers, which are not on what we read.
+  public static let identifierBase = "https://ehds.mabu.red/fhir/sid"
+  static let v2_0203 = "http://terminology.hl7.org/CodeSystem/v2-0203"
+
   /// Everything the writer needs that is not in the values themselves.
   public struct ReportMeta: Sendable, Equatable {
     /// Logical patient id used in the bundle. Never a real insurance number.
@@ -188,6 +200,25 @@ public enum FhirWriter {
     let status = status(for: source.kind)
     let subject: JSON = ["reference": .string("Patient/\(meta.patientId)")]
 
+    // Who assigned the identifiers below: this writer, named as the
+    // Provenance names it. The MII lab profiles require an assigner on each.
+    let assigner: JSON = ["display": .string("epa-ingest (\(source.extractor))")]
+    func identifier(_ type: String, _ display: String, _ part: String) -> JSON {
+      let kind = part.split(separator: "/").first.map(String.init) ?? part
+      return .array([
+        [
+          "type": [
+            "coding": .array([
+              ["system": .string(v2_0203), "code": .string(type), "display": .string(display)]
+            ])
+          ],
+          "system": .string("\(identifierBase)/epa-ingest-\(kind)"),
+          "value": .string(uuidV5("\(now)|\(source.sourceDocument)|\(part)")),
+          "assigner": assigner,
+        ]
+      ])
+    }
+
     // The laboratory or practice that printed the report, as printed. The
     // German lab profiles want the performer as a reference (#1172), so the
     // printed name becomes an Organization in the bundle, and the reference
@@ -229,17 +260,20 @@ public enum FhirWriter {
       var observation: JSON = [
         "resourceType": "Observation",
         "id": .string("obs-\(index + 1)"),
+        // One per transcribed value (v2-0203 OBI), required by the MII lab profile.
+        "identifier": identifier("OBI", "Observation Instance Identifier", "observation/\(index + 1)"),
         "status": .string(status),
         "extension": .array(provenanceExtensions(source: source, value: value)),
         "category": .array([
           [
-            "coding": .array([
+            "coding": .array(
               [
-                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                "code": .string(category(value)),
-                "display": .string(categoryDisplay[category(value)] ?? ""),
-              ]
-            ])
+                [
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": .string(category(value)),
+                  "display": .string(categoryDisplay[category(value)] ?? ""),
+                ]
+              ] + (category(value) == "laboratory" ? [labStudies()] : []))
           ]
         ]),
         // A quantity LOINC does not code gets a CodeableConcept with `text`
@@ -311,9 +345,27 @@ public enum FhirWriter {
     // A report whose every value is an ECG measurement is an ECG.
     let ecg = isElectrocardiogram(values)
     let kind = ecg ? nil : reportKind(values)
+    // A laboratory report proper: no ECG and none of the other report kinds.
+    let labReport = !ecg && kind == nil
     var report: JSON = [
       "resourceType": "DiagnosticReport",
       "id": "report-1",
+      // The report as this writer issued it (v2-0203 FILL, the filler's
+      // number): the lab's own report number is not on what we read.
+      "identifier": identifier("FILL", "Filler Identifier", "report/1"),
+      // The order the report answers. A printed report does not carry it, so
+      // the reference says it is unknown rather than inventing one; the MII
+      // lab profile requires the element.
+      "basedOn": .array([
+        [
+          "extension": .array([
+            [
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown",
+            ]
+          ])
+        ]
+      ]),
       "status": .string(status),
       "category": .array([
         [
@@ -331,7 +383,7 @@ public enum FhirWriter {
                 "code": .string(kind?.section ?? "LAB"),
                 "display": .string(kind?.sectionDisplay ?? "Laboratory"),
               ]
-          ])
+          ] + (labReport ? [labStudies()] : []))
         ]
       ]),
       "code": {

@@ -108,6 +108,24 @@ describe("toFhirResource", () => {
     expect(rest).toEqual({
       resourceType: "Observation",
       id: "obs-p1-4548-4-2024-09-12",
+      // The graph's id as an OBI identifier, and LOINC's lab class next to
+      // `laboratory`: the MII Kerndatensatz lab profile wants both.
+      identifier: [
+        {
+          type: {
+            coding: [
+              {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                code: "OBI",
+                display: "Observation Instance Identifier",
+              },
+            ],
+          },
+          system: "https://ehds.mabu.red/fhir/sid/graph-observation",
+          value: "obs-p1-4548-4-2024-09-12",
+          assigner: { display: "Minimum Viable Health Dataspace FHIR facade" },
+        },
+      ],
       status: "final",
       category: [
         {
@@ -117,6 +135,11 @@ describe("toFhirResource", () => {
                 "http://terminology.hl7.org/CodeSystem/observation-category",
               code: "laboratory",
               display: "Laboratory",
+            },
+            {
+              system: "http://loinc.org",
+              code: "26436-6",
+              display: "Laboratory studies (set)",
             },
           ],
         },
