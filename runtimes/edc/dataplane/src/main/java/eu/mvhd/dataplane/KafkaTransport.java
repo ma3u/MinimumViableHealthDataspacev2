@@ -2,7 +2,6 @@ package eu.mvhd.dataplane;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -181,13 +181,21 @@ public final class KafkaTransport implements StreamTransport {
 
     @Override
     public boolean consumed(String bootstrap, String topic, String group) throws Exception {
+        // A consumer of the reader's group, never subscribed and never
+        // committing: it only asks. Not AdminClient.listConsumerGroupOffsets,
+        // which Event Hubs answers with nothing, whoever committed (ADR-096;
+        // probed on evhns-mvhd-b53a0449 on 2026-11-25), while committed() gives
+        // the offset back with any login of the namespace.
         var partition = new TopicPartition(topic, 0);
-        try (var admin = AdminClient.create(adminProperties(bootstrap))) {
-            var end = admin.listOffsets(Map.of(partition, OffsetSpec.latest())).all().get(30, TimeUnit.SECONDS)
-                    .get(partition).offset();
-            var committed = admin.listConsumerGroupOffsets(group).partitionsToOffsetAndMetadata()
-                    .get(30, TimeUnit.SECONDS).get(partition);
-            return end > 0 && committed != null && committed.offset() >= end;
+        var properties = adminProperties(bootstrap);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, group);
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        try (var probe = new KafkaConsumer<String, String>(properties)) {
+            var end = probe.endOffsets(List.of(partition), Duration.ofSeconds(30)).get(partition);
+            var committed = probe.committed(Set.of(partition), Duration.ofSeconds(30)).get(partition);
+            return end != null && end > 0 && committed != null && committed.offset() >= end;
         }
     }
 
