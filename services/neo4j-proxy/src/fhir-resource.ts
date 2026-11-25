@@ -1,5 +1,5 @@
 import { claimedProfiles } from "./fhir-profiles.js";
-import { ucumQuantity } from "./ucum.js";
+import { UCUM, ucumQuantity } from "./ucum.js";
 
 // ---------------------------------------------------------------------------
 // A graph node as a FHIR R4 resource (#876, #1144)
@@ -147,9 +147,98 @@ function codeable(
 /**
  * A Quantity: the unit as printed, and its UCUM code beside it only when the
  * unit has one (#1214, ./ucum.ts). An unknown unit stays text, no `system`.
+ * A UCUM code the source gave (the loader's `ucumCode`, #1218) wins over the
+ * mapping, since the source knew what it meant.
  */
-function quantity(value: number, unit: string | undefined): Resource {
+function quantity(
+  value: number,
+  unit: string | undefined,
+  ucum?: string,
+): Resource {
+  if (ucum) {
+    return { value, unit: unit?.trim() || ucum, system: UCUM, code: ucum };
+  }
   return ucumQuantity(value, unit);
+}
+
+/** A list property as strings, or [] (#1218: codings and components). */
+function strings(v: unknown): string[] {
+  const p = plain(v);
+  return Array.isArray(p) ? p.map((x) => (x == null ? "" : String(x))) : [];
+}
+
+/** A list property as numbers; a slot that is not a number is undefined. */
+function numbers(v: unknown): (number | undefined)[] {
+  const p = plain(v);
+  return Array.isArray(p) ? p.map((x) => num(x)) : [];
+}
+
+/**
+ * The codings the loader kept beside the first (#1218), each once and after
+ * the ones `coded` already carries.
+ */
+function moreCodings(p: Props, coded: Resource | undefined): void {
+  if (!coded) return;
+  const systems = strings(p.codingSystems);
+  const codes = strings(p.codingCodes);
+  const displays = strings(p.codingDisplays);
+  const have = coded.coding as { system?: string; code: string }[] | undefined;
+  if (!have || codes.length < 2) return;
+  const seen = new Set(have.map((c) => `${c.system ?? ""}|${c.code}`));
+  for (let i = 0; i < codes.length; i++) {
+    const key = `${systems[i] ?? ""}|${codes[i]}`;
+    if (!codes[i] || seen.has(key)) continue;
+    seen.add(key);
+    have.push(
+      compact({
+        system: systems[i] || undefined,
+        code: codes[i],
+        display: displays[i] || undefined,
+      }) as { system?: string; code: string },
+    );
+  }
+}
+
+const UNKNOWN = {
+  coding: [
+    {
+      system: "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+      code: "unknown",
+    },
+  ],
+};
+
+/**
+ * The components the loader kept (#1218): each LOINC-coded, with its value,
+ * printed unit and UCUM code; a component the source sent without a value
+ * keeps its code and says the value is unknown.
+ */
+function storedComponents(p: Props): Resource[] | undefined {
+  const codes = strings(p.componentCodes);
+  const absent = strings(p.componentAbsentCodes);
+  if (!codes.length && !absent.length) return undefined;
+  const displays = strings(p.componentDisplays);
+  const values = numbers(p.componentValues);
+  const units = strings(p.componentUnits);
+  const ucums = strings(p.componentUcumCodes);
+  const coding = (code: string, display?: string) => ({
+    coding: [compact({ system: LOINC, code, display: display || undefined })],
+  });
+  return [
+    ...codes.map((code, i) => {
+      const v = values[i];
+      return v === undefined
+        ? { code: coding(code, displays[i]), dataAbsentReason: UNKNOWN }
+        : {
+            code: coding(code, displays[i]),
+            valueQuantity: quantity(v, units[i] || undefined, ucums[i]),
+          };
+    }),
+    ...absent.map((code) => ({
+      code: coding(code),
+      dataAbsentReason: UNKNOWN,
+    })),
+  ];
 }
 
 /** A reference to a party the graph knows by name only. */
@@ -423,17 +512,7 @@ function bloodPressure(value: number | undefined, unit: string) {
   const component = (code: string, v: number | undefined) => ({
     code: { coding: [loincCoding(code)] },
     ...(v === undefined
-      ? {
-          dataAbsentReason: {
-            coding: [
-              {
-                system:
-                  "http://terminology.hl7.org/CodeSystem/data-absent-reason",
-                code: "unknown",
-              },
-            ],
-          },
-        }
+      ? { dataAbsentReason: UNKNOWN }
       : { valueQuantity: quantity(v, unit) }),
   });
   return [component("8480-6", value), component("8462-4", undefined)];
@@ -456,10 +535,15 @@ function observation(p: Props, subject: Resource | undefined): Resource {
   const unit =
     first(p, "unit", "valueUnit") ?? (vital ? VITAL_SIGNS[code] : undefined);
   const coded = codeable(code, system, first(p, "display", "name"));
+  moreCodings(p, coded);
   if (bp && coded && code !== BP_PANEL) {
     coded.coding = [...(coded.coding as object[]), loincCoding(BP_PANEL)];
   }
   const value = num(p.valueQuantity) ?? num(p.value);
+  const ucum = first(p, "ucumCode");
+  // The components the source sent (#1218); only without them does a blood
+  // pressure fall back to its one stored value as the systolic component.
+  const stored = storedComponents(p);
   const low = num(p.referenceLow);
   const high = num(p.referenceHigh);
   const rangeText = first(p, "referenceText");
@@ -508,7 +592,9 @@ function observation(p: Props, subject: Resource | undefined): Resource {
         ? [absent()]
         : undefined,
     valueQuantity:
-      value === undefined || bp ? undefined : quantity(value, unit),
+      value === undefined || bp || stored
+        ? undefined
+        : quantity(value, unit, ucum),
     referenceRange:
       low !== undefined || high !== undefined || rangeText
         ? [
@@ -519,7 +605,8 @@ function observation(p: Props, subject: Resource | undefined): Resource {
             }),
           ]
         : undefined,
-    component: bp ? bloodPressure(value, unit ?? "mm[Hg]") : undefined,
+    component:
+      stored ?? (bp ? bloodPressure(value, unit ?? "mm[Hg]") : undefined),
   };
 }
 
