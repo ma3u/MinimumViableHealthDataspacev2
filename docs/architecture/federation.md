@@ -69,6 +69,17 @@ true, suppressionReason: "row_level_in_federation" }`, and `/query` says
    `federated: true`, `contributors: [labels]`, `aggregateSuppressed`, and
    `suppressionReason`, so EHDS Art. 53 transparency reports show _who we
    asked_ alongside _what we answered_.
+6. **One id per federated query** ([ADR-100](../ADRs/ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md)
+   decision 4; draft Art. 18(2)(f)): `/federated/query`, `/federated/stats`
+   and `/nlq` with `federated: true` give each query a `federationQueryId`
+   (UUID v4). It is a detail of the `QueryAuditEvent` and a property of its
+   `:AuditEvent` node, a field of the answer and its `X-Federation-Query-Id`
+   header, the transaction metadata each workspace receives
+   (`{federationQueryId, app: "mvhd-federation"}`), and a field of the log
+   line `federated query dispatched` the coordinator writes per workspace,
+   beside the W3C `trace_id` (`src/federation-query.ts`). `/federated/stats`
+   is on the audit chain too, and answers 503 when it cannot be recorded. A
+   question of one SPE is not federated and has no id.
 
 ### The same rules on every question
 
