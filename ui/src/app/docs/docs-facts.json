@@ -1478,6 +1478,12 @@
       "file": "ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md",
       "title": "The proxy coordinates a federation of attested workspaces, each answering through its own gateway",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-101",
+      "file": "ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md",
+      "title": "The SPE gives zero-trust, permit-scoped access to data in place, not a copy per permit",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1575,17 +1581,17 @@
     "/docs/developer/quality-gates": "2026-11-25",
     "/docs/developer/api": "2026-11-25",
     "/docs/developer/reference": "2026-11-25",
-    "/docs/developer/[slug]": "2026-11-24",
-    "/docs/architecture": "2026-11-25",
-    "/docs/security": "2026-11-24",
-    "/docs/security/[slug]": "2026-11-24",
-    "/docs/klarbefund": "2026-11-24",
-    "/docs/ehds": "2026-11-24",
+    "/docs/developer/[slug]": "2026-11-26",
+    "/docs/architecture": "2026-11-26",
+    "/docs/security": "2026-11-26",
+    "/docs/security/[slug]": "2026-11-26",
+    "/docs/klarbefund": "2026-11-26",
+    "/docs/ehds": "2026-11-26",
     "/docs/ehds/glossary": "2026-11-08",
-    "/docs/ehds/[slug]": "2026-11-24",
+    "/docs/ehds/[slug]": "2026-11-26",
     "/docs/roadmap": "2026-11-10",
-    "/docs/operations": "2026-11-24",
-    "/docs/operations/[slug]": "2026-11-24",
-    "/docs/klarbefund/[slug]": "2026-11-24"
+    "/docs/operations": "2026-11-26",
+    "/docs/operations/[slug]": "2026-11-26",
+    "/docs/klarbefund/[slug]": "2026-11-26"
   }
 }
