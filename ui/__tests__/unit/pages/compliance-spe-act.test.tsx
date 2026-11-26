@@ -32,10 +32,12 @@ describe("/compliance/spe-act", () => {
     expect(screen.getByTestId("spe-act-count-gap")).toHaveTextContent(
       `Not yet · ${counts.gap}`,
     );
-    await user.click(screen.getByTestId("spe-act-count-gap"));
+    // Filter by a status that always has rows: "Not yet" can be empty.
+    await user.click(screen.getByTestId("spe-act-count-partial"));
     const shown = screen.getAllByTestId(/^spe-act-(?!count)/);
-    expect(shown).toHaveLength(counts.gap);
-    for (const li of shown) expect(li).toHaveAttribute("data-status", "gap");
+    expect(shown).toHaveLength(counts.partial);
+    for (const li of shown)
+      expect(li).toHaveAttribute("data-status", "partial");
   });
 
   it("links the draft act and the published feedback", () => {

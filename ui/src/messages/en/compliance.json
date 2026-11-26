@@ -145,7 +145,7 @@
   "Records of each instance's life, and internal and external audits.": "Records of each instance's life, and internal and external audits.",
   "Start, load and deletion of each workspace are on the audit chain; there is no audit programme.": "Start, load and deletion of each workspace are on the audit chain; there is no audit programme.",
   "Publish which environments belong to the federation.": "Publish which environments belong to the federation.",
-  "Both workspaces appear in the catalogue and on the query page; there is no formal register.": "Both workspaces appear in the catalogue and on the query page; there is no formal register.",
+  "Both workspaces are published as HealthDCAT-AP data services in one register, with their membership status, public as JSON-LD and shown on the catalogue (ADR-100).": "Both workspaces are published as HealthDCAT-AP data services in one register, with their membership status, public as JSON-LD and shown on the catalogue (ADR-100).",
   "Catalog": "Catalog",
   "Common data models, terminologies, units and metadata, documented with their versions.": "Common data models, terminologies, units and metadata, documented with their versions.",
   "OMOP CDM 5.4, FHIR R4, LOINC, SNOMED CT and HealthDCAT-AP; the versions are not yet listed in one place.": "OMOP CDM 5.4, FHIR R4, LOINC, SNOMED CT and HealthDCAT-AP; the versions are not yet listed in one place.",
@@ -158,7 +158,7 @@
   "For federated learning, train locally and exchange only model updates.": "For federated learning, train locally and exchange only model updates.",
   "Not offered.": "Not offered.",
   "A written agreement on roles, admission, exclusion and incidents in the federation.": "A written agreement on roles, admission, exclusion and incidents in the federation.",
-  "One operator runs both workspaces; there is no agreement yet.": "One operator runs both workspaces; there is no agreement yet.",
+  "A versioned agreement between the fictional parties covers roles, admission, technical rules, suspension, incidents, change and exit; the mutual TLS and the workspace gateway it names are still to come (ADR-100 steps 3 and 4).": "A versioned agreement between the fictional parties covers roles, admission, technical rules, suspension, incidents, change and exit; the mutual TLS and the workspace gateway it names are still to come (ADR-100 steps 3 and 4).",
   "Chapter II: the instance from start to deletion": "Chapter II: the instance from start to deletion",
   "Chapter III: operations, security and logs": "Chapter III: operations, security and logs",
   "Chapter IV: federations of environments": "Chapter IV: federations of environments",
@@ -195,5 +195,7 @@
   "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.",
   "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.",
   "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.",
-  "EHDS Approval": "EHDS Approval"
+  "EHDS Approval": "EHDS Approval",
+  "Register (JSON-LD)": "Register (JSON-LD)",
+  "Federation agreement": "Federation agreement"
 }

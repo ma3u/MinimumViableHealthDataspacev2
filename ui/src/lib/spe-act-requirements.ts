@@ -53,6 +53,10 @@ const ADR_069 = adr(
   "ADR-069-two-spe-workspaces-as-aci-confidential-containers.md",
 );
 const ADR_072 = adr("072", "ADR-072-spe-workspaces-start-on-demand.md");
+const ADR_100 = adr(
+  "100",
+  "ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md",
+);
 const ATTESTATION = page("SPE attestation", "/admin/attestation");
 const AUDIT = page("Audit & Provenance", "/admin/audit");
 const QUERY = page("Federated query", "/query");
@@ -273,9 +277,16 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     chapter: "federation",
     article: "Art. 18(1)",
     requirement: "Publish which environments belong to the federation.",
-    demo: "Both workspaces appear in the catalogue and on the query page; there is no formal register.",
-    status: "partial",
-    evidence: [QUERY, page("Catalog", "/catalog")],
+    demo: "Both workspaces are published as HealthDCAT-AP data services in one register, with their membership status, public as JSON-LD and shown on the catalogue (ADR-100).",
+    status: "met",
+    evidence: [
+      page("Catalog", "/catalog"),
+      page(
+        "Register (JSON-LD)",
+        "https://ma3u.github.io/MinimumViableHealthDataspacev2/federation/members.jsonld",
+      ),
+      ADR_100,
+    ],
   },
   {
     id: "common-models",
@@ -321,13 +332,7 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     requirement: "Logging across the federation, joining each instance's logs.",
     demo: "The coordinator collects every workspace's events into one audit chain, and every federated query carries one id into its audit record and into each workspace's transaction (ADR-100).",
     status: "met",
-    evidence: [
-      AUDIT,
-      adr(
-        "100",
-        "ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md",
-      ),
-    ],
+    evidence: [AUDIT, ADR_100],
   },
   {
     id: "federated-learning",
@@ -345,9 +350,15 @@ export const SPE_ACT_REQUIREMENTS: SpeActRequirement[] = [
     article: "Art. 20",
     requirement:
       "A written agreement on roles, admission, exclusion and incidents in the federation.",
-    demo: "One operator runs both workspaces; there is no agreement yet.",
-    status: "gap",
-    evidence: [issue(1236)],
+    demo: "A versioned agreement between the fictional parties covers roles, admission, technical rules, suspension, incidents, change and exit; the mutual TLS and the workspace gateway it names are still to come (ADR-100 steps 3 and 4).",
+    status: "partial",
+    evidence: [
+      page(
+        "Federation agreement",
+        `${REPO}/blob/main/docs/governance/federation-agreement.md`,
+      ),
+      ADR_100,
+    ],
   },
 ];
 

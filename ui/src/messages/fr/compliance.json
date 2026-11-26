@@ -145,7 +145,7 @@
   "Records of each instance's life, and internal and external audits.": "Des traces du cycle de vie de chaque instance, et des audits internes et externes.",
   "Start, load and deletion of each workspace are on the audit chain; there is no audit programme.": "Le démarrage, le chargement et la suppression de chaque espace de travail figurent dans la chaîne d’audit ; il n’y a pas de programme d’audit.",
   "Publish which environments belong to the federation.": "Publier quels environnements font partie de la fédération.",
-  "Both workspaces appear in the catalogue and on the query page; there is no formal register.": "Les deux espaces de travail apparaissent dans le catalogue et sur la page de requête ; il n’y a pas de registre formel.",
+  "Both workspaces are published as HealthDCAT-AP data services in one register, with their membership status, public as JSON-LD and shown on the catalogue (ADR-100).": "Les deux espaces de travail sont publiés comme services de données HealthDCAT-AP dans un registre unique, avec leur statut de membre, publics en JSON-LD et affichés dans le catalogue (ADR-100).",
   "Catalog": "Catalogue",
   "Common data models, terminologies, units and metadata, documented with their versions.": "Des modèles de données, terminologies, unités et métadonnées communs, documentés avec leurs versions.",
   "OMOP CDM 5.4, FHIR R4, LOINC, SNOMED CT and HealthDCAT-AP; the versions are not yet listed in one place.": "OMOP CDM 5.4, FHIR R4, LOINC, SNOMED CT et HealthDCAT-AP ; les versions ne sont pas encore réunies en un seul endroit.",
@@ -158,7 +158,7 @@
   "For federated learning, train locally and exchange only model updates.": "Pour l’apprentissage fédéré, entraîner localement et n’échanger que des mises à jour du modèle.",
   "Not offered.": "Non proposé.",
   "A written agreement on roles, admission, exclusion and incidents in the federation.": "Un accord écrit sur les rôles, l’admission, l’exclusion et les incidents dans la fédération.",
-  "One operator runs both workspaces; there is no agreement yet.": "Un seul opérateur gère les deux espaces de travail ; il n’y a pas encore d’accord.",
+  "A versioned agreement between the fictional parties covers roles, admission, technical rules, suspension, incidents, change and exit; the mutual TLS and the workspace gateway it names are still to come (ADR-100 steps 3 and 4).": "Un accord versionné entre les parties fictives couvre les rôles, l’admission, les règles techniques, la suspension, les incidents, la modification et la sortie ; le TLS mutuel et la passerelle de l’espace de travail qu’il prévoit restent à venir (ADR-100, étapes 3 et 4).",
   "Chapter II: the instance from start to deletion": "Chapitre II : l’instance, du démarrage à la suppression",
   "Chapter III: operations, security and logs": "Chapitre III : exploitation, sécurité et journaux",
   "Chapter IV: federations of environments": "Chapitre IV : fédérations d’environnements",
@@ -195,5 +195,7 @@
   "A user's import waits in the workspace's staging area, outside its data, until the access body approves it on the EHDS Approval page; a refusal removes it. Holders' data arrives encrypted and its fingerprint is part of the permit.": "L’import d’un utilisateur attend dans la zone de préparation de l’espace de travail, hors de ses données, jusqu’à ce que l’organisme responsable de l’accès aux données de santé l’approuve sur la page Approbation EEDS ; un refus le retire. Les données des détenteurs arrivent chiffrées et leur empreinte fait partie de l’autorisation.",
   "Only the persons the permit's application names may query or analyse under it; one key per workspace still serves several permits.": "Seules les personnes nommées dans la demande de l’autorisation peuvent interroger ou analyser sous celle-ci ; une clé par espace de travail sert encore plusieurs autorisations.",
   "A hash-chained audit log of queries, attestation, key release, loading, deletion, imports and administrative actions (start, stop, revocation, decisions, reviews); sign-in is not yet on it, and it is not in write-once storage.": "Un journal d’audit chaîné des requêtes, de l’attestation, de la remise de clé, du chargement, de la suppression, des imports et des actions d’administration (démarrage, arrêt, révocation, décisions, examens) ; la connexion n’y figure pas encore, et il n’est pas en stockage à écriture unique.",
-  "EHDS Approval": "Approbation EEDS"
+  "EHDS Approval": "Approbation EEDS",
+  "Register (JSON-LD)": "Registre (JSON-LD)",
+  "Federation agreement": "Accord de fédération"
 }
