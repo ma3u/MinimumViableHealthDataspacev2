@@ -40,7 +40,7 @@ export interface ViewerProfile {
   resources: ViewerResource[];
 }
 
-export const viewerUrl = (profileId: string) =>
+const viewerUrl = (profileId: string) =>
   `${BASE_PATH}/eehrxf/validation/${encodeURIComponent(profileId)}.json`;
 
 /**
