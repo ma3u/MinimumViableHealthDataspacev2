@@ -1,8 +1,16 @@
 ---
 title: "Feedback on the draft Implementing Regulation on secure processing environments, Ares(2026)10903532"
 subtitle: "From a dataspace architect, with a non-commercial EHDS demo that runs a confidential, federated SPE"
-date: "December 2026"
+date: "26 November 2026"
 ---
+
+# What this feedback asks
+
+This feedback replaces my submission of 24 November 2026. Its first two parts are new:
+
+- **A. Cost and effort.** The draft prescribes a manual, per-permit pipeline whose cost falls on access bodies and operators, with one proportionality clause and no cost estimate.
+- **B. Data spaces and digital identity.** Secondary use under the EHDS is a data space, but the draft does not connect SPEs to the Data Act's rules for data spaces, to the Dataspace Protocol or to eIDAS 2.0.
+- **C. The points of my first submission** (C1 to C9), which stand.
 
 # Who I am
 
@@ -50,7 +58,67 @@ Natural-language and federated query: <https://ma3u.github.io/MinimumViableHealt
 
 Audit and provenance, tab "Secure processing": <https://ma3u.github.io/MinimumViableHealthDataspacev2/admin/audit>
 
-# 1. Protection of data in use
+# A. Cost and effort for operators
+
+**Draft:** every obligation below is per data permit or per instance, and none scales with risk or use:
+
+| Obligation                                                                                                       | Draft                  | Unit           |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------- |
+| A dedicated, segregated instance, configured to the permit's data, tools, persons and network                    | Art. 2(4), 3(1) to (3) | per permit     |
+| A separate staging environment                                                                                   | Recital 5, Art. 4(1)   | per instance   |
+| The access body verifies artefacts, mitigates risks, prepares and pseudonymises the data, and uploads it itself  | Art. 4(2), (3)         | per permit     |
+| Verification that the set-up fully matches the permit before access, and monitoring throughout                   | Art. 5(1), (2)         | per permit     |
+| A pre-installed data-science suite and collaboration tools in every instance                                     | Art. 6(1), (2)         | per instance   |
+| Approval of every export, with automated checks and manual review                                                | Art. 7(1), (3)         | per export     |
+| Documented, verifiable deletion within six months                                                                | Art. 8(5)              | per permit     |
+| Tamper-evident logs of all observable user activity, in a write-once, central repository                         | Art. 16(1) to (3)      | per instance   |
+| Internal audits, and external audits at least every four years; for a third-party operator 12 months after start | Art. 17(2) to (4)      | per operator   |
+| A written agreement for every federation, with admission, exclusion and incident procedures                      | Art. 20                | per federation |
+
+Only disaster recovery is proportionate to "size, complexity, risk profile and service criticality" (Art. 11(7)). Recital 3 expects "market actors" to offer compliant SPEs, but no impact or cost estimate is published, and the access body stays accountable for a third-party operator (Art. 9(4)(b)).
+
+**Evidence:** TEHDAS2 D7.4, written by the access bodies that will procure SPEs, says it plainly:
+
+- "building SPEs and their supporting services is an expensive and time-consuming effort" (Annex 7, p. 97);
+- recording every user action "is also significant cost issue", and the authors consider it a privacy problem for the users themselves (Annex 7, p. 100);
+- consultation respondents found some requirements "infeasible or overly costly (especially the exhaustive logging)" (Annex 2, p. 78);
+- remote desktop is "the legacy approach" (section 5.6, p. 61), yet eight of its nine requirements, TIR-18 to TIR-26, are mandatory (section 5.6.2, p. 64).
+
+**Experience:** in the hub, most of these duties are done by machines, not people. The access body's key broker checks a hardware-signed report of the measured workload against the permit's policy hash and releases the key only on a match (Art. 5 in one automated step). The extract is sealed per holder and decrypted only inside the attested instance (no staging copy to verify, store and delete). Small counts are suppressed automatically (Art. 7 for aggregates). A workspace starts on demand and stops after 30 minutes idle, so an unused instance costs nothing. Catena-X taught me the same lesson at scale: a data space with many independent participants is affordable only when conformance is checked once, against published standards, and the rest is automated.
+
+**Request:**
+
+1. Add a proportionality clause for the whole regulation, by risk and by use. An instance that only runs approved queries or batch jobs (Art. 14(3)) and returns aggregates needs neither the collaboration suite of Art. 6 nor a remote desktop; apply Art. 6 "where the data permit provides for interactive processing".
+2. Accept machine evidence in place of manual work: a hardware-signed attestation that binds the measured instance to the permit satisfies Art. 5(1), (2) and Art. 12(1)(a); destroying the per-permit key, together with volatile memory, is verifiable deletion under Art. 8(5), including for backups.
+3. Accept a sealed, per-permit encrypted extract that is decrypted only inside an attested instance as equivalent to staging and upload by the access body (Art. 4(2), (3)).
+4. Limit Art. 16(3)(d) to security-relevant events, as D7.4 recommends, and let a compliance assessment under the Art. 21 framework be recognised by every access body, so that an operator is not assessed again in each Member State.
+5. Publish a cost and impact assessment, covering access bodies, trusted health data holders and smaller operators, before adoption.
+
+# B. Data spaces and digital identity
+
+**Draft:** data spaces appear only in the name of the European Health Data Space, and the Data Act, Regulation (EU) 2023/2854, is not mentioned. Identity is covered by:
+
+- Art. 10(4): "strong user authentication as defined in Article 3 (51) of Regulation 910/2014", for all users;
+- recital 7: support for the European Digital Identity Wallet "referred to in Article 5a of Regulation (EU) No 910/2014", with a footnote to the 2014 text, in which Art. 5a does not exist; it was inserted by Regulation (EU) 2024/1183;
+- recital 10 and Art. 18(2)(c): "identity federation mechanisms" and user management "interoperable" within a federation, without saying how;
+- Art. 18(2)(d): instances are authenticated through encryption.
+
+Not addressed: identities of organisations (access bodies, holders, operators, federation members), identities of machines (instances, batch jobs, API clients), electronic attestations of attributes, qualified electronic seals and time stamps, machine-readable data permits, and any protocol between a data holder and an SPE.
+
+**Evidence:** D7.4 expects the opposite. It finds that the success of the EHDS "will depend heavily on" the eIDAS network and the EUDI Wallet (Annex 7, p. 94), that attributes such as a researcher's affiliation and qualification (EHDS Art. 68(1)(d)) are needed, and that data spaces are expected to provide them as Wallet verifiable credentials (p. 95). It asks for a "machine-actionable access permit" derived from the data permit (p. 95) and leaves the transfer protocol open (FSPER-8, p. 22 and p. 72).
+
+**Experience:** the hub is built the data space way. Participants are identified by DIDs and prove their role with verifiable credentials over the Decentralised Claims Protocol; data is offered, negotiated and transferred over the Dataspace Protocol; the policies are ODRL; the catalogue is HealthDCAT-AP; a person can sign in with an EUDI Wallet. Every access decision follows from something machine-readable. In Catena-X, the same building blocks let companies connect once and exchange data with all others; without them every pair of participants needs its own contract and its own integration, which is what an SPE federation under Art. 20 would become.
+
+**Request:**
+
+6. Cite Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183, and accept electronic attestations of attributes (affiliation, professional qualification, completed training) as a basis for granting and revoking access rights (Art. 10(1), (2)).
+7. Require organisational identities for access bodies, holders, operators and federation members, using the European Business Wallet or qualified electronic seals, and attested workload identities for instances, batch jobs and API clients (Art. 10, 14, 18(2)(c), (d)). Keep strong user authentication for natural persons.
+8. Make the data permit machine-readable, for example in ODRL, so that the configuration of Art. 3(3), the access check of Art. 5(1) and the access rights of Art. 10(1) follow from it automatically and can be audited against it.
+9. Connect holders, SPEs and federations through the Dataspace Protocol and the harmonised standards on trusted data transactions requested under Art. 33 of the Data Act, and name the common standards a federation starts from: the HealthData@EU specifications (EHDS Art. 75), HealthDCAT-AP (Art. 77), OMOP CDM and HL7 FHIR (Art. 18(2)).
+
+# C. The points of my first submission
+
+## C1. Protection of data in use
 
 **Draft:** Art. 13(2) and (3) require encryption at rest and in transit. Art. 12(1)(a) asks a third-party operator not to access personal data "except when strictly necessary". Art. 5(1) and (2) ask the operator and the access body to verify, and to monitor for the permit's lifetime, that an instance matches the permit, including its tools.
 
@@ -62,7 +130,7 @@ Audit and provenance, tab "Secure processing": <https://ma3u.github.io/MinimumVi
 - Name remote attestation as a means to verify the configuration of an instance before and during access (Art. 5(1), (2)).
 - Leave the technology open (AMD SEV-SNP, Intel TDX, Arm CCA, or others).
 
-# 2. Disclosure control on aggregates inside a federation
+## C2. Disclosure control on aggregates inside a federation
 
 **Draft:** Art. 2(12) defines federated processing as an exchange of "queries, code, aggregated results or model parameters". Art. 18(3) exempts parameters, weights and gradients from the export control of Art. 7. Art. 18(4) applies Art. 7 only to exports out of the federation.
 
@@ -78,7 +146,7 @@ Model updates carry the known risks of membership inference and gradient inversi
 - Require that each instance applies disclosure control to aggregated results before they leave it, and that the coordinating operator applies it again to combined results, including totals.
 - In the guidelines of Art. 22, name secure aggregation and differential privacy as measures for Art. 18(3).
 
-# 3. Query-only and batch SPEs
+## C3. Query-only and batch SPEs
 
 **Draft:** Art. 6(1) and (2) require, in every instance, general-purpose data-processing tools and collaboration tools. Art. 14(3) allows batch execution.
 
@@ -86,7 +154,7 @@ Model updates carry the known risks of membership inference and gradient inversi
 
 **Request:** apply Art. 6 "where the data permit provides for interactive processing", and state that an instance limited to batch or query execution under Art. 14(3) complies.
 
-# 4. Log retention
+## C4. Log retention
 
 **Draft:** Art. 16(4): logs are kept "for a period of five years or for one year following the end of validity of the data permit, whichever period is shorter". Regulation (EU) 2025/327 Art. 73(1)(e) requires "at least one year".
 
@@ -94,7 +162,7 @@ Model updates carry the known risks of membership inference and gradient inversi
 
 **Request:** state that the five years count from each log entry, and that no entry is kept less than one year (Art. 73(1)(e)).
 
-# 5. Deletion and reproducibility
+## C5. Deletion and reproducibility
 
 **Draft:** Art. 8(5): secure deletion of the instance within six months after the permit ends.
 
@@ -105,7 +173,7 @@ Model updates carry the known risks of membership inference and gradient inversi
 - Delete "without undue delay and at the latest within six months".
 - Allow the analysis scripts and the outputs already released under Art. 7, never row-level data, to be kept outside the instance for verification and reproducibility.
 
-# 6. Common standards for federations
+## C6. Common standards for federations
 
 **Draft:** Art. 18(2)(a) to (c) require common data models, metadata standards, query languages, remote execution interfaces and interoperable user management within a federation, and Art. 20 leaves their choice to each federation's agreement.
 
@@ -113,13 +181,13 @@ Model updates carry the known risks of membership inference and gradient inversi
 
 **Request:** refer to the specifications under Art. 75 (HealthData@EU) and Art. 77 (HealthDCAT-AP), to OMOP CDM and HL7 FHIR as common data models, and to organisation identities based on the European Digital Identity framework, as the default a federation departs from only with a reason.
 
-# 7. Machine-readable public information
+## C7. Machine-readable public information
 
 **Draft:** Art. 9(2) asks for public information on capabilities and tools; Art. 18(1) on the members of a federation.
 
 **Request:** publish both in the national dataset catalogue as HealthDCAT-AP data services (`dcat:DataService`), linked to the datasets they serve, so an applicant can choose an SPE in the application (Art. 67) and HealthData@EU can show them across borders.
 
-# 8. Authentication of machines
+## C8. Authentication of machines
 
 **Draft:** Art. 10(4) requires strong user authentication (eIDAS Art. 3(51)) "for all users"; recital 7 asks for European Digital Identity Wallet support.
 
@@ -127,7 +195,7 @@ Model updates carry the known risks of membership inference and gradient inversi
 
 **Request:** add a rule for workload and organisation identities, consistent with Art. 18(2)(d), and keep strong user authentication for natural persons. The hub's EUDI Wallet sign-in shows the person side is feasible.
 
-# 9. Editorial
+## C9. Editorial
 
 - Art. 1 is numbered (14) and (15).
 - Art. 2 starts at point (2).
@@ -141,26 +209,27 @@ Model updates carry the known risks of membership inference and gradient inversi
 
 # Annex: the hub checked against the draft
 
-This shows what an implementer meets in each article. Status as of 24 November 2026.
+This shows what an implementer meets in each article. Status as of 26 November 2026.
 
-| Article       | Requirement                                                  | The hub                                                         |
-| ------------- | ------------------------------------------------------------ | --------------------------------------------------------------- |
-| 3             | An instance per permit, segregated, allowed connections only | A workspace per data holder; per permit is planned              |
-| 4             | Staging, verification and preparation by the access body     | Encrypted extract per holder; no staging for data users         |
-| 5(1), (2)     | Verify and monitor that the instance matches the permit      | Hardware attestation bound to the permit's policy hash          |
-| 5(3)          | Separation across one user's concurrent permits              | One key per workspace, not per permit                           |
-| 6             | Data-science and collaboration tools                         | Query-only; an interactive workspace is planned                 |
-| 7             | Export only after approval; automated and manual checks      | Automatic suppression of groups below five; no approval step    |
-| 8             | Revoke at expiry; delete within six months                   | Data deleted when a workspace stops; not triggered by expiry    |
-| 9             | Public documentation and capabilities                        | Developer documentation public; no capability statement         |
-| 10            | Role-based access, strong authentication                     | Roles from the identity provider; EUDI Wallet sign-in available |
-| 13            | Isolation, encryption at rest and in transit                 | Encrypted memory per workspace, TLS                             |
-| 14(3)         | Batch execution with the same output control                 | Synchronous queries with the same output control                |
-| 16            | Tamper-evident, write-once logs; retention                   | Hash-chained log; 12-month retention                            |
-| 18(2)(e), (g) | Local execution; no sourced data between instances           | Local execution; suppression applied at the coordinator         |
-| 18(2)(f)      | Federation-wide logging                                      | Each workspace's events collected into one chain                |
-| 19            | Federated learning                                           | Not built                                                       |
-| 20            | Written governance agreement                                 | None (a demonstrator with one operator)                         |
+| Article       | Requirement                                                  | The hub                                                             |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------------- |
+| 3             | An instance per permit, segregated, allowed connections only | A workspace per data holder; per permit is planned                  |
+| 4             | Staging, verification and preparation by the access body     | Encrypted extract per holder; no staging for data users             |
+| 5(1), (2)     | Verify and monitor that the instance matches the permit      | Hardware attestation bound to the permit's policy hash              |
+| 5(3)          | Separation across one user's concurrent permits              | One key per workspace, not per permit                               |
+| 6             | Data-science and collaboration tools                         | Query-only; an interactive workspace is planned                     |
+| 7             | Export only after approval; automated and manual checks      | Automatic suppression of groups below five; no approval step        |
+| 8             | Revoke at expiry; delete within six months                   | Data deleted when a workspace stops; not triggered by expiry        |
+| 9             | Public documentation and capabilities                        | Developer documentation public; no capability statement             |
+| 10            | Role-based access, strong authentication                     | Roles from the identity provider; EUDI Wallet sign-in available     |
+| 13            | Isolation, encryption at rest and in transit                 | Encrypted memory per workspace, TLS                                 |
+| 14(3)         | Batch execution with the same output control                 | Synchronous queries with the same output control                    |
+| 16            | Tamper-evident, write-once logs; retention                   | Hash-chained log; kept one year after the permit ends, 1 to 5 years |
+| 18(2)(e), (g) | Local execution; no sourced data between instances           | Local execution; suppression applied at the coordinator             |
+| 18(2)(f)      | Federation-wide logging                                      | Each workspace's events collected into one chain                    |
+| 19            | Federated learning                                           | Not built                                                           |
+| 18(1)         | Public list of federation members                            | Drafted: members as HealthDCAT-AP data services                     |
+| 20            | Written governance agreement                                 | Drafted: an agreement between the fictional parties                 |
 
 # Sources
 
@@ -170,6 +239,12 @@ This shows what an implementer meets in each article. Status as of 24 November 2
 - Regulation (EU) No 910/2014 (eIDAS), Art. 3(51): <https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng>
 - TEHDAS2 D7.4, SPE specification for access bodies: <https://zenodo.org/records/20266473>
 - TEHDAS2 results by user group: <https://tehdas.eu/results-by-user-group/>
+- TEHDAS2 D7.4, PDF as read for this feedback (24 February 2026): <https://tehdas.eu/wp-content/uploads/2026/06/d7.4-technical-specification-for-health-data-access-bodies-on-the-implementation-of-secure-processing-environments.pdf>
+- Regulation (EU) 2024/1183 (eIDAS 2.0): <https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng>
+- Regulation (EU) 2023/2854 (Data Act), Art. 33: <https://eur-lex.europa.eu/eli/reg/2023/2854/oj/eng>
+- Dataspace Protocol (Eclipse Foundation): <https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/>
+- Decentralised Claims Protocol (Eclipse Foundation): <https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/>
+- ODRL Information Model 2.2 (W3C): <https://www.w3.org/TR/odrl-model/>
 - CNCF Confidential Containers: <https://confidentialcontainers.org/>
 - Trustee (key broker and attestation service): <https://github.com/confidential-containers/trustee>
 - AMD SEV-SNP: <https://docs.kernel.org/arch/x86/amd-memory-encryption.html#secure-nested-paging-snp>
