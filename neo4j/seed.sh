@@ -120,15 +120,18 @@ check_dataset_publishers() {
 
 # Issue #1167: seed-nedrex.cypher links SnomedConcept nodes by conceptId with
 # MATCH, so a key that drifts (an integer again, #1231) links nothing and the
-# file still loads. Rheumatoid arthritis must reach its MONDO disorder.
+# file still loads. Hypertension must reach its MONDO disorder: it is one of
+# the four mapped conditions every graph has, since
+# insert-synthetic-schema-data.cypher seeds them. Rheumatoid arthritis comes
+# only with the Synthea load, which CI does not run.
 check_nedrex_links() {
   local linked
   linked=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
     --non-interactive --format plain \
-    "RETURN COUNT { MATCH (:SnomedConcept {conceptId: '69896004'})-[:MAPS_TO_DISORDER]->(:NeDRexDisorder {nedrexId: 'mondo.0008383'}) } AS linked;" \
+    "RETURN COUNT { MATCH (:SnomedConcept {conceptId: '38341003'})-[:MAPS_TO_DISORDER]->(:NeDRexDisorder {nedrexId: 'mondo.0005044'}) } AS linked;" \
     2>/dev/null | tail -1)
-  echo "rheumatoid arthritis linked to its NeDRex disorder: ${linked:-unknown}"
-  [ "$linked" = "1" ] || failed+=("SnomedConcept 69896004 not linked to NeDRex mondo.0008383: ${linked:-unknown} (#1167)")
+  echo "hypertension linked to its NeDRex disorder: ${linked:-unknown}"
+  [ "$linked" = "1" ] || failed+=("SnomedConcept 38341003 not linked to NeDRex mondo.0005044: ${linked:-unknown} (#1167)")
 }
 
 finish() {
