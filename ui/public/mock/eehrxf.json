@@ -394,11 +394,11 @@
       "description": "Imaging studies and the related imaging reports",
       "ehdsDeadline": "2031-03",
       "ehdsGroup": 2,
-      "status": "none",
+      "status": "partial",
       "totalResources": 0,
-      "profileCount": 2,
+      "profileCount": 3,
       "tested": 3,
-      "passed": 0,
+      "passed": 3,
       "profiles": [
         {
           "profileId": "diagnostic-report-imaging-eu",
@@ -410,17 +410,30 @@
           "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
           "url": "https://hl7.eu/fhir/imaging/1.0.0-ballot/en/StructureDefinition-DiagnosticReportEuImaging.html",
           "baseResource": "DiagnosticReport",
-          "coverage": "none",
-          "tested": 3,
+          "coverage": "untested",
+          "tested": 0,
           "passed": 0,
-          "failed": 3,
-          "topIssues": [
-            "3x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-            "3x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)",
-            "3x DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t",
-            "3x DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice",
-            "2x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
-          ],
+          "failed": 0,
+          "topIssues": [],
+          "referenceTested": 0,
+          "referencePassed": 0,
+          "resourceCount": 0
+        },
+        {
+          "profileId": "diagnostic-report-imaging-minimal-eu",
+          "name": "DiagnosticReport (EU Imaging, minimal metadata)",
+          "igName": "HL7 Europe Imaging Report",
+          "igPackage": "hl7.fhir.eu.imaging#1.0.0-ballot",
+          "fhirVersion": "R4",
+          "status": "Ballot",
+          "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata",
+          "url": "https://hl7.eu/fhir/imaging/1.0.0-ballot/en/StructureDefinition-DiagnosticReportEuImagingMinimalMetadata.html",
+          "baseResource": "DiagnosticReport",
+          "coverage": "full",
+          "tested": 3,
+          "passed": 3,
+          "failed": 0,
+          "topIssues": [],
           "referenceTested": 0,
           "referencePassed": 0,
           "resourceCount": 0
@@ -449,12 +462,12 @@
   ],
   "summary": {
     "totalCategories": 6,
-    "totalProfiles": 16,
+    "totalProfiles": 17,
     "testedProfiles": 11,
-    "passingProfiles": 9,
+    "passingProfiles": 10,
     "resourcesTested": 261,
-    "resourcesPassed": 238,
-    "passRatePercent": 91,
+    "resourcesPassed": 241,
+    "passRatePercent": 92,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -501,7 +514,7 @@
       "reference: Reference examples with fictional data for profiles the hub produces nothing for; validated, never counted",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "06787a03b6b987ac"
+    "inputsDigest": "7e1ff5be7339b9b4"
   },
   "planned": [
     {

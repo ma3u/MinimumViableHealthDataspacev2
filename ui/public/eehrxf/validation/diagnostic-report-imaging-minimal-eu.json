@@ -1,0 +1,307 @@
+{
+  "profileId": "diagnostic-report-imaging-minimal-eu",
+  "name": "DiagnosticReport (EU Imaging, minimal metadata)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata",
+  "igPackage": "hl7.fhir.eu.imaging#1.0.0-ballot",
+  "baseResource": "DiagnosticReport",
+  "tested": 3,
+  "passed": 3,
+  "warnings": 4,
+  "resources": [
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[16]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-img-p1-2026-01-22",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata"
+          ]
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "dr-img-p1-2026-01-22",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD"
+              }
+            ],
+            "text": "Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "85430-7",
+                "display": "Diagnostic imaging report"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+                "code": "Medical-Imaging",
+                "display": "medical imaging studies and related imaging reports"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "36643-5"
+            }
+          ],
+          "text": "XR Chest 2 Views"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-01-22",
+        "issued": "2026-01-22T15:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Radiologie (fictional)"
+          }
+        ],
+        "conclusion": "Lungs clear. Cardiomediastinal silhouette within normal limits. No pleural effusion, no pneumothorax."
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[43]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-img-1002-2025-11-18",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata"
+          ]
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "dr-img-1002-2025-11-18",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD"
+              }
+            ],
+            "text": "Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "85430-7",
+                "display": "Diagnostic imaging report"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+                "code": "Medical-Imaging",
+                "display": "medical imaging studies and related imaging reports"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34552-0"
+            }
+          ],
+          "text": "Cardiac 2D echo panel"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18",
+        "issued": "2025-11-18T15:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "conclusion": "Normal left ventricular size and systolic function. Mild concentric remodelling. No significant valvular disease."
+      }
+    },
+    {
+      "source": "klarbefund",
+      "origin": "fhir-golden-bundle-dxa.json#entry[2]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.presentedForm[0]",
+          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "report-1",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+            "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
+            "assigner": {
+              "display": "epa-ingest (tesseract)"
+            }
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD",
+                "display": "Radiology"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "version": "2.83",
+                "code": "85430-7",
+                "display": "Diagnostic imaging report"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+                "code": "Medical-Imaging",
+                "display": "medical imaging studies and related imaging reports"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "version": "2.83",
+              "code": "38269-7",
+              "display": "Study report Skeletal system DXA"
+            }
+          ],
+          "text": "Körperzusammensetzung (DXA)"
+        },
+        "subject": {
+          "reference": "Patient/example-patient"
+        },
+        "effectiveDateTime": "2026-08-26",
+        "issued": "2026-09-13T12:00:00.000Z",
+        "performer": [
+          {
+            "reference": "Organization/performer-1",
+            "display": "Praxis Dr. Muster"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/obs-1"
+          },
+          {
+            "reference": "Observation/obs-2"
+          },
+          {
+            "reference": "Observation/obs-3"
+          }
+        ],
+        "presentedForm": [
+          {
+            "title": "laborbefund-2026-09-04.pdf"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata"
+          ]
+        }
+      }
+    }
+  ]
+}

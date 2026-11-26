@@ -132,16 +132,6 @@
               }
             }
           ],
-          "basedOn": [
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                  "valueCode": "unknown"
-                }
-              ]
-            }
-          ],
           "status": "preliminary",
           "category": [
             {
@@ -150,6 +140,25 @@
                   "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
                   "code": "RAD",
                   "display": "Radiology"
+                }
+              ]
+            },
+            {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "version": "2.83",
+                  "code": "85430-7",
+                  "display": "Diagnostic imaging report"
+                }
+              ]
+            },
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+                  "code": "Medical-Imaging",
+                  "display": "medical imaging studies and related imaging reports"
                 }
               ]
             }

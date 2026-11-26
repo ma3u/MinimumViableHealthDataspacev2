@@ -48,6 +48,13 @@ export const PROFILE_CLAIMS: readonly ProfileClaim[] = [
     category: "laboratory",
   },
   {
+    profileId: "diagnostic-report-imaging-minimal-eu",
+    canonical:
+      "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata",
+    resourceType: "DiagnosticReport",
+    category: "RAD",
+  },
+  {
     profileId: "encounter-hdr-eu",
     canonical: "http://hl7.eu/fhir/hdr/StructureDefinition/encounter-eu-hdr",
     resourceType: "Encounter",

@@ -33,6 +33,7 @@ import {
   type DocumentBundle,
   type FhirResource,
 } from "@/lib/fhir-documents/shared";
+import { medicationConcept } from "@/lib/fhir-medication";
 
 const SAMPLES = path.resolve(
   __dirname,
@@ -299,10 +300,14 @@ describe("Patient Summary", () => {
       { system: "https://ehds.mabu.red/fhir/sid/graph-node", value: "cond-1" },
     ]);
     const [request] = resources(doc, "MedicationRequest");
-    expect(
-      (request.medicationCodeableConcept as { coding: { system: string }[] })
-        .coding[0].system,
-    ).toBe("http://www.nlm.nih.gov/research/umls/rxnorm");
+    // The medication by reference to a contained Medication, which carries
+    // the code (the gematik ePA medication profile requires a reference).
+    expect(request.medicationReference).toMatchObject({
+      reference: "#medication",
+    });
+    expect(medicationConcept(request)?.coding?.[0]?.system).toBe(
+      "http://www.nlm.nih.gov/research/umls/rxnorm",
+    );
     expect(resources(doc, "MedicationStatement")[0].dosage).toEqual([
       { text: "1-0-1" },
     ]);

@@ -835,19 +835,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "Patient/P1"
+          "reference": "Patient/P1",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -871,19 +908,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P1"
+          "reference": "Patient/P1",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -901,6 +975,24 @@
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "dr-ecg-p1-2026-03-04",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "dr-ecg-p1-2026-03-04",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -940,6 +1032,29 @@
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "dr-img-p1-2026-01-22",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata"
+          ]
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "dr-img-p1-2026-01-22",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -950,6 +1065,24 @@
               }
             ],
             "text": "Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "85430-7",
+                "display": "Diagnostic imaging report"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+                "code": "Medical-Imaging",
+                "display": "medical imaging studies and related imaging reports"
+              }
+            ]
           }
         ],
         "code": {
@@ -1793,19 +1926,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "313988"
+                }
+              ],
+              "text": "Furosemide 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "313988"
-            }
-          ],
-          "text": "Furosemide 40 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P2"
+          "reference": "Patient/P2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-02-14",
         "requester": {
@@ -1829,19 +1999,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314077"
+                }
+              ],
+              "text": "Lisinopril 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314077"
-            }
-          ],
-          "text": "Lisinopril 20 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P2"
+          "reference": "Patient/P2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2010-05-17",
         "requester": {
@@ -2287,13 +2494,50 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Lisinopril 10mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Lisinopril 10mg"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10mg"
         },
         "subject": {
-          "reference": "Patient/fhir-pat-1002"
+          "reference": "Patient/fhir-pat-1002",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-10-01T09:00:00Z",
         "requester": {
@@ -2311,6 +2555,24 @@
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "dr-ecg-1002-2025-11-18",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "dr-ecg-1002-2025-11-18",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -2350,6 +2612,29 @@
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "dr-img-1002-2025-11-18",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata"
+          ]
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "dr-img-1002-2025-11-18",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "final",
         "category": [
           {
@@ -2360,6 +2645,24 @@
               }
             ],
             "text": "Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "85430-7",
+                "display": "Diagnostic imaging report"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+                "code": "Medical-Imaging",
+                "display": "medical imaging studies and related imaging reports"
+              }
+            ]
           }
         ],
         "code": {
@@ -2809,19 +3112,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "966221"
+                }
+              ],
+              "text": "Levothyroxine 50 mcg Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "966221"
-            }
-          ],
-          "text": "Levothyroxine 50 mcg Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Levothyroxine 50 mcg Tab"
         },
         "subject": {
-          "reference": "Patient/patient-2000"
+          "reference": "Patient/patient-2000",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -3311,19 +3651,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1545658"
+                }
+              ],
+              "text": "Empagliflozin 10 mg Oral Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "1545658"
-            }
-          ],
-          "text": "Empagliflozin 10 mg Oral Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Empagliflozin 10 mg Oral Tab"
         },
         "subject": {
-          "reference": "Patient/patient-2008"
+          "reference": "Patient/patient-2008",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -3354,19 +3731,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "311041"
+                }
+              ],
+              "text": "Insulin Glargine 100 U/mL"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "311041"
-            }
-          ],
-          "text": "Insulin Glargine 100 U/mL"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Insulin Glargine 100 U/mL"
         },
         "subject": {
-          "reference": "Patient/patient-2008"
+          "reference": "Patient/patient-2008",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -3505,19 +3919,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2551"
+                }
+              ],
+              "text": "Ciprofloxacin 500 mg Oral Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "completed",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2551"
-            }
-          ],
-          "text": "Ciprofloxacin 500 mg Oral Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Ciprofloxacin 500 mg Oral Tab"
         },
         "subject": {
-          "reference": "Patient/pv-pat-001"
+          "reference": "Patient/pv-pat-001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -3784,19 +4235,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "308182"
+                }
+              ],
+              "text": "Amoxicillin 250 MG Oral Capsule"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "stopped",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "308182"
-            }
-          ],
-          "text": "Amoxicillin 250 MG Oral Capsule"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Amoxicillin 250 MG Oral Capsule"
         },
         "subject": {
-          "reference": "Patient/loader-pat-0001"
+          "reference": "Patient/loader-pat-0001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-04-02T10:00:00+02:00",
         "requester": {
@@ -4169,13 +4657,50 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Ibuprofen 400 mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "unknown",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Ibuprofen 400 mg"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Ibuprofen 400 mg"
         },
         "subject": {
-          "reference": "Patient/sparse-pat-0001"
+          "reference": "Patient/sparse-pat-0001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -4214,6 +4739,24 @@
       "resource": {
         "resourceType": "DiagnosticReport",
         "id": "sparse-dr-0001",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+            "value": "sparse-dr-0001",
+            "assigner": {
+              "display": "Minimum Viable Health Dataspace FHIR facade"
+            }
+          }
+        ],
         "status": "unknown",
         "code": {
           "extension": [

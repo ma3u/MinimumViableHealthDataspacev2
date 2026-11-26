@@ -7,18 +7,13 @@
   "baseResource": "MedicationRequest",
   "tested": 47,
   "passed": 47,
-  "warnings": 70,
+  "warnings": 49,
   "resources": [
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[14]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -42,18 +37,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111",
-              "display": "Salbutamol 100 mcg inhaler"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111",
+                  "display": "Salbutamol 100 mcg inhaler"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -73,11 +105,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -99,18 +126,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076",
-              "display": "Lisinopril 10 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076",
+                  "display": "Lisinopril 10 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -128,11 +192,6 @@
       "origin": "P1-patient-summary-own-copy.json#entry[16]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -156,18 +215,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "860975",
-              "display": "Metformin 500 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 500 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "860975",
+                  "display": "Metformin 500 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 500 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 500 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2018-04-10",
         "requester": {
@@ -185,11 +281,6 @@
       "origin": "P1-patient-summary-own-copy.json#entry[17]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -213,18 +304,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617310",
-              "display": "Atorvastatin 20 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617310",
+                  "display": "Atorvastatin 20 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2024-09-12",
         "requester": {
@@ -242,11 +370,6 @@
       "origin": "P1-patient-summary.json#entry[14]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -270,18 +393,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111",
-              "display": "Salbutamol 100 mcg inhaler"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111",
+                  "display": "Salbutamol 100 mcg inhaler"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -299,11 +459,6 @@
       "origin": "P1-patient-summary.json#entry[15]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -327,18 +482,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076",
-              "display": "Lisinopril 10 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076",
+                  "display": "Lisinopril 10 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -356,11 +548,6 @@
       "origin": "P1-patient-summary.json#entry[16]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -384,18 +571,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "860975",
-              "display": "Metformin 500 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 500 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "860975",
+                  "display": "Metformin 500 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 500 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 500 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2018-04-10",
         "requester": {
@@ -413,11 +637,6 @@
       "origin": "P1-patient-summary.json#entry[17]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -441,18 +660,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617310",
-              "display": "Atorvastatin 20 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617310",
+                  "display": "Atorvastatin 20 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2024-09-12",
         "requester": {
@@ -470,11 +726,6 @@
       "origin": "P2-patient-summary.json#entry[15]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -498,18 +749,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314077",
-              "display": "Lisinopril 20 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314077",
+                  "display": "Lisinopril 20 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2010-05-17",
         "requester": {
@@ -527,11 +815,6 @@
       "origin": "P2-patient-summary.json#entry[16]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -555,18 +838,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "854905",
-              "display": "Bisoprolol 5 mg oral tablet"
-            }
-          ],
-          "text": "Bisoprolol 5 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "854905",
+                  "display": "Bisoprolol 5 mg oral tablet"
+                }
+              ],
+              "text": "Bisoprolol 5 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Bisoprolol 5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-08-03",
         "requester": {
@@ -584,11 +904,6 @@
       "origin": "P2-patient-summary.json#entry[17]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -612,18 +927,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "855332",
-              "display": "Warfarin 5 mg oral tablet"
-            }
-          ],
-          "text": "Warfarin 5 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "855332",
+                  "display": "Warfarin 5 mg oral tablet"
+                }
+              ],
+              "text": "Warfarin 5 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Warfarin 5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-08-03",
         "requester": {
@@ -641,11 +993,6 @@
       "origin": "P2-patient-summary.json#entry[18]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -669,18 +1016,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617311",
-              "display": "Atorvastatin 40 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 40 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617311",
+                  "display": "Atorvastatin 40 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2020-11-30",
         "requester": {
@@ -698,11 +1082,6 @@
       "origin": "P2-patient-summary.json#entry[19]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -726,18 +1105,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "861004",
-              "display": "Metformin 1000 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 1000 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "861004",
+                  "display": "Metformin 1000 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 1000 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 1000 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2022-01-11",
         "requester": {
@@ -755,11 +1171,6 @@
       "origin": "P2-patient-summary.json#entry[20]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -783,18 +1194,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "313988",
-              "display": "Furosemide 40 mg oral tablet"
-            }
-          ],
-          "text": "Furosemide 40 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "313988",
+                  "display": "Furosemide 40 mg oral tablet"
+                }
+              ],
+              "text": "Furosemide 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-02-14",
         "requester": {
@@ -812,11 +1260,6 @@
       "origin": "fhir-pat-1002-patient-summary.json#entry[7]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -840,11 +1283,48 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Lisinopril 10mg"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Lisinopril 10mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10mg"
         },
         "subject": {
-          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-10-01T09:00:00Z",
         "requester": {
@@ -885,18 +1365,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "966221",
-              "display": "Levothyroxine 50 mcg Tab"
-            }
-          ],
-          "text": "Levothyroxine 50 mcg Tab"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "966221",
+                  "display": "Levothyroxine 50 mcg Tab"
+                }
+              ],
+              "text": "Levothyroxine 50 mcg Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Levothyroxine 50 mcg Tab"
         },
         "subject": {
-          "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+          "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -923,11 +1440,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -941,19 +1453,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "Patient/P1"
+          "reference": "Patient/P1",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -973,11 +1522,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -991,19 +1535,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P1"
+          "reference": "Patient/P1",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -1023,11 +1604,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1041,19 +1617,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "313988"
+                }
+              ],
+              "text": "Furosemide 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "313988"
-            }
-          ],
-          "text": "Furosemide 40 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P2"
+          "reference": "Patient/P2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-02-14",
         "requester": {
@@ -1073,11 +1686,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1091,19 +1699,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314077"
+                }
+              ],
+              "text": "Lisinopril 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314077"
-            }
-          ],
-          "text": "Lisinopril 20 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P2"
+          "reference": "Patient/P2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2010-05-17",
         "requester": {
@@ -1123,11 +1768,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1141,13 +1781,50 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Lisinopril 10mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Lisinopril 10mg"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10mg"
         },
         "subject": {
-          "reference": "Patient/fhir-pat-1002"
+          "reference": "Patient/fhir-pat-1002",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-10-01T09:00:00Z",
         "requester": {
@@ -1180,19 +1857,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "966221"
+                }
+              ],
+              "text": "Levothyroxine 50 mcg Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "966221"
-            }
-          ],
-          "text": "Levothyroxine 50 mcg Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Levothyroxine 50 mcg Tab"
         },
         "subject": {
-          "reference": "Patient/patient-2000"
+          "reference": "Patient/patient-2000",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1232,19 +1946,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1545658"
+                }
+              ],
+              "text": "Empagliflozin 10 mg Oral Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "1545658"
-            }
-          ],
-          "text": "Empagliflozin 10 mg Oral Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Empagliflozin 10 mg Oral Tab"
         },
         "subject": {
-          "reference": "Patient/patient-2008"
+          "reference": "Patient/patient-2008",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1284,19 +2035,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "311041"
+                }
+              ],
+              "text": "Insulin Glargine 100 U/mL"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "311041"
-            }
-          ],
-          "text": "Insulin Glargine 100 U/mL"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Insulin Glargine 100 U/mL"
         },
         "subject": {
-          "reference": "Patient/patient-2008"
+          "reference": "Patient/patient-2008",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1336,19 +2124,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2551"
+                }
+              ],
+              "text": "Ciprofloxacin 500 mg Oral Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "completed",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2551"
-            }
-          ],
-          "text": "Ciprofloxacin 500 mg Oral Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Ciprofloxacin 500 mg Oral Tab"
         },
         "subject": {
-          "reference": "Patient/pv-pat-001"
+          "reference": "Patient/pv-pat-001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1375,11 +2200,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1393,19 +2213,56 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "308182"
+                }
+              ],
+              "text": "Amoxicillin 250 MG Oral Capsule"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "stopped",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "308182"
-            }
-          ],
-          "text": "Amoxicillin 250 MG Oral Capsule"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Amoxicillin 250 MG Oral Capsule"
         },
         "subject": {
-          "reference": "Patient/loader-pat-0001"
+          "reference": "Patient/loader-pat-0001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-04-02T10:00:00+02:00",
         "requester": {
@@ -1438,13 +2295,50 @@
             "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Ibuprofen 400 mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "unknown",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Ibuprofen 400 mg"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Ibuprofen 400 mg"
         },
         "subject": {
-          "reference": "Patient/sparse-pat-0001"
+          "reference": "Patient/sparse-pat-0001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [

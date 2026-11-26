@@ -1009,18 +1009,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "314077",
-       "display": "Lisinopril 20 mg oral tablet"
-      }
-     ],
-     "text": "Lisinopril 20 mg oral tablet"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "314077",
+         "display": "Lisinopril 20 mg oral tablet"
+        }
+       ],
+       "text": "Lisinopril 20 mg oral tablet"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Lisinopril 20 mg oral tablet"
     },
     "subject": {
-     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2010-05-17",
     "requester": {
@@ -1051,18 +1088,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "854905",
-       "display": "Bisoprolol 5 mg oral tablet"
-      }
-     ],
-     "text": "Bisoprolol 5 mg oral tablet"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "854905",
+         "display": "Bisoprolol 5 mg oral tablet"
+        }
+       ],
+       "text": "Bisoprolol 5 mg oral tablet"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Bisoprolol 5 mg oral tablet"
     },
     "subject": {
-     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2019-08-03",
     "requester": {
@@ -1093,18 +1167,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "855332",
-       "display": "Warfarin 5 mg oral tablet"
-      }
-     ],
-     "text": "Warfarin 5 mg oral tablet"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "855332",
+         "display": "Warfarin 5 mg oral tablet"
+        }
+       ],
+       "text": "Warfarin 5 mg oral tablet"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Warfarin 5 mg oral tablet"
     },
     "subject": {
-     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2019-08-03",
     "requester": {
@@ -1135,18 +1246,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "617311",
-       "display": "Atorvastatin 40 mg oral tablet"
-      }
-     ],
-     "text": "Atorvastatin 40 mg oral tablet"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "617311",
+         "display": "Atorvastatin 40 mg oral tablet"
+        }
+       ],
+       "text": "Atorvastatin 40 mg oral tablet"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Atorvastatin 40 mg oral tablet"
     },
     "subject": {
-     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2020-11-30",
     "requester": {
@@ -1177,18 +1325,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "861004",
-       "display": "Metformin 1000 mg oral tablet"
-      }
-     ],
-     "text": "Metformin 1000 mg oral tablet"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "861004",
+         "display": "Metformin 1000 mg oral tablet"
+        }
+       ],
+       "text": "Metformin 1000 mg oral tablet"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Metformin 1000 mg oral tablet"
     },
     "subject": {
-     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2022-01-11",
     "requester": {
@@ -1219,18 +1404,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "313988",
-       "display": "Furosemide 40 mg oral tablet"
-      }
-     ],
-     "text": "Furosemide 40 mg oral tablet"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "313988",
+         "display": "Furosemide 40 mg oral tablet"
+        }
+       ],
+       "text": "Furosemide 40 mg oral tablet"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Furosemide 40 mg oral tablet"
     },
     "subject": {
-     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+     "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2023-02-14",
     "requester": {

@@ -101,6 +101,25 @@ const ORGANISM_IDENTIFIED: Coding = loinc(
  */
 const LAB_STUDIES = (): Coding => loinc("26436-6", "Laboratory studies (set)");
 /**
+ * The two categories the HL7 Europe imaging report wants on a radiology report
+ * (DiagnosticReportEuImaging and its minimal-metadata form), each a
+ * CodeableConcept of its own: LOINC's "Diagnostic imaging report" and the
+ * EEHRxF priority category Medical-Imaging. They stand next to v2-0074 `RAD`.
+ */
+export const IMAGING_REPORT_CATEGORIES = (): { coding: Coding[] }[] => [
+  { coding: [loinc("85430-7", "Diagnostic imaging report")] },
+  {
+    coding: [
+      {
+        system:
+          "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+        code: "Medical-Imaging",
+        display: "medical imaging studies and related imaging reports",
+      },
+    ],
+  },
+];
+/**
  * Where the identifiers this writer assigns live. They name this
  * transcription of a result or report, not the lab's own numbers, which are
  * not on what we read.
@@ -500,6 +519,7 @@ export function buildBundle(
   const kind = ecg ? undefined : reportKind(values);
   // A laboratory report proper: no ECG and none of the other report kinds.
   const labReport = !ecg && kind === undefined;
+  const imagingReport = !ecg && kind?.section === "RAD";
   const report: FhirResource = {
     resourceType: "DiagnosticReport",
     id: "report-1",
@@ -508,17 +528,23 @@ export function buildBundle(
     identifier: identifier("FILL", "Filler Identifier", "report/1"),
     // The order the report answers. A printed report does not carry it, so
     // the reference says it is unknown rather than inventing one; the MII lab
-    // profile requires the element.
-    basedOn: [
-      {
-        extension: [
-          {
-            url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-            valueCode: "unknown",
-          },
-        ],
-      },
-    ],
+    // profile requires the element. A radiology report leaves it out: the EU
+    // imaging report accepts an order only as a reference or an accession
+    // number, and the element is optional there.
+    ...(imagingReport
+      ? {}
+      : {
+          basedOn: [
+            {
+              extension: [
+                {
+                  url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  valueCode: "unknown",
+                },
+              ],
+            },
+          ],
+        }),
     status,
     category: [
       {
@@ -539,6 +565,7 @@ export function buildBundle(
           ...(labReport ? [LAB_STUDIES()] : []),
         ],
       },
+      ...(imagingReport ? IMAGING_REPORT_CATEGORIES() : []),
     ],
     code: {
       coding: [

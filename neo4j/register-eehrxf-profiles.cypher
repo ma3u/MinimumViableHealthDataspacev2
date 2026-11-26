@@ -19,7 +19,7 @@ MATCH (c:EEHRxFCategory) WHERE NOT c.categoryId IN ['patient-summary', 'eprescri
 DETACH DELETE c;
 
 // Profiles the config no longer lists
-MATCH (p:EEHRxFProfile) WHERE p.profileId IS NOT NULL AND NOT p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu']
+MATCH (p:EEHRxFProfile) WHERE p.profileId IS NOT NULL AND NOT p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-imaging-minimal-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu']
 DETACH DELETE p;
 
 MERGE (c:EEHRxFCategory {categoryId: 'patient-summary'})
@@ -65,10 +65,10 @@ SET c.name = 'Medical Imaging Studies and Reports',
     c.description = 'Imaging studies and the related imaging reports',
     c.ehdsDeadline = '2031-03',
     c.ehdsGroup = 2,
-    c.status = 'none',
-    c.profileCount = 2,
+    c.status = 'partial',
+    c.profileCount = 3,
     c.tested = 3,
-    c.passed = 0;
+    c.passed = 3;
 
 MERGE (c:EEHRxFCategory {categoryId: 'laboratory-results'})
 SET c.name = 'Medical Test Results',
@@ -284,13 +284,31 @@ SET p.name = 'DiagnosticReport (EU Imaging)',
     p.url = 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/StructureDefinition-DiagnosticReportEuImaging.html',
     p.baseResource = 'DiagnosticReport',
     p.description = null,
-    p.tested = 3,
+    p.tested = 0,
     p.passed = 0,
-    p.failed = 3,
-    p.topIssues = ['3x DiagnosticReport: DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)', '3x DiagnosticReport: Slice \'...\' for extension \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to t', '3x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice', '2x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)'],
+    p.failed = 0,
+    p.topIssues = [],
     p.referenceTested = 0,
     p.referencePassed = 0,
-    p.coverage = 'none';
+    p.coverage = 'untested';
+
+MERGE (p:EEHRxFProfile {profileId: 'diagnostic-report-imaging-minimal-eu'})
+SET p.name = 'DiagnosticReport (EU Imaging, minimal metadata)',
+    p.igName = 'HL7 Europe Imaging Report',
+    p.igPackage = 'hl7.fhir.eu.imaging#1.0.0-ballot',
+    p.fhirVersion = 'R4',
+    p.status = 'Ballot',
+    p.canonical = 'http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata',
+    p.url = 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/StructureDefinition-DiagnosticReportEuImagingMinimalMetadata.html',
+    p.baseResource = 'DiagnosticReport',
+    p.description = null,
+    p.tested = 3,
+    p.passed = 3,
+    p.failed = 0,
+    p.topIssues = [],
+    p.referenceTested = 0,
+    p.referencePassed = 0,
+    p.coverage = 'full';
 
 MERGE (p:EEHRxFProfile {profileId: 'diagnostic-report-lab-eu'})
 SET p.name = 'DiagnosticReport (EU Lab)',
@@ -383,7 +401,7 @@ SET p.name = 'Encounter (EU HDR)',
     p.coverage = 'full';
 
 // Category links of the configured profiles: drop, then declare again
-MATCH (p:EEHRxFProfile)-[r:PART_OF_CATEGORY]->(:EEHRxFCategory) WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] DELETE r;
+MATCH (p:EEHRxFProfile)-[r:PART_OF_CATEGORY]->(:EEHRxFCategory) WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-imaging-minimal-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] DELETE r;
 
 MATCH (p:EEHRxFProfile {profileId: 'patient-eu-core'}), (c:EEHRxFCategory {categoryId: 'patient-summary'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 MATCH (p:EEHRxFProfile {profileId: 'patient-eu-core'}), (c:EEHRxFCategory {categoryId: 'laboratory-results'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
@@ -398,6 +416,7 @@ MATCH (p:EEHRxFProfile {profileId: 'medication-request-eu'}), (c:EEHRxFCategory 
 MATCH (p:EEHRxFProfile {profileId: 'medication-dispense-eu'}), (c:EEHRxFCategory {categoryId: 'edispensation'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 MATCH (p:EEHRxFProfile {profileId: 'imaging-study-eu'}), (c:EEHRxFCategory {categoryId: 'medical-imaging'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 MATCH (p:EEHRxFProfile {profileId: 'diagnostic-report-imaging-eu'}), (c:EEHRxFCategory {categoryId: 'medical-imaging'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
+MATCH (p:EEHRxFProfile {profileId: 'diagnostic-report-imaging-minimal-eu'}), (c:EEHRxFCategory {categoryId: 'medical-imaging'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 MATCH (p:EEHRxFProfile {profileId: 'diagnostic-report-lab-eu'}), (c:EEHRxFCategory {categoryId: 'laboratory-results'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 MATCH (p:EEHRxFProfile {profileId: 'observation-results-lab-eu'}), (c:EEHRxFCategory {categoryId: 'laboratory-results'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 MATCH (p:EEHRxFProfile {profileId: 'bundle-lab-report-eu'}), (c:EEHRxFCategory {categoryId: 'laboratory-results'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
@@ -405,9 +424,9 @@ MATCH (p:EEHRxFProfile {profileId: 'composition-hdr-eu'}), (c:EEHRxFCategory {ca
 MATCH (p:EEHRxFProfile {profileId: 'encounter-hdr-eu'}), (c:EEHRxFCategory {categoryId: 'hospital-discharge'}) MERGE (p)-[:PART_OF_CATEGORY]->(c);
 
 // Every profile builds on the EU core Patient except the Patient itself
-MATCH (p:EEHRxFProfile)-[r:DEPENDS_ON]->(:EEHRxFProfile) WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] DELETE r;
+MATCH (p:EEHRxFProfile)-[r:DEPENDS_ON]->(:EEHRxFProfile) WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-imaging-minimal-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] DELETE r;
 MATCH (p:EEHRxFProfile), (dep:EEHRxFProfile {profileId: 'patient-eu-core'})
-WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] AND p.profileId <> 'patient-eu-core' AND p.baseResource <> 'Bundle'
+WHERE p.profileId IN ['patient-eu-core', 'practitioner-eu-core', 'organization-eu-core', 'practitioner-role-eu-core', 'condition-eu-core', 'composition-eps-eu', 'bundle-eps-eu', 'medication-request-eu', 'medication-dispense-eu', 'imaging-study-eu', 'diagnostic-report-imaging-eu', 'diagnostic-report-imaging-minimal-eu', 'diagnostic-report-lab-eu', 'observation-results-lab-eu', 'bundle-lab-report-eu', 'composition-hdr-eu', 'encounter-hdr-eu'] AND p.profileId <> 'patient-eu-core' AND p.baseResource <> 'Bundle'
 MERGE (p)-[:DEPENDS_ON]->(dep);
 
 // Guides the hub plans to track that are not (yet) validated: new HL7 Europe drafts
@@ -454,7 +473,7 @@ MERGE (c)-[:DEFINED_IN]->(a);
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
     v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
-    v.inputsDigest = '06787a03b6b987ac',
+    v.inputsDigest = '7e1ff5be7339b9b4',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
     v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'facade: Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'reference: Reference examples with fictional data for profiles the hub produces nothing for; validated, never counted', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],

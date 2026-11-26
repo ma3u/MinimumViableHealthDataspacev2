@@ -888,18 +888,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111",
-              "display": "Salbutamol 100 mcg inhaler"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111",
+                  "display": "Salbutamol 100 mcg inhaler"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -930,18 +967,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076",
-              "display": "Lisinopril 10 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076",
+                  "display": "Lisinopril 10 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -972,18 +1046,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "860975",
-              "display": "Metformin 500 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 500 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "860975",
+                  "display": "Metformin 500 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 500 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 500 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2018-04-10",
         "requester": {
@@ -1014,18 +1125,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617310",
-              "display": "Atorvastatin 20 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617310",
+                  "display": "Atorvastatin 20 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2024-09-12",
         "requester": {
