@@ -158,24 +158,114 @@
       "system": "urn:ietf:rfc:3986",
       "value": "urn:uuid:5dd91b73-4262-5318-ad26-4cbb254abdad"
     },
-    "type": "collection",
+    "type": "document",
     "timestamp": "2026-09-13T12:00:00.000Z",
     "entry": [
       {
         "fullUrl": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57",
         "resource": {
-          "resourceType": "Patient",
-          "id": "example-patient"
+          "resourceType": "Composition",
+          "id": "composition-1",
+          "identifier": {
+            "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+            "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb"
+          },
+          "status": "preliminary",
+          "type": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "version": "2.83",
+                "code": "11502-2",
+                "display": "Laboratory report"
+              }
+            ]
+          },
+          "subject": {
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+          },
+          "date": "2026-09-13T12:00:00.000Z",
+          "author": [
+            {
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+              "display": "Praxis Dr. Muster"
+            }
+          ],
+          "title": "Laborbefund",
+          "section": [
+            {
+              "title": "Laboratory results",
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "26436-6",
+                    "display": "Laboratory studies (set)"
+                  }
+                ]
+              },
+              "text": {
+                "status": "generated",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>LDL-Cholesterin</li><li>HbA1c</li><li>NT-proBNP</li><li>Ferritin</li><li>CRP</li><li>Akkermansia muciniphila</li></ul></div>"
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
+                },
+                {
+                  "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
+                },
+                {
+                  "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
+                },
+                {
+                  "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
+                },
+                {
+                  "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
+                },
+                {
+                  "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
+                }
+              ]
+            }
+          ]
         }
       },
       {
         "fullUrl": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53",
         "resource": {
+          "resourceType": "Patient",
+          "id": "example-patient",
+          "name": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "masked"
+                }
+              ]
+            }
+          ],
+          "_birthDate": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "masked"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f",
+        "resource": {
           "resourceType": "DocumentReference",
           "id": "source-document",
           "status": "current",
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "date": "2026-09-13T12:00:00.000Z",
           "description": "laborbefund-2026-09-04.pdf",
@@ -190,7 +280,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f",
+        "fullUrl": "urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40",
         "resource": {
           "resourceType": "DiagnosticReport",
           "id": "report-1",
@@ -252,48 +342,53 @@
             "text": "Laborbefund"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
           "result": [
             {
-              "reference": "Observation/obs-1"
+              "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
             },
             {
-              "reference": "Observation/obs-2"
+              "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
             },
             {
-              "reference": "Observation/obs-3"
+              "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
             },
             {
-              "reference": "Observation/obs-4"
+              "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
             },
             {
-              "reference": "Observation/obs-5"
+              "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
             },
             {
-              "reference": "Observation/obs-6"
-            },
-            {
-              "reference": "Observation/obs-7"
+              "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
             }
           ],
           "presentedForm": [
             {
               "title": "laborbefund-2026-09-04.pdf"
             }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+              "valueReference": {
+                "reference": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57"
+              }
+            }
           ]
         }
       },
       {
-        "fullUrl": "urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40",
+        "fullUrl": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-1",
@@ -363,13 +458,13 @@
             "text": "LDL-Cholesterin"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -393,7 +488,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656",
+        "fullUrl": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-2",
@@ -467,13 +562,13 @@
             "text": "HbA1c"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -503,7 +598,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8",
+        "fullUrl": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-3",
@@ -573,13 +668,13 @@
             "text": "NT-proBNP"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -602,7 +697,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430",
+        "fullUrl": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-4",
@@ -668,13 +763,13 @@
             "text": "Ferritin"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -698,7 +793,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d",
+        "fullUrl": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-5",
@@ -764,13 +859,13 @@
             "text": "CRP"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -788,7 +883,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b",
+        "fullUrl": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-6",
@@ -860,13 +955,13 @@
             "text": "Akkermansia muciniphila"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -903,7 +998,7 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681",
+        "fullUrl": "urn:uuid:1699b266-eb6e-578c-aee6-d3fdc6079750",
         "resource": {
           "resourceType": "Observation",
           "id": "obs-7",
@@ -971,13 +1066,13 @@
             "text": "Körpergewicht"
           },
           "subject": {
-            "reference": "Patient/example-patient"
+            "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
           },
           "effectiveDateTime": "2026-09-04",
           "issued": "2026-09-13T12:00:00.000Z",
           "performer": [
             {
-              "reference": "Organization/performer-1",
+              "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
               "display": "Praxis Dr. Muster"
             }
           ],
@@ -990,34 +1085,34 @@
         }
       },
       {
-        "fullUrl": "urn:uuid:1699b266-eb6e-578c-aee6-d3fdc6079750",
+        "fullUrl": "urn:uuid:d4ef62bd-92f6-5468-a932-3d860678c814",
         "resource": {
           "resourceType": "Provenance",
           "id": "provenance-1",
           "target": [
             {
-              "reference": "DiagnosticReport/report-1"
+              "reference": "urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40"
             },
             {
-              "reference": "Observation/obs-1"
+              "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
             },
             {
-              "reference": "Observation/obs-2"
+              "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
             },
             {
-              "reference": "Observation/obs-3"
+              "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
             },
             {
-              "reference": "Observation/obs-4"
+              "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
             },
             {
-              "reference": "Observation/obs-5"
+              "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
             },
             {
-              "reference": "Observation/obs-6"
+              "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
             },
             {
-              "reference": "Observation/obs-7"
+              "reference": "urn:uuid:1699b266-eb6e-578c-aee6-d3fdc6079750"
             }
           ],
           "recorded": "2026-09-13T12:00:00.000Z",
@@ -1050,14 +1145,14 @@
             {
               "role": "source",
               "what": {
-                "reference": "DocumentReference/source-document"
+                "reference": "urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f"
               }
             }
           ]
         }
       },
       {
-        "fullUrl": "urn:uuid:d4ef62bd-92f6-5468-a932-3d860678c814",
+        "fullUrl": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
         "resource": {
           "resourceType": "Organization",
           "id": "performer-1",

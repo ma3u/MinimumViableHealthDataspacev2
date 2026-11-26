@@ -107,6 +107,8 @@ const LAB_STUDIES = (): Coding => loinc("26436-6", "Laboratory studies (set)");
  */
 export const IDENTIFIER_BASE = "https://ehds.mabu.red/fhir/sid";
 const V2_0203 = "http://terminology.hl7.org/CodeSystem/v2-0203";
+const DATA_ABSENT_REASON =
+  "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 
 /**
  * Observation status by provenance.
@@ -221,7 +223,8 @@ interface FhirResource {
 export interface FhirBundle {
   resourceType: "Bundle";
   identifier: { system: string; value: string };
-  type: "collection";
+  /** A document for a laboratory report (the EU lab report), else a collection. */
+  type: "collection" | "document";
   timestamp: string;
   entry: { fullUrl: string; resource: FhirResource }[];
 }
@@ -273,6 +276,34 @@ function provenanceExtensions(
   return ext;
 }
 
+/** Every `reference` that names an entry by `Type/id`, as that entry's fullUrl. */
+function withFullUrls(value: unknown, urls: Map<string, string>): unknown {
+  if (Array.isArray(value)) return value.map((v) => withFullUrls(v, urls));
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] =
+        k === "reference" && typeof v === "string" && urls.has(v)
+          ? urls.get(v)
+          : withFullUrls(v, urls);
+    }
+    return out;
+  }
+  return value;
+}
+
+const escapeXml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** A section's narrative: the printed labels of its results, as a list. */
+export function narrative(labels: string[]): string {
+  return (
+    '<div xmlns="http://www.w3.org/1999/xhtml"><ul>' +
+    labels.map((l) => `<li>${escapeXml(l)}</li>`).join("") +
+    "</ul></div>"
+  );
+}
+
 export interface BuildOptions {
   meta: ReportMeta;
   source: TextSource;
@@ -318,11 +349,19 @@ export function buildBundle(
       ]
     : undefined;
 
+  // Withheld, and saying so (data-absent-reason `masked`): FHIR's way to
+  // state that a value exists and is kept back for privacy. The EU core
+  // Patient requires a name and a birth date; none is invented.
+  const masked = {
+    extension: [{ url: DATA_ABSENT_REASON, valueCode: "masked" }],
+  };
   const patient: FhirResource = {
     resourceType: "Patient",
     id: meta.patientId,
     // No name, no insurance number, no birth date: this bundle is an extraction
     // artefact, and the ePA already knows who its owner is.
+    name: [masked],
+    _birthDate: masked,
   };
 
   const docRef: FhirResource = {
@@ -521,11 +560,59 @@ export function buildBundle(
     effectiveDateTime: meta.effectiveDateTime,
     issued: now,
     ...(performer ? { performer } : {}),
-    result: observations.map(
-      (o) => ({ reference: `Observation/${o.id}` }) satisfies Reference,
-    ),
+    // A laboratory report's results are its laboratory values: a weight or a
+    // blood pressure printed on the same sheet stays in the bundle, linked by
+    // the Provenance, but is not a lab result (the HL7 Europe lab report).
+    result: observations
+      .filter((_o, i) => !labReport || categoryOf(values[i]) === "laboratory")
+      .map((o) => ({ reference: `Observation/${o.id}` }) satisfies Reference),
     presentedForm: [{ title: source.sourceDocument }],
   };
+
+  // A laboratory report travels as the EU laboratory report: a document whose
+  // Composition comes first, carries the report's identifier and type, and
+  // lists the results; the DiagnosticReport points back to it (the R5
+  // extension the HL7 Europe guide uses on R4). Other kinds stay collections.
+  const composition: FhirResource | undefined = labReport
+    ? {
+        resourceType: "Composition",
+        id: "composition-1",
+        identifier: {
+          system: (report.identifier as { system: string }[])[0].system,
+          value: (report.identifier as { value: string }[])[0].value,
+        },
+        status,
+        type: { coding: [(report.code as { coding: Coding[] }).coding[0]] },
+        subject,
+        date: now,
+        author: performer ?? [{ display: assigner.display }],
+        title: meta.title ?? "Laboratory report",
+        section: [
+          {
+            title: "Laboratory results",
+            code: { coding: [LAB_STUDIES()] },
+            // The section in words, as a reader without FHIR sees it.
+            text: {
+              status: "generated",
+              div: narrative(
+                values
+                  .filter((v) => categoryOf(v) === "laboratory")
+                  .map((v) => v.label),
+              ),
+            },
+            entry: report.result as Reference[],
+          },
+        ],
+      }
+    : undefined;
+  if (composition) {
+    report.extension = [
+      {
+        url: "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+        valueReference: { reference: `Composition/${composition.id}` },
+      },
+    ];
+  }
 
   const provenance: FhirResource = {
     resourceType: "Provenance",
@@ -572,6 +659,7 @@ export function buildBundle(
   // The Organization last, so every other entry keeps the position, and so
   // the fullUrl, it had before there was one.
   const resources = [
+    ...(composition ? [composition] : []),
     patient,
     docRef,
     report,
@@ -579,6 +667,23 @@ export function buildBundle(
     provenance,
     ...(organization ? [organization] : []),
   ];
+  const entries = resources.map((resource, index) => ({
+    fullUrl: `urn:uuid:${uuidV5(name(`entry/${index}`))}`,
+    resource,
+  }));
+  // In a document every reference resolves to an entry's fullUrl: a relative
+  // `Type/id` cannot be matched against a urn:uuid (FHIR R4, Bundle,
+  // resolving references). A collection keeps the relative references.
+  if (composition) {
+    const urls = new Map(
+      entries.map((e) => [
+        `${e.resource.resourceType}/${e.resource.id}`,
+        e.fullUrl,
+      ]),
+    );
+    for (const e of entries)
+      e.resource = withFullUrls(e.resource, urls) as FhirResource;
+  }
   return {
     resourceType: "Bundle",
     // The bundle's own identity, named like its entries.
@@ -586,16 +691,13 @@ export function buildBundle(
       system: "urn:ietf:rfc:3986",
       value: `urn:uuid:${uuidV5(name("bundle"))}`,
     },
-    type: "collection",
+    type: composition ? "document" : "collection",
     timestamp: now,
     // A urn:uuid must be a UUID (#1144). Named by the report it comes from
     // (timestamp, source document) and the entry's position, so the same
     // report gives the same bundle. Neither the patient id nor a resource id
     // goes into the name: the Patient's id is the patient id, and no
     // identifier should go into SHA-1 (CodeQL js/weak-cryptographic-algorithm).
-    entry: resources.map((resource, index) => ({
-      fullUrl: `urn:uuid:${uuidV5(name(`entry/${index}`))}`,
-      resource,
-    })),
+    entry: entries,
   };
 }

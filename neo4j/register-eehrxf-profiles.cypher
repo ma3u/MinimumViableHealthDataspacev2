@@ -32,7 +32,7 @@ SET c.name = 'Patient Summaries',
     c.status = 'partial',
     c.profileCount = 7,
     c.tested = 76,
-    c.passed = 67;
+    c.passed = 76;
 
 MERGE (c:EEHRxFCategory {categoryId: 'eprescription'})
 SET c.name = 'ePrescriptions',
@@ -79,8 +79,8 @@ SET c.name = 'Medical Test Results',
     c.ehdsGroup = 2,
     c.status = 'partial',
     c.profileCount = 4,
-    c.tested = 80,
-    c.passed = 40;
+    c.tested = 71,
+    c.passed = 51;
 
 MERGE (c:EEHRxFCategory {categoryId: 'hospital-discharge'})
 SET c.name = 'Discharge Reports',
@@ -92,7 +92,7 @@ SET c.name = 'Discharge Reports',
     c.status = 'partial',
     c.profileCount = 3,
     c.tested = 60,
-    c.passed = 51;
+    c.passed = 60;
 
 MERGE (p:EEHRxFProfile {profileId: 'patient-eu-core'})
 SET p.name = 'Patient (EU core)',
@@ -105,10 +105,10 @@ SET p.name = 'Patient (EU core)',
     p.baseResource = 'Patient',
     p.description = null,
     p.tested = 29,
-    p.passed = 20,
-    p.failed = 9,
-    p.topIssues = ['9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)', '9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)'],
-    p.coverage = 'partial';
+    p.passed = 29,
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 
 MERGE (p:EEHRxFProfile {profileId: 'practitioner-eu-core'})
 SET p.name = 'Practitioner (EU core)',
@@ -280,11 +280,11 @@ SET p.name = 'DiagnosticReport (EU Lab)',
     p.url = 'https://hl7.eu/fhir/laboratory/StructureDefinition-DiagnosticReport-eu-lab.html',
     p.baseResource = 'DiagnosticReport',
     p.description = null,
-    p.tested = 2,
-    p.passed = 0,
-    p.failed = 2,
-    p.topIssues = ['2x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)', '2x DiagnosticReport: Slice \'...\' for extension \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0). Note that other slices are allowed in addition to this re'],
-    p.coverage = 'none';
+    p.tested = 1,
+    p.passed = 1,
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 
 MERGE (p:EEHRxFProfile {profileId: 'observation-results-lab-eu'})
 SET p.name = 'Observation results (EU Lab)',
@@ -312,11 +312,11 @@ SET p.name = 'Bundle (EU Lab Report)',
     p.url = 'https://hl7.eu/fhir/laboratory/StructureDefinition-Bundle-eu-lab.html',
     p.baseResource = 'Bundle',
     p.description = null,
-    p.tested = 12,
-    p.passed = 3,
-    p.failed = 9,
-    p.topIssues = ['9x Bundle.type: Value is \'collection\' but is fixed to \'document\' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type', '9x Bundle: Constraint failed: dr-comp-identifier: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Constraint failed: dr-comp-type: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Constraint failed: one-comp: \'...\' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)', '9x Bundle: Slice \'...\': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice'],
-    p.coverage = 'partial';
+    p.tested = 4,
+    p.passed = 4,
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 
 MERGE (p:EEHRxFProfile {profileId: 'composition-hdr-eu'})
 SET p.name = 'Composition (EU HDR)',
@@ -422,7 +422,7 @@ MERGE (c)-[:DEFINED_IN]->(a);
 MERGE (v:EEHRxFValidationRun {runId: 'current'})
 SET v.igUrls = ['https://hl7.eu/fhir/base/', 'https://hl7.eu/fhir/eps/1.0.0-ballot/', 'https://hl7.eu/fhir/hdr/', 'https://hl7.eu/fhir/imaging/1.0.0-ballot/en/', 'https://hl7.eu/fhir/laboratory/', 'https://hl7.eu/fhir/mpd/'],
     v.igs = ['hl7.fhir.eu.base#2.0.1', 'hl7.fhir.eu.eps#1.0.0-ballot', 'hl7.fhir.eu.hdr#1.0.0', 'hl7.fhir.eu.imaging#1.0.0-ballot', 'hl7.fhir.eu.laboratory#2.1.0', 'hl7.fhir.eu.mpd#1.0.0'],
-    v.inputsDigest = '5dbbe162b35ede24',
+    v.inputsDigest = '8d4434abe7d14bab',
     v.maxPerSource = 20,
     v.passRule = 'a resource passes when the validator reports no error or fatal issue',
     v.sources = ['documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients', 'facade: Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows', 'klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)', 'synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads'],

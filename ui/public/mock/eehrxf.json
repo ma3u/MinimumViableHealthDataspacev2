@@ -78,7 +78,7 @@
       "totalResources": 2588,
       "profileCount": 7,
       "tested": 76,
-      "passed": 67,
+      "passed": 76,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -158,14 +158,11 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
-          "coverage": "partial",
+          "coverage": "full",
           "tested": 29,
-          "passed": 20,
-          "failed": 9,
-          "topIssues": [
-            "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)"
-          ],
+          "passed": 29,
+          "failed": 0,
+          "topIssues": [],
           "resourceCount": 167
         },
         {
@@ -216,7 +213,7 @@
       "totalResources": 5628,
       "profileCount": 3,
       "tested": 60,
-      "passed": 51,
+      "passed": 60,
       "profiles": [
         {
           "profileId": "composition-hdr-eu",
@@ -262,14 +259,11 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
-          "coverage": "partial",
+          "coverage": "full",
           "tested": 29,
-          "passed": 20,
-          "failed": 9,
-          "topIssues": [
-            "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)"
-          ],
+          "passed": 29,
+          "failed": 0,
+          "topIssues": [],
           "resourceCount": 167
         }
       ]
@@ -285,8 +279,8 @@
       "status": "partial",
       "totalResources": 37880,
       "profileCount": 4,
-      "tested": 80,
-      "passed": 40,
+      "tested": 71,
+      "passed": 51,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -298,17 +292,11 @@
           "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Bundle-eu-lab.html",
           "baseResource": "Bundle",
-          "coverage": "partial",
-          "tested": 12,
-          "passed": 3,
-          "failed": 9,
-          "topIssues": [
-            "9x Bundle.type: Value is 'collection' but is fixed to 'document' in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0#Bundle.type",
-            "9x Bundle: Constraint failed: dr-comp-identifier: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-            "9x Bundle: Constraint failed: dr-comp-type: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-            "9x Bundle: Constraint failed: one-comp: '...' (defined in http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab)",
-            "9x Bundle: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab|2.1.0). Note that other slices are allowed in addition to this required slice"
-          ],
+          "coverage": "full",
+          "tested": 4,
+          "passed": 4,
+          "failed": 0,
+          "topIssues": [],
           "resourceCount": 0
         },
         {
@@ -321,14 +309,11 @@
           "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-DiagnosticReport-eu-lab.html",
           "baseResource": "DiagnosticReport",
-          "coverage": "none",
-          "tested": 2,
-          "passed": 0,
-          "failed": 2,
-          "topIssues": [
-            "2x DiagnosticReport: DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0)",
-            "2x DiagnosticReport: Slice '...' for extension '...': a matching slice is required, but not found (from http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab|2.1.0). Note that other slices are allowed in addition to this re"
-          ],
+          "coverage": "full",
+          "tested": 1,
+          "passed": 1,
+          "failed": 0,
+          "topIssues": [],
           "resourceCount": 0
         },
         {
@@ -360,14 +345,11 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
-          "coverage": "partial",
+          "coverage": "full",
           "tested": 29,
-          "passed": 20,
-          "failed": 9,
-          "topIssues": [
-            "9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)",
-            "9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)"
-          ],
+          "passed": 29,
+          "failed": 0,
+          "topIssues": [],
           "resourceCount": 167
         }
       ]
@@ -433,10 +415,10 @@
     "totalCategories": 6,
     "totalProfiles": 16,
     "testedProfiles": 10,
-    "passingProfiles": 5,
-    "resourcesTested": 192,
-    "resourcesPassed": 149,
-    "passRatePercent": 78,
+    "passingProfiles": 8,
+    "resourcesTested": 183,
+    "resourcesPassed": 160,
+    "passRatePercent": 87,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -482,7 +464,7 @@
       "klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "5dbbe162b35ede24"
+    "inputsDigest": "8d4434abe7d14bab"
   },
   "planned": [
     {

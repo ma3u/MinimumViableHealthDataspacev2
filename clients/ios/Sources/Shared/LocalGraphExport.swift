@@ -29,7 +29,13 @@ public enum LocalGraphExport {
       guard var resource = entries[index]["resource"] as? [String: Any],
         resource["resourceType"] as? String == "Patient"
       else { continue }
-      if let birthYear { resource["birthDate"] = String(format: "%04d", birthYear) }
+      if let birthYear {
+        resource["birthDate"] = String(format: "%04d", birthYear)
+        // The writer marks the birth date as withheld; once the person shares
+        // the year, it is no longer withheld (a value and a data-absent
+        // reason together are invalid FHIR).
+        resource["_birthDate"] = nil
+      }
       if sex != .any { resource["gender"] = sex.rawValue }
       entries[index]["resource"] = resource
     }

@@ -104,11 +104,11 @@ SET p.name = 'DiagnosticReport (MII KDS Laborbefund)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab',
     p.baseResource = 'DiagnosticReport',
     p.fhirVersion = 'R4',
-    p.tested = 2,
+    p.tested = 1,
     p.passed = 1,
-    p.failed = 1,
-    p.topIssues = ['1x DiagnosticReport.code: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in', '1x DiagnosticReport: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi'],
-    p.coverage = 'partial';
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 MATCH (p:NationalProfile {profileId: 'kds-lab-diagnostic-report-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-lab-diagnostic-report-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);
 MATCH (p:NationalProfile {profileId: 'kds-lab-diagnostic-report-de'}), (e:EEHRxFProfile {profileId: 'diagnostic-report-lab-eu'}) MERGE (p)-[:CORRESPONDS_TO]->(e);

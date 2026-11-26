@@ -53,7 +53,8 @@ class Filters(unittest.TestCase):
 
         collection = {"resourceType": "Bundle", "type": "collection", "entry": [{"resource": {"resourceType": "Patient"}}]}
         self.assertTrue(validate.matches_filter(doc("11502-2"), "laboratory-report-bundle"))
-        self.assertTrue(validate.matches_filter(collection, "laboratory-report-bundle"))
+        # The writer's other report kinds are collections, no EU lab report.
+        self.assertFalse(validate.matches_filter(collection, "laboratory-report-bundle"))
         self.assertFalse(validate.matches_filter(doc("60591-5"), "laboratory-report-bundle"))
 
     def test_unknown_filter_is_an_error(self):
@@ -197,7 +198,11 @@ class Config(unittest.TestCase):
 
 class LabBundleFilter(unittest.TestCase):
     def test_a_bundle_counts_as_lab_only_with_a_lab_report_in_it(self):
-        lab = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "LAB"}]}]}
+        lab = {
+            "resourceType": "DiagnosticReport",
+            "category": [{"coding": [{"code": "LAB"}]}],
+            "code": {"coding": [{"code": "11502-2"}]},
+        }
         ecg = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "EC"}]}]}
         self.assertTrue(
             validate.matches_filter({"resourceType": "Bundle", "entry": [{"resource": lab}]}, "laboratory-bundle")
@@ -205,6 +210,17 @@ class LabBundleFilter(unittest.TestCase):
         self.assertFalse(
             validate.matches_filter({"resourceType": "Bundle", "entry": [{"resource": ecg}]}, "laboratory-bundle")
         )
+
+
+class LabReportFilter(unittest.TestCase):
+    def test_a_lab_report_needs_category_lab_and_loinc_11502_2(self):
+        def dr(cat, code):
+            return {"category": [{"coding": [{"code": cat}]}], "code": {"coding": [{"code": code}]}}
+
+        self.assertTrue(validate.matches_filter(dr("LAB", "11502-2"), "laboratory-report"))
+        # A CGM summary sits in v2-0074 LAB but is no laboratory report.
+        self.assertFalse(validate.matches_filter(dr("LAB", "107930-0"), "laboratory-report"))
+        self.assertFalse(validate.matches_filter(dr("EC", "11502-2"), "laboratory-report"))
 
 
 class FacadeSource(unittest.TestCase):

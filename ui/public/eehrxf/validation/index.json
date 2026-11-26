@@ -67,7 +67,7 @@
         "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-spirometry.json",
         "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle.json"
       ],
-      "resources": 84
+      "resources": 85
     },
     {
       "sourceId": "synthea",
@@ -88,8 +88,8 @@
       "igPackage": "hl7.fhir.eu.base#2.0.1",
       "baseResource": "Patient",
       "tested": 29,
-      "passed": 20,
-      "warnings": 53
+      "passed": 29,
+      "warnings": 44
     },
     {
       "profileId": "practitioner-eu-core",
@@ -208,9 +208,9 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
       "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
       "baseResource": "DiagnosticReport",
-      "tested": 2,
-      "passed": 0,
-      "warnings": 6
+      "tested": 1,
+      "passed": 1,
+      "warnings": 3
     },
     {
       "profileId": "observation-results-lab-eu",
@@ -230,9 +230,9 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
       "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
       "baseResource": "Bundle",
-      "tested": 12,
-      "passed": 3,
-      "warnings": 409
+      "tested": 4,
+      "passed": 4,
+      "warnings": 112
     },
     {
       "profileId": "composition-hdr-eu",
@@ -265,7 +265,7 @@
       "baseResource": "Patient",
       "tested": 29,
       "passed": 26,
-      "warnings": 53
+      "warnings": 44
     },
     {
       "profileId": "kds-condition-de",
@@ -318,9 +318,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
       "baseResource": "DiagnosticReport",
-      "tested": 2,
+      "tested": 1,
       "passed": 1,
-      "warnings": 6
+      "warnings": 3
     },
     {
       "profileId": "kds-medication-request-de",

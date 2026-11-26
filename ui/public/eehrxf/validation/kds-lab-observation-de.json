@@ -1242,7 +1242,7 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[3]",
+      "origin": "fhir-golden-bundle.json#entry[4]",
       "passed": true,
       "issues": [
         {
@@ -1335,13 +1335,13 @@
           "text": "LDL-Cholesterin"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],
@@ -1371,7 +1371,7 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[4]",
+      "origin": "fhir-golden-bundle.json#entry[5]",
       "passed": true,
       "issues": [
         {
@@ -1473,13 +1473,13 @@
           "text": "HbA1c"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],
@@ -1515,7 +1515,7 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[5]",
+      "origin": "fhir-golden-bundle.json#entry[6]",
       "passed": true,
       "issues": [
         {
@@ -1608,13 +1608,13 @@
           "text": "NT-proBNP"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],
@@ -1643,7 +1643,7 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[6]",
+      "origin": "fhir-golden-bundle.json#entry[7]",
       "passed": true,
       "issues": [
         {
@@ -1732,13 +1732,13 @@
           "text": "Ferritin"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],
@@ -1768,7 +1768,7 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[7]",
+      "origin": "fhir-golden-bundle.json#entry[8]",
       "passed": true,
       "issues": [
         {
@@ -1852,13 +1852,13 @@
           "text": "CRP"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],
@@ -1882,7 +1882,7 @@
     },
     {
       "source": "klarbefund",
-      "origin": "fhir-golden-bundle.json#entry[8]",
+      "origin": "fhir-golden-bundle.json#entry[9]",
       "passed": true,
       "issues": [
         {
@@ -1977,13 +1977,13 @@
           "text": "Akkermansia muciniphila"
         },
         "subject": {
-          "reference": "Patient/example-patient"
+          "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
         },
         "effectiveDateTime": "2026-09-04",
         "issued": "2026-09-13T12:00:00.000Z",
         "performer": [
           {
-            "reference": "Organization/performer-1",
+            "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
             "display": "Praxis Dr. Muster"
           }
         ],

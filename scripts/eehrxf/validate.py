@@ -122,6 +122,12 @@ def matches_filter(resource: dict, source_filter: str | None) -> bool:
         return bool(codes & LAB_CODES)
     if source_filter == "imaging":
         return bool(codes & IMAGING_CODES)
+    if source_filter == "laboratory-report":
+        # A laboratory report proper: category LAB and LOINC 11502-2. A CGM
+        # summary, an ECG or a spirometry report is not one, whatever its
+        # v2-0074 section.
+        report_codes = {c.get("code", "") for c in resource.get("code", {}).get("coding", [])}
+        return bool(codes & LAB_CODES) and LAB_REPORT in report_codes
     if source_filter == "patient-summary":
         return PATIENT_SUMMARY in loinc_type(resource)
     if source_filter == "discharge-report":
@@ -129,14 +135,14 @@ def matches_filter(resource: dict, source_filter: str | None) -> bool:
     if source_filter == "patient-summary-document":
         return resource.get("type") == "document" and PATIENT_SUMMARY in loinc_type(first_composition(resource))
     if source_filter == "laboratory-report-bundle":
-        # A lab report document, or a Bundle with no Composition (the writer's
-        # collections, one lab report each). Never a Patient Summary.
-        composition = first_composition(resource)
-        return not composition or LAB_REPORT in loinc_type(composition)
+        # A lab report document. The shared FHIR writer emits one for a
+        # laboratory report; its other report kinds stay collections and are
+        # no EU lab report. Never a Patient Summary.
+        return resource.get("type") == "document" and LAB_REPORT in loinc_type(first_composition(resource))
     if source_filter == "laboratory-bundle":
         return resource.get("resourceType") == "Bundle" and any(
             e.get("resource", {}).get("resourceType") == "DiagnosticReport"
-            and matches_filter(e["resource"], "laboratory")
+            and matches_filter(e["resource"], "laboratory-report")
             for e in resource.get("entry", [])
         )
     raise ValueError(f"unknown sourceFilter {source_filter!r}")
