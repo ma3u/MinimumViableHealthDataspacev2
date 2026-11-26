@@ -1,21 +1,41 @@
-I am a patient and I take part in medical studies, so my health data is exactly what secure processing environments (SPEs) will hold. I am also a dataspace architect: I built the operating company for Catena-X and contribute to Eclipse Tractus-X and Eclipse Dataspace Components. I run a non-commercial, open-source EHDS demo with synthetic data only (https://ma3u.github.io/MinimumViableHealthDataspacev2), whose SPE runs on confidential hardware. My questions are those of someone whose data is inside.
+I am a dataspace architect: I built the operating company for Catena-X and contribute to Eclipse Tractus-X and Eclipse Dataspace Components. I run a non-commercial, open-source EHDS demo with synthetic data only, including a federated SPE on confidential hardware (https://ma3u.github.io/MinimumViableHealthDataspacev2). This replaces my feedback of 24 November.
 
-(1) Who can read my data while it is being analysed? The draft protects data when it is stored and when it is sent (Art. 13), but not while it is processed. Please require protection of data in use, such as confidential computing, and let the access body check by hardware evidence (attestation) that only the approved tools run (Art. 5).
+As written, the draft will make SPEs very expensive to run, and it builds them outside the data space that the EHDS is meant to be.
 
-(2) Can I be recognised in combined results? When several SPEs work together, totals can give away a small hidden number: a total of 80 minus 40 and 37 shows that 3 patients in one hospital have a rare condition. Please require that small numbers are hidden in each SPE before results leave it, and again in the totals (Art. 18).
+A. Cost and effort for operators
 
-(3) Not every question needs a full workspace. A simple count to see whether a study is feasible needs no notebook or remote desktop, and fewer tools mean less risk for my data. Please allow SPEs that only answer approved queries (Art. 6).
+The draft prescribes a manual pipeline per permit: a dedicated instance and staging environment (Art. 3(1), 4(1)); the access body checks, prepares and uploads the data itself (Art. 4(2), (3)); verification before access and monitoring for the permit's lifetime (Art. 5); approval of every export, with manual review (Art. 7); verifiable deletion (Art. 8); write-once logs of all observable user activity (Art. 16); external audits (Art. 17). Only disaster recovery is proportionate (Art. 11(7)), and no cost estimate is published. TEHDAS2 D7.4 already calls building SPEs "an expensive and time-consuming effort", and activity logging a "significant cost issue". Please:
 
-(4) Can I check later what happened to my data? Logs are kept five years or one year after the permit ends, whichever is shorter (Art. 16). Please say when this period starts, and never keep logs for less than one year.
+1. Add proportionality by risk and use: an SPE that only runs approved queries or batch jobs and returns aggregates needs no full workspace, collaboration suite (Art. 6) or remote desktop.
 
-(5) Can study results be checked? Please delete my data soon after a permit ends, but keep the analysis scripts and the approved results, so that others can verify the findings (Art. 8).
+2. Accept machine evidence instead of manual work: a hardware-signed attestation that binds the measured instance to the permit should satisfy Art. 5 and 12(1)(a); destroying the per-permit key should count as verifiable deletion (Art. 8).
 
-(6) Will my data from different countries fit together? Please name the common standards that federated SPEs must share: HealthDCAT-AP, the HealthData@EU specifications, OMOP and FHIR (Art. 18).
+3. Let a sealed, per-permit encrypted extract, decrypted only inside an attested instance, replace staging and upload by the access body (Art. 4).
 
-(7) Where is my data processed? Please publish every SPE and every federation in the national data catalogue, in a form that machines can read (Art. 9 and 18).
+4. Limit Art. 16 to security-relevant events, and let one compliance assessment (Art. 21) count in every Member State.
 
-(8) Machines need identities too. Strong login is required for every user (Art. 10), but automated jobs and connected SPEs are not persons. Please add rules for them.
+5. Publish a cost and impact assessment before adoption.
 
-(9) Some numbering errors and typos, listed in the attachment.
+B. Data spaces and digital identity
+
+Secondary use under the EHDS is a data space, yet the draft never mentions the Data Act's interoperability rules for data spaces (Art. 33), the Dataspace Protocol, or eIDAS 2.0 (Regulation (EU) 2024/1183). Identity stops at strong authentication of persons (Art. 10(4)) and a recital on the EUDI Wallet that cites the 2014 text. Please:
+
+6. Cite eIDAS as amended by Regulation (EU) 2024/1183, and accept electronic attestations of attributes (affiliation, qualification) as verifiable credentials when granting access (Art. 10).
+
+7. Require organisational identities for access bodies, holders, operators and federation members (European Business Wallet, qualified electronic seals), and attested workload identities for instances and automated jobs (Art. 10, 18(2)(c), (d)).
+
+8. Make the data permit machine-readable (for example ODRL), so that instance configuration, access rights and export rules follow from it automatically (Art. 3(3), 5(1), 10(1)).
+
+9. Connect holders, SPEs and federations through the Dataspace Protocol and the harmonised standards on trusted data transactions under Art. 33 Data Act, and name the common standards for federations: HealthDCAT-AP, OMOP CDM, HL7 FHIR (Art. 18(2)).
+
+C. Points from my first submission
+
+10. Protect data in use, not only at rest and in transit (Art. 13).
+
+11. Hide small counts in each SPE and again in federated totals (Art. 18).
+
+12. Say when the log period starts, and never keep logs less than one year (Art. 16(4)).
+
+13. Editorial: Art. 8 starts at paragraph 4, Art. 18 at 8, Art. 21(3) has two points (a), Art. 13(2) lacks a noun.
 
 Details, sources and screenshots of a working SPE are in the attachment.
