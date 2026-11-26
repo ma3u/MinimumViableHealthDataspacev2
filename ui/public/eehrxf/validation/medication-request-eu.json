@@ -5,10 +5,917 @@
   "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
   "igPackage": "hl7.fhir.eu.mpd#1.0.0",
   "baseResource": "MedicationRequest",
-  "tested": 31,
-  "passed": 31,
-  "warnings": 39,
+  "tested": 47,
+  "passed": 47,
+  "warnings": 70,
   "resources": [
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[14]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "146cf1a1-f42f-8719-a0be-5c5936cb5856",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-2123111"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "2123111",
+              "display": "Salbutamol 100 mcg inhaler"
+            }
+          ],
+          "text": "Salbutamol 100 mcg inhaler"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2009-02-27",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[15]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "775987a4-2e88-80e1-be15-9524ca83a10a",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-314076"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "314076",
+              "display": "Lisinopril 10 mg oral tablet"
+            }
+          ],
+          "text": "Lisinopril 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2015-11-02",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[16]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "282d9411-e911-87a5-a147-2671b6780629",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-860975"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "860975",
+              "display": "Metformin 500 mg oral tablet"
+            }
+          ],
+          "text": "Metformin 500 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2018-04-10",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[17]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "68ed8e40-d803-842b-a234-811b140152b3",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-617310"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "617310",
+              "display": "Atorvastatin 20 mg oral tablet"
+            }
+          ],
+          "text": "Atorvastatin 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2024-09-12",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[14]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "146cf1a1-f42f-8719-a0be-5c5936cb5856",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-2123111"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "2123111",
+              "display": "Salbutamol 100 mcg inhaler"
+            }
+          ],
+          "text": "Salbutamol 100 mcg inhaler"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2009-02-27",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[15]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "775987a4-2e88-80e1-be15-9524ca83a10a",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-314076"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "314076",
+              "display": "Lisinopril 10 mg oral tablet"
+            }
+          ],
+          "text": "Lisinopril 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2015-11-02",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[16]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "282d9411-e911-87a5-a147-2671b6780629",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-860975"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "860975",
+              "display": "Metformin 500 mg oral tablet"
+            }
+          ],
+          "text": "Metformin 500 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2018-04-10",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[17]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "68ed8e40-d803-842b-a234-811b140152b3",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p1-617310"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "617310",
+              "display": "Atorvastatin 20 mg oral tablet"
+            }
+          ],
+          "text": "Atorvastatin 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "authoredOn": "2024-09-12",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[15]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "c3efbd33-252f-8722-a166-76bb03445404",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p2-314077"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "314077",
+              "display": "Lisinopril 20 mg oral tablet"
+            }
+          ],
+          "text": "Lisinopril 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "authoredOn": "2010-05-17",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[16]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "9ba908ed-0acf-88b3-8ba6-f4b30dfbc459",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p2-854905"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "854905",
+              "display": "Bisoprolol 5 mg oral tablet"
+            }
+          ],
+          "text": "Bisoprolol 5 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "authoredOn": "2019-08-03",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[17]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "262a6dfb-6070-8947-9ab6-8226e4c4f929",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p2-855332"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "855332",
+              "display": "Warfarin 5 mg oral tablet"
+            }
+          ],
+          "text": "Warfarin 5 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "authoredOn": "2019-08-03",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[18]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "e17e0f55-4de4-892e-a7d1-4e18cd051a48",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p2-617311"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "617311",
+              "display": "Atorvastatin 40 mg oral tablet"
+            }
+          ],
+          "text": "Atorvastatin 40 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "authoredOn": "2020-11-30",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[19]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "b5b50a6c-7115-8a50-ab71-6c4807101f6d",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p2-861004"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "861004",
+              "display": "Metformin 1000 mg oral tablet"
+            }
+          ],
+          "text": "Metformin 1000 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "authoredOn": "2022-01-11",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[20]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "76754139-b56b-8ee5-968f-caa7f1faf6f3",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "med-p2-313988"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "313988",
+              "display": "Furosemide 40 mg oral tablet"
+            }
+          ],
+          "text": "Furosemide 40 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "authoredOn": "2023-02-14",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "fhir-pat-1002-patient-summary.json#entry[7]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "b7960990-b2fb-8df4-a0e5-cbe8c0278fe5",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "fhir-med-5002"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "text": "Lisinopril 10mg"
+        },
+        "subject": {
+          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+        },
+        "authoredOn": "2023-10-01T09:00:00Z",
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "patient-2000-patient-summary.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationRequest.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "0fe1b498-b964-819a-9881-455fe227cdcc",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "rx-2000-197381"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "966221",
+              "display": "Levothyroxine 50 mcg Tab"
+            }
+          ],
+          "text": "Levothyroxine 50 mcg Tab"
+        },
+        "subject": {
+          "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+        },
+        "_authoredOn": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "requester": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[13]",
@@ -25,6 +932,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "med-p1-2123111",
@@ -74,6 +982,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "med-p1-314076",
@@ -123,6 +1032,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "med-p2-313988",
@@ -172,6 +1082,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "med-p2-314077",
@@ -221,6 +1132,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "fhir-med-5002",
@@ -259,6 +1171,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "rx-2000-197381",
@@ -310,6 +1223,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "rx-2008-1861634",
@@ -361,6 +1275,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "rx-2008-197884",
@@ -412,6 +1327,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "pv-pat-001-cipro",
@@ -468,6 +1384,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "loader-med-0001",
@@ -512,6 +1429,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "sparse-med-0001",
@@ -557,6 +1475,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "766755d2-7e97-146e-abf3-7a945236a9bc",
@@ -613,6 +1532,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "4125dcf2-608d-ce0f-ac10-7f8a3c0ea709",
@@ -669,6 +1589,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "51266836-fc93-6d63-da7b-c1a5338cc531",
@@ -725,6 +1646,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "e3274bb9-7a2c-7e29-9c01-96d6a346a122",
@@ -781,6 +1703,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "7b17d9e1-62f4-a873-1a43-99b7c5299a25",
@@ -848,6 +1771,7 @@
           "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "a56b0c6e-d18a-3ea2-0999-33cb51503629",
@@ -939,6 +1863,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "ffe44e16-57f0-0e65-c662-f6c428fe554c",
@@ -1006,6 +1931,7 @@
           "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "9ae301d8-3a81-2239-ef09-7ff48e1c69b8",
@@ -1097,6 +2023,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "0e42ab62-277f-9afa-5120-aafcec4a6f6d",
@@ -1152,6 +2079,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "f6fc4ddf-3fc7-f0a5-db99-2d2863938cc5",
@@ -1207,6 +2135,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "eff3c8d1-5a05-4b86-be91-b6737fe74163",
@@ -1262,6 +2191,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "e8f80934-6826-0649-f74d-0439a5e7c1e2",
@@ -1317,6 +2247,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "006a55f5-8938-3e6e-6f24-8f81e9d69350",
@@ -1372,6 +2303,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "dda7a635-2859-b234-580e-e7f0cf851b0f",
@@ -1427,6 +2359,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "fe15e0b5-052a-35d3-487a-77fb7e057757",
@@ -1482,6 +2415,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "6b17c667-6ac0-68f5-be80-4a74e2ae9bc5",
@@ -1537,6 +2471,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "1908467f-ad60-791e-b4db-18f1a76027f7",
@@ -1592,6 +2527,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "b1f3ab76-31e0-972c-c9c9-fa86041224a4",
@@ -1647,6 +2583,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "3f581bf9-092a-a35b-8e69-cfd4a6f36109",
@@ -1702,6 +2639,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "MedicationRequest",
         "id": "5f37310e-0e63-2111-9bb7-ed2405d80a3f",

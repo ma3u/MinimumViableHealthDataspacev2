@@ -238,5 +238,8 @@
   "No errors or warnings": "No errors or warnings",
   "line {n}": "line {n}",
   "Ignored by a configured rule": "Ignored by a configured rule",
-  "No resources match the filter": "No resources match the filter"
+  "No resources match the filter": "No resources match the filter",
+  "Reference example: {passed}/{tested} pass, not counted": "Reference example: {passed}/{tested} pass, not counted",
+  "A fictional reference example, validated but never counted in coverage": "A fictional reference example, validated but never counted in coverage",
+  "not counted": "not counted"
 }

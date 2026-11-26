@@ -7,7 +7,7 @@
   "baseResource": "Bundle",
   "tested": 6,
   "passed": 6,
-  "warnings": 138,
+  "warnings": 153,
   "resources": [
     {
       "source": "documents",
@@ -66,8 +66,18 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[14].resource/*MedicationRequest/146cf1a1-f42f-8719-a0be-5c5936cb5856*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[15].resource/*MedicationRequest/775987a4-2e88-80e1-be15-9524ca83a10a*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[15].resource/*MedicationRequest/775987a4-2e88-80e1-be15-9524ca83a10a*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -76,8 +86,18 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[16].resource/*MedicationRequest/282d9411-e911-87a5-a147-2671b6780629*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[17].resource/*MedicationRequest/68ed8e40-d803-842b-a234-811b140152b3*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[17].resource/*MedicationRequest/68ed8e40-d803-842b-a234-811b140152b3*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -195,6 +215,7 @@
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -1045,7 +1066,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2009-02-27"
+              "authoredOn": "2009-02-27",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1079,7 +1108,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2015-11-02"
+              "authoredOn": "2015-11-02",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1113,7 +1150,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2018-04-10"
+              "authoredOn": "2018-04-10",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1147,7 +1192,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2024-09-12"
+              "authoredOn": "2024-09-12",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -1374,8 +1427,18 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[14].resource/*MedicationRequest/146cf1a1-f42f-8719-a0be-5c5936cb5856*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[15].resource/*MedicationRequest/775987a4-2e88-80e1-be15-9524ca83a10a*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[15].resource/*MedicationRequest/775987a4-2e88-80e1-be15-9524ca83a10a*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -1384,8 +1447,18 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[16].resource/*MedicationRequest/282d9411-e911-87a5-a147-2671b6780629*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[17].resource/*MedicationRequest/68ed8e40-d803-842b-a234-811b140152b3*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[17].resource/*MedicationRequest/68ed8e40-d803-842b-a234-811b140152b3*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -1508,6 +1581,7 @@
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -2357,7 +2431,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2009-02-27"
+              "authoredOn": "2009-02-27",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2391,7 +2473,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2015-11-02"
+              "authoredOn": "2015-11-02",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2425,7 +2515,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2018-04-10"
+              "authoredOn": "2018-04-10",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2459,7 +2557,15 @@
               "subject": {
                 "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
               },
-              "authoredOn": "2024-09-12"
+              "authoredOn": "2024-09-12",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -2696,8 +2802,18 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[15].resource/*MedicationRequest/c3efbd33-252f-8722-a166-76bb03445404*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[16].resource/*MedicationRequest/9ba908ed-0acf-88b3-8ba6-f4b30dfbc459*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[16].resource/*MedicationRequest/9ba908ed-0acf-88b3-8ba6-f4b30dfbc459*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -2706,13 +2822,28 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[17].resource/*MedicationRequest/262a6dfb-6070-8947-9ab6-8226e4c4f929*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[18].resource/*MedicationRequest/e17e0f55-4de4-892e-a7d1-4e18cd051a48*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[18].resource/*MedicationRequest/e17e0f55-4de4-892e-a7d1-4e18cd051a48*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[19].resource/*MedicationRequest/b5b50a6c-7115-8a50-ab71-6c4807101f6d*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[19].resource/*MedicationRequest/b5b50a6c-7115-8a50-ab71-6c4807101f6d*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -2723,6 +2854,11 @@
           "severity": "warning",
           "expression": "Bundle.entry[20].resource/*MedicationRequest/76754139-b56b-8ee5-968f-caa7f1faf6f3*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[20].resource/*MedicationRequest/76754139-b56b-8ee5-968f-caa7f1faf6f3*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -2800,6 +2936,7 @@
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIIllnessandDisorder' not found"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -3728,7 +3865,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "authoredOn": "2010-05-17"
+              "authoredOn": "2010-05-17",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3762,7 +3907,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "authoredOn": "2019-08-03"
+              "authoredOn": "2019-08-03",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3796,7 +3949,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "authoredOn": "2019-08-03"
+              "authoredOn": "2019-08-03",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3830,7 +3991,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "authoredOn": "2020-11-30"
+              "authoredOn": "2020-11-30",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3864,7 +4033,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "authoredOn": "2022-01-11"
+              "authoredOn": "2022-01-11",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -3898,7 +4075,15 @@
               "subject": {
                 "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
               },
-              "authoredOn": "2023-02-14"
+              "authoredOn": "2023-02-14",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           }
         ]
@@ -3991,6 +4176,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*MedicationRequest/b7960990-b2fb-8df4-a0e5-cbe8c0278fe5*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
           "expression": "Bundle.entry[8].resource/*Immunization/412530ef-47b6-88e6-9e6a-bc5dabe0923d*/",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         },
@@ -4010,6 +4200,7 @@
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIVaccine' not found"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -4471,7 +4662,15 @@
               "subject": {
                 "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
               },
-              "authoredOn": "2023-10-01T09:00:00Z"
+              "authoredOn": "2023-10-01T09:00:00Z",
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              }
             }
           },
           {
@@ -4673,8 +4872,8 @@
         },
         {
           "severity": "warning",
-          "expression": "Bundle.entry[4].resource/*MedicationRequest/0fe1b498-b964-819a-9881-455fe227cdcc*/",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+          "expression": "Bundle.entry[4].resource/*MedicationRequest/0fe1b498-b964-819a-9881-455fe227cdcc*/.requester",
+          "message": "A Reference without an actual reference or identifier should have a display"
         },
         {
           "severity": "warning",
@@ -4682,6 +4881,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -4996,6 +5196,22 @@
               },
               "subject": {
                 "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+              },
+              "_authoredOn": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              },
+              "requester": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
               }
             }
           },
@@ -5066,6 +5282,7 @@
           "message": "ValueSet 'http://terminology.ehdsi.eu/ValueSet/eHDSIAllergenNoDrug' not found"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {

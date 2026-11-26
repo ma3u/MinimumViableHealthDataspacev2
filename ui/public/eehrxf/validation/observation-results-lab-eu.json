@@ -5,10 +5,1228 @@
   "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
   "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
   "baseResource": "Observation",
-  "tested": 37,
-  "passed": 17,
-  "warnings": 122,
+  "tested": 49,
+  "passed": 29,
+  "warnings": 174,
   "resources": [
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json#entry[3]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "583b854e-f7ce-826f-8565-59fbd3f1bbef",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-2089-1-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2089-1",
+              "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 132,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 116,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "0 - 116 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "cf550749-5de4-8bc3-b377-37f45a4810e3",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-2093-3-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3",
+              "display": "Cholesterol [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 205,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 200,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "0 - 200 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json#entry[5]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "c458d317-6699-8cd8-9781-2e359e089e26",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-2339-0-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2339-0",
+              "display": "Glucose [Mass/volume] in Blood"
+            }
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 142,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 70,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "high": {
+              "value": 99,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "70 - 99 mg/dL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json#entry[6]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "15c3a445-61f9-86d9-b155-7c81c411a621",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-33914-3-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33914-3",
+              "display": "Glomerular filtration rate/1.73 sq M.predicted"
+            }
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
+        },
+        "subject": {
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 88,
+          "unit": "mL/min/{1.73_m2}",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL/min/{1.73_m2}"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 90,
+              "unit": "mL/min/{1.73_m2}",
+              "system": "http://unitsofmeasure.org",
+              "code": "mL/min/{1.73_m2}"
+            },
+            "text": "> 90 mL/min/{1.73_m2} (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json#entry[7]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "5adc73fb-afb6-89c9-96e5-e72ce712aaeb",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p1-4548-4-2026-08-21"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+        },
+        "effectiveDateTime": "2026-08-21T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+            "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 7.6,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 4,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "high": {
+              "value": 6,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "text": "4.0 - 6.0 % (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json#entry[3]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "5681d160-230a-8295-be19-ea5371764fd2",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p2-22748-8-2026-09-08"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "22748-8",
+              "display": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+        },
+        "effectiveDateTime": "2026-09-08T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 1.9,
+          "unit": "mmol/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "mmol/L",
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            },
+            "high": {
+              "value": 3,
+              "unit": "mmol/L",
+              "system": "http://unitsofmeasure.org",
+              "code": "mmol/L"
+            },
+            "text": "0 - 3.0 mmol/L (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "2028aca4-9436-8fd6-a703-2f1e00e6d127",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p2-33762-6-2026-09-08"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33762-6",
+              "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+        },
+        "effectiveDateTime": "2026-09-08T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 420,
+          "unit": "pg/mL",
+          "system": "http://unitsofmeasure.org",
+          "code": "pg/mL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0,
+              "unit": "pg/mL",
+              "system": "http://unitsofmeasure.org",
+              "code": "pg/mL"
+            },
+            "high": {
+              "value": 125,
+              "unit": "pg/mL",
+              "system": "http://unitsofmeasure.org",
+              "code": "pg/mL"
+            },
+            "text": "0 - 125 pg/mL (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json#entry[5]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "cd14efc1-4653-8989-b3b3-bfd62dba95ff",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p2-4548-4-2026-09-08"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+        },
+        "effectiveDateTime": "2026-09-08T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 6.6,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 4,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "high": {
+              "value": 6,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "text": "4.0 - 6.0 % (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json#entry[6]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "8b3feb6c-4601-875e-934c-88eea758b412",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p2-62238-1-2026-09-08"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "62238-1",
+              "display": "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI"
+            }
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI"
+        },
+        "subject": {
+          "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+        },
+        "effectiveDateTime": "2026-09-08T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 66,
+          "unit": "mL/min/{1.73_m2}",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL/min/{1.73_m2}"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 90,
+              "unit": "mL/min/{1.73_m2}",
+              "system": "http://unitsofmeasure.org",
+              "code": "mL/min/{1.73_m2}"
+            },
+            "text": "> 90 mL/min/{1.73_m2} (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json#entry[7]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code '{INR}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code '{INR}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code '{INR}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "6251a2e7-79a1-8965-984f-d8c312ef97d4",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "obs-p2-6301-6-2026-09-08"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "6301-6",
+              "display": "INR in Platelet poor plasma by Coagulation assay"
+            }
+          ],
+          "text": "INR in Platelet poor plasma by Coagulation assay"
+        },
+        "subject": {
+          "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+        },
+        "effectiveDateTime": "2026-09-08T08:30:00Z",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+            "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2.8,
+          "unit": "{INR}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{INR}"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.8,
+              "unit": "{INR}",
+              "system": "http://unitsofmeasure.org",
+              "code": "{INR}"
+            },
+            "high": {
+              "value": 1.2,
+              "unit": "{INR}",
+              "system": "http://unitsofmeasure.org",
+              "code": "{INR}"
+            },
+            "text": "0.8 - 1.2 {INR} (as printed on the report)"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "sandbox-klarbefund-lab-report.json#entry[3]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "db7fa497-356d-8d2a-bf15-46271a4d971a",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "extension": [
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+            "valueCode": "ocr-transcribed"
+          },
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+            "valueString": "HbA1c 5,6 % 4,0 - 6,0"
+          },
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+            "valueString": "1@0.08,0.41,0.84,0.02"
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "sandbox-demo-0d3c6a52-1"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "HbA1c"
+            }
+          ],
+          "text": "HbA1c"
+        },
+        "subject": {
+          "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
+        },
+        "effectiveDateTime": "2026-06-02",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+            "display": "Praxislabor Musterstadt (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 5.6,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 4,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "high": {
+              "value": 6,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "text": "4,0 - 6,0"
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "sandbox-klarbefund-lab-report.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Observation",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Observation",
+        "id": "75769fac-4006-89e6-ab6a-9eadac937ea2",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+          ]
+        },
+        "extension": [
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+            "valueCode": "ocr-transcribed"
+          },
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+            "valueString": "Cholesterin gesamt 212 mg/dl < 200"
+          },
+          {
+            "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+            "valueString": "1@0.08,0.44,0.84,0.02"
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "sandbox-demo-0d3c6a52-2"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3",
+              "display": "Cholesterin gesamt"
+            }
+          ],
+          "text": "Cholesterin gesamt"
+        },
+        "subject": {
+          "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
+        },
+        "effectiveDateTime": "2026-06-02",
+        "issued": "2026-11-20T09:00:00Z",
+        "performer": [
+          {
+            "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+            "display": "Praxislabor Musterstadt (fictional)"
+          }
+        ],
+        "valueQuantity": {
+          "value": 212,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 200,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            },
+            "text": "< 200"
+          }
+        ]
+      }
+    },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[10]",
@@ -40,6 +1258,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2024-09-12",
@@ -157,6 +1376,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2025-01-20",
@@ -274,6 +1494,7 @@
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p2-22748-8-2025-03-04",
@@ -391,6 +1612,7 @@
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p2-22748-8-2025-09-16",
@@ -503,6 +1725,7 @@
           "message": "Unable to validate code 'g/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "loader-obs-0002",
@@ -598,6 +1821,7 @@
           "message": "A Reference without an actual reference or identifier should have a display"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "sparse-obs-0001",
@@ -696,6 +1920,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-1",
@@ -805,6 +2030,7 @@
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2",
@@ -914,6 +2140,7 @@
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-3",
@@ -1023,6 +2250,7 @@
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-1",
@@ -1132,6 +2360,7 @@
           "message": "Unable to validate code 'cm2' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-3",
@@ -1246,6 +2475,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-1",
@@ -1380,6 +2610,7 @@
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-2",
@@ -1519,6 +2750,7 @@
           "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-3",
@@ -1647,6 +2879,7 @@
           "message": "Unable to validate code 'ug/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-4",
@@ -1767,6 +3000,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-5",
@@ -1886,6 +3120,7 @@
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "obs-6",
@@ -2030,6 +3265,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "0725f70c-707d-74a2-d130-c93c68e92b47",
@@ -2102,6 +3338,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "b91156b1-4034-e285-6726-7f50a9199e8a",
@@ -2174,6 +3411,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "cf901ce8-2336-59e5-1e5d-b48d07543b68",
@@ -2246,6 +3484,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "864b4510-e58d-738d-1dcc-ac97f0df74e3",
@@ -2318,6 +3557,7 @@
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "02d71b85-dd4f-d946-bc30-8c5501deaf10",
@@ -2390,6 +3630,7 @@
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "eb021dfc-cd48-512c-e393-82d1f2b3ac28",
@@ -2462,6 +3703,7 @@
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "5a8bbebd-d6fb-42af-1ed9-bb362448ce16",
@@ -2534,6 +3776,7 @@
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "faac9473-ca0b-8bde-91fb-42a9ea41375d",
@@ -2606,6 +3849,7 @@
           "message": "Unable to validate code 'mL/min' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "e421d993-f78f-9639-c001-0328c350a3e0",
@@ -2678,6 +3922,7 @@
           "message": "Unable to validate code 'g/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "ec2ba76e-fe51-bac1-412a-ed85084372db",
@@ -2750,6 +3995,7 @@
           "message": "Unable to validate code 'g/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "bd0c73d4-2342-0b81-56ff-699a0a0e5388",
@@ -2822,6 +4068,7 @@
           "message": "Unable to validate code 'g/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "3696dcc0-9732-9292-69e6-be5e773ea79b",
@@ -2894,6 +4141,7 @@
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "bfe011ff-4106-2e59-c5fc-892f08016d0b",
@@ -2966,6 +4214,7 @@
           "message": "Unable to validate code 'U/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "ae2e98dc-0cdc-a6bc-f506-f9ba689fecac",
@@ -3038,6 +4287,7 @@
           "message": "Unable to validate code 'U/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "e55d6142-c969-5bbd-6131-b59c78d36edf",
@@ -3110,6 +4360,7 @@
           "message": "Unable to validate code 'U/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "de9528e1-64bd-aa38-161a-ee0bb70bedc9",
@@ -3177,6 +4428,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "af2e9f27-a984-c0ce-6a78-e36e1130237b",
@@ -3248,6 +4500,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "e539e651-6c8b-8e9e-a73f-f3ca8cd31f41",
@@ -3319,6 +4572,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "526293c7-d656-19c0-e091-f8824f29920f",
@@ -3390,6 +4644,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Observation",
         "id": "0a06b1e4-af9e-2888-6c40-354bd1e68ce7",

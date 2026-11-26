@@ -39,7 +39,7 @@
         "scripts/eehrxf/samples/documents/sandbox-klarbefund-lab-report.json",
         "scripts/eehrxf/samples/documents/sandbox-patient-summary-with-allergy.json"
       ],
-      "resources": 9
+      "resources": 126
     },
     {
       "sourceId": "facade",
@@ -70,6 +70,21 @@
       "resources": 85
     },
     {
+      "sourceId": "reference",
+      "label": "Reference examples",
+      "role": "Not hub data, never counted",
+      "data": "Fictional resources written to show what a conforming Practitioner, PractitionerRole, MedicationDispense, ImagingStudy and hospital discharge report look like, for the profiles the hub produces nothing for. They are validated and shown, and stay out of every coverage figure.",
+      "generatedBy": "scripts/eehrxf/reference_examples.py",
+      "files": [
+        "scripts/eehrxf/samples/reference/hospital-discharge-report.json",
+        "scripts/eehrxf/samples/reference/imaging-study-eu.json",
+        "scripts/eehrxf/samples/reference/medication-dispense-eu.json",
+        "scripts/eehrxf/samples/reference/practitioner-eu-core.json",
+        "scripts/eehrxf/samples/reference/practitioner-role-eu-core.json"
+      ],
+      "resources": 11
+    },
+    {
       "sourceId": "synthea",
       "label": "Synthea sample",
       "role": "Hub input as received",
@@ -87,9 +102,9 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
       "igPackage": "hl7.fhir.eu.base#2.0.1",
       "baseResource": "Patient",
-      "tested": 29,
-      "passed": 29,
-      "warnings": 44
+      "tested": 38,
+      "passed": 38,
+      "warnings": 53
     },
     {
       "profileId": "practitioner-eu-core",
@@ -100,7 +115,7 @@
       "baseResource": "Practitioner",
       "tested": 0,
       "passed": 0,
-      "warnings": 0
+      "warnings": 2
     },
     {
       "profileId": "organization-eu-core",
@@ -109,9 +124,9 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/organization-eu-core",
       "igPackage": "hl7.fhir.eu.base#2.0.1",
       "baseResource": "Organization",
-      "tested": 9,
-      "passed": 9,
-      "warnings": 9
+      "tested": 21,
+      "passed": 21,
+      "warnings": 22
     },
     {
       "profileId": "practitioner-role-eu-core",
@@ -122,7 +137,7 @@
       "baseResource": "PractitionerRole",
       "tested": 0,
       "passed": 0,
-      "warnings": 0
+      "warnings": 1
     },
     {
       "profileId": "condition-eu-core",
@@ -131,9 +146,9 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core",
       "igPackage": "hl7.fhir.eu.base#2.0.1",
       "baseResource": "Condition",
-      "tested": 32,
-      "passed": 32,
-      "warnings": 64
+      "tested": 52,
+      "passed": 52,
+      "warnings": 106
     },
     {
       "profileId": "composition-eps-eu",
@@ -142,9 +157,9 @@
       "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps",
       "igPackage": "hl7.fhir.eu.eps#1.0.0-ballot",
       "baseResource": "Composition",
-      "tested": 0,
-      "passed": 0,
-      "warnings": 0
+      "tested": 6,
+      "passed": 6,
+      "warnings": 6
     },
     {
       "profileId": "bundle-eps-eu",
@@ -155,7 +170,7 @@
       "baseResource": "Bundle",
       "tested": 6,
       "passed": 6,
-      "warnings": 138
+      "warnings": 153
     },
     {
       "profileId": "medication-request-eu",
@@ -164,9 +179,9 @@
       "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
       "igPackage": "hl7.fhir.eu.mpd#1.0.0",
       "baseResource": "MedicationRequest",
-      "tested": 31,
-      "passed": 31,
-      "warnings": 39
+      "tested": 47,
+      "passed": 47,
+      "warnings": 70
     },
     {
       "profileId": "medication-dispense-eu",
@@ -177,7 +192,7 @@
       "baseResource": "MedicationDispense",
       "tested": 0,
       "passed": 0,
-      "warnings": 0
+      "warnings": 2
     },
     {
       "profileId": "imaging-study-eu",
@@ -188,7 +203,7 @@
       "baseResource": "ImagingStudy",
       "tested": 0,
       "passed": 0,
-      "warnings": 0
+      "warnings": 5
     },
     {
       "profileId": "diagnostic-report-imaging-eu",
@@ -208,9 +223,9 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
       "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
       "baseResource": "DiagnosticReport",
-      "tested": 1,
-      "passed": 1,
-      "warnings": 3
+      "tested": 4,
+      "passed": 4,
+      "warnings": 6
     },
     {
       "profileId": "observation-results-lab-eu",
@@ -219,9 +234,9 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
       "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
       "baseResource": "Observation",
-      "tested": 37,
-      "passed": 17,
-      "warnings": 122
+      "tested": 49,
+      "passed": 29,
+      "warnings": 174
     },
     {
       "profileId": "bundle-lab-report-eu",
@@ -243,7 +258,7 @@
       "baseResource": "Composition",
       "tested": 0,
       "passed": 0,
-      "warnings": 0
+      "warnings": 1
     },
     {
       "profileId": "encounter-hdr-eu",
@@ -254,7 +269,7 @@
       "baseResource": "Encounter",
       "tested": 31,
       "passed": 31,
-      "warnings": 60
+      "warnings": 61
     },
     {
       "profileId": "kds-patient-de",
@@ -263,9 +278,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Patient",
-      "tested": 29,
-      "passed": 26,
-      "warnings": 44
+      "tested": 38,
+      "passed": 35,
+      "warnings": 53
     },
     {
       "profileId": "kds-condition-de",
@@ -274,9 +289,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Condition",
-      "tested": 32,
+      "tested": 52,
       "passed": 20,
-      "warnings": 32
+      "warnings": 53
     },
     {
       "profileId": "kds-procedure-de",
@@ -285,9 +300,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Procedure",
-      "tested": 24,
-      "passed": 23,
-      "warnings": 24
+      "tested": 25,
+      "passed": 24,
+      "warnings": 25
     },
     {
       "profileId": "kds-encounter-de",
@@ -298,7 +313,7 @@
       "baseResource": "Encounter",
       "tested": 31,
       "passed": 21,
-      "warnings": 32
+      "warnings": 33
     },
     {
       "profileId": "kds-lab-observation-de",
@@ -307,9 +322,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
       "baseResource": "Observation",
-      "tested": 37,
+      "tested": 49,
       "passed": 16,
-      "warnings": 142
+      "warnings": 206
     },
     {
       "profileId": "kds-lab-diagnostic-report-de",
@@ -318,9 +333,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
       "baseResource": "DiagnosticReport",
-      "tested": 1,
+      "tested": 4,
       "passed": 1,
-      "warnings": 3
+      "warnings": 6
     },
     {
       "profileId": "kds-medication-request-de",
@@ -329,9 +344,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
       "baseResource": "MedicationRequest",
-      "tested": 31,
-      "passed": 29,
-      "warnings": 39
+      "tested": 47,
+      "passed": 45,
+      "warnings": 70
     },
     {
       "profileId": "kds-medication-statement-de",
@@ -340,9 +355,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
       "baseResource": "MedicationStatement",
-      "tested": 5,
-      "passed": 0,
-      "warnings": 21
+      "tested": 16,
+      "passed": 11,
+      "warnings": 43
     }
   ]
 }

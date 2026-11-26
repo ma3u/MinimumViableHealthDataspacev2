@@ -926,7 +926,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2010-05-17"
+    "authoredOn": "2010-05-17",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -960,7 +968,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2019-08-03"
+    "authoredOn": "2019-08-03",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -994,7 +1010,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2019-08-03"
+    "authoredOn": "2019-08-03",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -1028,7 +1052,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2020-11-30"
+    "authoredOn": "2020-11-30",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -1062,7 +1094,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2022-01-11"
+    "authoredOn": "2022-01-11",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -1096,7 +1136,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2023-02-14"
+    "authoredOn": "2023-02-14",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   }
  ]

@@ -238,5 +238,8 @@
   "No errors or warnings": "Sin errores ni advertencias",
   "line {n}": "línea {n}",
   "Ignored by a configured rule": "Ignorado por una regla configurada",
-  "No resources match the filter": "Ningún recurso coincide con el filtro"
+  "No resources match the filter": "Ningún recurso coincide con el filtro",
+  "Reference example: {passed}/{tested} pass, not counted": "Ejemplo de referencia: {passed}/{tested} superados, no contados",
+  "A fictional reference example, validated but never counted in coverage": "Un ejemplo de referencia ficticio, validado pero nunca contado en la cobertura",
+  "not counted": "no contado"
 }

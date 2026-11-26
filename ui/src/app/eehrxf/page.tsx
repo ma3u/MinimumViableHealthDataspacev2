@@ -37,6 +37,9 @@ interface EEHRxFProfile {
   passed: number;
   failed: number;
   topIssues: string[];
+  // Reference examples (scripts/eehrxf/reference_examples.py): shown, never counted
+  referenceTested?: number;
+  referencePassed?: number;
   resourceCount: number;
 }
 
@@ -302,7 +305,20 @@ function ProfileRow({
               })}
             </span>
           )}
-          {profile.tested > 0 && (
+          {(profile.referenceTested ?? 0) > 0 && (
+            <span
+              className="text-[11px] text-(--text-secondary) italic"
+              title={t(
+                "A fictional reference example, validated but never counted in coverage",
+              )}
+            >
+              {t("Reference example: {passed}/{tested} pass, not counted", {
+                passed: profile.referencePassed ?? 0,
+                tested: profile.referenceTested ?? 0,
+              })}
+            </span>
+          )}
+          {(profile.tested > 0 || (profile.referenceTested ?? 0) > 0) && (
             <ViewButton onClick={() => onView(profile.profileId)} />
           )}
           <StatusBadge status={profile.coverage} />

@@ -29,6 +29,8 @@
           "passed": 0,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 0
         }
       ]
@@ -44,8 +46,8 @@
       "status": "available",
       "totalResources": 3895,
       "profileCount": 1,
-      "tested": 31,
-      "passed": 31,
+      "tested": 47,
+      "passed": 47,
       "profiles": [
         {
           "profileId": "medication-request-eu",
@@ -58,10 +60,12 @@
           "url": "https://hl7.eu/fhir/mpd/StructureDefinition-MedicationRequest-eu-mpd.html",
           "baseResource": "MedicationRequest",
           "coverage": "full",
-          "tested": 31,
-          "passed": 31,
+          "tested": 47,
+          "passed": 47,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 3895
         }
       ]
@@ -77,8 +81,8 @@
       "status": "partial",
       "totalResources": 2588,
       "profileCount": 7,
-      "tested": 76,
-      "passed": 76,
+      "tested": 123,
+      "passed": 123,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -95,6 +99,8 @@
           "passed": 6,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 0
         },
         {
@@ -107,11 +113,13 @@
           "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps",
           "url": "https://hl7.eu/fhir/eps/1.0.0-ballot/StructureDefinition-composition-eu-eps.html",
           "baseResource": "Composition",
-          "coverage": "untested",
-          "tested": 0,
-          "passed": 0,
+          "coverage": "full",
+          "tested": 6,
+          "passed": 6,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 0
         },
         {
@@ -125,10 +133,12 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-condition-eu-core.html",
           "baseResource": "Condition",
           "coverage": "full",
-          "tested": 32,
-          "passed": 32,
+          "tested": 52,
+          "passed": 52,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 2421
         },
         {
@@ -142,10 +152,12 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-organization-eu-core.html",
           "baseResource": "Organization",
           "coverage": "full",
-          "tested": 9,
-          "passed": 9,
+          "tested": 21,
+          "passed": 21,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 0
         },
         {
@@ -159,10 +171,12 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
           "coverage": "full",
-          "tested": 29,
-          "passed": 29,
+          "tested": 38,
+          "passed": 38,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 167
         },
         {
@@ -180,6 +194,8 @@
           "passed": 0,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 2,
+          "referencePassed": 2,
           "resourceCount": 0
         },
         {
@@ -197,6 +213,8 @@
           "passed": 0,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 0
         }
       ]
@@ -212,8 +230,8 @@
       "status": "partial",
       "totalResources": 5628,
       "profileCount": 3,
-      "tested": 60,
-      "passed": 60,
+      "tested": 69,
+      "passed": 69,
       "profiles": [
         {
           "profileId": "composition-hdr-eu",
@@ -230,6 +248,8 @@
           "passed": 0,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 0
         },
         {
@@ -247,6 +267,8 @@
           "passed": 31,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 5461
         },
         {
@@ -260,10 +282,12 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
           "coverage": "full",
-          "tested": 29,
-          "passed": 29,
+          "tested": 38,
+          "passed": 38,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 167
         }
       ]
@@ -279,8 +303,8 @@
       "status": "partial",
       "totalResources": 37880,
       "profileCount": 4,
-      "tested": 71,
-      "passed": 51,
+      "tested": 95,
+      "passed": 75,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -297,6 +321,8 @@
           "passed": 4,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 0
         },
         {
@@ -310,10 +336,12 @@
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-DiagnosticReport-eu-lab.html",
           "baseResource": "DiagnosticReport",
           "coverage": "full",
-          "tested": 1,
-          "passed": 1,
+          "tested": 4,
+          "passed": 4,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 0
         },
         {
@@ -327,12 +355,14 @@
           "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Observation-resultslab-eu-lab.html",
           "baseResource": "Observation",
           "coverage": "partial",
-          "tested": 37,
-          "passed": 17,
+          "tested": 49,
+          "passed": 29,
           "failed": 20,
           "topIssues": [
             "20x Observation: Observation.performer: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab|2.1.0)"
           ],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 37713
         },
         {
@@ -346,10 +376,12 @@
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
           "coverage": "full",
-          "tested": 29,
-          "passed": 29,
+          "tested": 38,
+          "passed": 38,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 167
         }
       ]
@@ -389,6 +421,8 @@
             "3x DiagnosticReport: Slice '...': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice",
             "2x DiagnosticReport: DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
           ],
+          "referenceTested": 0,
+          "referencePassed": 0,
           "resourceCount": 0
         },
         {
@@ -406,6 +440,8 @@
           "passed": 0,
           "failed": 0,
           "topIssues": [],
+          "referenceTested": 1,
+          "referencePassed": 1,
           "resourceCount": 0
         }
       ]
@@ -414,11 +450,11 @@
   "summary": {
     "totalCategories": 6,
     "totalProfiles": 16,
-    "testedProfiles": 10,
-    "passingProfiles": 8,
-    "resourcesTested": 183,
-    "resourcesPassed": 160,
-    "passRatePercent": 87,
+    "testedProfiles": 11,
+    "passingProfiles": 9,
+    "resourcesTested": 261,
+    "resourcesPassed": 238,
+    "passRatePercent": 91,
     "resourceCounts": {
       "Bundle": 0,
       "Composition": 0,
@@ -462,9 +498,10 @@
       "documents: FHIR documents the hub builds from the graph: Patient Summaries and laboratory reports of seeded patients",
       "facade: Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows",
       "klarbefund: Golden bundles of the shared FHIR writer (Klarbefund iPhone app and services/epa-ingest)",
+      "reference: Reference examples with fictional data for profiles the hub produces nothing for; validated, never counted",
       "synthea: Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads"
     ],
-    "inputsDigest": "8d4434abe7d14bab"
+    "inputsDigest": "1c534981831ec0a4"
   },
   "planned": [
     {

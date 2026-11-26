@@ -48,7 +48,7 @@
         "scripts/eehrxf/samples/documents/sandbox-klarbefund-lab-report.json",
         "scripts/eehrxf/samples/documents/sandbox-patient-summary-with-allergy.json"
       ],
-      "resources": 9
+      "resources": 126
     },
     "facade": {
       "description": "Resources the neo4j-proxy FHIR facade serves, mapped from fixed graph rows",
@@ -72,6 +72,18 @@
       ],
       "resources": 85
     },
+    "reference": {
+      "description": "Reference examples with fictional data for profiles the hub produces nothing for; validated, never counted",
+      "files": [
+        "scripts/eehrxf/samples/reference/hospital-discharge-report.json",
+        "scripts/eehrxf/samples/reference/imaging-study-eu.json",
+        "scripts/eehrxf/samples/reference/medication-dispense-eu.json",
+        "scripts/eehrxf/samples/reference/practitioner-eu-core.json",
+        "scripts/eehrxf/samples/reference/practitioner-role-eu-core.json"
+      ],
+      "resources": 11,
+      "counted": false
+    },
     "synthea": {
       "description": "Seeded Synthea sample, cut to the resource types scripts/load_fhir_neo4j.py loads",
       "files": [
@@ -80,19 +92,19 @@
       "resources": 183
     }
   },
-  "inputsDigest": "8d4434abe7d14bab",
+  "inputsDigest": "1c534981831ec0a4",
   "profiles": {
     "patient-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
-      "tested": 29,
-      "passed": 29,
+      "tested": 38,
+      "passed": 38,
       "failed": 0,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 9,
+          "passed": 9
         },
         "facade": {
           "tested": 8,
@@ -101,6 +113,10 @@
         "klarbefund": {
           "tested": 9,
           "passed": 9
+        },
+        "reference": {
+          "tested": 1,
+          "passed": 1
         },
         "synthea": {
           "tested": 12,
@@ -129,6 +145,10 @@
           "tested": 0,
           "passed": 0
         },
+        "reference": {
+          "tested": 2,
+          "passed": 2
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -140,13 +160,13 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/organization-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
-      "tested": 9,
-      "passed": 9,
+      "tested": 21,
+      "passed": 21,
       "failed": 0,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 12,
+          "passed": 12
         },
         "facade": {
           "tested": 0,
@@ -155,6 +175,10 @@
         "klarbefund": {
           "tested": 9,
           "passed": 9
+        },
+        "reference": {
+          "tested": 1,
+          "passed": 1
         },
         "synthea": {
           "tested": 0,
@@ -183,6 +207,10 @@
           "tested": 0,
           "passed": 0
         },
+        "reference": {
+          "tested": 1,
+          "passed": 1
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -194,13 +222,13 @@
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/condition-eu-core",
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
-      "tested": 32,
-      "passed": 32,
+      "tested": 52,
+      "passed": 52,
       "failed": 0,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 20,
+          "passed": 20
         },
         "facade": {
           "tested": 12,
@@ -209,6 +237,10 @@
         "klarbefund": {
           "tested": 0,
           "passed": 0
+        },
+        "reference": {
+          "tested": 1,
+          "passed": 1
         },
         "synthea": {
           "tested": 20,
@@ -221,19 +253,23 @@
       "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps",
       "ig": "hl7.fhir.eu.eps#1.0.0-ballot",
       "gate": false,
-      "tested": 0,
-      "passed": 0,
+      "tested": 6,
+      "passed": 6,
       "failed": 0,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 6,
+          "passed": 6
         },
         "facade": {
           "tested": 0,
           "passed": 0
         },
         "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "reference": {
           "tested": 0,
           "passed": 0
         },
@@ -264,6 +300,10 @@
           "tested": 0,
           "passed": 0
         },
+        "reference": {
+          "tested": 0,
+          "passed": 0
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -275,19 +315,23 @@
       "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationRequest-eu-mpd",
       "ig": "hl7.fhir.eu.mpd#1.0.0",
       "gate": true,
-      "tested": 31,
-      "passed": 31,
+      "tested": 47,
+      "passed": 47,
       "failed": 0,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 16,
+          "passed": 16
         },
         "facade": {
           "tested": 11,
           "passed": 11
         },
         "klarbefund": {
+          "tested": 0,
+          "passed": 0
+        },
+        "reference": {
           "tested": 0,
           "passed": 0
         },
@@ -318,6 +362,10 @@
           "tested": 0,
           "passed": 0
         },
+        "reference": {
+          "tested": 1,
+          "passed": 1
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -345,6 +393,10 @@
           "tested": 0,
           "passed": 0
         },
+        "reference": {
+          "tested": 1,
+          "passed": 1
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -370,6 +422,10 @@
         },
         "klarbefund": {
           "tested": 1,
+          "passed": 0
+        },
+        "reference": {
+          "tested": 0,
           "passed": 0
         },
         "synthea": {
@@ -404,13 +460,13 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab",
       "ig": "hl7.fhir.eu.laboratory#2.1.0",
       "gate": true,
-      "tested": 1,
-      "passed": 1,
+      "tested": 4,
+      "passed": 4,
       "failed": 0,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 3,
+          "passed": 3
         },
         "facade": {
           "tested": 0,
@@ -419,6 +475,10 @@
         "klarbefund": {
           "tested": 1,
           "passed": 1
+        },
+        "reference": {
+          "tested": 0,
+          "passed": 0
         },
         "synthea": {
           "tested": 0,
@@ -431,13 +491,13 @@
       "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab",
       "ig": "hl7.fhir.eu.laboratory#2.1.0",
       "gate": true,
-      "tested": 37,
-      "passed": 17,
+      "tested": 49,
+      "passed": 29,
       "failed": 20,
       "bySource": {
         "documents": {
-          "tested": 0,
-          "passed": 0
+          "tested": 12,
+          "passed": 12
         },
         "facade": {
           "tested": 6,
@@ -446,6 +506,10 @@
         "klarbefund": {
           "tested": 11,
           "passed": 11
+        },
+        "reference": {
+          "tested": 0,
+          "passed": 0
         },
         "synthea": {
           "tested": 20,
@@ -479,6 +543,10 @@
           "tested": 1,
           "passed": 1
         },
+        "reference": {
+          "tested": 0,
+          "passed": 0
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -506,6 +574,10 @@
           "tested": 0,
           "passed": 0
         },
+        "reference": {
+          "tested": 1,
+          "passed": 1
+        },
         "synthea": {
           "tested": 0,
           "passed": 0
@@ -532,6 +604,10 @@
         "klarbefund": {
           "tested": 0,
           "passed": 0
+        },
+        "reference": {
+          "tested": 1,
+          "passed": 1
         },
         "synthea": {
           "tested": 20,
@@ -580,12 +656,12 @@
         "canonical": "https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request",
         "ig": "de.gematik.epa.medication#1.3.5",
         "gate": true,
-        "tested": 31,
+        "tested": 47,
         "passed": 0,
-        "failed": 31,
+        "failed": 47,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 16,
             "passed": 0
           },
           "facade": {
@@ -593,6 +669,10 @@
             "passed": 0
           },
           "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "reference": {
             "tested": 0,
             "passed": 0
           },
@@ -604,23 +684,23 @@
         "topIssues": [
           {
             "issue": "MedicationRequest.subject: MedicationRequest.subject.identifier: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2)",
-            "resources": 31
+            "resources": 47
           },
           {
             "issue": "MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1",
-            "resources": 19
+            "resources": 35
           },
           {
             "issue": "MedicationRequest.medication.ofType(CodeableConcept).text: This element is not allowed by the profile https://gematik.de/fhir/epa-medication/StructureDefinition/epa-medication-request|1.3.2",
-            "resources": 19
+            "resources": 35
           },
           {
             "issue": "MedicationRequest.medication.ofType(CodeableConcept): The Profile '...' definition allows for the type Reference but found type CodeableConcept",
-            "resources": 19
+            "resources": 35
           },
           {
             "issue": "MedicationRequest.medication.ofType(CodeableConcept).coding[n]: This element is not allowed by the profile http://hl7.org/fhir/StructureDefinition/Reference|4.0.1",
-            "resources": 17
+            "resources": 32
           }
         ]
       },
@@ -628,12 +708,12 @@
         "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study",
         "ig": "kbv.mio.laborbefund#1.0.0-update",
         "gate": false,
-        "tested": 37,
+        "tested": 49,
         "passed": 0,
-        "failed": 37,
+        "failed": 49,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 12,
             "passed": 0
           },
           "facade": {
@@ -644,6 +724,10 @@
             "tested": 11,
             "passed": 0
           },
+          "reference": {
+            "tested": 0,
+            "passed": 0
+          },
           "synthea": {
             "tested": 20,
             "passed": 0
@@ -652,23 +736,23 @@
         "topIssues": [
           {
             "issue": "Observation.category[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update and slicing is CLOSED: Observation.category[n]: Doe",
-            "resources": 37
+            "resources": 49
           },
           {
             "issue": "Observation.subject: Observation.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 37
+            "resources": 49
           },
           {
             "issue": "Observation: Slice '...': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update). Note that other slices are allowed in addition to this required s",
-            "resources": 37
+            "resources": 49
           },
           {
             "issue": "Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 26
+            "resources": 38
           },
           {
-            "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
-            "resources": 20
+            "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_Observation_Laboratory_Study|1.0.0-update)",
+            "resources": 21
           }
         ]
       },
@@ -676,12 +760,12 @@
         "canonical": "https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport",
         "ig": "kbv.mio.laborbefund#1.0.0-update",
         "gate": false,
-        "tested": 1,
+        "tested": 4,
         "passed": 0,
-        "failed": 1,
+        "failed": 4,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 3,
             "passed": 0
           },
           "facade": {
@@ -692,6 +776,10 @@
             "tested": 1,
             "passed": 0
           },
+          "reference": {
+            "tested": 0,
+            "passed": 0
+          },
           "synthea": {
             "tested": 0,
             "passed": 0
@@ -699,24 +787,24 @@
         },
         "topIssues": [
           {
-            "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 1
-          },
-          {
-            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code",
-            "resources": 1
-          },
-          {
-            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update#DiagnosticReport.code.coding",
-            "resources": 1
-          },
-          {
             "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update and slicing is CLOSED: DiagnosticReport.identifier[n]: D",
-            "resources": 1
+            "resources": 4
           },
           {
-            "issue": "DiagnosticReport.presentedForm[n]: DiagnosticReport.presentedForm.contentType: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
-            "resources": 1
+            "issue": "DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "resources": 4
+          },
+          {
+            "issue": "DiagnosticReport.result[n]: Slice '...' for extension '...': a matching slice is required, but not found (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update). Note that other slices are allowed in addi",
+            "resources": 4
+          },
+          {
+            "issue": "DiagnosticReport.subject: DiagnosticReport.subject.identifier: minimum required = 1, but only found 0 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "resources": 4
+          },
+          {
+            "issue": "DiagnosticReport: DiagnosticReport.category: max allowed = 0, but found 1 (from https://fhir.kbv.de/StructureDefinition/KBV_PR_MIO_LAB_DiagnosticReport|1.0.0-update)",
+            "resources": 4
           }
         ]
       },
@@ -738,6 +826,10 @@
           },
           "klarbefund": {
             "tested": 1,
+            "passed": 0
+          },
+          "reference": {
+            "tested": 0,
             "passed": 0
           },
           "synthea": {
@@ -772,12 +864,12 @@
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp",
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
-        "tested": 37,
+        "tested": 49,
         "passed": 0,
-        "failed": 37,
+        "failed": 49,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 12,
             "passed": 0
           },
           "facade": {
@@ -788,6 +880,10 @@
             "tested": 11,
             "passed": 0
           },
+          "reference": {
+            "tested": 0,
+            "passed": 0
+          },
           "synthea": {
             "tested": 20,
             "passed": 0
@@ -796,7 +892,11 @@
         "topIssues": [
           {
             "issue": "Observation.code.coding[n]: Observation.code.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 26
+            "resources": 38
+          },
+          {
+            "issue": "Observation.referenceRange[n]: Observation.referenceRange.type: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
+            "resources": 21
           },
           {
             "issue": "Observation: Observation.encounter: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
@@ -809,10 +909,6 @@
           {
             "issue": "Observation.identifier[n].type.coding[n]: Observation.identifier:resultID.type.coding.version: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
             "resources": 17
-          },
-          {
-            "issue": "Observation.identifier[n]: Observation.identifier:resultID.assigner: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/observation-laboratory-study-dglp|1.0.0)",
-            "resources": 17
           }
         ]
       },
@@ -820,12 +916,12 @@
         "canonical": "https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp",
         "ig": "de.gematik.epa.laboratory#1.0.0-ballot.1",
         "gate": false,
-        "tested": 1,
+        "tested": 4,
         "passed": 0,
-        "failed": 1,
+        "failed": 4,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 3,
             "passed": 0
           },
           "facade": {
@@ -836,6 +932,10 @@
             "tested": 1,
             "passed": 0
           },
+          "reference": {
+            "tested": 0,
+            "passed": 0
+          },
           "synthea": {
             "tested": 0,
             "passed": 0
@@ -843,24 +943,24 @@
         },
         "topIssues": [
           {
-            "issue": "DiagnosticReport.basedOn[n]: DiagnosticReport.basedOn.reference: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
-            "resources": 1
-          },
-          {
-            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code",
-            "resources": 1
-          },
-          {
-            "issue": "DiagnosticReport.code.coding[n].version: Value is '2.83' but is fixed to '2.82' in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0#DiagnosticReport.code.coding",
-            "resources": 1
-          },
-          {
             "issue": "DiagnosticReport.effective.ofType(dateTime): This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.",
-            "resources": 1
+            "resources": 4
           },
           {
             "issue": "DiagnosticReport.identifier[n]: This element does not match any known slice defined in the profile https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0 and slicing is CLOSED: DiagnosticReport.identifier[n]",
-            "resources": 1
+            "resources": 4
+          },
+          {
+            "issue": "DiagnosticReport.performer[n]: DiagnosticReport.performer.display: max allowed = 0, but found 1 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "resources": 4
+          },
+          {
+            "issue": "DiagnosticReport.result[n]: DiagnosticReport.result.extension: minimum required = 1, but only found 0 (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0)",
+            "resources": 4
+          },
+          {
+            "issue": "DiagnosticReport.result[n]: Slice '...' for extension '...': a matching slice is required, but not found (from https://gematik.de/fhir/epa-laboratory/StructureDefinition/diagnostic-report-dglp|1.0.0). Note that other slices are allowed in a",
+            "resources": 4
           }
         ]
       },
@@ -882,6 +982,10 @@
           },
           "klarbefund": {
             "tested": 1,
+            "passed": 0
+          },
+          "reference": {
+            "tested": 0,
             "passed": 0
           },
           "synthea": {
@@ -916,13 +1020,13 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
         "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
         "gate": true,
-        "tested": 29,
-        "passed": 26,
+        "tested": 38,
+        "passed": 35,
         "failed": 3,
         "bySource": {
           "documents": {
-            "tested": 0,
-            "passed": 0
+            "tested": 9,
+            "passed": 9
           },
           "facade": {
             "tested": 8,
@@ -931,6 +1035,10 @@
           "klarbefund": {
             "tested": 9,
             "passed": 9
+          },
+          "reference": {
+            "tested": 1,
+            "passed": 1
           },
           "synthea": {
             "tested": 12,
@@ -952,12 +1060,12 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
         "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
         "gate": true,
-        "tested": 32,
+        "tested": 52,
         "passed": 20,
-        "failed": 12,
+        "failed": 32,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 20,
             "passed": 0
           },
           "facade": {
@@ -968,6 +1076,10 @@
             "tested": 0,
             "passed": 0
           },
+          "reference": {
+            "tested": 1,
+            "passed": 1
+          },
           "synthea": {
             "tested": 20,
             "passed": 20
@@ -976,7 +1088,7 @@
         "topIssues": [
           {
             "issue": "Condition: Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
-            "resources": 12
+            "resources": 32
           },
           {
             "issue": "Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)",
@@ -988,19 +1100,23 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
         "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
         "gate": true,
-        "tested": 24,
-        "passed": 23,
+        "tested": 25,
+        "passed": 24,
         "failed": 1,
         "bySource": {
           "documents": {
-            "tested": 0,
-            "passed": 0
+            "tested": 1,
+            "passed": 1
           },
           "facade": {
             "tested": 4,
             "passed": 3
           },
           "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "reference": {
             "tested": 0,
             "passed": 0
           },
@@ -1044,6 +1160,10 @@
             "tested": 0,
             "passed": 0
           },
+          "reference": {
+            "tested": 1,
+            "passed": 1
+          },
           "synthea": {
             "tested": 20,
             "passed": 20
@@ -1068,12 +1188,12 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
         "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
         "gate": true,
-        "tested": 37,
+        "tested": 49,
         "passed": 16,
-        "failed": 21,
+        "failed": 33,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 12,
             "passed": 0
           },
           "facade": {
@@ -1084,6 +1204,10 @@
             "tested": 11,
             "passed": 11
           },
+          "reference": {
+            "tested": 0,
+            "passed": 0
+          },
           "synthea": {
             "tested": 20,
             "passed": 0
@@ -1092,18 +1216,18 @@
         "topIssues": [
           {
             "issue": "Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
-            "resources": 20
+            "resources": 32
           },
           {
             "issue": "Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
-            "resources": 20
-          },
-          {
-            "issue": "Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
-            "resources": 20
+            "resources": 32
           },
           {
             "issue": "Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
+            "resources": 32
+          },
+          {
+            "issue": "Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
             "resources": 20
           },
           {
@@ -1116,12 +1240,12 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
         "ig": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
         "gate": true,
-        "tested": 1,
+        "tested": 4,
         "passed": 1,
-        "failed": 0,
+        "failed": 3,
         "bySource": {
           "documents": {
-            "tested": 0,
+            "tested": 3,
             "passed": 0
           },
           "facade": {
@@ -1132,30 +1256,47 @@
             "tested": 1,
             "passed": 1
           },
+          "reference": {
+            "tested": 0,
+            "passed": 0
+          },
           "synthea": {
             "tested": 0,
             "passed": 0
           }
         },
-        "topIssues": []
+        "topIssues": [
+          {
+            "issue": "DiagnosticReport: DiagnosticReport.basedOn: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3)",
+            "resources": 3
+          },
+          {
+            "issue": "DiagnosticReport: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addi",
+            "resources": 3
+          }
+        ]
       },
       "kds-medication-request-de": {
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
         "ig": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
         "gate": true,
-        "tested": 31,
-        "passed": 29,
+        "tested": 47,
+        "passed": 45,
         "failed": 2,
         "bySource": {
           "documents": {
-            "tested": 0,
-            "passed": 0
+            "tested": 16,
+            "passed": 16
           },
           "facade": {
             "tested": 11,
             "passed": 11
           },
           "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "reference": {
             "tested": 0,
             "passed": 0
           },
@@ -1175,19 +1316,23 @@
         "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
         "ig": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
         "gate": true,
-        "tested": 5,
-        "passed": 0,
+        "tested": 16,
+        "passed": 11,
         "failed": 5,
         "bySource": {
           "documents": {
-            "tested": 0,
-            "passed": 0
+            "tested": 11,
+            "passed": 11
           },
           "facade": {
             "tested": 5,
             "passed": 0
           },
           "klarbefund": {
+            "tested": 0,
+            "passed": 0
+          },
+          "reference": {
             "tested": 0,
             "passed": 0
           },

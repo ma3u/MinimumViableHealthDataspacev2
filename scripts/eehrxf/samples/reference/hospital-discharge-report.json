@@ -1,0 +1,308 @@
+{
+  "resourceType": "Bundle",
+  "id": "ref-hdr-document-1",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "identifier": {
+    "system": "https://ehds.mabu.red/fhir/sid/document",
+    "value": "HDR-DOC-0001"
+  },
+  "type": "document",
+  "timestamp": "2026-03-09T12:00:00+01:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:1a9bf4da-e0fb-5da8-ba1d-314ad06921c0",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "ref-composition-hdr-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ]
+        },
+        "identifier": {
+          "system": "https://ehds.mabu.red/fhir/sid/discharge-report",
+          "value": "HDR-0001"
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34105-7",
+              "display": "Hospital Discharge summary"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9"
+        },
+        "encounter": {
+          "reference": "urn:uuid:18feeb35-0097-56d4-9bb7-8170a99702cf"
+        },
+        "date": "2026-03-09T12:00:00+01:00",
+        "author": [
+          {
+            "reference": "urn:uuid:01866220-b2b1-5998-984f-2b70f2e1e04a"
+          }
+        ],
+        "title": "Hospital discharge report (fictional)",
+        "custodian": {
+          "reference": "urn:uuid:299fca76-c5f8-544f-9d04-8b0decec34bf"
+        },
+        "section": [
+          {
+            "title": "Problem list",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list - Reported"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pneumonia, confirmed, treated in hospital.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:018c7c75-8a2f-5cc7-ab10-6d00075ee1ff"
+              }
+            ]
+          },
+          {
+            "title": "Hospital course",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8648-8",
+                  "display": "Hospital course Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Admitted with fever and cough; seven days of antibiotics; discharged home in good condition.</p></div>"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "P1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/patient",
+            "value": "P1"
+          }
+        ],
+        "name": [
+          {
+            "family": "Schmidt",
+            "given": [
+              "Maria"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1968-04-02"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:18feeb35-0097-56d4-9bb7-8170a99702cf",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ref-encounter-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9"
+        },
+        "period": {
+          "start": "2026-03-02T08:00:00+01:00",
+          "end": "2026-03-09T11:00:00+01:00"
+        },
+        "serviceProvider": {
+          "reference": "urn:uuid:299fca76-c5f8-544f-9d04-8b0decec34bf"
+        },
+        "hospitalization": {
+          "admitSource": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/admit-source",
+                "code": "emd",
+                "display": "From accident/emergency department"
+              }
+            ]
+          },
+          "dischargeDisposition": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                "code": "home",
+                "display": "Home"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:018c7c75-8a2f-5cc7-ab10-6d00075ee1ff",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "ref-condition-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "233604007",
+              "display": "Pneumonia"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9"
+        },
+        "encounter": {
+          "reference": "urn:uuid:18feeb35-0097-56d4-9bb7-8170a99702cf"
+        },
+        "onsetDateTime": "2026-03-01",
+        "recordedDate": "2026-03-02"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:01866220-b2b1-5998-984f-2b70f2e1e04a",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "ref-practitioner-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/practitioner",
+            "value": "PRAC-0001"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "family": "Vogt",
+            "given": [
+              "Lena"
+            ],
+            "prefix": [
+              "Dr."
+            ]
+          }
+        ],
+        "gender": "female"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:299fca76-c5f8-544f-9d04-8b0decec34bf",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "alpha-klinik",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/organization",
+            "value": "ALPHA-KLINIK"
+          }
+        ],
+        "name": "AlphaKlinik Berlin (fictional)"
+      }
+    }
+  ]
+}

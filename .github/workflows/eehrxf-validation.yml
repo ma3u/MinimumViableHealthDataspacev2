@@ -84,7 +84,9 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s scripts/eehrxf -p "test_*.py" -v
       - name: Generated files are current
-        run: python3 scripts/eehrxf/build.py --check
+        run: |
+          python3 scripts/eehrxf/reference_examples.py --check
+          python3 scripts/eehrxf/build.py --check
 
   validate:
     name: Report matches a fresh validator run

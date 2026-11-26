@@ -155,6 +155,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -962,6 +963,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -1684,6 +1686,7 @@
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "meta": {
@@ -2322,6 +2325,7 @@
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         }
       ],
+      "counted": true,
       "resource": {
         "resourceType": "Bundle",
         "identifier": {

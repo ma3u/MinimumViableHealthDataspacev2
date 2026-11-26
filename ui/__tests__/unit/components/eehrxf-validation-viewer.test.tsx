@@ -71,8 +71,13 @@ describe("the viewer files", () => {
       const p: ViewerProfile = JSON.parse(
         readFileSync(path.join(DIR, f), "utf8"),
       );
-      expect(p.resources.length, f).toBe(p.tested);
-      expect(p.resources.filter((r) => r.passed).length, f).toBe(p.passed);
+      // Reference examples are shown but never counted.
+      const counted = p.resources.filter((r) => r.counted !== false);
+      expect(counted.length, f).toBe(p.tested);
+      expect(counted.filter((r) => r.passed).length, f).toBe(p.passed);
+      for (const r of p.resources.filter((x) => x.counted === false)) {
+        expect(r.source, f).toBe("reference");
+      }
       for (const r of p.resources) {
         expect(r.resource.meta, f).toMatchObject({ profile: [p.canonical] });
         const blocking = r.issues.filter(
