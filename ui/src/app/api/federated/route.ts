@@ -36,7 +36,9 @@ export async function GET(request: NextRequest) {
       },
     });
     const data = await resp.json();
-    return NextResponse.json(data);
+    // A 503 from the proxy (its audit could not record the query, so it was
+    // not answered; ADR-100 decision 1) stays a 503.
+    return NextResponse.json(data, { status: resp.status });
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "Federated stats proxy error";

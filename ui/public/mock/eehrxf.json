@@ -82,7 +82,7 @@
       "totalResources": 2588,
       "profileCount": 7,
       "tested": 123,
-      "passed": 122,
+      "passed": 123,
       "profiles": [
         {
           "profileId": "bundle-eps-eu",
@@ -170,13 +170,11 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
-          "coverage": "partial",
+          "coverage": "full",
           "tested": 38,
-          "passed": 37,
-          "failed": 1,
-          "topIssues": [
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-          ],
+          "passed": 38,
+          "failed": 0,
+          "topIssues": [],
           "referenceTested": 1,
           "referencePassed": 1,
           "resourceCount": 167
@@ -233,7 +231,7 @@
       "totalResources": 5628,
       "profileCount": 3,
       "tested": 69,
-      "passed": 68,
+      "passed": 69,
       "profiles": [
         {
           "profileId": "composition-hdr-eu",
@@ -283,13 +281,11 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
-          "coverage": "partial",
+          "coverage": "full",
           "tested": 38,
-          "passed": 37,
-          "failed": 1,
-          "topIssues": [
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-          ],
+          "passed": 38,
+          "failed": 0,
+          "topIssues": [],
           "referenceTested": 1,
           "referencePassed": 1,
           "resourceCount": 167
@@ -308,7 +304,7 @@
       "totalResources": 37880,
       "profileCount": 4,
       "tested": 95,
-      "passed": 74,
+      "passed": 75,
       "profiles": [
         {
           "profileId": "bundle-lab-report-eu",
@@ -379,13 +375,11 @@
           "canonical": "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core",
           "url": "https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html",
           "baseResource": "Patient",
-          "coverage": "partial",
+          "coverage": "full",
           "tested": 38,
-          "passed": 37,
-          "failed": 1,
-          "topIssues": [
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-          ],
+          "passed": 38,
+          "failed": 0,
+          "topIssues": [],
           "referenceTested": 1,
           "referencePassed": 1,
           "resourceCount": 167
@@ -457,9 +451,9 @@
     "totalCategories": 6,
     "totalProfiles": 16,
     "testedProfiles": 11,
-    "passingProfiles": 8,
+    "passingProfiles": 9,
     "resourcesTested": 261,
-    "resourcesPassed": 237,
+    "resourcesPassed": 238,
     "passRatePercent": 91,
     "resourceCounts": {
       "Bundle": 0,

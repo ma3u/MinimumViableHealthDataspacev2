@@ -154,7 +154,7 @@
   "Run the analysis where the data is, and never move source data between instances.": "Die Analyse dort ausführen, wo die Daten liegen, und nie Quelldaten zwischen Instanzen bewegen.",
   "Each workspace runs the query itself, but row-level answers can still reach the coordinator.": "Jeder Workspace führt die Abfrage selbst aus, aber Antworten auf Datensatzebene können noch beim Koordinator ankommen.",
   "Logging across the federation, joining each instance's logs.": "Protokollierung über die Föderation hinweg, die die Protokolle jeder Instanz verbindet.",
-  "The coordinator collects every workspace's events into one audit chain.": "Der Koordinator sammelt die Ereignisse jedes Workspaces in einer Audit-Kette.",
+  "The coordinator collects every workspace's events into one audit chain, and every federated query carries one id into its audit record and into each workspace's transaction (ADR-100).": "Der Koordinator sammelt die Ereignisse jedes Workspaces in einer Audit-Kette, und jede föderierte Abfrage trägt eine Kennung in ihren Audit-Eintrag und in die Transaktion jedes Workspaces (ADR-100).",
   "For federated learning, train locally and exchange only model updates.": "Beim föderierten Lernen lokal trainieren und nur Modellaktualisierungen austauschen.",
   "Not offered.": "Nicht angeboten.",
   "A written agreement on roles, admission, exclusion and incidents in the federation.": "Eine schriftliche Vereinbarung über Rollen, Aufnahme, Ausschluss und Vorfälle in der Föderation.",

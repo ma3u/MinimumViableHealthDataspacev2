@@ -33,7 +33,7 @@ vi.mock("fs", () => ({
 }));
 
 import { runQuery } from "@/lib/neo4j";
-import { GET, POST } from "@/app/api/admin/policies/route";
+import { GET, POST, PUT, DELETE } from "@/app/api/admin/policies/route";
 
 const mockRunQuery = vi.mocked(runQuery);
 
@@ -456,5 +456,57 @@ describe("POST /api/admin/policies", () => {
     );
 
     expect(res.status).toBe(502);
+  });
+});
+
+// =====================================================================
+// #1222: the local registry keys a policy by policyId, the key
+// init-schema.cypher makes unique. It merged on `id`, which no constraint
+// covers, so the same policy could be stored twice.
+// =====================================================================
+describe("OdrlPolicy key in the local registry (#1222)", () => {
+  function req(method: string, body: unknown) {
+    return new NextRequest("http://localhost:3000/api/admin/policies", {
+      method,
+      body: JSON.stringify(body),
+    });
+  }
+
+  beforeEach(() => {
+    mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
+    mockRunQuery.mockResolvedValue([]);
+  });
+
+  it("POST merges on policyId and keeps id", async () => {
+    await POST(
+      req("POST", { participantId: "ctx-1", policy: { "@id": "pol-1" } }),
+    );
+    const cypher = String(mockRunQuery.mock.calls[0][0]);
+    expect(cypher).toMatch(/MERGE \(pol:OdrlPolicy \{policyId: \$policyId\}\)/);
+    expect(cypher).toContain("pol.id            = $policyId");
+    expect(cypher).not.toMatch(/OdrlPolicy \{id:/);
+  });
+
+  it("PUT merges on policyId", async () => {
+    await PUT(
+      req("PUT", {
+        participantId: "ctx-1",
+        policyId: "pol-1",
+        policy: { "@id": "pol-1" },
+      }),
+    );
+    const cypher = String(mockRunQuery.mock.calls[0][0]);
+    expect(cypher).toMatch(/MERGE \(pol:OdrlPolicy \{policyId: \$policyId\}\)/);
+    expect(cypher).not.toMatch(/OdrlPolicy \{id:/);
+  });
+
+  it("DELETE removes a policy stored under either key", async () => {
+    const res = await DELETE(
+      req("DELETE", { participantId: "ctx-1", policyId: "pol-1" }),
+    );
+    expect(res.status).toBe(200);
+    const cypher = String(mockRunQuery.mock.calls[0][0]);
+    expect(cypher).toContain("pol.policyId = $policyId OR pol.id = $policyId");
+    expect(mockRunQuery.mock.calls[0][1]).toEqual({ policyId: "pol-1" });
   });
 });

@@ -13,6 +13,8 @@
  * ui/src/lib/opt-out.ts; the two share their test vectors.
  */
 import type { Session, QueryResult } from "neo4j-driver";
+/** The third argument of Session.run. */
+type TransactionConfig = NonNullable<Parameters<Session["run"]>[2]>;
 
 /** The marker label the opt-out route sets and the reversal removes. */
 export const OPTED_OUT_LABEL = "OptedOut";
@@ -166,8 +168,14 @@ export function secondaryUseSession(
   return new Proxy(session, {
     get(target, prop, receiver) {
       if (prop === "run") {
-        return (cypher: string, params?: Record<string, unknown>) =>
-          target.run(forSecondaryUse(cypher, scope), params);
+        return (
+          cypher: string,
+          params?: Record<string, unknown>,
+          config?: TransactionConfig,
+        ) =>
+          config === undefined
+            ? target.run(forSecondaryUse(cypher, scope), params)
+            : target.run(forSecondaryUse(cypher, scope), params, config);
       }
       const v = Reflect.get(target, prop, receiver);
       return typeof v === "function" ? v.bind(target) : v;
