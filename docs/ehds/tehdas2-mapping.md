@@ -91,8 +91,10 @@ gaps mean and in which order to close them.
   ([ADR-068](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md)).
   The deck's separation of roles (SPE operator, data user, an access body that
   monitors the logs, an external auditor) is where the hub is thin: no review
-  before export and no workspace per permit
-  ([#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716)).
+  before export ([#1133](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1133)) and no check of the extract by
+  the access body before it is loaded ([#1275](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1275)). The hub
+  keeps one attested workspace per data holder, not one per permit
+  ([ADR-101](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md)).
 - **Linkage, D7.5** (pages 56 to 61, the wave-3 "Linkage of datasets").
   Linking organisations link, users never do; a trusted third party creates
   project-specific pseudonyms by keyed hashing; pseudonyms per permit are
