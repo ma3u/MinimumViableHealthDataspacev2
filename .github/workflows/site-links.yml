@@ -1,0 +1,86 @@
+# ---------------------------------------------------------------------------
+# Site links: the static export has no broken link
+# ---------------------------------------------------------------------------
+# The GitHub Pages site lives under /MinimumViableHealthDataspacev2. A link
+# rendered without that base path works on the hub and is a 404 on Pages;
+# until #1277 every link between published docs was one. The Markdown hook
+# checks the sources, not what Next renders, so this builds the static export
+# as pages.yml does and checks every link, image and anchor in it
+# (scripts/check-site-links.py).
+#
+# - pull_request: a change to the UI, the docs or the generators is checked
+#   before it is merged. Internal links and anchors only.
+# - schedule, weekly: external URLs too. A 404 or 410 fails the run; rate
+#   limits and sites that refuse robots are warnings.
+# - pages.yml runs the same check before every deploy and stops a broken site.
+# ---------------------------------------------------------------------------
+name: Site links
+
+on:
+  pull_request:
+    paths:
+      - "ui/**"
+      - "docs/**"
+      - "scripts/check-site-links.py"
+      - "scripts/gen-docs-content.py"
+      - "scripts/gen-docs-facts.py"
+      - ".github/workflows/site-links.yml"
+  schedule:
+    - cron: "17 5 * * 1" # Mondays 05:17 UTC
+  workflow_dispatch:
+    inputs:
+      external:
+        description: "Also fetch external URLs"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-links-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: Site links
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --fund=false
+
+      - name: Cache Next.js build
+        uses: actions/cache@v6
+        with:
+          path: ui/.next/cache
+          key: nextjs-links-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
+          restore-keys: nextjs-links-${{ hashFiles('ui/package-lock.json') }}-
+
+      # The same static export as pages.yml.
+      - name: Disable API routes for static export
+        run: mv src/app/api /tmp/api_disabled || true
+
+      - name: Build the static export
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "true"
+
+      - name: Check internal links and anchors
+        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && !inputs.external)
+        run: python3 ../scripts/check-site-links.py out --base /MinimumViableHealthDataspacev2
+
+      - name: Check internal and external links
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.external)
+        run: python3 ../scripts/check-site-links.py out --base /MinimumViableHealthDataspacev2 --external
