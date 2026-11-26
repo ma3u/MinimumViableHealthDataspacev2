@@ -36,6 +36,7 @@ import {
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 import { DEFAULT_PAGE_SIZE } from "@/lib/list-page";
+import { medicationConcept } from "@/lib/fhir-medication";
 
 /* ── Types ── */
 
@@ -531,7 +532,7 @@ function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
   } else if (type === "Condition") {
     summary = (r.code as { text?: string })?.text || "";
   } else if (type === "MedicationRequest") {
-    summary = (r.medicationCodeableConcept as { text?: string })?.text || "";
+    summary = medicationConcept(r)?.text || "";
   } else if (type === "Encounter") {
     const cls = r.class as { display?: string } | undefined;
     summary = `${cls?.display || "visit"} — ${r.status}`;

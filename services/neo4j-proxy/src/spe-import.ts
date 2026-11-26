@@ -51,11 +51,28 @@ export class ImportShapeError extends Error {}
  */
 export class TooManyRecordsError extends ImportShapeError {}
 
+/**
+ * A prescription's medication: its own CodeableConcept, or the code of the
+ * Medication contained in it, which is how the hub's facade sends it (the
+ * gematik ePA medication profile requires a reference).
+ */
+function medicationOf(r: Record<string, unknown>): unknown {
+  if (r.medicationCodeableConcept) return r.medicationCodeableConcept;
+  const ref = (r.medicationReference as { reference?: unknown } | undefined)
+    ?.reference;
+  if (typeof ref !== "string" || !ref.startsWith("#")) return undefined;
+  const contained = Array.isArray(r.contained) ? r.contained : [];
+  const hit = contained.find(
+    (c) => (c as { id?: unknown } | null)?.id === ref.slice(1),
+  ) as { code?: unknown } | undefined;
+  return hit?.code;
+}
+
 /** What a person reads on a record's node. */
 function displayName(r: Record<string, unknown>, id: string): string {
   // A prescription, a medication plan entry and a vaccination carry their
   // code in an element of their own (R4), not in `code`.
-  const code = (r.code ?? r.medicationCodeableConcept ?? r.vaccineCode) as
+  const code = (r.code ?? medicationOf(r) ?? r.vaccineCode) as
     | { text?: string; coding?: Array<{ display?: string; code?: string }> }
     | undefined;
   const coded =
@@ -495,9 +512,7 @@ export function recordFacts(
   }
   // An R4 resource holds its code and value in structures (#1144): their
   // plain reading, where the record has no plain value of that name.
-  const coded = (parsed.code ??
-    parsed.medicationCodeableConcept ??
-    parsed.vaccineCode) as
+  const coded = (parsed.code ?? medicationOf(parsed) ?? parsed.vaccineCode) as
     | { text?: unknown; coding?: Array<{ code?: unknown }> }
     | undefined;
   const code = coded?.coding?.[0]?.code;

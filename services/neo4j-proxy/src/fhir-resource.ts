@@ -673,20 +673,52 @@ function procedure(p: Props, subject: Resource | undefined): Resource {
   };
 }
 
+/**
+ * The patient's KVNR on a prescription's subject, as the gematik ePA
+ * medication profile requires (identifier-kvid-10). The hub holds no
+ * insurance numbers and invents none, so the value says it is unknown.
+ */
+export const KVID_UNKNOWN = {
+  system: "http://fhir.de/sid/gkv/kvid-10",
+  _value: absent(),
+};
+
+/**
+ * A prescription names its medication by reference, as the gematik ePA
+ * medication profile requires and every EU, IPS and MII profile accepts: a
+ * Medication contained in the request, carrying the code the graph holds.
+ */
+export const CONTAINED_MEDICATION_ID = "medication";
+
 function medicationRequest(p: Props, subject: Resource | undefined): Resource {
   const code = first(p, "code", "medicationCode");
   const authoredOn = fhirDateTime(p.date ?? p.authoredOn);
+  const display = first(p, "display", "name");
   return {
+    contained: [
+      {
+        resourceType: "Medication",
+        id: CONTAINED_MEDICATION_ID,
+        code:
+          codeable(
+            code,
+            first(p, "codeSystem", "system") ?? (code ? RXNORM : undefined),
+            display,
+          ) ?? absent(),
+        // The MII Kerndatensatz Medication requires an ingredient with a
+        // coding. The graph holds the product's code, not its ingredients,
+        // so the ingredient says it is unknown rather than repeating it.
+        ingredient: [{ itemCodeableConcept: { coding: [absent()] } }],
+      },
+    ],
     status: pick(p.status, MED_REQUEST_STATUS, "unknown"),
     // A prescription the graph holds is an order (the UI's builders say so too).
     intent: pick(p.intent, MED_REQUEST_INTENT, "order"),
-    medicationCodeableConcept:
-      codeable(
-        code,
-        first(p, "codeSystem", "system") ?? (code ? RXNORM : undefined),
-        first(p, "display", "name"),
-      ) ?? absent(),
-    subject,
+    medicationReference: {
+      reference: `#${CONTAINED_MEDICATION_ID}`,
+      display,
+    },
+    subject: subject ? { ...subject, identifier: KVID_UNKNOWN } : undefined,
     authoredOn,
     // The EU prescription (MPD) wants the date and the prescriber; the
     // graph keeps no prescriber, so it says it does not know.
@@ -695,11 +727,62 @@ function medicationRequest(p: Props, subject: Resource | undefined): Resource {
   };
 }
 
+/** Where the facade's DiagnosticReport identifiers live, as for Observations. */
+export const FACADE_REPORT_IDENTIFIER_SYSTEM =
+  "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report";
+
+/**
+ * The two categories the HL7 Europe imaging report wants on a radiology report
+ * (DiagnosticReportEuImaging and its minimal-metadata form), each a
+ * CodeableConcept of its own, next to v2-0074 `RAD`. Same as
+ * `IMAGING_REPORT_CATEGORIES` in services/epa-ingest.
+ */
+const IMAGING_REPORT_CATEGORIES = [
+  {
+    coding: [
+      { system: LOINC, code: "85430-7", display: "Diagnostic imaging report" },
+    ],
+  },
+  {
+    coding: [
+      {
+        system:
+          "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+        code: "Medical-Imaging",
+        display: "medical imaging studies and related imaging reports",
+      },
+    ],
+  },
+];
+
 function diagnosticReport(p: Props, subject: Resource | undefined): Resource {
   const code = first(p, "code");
   const category = first(p, "category");
   const performer = named(first(p, "performer"));
+  const id = fhirIdOf(p);
   return {
+    // The report as this hub holds it: the graph's id, assigned by the facade.
+    // The EU imaging report requires an identifier; a lab report may carry one.
+    identifier: id
+      ? [
+          {
+            type: {
+              coding: [
+                {
+                  system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  code: "FILL",
+                  display: "Filler Identifier",
+                },
+              ],
+            },
+            system: FACADE_REPORT_IDENTIFIER_SYSTEM,
+            value: id,
+            assigner: {
+              display: "Minimum Viable Health Dataspace FHIR facade",
+            },
+          },
+        ]
+      : undefined,
     status: pick(p.status, REPORT_STATUS, "unknown"),
     category: category
       ? [
@@ -708,6 +791,7 @@ function diagnosticReport(p: Props, subject: Resource | undefined): Resource {
             "http://terminology.hl7.org/CodeSystem/v2-0074",
             first(p, "categoryDisplay"),
           ),
+          ...(category === "RAD" ? IMAGING_REPORT_CATEGORIES : []),
         ]
       : undefined,
     code:

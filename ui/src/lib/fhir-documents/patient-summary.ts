@@ -319,12 +319,59 @@ export function buildPatientSummaryDocument(
           identifier: [graphIdentifier(m.id)],
           status: pick(m.status, MED_REQUEST_STATUS, "unknown"),
           intent: "order",
-          medicationCodeableConcept: codeable(
-            m.code,
-            systemOr(m.system, m.code, RXNORM),
-            m.display,
-          ),
-          subject,
+          // The medication by reference, as the gematik ePA medication profile
+          // requires and the EU, IPS and MII profiles accept: a Medication
+          // contained in the request, as the FHIR facade sends it.
+          contained: [
+            {
+              resourceType: "Medication",
+              id: "medication",
+              code: codeable(
+                m.code,
+                systemOr(m.system, m.code, RXNORM),
+                m.display,
+              ),
+              // The MII Kerndatensatz Medication requires an ingredient with
+              // a coding. The graph holds the product's code, not its
+              // ingredients, so the ingredient says it is unknown.
+              ingredient: [
+                {
+                  itemCodeableConcept: {
+                    coding: [
+                      {
+                        extension: [
+                          {
+                            url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                            valueCode: "unknown",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+          medicationReference: {
+            reference: "#medication",
+            ...(m.display ? { display: m.display } : {}),
+          },
+          // The KVNR the ePA profile wants on the subject. The hub holds no
+          // insurance numbers and invents none, so the value is unknown.
+          subject: {
+            ...subject,
+            identifier: {
+              system: "http://fhir.de/sid/gkv/kvid-10",
+              _value: {
+                extension: [
+                  {
+                    url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    valueCode: "unknown",
+                  },
+                ],
+              },
+            },
+          },
           // The EU prescription (MPD) wants the date and the prescriber. The
           // graph keeps no prescriber and not always a date, so the document
           // says it does not know, as the FHIR facade does.

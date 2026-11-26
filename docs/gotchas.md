@@ -3,6 +3,21 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-26: a gating EEHRxF profile can fail every resource with CI green
+
+`epa-medication-request-de` (gematik ePA, published, so gating) failed all 27
+of the hub's MedicationRequests on `main`, and the EEHRxF validation job
+passed. The gate in `scripts/eehrxf/validate.py` is a ratchet: a gating
+profile may keep the failures the committed `validation-report.json` records
+for it, and only a new failure fails the run. A profile that failed
+everything from its first committed run is therefore never checked.
+
+Read `"failed"` in the committed report, not the job's colour, before saying a
+gate holds. Bring a gating profile's count down and commit the new report:
+that becomes the new allowance. Validate against `main`'s report
+(`--baseline <file>`) when a run in a worktree has already overwritten the
+local one, or the gate compares the change with itself.
+
 ## 2026-11-25: Event Hubs answers a consumer group's offsets to a consumer, not to the admin client
 
 The first Kafka-PUSH on Azure wrote all 121 records of the one-hour ECG to

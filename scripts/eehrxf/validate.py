@@ -92,6 +92,7 @@ FILE_EXT = "http://hl7.org/fhir/StructureDefinition/operationoutcome-file"
 
 LAB_CODES = {"laboratory", "LAB"}
 IMAGING_CODES = {"imaging", "RAD", "radiology"}
+IMAGING_COMPOSITION_EXT = "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition"
 # LOINC document types of the Composition a document Bundle starts with.
 PATIENT_SUMMARY = "60591-5"
 DISCHARGE_REPORT = "34105-7"
@@ -127,6 +128,14 @@ def matches_filter(resource: dict, source_filter: str | None) -> bool:
         return bool(codes & LAB_CODES)
     if source_filter == "imaging":
         return bool(codes & IMAGING_CODES)
+    if source_filter == "imaging-document":
+        # The full EU imaging report: a radiology report that names the
+        # Composition of its report document. A report sent on its own is
+        # validated against the minimal-metadata profile instead, which the
+        # guide defines for exactly that case.
+        return bool(codes & IMAGING_CODES) and any(
+            e.get("url") == IMAGING_COMPOSITION_EXT for e in resource.get("extension", [])
+        )
     if source_filter == "laboratory-report":
         # A laboratory report proper: category LAB and LOINC 11502-2. A CGM
         # summary, an ECG or a spirometry report is not one, whatever its
@@ -245,7 +254,16 @@ def report_only(ig: dict) -> bool:
 
 
 def national(cfg: dict) -> dict:
-    return cfg.get("national", {"igs": {}, "profiles": []})
+    """The German section. Its excludeSources apply to each of its profiles:
+    the raw Synthea input is US data, never a German record, so it is not
+    checked against a German profile (a KVNR, a PZN or an ATC code it cannot
+    carry would only measure Synthea)."""
+    nat = cfg.get("national", {"igs": {}, "profiles": []})
+    skip = nat.get("excludeSources", [])
+    return {
+        **nat,
+        "profiles": [{**p, "excludeSources": sorted({*skip, *p.get("excludeSources", [])})} for p in nat["profiles"]],
+    }
 
 
 def candidates(profile: dict, sources: dict[str, dict]) -> list[tuple[str, str, dict]]:
@@ -257,6 +275,7 @@ def candidates(profile: dict, sources: dict[str, dict]) -> list[tuple[str, str, 
             for origin, r in sources[sid]["resources"]
             if r.get("resourceType") == profile["baseResource"]
             and matches_filter(r, profile.get("sourceFilter"))
+            and sid not in profile.get("excludeSources", [])
         ]
         picked.sort(key=lambda x: x[0])
         out.extend((sid, origin, r) for origin, r in picked[:MAX_PER_SOURCE])

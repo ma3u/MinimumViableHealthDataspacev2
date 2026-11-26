@@ -57,6 +57,15 @@ class Filters(unittest.TestCase):
         self.assertFalse(validate.matches_filter(collection, "laboratory-report-bundle"))
         self.assertFalse(validate.matches_filter(doc("60591-5"), "laboratory-report-bundle"))
 
+    def test_full_imaging_report_needs_its_composition(self):
+        # DiagnosticReportEuImaging is the report inside a report document; a
+        # report sent on its own goes to the minimal-metadata profile.
+        rad = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "RAD"}]}]}
+        in_document = {**rad, "extension": [{"url": validate.IMAGING_COMPOSITION_EXT, "valueReference": {"reference": "Composition/c1"}}]}
+        self.assertTrue(validate.matches_filter(rad, "imaging"))
+        self.assertFalse(validate.matches_filter(rad, "imaging-document"))
+        self.assertTrue(validate.matches_filter(in_document, "imaging-document"))
+
     def test_unknown_filter_is_an_error(self):
         with self.assertRaises(ValueError):
             validate.matches_filter({}, "radiology")
@@ -182,6 +191,17 @@ class Config(unittest.TestCase):
         self.assertEqual(
             set(report["national"]["profiles"]), {p["profileId"] for p in validate.national(cfg)["profiles"]}
         )
+
+    def test_raw_synthea_is_never_checked_against_a_german_profile(self):
+        # Synthea writes US records: a KVNR, a PZN or an ATC code it cannot
+        # carry would only measure Synthea, never the hub.
+        cfg = validate.load_config()
+        for p in validate.national(cfg)["profiles"]:
+            self.assertIn("synthea", p["excludeSources"], p["profileId"])
+        sources = {"synthea": {"resources": [("s#0", {"resourceType": "MedicationRequest"})]},
+                   "facade": {"resources": [("f#0", {"resourceType": "MedicationRequest"})]}}
+        profile = next(p for p in validate.national(cfg)["profiles"] if p["profileId"] == "epa-medication-request-de")
+        self.assertEqual([sid for sid, _o, _r in validate.candidates(profile, sources)], ["facade"])
 
     def test_every_national_profile_names_a_known_national_ig(self):
         cfg = validate.load_config()

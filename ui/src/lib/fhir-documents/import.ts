@@ -25,6 +25,7 @@ import {
   SNOMED,
   documentUuid,
 } from "./shared";
+import { medicationConcept } from "@/lib/fhir-medication";
 
 /**
  * Reading a FHIR document back (#1173, EHDS Art. 15(4)): a laboratory report
@@ -437,9 +438,10 @@ function patientSummary(
           break;
         case "MedicationStatement":
         case "MedicationRequest": {
-          const medication =
-            r.medicationCodeableConcept ??
-            obj(resolve(r.medicationReference)?.resource).code;
+          const medication = medicationConcept(
+            r,
+            (ref) => resolve(ref)?.resource as Record<string, unknown>,
+          );
           if (!medication) {
             skip(e, "no medication named");
             break;

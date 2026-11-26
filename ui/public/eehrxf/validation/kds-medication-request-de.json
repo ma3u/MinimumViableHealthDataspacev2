@@ -5,20 +5,15 @@
   "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
   "baseResource": "MedicationRequest",
-  "tested": 47,
-  "passed": 45,
-  "warnings": 70,
+  "tested": 27,
+  "passed": 27,
+  "warnings": 27,
   "resources": [
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[14]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -42,18 +37,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111",
-              "display": "Salbutamol 100 mcg inhaler"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111",
+                  "display": "Salbutamol 100 mcg inhaler"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -73,11 +105,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -99,18 +126,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076",
-              "display": "Lisinopril 10 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076",
+                  "display": "Lisinopril 10 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -128,11 +192,6 @@
       "origin": "P1-patient-summary-own-copy.json#entry[16]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -156,18 +215,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "860975",
-              "display": "Metformin 500 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 500 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "860975",
+                  "display": "Metformin 500 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 500 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 500 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2018-04-10",
         "requester": {
@@ -185,11 +281,6 @@
       "origin": "P1-patient-summary-own-copy.json#entry[17]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -213,18 +304,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617310",
-              "display": "Atorvastatin 20 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617310",
+                  "display": "Atorvastatin 20 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2024-09-12",
         "requester": {
@@ -242,11 +370,6 @@
       "origin": "P1-patient-summary.json#entry[14]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -270,18 +393,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111",
-              "display": "Salbutamol 100 mcg inhaler"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111",
+                  "display": "Salbutamol 100 mcg inhaler"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -299,11 +459,6 @@
       "origin": "P1-patient-summary.json#entry[15]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -327,18 +482,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076",
-              "display": "Lisinopril 10 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076",
+                  "display": "Lisinopril 10 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -356,11 +548,6 @@
       "origin": "P1-patient-summary.json#entry[16]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -384,18 +571,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "860975",
-              "display": "Metformin 500 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 500 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "860975",
+                  "display": "Metformin 500 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 500 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 500 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2018-04-10",
         "requester": {
@@ -413,11 +637,6 @@
       "origin": "P1-patient-summary.json#entry[17]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -441,18 +660,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617310",
-              "display": "Atorvastatin 20 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617310",
+                  "display": "Atorvastatin 20 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2024-09-12",
         "requester": {
@@ -470,11 +726,6 @@
       "origin": "P2-patient-summary.json#entry[15]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -498,18 +749,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314077",
-              "display": "Lisinopril 20 mg oral tablet"
-            }
-          ],
-          "text": "Lisinopril 20 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314077",
+                  "display": "Lisinopril 20 mg oral tablet"
+                }
+              ],
+              "text": "Lisinopril 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2010-05-17",
         "requester": {
@@ -527,11 +815,6 @@
       "origin": "P2-patient-summary.json#entry[16]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -555,18 +838,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "854905",
-              "display": "Bisoprolol 5 mg oral tablet"
-            }
-          ],
-          "text": "Bisoprolol 5 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "854905",
+                  "display": "Bisoprolol 5 mg oral tablet"
+                }
+              ],
+              "text": "Bisoprolol 5 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Bisoprolol 5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-08-03",
         "requester": {
@@ -584,11 +904,6 @@
       "origin": "P2-patient-summary.json#entry[17]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -612,18 +927,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "855332",
-              "display": "Warfarin 5 mg oral tablet"
-            }
-          ],
-          "text": "Warfarin 5 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "855332",
+                  "display": "Warfarin 5 mg oral tablet"
+                }
+              ],
+              "text": "Warfarin 5 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Warfarin 5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-08-03",
         "requester": {
@@ -641,11 +993,6 @@
       "origin": "P2-patient-summary.json#entry[18]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -669,18 +1016,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "617311",
-              "display": "Atorvastatin 40 mg oral tablet"
-            }
-          ],
-          "text": "Atorvastatin 40 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "617311",
+                  "display": "Atorvastatin 40 mg oral tablet"
+                }
+              ],
+              "text": "Atorvastatin 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Atorvastatin 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2020-11-30",
         "requester": {
@@ -698,11 +1082,6 @@
       "origin": "P2-patient-summary.json#entry[19]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -726,18 +1105,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "861004",
-              "display": "Metformin 1000 mg oral tablet"
-            }
-          ],
-          "text": "Metformin 1000 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "861004",
+                  "display": "Metformin 1000 mg oral tablet"
+                }
+              ],
+              "text": "Metformin 1000 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Metformin 1000 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2022-01-11",
         "requester": {
@@ -755,11 +1171,6 @@
       "origin": "P2-patient-summary.json#entry[20]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -783,18 +1194,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "313988",
-              "display": "Furosemide 40 mg oral tablet"
-            }
-          ],
-          "text": "Furosemide 40 mg oral tablet"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "313988",
+                  "display": "Furosemide 40 mg oral tablet"
+                }
+              ],
+              "text": "Furosemide 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-02-14",
         "requester": {
@@ -812,11 +1260,6 @@
       "origin": "fhir-pat-1002-patient-summary.json#entry[7]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "MedicationRequest.requester",
@@ -840,11 +1283,48 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Lisinopril 10mg"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Lisinopril 10mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10mg"
         },
         "subject": {
-          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+          "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-10-01T09:00:00Z",
         "requester": {
@@ -885,18 +1365,55 @@
         ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "966221",
-              "display": "Levothyroxine 50 mcg Tab"
-            }
-          ],
-          "text": "Levothyroxine 50 mcg Tab"
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "966221",
+                  "display": "Levothyroxine 50 mcg Tab"
+                }
+              ],
+              "text": "Levothyroxine 50 mcg Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Levothyroxine 50 mcg Tab"
         },
         "subject": {
-          "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+          "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -923,11 +1440,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -941,19 +1453,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2123111"
+                }
+              ],
+              "text": "Salbutamol 100 mcg inhaler"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2123111"
-            }
-          ],
-          "text": "Salbutamol 100 mcg inhaler"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Salbutamol 100 mcg inhaler"
         },
         "subject": {
-          "reference": "Patient/P1"
+          "reference": "Patient/P1",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2009-02-27",
         "requester": {
@@ -973,11 +1522,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -991,19 +1535,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314076"
+                }
+              ],
+              "text": "Lisinopril 10 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076"
-            }
-          ],
-          "text": "Lisinopril 10 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P1"
+          "reference": "Patient/P1",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2015-11-02",
         "requester": {
@@ -1023,11 +1604,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1041,19 +1617,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "313988"
+                }
+              ],
+              "text": "Furosemide 40 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "313988"
-            }
-          ],
-          "text": "Furosemide 40 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P2"
+          "reference": "Patient/P2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-02-14",
         "requester": {
@@ -1073,11 +1686,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1091,19 +1699,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "314077"
+                }
+              ],
+              "text": "Lisinopril 20 mg oral tablet"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314077"
-            }
-          ],
-          "text": "Lisinopril 20 mg oral tablet"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "Patient/P2"
+          "reference": "Patient/P2",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2010-05-17",
         "requester": {
@@ -1123,11 +1768,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1141,13 +1781,50 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Lisinopril 10mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Lisinopril 10mg"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Lisinopril 10mg"
         },
         "subject": {
-          "reference": "Patient/fhir-pat-1002"
+          "reference": "Patient/fhir-pat-1002",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2023-10-01T09:00:00Z",
         "requester": {
@@ -1180,19 +1857,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "966221"
+                }
+              ],
+              "text": "Levothyroxine 50 mcg Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "966221"
-            }
-          ],
-          "text": "Levothyroxine 50 mcg Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Levothyroxine 50 mcg Tab"
         },
         "subject": {
-          "reference": "Patient/patient-2000"
+          "reference": "Patient/patient-2000",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1232,19 +1946,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1545658"
+                }
+              ],
+              "text": "Empagliflozin 10 mg Oral Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "1545658"
-            }
-          ],
-          "text": "Empagliflozin 10 mg Oral Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Empagliflozin 10 mg Oral Tab"
         },
         "subject": {
-          "reference": "Patient/patient-2008"
+          "reference": "Patient/patient-2008",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1284,19 +2035,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "311041"
+                }
+              ],
+              "text": "Insulin Glargine 100 U/mL"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "active",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "311041"
-            }
-          ],
-          "text": "Insulin Glargine 100 U/mL"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Insulin Glargine 100 U/mL"
         },
         "subject": {
-          "reference": "Patient/patient-2008"
+          "reference": "Patient/patient-2008",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1336,19 +2124,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2551"
+                }
+              ],
+              "text": "Ciprofloxacin 500 mg Oral Tab"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "completed",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "2551"
-            }
-          ],
-          "text": "Ciprofloxacin 500 mg Oral Tab"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Ciprofloxacin 500 mg Oral Tab"
         },
         "subject": {
-          "reference": "Patient/pv-pat-001"
+          "reference": "Patient/pv-pat-001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1375,11 +2200,6 @@
       "issues": [
         {
           "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
           "expression": "MedicationRequest.requester",
           "message": "A Reference without an actual reference or identifier should have a display"
         }
@@ -1393,19 +2213,56 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "308182"
+                }
+              ],
+              "text": "Amoxicillin 250 MG Oral Capsule"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "stopped",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "308182"
-            }
-          ],
-          "text": "Amoxicillin 250 MG Oral Capsule"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Amoxicillin 250 MG Oral Capsule"
         },
         "subject": {
-          "reference": "Patient/loader-pat-0001"
+          "reference": "Patient/loader-pat-0001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "authoredOn": "2019-04-02T10:00:00+02:00",
         "requester": {
@@ -1438,13 +2295,50 @@
             "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
           ]
         },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "medication",
+            "code": {
+              "text": "Ibuprofen 400 mg"
+            },
+            "ingredient": [
+              {
+                "itemCodeableConcept": {
+                  "coding": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                          "valueCode": "unknown"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
         "status": "unknown",
         "intent": "order",
-        "medicationCodeableConcept": {
-          "text": "Ibuprofen 400 mg"
+        "medicationReference": {
+          "reference": "#medication",
+          "display": "Ibuprofen 400 mg"
         },
         "subject": {
-          "reference": "Patient/sparse-pat-0001"
+          "reference": "Patient/sparse-pat-0001",
+          "identifier": {
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "_value": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
         },
         "_authoredOn": {
           "extension": [
@@ -1462,1236 +2356,6 @@
             }
           ]
         }
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[40]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "766755d2-7e97-146e-abf3-7a945236a9bc",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "active",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "310325",
-              "display": "ferrous sulfate 325 MG Oral Tablet"
-            }
-          ],
-          "text": "ferrous sulfate 325 MG Oral Tablet"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:fb99658c-1c1a-140b-37ce-bbad9f8579bf"
-        },
-        "authoredOn": "1973-09-15T07:43:53+01:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        }
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[41]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "4125dcf2-608d-ce0f-ac10-7f8a3c0ea709",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "active",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "312961",
-              "display": "Simvastatin 20 MG Oral Tablet"
-            }
-          ],
-          "text": "Simvastatin 20 MG Oral Tablet"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:bad02022-83e2-2d86-9146-07044d319834"
-        },
-        "authoredOn": "1995-01-20T06:33:09+01:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        }
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[42]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "51266836-fc93-6d63-da7b-c1a5338cc531",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "active",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "866412",
-              "display": "24 HR metoprolol succinate 100 MG Extended Release Oral Tablet"
-            }
-          ],
-          "text": "24 HR metoprolol succinate 100 MG Extended Release Oral Tablet"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:bad02022-83e2-2d86-9146-07044d319834"
-        },
-        "authoredOn": "1995-01-20T06:33:09+01:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        }
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[43]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "e3274bb9-7a2c-7e29-9c01-96d6a346a122",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "active",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "705129",
-              "display": "Nitroglycerin 0.4 MG/ACTUAT Mucosal Spray"
-            }
-          ],
-          "text": "Nitroglycerin 0.4 MG/ACTUAT Mucosal Spray"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:bad02022-83e2-2d86-9146-07044d319834"
-        },
-        "authoredOn": "1995-01-20T06:33:09+01:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        }
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[44]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "7b17d9e1-62f4-a873-1a43-99b7c5299a25",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "106892",
-              "display": "insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Injectable Suspension [Humulin]"
-            }
-          ],
-          "text": "insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Injectable Suspension [Humulin]"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:4aa5991d-b071-c70a-22f2-447ea7865010"
-        },
-        "authoredOn": "1999-04-17T07:33:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:e1bc67b1-606e-3c44-6fac-831b65eb24da",
-            "display": "Diabetes mellitus type 2 (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[45]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.dosageInstruction[0]",
-          "message": "Constraint failed: DosageDoseUnitSameCode: 'Die Dosiereinheit muss über alle Dosierungen gleich sein.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
-        },
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest.dosageInstruction[0].timing.repeat.periodUnit",
-          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "a56b0c6e-d18a-3ea2-0999-33cb51503629",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "310798",
-              "display": "Hydrochlorothiazide 25 MG Oral Tablet"
-            }
-          ],
-          "text": "Hydrochlorothiazide 25 MG Oral Tablet"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:4aa5991d-b071-c70a-22f2-447ea7865010"
-        },
-        "authoredOn": "1999-04-17T07:33:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:8a5a8655-9239-1bb2-cd19-8c6435de7477",
-            "display": "Essential hypertension (disorder)"
-          }
-        ],
-        "dosageInstruction": [
-          {
-            "sequence": 1,
-            "timing": {
-              "repeat": {
-                "frequency": 1,
-                "period": 1.0,
-                "periodUnit": "d"
-              }
-            },
-            "asNeededBoolean": false,
-            "doseAndRate": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
-                      "code": "ordered",
-                      "display": "Ordered"
-                    }
-                  ]
-                },
-                "doseQuantity": {
-                  "value": 1.0
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[46]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "ffe44e16-57f0-0e65-c662-f6c428fe554c",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "860975",
-              "display": "24 HR Metformin hydrochloride 500 MG Extended Release Oral Tablet"
-            }
-          ],
-          "text": "24 HR Metformin hydrochloride 500 MG Extended Release Oral Tablet"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:4aa5991d-b071-c70a-22f2-447ea7865010"
-        },
-        "authoredOn": "1999-04-17T07:33:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:e1bc67b1-606e-3c44-6fac-831b65eb24da",
-            "display": "Diabetes mellitus type 2 (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[47]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "MedicationRequest.dosageInstruction[0]",
-          "message": "Constraint failed: DosageDoseUnitSameCode: 'Die Dosiereinheit muss über alle Dosierungen gleich sein.' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
-        },
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest.dosageInstruction[0].timing.repeat.periodUnit",
-          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "9ae301d8-3a81-2239-ef09-7ff48e1c69b8",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "community",
-                "display": "Community"
-              }
-            ],
-            "text": "Community"
-          }
-        ],
-        "medicationCodeableConcept": {
-          "coding": [
-            {
-              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "308136",
-              "display": "amLODIPine 2.5 MG Oral Tablet"
-            }
-          ],
-          "text": "amLODIPine 2.5 MG Oral Tablet"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:4aa5991d-b071-c70a-22f2-447ea7865010"
-        },
-        "authoredOn": "1999-04-17T07:33:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:8a5a8655-9239-1bb2-cd19-8c6435de7477",
-            "display": "Essential hypertension (disorder)"
-          }
-        ],
-        "dosageInstruction": [
-          {
-            "sequence": 1,
-            "timing": {
-              "repeat": {
-                "frequency": 1,
-                "period": 1.0,
-                "periodUnit": "d"
-              }
-            },
-            "asNeededBoolean": false,
-            "doseAndRate": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
-                      "code": "ordered",
-                      "display": "Ordered"
-                    }
-                  ]
-                },
-                "doseQuantity": {
-                  "value": 1.0
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[48]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "0e42ab62-277f-9afa-5120-aafcec4a6f6d",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:95f783a3-bc7c-6562-5bb0-a5b62e051047"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:cc8b124b-1612-ed51-715a-64706c34bc88"
-        },
-        "authoredOn": "1999-07-13T10:52:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[49]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "f6fc4ddf-3fc7-f0a5-db99-2d2863938cc5",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:c5371896-deb0-8d82-8fc1-92f0f3939ed8"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:8030cb21-8dc2-83f1-8a39-2aef21424830"
-        },
-        "authoredOn": "1999-07-16T13:09:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[50]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "eff3c8d1-5a05-4b86-be91-b6737fe74163",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:67816608-f523-eade-1267-2a63a3365c67"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:472bf674-534c-72d7-afc6-d824a1d021f9"
-        },
-        "authoredOn": "1999-07-19T15:12:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[51]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "e8f80934-6826-0649-f74d-0439a5e7c1e2",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:b20854c9-e2b3-9d83-729b-e10f39e5c4f1"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:256c4c1c-7d0d-290a-a573-c63a28812829"
-        },
-        "authoredOn": "1999-07-22T18:06:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[52]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "006a55f5-8938-3e6e-6f24-8f81e9d69350",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:bf308e1d-cd3e-07ca-5a4a-afd617042a76"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:2d16358b-396a-cf41-bc17-4b568725a5d9"
-        },
-        "authoredOn": "1999-07-25T21:36:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[53]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "dda7a635-2859-b234-580e-e7f0cf851b0f",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:8237f705-d4ce-a38c-30ac-5f9595f5bc17"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:8ceb3578-a7f0-6573-2cd1-99bd84a46765"
-        },
-        "authoredOn": "1999-07-29T00:10:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[54]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "fe15e0b5-052a-35d3-487a-77fb7e057757",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:96a13919-68f5-7f40-9b3d-9b4422e72c9f"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:f1fddfc2-4867-99ee-dcdf-38bce3184829"
-        },
-        "authoredOn": "1999-08-01T02:50:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[55]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "6b17c667-6ac0-68f5-be80-4a74e2ae9bc5",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:a813fa34-5142-2539-1b19-32f8a6b64953"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:f02bd7bb-24a9-9b7a-6f34-37a560768324"
-        },
-        "authoredOn": "1999-08-04T06:16:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[56]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "1908467f-ad60-791e-b4db-18f1a76027f7",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:77962f4a-ac35-d9d9-ebfb-0b1c356e9e2e"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:0bde4aff-85a2-7931-6c45-b4a09dd28a5d"
-        },
-        "authoredOn": "1999-08-07T09:43:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[57]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "b1f3ab76-31e0-972c-c9c9-fa86041224a4",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:36fa4064-7137-5c74-8931-5e290d99872e"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:bcb4ac76-8f52-8695-1889-42f95faba6f1"
-        },
-        "authoredOn": "1999-08-10T11:47:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[58]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "3f581bf9-092a-a35b-8e69-cfd4a6f36109",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:864eded3-e48a-18fa-6a53-2dd91d4e6e6f"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:6be2d479-4f94-6e8d-55dc-7c3bfecfaf04"
-        },
-        "authoredOn": "1999-08-13T13:52:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
-      }
-    },
-    {
-      "source": "synthea",
-      "origin": "synthea-sample.json#entry[59]",
-      "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "MedicationRequest",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
-      "counted": true,
-      "resource": {
-        "resourceType": "MedicationRequest",
-        "id": "5f37310e-0e63-2111-9bb7-ed2405d80a3f",
-        "meta": {
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest"
-          ]
-        },
-        "status": "stopped",
-        "intent": "order",
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-                "code": "outpatient",
-                "display": "Outpatient"
-              }
-            ],
-            "text": "Outpatient"
-          }
-        ],
-        "medicationReference": {
-          "reference": "urn:uuid:ace38b03-0c83-cc97-cf8f-342b5148165d"
-        },
-        "subject": {
-          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
-        },
-        "encounter": {
-          "reference": "urn:uuid:3e584b4c-0e66-0b79-55dd-6af3528ce942"
-        },
-        "authoredOn": "1999-08-16T17:37:09+02:00",
-        "requester": {
-          "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996595",
-          "display": "Dr. January966 Roberts511"
-        },
-        "reasonReference": [
-          {
-            "reference": "urn:uuid:0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
-            "display": "Anemia (disorder)"
-          }
-        ]
       }
     }
   ]

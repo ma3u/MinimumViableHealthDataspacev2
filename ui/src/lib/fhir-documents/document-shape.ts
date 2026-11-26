@@ -81,8 +81,16 @@ export function documentProblems(bundle: unknown): string[] {
   });
   const byKey = indexOf(entries);
   entries.forEach((e, i) => {
+    // A local reference (#id) names a resource contained in this entry, as a
+    // prescription's Medication is; it never needs an entry of its own.
+    const contained = new Set(
+      (Array.isArray(obj(e.resource).contained)
+        ? (obj(e.resource).contained as unknown[])
+        : []
+      ).map((c) => `#${String(obj(c).id)}`),
+    );
     for (const ref of referencesIn(e.resource)) {
-      if (!byKey.has(ref)) {
+      if (ref.startsWith("#") ? !contained.has(ref) : !byKey.has(ref)) {
         problems.push(
           `entry[${i}] refers to ${ref}, which is not in the Bundle`,
         );

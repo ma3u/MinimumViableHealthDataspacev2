@@ -461,11 +461,48 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "text": "Lisinopril 10mg"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "text": "Lisinopril 10mg"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Lisinopril 10mg"
     },
     "subject": {
-     "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56"
+     "reference": "urn:uuid:0829c29f-b70e-8540-a8b3-166783ac1e56",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "authoredOn": "2023-10-01T09:00:00Z",
     "requester": {

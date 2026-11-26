@@ -170,7 +170,7 @@
       "baseResource": "Bundle",
       "tested": 6,
       "passed": 6,
-      "warnings": 125
+      "warnings": 110
     },
     {
       "profileId": "medication-request-eu",
@@ -181,7 +181,7 @@
       "baseResource": "MedicationRequest",
       "tested": 47,
       "passed": 47,
-      "warnings": 70
+      "warnings": 49
     },
     {
       "profileId": "medication-dispense-eu",
@@ -212,9 +212,20 @@
       "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
       "igPackage": "hl7.fhir.eu.imaging#1.0.0-ballot",
       "baseResource": "DiagnosticReport",
-      "tested": 3,
+      "tested": 0,
       "passed": 0,
-      "warnings": 5
+      "warnings": 0
+    },
+    {
+      "profileId": "diagnostic-report-imaging-minimal-eu",
+      "name": "DiagnosticReport (EU Imaging, minimal metadata)",
+      "section": "eehrxf",
+      "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata",
+      "igPackage": "hl7.fhir.eu.imaging#1.0.0-ballot",
+      "baseResource": "DiagnosticReport",
+      "tested": 3,
+      "passed": 3,
+      "warnings": 4
     },
     {
       "profileId": "diagnostic-report-lab-eu",
@@ -278,9 +289,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Patient",
-      "tested": 38,
-      "passed": 35,
-      "warnings": 53
+      "tested": 26,
+      "passed": 26,
+      "warnings": 16
     },
     {
       "profileId": "kds-condition-de",
@@ -289,9 +300,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Condition",
-      "tested": 52,
-      "passed": 51,
-      "warnings": 21
+      "tested": 32,
+      "passed": 31,
+      "warnings": 1
     },
     {
       "profileId": "kds-procedure-de",
@@ -300,9 +311,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Procedure",
-      "tested": 25,
-      "passed": 24,
-      "warnings": 25
+      "tested": 5,
+      "passed": 4,
+      "warnings": 5
     },
     {
       "profileId": "kds-encounter-de",
@@ -311,9 +322,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
       "baseResource": "Encounter",
-      "tested": 31,
-      "passed": 30,
-      "warnings": 23
+      "tested": 11,
+      "passed": 10,
+      "warnings": 3
     },
     {
       "profileId": "kds-lab-observation-de",
@@ -322,9 +333,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
       "baseResource": "Observation",
-      "tested": 49,
+      "tested": 29,
       "passed": 28,
-      "warnings": 206
+      "warnings": 130
     },
     {
       "profileId": "kds-lab-diagnostic-report-de",
@@ -344,9 +355,9 @@
       "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
       "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
       "baseResource": "MedicationRequest",
-      "tested": 47,
-      "passed": 45,
-      "warnings": 70
+      "tested": 27,
+      "passed": 27,
+      "warnings": 27
     },
     {
       "profileId": "kds-medication-statement-de",

@@ -338,20 +338,45 @@ describe("toFhirResource", () => {
       status: "active",
       date: "2023-07-10T14:20:00Z",
     });
+    // The medication by reference to a contained Medication, and the KVNR
+    // slot on the subject marked unknown: the gematik ePA medication profile
+    // requires both, and every EU, IPS and MII profile accepts them.
     expect(med).toMatchObject({
       status: "active",
       intent: "order",
-      medicationCodeableConcept: {
-        coding: [
-          {
-            system: "http://www.nlm.nih.gov/research/umls/rxnorm",
-            code: "860975",
+      contained: [
+        {
+          resourceType: "Medication",
+          id: "medication",
+          code: {
+            coding: [
+              {
+                system: "http://www.nlm.nih.gov/research/umls/rxnorm",
+                code: "860975",
+              },
+            ],
+            text: "Metformin 500mg",
           },
-        ],
-        text: "Metformin 500mg",
+        },
+      ],
+      medicationReference: {
+        reference: "#medication",
+        display: "Metformin 500mg",
       },
       authoredOn: "2023-07-10T14:20:00Z",
       requester: DAR,
+    });
+    expect(med).not.toHaveProperty("medicationCodeableConcept");
+
+    const withSubject = toFhirResource(
+      "MedicationRequest",
+      { resourceId: "m2", medicationCode: "860975" },
+      "P1",
+    );
+    // The hub holds no KVNR and invents none: the identifier says unknown.
+    expect(withSubject.subject).toEqual({
+      reference: "Patient/P1",
+      identifier: { system: "http://fhir.de/sid/gkv/kvid-10", _value: DAR },
     });
 
     const proc = toFhirResource("Procedure", {
@@ -382,9 +407,30 @@ describe("toFhirResource", () => {
       modality: "DX",
       status: "final",
     });
+    // A radiology report carries the two categories and the identifier the
+    // HL7 Europe imaging report requires, next to v2-0074 RAD.
     expect(rep).toMatchObject({
+      identifier: [
+        {
+          type: { coding: [{ code: "FILL" }] },
+          system: "https://ehds.mabu.red/fhir/sid/graph-diagnostic-report",
+          value: "dr1",
+        },
+      ],
       status: "final",
-      category: [{ coding: [{ code: "RAD" }], text: "Radiology" }],
+      category: [
+        { coding: [{ code: "RAD" }], text: "Radiology" },
+        { coding: [{ system: "http://loinc.org", code: "85430-7" }] },
+        {
+          coding: [
+            {
+              system:
+                "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+              code: "Medical-Imaging",
+            },
+          ],
+        },
+      ],
       effectiveDateTime: "2026-01-22",
       issued: "2026-01-22T15:30:00Z",
       performer: [{ display: "AlphaKlinik Berlin, Radiologie (fictional)" }],

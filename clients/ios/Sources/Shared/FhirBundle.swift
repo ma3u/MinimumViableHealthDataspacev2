@@ -58,6 +58,27 @@ public enum FhirWriter {
   /// services/epa-ingest.
   static func labStudies() -> JSON { loinc("26436-6", "Laboratory studies (set)") }
 
+  /// The two categories the HL7 Europe imaging report wants on a radiology
+  /// report, each a CodeableConcept of its own: LOINC's "Diagnostic imaging
+  /// report" and the EEHRxF priority category Medical-Imaging. They stand next
+  /// to v2-0074 `RAD`. Same as `IMAGING_REPORT_CATEGORIES` in
+  /// services/epa-ingest.
+  static func imagingReportCategories() -> [JSON] {
+    [
+      ["coding": .array([loinc("85430-7", "Diagnostic imaging report")])],
+      [
+        "coding": .array([
+          [
+            "system":
+              "http://hl7.eu/fhir/health-data-api/CodeSystem/eehrxf-document-priority-category-cs",
+            "code": "Medical-Imaging",
+            "display": "medical imaging studies and related imaging reports",
+          ]
+        ])
+      ],
+    ]
+  }
+
   /// Where the identifiers this writer assigns live, as `IDENTIFIER_BASE` in
   /// services/epa-ingest. They name this transcription of a result or
   /// report, not the lab's own numbers, which are not on what we read.
@@ -355,6 +376,7 @@ public enum FhirWriter {
     let kind = ecg ? nil : reportKind(values)
     // A laboratory report proper: no ECG and none of the other report kinds.
     let labReport = !ecg && kind == nil
+    let imagingReport = !ecg && kind?.section == "RAD"
     var report: JSON = [
       "resourceType": "DiagnosticReport",
       "id": "report-1",
@@ -393,7 +415,7 @@ public enum FhirWriter {
               ]
           ] + (labReport ? [labStudies()] : []))
         ]
-      ]),
+      ] + (imagingReport ? imagingReportCategories() : [])),
       "code": {
         var code: JSON = [
           "coding": .array([
@@ -411,6 +433,10 @@ public enum FhirWriter {
       "effectiveDateTime": .string(meta.effectiveDateTime),
       "issued": .string(now),
     ]
+    // A radiology report leaves the unknown order out: the EU imaging report
+    // accepts an order only as a reference or an accession number, and the
+    // element is optional there. Same as services/epa-ingest.
+    if imagingReport { report["basedOn"] = nil }
     if let performer { report["performer"] = performer }
     // A laboratory report's results are its laboratory values: a weight or a
     // blood pressure printed on the same sheet stays in the bundle, linked by

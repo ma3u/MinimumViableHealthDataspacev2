@@ -35,8 +35,8 @@ SET p.name = 'Condition (MII KDS Diagnose)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose',
     p.baseResource = 'Condition',
     p.fhirVersion = 'R4',
-    p.tested = 52,
-    p.passed = 51,
+    p.tested = 32,
+    p.passed = 31,
     p.failed = 1,
     p.topIssues = ['1x Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)'],
     p.coverage = 'partial';
@@ -50,8 +50,8 @@ SET p.name = 'Encounter (MII KDS Fall, Kontakt Gesundheitseinrichtung)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung',
     p.baseResource = 'Encounter',
     p.fhirVersion = 'R4',
-    p.tested = 31,
-    p.passed = 30,
+    p.tested = 11,
+    p.passed = 10,
     p.failed = 1,
     p.topIssues = ['1x Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set \'EncounterClassDE\'...\'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER (\'emergency\')\'...\'http://fhir.de/ValueSe'],
     p.coverage = 'partial';
@@ -65,11 +65,11 @@ SET p.name = 'Patient (MII KDS Person)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient',
     p.baseResource = 'Patient',
     p.fhirVersion = 'R4',
-    p.tested = 38,
-    p.passed = 35,
-    p.failed = 3,
-    p.topIssues = ['3x Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)', '3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)'],
-    p.coverage = 'partial';
+    p.tested = 26,
+    p.passed = 26,
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 MATCH (p:NationalProfile {profileId: 'kds-patient-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-patient-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-base'}) MERGE (p)-[:PUBLISHED_IN]->(g);
 MATCH (p:NationalProfile {profileId: 'kds-patient-de'}), (e:EEHRxFProfile {profileId: 'patient-eu-core'}) MERGE (p)-[:CORRESPONDS_TO]->(e);
@@ -80,8 +80,8 @@ SET p.name = 'Procedure (MII KDS Prozedur)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure',
     p.baseResource = 'Procedure',
     p.fhirVersion = 'R4',
-    p.tested = 25,
-    p.passed = 24,
+    p.tested = 5,
+    p.passed = 4,
     p.failed = 1,
     p.topIssues = ['1x Procedure.code: Constraint failed: sct-ops-1: \'...\' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure)', '1x Procedure.code: Procedure.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)', '1x Procedure: Procedure.performed[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)'],
     p.coverage = 'partial';
@@ -119,10 +119,10 @@ SET p.name = 'Observation (MII KDS Laboruntersuchung)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab',
     p.baseResource = 'Observation',
     p.fhirVersion = 'R4',
-    p.tested = 49,
+    p.tested = 29,
     p.passed = 28,
-    p.failed = 21,
-    p.topIssues = ['20x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '20x Observation.category[n]: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad', '20x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '20x Observation: Slice \'...\': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th', '1x Observation.effective.ofType(Period): The Profile \'...\' definition allows for the type dateTime but found type Period'],
+    p.failed = 1,
+    p.topIssues = ['1x Observation.effective.ofType(Period): The Profile \'...\' definition allows for the type dateTime but found type Period', '1x Observation.value.ofType(Quantity): Observation.value[x]:valueQuantity.code: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '1x Observation.value.ofType(Quantity): Observation.value[x]:valueQuantity.system: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)', '1x Observation.value.ofType(Quantity): Observation.value[x]:valueQuantity.unit: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)'],
     p.coverage = 'partial';
 MATCH (p:NationalProfile {profileId: 'kds-lab-observation-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-lab-observation-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-laborbefund'}) MERGE (p)-[:PUBLISHED_IN]->(g);
@@ -144,11 +144,11 @@ SET p.name = 'MedicationRequest (MII KDS Medikation)',
     p.canonical = 'https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest',
     p.baseResource = 'MedicationRequest',
     p.fhirVersion = 'R4',
-    p.tested = 47,
-    p.passed = 45,
-    p.failed = 2,
-    p.topIssues = ['2x MedicationRequest.dosageInstruction[n]: Constraint failed: DosageDoseUnitSameCode: \'...\' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)'],
-    p.coverage = 'partial';
+    p.tested = 27,
+    p.passed = 27,
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 MATCH (p:NationalProfile {profileId: 'kds-medication-request-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-medication-request-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-medikation'}) MERGE (p)-[:PUBLISHED_IN]->(g);
 MATCH (p:NationalProfile {profileId: 'kds-medication-request-de'}), (e:EEHRxFProfile {profileId: 'medication-request-eu'}) MERGE (p)-[:CORRESPONDS_TO]->(e);

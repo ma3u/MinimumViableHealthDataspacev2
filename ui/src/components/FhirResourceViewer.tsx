@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { T, useT } from "@/lib/i18n/translate";
+import { medicationConcept } from "@/lib/fhir-medication";
 
 /* ── Types ─────────────────────────────────────── */
 
@@ -140,10 +141,7 @@ function getResourceDisplayName(r: FhirResource): string {
     return cc?.text ?? cc?.coding?.[0]?.display ?? r.id ?? "—";
   }
   if (rt === "MedicationRequest") {
-    const med = r.medicationCodeableConcept as {
-      text?: string;
-      coding?: Array<{ display?: string }>;
-    };
+    const med = medicationConcept(r);
     return med?.text ?? med?.coding?.[0]?.display ?? r.id ?? "—";
   }
   if (rt === "Encounter") {

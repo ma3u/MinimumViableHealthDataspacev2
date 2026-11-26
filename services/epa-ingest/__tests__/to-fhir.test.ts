@@ -23,6 +23,7 @@ import {
   GOLDEN_HOLTER_VALUES,
   GOLDEN_KIND_REPORTS,
   GOLDEN_VALUES,
+  goldenKindBundle,
 } from "../src/generate-fhir-golden.js";
 import type { CodedLabValue, TextSource } from "../src/types.js";
 
@@ -522,6 +523,32 @@ describe("the kind of report", () => {
     expect(reportKind([...GOLDEN_VALUES, fvc])).toBeUndefined();
     expect(reportKind(GOLDEN_VALUES)).toBeUndefined();
     expect(reportKind([])).toBeUndefined();
+  });
+});
+
+describe("a radiology report (HL7 Europe imaging)", () => {
+  const reportOf = (name: string) =>
+    (
+      JSON.parse(goldenKindBundle(name)) as {
+        bundle: { entry: { resource: Record<string, unknown> }[] };
+      }
+    ).bundle.entry
+      .map((e) => e.resource)
+      .find((r) => r.resourceType === "DiagnosticReport")!;
+
+  it("carries the two EU imaging categories next to RAD, and no unknown order", () => {
+    const dxa = reportOf("dxa");
+    const codes = (dxa.category as { coding: { code: string }[] }[]).map((c) =>
+      c.coding.map((x) => x.code),
+    );
+    expect(codes).toEqual([["RAD"], ["85430-7"], ["Medical-Imaging"]]);
+    expect(dxa).not.toHaveProperty("basedOn");
+  });
+
+  it("leaves every other report as it was", () => {
+    const spirometry = reportOf("spirometry");
+    expect(spirometry.category).toHaveLength(1);
+    expect(spirometry).toHaveProperty("basedOn");
   });
 });
 

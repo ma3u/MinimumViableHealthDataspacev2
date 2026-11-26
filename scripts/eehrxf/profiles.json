@@ -265,6 +265,15 @@
       "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
       "baseResource": "DiagnosticReport",
       "categories": ["medical-imaging"],
+      "sourceFilter": "imaging-document"
+    },
+    {
+      "profileId": "diagnostic-report-imaging-minimal-eu",
+      "name": "DiagnosticReport (EU Imaging, minimal metadata)",
+      "ig": "imaging",
+      "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImagingMinimalMetadata",
+      "baseResource": "DiagnosticReport",
+      "categories": ["medical-imaging"],
       "sourceFilter": "imaging"
     },
     {
@@ -417,6 +426,7 @@
         "checkNote": "The national ePA lab report on the EU basis: its Bundle, Composition and DiagnosticReport derive from hl7.fhir.eu.laboratory 2.0.0. Its only version, a ballot dated 2026-11-16 (ePA 3.2.0)."
       }
     },
+    "excludeSources": ["synthea"],
     "profiles": [
       {
         "profileId": "epa-medication-request-de",

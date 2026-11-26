@@ -58,6 +58,9 @@ const facade = (p: ReportProfile) => p.bySource.facade;
 function claimCategory(p: ConfigProfile): string | undefined {
   if (!p.sourceFilter) return undefined;
   if (p.sourceFilter === "laboratory") return "laboratory";
+  // validate.py's imaging filter takes v2-0074 RAD among its codes, and RAD
+  // is the code the facade's radiology reports carry.
+  if (p.sourceFilter === "imaging") return "RAD";
   throw new Error(
     `${p.profileId}: claimedProfiles() knows no counterpart of sourceFilter ${p.sourceFilter}`,
   );

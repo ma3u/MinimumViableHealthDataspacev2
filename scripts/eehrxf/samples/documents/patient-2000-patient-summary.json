@@ -308,18 +308,55 @@
     ],
     "status": "active",
     "intent": "order",
-    "medicationCodeableConcept": {
-     "coding": [
-      {
-       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-       "code": "966221",
-       "display": "Levothyroxine 50 mcg Tab"
-      }
-     ],
-     "text": "Levothyroxine 50 mcg Tab"
+    "contained": [
+     {
+      "resourceType": "Medication",
+      "id": "medication",
+      "code": {
+       "coding": [
+        {
+         "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+         "code": "966221",
+         "display": "Levothyroxine 50 mcg Tab"
+        }
+       ],
+       "text": "Levothyroxine 50 mcg Tab"
+      },
+      "ingredient": [
+       {
+        "itemCodeableConcept": {
+         "coding": [
+          {
+           "extension": [
+            {
+             "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+             "valueCode": "unknown"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "medicationReference": {
+     "reference": "#medication",
+     "display": "Levothyroxine 50 mcg Tab"
     },
     "subject": {
-     "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+     "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2",
+     "identifier": {
+      "system": "http://fhir.de/sid/gkv/kvid-10",
+      "_value": {
+       "extension": [
+        {
+         "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+         "valueCode": "unknown"
+        }
+       ]
+      }
+     }
     },
     "_authoredOn": {
      "extension": [
