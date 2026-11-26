@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { headingId, renderMarkdown, splitMermaid } from "@/lib/docs/markdown";
 
 describe("headingId", () => {
@@ -32,7 +32,27 @@ describe("renderMarkdown", () => {
     expect(html).toContain(
       '<a href="https://github.com/x" target="_blank" rel="noopener noreferrer">gh</a>',
     );
-    expect(html).toContain('<a href="/docs/security/sbom#x">here</a>');
+    expect(html).toContain(
+      '<a href="__BASE_PATH__/docs/security/sbom#x">here</a>',
+    );
+  });
+
+  it("gives a route link the base path, so it works on GitHub Pages", () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
+    return import("@/lib/docs/markdown").then(({ docSegments }) => {
+      const [seg] = docSegments(
+        "[journey](/docs/ehds/researcher-journey) and [ext](https://x.org) and [top](#a)",
+      );
+      const html = seg.kind === "html" ? seg.html : "";
+      expect(html).toContain(
+        'href="/MinimumViableHealthDataspacev2/docs/ehds/researcher-journey"',
+      );
+      expect(html).toContain('href="https://x.org"');
+      expect(html).toContain('href="#a"');
+      expect(html).not.toContain("__BASE_PATH__");
+      vi.unstubAllEnvs();
+    });
   });
 });
 

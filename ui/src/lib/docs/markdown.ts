@@ -57,8 +57,12 @@ const marked = new Marked({
     link({ href, title, tokens }: Tokens.Link) {
       const text = this.parser.parseInline(tokens);
       const external = /^https?:\/\//.test(href);
+      // A route link (/docs/ehds/x) gets the base-path placeholder too, like
+      // an image: on GitHub Pages the site lives under a base path, and a
+      // plain <a> does not get it from Next as <Link> would.
+      const route = href.startsWith("/") && !href.startsWith("//");
       const attrs = [
-        `href="${href}"`,
+        `href="${route ? `__BASE_PATH__${href}` : href}"`,
         title ? `title="${title}"` : "",
         external ? 'target="_blank" rel="noopener noreferrer"' : "",
       ]
