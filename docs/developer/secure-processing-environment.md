@@ -21,9 +21,9 @@ The decisions are [ADR-037](../ADRs/ADR-037-secure-processing-environment-confid
 > instance, a staging area, an upload by the access body, and a deletion to
 > prove, for every permit. That makes SPEs expensive to run, and it leaves
 > out what data spaces already have: organisational and workload identities,
-> eIDAS 2.0 and machine-readable permits. We propose zero trust instead, with
+> eIDAS 2.0 and machine-readable permits. The hub builds zero trust instead, with
 > one attested workspace per data holder, and each permit as a governed view,
-> a key and a log scope inside it ([ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md), proposed). Section 11 lists the
+> a key and a log scope inside it ([ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md), accepted). Section 11 lists the
 > clear points we build first. Our feedback to the Commission is in
 > [#1225](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1225).
 
@@ -158,10 +158,10 @@ Each group has three containers, built from
   `emptyDir` volume `work`.
 - **`neo4j`**: [Neo4j 5.26](https://neo4j.com/release-notes/database/neo4j-5/) Community, [1.5 vCPU](../../scripts/azure/aci/spe-workspace.template.json#L126) and 4 GiB, store in the
   `emptyDir` volume `neo4j-data`, Bolt with TLS required, HTTP off. Neo4j is
-  **not a long-lived store** ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision) decision 3): it holds the data only
-  in memory and on ephemeral storage inside the TEE. Today there is one
-  workspace per data holder; [ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md) proposes keeping it that way and
-  scoping each permit inside it, rather than a workspace per permit.
+  **not a long-lived store**: it holds the data only in memory and on
+  ephemeral storage inside the TEE. There is one workspace per data holder,
+  and each permit is scoped inside it, not given a workspace of its own
+  ([ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md), which supersedes [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision) decision 3).
 - **`spe-ingest`** (sidecar): loads the extract, applies
   [`neo4j/init-schema.cypher`](../../neo4j/init-schema.cypher) and the SPE's HealthDCAT-AP registration,
   deletes the plaintext, records the attestation, and stays up.
@@ -273,7 +273,7 @@ and what each phase prints; read it before the first run. Two phases protect
 themselves: `--extracts` refuses to re-key while Trustee holds keys unless
 `--rekey`, and `--trustee` keeps a resource policy that Trustee already holds.
 
-## 11. Zero trust instead of a copy per permit (proposed)
+## 11. Zero trust instead of a copy per permit
 
 [ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md) sets out what the hub builds next, and why it departs from the
 draft act's copy per permit.
@@ -337,13 +337,13 @@ Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774
 
 ## 13. The decisions, in order
 
-| ADR                                                                                               | Decision                                                                                | Status                |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------- |
-| [ADR-037](../ADRs/ADR-037-secure-processing-environment-confidential-computing.md)                | Confidential containers with remote attestation, not trust in the operator              | Accepted              |
-| [ADR-052](../ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                                 | AKS with Kata and Azure Attestation                                                     | Superseded by ADR-068 |
-| [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) | CNCF Confidential Containers, a Trustee the access body runs, Neo4j loaded per permit   | Accepted (2026-10-30) |
-| [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)                   | Two workspaces as ACI confidential containers; the policy hash is HOST_DATA             | Accepted (2026-11-02) |
-| [ADR-072](../ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                      | Stopped by default, started by a federated query, stopped after 30 idle minutes         | Accepted (2026-11-02) |
-| [ADR-073](../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)                                 | The SEV-SNP TCB is checked against a minimum per component                              | Proposed              |
-| [ADR-100](../ADRs/ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md)           | The proxy coordinates a federation of attested workspaces                               | Accepted (2026-11-25) |
-| [ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md)                    | Zero trust, one workspace per holder, a permit as a governed view and a key, not a copy | Proposed              |
+| ADR                                                                                               | Decision                                                                                | Status                                     |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [ADR-037](../ADRs/ADR-037-secure-processing-environment-confidential-computing.md)                | Confidential containers with remote attestation, not trust in the operator              | Accepted                                   |
+| [ADR-052](../ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                                 | AKS with Kata and Azure Attestation                                                     | Superseded by ADR-068                      |
+| [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) | CNCF Confidential Containers, a Trustee the access body runs, Neo4j loaded per permit   | Accepted; decision 3 superseded by ADR-101 |
+| [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)                   | Two workspaces as ACI confidential containers; the policy hash is HOST_DATA             | Accepted (2026-11-02)                      |
+| [ADR-072](../ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                      | Stopped by default, started by a federated query, stopped after 30 idle minutes         | Accepted (2026-11-02)                      |
+| [ADR-073](../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)                                 | The SEV-SNP TCB is checked against a minimum per component                              | Proposed                                   |
+| [ADR-100](../ADRs/ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md)           | The proxy coordinates a federation of attested workspaces                               | Accepted (2026-11-25)                      |
+| [ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md)                    | Zero trust, one workspace per holder, a permit as a governed view and a key, not a copy | Accepted (2026-11-26)                      |

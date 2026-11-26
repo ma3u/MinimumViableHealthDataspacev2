@@ -2,7 +2,8 @@
 
 Date: 2026-11-26
 
-**Status:** Proposed (2026-11-26). Once accepted, it supersedes decision 3 of [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) ("a workspace per permit") in part: a workspace is per data holder, and the permit becomes a policy, a key and a log scope inside it.
+**Status:** Accepted (2026-11-26; proposed the same day)
+**Supersedes:** decision 3 of [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) ("a workspace per permit"): a workspace is per data holder, and the permit becomes a policy, a key and a log scope inside it. ADR-068 decisions 1, 2, 4, 5 and 6 stay in force, and this ADR builds on 1 and 2 (the access body runs the Trustee; the policy hash opens the key).
 **Relates to:** [ADR-037](ADR-037-secure-processing-environment-confidential-computing.md), [ADR-062](ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md), [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md), [ADR-072](ADR-072-spe-workspaces-start-on-demand.md), [ADR-094](ADR-094-national-health-data-stays-at-the-source.md), [ADR-100](ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md)
 **Tracks:** [#1225](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1225) (feedback on the draft act), [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716), [#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833)
 
