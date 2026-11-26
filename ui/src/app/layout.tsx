@@ -10,6 +10,7 @@ import { T } from "@/lib/i18n/translate";
 import SiteFooter from "@/components/SiteFooter";
 import { STATIC_SITE_URL } from "@/lib/offline-mode";
 import { REPO_URL } from "@/lib/docs/published-docs";
+import { BASE_PATH } from "@/lib/static-export";
 
 // Resolve the canonical base URL for metadata (og:image, canonical links, etc.).
 // - Azure prod:     https://ehds.mabu.red
@@ -48,13 +49,12 @@ export const metadata: Metadata = {
   ...(process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
     ? { alternates: { canonical: "./" } }
     : {}),
+  // Under the base path on GitHub Pages: metadata URLs are not prefixed by
+  // Next. There is no favicon.ico in public/, so the SVG is the only icon.
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    shortcut: "/favicon.ico",
-    apple: "/favicon.svg",
+    icon: [{ url: `${BASE_PATH}/favicon.svg`, type: "image/svg+xml" }],
+    shortcut: `${BASE_PATH}/favicon.svg`,
+    apple: `${BASE_PATH}/favicon.svg`,
   },
   openGraph: {
     title: "European Health Data Space | Interactive Demo",
