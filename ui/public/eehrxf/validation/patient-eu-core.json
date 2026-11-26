@@ -6,7 +6,7 @@
   "igPackage": "hl7.fhir.eu.base#2.0.1",
   "baseResource": "Patient",
   "tested": 38,
-  "passed": 37,
+  "passed": 38,
   "warnings": 53,
   "resources": [
     {
@@ -1616,13 +1616,8 @@
     {
       "source": "synthea",
       "origin": "synthea-sample.json#entry[154]",
-      "passed": false,
+      "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Patient.extension[0]",
-          "message": "The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-        },
         {
           "severity": "warning",
           "expression": "Patient.communication[0].language.coding[0].system",

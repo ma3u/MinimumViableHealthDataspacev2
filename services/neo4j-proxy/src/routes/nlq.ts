@@ -17,6 +17,12 @@ import {
 } from "../db.js";
 import { app } from "../app.js";
 import { noteSpeQueried } from "../spe-status.js";
+import {
+  federationTxConfig,
+  logDispatch,
+  newFederationQueryId,
+  tagFederatedResponse,
+} from "../federation-query.js";
 import { auditContext, logTransferEvent } from "../audit.js";
 import {
   type AuditPermit,
@@ -341,6 +347,11 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       return obj;
     };
     const contributions: Contribution[] = [];
+    // A query asked of every SPE gets one id for all its logs (ADR-100
+    // decision 4); a query of one SPE is not federated and gets none.
+    const federationQueryId =
+      federated && federationAvailable() ? newFederationQueryId() : undefined;
+    if (federationQueryId) tagFederatedResponse(res, federationQueryId);
 
     const withholdList =
       federated && federationAvailable() && isRowLevelAboutPersons(cypher);
@@ -355,13 +366,36 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       await Promise.all(
         spes.map(async ({ label, driver: d }) => {
           const session = readSession(d);
+          const started = Date.now();
           try {
-            // nosemgrep: cypher-built-from-request-input -- generated Cypher in a read-only session; WRITE_PATTERN and checkReIdentification above
-            const result = await session.run(cypher!, params);
+            const result = await session.run(
+              // nosemgrep: cypher-built-from-request-input -- generated Cypher in a read-only session; WRITE_PATTERN and checkReIdentification above
+              cypher!,
+              params,
+              federationTxConfig(federationQueryId!),
+            );
             contributions.push({
               source: label,
               records: result.records.map((r) => toRow(r, label)),
             });
+            logDispatch({
+              federationQueryId: federationQueryId!,
+              route: "/nlq",
+              spe: label,
+              outcome: "answered",
+              rows: result.records.length,
+              ms: Date.now() - started,
+            });
+          } catch (err) {
+            logDispatch({
+              federationQueryId: federationQueryId!,
+              route: "/nlq",
+              spe: label,
+              outcome: "failed",
+              rows: 0,
+              ms: Date.now() - started,
+            });
+            throw err;
           } finally {
             await session.close();
           }
@@ -427,6 +461,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     // Fail closed (ADR-045, #418): no record, no answer.
     try {
       await appendQueryAudit({
+        ...(federationQueryId ? { federationQueryId } : {}),
         participantId,
         question,
         cypher,
@@ -456,6 +491,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       method,
       templateName,
       federated: federated && federationAvailable(),
+      ...(federationQueryId ? { federationQueryId } : {}),
       results,
       totalRows: results.length,
       odrlEnforced,

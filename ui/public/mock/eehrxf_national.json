@@ -53,13 +53,12 @@
           "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
           "baseResource": "Patient",
           "tested": 38,
-          "passed": 34,
-          "failed": 4,
+          "passed": 35,
+          "failed": 3,
           "coverage": "partial",
           "topIssues": [
             "3x Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
-            "3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
-            "1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
+            "3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)"
           ],
           "eehrxfCounterpart": {
             "profileId": "patient-eu-core",
@@ -184,7 +183,7 @@
     "guides": 3,
     "profiles": 8,
     "resourcesTested": 262,
-    "resourcesPassed": 172,
+    "resourcesPassed": 173,
     "passRatePercent": 66
   }
 }

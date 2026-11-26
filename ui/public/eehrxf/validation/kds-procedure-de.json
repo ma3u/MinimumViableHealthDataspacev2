@@ -213,12 +213,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -265,12 +259,6 @@
       "origin": "synthea-sample.json#entry[164]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -319,12 +307,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -371,12 +353,6 @@
       "origin": "synthea-sample.json#entry[166]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -425,12 +401,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -477,12 +447,6 @@
       "origin": "synthea-sample.json#entry[168]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -531,12 +495,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -583,12 +541,6 @@
       "origin": "synthea-sample.json#entry[170]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -637,12 +589,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -689,12 +635,6 @@
       "origin": "synthea-sample.json#entry[172]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -743,12 +683,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -795,12 +729,6 @@
       "origin": "synthea-sample.json#entry[174]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -849,12 +777,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -901,12 +823,6 @@
       "origin": "synthea-sample.json#entry[176]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -955,12 +871,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1007,12 +917,6 @@
       "origin": "synthea-sample.json#entry[178]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -1061,12 +965,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1113,12 +1011,6 @@
       "origin": "synthea-sample.json#entry[180]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
@@ -1167,12 +1059,6 @@
       "passed": true,
       "issues": [
         {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
-        {
           "severity": "warning",
           "expression": "Procedure",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
@@ -1219,12 +1105,6 @@
       "origin": "synthea-sample.json#entry[182]",
       "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Procedure.location",
-          "message": "The reference 'Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c' is a conditional reference, and conditional references are only valid inside a transaction Bundle",
-          "ignored": true
-        },
         {
           "severity": "warning",
           "expression": "Procedure",
