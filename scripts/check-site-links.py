@@ -48,7 +48,7 @@ HARD_EXTERNAL = {404, 410}
 def strip_scripts(text: str) -> str:
     """Links inside a script (the RSC payload) are not anchors a reader
     clicks; Next writes them for the client router."""
-    return re.sub(r"<script\b[^>]*>.*?</script>", "", text, flags=re.S | re.I)
+    return re.sub(r"<script\b[^>]*>.*?</script\b[^>]*>", "", text, flags=re.S | re.I)
 
 
 def page_of(out: Path, path: str) -> Path | None:

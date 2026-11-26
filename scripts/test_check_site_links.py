@@ -69,6 +69,7 @@ class SiteLinks(unittest.TestCase):
                 '<a href="https://example.org/x">e</a><a href="mailto:a@b.c">m</a>'
                 f'<a href="{BASE}/talk.html#/2">slide</a>'
                 '<script>self.__next_f.push(["/docs/not-a-link"])</script>'
+                '<script type="x">["<a href=\\"/docs/also-not\\">"]</script >'
             ),
             "talk.html": "",
         })
