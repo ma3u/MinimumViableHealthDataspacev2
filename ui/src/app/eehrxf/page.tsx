@@ -14,6 +14,8 @@ import {
   Layers,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import ValidationViewer from "@/components/eehrxf/ValidationViewer";
+import { BASE_PATH } from "@/lib/static-export";
 import { SignInRequired } from "@/components/SignInRequired";
 import { useT } from "@/lib/i18n/translate";
 
@@ -121,6 +123,18 @@ interface NationalGuide {
   home: string;
   gate: boolean;
   profiles: NationalProfile[];
+}
+
+// What validate.py checked, from ui/public/eehrxf/validation/index.json
+// (scripts/eehrxf/build.py): every source, what it is and how many resources.
+interface ValidatedSource {
+  sourceId: string;
+  label?: string;
+  role?: string;
+  data?: string;
+  generatedBy?: string;
+  files: string[];
+  resources: number;
 }
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -236,7 +250,26 @@ function CoverageMeter({ percent }: { percent: number }) {
   );
 }
 
-function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
+function ViewButton({ onClick }: { onClick: () => void }) {
+  const t = useT("holder");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-xs text-(--text-secondary) underline decoration-dotted hover:text-teal-800 dark:hover:text-teal-300"
+    >
+      {t("View resources")}
+    </button>
+  );
+}
+
+function ProfileRow({
+  profile,
+  onView,
+}: {
+  profile: EEHRxFProfile;
+  onView: (profileId: string) => void;
+}) {
   const t = useT("holder");
   return (
     <div className="py-2 px-3 rounded-sm hover:bg-(--surface-2)/50 transition-colors">
@@ -269,6 +302,9 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
               })}
             </span>
           )}
+          {profile.tested > 0 && (
+            <ViewButton onClick={() => onView(profile.profileId)} />
+          )}
           <StatusBadge status={profile.coverage} />
           {profile.url && (
             <a
@@ -299,7 +335,13 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
   );
 }
 
-function NationalGuideCard({ guide }: { guide: NationalGuide }) {
+function NationalGuideCard({
+  guide,
+  onView,
+}: {
+  guide: NationalGuide;
+  onView: (profileId: string) => void;
+}) {
   const t = useT("holder");
   return (
     <div
@@ -353,6 +395,9 @@ function NationalGuideCard({ guide }: { guide: NationalGuide }) {
                   })}
                 </span>
               )}
+              {p.tested > 0 && (
+                <ViewButton onClick={() => onView(p.profileId)} />
+              )}
               <StatusBadge status={p.coverage} />
             </div>
             {p.topIssues.length > 0 && (
@@ -374,7 +419,13 @@ function NationalGuideCard({ guide }: { guide: NationalGuide }) {
   );
 }
 
-function CategoryCard({ category }: { category: EEHRxFCategory }) {
+function CategoryCard({
+  category,
+  onView,
+}: {
+  category: EEHRxFCategory;
+  onView: (profileId: string) => void;
+}) {
   const t = useT("holder");
   const [expanded, setExpanded] = useState(category.status !== "none");
 
@@ -458,7 +509,7 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
           </div>
           <div className="divide-y divide-gray-800/50">
             {category.profiles.map((p) => (
-              <ProfileRow key={p.profileId} profile={p} />
+              <ProfileRow key={p.profileId} profile={p} onView={onView} />
             ))}
           </div>
         </div>
@@ -475,6 +526,16 @@ export default function EEHRxFPage() {
   const [error, setError] = useState<string | null>(null);
   const [unauthenticated, setUnauthenticated] = useState(false);
   const [national, setNational] = useState<NationalGuide[]>([]);
+  const [validated, setValidated] = useState<ValidatedSource[]>([]);
+  const [viewing, setViewing] = useState<string | null>(null);
+
+  useEffect(() => {
+    // A static file build.py writes; the page works without it.
+    fetch(`${BASE_PATH}/eehrxf/validation/index.json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setValidated(d?.sources ?? []))
+      .catch(() => setValidated([]));
+  }, []);
 
   useEffect(() => {
     // A section of its own; the page works without it.
@@ -672,7 +733,7 @@ export default function EEHRxFPage() {
                 </p>
                 <p>
                   {t(
-                    "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.",
+                    "Sources: four sets of synthetic or fictional data, listed under What we validated.",
                   )}
                 </p>
                 <p className="font-mono text-[11px] break-words flex flex-wrap gap-x-3 gap-y-1">
@@ -720,6 +781,62 @@ export default function EEHRxFPage() {
                   ))}
                 </p>
               </div>
+            )}
+
+            {/* What was validated: every source, synthetic or fictional */}
+            {validated.length > 0 && (
+              <section
+                className="bg-(--surface) border border-(--border) rounded-xl p-5 mb-8 text-xs text-(--text-secondary)"
+                aria-labelledby="eehrxf-validated"
+                data-testid="eehrxf-validated-sources"
+              >
+                <h2
+                  id="eehrxf-validated"
+                  className="font-semibold text-sm text-(--text-primary)"
+                >
+                  {t("What we validated")}
+                </h2>
+                <p className="mt-1 mb-3">
+                  {t(
+                    "All data checked here is synthetic or fictional: no real patient's data is validated or published. Open View resources on any profile to see each resource with its errors and warnings.",
+                  )}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {validated.map((s) => (
+                    <div
+                      key={s.sourceId}
+                      className="border border-(--border) rounded-lg p-3"
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-(--text-primary)">
+                          {s.label ?? s.sourceId}
+                        </span>
+                        <span className="font-mono text-[10px] bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
+                          {s.sourceId}
+                        </span>
+                        <span className="tabular-nums">
+                          {t("{n} resources", { n: s.resources })}
+                        </span>
+                      </div>
+                      {s.role && (
+                        <p className="mt-1 text-(--text-primary)">{s.role}</p>
+                      )}
+                      {s.data && <p className="mt-1">{s.data}</p>}
+                      {s.generatedBy && (
+                        <a
+                          href={`${BLOB}/${s.generatedBy}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 font-mono text-[11px] hover:text-teal-800 dark:hover:text-teal-300"
+                        >
+                          <ExternalLink size={10} />
+                          {s.generatedBy}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* EHDS Timeline */}
@@ -770,7 +887,11 @@ export default function EEHRxFPage() {
             ) : (
               <div className="flex flex-col gap-4">
                 {data?.categories.map((cat) => (
-                  <CategoryCard key={cat.categoryId} category={cat} />
+                  <CategoryCard
+                    key={cat.categoryId}
+                    category={cat}
+                    onView={setViewing}
+                  />
                 ))}
               </div>
             )}
@@ -791,7 +912,11 @@ export default function EEHRxFPage() {
                 </p>
                 <div className="flex flex-col gap-3">
                   {national.map((g) => (
-                    <NationalGuideCard key={g.guideId} guide={g} />
+                    <NationalGuideCard
+                      key={g.guideId}
+                      guide={g}
+                      onView={setViewing}
+                    />
                   ))}
                 </div>
               </section>
@@ -864,6 +989,13 @@ export default function EEHRxFPage() {
               </section>
             )}
           </>
+        )}
+
+        {viewing && (
+          <ValidationViewer
+            profileId={viewing}
+            onClose={() => setViewing(null)}
+          />
         )}
 
         {/* Reference links */}

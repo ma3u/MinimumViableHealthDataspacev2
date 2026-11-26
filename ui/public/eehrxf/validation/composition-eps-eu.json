@@ -1,0 +1,12 @@
+{
+  "profileId": "composition-eps-eu",
+  "name": "Composition (EU Patient Summary)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/eps/StructureDefinition/composition-eu-eps",
+  "igPackage": "hl7.fhir.eu.eps#1.0.0-ballot",
+  "baseResource": "Composition",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 0,
+  "resources": []
+}

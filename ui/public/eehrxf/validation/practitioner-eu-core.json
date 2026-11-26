@@ -1,0 +1,12 @@
+{
+  "profileId": "practitioner-eu-core",
+  "name": "Practitioner (EU core)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core",
+  "igPackage": "hl7.fhir.eu.base#2.0.1",
+  "baseResource": "Practitioner",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 0,
+  "resources": []
+}

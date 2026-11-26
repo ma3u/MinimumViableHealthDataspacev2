@@ -1,0 +1,259 @@
+{
+  "profileId": "kds-lab-diagnostic-report-de",
+  "name": "DiagnosticReport (MII KDS Laborbefund)",
+  "section": "national",
+  "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
+  "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
+  "baseResource": "DiagnosticReport",
+  "tested": 2,
+  "passed": 1,
+  "warnings": 6,
+  "resources": [
+    {
+      "source": "klarbefund",
+      "origin": "fhir-golden-bundle-cgm.json#entry[2]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:lab-category': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport.code",
+          "message": "Slice 'DiagnosticReport.code.coding:loinc-labReport': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab|2026.0.3). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.presentedForm[0]",
+          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
+        }
+      ],
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "report-1",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+            "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
+            "assigner": {
+              "display": "epa-ingest (tesseract)"
+            }
+          }
+        ],
+        "basedOn": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "LAB",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "version": "2.83",
+              "code": "107930-0",
+              "display": "Continuous glucose monitoring summary report Document"
+            }
+          ],
+          "text": "Glukoseprofil (Sensor)"
+        },
+        "subject": {
+          "reference": "Patient/example-patient"
+        },
+        "effectiveDateTime": "2026-08-26",
+        "issued": "2026-09-13T12:00:00.000Z",
+        "performer": [
+          {
+            "reference": "Organization/performer-1",
+            "display": "Praxis Dr. Muster"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/obs-1"
+          },
+          {
+            "reference": "Observation/obs-2"
+          },
+          {
+            "reference": "Observation/obs-3"
+          }
+        ],
+        "presentedForm": [
+          {
+            "title": "laborbefund-2026-09-04.pdf"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"
+          ]
+        }
+      }
+    },
+    {
+      "source": "klarbefund",
+      "origin": "fhir-golden-bundle.json#entry[2]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.presentedForm[0]",
+          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
+        }
+      ],
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "report-1",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+            "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
+            "assigner": {
+              "display": "epa-ingest (tesseract)"
+            }
+          }
+        ],
+        "basedOn": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "LAB",
+                "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "version": "2.83",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "version": "2.83",
+              "code": "11502-2",
+              "display": "Laboratory report"
+            }
+          ],
+          "text": "Laborbefund"
+        },
+        "subject": {
+          "reference": "Patient/example-patient"
+        },
+        "effectiveDateTime": "2026-09-04",
+        "issued": "2026-09-13T12:00:00.000Z",
+        "performer": [
+          {
+            "reference": "Organization/performer-1",
+            "display": "Praxis Dr. Muster"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/obs-1"
+          },
+          {
+            "reference": "Observation/obs-2"
+          },
+          {
+            "reference": "Observation/obs-3"
+          },
+          {
+            "reference": "Observation/obs-4"
+          },
+          {
+            "reference": "Observation/obs-5"
+          },
+          {
+            "reference": "Observation/obs-6"
+          },
+          {
+            "reference": "Observation/obs-7"
+          }
+        ],
+        "presentedForm": [
+          {
+            "title": "laborbefund-2026-09-04.pdf"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"
+          ]
+        }
+      }
+    }
+  ]
+}

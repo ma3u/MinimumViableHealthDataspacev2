@@ -71,6 +71,9 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 CONFIG = HERE / "profiles.json"
 REPORT = HERE / "validation-report.json"
+# Every tested resource with its errors and warnings, for the viewer on
+# /eehrxf. build.py joins it with the resources and writes the viewer files.
+DETAILS = HERE / "validation-details.json"
 GOLDEN_GLOB = "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
 SYNTHEA_SAMPLE = "scripts/eehrxf/samples/synthea-sample.json"
 DOCUMENTS_DIR = "scripts/eehrxf/samples/documents"
@@ -290,8 +293,16 @@ def generic(text: str) -> str:
     return text[:240]
 
 
+VIEWER_SEVERITIES = ("fatal", "error", "warning")
+
+
 def parse_outcomes(out: Path) -> dict[str, list[dict]]:
     """{file name: [error issues]} from the validator's output."""
+    return {f: [i for i in issues if i.get("severity") in ("error", "fatal")] for f, issues in parse_all(out).items()}
+
+
+def parse_all(out: Path) -> dict[str, list[dict]]:
+    """{file name: [fatal, error and warning issues]} from the validator's output."""
     data = json.loads(out.read_text(encoding="utf-8"))
     outcomes = [e["resource"] for e in data.get("entry", [])] if data.get("resourceType") == "Bundle" else [data]
     result: dict[str, list[dict]] = {}
@@ -302,9 +313,37 @@ def parse_outcomes(out: Path) -> dict[str, list[dict]]:
         )
         if fname is None:
             continue
-        errors = [i for i in oo.get("issue", []) if i.get("severity") in ("error", "fatal")]
-        result[fname] = errors
+        result[fname] = [i for i in oo.get("issue", []) if i.get("severity") in VIEWER_SEVERITIES]
     return result
+
+
+def viewer_issue(cfg: dict, sid: str, issue: dict) -> dict:
+    """One issue as the viewer shows it: where, how bad, what, and whether a configured rule ignores it."""
+    where = (issue.get("expression") or issue.get("location") or [""])[0]
+    msg = issue.get("details", {}).get("text") or issue.get("diagnostics") or issue.get("code", "")
+    out = {"severity": issue.get("severity", ""), "expression": where, "message": msg[:400]}
+    if issue.get("severity") in ("error", "fatal") and ignored(cfg, sid, issue):
+        out["ignored"] = True
+    return out
+
+
+def build_details(cfg: dict, index: dict, everything: dict) -> dict:
+    """{profileId: [one entry per tested resource]}, in file order, so a rerun gives the same file."""
+    profiles: dict[str, list[dict]] = {}
+    for fname, (pid, sid, origin) in sorted(index.items()):
+        # An issue a configured rule ignores is left out: the rule and its reason
+        # are in profiles.json and the report, and one of them (us-core-race)
+        # lands on a different resource on each machine.
+        issues = [v for v in (viewer_issue(cfg, sid, i) for i in everything.get(fname, [])) if not v.get("ignored")]
+        issues.sort(key=lambda i: (("fatal", "error", "warning").index(i["severity"]), i["expression"], i["message"]))
+        blocking = [i for i in issues if i["severity"] in ("error", "fatal") and not i.get("ignored")]
+        profiles.setdefault(pid, []).append(
+            {"file": fname, "source": sid, "origin": origin, "passed": not blocking, "issues": issues}
+        )
+    return {
+        "$comment": "Written by scripts/eehrxf/validate.py; do not edit. build.py joins it with the resources for the viewer on /eehrxf.",
+        "profiles": profiles,
+    }
 
 
 def issue_text(issue: dict) -> str:
@@ -386,7 +425,7 @@ def build_report(cfg: dict, sources: dict, index: dict, outcomes: dict) -> dict:
         "inputsDigest": inputs_digest(sources),
         "profiles": profile_results(cfg, cfg["igs"], cfg["profiles"], sources, index, outcomes),
         "national": {
-            "$comment": "German ePA profiles (#1172). Not EEHRxF: build.py does not read this section, so /eehrxf never shows it as coverage.",
+            "$comment": "German profiles (#1172): gematik ePA, KBV MIO, MII Kerndatensatz. Not EEHRxF: build.py writes the onPage ones to a seed and mock of their own, never counted as EEHRxF coverage.",
             "igs": {
                 k: {"package": f"{v['package']}#{v['version']}", "status": v["status"], "gate": not report_only(v)}
                 for k, v in sorted(nat["igs"].items())
@@ -422,6 +461,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--keep", action="store_true", help="keep the work directory")
     ap.add_argument("--report", default=str(REPORT), help="where to write the report")
+    ap.add_argument("--details", default=str(DETAILS), help="where to write the per-resource details")
     ap.add_argument(
         "--baseline",
         default=str(REPORT),
@@ -445,6 +485,7 @@ def main() -> int:
             runs.append((f"national-{key}", [ig], [p for p in nat["profiles"] if p["ig"] == key]))
         index: dict[str, tuple[str, str, str]] = {}
         outcomes: dict[str, list[dict]] = {}
+        everything: dict[str, list[dict]] = {}
         for name, igs, profiles in runs:
             inputs = work / "in" / name
             inputs.mkdir(parents=True)
@@ -455,7 +496,9 @@ def main() -> int:
             out = work / f"outcome-{name}.json"
             run_validator(cfg, jar, inputs, out, igs)
             outcomes.update(parse_outcomes(out))
+            everything.update(parse_all(out))
         report = build_report(cfg, sources, index, outcomes)
+        details = build_details(cfg, index, everything)
     finally:
         if args.keep:
             print(f"work directory kept: {work}", file=sys.stderr)
@@ -463,6 +506,7 @@ def main() -> int:
             shutil.rmtree(work, ignore_errors=True)
 
     Path(args.report).write_text(json.dumps(report, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+    Path(args.details).write_text(json.dumps(details, indent=1, sort_keys=False) + "\n", encoding="utf-8")
     for pid, p in all_profiles(report).items():
         mode = "" if p["gate"] else "  (report-only)"
         print(f"{pid:32} {p['passed']:3}/{p['tested']:<3} passed{mode}")

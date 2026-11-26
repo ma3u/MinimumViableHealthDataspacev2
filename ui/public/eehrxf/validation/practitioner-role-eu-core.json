@@ -1,0 +1,12 @@
+{
+  "profileId": "practitioner-role-eu-core",
+  "name": "PractitionerRole (EU core)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitionerRole-eu-core",
+  "igPackage": "hl7.fhir.eu.base#2.0.1",
+  "baseResource": "PractitionerRole",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 0,
+  "resources": []
+}

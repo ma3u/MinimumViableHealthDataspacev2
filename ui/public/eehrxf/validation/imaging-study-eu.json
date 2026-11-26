@@ -1,0 +1,12 @@
+{
+  "profileId": "imaging-study-eu",
+  "name": "ImagingStudy (EU Imaging)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/ImagingStudyEuImaging",
+  "igPackage": "hl7.fhir.eu.imaging#1.0.0-ballot",
+  "baseResource": "ImagingStudy",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 0,
+  "resources": []
+}

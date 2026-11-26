@@ -32,7 +32,7 @@ SET c.name = 'Patient Summaries',
     c.status = 'partial',
     c.profileCount = 7,
     c.tested = 76,
-    c.passed = 66;
+    c.passed = 67;
 
 MERGE (c:EEHRxFCategory {categoryId: 'eprescription'})
 SET c.name = 'ePrescriptions',
@@ -80,7 +80,7 @@ SET c.name = 'Medical Test Results',
     c.status = 'partial',
     c.profileCount = 4,
     c.tested = 80,
-    c.passed = 39;
+    c.passed = 40;
 
 MERGE (c:EEHRxFCategory {categoryId: 'hospital-discharge'})
 SET c.name = 'Discharge Reports',
@@ -92,7 +92,7 @@ SET c.name = 'Discharge Reports',
     c.status = 'partial',
     c.profileCount = 3,
     c.tested = 60,
-    c.passed = 50;
+    c.passed = 51;
 
 MERGE (p:EEHRxFProfile {profileId: 'patient-eu-core'})
 SET p.name = 'Patient (EU core)',
@@ -105,9 +105,9 @@ SET p.name = 'Patient (EU core)',
     p.baseResource = 'Patient',
     p.description = null,
     p.tested = 29,
-    p.passed = 19,
-    p.failed = 10,
-    p.topIssues = ['9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)', '9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)', '1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here'],
+    p.passed = 20,
+    p.failed = 9,
+    p.topIssues = ['9x Patient: Patient.birthDate: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)', '9x Patient: Patient.name: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core|2.0.1)'],
     p.coverage = 'partial';
 
 MERGE (p:EEHRxFProfile {profileId: 'practitioner-eu-core'})

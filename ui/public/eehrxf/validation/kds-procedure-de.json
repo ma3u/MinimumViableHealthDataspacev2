@@ -1,0 +1,1084 @@
+{
+  "profileId": "kds-procedure-de",
+  "name": "Procedure (MII KDS Prozedur)",
+  "section": "national",
+  "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
+  "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+  "baseResource": "Procedure",
+  "tested": 24,
+  "passed": 23,
+  "warnings": 24,
+  "resources": [
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[55]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-2000-173160006",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "173160006"
+            }
+          ],
+          "text": "Diabetic Eye Screening"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "performedDateTime": "2024-06-20",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[67]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-2008-173160006",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "173160006"
+            }
+          ],
+          "text": "Diabetic Eye Screening"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "performedDateTime": "2025-01-28",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[80]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "loader-proc-0001",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "117015009"
+            }
+          ],
+          "text": "Throat culture (procedure)"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "performedPeriod": {
+          "start": "2019-04-02T10:00:00+02:00",
+          "end": "2019-04-02T10:15:00+02:00"
+        },
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[88]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Procedure",
+          "message": "Procedure.performed[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)"
+        },
+        {
+          "severity": "error",
+          "expression": "Procedure.code",
+          "message": "Constraint failed: sct-ops-1: 'Eine Prozedur MUSS mit OPS oder SNOMED-CT kodiert werden.' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure)"
+        },
+        {
+          "severity": "error",
+          "expression": "Procedure.code",
+          "message": "Procedure.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "sparse-proc-0001",
+        "status": "unknown",
+        "code": {
+          "text": "Wound dressing"
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[163]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "a80697c1-887f-41ab-8e42-2465c815fdef",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:cc8b124b-1612-ed51-715a-64706c34bc88"
+        },
+        "performedPeriod": {
+          "start": "1999-07-13T07:33:09+02:00",
+          "end": "1999-07-13T10:52:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[164]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "85369cf6-40c3-abbd-466e-58795bab72c8",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:8030cb21-8dc2-83f1-8a39-2aef21424830"
+        },
+        "performedPeriod": {
+          "start": "1999-07-16T10:52:09+02:00",
+          "end": "1999-07-16T13:09:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[165]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "68076ea8-e5ad-2637-dac7-3acc2be73f5f",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:472bf674-534c-72d7-afc6-d824a1d021f9"
+        },
+        "performedPeriod": {
+          "start": "1999-07-19T13:09:09+02:00",
+          "end": "1999-07-19T15:12:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[166]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "ae684b1a-c306-4454-9960-61d0059a5dae",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:256c4c1c-7d0d-290a-a573-c63a28812829"
+        },
+        "performedPeriod": {
+          "start": "1999-07-22T15:12:09+02:00",
+          "end": "1999-07-22T18:06:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[167]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "92c9bd9f-77ec-aaa5-dc81-4850b00b4fb8",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:2d16358b-396a-cf41-bc17-4b568725a5d9"
+        },
+        "performedPeriod": {
+          "start": "1999-07-25T18:06:09+02:00",
+          "end": "1999-07-25T21:36:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[168]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "4038c198-0871-9cb0-0c3c-f4d9db7b21db",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:8ceb3578-a7f0-6573-2cd1-99bd84a46765"
+        },
+        "performedPeriod": {
+          "start": "1999-07-28T21:36:09+02:00",
+          "end": "1999-07-29T00:10:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[169]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "4477e630-7e9a-2657-3ff8-1e027afba478",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:f1fddfc2-4867-99ee-dcdf-38bce3184829"
+        },
+        "performedPeriod": {
+          "start": "1999-08-01T00:10:09+02:00",
+          "end": "1999-08-01T02:50:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[170]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "ca43d9e6-3e31-1e99-f06a-5c099b92f2a9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:f02bd7bb-24a9-9b7a-6f34-37a560768324"
+        },
+        "performedPeriod": {
+          "start": "1999-08-04T02:50:09+02:00",
+          "end": "1999-08-04T06:16:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[171]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "8fe535d9-74b2-fe77-f031-86e606b99343",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:0bde4aff-85a2-7931-6c45-b4a09dd28a5d"
+        },
+        "performedPeriod": {
+          "start": "1999-08-07T06:16:09+02:00",
+          "end": "1999-08-07T09:43:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[172]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "f9748562-4071-ee0d-f0d7-3caf59b482f7",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:bcb4ac76-8f52-8695-1889-42f95faba6f1"
+        },
+        "performedPeriod": {
+          "start": "1999-08-10T09:43:09+02:00",
+          "end": "1999-08-10T11:47:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[173]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "90d58246-f087-7ff5-b035-1e64c4a2cafd",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:6be2d479-4f94-6e8d-55dc-7c3bfecfaf04"
+        },
+        "performedPeriod": {
+          "start": "1999-08-13T11:47:09+02:00",
+          "end": "1999-08-13T13:52:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[174]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "1f59f775-db43-a190-cbf7-0d6452dbc722",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:3e584b4c-0e66-0b79-55dd-6af3528ce942"
+        },
+        "performedPeriod": {
+          "start": "1999-08-16T13:52:09+02:00",
+          "end": "1999-08-16T17:37:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[175]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "0f6df6fd-4af7-cb78-8710-00ee632ed5b9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:0621a46a-3f29-16d4-92ff-2640f1d7f247"
+        },
+        "performedPeriod": {
+          "start": "1999-08-19T17:37:09+02:00",
+          "end": "1999-08-19T20:07:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[176]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "a9486b0c-b24a-ca56-7d9c-ddbbc30a85f7",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:a275b3e9-3e8b-51a4-a599-c6862fd48d95"
+        },
+        "performedPeriod": {
+          "start": "1999-08-22T20:07:09+02:00",
+          "end": "1999-08-22T22:58:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[177]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "84c01f20-cb6b-f5e3-d1d3-8a5b405a29de",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:650bd1e9-4de9-7eaa-eb36-9f500e440f87"
+        },
+        "performedPeriod": {
+          "start": "1999-08-25T22:58:09+02:00",
+          "end": "1999-08-26T01:33:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[178]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "cbe1a189-e836-558c-2af7-4ae75b385817",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:d5129b3f-fe7a-7b97-78dd-745b2052a8a2"
+        },
+        "performedPeriod": {
+          "start": "1999-08-29T01:33:09+02:00",
+          "end": "1999-08-29T05:09:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[179]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "10837831-386a-8912-b7cf-0e006839fcba",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:670de622-36d7-5eed-c5ec-5837383c464f"
+        },
+        "performedPeriod": {
+          "start": "1999-09-01T05:09:09+02:00",
+          "end": "1999-09-01T08:10:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[180]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "b01d5119-7f6e-0546-efdd-cd2033d5d69d",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:3be6fc4a-59fe-b94b-4397-530a1b3aebfc"
+        },
+        "performedPeriod": {
+          "start": "1999-09-04T08:10:09+02:00",
+          "end": "1999-09-04T12:05:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[181]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "dc3f7d7c-8243-21ad-9759-61dd3fa61ab3",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:c568e6ff-df00-e0e5-1190-4c7112976ede"
+        },
+        "performedPeriod": {
+          "start": "1999-09-07T12:05:09+02:00",
+          "end": "1999-09-07T14:23:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[182]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Procedure",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "be25621b-3574-ab33-c359-15259fe0236c",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "265764009",
+              "display": "Renal dialysis (procedure)"
+            }
+          ],
+          "text": "Renal dialysis (procedure)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:a5be7dc9-dcaf-3eac-8518-4e64de92ce82"
+        },
+        "performedPeriod": {
+          "start": "1999-09-10T14:23:09+02:00",
+          "end": "1999-09-10T17:53:09+02:00"
+        },
+        "location": {
+          "reference": "Location?identifier=https://github.com/synthetichealth/synthea|3ce5928b-30d4-3748-868a-a223c0fba93c",
+          "display": "SOUTH SHORE HOSPITAL INC."
+        }
+      }
+    }
+  ]
+}

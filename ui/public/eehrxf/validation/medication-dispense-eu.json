@@ -1,0 +1,12 @@
+{
+  "profileId": "medication-dispense-eu",
+  "name": "MedicationDispense (EU MPD)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationDispense-eu-mpd",
+  "igPackage": "hl7.fhir.eu.mpd#1.0.0",
+  "baseResource": "MedicationDispense",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 0,
+  "resources": []
+}
