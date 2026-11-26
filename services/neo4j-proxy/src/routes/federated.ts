@@ -26,16 +26,24 @@ import {
   withheldRowLevel,
 } from "../k-anonymity.js";
 import { noteSpeQueried } from "../spe-status.js";
+import {
+  federationTxConfig,
+  logDispatch,
+  newFederationQueryId,
+  tagFederatedResponse,
+} from "../federation-query.js";
 
 /** A refused federated query is recorded before the refusal goes out. */
 async function auditFederatedRefusal(
   callerId: string | undefined,
   cypher: string,
   reason: string,
-  permits?: AuditPermit[],
+  permits: AuditPermit[] | undefined,
+  federationQueryId: string,
 ): Promise<void> {
   try {
     await appendQueryAudit({
+      federationQueryId,
       participantId: callerId,
       permits,
       question: "(federated)",
@@ -80,6 +88,9 @@ app.post(
       const { cypher, params = {} } = req.body;
       const minK = Math.max(requestedMinK, MIN_COHORT_SIZE);
       const callerId = req.headers["x-participant"] as string | undefined;
+      // One id for this query in every log it touches (ADR-100 decision 4).
+      const federationQueryId = newFederationQueryId();
+      tagFederatedResponse(res, federationQueryId);
 
       if (!cypher || typeof cypher !== "string") {
         res.status(400).json({ error: "Missing 'cypher' in request body" });
@@ -97,6 +108,7 @@ app.post(
             cypher,
             "ODRL temporal limit",
             auditPermits(scope),
+            federationQueryId,
           );
           res
             .status(403)
@@ -109,6 +121,7 @@ app.post(
             cypher,
             "ODRL re-identification prohibition",
             auditPermits(scope),
+            federationQueryId,
           );
           res.status(403).json({
             error:
@@ -130,6 +143,7 @@ app.post(
           cypher,
           "reads outside the graph (#779)",
           auditPermits(scope),
+          federationQueryId,
         );
         res.status(403).json({
           error:
@@ -151,6 +165,7 @@ app.post(
         const withheld = withheldRowLevel(minK);
         try {
           await appendQueryAudit({
+            federationQueryId,
             participantId: callerId,
             question: "(federated)",
             cypher,
@@ -170,6 +185,7 @@ app.post(
           return;
         }
         res.json({
+          federationQueryId,
           results: [],
           sources: [],
           totalRows: 0,
@@ -191,9 +207,14 @@ app.post(
           // Art. 71 (ADR-062): each SPE answers without the persons who opted out.
           // Read-only: the database refuses a write the regex above misses.
           const session = secondaryUseSession(readSession(d), scope);
+          const started = Date.now();
           try {
-            // nosemgrep: cypher-built-from-request-input -- caller-supplied Cypher by design, in a read-only session; WRITE_PATTERN and checkReIdentification above
-            const result = await session.run(cypher, params);
+            const result = await session.run(
+              // nosemgrep: cypher-built-from-request-input -- caller-supplied Cypher by design, in a read-only session; WRITE_PATTERN and checkReIdentification above
+              cypher,
+              params,
+              federationTxConfig(federationQueryId),
+            );
             const records = result.records.map((r) => {
               const obj: Record<string, any> = { _source: label };
               r.keys.forEach((key) => {
@@ -203,10 +224,29 @@ app.post(
               return obj;
             });
             allResults.push({ source: label, records });
+            logDispatch({
+              federationQueryId,
+              route: "/federated/query",
+              spe: label,
+              outcome: "answered",
+              rows: records.length,
+              ms: Date.now() - started,
+            });
           } catch (err) {
             // The caller learns which SPE failed, not why: a driver error
             // quotes the query and the address it failed on (#1029).
-            logger.error({ err, spe: label }, "federated SPE query failed");
+            logger.error(
+              { err, spe: label, federationQueryId },
+              "federated SPE query failed",
+            );
+            logDispatch({
+              federationQueryId,
+              route: "/federated/query",
+              spe: label,
+              outcome: "failed",
+              rows: 0,
+              ms: Date.now() - started,
+            });
             allResults.push({
               source: label,
               records: [{ _source: label, _error: "SPE query failed" }],
@@ -234,6 +274,7 @@ app.post(
       // Fail closed (ADR-045, #418): no record, no answer.
       try {
         await appendQueryAudit({
+          federationQueryId,
           participantId: callerId,
           question: "(federated)",
           cypher,
@@ -254,6 +295,7 @@ app.post(
       }
 
       res.json({
+        federationQueryId,
         results: merged,
         sources,
         totalRows,
@@ -300,6 +342,10 @@ app.get(
       );
       const spes = getSpeDrivers();
       noteSpeQueried(spes.map((s) => s.label));
+      // One id for this query in every log it touches (ADR-100 decision 4).
+      const federationQueryId = newFederationQueryId();
+      tagFederatedResponse(res, federationQueryId);
+      const tx = federationTxConfig(federationQueryId);
       const stats: Array<{
         source: string;
         patients: number;
@@ -314,15 +360,20 @@ app.get(
         spes.map(async ({ label, driver: d }) => {
           // Art. 71 (ADR-062): the statistics leave out the persons who opted out.
           const session = secondaryUseSession(d.session({ database: "neo4j" }));
+          const started = Date.now();
           try {
             // Get counts
-            const counts = await session.run(`
+            const counts = await session.run(
+              `
               MATCH (p:Patient) WITH count(p) AS patients
               MATCH (e:Encounter) WITH patients, count(e) AS encounters
               MATCH (c:Condition) WITH patients, encounters, count(c) AS conditions
               MATCH (o:Observation) WITH patients, encounters, conditions, count(o) AS observations
               RETURN patients, encounters, conditions, observations
-            `);
+            `,
+              {},
+              tx,
+            );
 
             const row = counts.records[0];
             const patients = row
@@ -339,21 +390,29 @@ app.get(
               : 0;
 
             // Top conditions
-            const topCond = await session.run(`
+            const topCond = await session.run(
+              `
               MATCH (c:Condition)
               RETURN c.name AS name, count(*) AS cnt
               ORDER BY cnt DESC LIMIT 10
-            `);
+            `,
+              {},
+              tx,
+            );
             const topConditions = topCond.records.map((r) => ({
               name: r.get("name"),
               count: neo4j.integer.toNumber(r.get("cnt")),
             }));
 
             // Gender breakdown
-            const genders = await session.run(`
+            const genders = await session.run(
+              `
               MATCH (p:Patient)
               RETURN p.gender AS gender, count(*) AS cnt
-            `);
+            `,
+              {},
+              tx,
+            );
             const genderBreakdown = genders.records.map((r) => ({
               gender: r.get("gender"),
               count: neo4j.integer.toNumber(r.get("cnt")),
@@ -368,6 +427,24 @@ app.get(
               topConditions,
               genderBreakdown,
             });
+            logDispatch({
+              federationQueryId,
+              route: "/federated/stats",
+              spe: label,
+              outcome: "answered",
+              rows: 1,
+              ms: Date.now() - started,
+            });
+          } catch (err) {
+            logDispatch({
+              federationQueryId,
+              route: "/federated/stats",
+              spe: label,
+              outcome: "failed",
+              rows: 0,
+              ms: Date.now() - started,
+            });
+            throw err;
           } finally {
             await session.close();
           }
@@ -432,7 +509,31 @@ app.get(
         ([gender, counts]) => ({ gender, count: combine(counts) }),
       );
 
+      // Recorded before the answer goes out, like every federated query
+      // (ADR-100 decision 1; fail closed, ADR-045).
+      try {
+        await appendQueryAudit({
+          federationQueryId,
+          participantId: _req.headers["x-participant"] as string | undefined,
+          question: "(federated statistics)",
+          cypher: null,
+          method: "federated-stats",
+          resultCount: stats.length,
+          odrlEnforced: false,
+          outcome: "success",
+          federated: {
+            contributors: stats.map((s) => s.source).sort(),
+            aggregateSuppressed: false,
+            suppressionReason: filtered > 0 ? "small_cells" : null,
+          },
+        });
+      } catch (err) {
+        auditUnavailable(res, err);
+        return;
+      }
+
       res.json({
+        federationQueryId,
         speCount: spes.length,
         totals,
         aggregatedConditions,

@@ -66,9 +66,9 @@ SET p.name = 'Patient (MII KDS Person)',
     p.baseResource = 'Patient',
     p.fhirVersion = 'R4',
     p.tested = 29,
-    p.passed = 25,
-    p.failed = 4,
-    p.topIssues = ['3x Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)', '3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)', '1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here'],
+    p.passed = 26,
+    p.failed = 3,
+    p.topIssues = ['3x Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)', '3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)'],
     p.coverage = 'partial';
 MATCH (p:NationalProfile {profileId: 'kds-patient-de'})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;
 MATCH (p:NationalProfile {profileId: 'kds-patient-de'}), (g:NationalProfileGuide {guideId: 'mii-kds-base'}) MERGE (p)-[:PUBLISHED_IN]->(g);

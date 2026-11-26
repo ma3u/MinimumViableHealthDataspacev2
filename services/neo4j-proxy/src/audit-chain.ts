@@ -110,6 +110,8 @@ export interface QueryAuditInput {
   loadTest?: string;
   /** The permits the query ran under, so each agent query is tied to one (#779). */
   permits?: AuditPermit[];
+  /** The id of a federated query, the same in every workspace's log (ADR-100). */
+  federationQueryId?: string;
 }
 
 /** FHIR R4 AuditEvent, BALP Query pattern, with no plaintext query. */
@@ -152,6 +154,9 @@ export function buildQueryAuditEvent(
     );
   }
   if (input.loadTest) details.push(detail("loadTest", input.loadTest));
+  if (input.federationQueryId) {
+    details.push(detail("federationQueryId", input.federationQueryId));
+  }
   return {
     resourceType: "AuditEvent",
     id: meta.id,
@@ -291,6 +296,9 @@ export async function appendQueryAudit(
   return appendAuditEvent(QUERY_CHAIN, resource, {
     participantId: input.participantId ?? "anonymous",
     outcome: input.outcome,
+    ...(input.federationQueryId
+      ? { properties: { federationQueryId: input.federationQueryId } }
+      : {}),
   });
 }
 

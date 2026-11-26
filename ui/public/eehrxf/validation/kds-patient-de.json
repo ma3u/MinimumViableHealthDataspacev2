@@ -6,7 +6,7 @@
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
   "baseResource": "Patient",
   "tested": 29,
-  "passed": 25,
+  "passed": 26,
   "warnings": 44,
   "resources": [
     {
@@ -1476,13 +1476,8 @@
     {
       "source": "synthea",
       "origin": "synthea-sample.json#entry[155]",
-      "passed": false,
+      "passed": true,
       "issues": [
-        {
-          "severity": "error",
-          "expression": "Patient.extension[0]",
-          "message": "The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here"
-        },
         {
           "severity": "warning",
           "expression": "Patient.communication[0].language.coding[0].system",

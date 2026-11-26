@@ -337,7 +337,10 @@ def build_details(cfg: dict, index: dict, everything: dict) -> dict:
     """{profileId: [one entry per tested resource]}, in file order, so a rerun gives the same file."""
     profiles: dict[str, list[dict]] = {}
     for fname, (pid, sid, origin) in sorted(index.items()):
-        issues = [viewer_issue(cfg, sid, i) for i in everything.get(fname, [])]
+        # An issue a configured rule ignores is left out: the rule and its reason
+        # are in profiles.json and the report, and one of them (us-core-race)
+        # lands on a different resource on each machine.
+        issues = [v for v in (viewer_issue(cfg, sid, i) for i in everything.get(fname, [])) if not v.get("ignored")]
         issues.sort(key=lambda i: (("fatal", "error", "warning").index(i["severity"]), i["expression"], i["message"]))
         blocking = [i for i in issues if i["severity"] in ("error", "fatal") and not i.get("ignored")]
         profiles.setdefault(pid, []).append(

@@ -71,7 +71,7 @@ UNWIND [
 OPTIONAL MATCH (have:RxNormConcept) WHERE toString(have.rxcui) = m.new
 WITH m, count(have) AS existing
 WHERE existing = 0
-MERGE (n:RxNormConcept {rxcui: toInteger(m.new)})
+MERGE (n:RxNormConcept {rxcui: m.new})
   ON CREATE SET n.display = m.newName,
                 n.system = 'http://www.nlm.nih.gov/research/umls/rxnorm';
 

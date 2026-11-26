@@ -16,6 +16,13 @@
           "synthea"
         ],
         "reason": "Synthea writes conditional references to practitioners and organisations inside its transaction Bundle. The sample lifts resources out of that Bundle, so the rule cannot hold there; scripts/load_fhir_neo4j.py reads them inside it."
+      },
+      {
+        "contains": "us-core-race could not be found so is not allowed here",
+        "sources": [
+          "synthea"
+        ],
+        "reason": "HL7 FHIR Validator 7.0.5 reports this for exactly one Synthea Patient per run, a different one each time, and accepts the same extension on the others: the US Core definition is resolved once and only the first lookup fails. Ignored so a rerun gives the same result; the US Core race extension is Synthea's own and the hub does not load it."
       }
     ]
   },
@@ -80,8 +87,8 @@
       "ig": "hl7.fhir.eu.base#2.0.1",
       "gate": true,
       "tested": 29,
-      "passed": 28,
-      "failed": 1,
+      "passed": 29,
+      "failed": 0,
       "bySource": {
         "documents": {
           "tested": 0,
@@ -97,15 +104,10 @@
         },
         "synthea": {
           "tested": 12,
-          "passed": 11
+          "passed": 12
         }
       },
-      "topIssues": [
-        {
-          "issue": "Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here",
-          "resources": 1
-        }
-      ]
+      "topIssues": []
     },
     "practitioner-eu-core": {
       "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core",
@@ -915,8 +917,8 @@
         "ig": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
         "gate": true,
         "tested": 29,
-        "passed": 25,
-        "failed": 4,
+        "passed": 26,
+        "failed": 3,
         "bySource": {
           "documents": {
             "tested": 0,
@@ -932,7 +934,7 @@
           },
           "synthea": {
             "tested": 12,
-            "passed": 8
+            "passed": 9
           }
         },
         "topIssues": [
@@ -943,10 +945,6 @@
           {
             "issue": "Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
             "resources": 3
-          },
-          {
-            "issue": "Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here",
-            "resources": 1
           }
         ]
       },

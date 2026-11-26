@@ -32,7 +32,7 @@ SET c.name = 'Patient Summaries',
     c.status = 'partial',
     c.profileCount = 7,
     c.tested = 76,
-    c.passed = 75;
+    c.passed = 76;
 
 MERGE (c:EEHRxFCategory {categoryId: 'eprescription'})
 SET c.name = 'ePrescriptions',
@@ -80,7 +80,7 @@ SET c.name = 'Medical Test Results',
     c.status = 'partial',
     c.profileCount = 4,
     c.tested = 71,
-    c.passed = 50;
+    c.passed = 51;
 
 MERGE (c:EEHRxFCategory {categoryId: 'hospital-discharge'})
 SET c.name = 'Discharge Reports',
@@ -92,7 +92,7 @@ SET c.name = 'Discharge Reports',
     c.status = 'partial',
     c.profileCount = 3,
     c.tested = 60,
-    c.passed = 59;
+    c.passed = 60;
 
 MERGE (p:EEHRxFProfile {profileId: 'patient-eu-core'})
 SET p.name = 'Patient (EU core)',
@@ -105,10 +105,10 @@ SET p.name = 'Patient (EU core)',
     p.baseResource = 'Patient',
     p.description = null,
     p.tested = 29,
-    p.passed = 28,
-    p.failed = 1,
-    p.topIssues = ['1x Patient.extension[n]: The extension http://hl7.org/fhir/us/core/StructureDefinition/us-core-race could not be found so is not allowed here'],
-    p.coverage = 'partial';
+    p.passed = 29,
+    p.failed = 0,
+    p.topIssues = [],
+    p.coverage = 'full';
 
 MERGE (p:EEHRxFProfile {profileId: 'practitioner-eu-core'})
 SET p.name = 'Practitioner (EU core)',

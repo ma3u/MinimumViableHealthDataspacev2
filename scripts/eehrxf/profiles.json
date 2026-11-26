@@ -16,6 +16,11 @@
         "contains": "conditional references are only valid inside a transaction Bundle",
         "sources": ["synthea"],
         "reason": "Synthea writes conditional references to practitioners and organisations inside its transaction Bundle. The sample lifts resources out of that Bundle, so the rule cannot hold there; scripts/load_fhir_neo4j.py reads them inside it."
+      },
+      {
+        "contains": "us-core-race could not be found so is not allowed here",
+        "sources": ["synthea"],
+        "reason": "HL7 FHIR Validator 7.0.5 reports this for exactly one Synthea Patient per run, a different one each time, and accepts the same extension on the others: the US Core definition is resolved once and only the first lookup fails. Ignored so a rerun gives the same result; the US Core race extension is Synthea's own and the hub does not load it."
       }
     ]
   },
