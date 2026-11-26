@@ -14,4 +14,5 @@ ui/src/content/localized-images.json
 
 # EEHRxF validation (#1144), written by scripts/eehrxf/validate.py and sample_synthea.py and byte-compared in CI
 scripts/eehrxf/validation-report.json
+scripts/eehrxf/validation-details.json
 scripts/eehrxf/samples/
