@@ -1,0 +1,120 @@
+{
+  "@context": {
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcatap": "http://data.europa.eu/r5r/",
+    "eli": "http://data.europa.eu/eli/ontology#",
+    "ehds": "https://w3id.org/ehds/"
+  },
+  "@id": "https://ehds.mabu.red/federation/members",
+  "@type": "dcat:Catalog",
+  "dct:title": {
+    "@value": "Members of the MVHD SPE federation",
+    "@language": "en"
+  },
+  "dct:description": {
+    "@value": "The secure processing environments of the federation (Regulation (EU) 2025/327, Art. 73; draft SPE implementing act Art. 18(1)), with their membership status under the federation agreement.",
+    "@language": "en"
+  },
+  "dct:publisher": {
+    "@id": "https://ehds.mabu.red/agents/operator",
+    "@type": "foaf:Organization",
+    "foaf:name": "Health MVD Operator"
+  },
+  "dcatap:applicableLegislation": {
+    "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+    "@type": "eli:LegalResource"
+  },
+  "dcat:themeTaxonomy": {
+    "@id": "http://publications.europa.eu/resource/authority/data-theme"
+  },
+  "ehds:accessBody": {
+    "@id": "did:web:medreg.de:hdab",
+    "@type": "foaf:Organization",
+    "foaf:name": "MedReg DE"
+  },
+  "ehds:federationAgreement": {
+    "@id": "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/governance/federation-agreement.md",
+    "dct:hasVersion": "1.0"
+  },
+  "dcat:service": [
+    {
+      "@id": "https://ehds.mabu.red/federation/spe-1",
+      "@type": "dcat:DataService",
+      "dct:identifier": "service:spe-1",
+      "dct:title": {
+        "@value": "SPE-1, the secure processing environment of AlphaKlinik Berlin",
+        "@language": "en"
+      },
+      "dct:publisher": {
+        "@id": "did:web:alpha-klinik.de:participant",
+        "@type": "foaf:Organization",
+        "foaf:name": "AlphaKlinik Berlin"
+      },
+      "dcat:endpointURL": {
+        "@id": "https://ehds.mabu.red/api/federated"
+      },
+      "dcat:endpointDescription": {
+        "@id": "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/architecture/federation.md"
+      },
+      "ehds:servesDatasetId": "dataset:synthea-fhir-r4-spe1",
+      "dct:conformsTo": [
+        {
+          "@id": "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "http://hl7.org/fhir/R4",
+          "@type": "dct:Standard"
+        }
+      ],
+      "ehds:membershipStatus": "admitted",
+      "ehds:admitted": {
+        "@value": "2026-11-26",
+        "@type": "xsd:date"
+      },
+      "ehds:agreementVersion": "1.0",
+      "ehds:attestationRequired": "Attested: confidential workload"
+    },
+    {
+      "@id": "https://ehds.mabu.red/federation/spe-2",
+      "@type": "dcat:DataService",
+      "dct:identifier": "service:spe-2",
+      "dct:title": {
+        "@value": "SPE-2, the secure processing environment of Limburg Medical Centre",
+        "@language": "en"
+      },
+      "dct:publisher": {
+        "@id": "did:web:lmc.nl:clinic",
+        "@type": "foaf:Organization",
+        "foaf:name": "Limburg Medical Centre"
+      },
+      "dcat:endpointURL": {
+        "@id": "https://ehds.mabu.red/api/federated"
+      },
+      "dcat:endpointDescription": {
+        "@id": "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/architecture/federation.md"
+      },
+      "ehds:servesDatasetId": "dataset:synthea-fhir-r4-spe2",
+      "dct:conformsTo": [
+        {
+          "@id": "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "http://hl7.org/fhir/R4",
+          "@type": "dct:Standard"
+        }
+      ],
+      "ehds:membershipStatus": "admitted",
+      "ehds:admitted": {
+        "@value": "2026-11-26",
+        "@type": "xsd:date"
+      },
+      "ehds:agreementVersion": "1.0",
+      "ehds:attestationRequired": "Attested: confidential workload"
+    }
+  ]
+}

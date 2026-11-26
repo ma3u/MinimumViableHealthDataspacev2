@@ -82,6 +82,14 @@ afterEach(() => {
 });
 
 // ── Tests ────────────────────────────────────────────────────────────
+/** Text in the dataset list, not in the federation's register above it. */
+function inDatasets(text: RegExp): HTMLElement[] {
+  const register = screen.queryByTestId("federation-members");
+  return screen
+    .getAllByText(text)
+    .filter((el) => !register || !register.contains(el));
+}
+
 describe("CatalogPage", () => {
   it("renders the page title and description", async () => {
     mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
@@ -115,7 +123,7 @@ describe("CatalogPage", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/AlphaKlinik Berlin/)).toBeInTheDocument();
+    expect(inDatasets(/AlphaKlinik Berlin/)).toHaveLength(1);
     expect(screen.getByText(/CC-BY-4.0/)).toBeInTheDocument();
     // Record count is displayed as a plain number in the Samples column
     expect(screen.getAllByText("100").length).toBeGreaterThan(0);
@@ -309,9 +317,9 @@ describe("CatalogPage", () => {
     });
 
     expect(screen.getByText("OMOP CDM Condition Data")).toBeInTheDocument();
-    expect(screen.getByText(/AlphaKlinik Berlin/)).toBeInTheDocument();
+    expect(inDatasets(/AlphaKlinik Berlin/)).toHaveLength(1);
     // shortPublisher() truncates to first 2 words
-    expect(screen.getByText(/Limburg Medical/)).toBeInTheDocument();
+    expect(inDatasets(/Limburg Medical/)).toHaveLength(1);
   });
 
   it("handles API returning datasets wrapped in an object", async () => {

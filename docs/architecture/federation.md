@@ -81,6 +81,22 @@ true, suppressionReason: "row_level_in_federation" }`, and `/query` says
    is on the audit chain too, and answers 503 when it cannot be recorded. A
    question of one SPE is not federated and has no id.
 
+### Who belongs to the federation
+
+The members are listed in one register, `ui/src/lib/federation-members.ts`
+(ADR-100 decision 5; draft Art. 18(1)): each workspace is a HealthDCAT-AP
+`dcat:DataService` with its operator, its dataset, its membership status
+(`admitted`, `suspended`, `excluded`), the date it was admitted, the
+agreement version and the attestation it needs. The register is public as
+JSON-LD at `/federation/members.jsonld` on the hub and in the static
+documentation site, so no anonymous route is needed (ADR-044), and the PR
+Gate validates it with the official SHACL. `/catalog` shows it to a
+signed-in participant. Each workspace's registration cypher writes the same
+`(:DataService {serviceId: 'service:spe-<n>'})-[:SERVES_DATASET]->(:HealthDataset)`
+into its own graph; a UI unit test keeps the three equal. Admission,
+suspension and exclusion follow the
+[federation agreement](../governance/federation-agreement.md).
+
 ### The same rules on every question
 
 The Federated button on `/query` asks `POST /nlq` with `federated: true`, which
