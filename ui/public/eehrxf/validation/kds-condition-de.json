@@ -6,25 +6,14 @@
   "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
   "baseResource": "Condition",
   "tested": 52,
-  "passed": 20,
-  "warnings": 53,
+  "passed": 51,
+  "warnings": 21,
   "resources": [
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[3]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -72,25 +61,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2009-02-27"
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[4]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -138,25 +124,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2013-09-14"
+        "onsetDateTime": "2013-09-14",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[5]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -204,25 +187,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2015-11-02"
+        "onsetDateTime": "2015-11-02",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[6]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -270,25 +250,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2017-06-20"
+        "onsetDateTime": "2017-06-20",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[7]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -336,25 +313,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2018-04-10"
+        "onsetDateTime": "2018-04-10",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[8]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -402,25 +376,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2020-01-15"
+        "onsetDateTime": "2020-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary-own-copy.json#entry[9]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -468,25 +439,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2021-03-08"
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[3]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -534,25 +502,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2009-02-27"
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[4]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -600,25 +565,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2013-09-14"
+        "onsetDateTime": "2013-09-14",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[5]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -666,25 +628,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2015-11-02"
+        "onsetDateTime": "2015-11-02",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[6]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -732,25 +691,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2017-06-20"
+        "onsetDateTime": "2017-06-20",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[7]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -798,25 +754,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2018-04-10"
+        "onsetDateTime": "2018-04-10",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[8]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -864,25 +817,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2020-01-15"
+        "onsetDateTime": "2020-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P1-patient-summary.json#entry[9]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -930,25 +880,22 @@
         "subject": {
           "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
         },
-        "onsetDateTime": "2021-03-08"
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P2-patient-summary.json#entry[10]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -996,25 +943,22 @@
         "subject": {
           "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
         },
-        "onsetDateTime": "2020-11-30"
+        "onsetDateTime": "2020-11-30",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P2-patient-summary.json#entry[11]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1062,25 +1006,22 @@
         "subject": {
           "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
         },
-        "onsetDateTime": "2021-06-18"
+        "onsetDateTime": "2021-06-18",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P2-patient-summary.json#entry[12]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1128,25 +1069,22 @@
         "subject": {
           "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
         },
-        "onsetDateTime": "2022-01-11"
+        "onsetDateTime": "2022-01-11",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P2-patient-summary.json#entry[13]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1194,25 +1132,22 @@
         "subject": {
           "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
         },
-        "onsetDateTime": "2022-09-27"
+        "onsetDateTime": "2022-09-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P2-patient-summary.json#entry[14]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1260,25 +1195,22 @@
         "subject": {
           "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
         },
-        "onsetDateTime": "2023-02-14"
+        "onsetDateTime": "2023-02-14",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "documents",
       "origin": "P2-patient-summary.json#entry[3]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1326,25 +1258,22 @@
         "subject": {
           "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
         },
-        "onsetDateTime": "1985-01-01"
+        "onsetDateTime": "1985-01-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[24]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1374,25 +1303,22 @@
         "subject": {
           "reference": "Patient/P2"
         },
-        "onsetDateTime": "2014-07-09"
+        "onsetDateTime": "2014-07-09",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[25]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1422,25 +1348,22 @@
         "subject": {
           "reference": "Patient/P2"
         },
-        "onsetDateTime": "2018-10-05"
+        "onsetDateTime": "2018-10-05",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[36]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1470,25 +1393,22 @@
         "subject": {
           "reference": "Patient/fhir-pat-1002"
         },
-        "onsetDateTime": "2023-09-12T11:30:00Z"
+        "onsetDateTime": "2023-09-12T11:30:00Z",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[3]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1518,25 +1438,22 @@
         "subject": {
           "reference": "Patient/P1"
         },
-        "onsetDateTime": "2009-02-27"
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[4]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1566,25 +1483,22 @@
         "subject": {
           "reference": "Patient/P1"
         },
-        "onsetDateTime": "2021-03-08"
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[51]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1614,25 +1528,22 @@
         "subject": {
           "reference": "Patient/patient-2000"
         },
-        "onsetDateTime": "2020-09-01"
+        "onsetDateTime": "2020-09-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[60]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1662,25 +1573,22 @@
         "subject": {
           "reference": "Patient/patient-2008"
         },
-        "onsetDateTime": "2019-02-01"
+        "onsetDateTime": "2019-02-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[61]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1710,25 +1618,22 @@
         "subject": {
           "reference": "Patient/patient-2008"
         },
-        "onsetDateTime": "2023-09-01"
+        "onsetDateTime": "2023-09-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[71]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1758,25 +1663,22 @@
         "subject": {
           "reference": "Patient/pv-pat-001"
         },
-        "onsetDateTime": "2024-03-08"
+        "onsetDateTime": "2024-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[72]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1806,25 +1708,22 @@
         "subject": {
           "reference": "Patient/pv-pat-001"
         },
-        "onsetDateTime": "2024-01-15"
+        "onsetDateTime": "2024-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[76]",
-      "passed": false,
-      "issues": [
-        {
-          "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "passed": true,
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Condition",
@@ -1854,7 +1753,15 @@
         "subject": {
           "reference": "Patient/loader-pat-0001"
         },
-        "onsetDateTime": "2019-04-02T10:00:00+02:00"
+        "onsetDateTime": "2019-04-02T10:00:00+02:00",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -1864,18 +1771,8 @@
       "issues": [
         {
           "severity": "error",
-          "expression": "Condition",
-          "message": "Condition.recordedDate: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "error",
           "expression": "Condition.code",
           "message": "Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
-        },
-        {
-          "severity": "warning",
-          "expression": "Condition",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
         }
       ],
       "counted": true,
@@ -1897,6 +1794,14 @@
         },
         "subject": {
           "reference": "Patient/sparse-pat-0001"
+        },
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
         }
       }
     },

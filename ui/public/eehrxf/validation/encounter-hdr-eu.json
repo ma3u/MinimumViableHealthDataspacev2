@@ -7,18 +7,13 @@
   "baseResource": "Encounter",
   "tested": 31,
   "passed": 31,
-  "warnings": 61,
+  "warnings": 51,
   "resources": [
     {
       "source": "facade",
       "origin": "facade-sample.json#entry[1]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -55,7 +50,15 @@
           "reference": "Patient/P1"
         },
         "period": {
-          "start": "2025-03-14T09:00:00Z"
+          "start": "2025-03-14T09:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "AlphaKlinik Berlin"
@@ -67,11 +70,6 @@
       "origin": "facade-sample.json#entry[22]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -108,7 +106,15 @@
           "reference": "Patient/P2"
         },
         "period": {
-          "start": "2025-10-07T09:00:00Z"
+          "start": "2025-10-07T09:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "Limburg Medical Centre"
@@ -120,11 +126,6 @@
       "origin": "facade-sample.json#entry[23]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -155,7 +156,15 @@
           "reference": "Patient/P2"
         },
         "period": {
-          "start": "2025-03-04T08:00:00Z"
+          "start": "2025-03-04T08:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "Limburg Medical Centre"
@@ -167,11 +176,6 @@
       "origin": "facade-sample.json#entry[2]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -202,7 +206,15 @@
           "reference": "Patient/P1"
         },
         "period": {
-          "start": "2024-09-12T08:00:00Z"
+          "start": "2024-09-12T08:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "AlphaKlinik Berlin"
@@ -214,11 +226,6 @@
       "origin": "facade-sample.json#entry[35]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -249,7 +256,15 @@
           "reference": "Patient/fhir-pat-1002"
         },
         "period": {
-          "start": "2023-09-12T11:00:00Z"
+          "start": "2023-09-12T11:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -258,11 +273,6 @@
       "origin": "facade-sample.json#entry[49]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -288,7 +298,15 @@
           "reference": "Patient/patient-2000"
         },
         "period": {
-          "start": "2025-12-03"
+          "start": "2025-12-03",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -297,11 +315,6 @@
       "origin": "facade-sample.json#entry[50]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -327,7 +340,15 @@
           "reference": "Patient/patient-2000"
         },
         "period": {
-          "start": "2023-01-03"
+          "start": "2023-01-03",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -336,11 +357,6 @@
       "origin": "facade-sample.json#entry[58]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -366,7 +382,15 @@
           "reference": "Patient/patient-2008"
         },
         "period": {
-          "start": "2025-05-24"
+          "start": "2025-05-24",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -374,13 +398,7 @@
       "source": "facade",
       "origin": "facade-sample.json#entry[59]",
       "passed": true,
-      "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        }
-      ],
+      "issues": [],
       "counted": true,
       "resource": {
         "resourceType": "Encounter",
@@ -400,7 +418,15 @@
           "reference": "Patient/patient-2008"
         },
         "period": {
-          "start": "2024-12-18"
+          "start": "2024-12-18",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -409,11 +435,6 @@
       "origin": "facade-sample.json#entry[75]",
       "passed": true,
       "issues": [
-        {
-          "severity": "warning",
-          "expression": "Encounter",
-          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
-        },
         {
           "severity": "warning",
           "expression": "Encounter.class",
@@ -444,7 +465,15 @@
           "reference": "Patient/loader-pat-0001"
         },
         "period": {
-          "start": "2019-04-02T10:00:00+02:00"
+          "start": "2019-04-02T10:00:00+02:00",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },

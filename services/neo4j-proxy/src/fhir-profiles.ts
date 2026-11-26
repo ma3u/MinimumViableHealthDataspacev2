@@ -61,6 +61,12 @@ export const PROFILE_CLAIMS: readonly ProfileClaim[] = [
     resourceType: "Patient",
   },
   {
+    profileId: "kds-medication-statement-de",
+    canonical:
+      "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+    resourceType: "MedicationStatement",
+  },
+  {
     profileId: "kds-medication-request-de",
     canonical:
       "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",

@@ -59,7 +59,15 @@
           "reference": "Patient/P1"
         },
         "period": {
-          "start": "2025-03-14T09:00:00Z"
+          "start": "2025-03-14T09:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "AlphaKlinik Berlin"
@@ -91,7 +99,15 @@
           "reference": "Patient/P1"
         },
         "period": {
-          "start": "2024-09-12T08:00:00Z"
+          "start": "2024-09-12T08:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "AlphaKlinik Berlin"
@@ -128,7 +144,15 @@
         "subject": {
           "reference": "Patient/P1"
         },
-        "onsetDateTime": "2009-02-27"
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -161,7 +185,15 @@
         "subject": {
           "reference": "Patient/P1"
         },
-        "onsetDateTime": "2021-03-08"
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -1005,6 +1037,11 @@
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-p1-A10BA02",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
         "status": "active",
         "medicationCodeableConcept": {
           "coding": [
@@ -1032,17 +1069,7 @@
         ],
         "dosage": [
           {
-            "text": "1-0-1",
-            "doseAndRate": [
-              {
-                "doseQuantity": {
-                  "value": 500,
-                  "unit": "mg",
-                  "system": "http://unitsofmeasure.org",
-                  "code": "mg"
-                }
-              }
-            ]
+            "text": "500 mg, 1-0-1"
           }
         ]
       }
@@ -1052,6 +1079,11 @@
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-p1-C09AA03",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
         "status": "active",
         "medicationCodeableConcept": {
           "coding": [
@@ -1079,17 +1111,7 @@
         ],
         "dosage": [
           {
-            "text": "1-0-0",
-            "doseAndRate": [
-              {
-                "doseQuantity": {
-                  "value": 10,
-                  "unit": "mg",
-                  "system": "http://unitsofmeasure.org",
-                  "code": "mg"
-                }
-              }
-            ]
+            "text": "10 mg, 1-0-0"
           }
         ]
       }
@@ -1151,7 +1173,15 @@
           "reference": "Patient/P2"
         },
         "period": {
-          "start": "2025-10-07T09:00:00Z"
+          "start": "2025-10-07T09:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "Limburg Medical Centre"
@@ -1183,7 +1213,15 @@
           "reference": "Patient/P2"
         },
         "period": {
-          "start": "2025-03-04T08:00:00Z"
+          "start": "2025-03-04T08:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         },
         "serviceProvider": {
           "display": "Limburg Medical Centre"
@@ -1220,7 +1258,15 @@
         "subject": {
           "reference": "Patient/P2"
         },
-        "onsetDateTime": "2014-07-09"
+        "onsetDateTime": "2014-07-09",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -1253,7 +1299,15 @@
         "subject": {
           "reference": "Patient/P2"
         },
-        "onsetDateTime": "2018-10-05"
+        "onsetDateTime": "2018-10-05",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -1845,7 +1899,15 @@
           "reference": "Patient/fhir-pat-1002"
         },
         "period": {
-          "start": "2023-09-12T11:00:00Z"
+          "start": "2023-09-12T11:00:00Z",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -1879,7 +1941,15 @@
         "subject": {
           "reference": "Patient/fhir-pat-1002"
         },
-        "onsetDateTime": "2023-09-12T11:30:00Z"
+        "onsetDateTime": "2023-09-12T11:30:00Z",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -2377,6 +2447,11 @@
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-1002-B01AC06",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
         "status": "active",
         "medicationCodeableConcept": {
           "coding": [
@@ -2404,17 +2479,7 @@
         ],
         "dosage": [
           {
-            "text": "1-0-0",
-            "doseAndRate": [
-              {
-                "doseQuantity": {
-                  "value": 100,
-                  "unit": "mg",
-                  "system": "http://unitsofmeasure.org",
-                  "code": "mg"
-                }
-              }
-            ]
+            "text": "100 mg, 1-0-0"
           }
         ]
       }
@@ -2424,6 +2489,11 @@
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "ms-1002-C07AB07",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
         "status": "active",
         "medicationCodeableConcept": {
           "coding": [
@@ -2451,17 +2521,7 @@
         ],
         "dosage": [
           {
-            "text": "1-0-0",
-            "doseAndRate": [
-              {
-                "doseQuantity": {
-                  "value": 2.5,
-                  "unit": "mg",
-                  "system": "http://unitsofmeasure.org",
-                  "code": "mg"
-                }
-              }
-            ]
+            "text": "2.5 mg, 1-0-0"
           }
         ]
       }
@@ -2506,7 +2566,15 @@
           "reference": "Patient/patient-2000"
         },
         "period": {
-          "start": "2025-12-03"
+          "start": "2025-12-03",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -2530,7 +2598,15 @@
           "reference": "Patient/patient-2000"
         },
         "period": {
-          "start": "2023-01-03"
+          "start": "2023-01-03",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -2564,7 +2640,15 @@
         "subject": {
           "reference": "Patient/patient-2000"
         },
-        "onsetDateTime": "2020-09-01"
+        "onsetDateTime": "2020-09-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -2797,7 +2881,15 @@
           "reference": "Patient/patient-2008"
         },
         "period": {
-          "start": "2025-05-24"
+          "start": "2025-05-24",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -2821,7 +2913,15 @@
           "reference": "Patient/patient-2008"
         },
         "period": {
-          "start": "2024-12-18"
+          "start": "2024-12-18",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -2855,7 +2955,15 @@
         "subject": {
           "reference": "Patient/patient-2008"
         },
-        "onsetDateTime": "2019-02-01"
+        "onsetDateTime": "2019-02-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -2888,7 +2996,15 @@
         "subject": {
           "reference": "Patient/patient-2008"
         },
-        "onsetDateTime": "2023-09-01"
+        "onsetDateTime": "2023-09-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -3326,7 +3442,15 @@
         "subject": {
           "reference": "Patient/pv-pat-001"
         },
-        "onsetDateTime": "2024-03-08"
+        "onsetDateTime": "2024-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -3359,7 +3483,15 @@
         "subject": {
           "reference": "Patient/pv-pat-001"
         },
-        "onsetDateTime": "2024-01-15"
+        "onsetDateTime": "2024-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -3456,7 +3588,15 @@
           "reference": "Patient/loader-pat-0001"
         },
         "period": {
-          "start": "2019-04-02T10:00:00+02:00"
+          "start": "2019-04-02T10:00:00+02:00",
+          "_end": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
         }
       }
     },
@@ -3490,7 +3630,15 @@
         "subject": {
           "reference": "Patient/loader-pat-0001"
         },
-        "onsetDateTime": "2019-04-02T10:00:00+02:00"
+        "onsetDateTime": "2019-04-02T10:00:00+02:00",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
       }
     },
     {
@@ -3760,6 +3908,14 @@
         },
         "subject": {
           "reference": "Patient/sparse-pat-0001"
+        },
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
         }
       }
     },
@@ -4104,12 +4260,25 @@
       "resource": {
         "resourceType": "MedicationStatement",
         "id": "sparse-ms-0001",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"
+          ]
+        },
         "status": "unknown",
         "medicationCodeableConcept": {
           "text": "Colecalciferol"
         },
         "subject": {
           "reference": "Patient/sparse-pat-0001"
+        },
+        "_effectiveDateTime": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
         }
       }
     }

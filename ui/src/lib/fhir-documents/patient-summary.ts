@@ -275,6 +275,16 @@ export function buildPatientSummaryDocument(
     code: codeable(c.code, systemOr(c.system, c.code, SNOMED), c.display),
     subject,
     ...(c.onset ? { onsetDateTime: c.onset } : {}),
+    // When the diagnosis was recorded (MII Kerndatensatz Diagnose). The graph
+    // keeps the onset, a different date, so this one is unknown.
+    _recordedDate: {
+      extension: [
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          valueCode: "unknown",
+        },
+      ],
+    },
   }));
 
   const medications: FhirResource[] = input.medications.map((m) =>

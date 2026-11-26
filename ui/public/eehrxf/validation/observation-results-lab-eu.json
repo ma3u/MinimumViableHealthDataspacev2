@@ -7,7 +7,7 @@
   "baseResource": "Observation",
   "tested": 49,
   "passed": 29,
-  "warnings": 174,
+  "warnings": 186,
   "resources": [
     {
       "source": "documents",
@@ -18,6 +18,11 @@
           "severity": "warning",
           "expression": "Observation",
           "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
         },
         {
           "severity": "warning",
@@ -47,7 +52,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p1-2089-1-2026-08-21"
+            "value": "obs-p1-2089-1-2026-08-21",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -58,6 +75,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -120,6 +142,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -146,7 +173,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p1-2093-3-2026-08-21"
+            "value": "obs-p1-2093-3-2026-08-21",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -157,6 +196,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -219,6 +263,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -245,7 +294,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p1-2339-0-2026-08-21"
+            "value": "obs-p1-2339-0-2026-08-21",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -256,6 +317,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -318,6 +384,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].low",
           "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
         },
@@ -349,7 +420,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p1-33914-3-2026-08-21"
+            "value": "obs-p1-33914-3-2026-08-21",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -360,6 +443,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -416,6 +504,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -442,7 +535,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p1-4548-4-2026-08-21"
+            "value": "obs-p1-4548-4-2026-08-21",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -453,6 +558,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -515,6 +625,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -541,7 +656,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p2-22748-8-2026-09-08"
+            "value": "obs-p2-22748-8-2026-09-08",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -552,6 +679,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -614,6 +746,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -640,7 +777,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p2-33762-6-2026-09-08"
+            "value": "obs-p2-33762-6-2026-09-08",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -651,6 +800,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -713,6 +867,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -739,7 +898,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p2-4548-4-2026-09-08"
+            "value": "obs-p2-4548-4-2026-09-08",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -750,6 +921,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -812,6 +988,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].low",
           "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
         },
@@ -843,7 +1024,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p2-62238-1-2026-09-08"
+            "value": "obs-p2-62238-1-2026-09-08",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -854,6 +1047,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -910,6 +1108,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
         },
@@ -951,7 +1154,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "obs-p2-6301-6-2026-09-08"
+            "value": "obs-p2-6301-6-2026-09-08",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "final",
@@ -962,6 +1177,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -1024,6 +1244,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -1064,7 +1289,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "sandbox-demo-0d3c6a52-1"
+            "value": "sandbox-demo-0d3c6a52-1",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "preliminary",
@@ -1075,6 +1312,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }
@@ -1137,6 +1379,11 @@
         },
         {
           "severity": "warning",
+          "expression": "Observation.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
           "expression": "Observation.referenceRange[0].high",
           "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
         },
@@ -1172,7 +1419,19 @@
         "identifier": [
           {
             "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-            "value": "sandbox-demo-0d3c6a52-2"
+            "value": "sandbox-demo-0d3c6a52-2",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "OBI",
+                  "display": "Observation Instance Identifier"
+                }
+              ]
+            },
+            "assigner": {
+              "display": "EHDS Integration Hub (demo)"
+            }
           }
         ],
         "status": "preliminary",
@@ -1183,6 +1442,11 @@
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                 "code": "laboratory",
                 "display": "Laboratory"
+              },
+              {
+                "system": "http://loinc.org",
+                "code": "26436-6",
+                "display": "Laboratory studies (set)"
               }
             ]
           }

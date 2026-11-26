@@ -411,12 +411,9 @@ describe("toFhirResource", () => {
       dateAsserted: "2026-08-21",
       informationSource: { display: "Medikationsplan (fictional)" },
       reasonCode: [{ text: "Diabetes mellitus type 2" }],
-      dosage: [
-        {
-          text: "1-0-1",
-          doseAndRate: [{ doseQuantity: { value: 500, code: "mg" } }],
-        },
-      ],
+      // The dose rides in the text: a structured dose needs its timing
+      // (MII DosageStructuredRequiresBoth), and the graph keeps none.
+      dosage: [{ text: "500 mg, 1-0-1" }],
     });
   });
 
