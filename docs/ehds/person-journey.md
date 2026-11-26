@@ -12,6 +12,10 @@ what is implemented, what is planned and what is not planned.
 
 [Full screen, every step described](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=primary): the diagram with a panel per step, its user and its page on the static demo and the live app.
 
+[![The person's journey in full screen: ten steps in five lanes, from a paper result to the person's own EHDS record, each marked implemented, partial or planned](../images/screenshots/person-journey-full-screen.jpg)](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=primary)
+
+_The person's journey in full screen, 26 November 2026: ten steps in five lanes (the person, study centre or laboratory, Klarbefund on the phone, doctor and patient record, dataspace in the cloud), each marked implemented, partial or planned. Pick a step for its user, its article and its page. [Open it full screen](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=primary)._
+
 The hub holds synthetic records of fictional people only. The app reads a
 person's own reports and keeps them on their iPhone; it sends them to the
 demo hub only when the person connects it and decides so.
