@@ -51,6 +51,29 @@ export const LAB_REPORT_SYSTEM = "https://ehds.mabu.red/fhir/sid/lab-report";
 /** The Klarbefund report (its UUID) a value was read from. */
 export const KLARBEFUND_REPORT_SYSTEM =
   "https://ehds.mabu.red/fhir/sid/klarbefund-report";
+/**
+ * LOINC's class for laboratory results. The MII Kerndatensatz Laborbefund
+ * wants it next to FHIR's `laboratory` on each result and next to v2-0074
+ * `LAB` on the report, as the shared writer (services/epa-ingest) has it.
+ */
+const LAB_STUDIES = {
+  system: LOINC,
+  code: "26436-6",
+  display: "Laboratory studies (set)",
+};
+const V2_0203 = "http://terminology.hl7.org/CodeSystem/v2-0203";
+/** Who assigns the hub's identifiers: the hub. The MII lab profile requires an assigner. */
+const HUB_ASSIGNER = { display: HUB_ORGANIZATION_NAME };
+/** An identifier with the v2-0203 type the MII lab profile slices on. */
+const typed = (
+  identifier: { system: string; value: string },
+  code: string,
+  display: string,
+) => ({
+  ...identifier,
+  type: { coding: [{ system: V2_0203, code, display }] },
+  assigner: HUB_ASSIGNER,
+});
 const REPORT_TYPE = {
   system: LOINC,
   code: "11502-2",
@@ -177,7 +200,10 @@ export function buildLabReportDocument(
     id: uuid(`observation|${r.id}`),
     meta: { profile: [LAB_PROFILES.observation] },
     ...observationExtensions(r),
-    identifier: [graphIdentifier(r.id)],
+    // The graph node's id, typed as the observation instance (v2-0203 OBI).
+    identifier: [
+      typed(graphIdentifier(r.id), "OBI", "Observation Instance Identifier"),
+    ],
     status: r.status === "preliminary" ? "preliminary" : "final",
     category: [
       {
@@ -188,6 +214,7 @@ export function buildLabReportDocument(
             code: "laboratory",
             display: "Laboratory",
           },
+          LAB_STUDIES,
         ],
       },
     ],
@@ -227,7 +254,21 @@ export function buildLabReportDocument(
         valueReference: { reference: `urn:uuid:${compositionId}` },
       },
     ],
-    identifier: [reportIdentifier],
+    // The report as the hub keeps it (v2-0203 FILL), same system and value as
+    // the Composition's identifier.
+    identifier: [typed(reportIdentifier, "FILL", "Filler Identifier")],
+    // The order the report answers. The graph keeps none, so the reference
+    // says it is unknown; the MII lab profile requires the element.
+    basedOn: [
+      {
+        extension: [
+          {
+            url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+            valueCode: "unknown",
+          },
+        ],
+      },
+    ],
     status,
     category: [
       {
@@ -237,6 +278,7 @@ export function buildLabReportDocument(
             code: "LAB",
             display: "Laboratory",
           },
+          LAB_STUDIES,
         ],
       },
     ],

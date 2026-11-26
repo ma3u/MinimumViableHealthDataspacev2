@@ -1,0 +1,321 @@
+{
+  "profileId": "diagnostic-report-imaging-eu",
+  "name": "DiagnosticReport (EU Imaging)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging",
+  "igPackage": "hl7.fhir.eu.imaging#1.0.0-ballot",
+  "baseResource": "DiagnosticReport",
+  "tested": 3,
+  "passed": 0,
+  "warnings": 5,
+  "resources": [
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[16]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:imaging': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:imaging-report': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.extension:composition' for extension 'http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-img-p1-2026-01-22",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD"
+              }
+            ],
+            "text": "Radiology"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "36643-5"
+            }
+          ],
+          "text": "XR Chest 2 Views"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "effectiveDateTime": "2026-01-22",
+        "issued": "2026-01-22T15:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Radiologie (fictional)"
+          }
+        ],
+        "conclusion": "Lungs clear. Cardiomediastinal silhouette within normal limits. No pleural effusion, no pneumothorax.",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging"
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[43]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:imaging': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:imaging-report': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.extension:composition' for extension 'http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-img-1002-2025-11-18",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD"
+              }
+            ],
+            "text": "Radiology"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34552-0"
+            }
+          ],
+          "text": "Cardiac 2D echo panel"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "effectiveDateTime": "2025-11-18",
+        "issued": "2025-11-18T15:30:00Z",
+        "performer": [
+          {
+            "display": "AlphaKlinik Berlin, Kardiologie (fictional)"
+          }
+        ],
+        "conclusion": "Normal left ventricular size and systolic function. Mild concentric remodelling. No significant valvular disease.",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging"
+          ]
+        }
+      }
+    },
+    {
+      "source": "klarbefund",
+      "origin": "fhir-golden-bundle-dxa.json#entry[2]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.category: minimum required = 2, but only found 1 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "DiagnosticReport.extension: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:imaging': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.category:imaging-report': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport",
+          "message": "Slice 'DiagnosticReport.extension:composition' for extension 'http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition': a matching slice is required, but not found (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot). Note that other slices are allowed in addition to this required slice"
+        },
+        {
+          "severity": "error",
+          "expression": "DiagnosticReport.basedOn[0]",
+          "message": "DiagnosticReport.basedOn:ServiceRequestOrderEuImagingaccession.identifier: minimum required = 1, but only found 0 (from http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging|1.0.0-ballot)"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "DiagnosticReport.presentedForm[0]",
+          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "report-1",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "FILL",
+                  "display": "Filler Identifier"
+                }
+              ]
+            },
+            "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+            "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
+            "assigner": {
+              "display": "epa-ingest (tesseract)"
+            }
+          }
+        ],
+        "basedOn": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD",
+                "display": "Radiology"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "version": "2.83",
+              "code": "38269-7",
+              "display": "Study report Skeletal system DXA"
+            }
+          ],
+          "text": "Körperzusammensetzung (DXA)"
+        },
+        "subject": {
+          "reference": "Patient/example-patient"
+        },
+        "effectiveDateTime": "2026-08-26",
+        "issued": "2026-09-13T12:00:00.000Z",
+        "performer": [
+          {
+            "reference": "Organization/performer-1",
+            "display": "Praxis Dr. Muster"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/obs-1"
+          },
+          {
+            "reference": "Observation/obs-2"
+          },
+          {
+            "reference": "Observation/obs-3"
+          }
+        ],
+        "presentedForm": [
+          {
+            "title": "laborbefund-2026-09-04.pdf"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/imaging/StructureDefinition/DiagnosticReportEuImaging"
+          ]
+        }
+      }
+    }
+  ]
+}

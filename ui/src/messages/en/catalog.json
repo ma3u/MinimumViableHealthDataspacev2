@@ -49,5 +49,16 @@
   "EHDS Art. 53": "EHDS Art. 53",
   "Any": "Any",
   "HealthDCAT-AP Data Model": "HealthDCAT-AP Data Model",
-  "EHDS Art. 77 · HealthDCAT-AP Release 8": "EHDS Art. 77 · HealthDCAT-AP Release 8"
+  "EHDS Art. 77 · HealthDCAT-AP Release 8": "EHDS Art. 77 · HealthDCAT-AP Release 8",
+  "Federation members": "Federation members",
+  "The secure processing environments that answer federated queries, published as HealthDCAT-AP data services. {coordinator} coordinates them; {accessBody} admits and excludes them under the federation agreement.": "The secure processing environments that answer federated queries, published as HealthDCAT-AP data services. {coordinator} coordinates them; {accessBody} admits and excludes them under the federation agreement.",
+  "Register (JSON-LD)": "Register (JSON-LD)",
+  "Federation agreement": "Federation agreement",
+  "Admitted": "Admitted",
+  "Suspended": "Suspended",
+  "Excluded": "Excluded",
+  "Admitted on": "Admitted on",
+  "Agreement": "Agreement",
+  "Required attestation": "Required attestation",
+  "Dataset": "Dataset"
 }

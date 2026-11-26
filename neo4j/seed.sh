@@ -106,6 +106,15 @@ check_clinical_keys() {
     2>/dev/null | tail -1)
   echo "clinical nodes and policies without their key: ${unkeyed:-unknown}"
   [ "$unkeyed" = "0" ] || failed+=("clinical nodes and policies without their key: ${unkeyed:-unknown} (#1222)")
+  # Issue #1218: an Observation's value is a number, never the string the
+  # loader once stored (migrate-observation-values.cypher converts it).
+  local textual
+  textual=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (o:Observation) WHERE o.value IS :: STRING NOT NULL } AS textual;" \
+    2>/dev/null | tail -1)
+  echo "Observation values stored as text: ${textual:-unknown}"
+  [ "$textual" = "0" ] || failed+=("Observation values stored as text: ${textual:-unknown} (#1218)")
 }
 
 check_dataset_publishers() {
@@ -201,6 +210,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   # Generated from the validator's report (#1144); a few hundred statements,
   # so a change to /eehrxf reaches Azure without the full pipeline.
   run_file "$SEED_DIR"/register-eehrxf-profiles.cypher "EEHRxF categories, profiles and validation results (#1144)"
+  run_file "$SEED_DIR"/register-national-profiles.cypher "German profiles (MII Kerndatensatz) and validation results"
   run_file "$SEED_DIR"/seed-audit-provenance.cypher "audit provenance"
   run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"
   run_file "$SEED_DIR"/seed-trust-center.cypher "trust center"
@@ -220,6 +230,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
   run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
   run_file "$SEED_DIR"/migrate-clinical-keys.cypher "clinical nodes keyed by resourceId, lab values with a unit (#1222)"
+  run_file "$SEED_DIR"/migrate-observation-values.cypher "Observation values as numbers (#1218)"
   run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
   run_file "$SEED_DIR"/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
   echo ""
@@ -249,6 +260,7 @@ run_file "$SEED_DIR"/register-dsp-marketplace.cypher "DSP marketplace"
 run_file "$SEED_DIR"/register-fhir-dataset-hdcatap.cypher "FHIR DCAT-AP"
 run_file "$SEED_DIR"/register-fhir-dataset-hdcatap-spe2.cypher "FHIR DCAT-AP SPE2"
 run_file "$SEED_DIR"/register-eehrxf-profiles.cypher "EEHRxF profiles"
+run_file "$SEED_DIR"/register-national-profiles.cypher "German profiles (MII Kerndatensatz)"
 run_file "$SEED_DIR"/register-ehds-credentials.cypher "EHDS credentials"
 run_file "$SEED_DIR"/fhir-to-omop-transform.cypher "FHIR→OMOP transform"
 run_file "$SEED_DIR"/seed-transfer-events.cypher "transfer events"
@@ -283,6 +295,7 @@ run_file "$SEED_DIR"/migrate-fictional-organisations.cypher "real organisations 
 run_file "$SEED_DIR"/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
 run_file "$SEED_DIR"/migrate-dataset-publishers.cypher "every dataset names its publisher Participant (#514)"
 run_file "$SEED_DIR"/migrate-clinical-keys.cypher "clinical nodes keyed by resourceId, lab values with a unit (#1222)"
+run_file "$SEED_DIR"/migrate-observation-values.cypher "Observation values as numbers (#1218)"
 run_file "$SEED_DIR"/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the

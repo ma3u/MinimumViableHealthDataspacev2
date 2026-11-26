@@ -106,11 +106,33 @@ SET o.resourceId = row.id,
     o.display  = row.display,
     o.system   = row.system,
     o.value    = row.value,
+    o.valueQuantity = row.value,
     o.unit     = row.unit,
-    o.category = row.category
+    o.ucumCode = row.ucumCode,
+    o.category = row.category,
+    o.codingSystems  = row.codingSystems,
+    o.codingCodes    = row.codingCodes,
+    o.codingDisplays = row.codingDisplays,
+    o.componentCodes    = row.componentCodes,
+    o.componentDisplays = row.componentDisplays,
+    o.componentValues   = row.componentValues,
+    o.componentUnits    = row.componentUnits,
+    o.componentUcumCodes = row.componentUcumCodes,
+    o.componentAbsentCodes = row.componentAbsentCodes
 WITH o, row WHERE row.patientId <> ''
 MATCH (p:Patient {id: row.patientId})
 MERGE (p)-[:HAS_OBSERVATION]->(o)
+"""
+
+# #1218: an Observation's SNOMED CT codings beside its LOINC code.
+LINK_OBSERVATIONS_SNOMED = """
+UNWIND $rows AS row
+MATCH (o:Observation {id: row.id})
+MERGE (s:SnomedConcept {conceptId: toString(row.code)})
+  ON CREATE SET s.code = row.code, s.name = row.display,
+                s.description = row.display
+  ON MATCH SET s.code = coalesce(s.code, row.code)
+MERGE (o)-[:CODED_BY]->(s)
 """
 
 LINK_OBSERVATIONS_LOINC = """
@@ -190,6 +212,62 @@ FOREACH (_ IN CASE WHEN known IS NULL THEN [1] ELSE [] END |
 
 # ── Bundle parser ─────────────────────────────────────────────────────────────
 
+UCUM = "http://unitsofmeasure.org"
+
+
+def _number(v):
+    """A quantity's value as a number, or None (#1218: it was a string)."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    try:
+        return float(str(v).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _quantity(q):
+    """(value, printed unit, UCUM code) of a FHIR Quantity.
+
+    The unit as the source printed it, and the UCUM code only when the source
+    says it is one (system unitsofmeasure.org); the FHIR facade maps a printed
+    unit without one (#1214)."""
+    q = q or {}
+    printed = (q.get("unit") or q.get("code") or "").strip()
+    ucum = (q.get("code") or "").strip() if q.get("system") == UCUM else ""
+    return _number(q.get("value")), printed, ucum
+
+
+def _codings(concept):
+    """Every coding of a CodeableConcept, LOINC first (#1218)."""
+    codings = [c for c in (concept or {}).get("coding", []) if c.get("code")]
+    return sorted(codings, key=lambda c: "loinc" not in (c.get("system") or "").lower())
+
+
+def _components(r):
+    """An Observation's components as aligned lists (#1218).
+
+    Neo4j keeps no null in a list, so a component without a numeric value is
+    named in componentAbsentCodes rather than given an empty slot."""
+    out = {k: [] for k in ("componentCodes", "componentDisplays", "componentValues",
+                           "componentUnits", "componentUcumCodes", "componentAbsentCodes")}
+    for comp in r.get("component") or []:
+        cs = _codings(comp.get("code"))
+        if not cs:
+            continue
+        value, unit, ucum = _quantity(comp.get("valueQuantity"))
+        if value is None:
+            out["componentAbsentCodes"].append(cs[0]["code"])
+            continue
+        out["componentCodes"].append(cs[0]["code"])
+        out["componentDisplays"].append(cs[0].get("display") or (comp.get("code") or {}).get("text") or "")
+        out["componentValues"].append(value)
+        out["componentUnits"].append(unit)
+        out["componentUcumCodes"].append(ucum)
+    return out
+
+
 def parse_bundle(bundle_path: str, dataset_id: str):
     """Parse a FHIR bundle into typed row lists ready for UNWIND upserts."""
     with open(bundle_path, encoding="utf-8") as f:
@@ -210,6 +288,7 @@ def parse_bundle(bundle_path: str, dataset_id: str):
 
     patients, encounters, conditions, observations, medications, procedures = [], [], [], [], [], []
     snomed_rows, loinc_rows, rxnorm_rows, proc_snomed_rows = [], [], [], []
+    obs_snomed_rows = []
 
     for entry in entries:
         r = entry.get("resource", {})
@@ -271,26 +350,35 @@ def parse_bundle(bundle_path: str, dataset_id: str):
 
         elif rtype == "Observation" and patient_id:
             oid = r["id"]
-            codings = r.get("code", {}).get("coding", [])
-            code = codings[0].get("code", "") if codings else ""
-            display = (
-                codings[0].get("display", r.get("code", {}).get("text", ""))
-                if codings else ""
-            )
-            system = codings[0].get("system", "") if codings else ""
-            vq = r.get("valueQuantity") or {}
+            # #1218: every coding, LOINC first; the first is the node's code.
+            codings = _codings(r.get("code"))
+            text = (r.get("code") or {}).get("text", "")
+            primary = codings[0] if codings else {}
+            code = primary.get("code", "")
+            display = primary.get("display", text) if codings else ""
+            system = primary.get("system", "")
+            value, unit, ucum = _quantity(r.get("valueQuantity"))
             cat_codings = (r.get("category") or [{}])[0].get("coding", [])
             cat = cat_codings[0].get("code", "") if cat_codings else ""
             row = {
                 "id": oid, "name": display or oid,
                 "dateTime": r.get("effectiveDateTime", ""),
                 "code": code, "display": display, "system": system,
-                "value": str(vq.get("value", "")), "unit": vq.get("unit", ""),
+                "value": value, "unit": unit or None, "ucumCode": ucum or None,
                 "category": cat, "patientId": patient_id,
+                "codingSystems": [c.get("system", "") for c in codings],
+                "codingCodes": [c["code"] for c in codings],
+                "codingDisplays": [c.get("display", "") for c in codings],
+                **_components(r),
             }
             observations.append(row)
-            if code and "loinc" in system.lower():
-                loinc_rows.append({"id": oid, "code": code, "display": display})
+            for c in codings:
+                sys_ = (c.get("system") or "").lower()
+                link = {"id": oid, "code": c["code"], "display": c.get("display", display)}
+                if "loinc" in sys_:
+                    loinc_rows.append(link)
+                elif "snomed" in sys_:
+                    obs_snomed_rows.append(link)
 
         elif rtype == "MedicationRequest" and patient_id:
             mid = r["id"]
@@ -338,6 +426,7 @@ def parse_bundle(bundle_path: str, dataset_id: str):
         "patients": patients, "encounters": encounters,
         "conditions": conditions, "snomed_rows": snomed_rows,
         "observations": observations, "loinc_rows": loinc_rows,
+        "obs_snomed_rows": obs_snomed_rows,
         "medications": medications, "rxnorm_rows": rxnorm_rows,
         "procedures": procedures, "proc_snomed_rows": proc_snomed_rows,
     }
@@ -364,6 +453,8 @@ def load_bundle(session, bundle_path: str, dataset_id: str, stats: dict):
                 tx.run(UPSERT_OBSERVATIONS, rows=data["observations"])
                 if data["loinc_rows"]:
                     tx.run(LINK_OBSERVATIONS_LOINC, rows=data["loinc_rows"])
+                if data["obs_snomed_rows"]:
+                    tx.run(LINK_OBSERVATIONS_SNOMED, rows=data["obs_snomed_rows"])
                 stats["Observation"] = stats.get("Observation", 0) + len(data["observations"])
             if data["medications"]:
                 tx.run(UPSERT_MEDICATIONS, rows=data["medications"])

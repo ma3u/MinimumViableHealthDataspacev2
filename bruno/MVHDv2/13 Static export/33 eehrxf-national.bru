@@ -1,0 +1,28 @@
+meta {
+  name: 33 eehrxf-national
+  type: http
+  seq: 33
+}
+
+get {
+  url: {{baseUrl}}/mock/eehrxf_national.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.guides: isArray
+  res.body.summary: isDefined
+}
+
+docs {
+  ui/public/mock/eehrxf_national.json stands in for /api/eehrxf/national in
+  the static build. This request runs against the published GitHub Pages
+  site, which serves the fixture of the last deploy; the validation shape is
+  asserted by 03 Data User/29 against the API.
+}

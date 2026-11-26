@@ -1,0 +1,100 @@
+{
+  "profileId": "medication-dispense-eu",
+  "name": "MedicationDispense (EU MPD)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationDispense-eu-mpd",
+  "igPackage": "hl7.fhir.eu.mpd#1.0.0",
+  "baseResource": "MedicationDispense",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 2,
+  "resources": [
+    {
+      "source": "reference",
+      "origin": "medication-dispense-eu.json",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "MedicationDispense",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "MedicationDispense.medication.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.whocc.no/atc' could not be found, so the code cannot be validated"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "MedicationDispense",
+        "id": "ref-medication-dispense-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "http://hl7.eu/fhir/mpd/StructureDefinition/MedicationDispense-eu-mpd"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MedicationDispense.recorded",
+            "valueDateTime": "2026-03-12T10:35:00+01:00"
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/medication-dispense",
+            "value": "DISP-0001"
+          }
+        ],
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C10AA05",
+              "display": "atorvastatin"
+            }
+          ],
+          "text": "Atorvastatin 20 mg film-coated tablets"
+        },
+        "subject": {
+          "reference": "Patient/P1",
+          "display": "Maria Schmidt (fictional)"
+        },
+        "performer": [
+          {
+            "actor": {
+              "reference": "Organization/alpha-klinik-pharmacy",
+              "display": "AlphaKlinik Berlin pharmacy (fictional)"
+            }
+          }
+        ],
+        "authorizingPrescription": [
+          {
+            "reference": "MedicationRequest/ref-medication-request-1",
+            "display": "Atorvastatin 20 mg daily"
+          }
+        ],
+        "quantity": {
+          "value": 30,
+          "unit": "tablet",
+          "system": "http://standardterms.edqm.eu",
+          "code": "10219000"
+        },
+        "whenHandedOver": "2026-03-12T10:30:00+01:00",
+        "dosageInstruction": [
+          {
+            "text": "One tablet daily in the evening"
+          }
+        ]
+      }
+    }
+  ]
+}

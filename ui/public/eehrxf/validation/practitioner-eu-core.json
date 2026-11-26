@@ -1,0 +1,101 @@
+{
+  "profileId": "practitioner-eu-core",
+  "name": "Practitioner (EU core)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core",
+  "igPackage": "hl7.fhir.eu.base#2.0.1",
+  "baseResource": "Practitioner",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 2,
+  "resources": [
+    {
+      "source": "reference",
+      "origin": "hospital-discharge-report.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Practitioner",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "ref-practitioner-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/practitioner",
+            "value": "PRAC-0001"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "family": "Vogt",
+            "given": ["Lena"],
+            "prefix": ["Dr."]
+          }
+        ],
+        "gender": "female"
+      }
+    },
+    {
+      "source": "reference",
+      "origin": "practitioner-eu-core.json",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Practitioner",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "ref-practitioner-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "http://hl7.eu/fhir/base/StructureDefinition/practitioner-eu-core"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/practitioner",
+            "value": "PRAC-0001"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "family": "Vogt",
+            "given": ["Lena"],
+            "prefix": ["Dr."]
+          }
+        ],
+        "gender": "female"
+      }
+    }
+  ]
+}

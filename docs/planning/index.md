@@ -20,6 +20,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## future/
 
+- [mii-ag-interoperabilitaet-2026-11](future/mii-ag-interoperabilitaet-2026-11.md): the MII working group, its core data set (KDS) and tooling, and what the hub takes from it; first step in PR #1260
 - [issue-4-bsi-c5-production](future/issue-4-bsi-c5-production.md): BSI C5 production audit; #4 closed 2026-10-04 with the demo track done, this track is a future milestone
 - [longevity-community-data-sharing](future/longevity-community-data-sharing.md) — no CVD Fox Insight exists; the behaviour lives in longevity communities. S3 journey deferred here
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers

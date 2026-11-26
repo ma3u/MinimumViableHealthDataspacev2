@@ -201,6 +201,47 @@ MATCH (dist:Distribution)
 MERGE (ds)-[:HAS_DISTRIBUTION]->(dist);
 
 // ---------------------------------------------------------------------------
+// 7d. The workspace as a member of the federation (ADR-100 decision 5)
+//
+// A dcat:DataService serving this workspace's dataset. The register of every
+// member is ui/src/lib/federation-members.ts, published as
+// ui/public/federation/members.jsonld; a unit test keeps these values equal
+// to it. The status changes only by a decision of the access body under
+// docs/governance/federation-agreement.md.
+// ---------------------------------------------------------------------------
+MERGE (svc:DataService {serviceId: 'service:spe-1'})
+  ON CREATE SET
+    svc.title               = 'SPE-1, the secure processing environment of AlphaKlinik Berlin',
+    svc.publisherDid        = 'did:web:alpha-klinik.de:participant',
+    svc.publisherName       = 'AlphaKlinik Berlin',
+    svc.endpointUrl         = 'https://ehds.mabu.red/api/federated',
+    svc.conformsTo          = ['https://ohdsi.github.io/CommonDataModel/cdm54.html', 'http://hl7.org/fhir/R4'],
+    svc.membershipStatus    = 'admitted',
+    svc.admitted            = date('2026-11-26'),
+    svc.agreementVersion    = '1.0',
+    svc.attestationRequired = 'Attested: confidential workload',
+    svc.createdAt           = datetime()
+  ON MATCH SET
+    svc.title               = 'SPE-1, the secure processing environment of AlphaKlinik Berlin',
+    svc.publisherDid        = 'did:web:alpha-klinik.de:participant',
+    svc.publisherName       = 'AlphaKlinik Berlin',
+    svc.endpointUrl         = 'https://ehds.mabu.red/api/federated',
+    svc.conformsTo          = ['https://ohdsi.github.io/CommonDataModel/cdm54.html', 'http://hl7.org/fhir/R4'],
+    svc.membershipStatus    = 'admitted',
+    svc.admitted            = date('2026-11-26'),
+    svc.agreementVersion    = '1.0',
+    svc.attestationRequired = 'Attested: confidential workload',
+    svc.modifiedAt          = datetime();
+
+MATCH (svc:DataService {serviceId: 'service:spe-1'})
+MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-spe1'})
+MATCH (cat:Catalog {catalogId: 'catalog:health-mvd-spe1'})
+MATCH (pub:Organization {organizationId: 'org:health-mvd-operator-spe1'})
+MERGE (svc)-[:SERVES_DATASET]->(ds)
+MERGE (cat)-[:HAS_SERVICE]->(svc)
+MERGE (svc)-[:PUBLISHED_BY]->(pub);
+
+// ---------------------------------------------------------------------------
 // 8. EHDS Purpose Restriction
 // ---------------------------------------------------------------------------
 MERGE (purpose:EhdsPurpose {id: 'purpose:ehds-art53'})

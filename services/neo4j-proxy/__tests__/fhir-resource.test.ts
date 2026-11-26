@@ -108,6 +108,24 @@ describe("toFhirResource", () => {
     expect(rest).toEqual({
       resourceType: "Observation",
       id: "obs-p1-4548-4-2024-09-12",
+      // The graph's id as an OBI identifier, and LOINC's lab class next to
+      // `laboratory`: the MII Kerndatensatz lab profile wants both.
+      identifier: [
+        {
+          type: {
+            coding: [
+              {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                code: "OBI",
+                display: "Observation Instance Identifier",
+              },
+            ],
+          },
+          system: "https://ehds.mabu.red/fhir/sid/graph-observation",
+          value: "obs-p1-4548-4-2024-09-12",
+          assigner: { display: "Minimum Viable Health Dataspace FHIR facade" },
+        },
+      ],
       status: "final",
       category: [
         {
@@ -117,6 +135,11 @@ describe("toFhirResource", () => {
                 "http://terminology.hl7.org/CodeSystem/observation-category",
               code: "laboratory",
               display: "Laboratory",
+            },
+            {
+              system: "http://loinc.org",
+              code: "26436-6",
+              display: "Laboratory studies (set)",
             },
           ],
         },
@@ -388,12 +411,9 @@ describe("toFhirResource", () => {
       dateAsserted: "2026-08-21",
       informationSource: { display: "Medikationsplan (fictional)" },
       reasonCode: [{ text: "Diabetes mellitus type 2" }],
-      dosage: [
-        {
-          text: "1-0-1",
-          doseAndRate: [{ doseQuantity: { value: 500, code: "mg" } }],
-        },
-      ],
+      // The dose rides in the text: a structured dose needs its timing
+      // (MII DosageStructuredRequiresBoth), and the graph keeps none.
+      dosage: [{ text: "500 mg, 1-0-1" }],
     });
   });
 
@@ -459,5 +479,161 @@ describe("R4 dates", () => {
     expect(fhirDate(new neo4j.types.Date(1965, 4, 12))).toBe("1965-04-12");
     expect(fhirInstant("2026-03-04T10:00:00Z")).toBe("2026-03-04T10:00:00Z");
     expect(fhirInstant("2026-03-04")).toBeUndefined();
+  });
+});
+
+// #1218: what the loader now keeps of an Observation comes back in FHIR: the
+// components of a blood pressure panel, every coding, and the UCUM code the
+// source gave beside the printed unit.
+describe("Observation fidelity (#1218)", () => {
+  const panel = {
+    id: "bp-1218",
+    code: "85354-9",
+    system: "http://loinc.org",
+    display: "Blood pressure panel with all children optional",
+    category: "vital-signs",
+    status: "final",
+    dateTime: "2024-05-06T08:00:00+02:00",
+    codingSystems: ["http://loinc.org"],
+    codingCodes: ["85354-9"],
+    codingDisplays: ["Blood pressure panel with all children optional"],
+    componentCodes: ["8462-4", "8480-6"],
+    componentDisplays: ["Diastolic Blood Pressure", "Systolic Blood Pressure"],
+    componentValues: [82, 131],
+    componentUnits: ["mm[Hg]", "mm[Hg]"],
+    componentUcumCodes: ["mm[Hg]", "mm[Hg]"],
+    componentAbsentCodes: [],
+  };
+
+  it("serves both values of a blood pressure panel", () => {
+    const r = toFhirResource("Observation", panel, "p-1");
+    expect(r.valueQuantity).toBeUndefined();
+    expect(r.component).toEqual([
+      {
+        code: {
+          coding: [
+            {
+              system: "http://loinc.org",
+              code: "8462-4",
+              display: "Diastolic Blood Pressure",
+            },
+          ],
+        },
+        valueQuantity: {
+          value: 82,
+          unit: "mm[Hg]",
+          system: "http://unitsofmeasure.org",
+          code: "mm[Hg]",
+        },
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: "http://loinc.org",
+              code: "8480-6",
+              display: "Systolic Blood Pressure",
+            },
+          ],
+        },
+        valueQuantity: {
+          value: 131,
+          unit: "mm[Hg]",
+          system: "http://unitsofmeasure.org",
+          code: "mm[Hg]",
+        },
+      },
+    ]);
+  });
+
+  it("names a component the source sent without a value as unknown", () => {
+    const r = toFhirResource(
+      "Observation",
+      {
+        ...panel,
+        componentCodes: ["8480-6"],
+        componentDisplays: ["Systolic Blood Pressure"],
+        componentValues: [131],
+        componentUnits: ["mm[Hg]"],
+        componentUcumCodes: ["mm[Hg]"],
+        componentAbsentCodes: ["8462-4"],
+      },
+      "p-1",
+    );
+    const comps = r.component as Record<string, unknown>[];
+    expect(comps).toHaveLength(2);
+    expect(comps[1]).toEqual({
+      code: { coding: [{ system: "http://loinc.org", code: "8462-4" }] },
+      dataAbsentReason: {
+        coding: [
+          {
+            system: "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+            code: "unknown",
+          },
+        ],
+      },
+    });
+  });
+
+  it("keeps every coding, the first one first", () => {
+    const r = toFhirResource("Observation", {
+      id: "multi",
+      code: "8480-6",
+      system: "http://loinc.org",
+      display: "Systolic blood pressure",
+      value: 120,
+      unit: "mm[Hg]",
+      codingSystems: [
+        "http://loinc.org",
+        "http://snomed.info/sct",
+        "urn:oid:1.2.276.0.76.5.409",
+      ],
+      codingCodes: ["8480-6", "271649006", "RR-SYS"],
+      codingDisplays: [
+        "Systolic blood pressure",
+        "Systolic blood pressure",
+        "",
+      ],
+    });
+    const coding = (r.code as { coding: { system?: string; code: string }[] })
+      .coding;
+    expect(coding.map((c) => c.code)).toEqual([
+      "8480-6",
+      "271649006",
+      "RR-SYS",
+      "85354-9",
+    ]);
+    expect(coding[1].system).toBe("http://snomed.info/sct");
+  });
+
+  it("uses the UCUM code the source gave, beside the printed unit", () => {
+    const r = toFhirResource("Observation", {
+      id: "u",
+      code: "2345-7",
+      system: "http://loinc.org",
+      value: 95,
+      unit: "mg/dl",
+      ucumCode: "mg/dL",
+    });
+    expect(r.valueQuantity).toEqual({
+      value: 95,
+      unit: "mg/dl",
+      system: "http://unitsofmeasure.org",
+      code: "mg/dL",
+    });
+  });
+
+  it("still serves a stored blood pressure without components as before", () => {
+    const r = toFhirResource("Observation", {
+      resourceId: "bp-seed",
+      code: "55284-4",
+      valueQuantity: 145,
+      valueUnit: "mmHg",
+    });
+    const comps = r.component as Record<string, unknown>[];
+    expect(comps).toHaveLength(2);
+    expect(
+      (comps[0].valueQuantity as Record<string, unknown> | undefined)?.value,
+    ).toBe(145);
   });
 });

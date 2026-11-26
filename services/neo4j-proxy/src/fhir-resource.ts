@@ -1,5 +1,5 @@
 import { claimedProfiles } from "./fhir-profiles.js";
-import { ucumQuantity } from "./ucum.js";
+import { UCUM, ucumQuantity } from "./ucum.js";
 
 // ---------------------------------------------------------------------------
 // A graph node as a FHIR R4 resource (#876, #1144)
@@ -147,9 +147,98 @@ function codeable(
 /**
  * A Quantity: the unit as printed, and its UCUM code beside it only when the
  * unit has one (#1214, ./ucum.ts). An unknown unit stays text, no `system`.
+ * A UCUM code the source gave (the loader's `ucumCode`, #1218) wins over the
+ * mapping, since the source knew what it meant.
  */
-function quantity(value: number, unit: string | undefined): Resource {
+function quantity(
+  value: number,
+  unit: string | undefined,
+  ucum?: string,
+): Resource {
+  if (ucum) {
+    return { value, unit: unit?.trim() || ucum, system: UCUM, code: ucum };
+  }
   return ucumQuantity(value, unit);
+}
+
+/** A list property as strings, or [] (#1218: codings and components). */
+function strings(v: unknown): string[] {
+  const p = plain(v);
+  return Array.isArray(p) ? p.map((x) => (x == null ? "" : String(x))) : [];
+}
+
+/** A list property as numbers; a slot that is not a number is undefined. */
+function numbers(v: unknown): (number | undefined)[] {
+  const p = plain(v);
+  return Array.isArray(p) ? p.map((x) => num(x)) : [];
+}
+
+/**
+ * The codings the loader kept beside the first (#1218), each once and after
+ * the ones `coded` already carries.
+ */
+function moreCodings(p: Props, coded: Resource | undefined): void {
+  if (!coded) return;
+  const systems = strings(p.codingSystems);
+  const codes = strings(p.codingCodes);
+  const displays = strings(p.codingDisplays);
+  const have = coded.coding as { system?: string; code: string }[] | undefined;
+  if (!have || codes.length < 2) return;
+  const seen = new Set(have.map((c) => `${c.system ?? ""}|${c.code}`));
+  for (let i = 0; i < codes.length; i++) {
+    const key = `${systems[i] ?? ""}|${codes[i]}`;
+    if (!codes[i] || seen.has(key)) continue;
+    seen.add(key);
+    have.push(
+      compact({
+        system: systems[i] || undefined,
+        code: codes[i],
+        display: displays[i] || undefined,
+      }) as { system?: string; code: string },
+    );
+  }
+}
+
+const UNKNOWN = {
+  coding: [
+    {
+      system: "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+      code: "unknown",
+    },
+  ],
+};
+
+/**
+ * The components the loader kept (#1218): each LOINC-coded, with its value,
+ * printed unit and UCUM code; a component the source sent without a value
+ * keeps its code and says the value is unknown.
+ */
+function storedComponents(p: Props): Resource[] | undefined {
+  const codes = strings(p.componentCodes);
+  const absent = strings(p.componentAbsentCodes);
+  if (!codes.length && !absent.length) return undefined;
+  const displays = strings(p.componentDisplays);
+  const values = numbers(p.componentValues);
+  const units = strings(p.componentUnits);
+  const ucums = strings(p.componentUcumCodes);
+  const coding = (code: string, display?: string) => ({
+    coding: [compact({ system: LOINC, code, display: display || undefined })],
+  });
+  return [
+    ...codes.map((code, i) => {
+      const v = values[i];
+      return v === undefined
+        ? { code: coding(code, displays[i]), dataAbsentReason: UNKNOWN }
+        : {
+            code: coding(code, displays[i]),
+            valueQuantity: quantity(v, units[i] || undefined, ucums[i]),
+          };
+    }),
+    ...absent.map((code) => ({
+      code: coding(code),
+      dataAbsentReason: UNKNOWN,
+    })),
+  ];
 }
 
 /** A reference to a party the graph knows by name only. */
@@ -334,8 +423,9 @@ function encounter(p: Props, subject: Resource | undefined): Resource {
     typeText,
   );
   const start = fhirDateTime(p.date ?? p.period);
+  const status = pick(p.status, ENCOUNTER_STATUS, "unknown");
   return {
-    status: pick(p.status, ENCOUNTER_STATUS, "unknown"),
+    status,
     class: cls
       ? {
           system: "http://terminology.hl7.org/CodeSystem/v3-ActCode",
@@ -345,7 +435,11 @@ function encounter(p: Props, subject: Resource | undefined): Resource {
       : absent(),
     type: type ? [type] : undefined,
     subject,
-    period: start ? { start } : undefined,
+    // A finished contact has an end (MII Kerndatensatz mii-enc-1); the graph
+    // keeps the day it began, so the end is stated as unknown, not guessed.
+    period: start
+      ? { start, ...(status === "finished" ? { _end: absent() } : {}) }
+      : undefined,
     serviceProvider: named(first(p, "serviceProvider")),
   };
 }
@@ -377,6 +471,9 @@ function condition(p: Props, subject: Resource | undefined): Resource {
       ) ?? absent(),
     subject,
     onsetDateTime: fhirDateTime(p.onsetDate ?? p.onset),
+    // When the diagnosis was recorded (MII Kerndatensatz Diagnose). The graph
+    // keeps the onset, which is a different date, so this one is unknown.
+    _recordedDate: absent(),
   };
 }
 
@@ -415,6 +512,33 @@ const BP_PANELS = new Set([BP_PANEL, "55284-4", "8480-6"]);
 const loincCoding = (code: string) => ({ system: LOINC, code });
 
 /**
+ * Where the facade's own identifiers live. The MII Kerndatensatz lab profile
+ * wants an Observation identifier of type OBI with a system, a value and an
+ * assigner; the graph's resource id is that value, assigned by this hub.
+ */
+export const FACADE_IDENTIFIER_SYSTEM =
+  "https://ehds.mabu.red/fhir/sid/graph-observation";
+const observationIdentifier = (id: string | undefined) =>
+  id
+    ? [
+        {
+          type: {
+            coding: [
+              {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                code: "OBI",
+                display: "Observation Instance Identifier",
+              },
+            ],
+          },
+          system: FACADE_IDENTIFIER_SYSTEM,
+          value: id,
+          assigner: { display: "Minimum Viable Health Dataspace FHIR facade" },
+        },
+      ]
+    : undefined;
+
+/**
  * A blood pressure the graph holds one value of (the seeds write "BP 145/92"
  * as 145 mmHg, the generated seed a systolic value alone): the value is the
  * systolic component and the diastolic is absent, which `bp` allows.
@@ -423,17 +547,7 @@ function bloodPressure(value: number | undefined, unit: string) {
   const component = (code: string, v: number | undefined) => ({
     code: { coding: [loincCoding(code)] },
     ...(v === undefined
-      ? {
-          dataAbsentReason: {
-            coding: [
-              {
-                system:
-                  "http://terminology.hl7.org/CodeSystem/data-absent-reason",
-                code: "unknown",
-              },
-            ],
-          },
-        }
+      ? { dataAbsentReason: UNKNOWN }
       : { valueQuantity: quantity(v, unit) }),
   });
   return [component("8480-6", value), component("8462-4", undefined)];
@@ -456,10 +570,15 @@ function observation(p: Props, subject: Resource | undefined): Resource {
   const unit =
     first(p, "unit", "valueUnit") ?? (vital ? VITAL_SIGNS[code] : undefined);
   const coded = codeable(code, system, first(p, "display", "name"));
+  moreCodings(p, coded);
   if (bp && coded && code !== BP_PANEL) {
     coded.coding = [...(coded.coding as object[]), loincCoding(BP_PANEL)];
   }
   const value = num(p.valueQuantity) ?? num(p.value);
+  const ucum = first(p, "ucumCode");
+  // The components the source sent (#1218); only without them does a blood
+  // pressure fall back to its one stored value as the systolic component.
+  const stored = storedComponents(p);
   const low = num(p.referenceLow);
   const high = num(p.referenceHigh);
   const rangeText = first(p, "referenceText");
@@ -475,6 +594,7 @@ function observation(p: Props, subject: Resource | undefined): Resource {
     extension: sourceKind
       ? [{ url: EXT_SOURCE_KIND, valueCode: sourceKind }]
       : undefined,
+    identifier: observationIdentifier(fhirIdOf(p)),
     status: pick(p.status, OBSERVATION_STATUS, "unknown"),
     category: categoryDisplay
       ? [
@@ -486,6 +606,16 @@ function observation(p: Props, subject: Resource | undefined): Resource {
                 code: category,
                 display: categoryDisplay,
               },
+              // LOINC's class for laboratory results, which the MII lab
+              // profile wants next to FHIR's `laboratory`.
+              ...(category === "laboratory"
+                ? [
+                    {
+                      ...loincCoding("26436-6"),
+                      display: "Laboratory studies (set)",
+                    },
+                  ]
+                : []),
             ],
           },
         ]
@@ -508,7 +638,9 @@ function observation(p: Props, subject: Resource | undefined): Resource {
         ? [absent()]
         : undefined,
     valueQuantity:
-      value === undefined || bp ? undefined : quantity(value, unit),
+      value === undefined || bp || stored
+        ? undefined
+        : quantity(value, unit, ucum),
     referenceRange:
       low !== undefined || high !== undefined || rangeText
         ? [
@@ -519,7 +651,8 @@ function observation(p: Props, subject: Resource | undefined): Resource {
             }),
           ]
         : undefined,
-    component: bp ? bloodPressure(value, unit ?? "mm[Hg]") : undefined,
+    component:
+      stored ?? (bp ? bloodPressure(value, unit ?? "mm[Hg]") : undefined),
   };
 }
 
@@ -628,20 +761,31 @@ function medicationStatement(
       ) ?? absent(),
     subject,
     effectivePeriod: start ? { start } : undefined,
+    // The MII Kerndatensatz requires a time; one the graph does not hold is unknown.
+    _effectiveDateTime: start ? undefined : absent(),
     // The date the medication plan was printed is when it said so.
     dateAsserted: fhirDateTime(p.planPrinted),
     informationSource: named(first(p, "source")),
     reasonCode: reason ? [{ text: reason }] : undefined,
+    // The graph keeps a dose and the plan's text, but no structured schedule.
+    // A structured dose without its timing breaks the German dosage rule
+    // (DosageStructuredRequiresBoth), so the dose travels in the text, ahead
+    // of the plan's own wording ("500 mg, 1-0-1").
     dosage:
       text || dose !== undefined
         ? [
-            compact({
-              text,
-              doseAndRate:
+            {
+              text: [
                 dose === undefined
                   ? undefined
-                  : [{ doseQuantity: quantity(dose, first(p, "doseUnit")) }],
-            }),
+                  : [dose, first(p, "doseUnit")]
+                      .filter((x) => x !== undefined)
+                      .join(" "),
+                text,
+              ]
+                .filter((x) => x !== undefined)
+                .join(", "),
+            },
           ]
         : undefined,
   };

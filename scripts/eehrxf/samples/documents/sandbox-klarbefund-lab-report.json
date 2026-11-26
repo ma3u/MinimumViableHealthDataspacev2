@@ -129,7 +129,29 @@
     "identifier": [
      {
       "system": "https://ehds.mabu.red/fhir/sid/lab-report",
-      "value": "klarbefund-0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19"
+      "value": "klarbefund-0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19",
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+         "code": "FILL",
+         "display": "Filler Identifier"
+        }
+       ]
+      },
+      "assigner": {
+       "display": "EHDS Integration Hub (demo)"
+      }
+     }
+    ],
+    "basedOn": [
+     {
+      "extension": [
+       {
+        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+        "valueCode": "unknown"
+       }
+      ]
      }
     ],
     "status": "preliminary",
@@ -140,6 +162,11 @@
         "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
         "code": "LAB",
         "display": "Laboratory"
+       },
+       {
+        "system": "http://loinc.org",
+        "code": "26436-6",
+        "display": "Laboratory studies (set)"
        }
       ]
      }
@@ -202,7 +229,19 @@
     "identifier": [
      {
       "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-      "value": "sandbox-demo-0d3c6a52-1"
+      "value": "sandbox-demo-0d3c6a52-1",
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+         "code": "OBI",
+         "display": "Observation Instance Identifier"
+        }
+       ]
+      },
+      "assigner": {
+       "display": "EHDS Integration Hub (demo)"
+      }
      }
     ],
     "status": "preliminary",
@@ -213,6 +252,11 @@
         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
         "code": "laboratory",
         "display": "Laboratory"
+       },
+       {
+        "system": "http://loinc.org",
+        "code": "26436-6",
+        "display": "Laboratory studies (set)"
        }
       ]
      }
@@ -290,7 +334,19 @@
     "identifier": [
      {
       "system": "https://ehds.mabu.red/fhir/sid/graph-node",
-      "value": "sandbox-demo-0d3c6a52-2"
+      "value": "sandbox-demo-0d3c6a52-2",
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+         "code": "OBI",
+         "display": "Observation Instance Identifier"
+        }
+       ]
+      },
+      "assigner": {
+       "display": "EHDS Integration Hub (demo)"
+      }
      }
     ],
     "status": "preliminary",
@@ -301,6 +357,11 @@
         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
         "code": "laboratory",
         "display": "Laboratory"
+       },
+       {
+        "system": "http://loinc.org",
+        "code": "26436-6",
+        "display": "Laboratory studies (set)"
        }
       ]
      }

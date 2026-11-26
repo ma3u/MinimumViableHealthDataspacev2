@@ -105,6 +105,14 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s scripts/nedrex -p "test_*.py" -v
 
+      # The link check that guards the Pages deploy (site-links.yml,
+      # pages.yml) fails on a link without the base path, a missing page or a
+      # missing anchor (#1277). Its own tests run on every PR, in seconds.
+      - name: Site link checker works
+        run: |
+          set -euo pipefail
+          python3 -m unittest scripts/test_check_site_links.py -v
+
       # The persona-organised API collection must cover every route and every
       # request must be able to fail (ADR-032, ADR-031).
       - name: API collection covers every route
@@ -126,6 +134,9 @@ jobs:
             --same-as services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
           # AlphaKasse's bonus programme is not health data: DCAT-AP alone (#934)
           python3 scripts/healthdcat-ap/validate.py ui/src/content/catalogues/alphakasse-dcat-ap.json --dcat-ap
+          # The federation's register of members (ADR-100 decision 5, #1236),
+          # pinned to src/lib/federation-members.ts by a UI unit test
+          python3 scripts/healthdcat-ap/validate.py ui/public/federation/members.jsonld
 
       # #404 removed the dead files, exports and dependencies knip found;
       # this keeps it that way. ui/knip.json lists the entry points knip

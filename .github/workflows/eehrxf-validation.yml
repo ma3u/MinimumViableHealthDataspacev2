@@ -11,8 +11,9 @@ name: EEHRxF validation
 # cannot change what the page claims without the claim changing in the same
 # pull request. It also fails when the seed or mock were edited by hand.
 #
-# The same run checks the German ePA profiles in profiles.json's national
-# section (#1172), written to the report but never to /eehrxf. A draft or
+# The same run checks the German profiles in profiles.json's national
+# section (#1172): gematik ePA, KBV MIO and the MII Kerndatensatz. build.py
+# writes the MII ones to their own seed and mock, never to the EEHRxF ones. A draft or
 # ballot guide is report-only; a published one gates: validate.py exits 1
 # when a gating profile fails more resources than the committed report
 # records for it.
@@ -32,6 +33,9 @@ on:
       - "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
       - "neo4j/register-eehrxf-profiles.cypher"
       - "ui/public/mock/eehrxf.json"
+      - "neo4j/register-national-profiles.cypher"
+      - "ui/public/mock/eehrxf_national.json"
+      - "ui/public/eehrxf/validation/**"
       # The sample is cut to the loader's types with Synthea's own flags.
       - "scripts/load_fhir_neo4j.py"
       - "scripts/generate-synthea.sh"
@@ -49,6 +53,9 @@ on:
       - "clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle*.json"
       - "neo4j/register-eehrxf-profiles.cypher"
       - "ui/public/mock/eehrxf.json"
+      - "neo4j/register-national-profiles.cypher"
+      - "ui/public/mock/eehrxf_national.json"
+      - "ui/public/eehrxf/validation/**"
       # The sample is cut to the loader's types with Synthea's own flags.
       - "scripts/load_fhir_neo4j.py"
       - "scripts/generate-synthea.sh"
@@ -77,7 +84,9 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s scripts/eehrxf -p "test_*.py" -v
       - name: Generated files are current
-        run: python3 scripts/eehrxf/build.py --check
+        run: |
+          python3 scripts/eehrxf/reference_examples.py --check
+          python3 scripts/eehrxf/build.py --check
 
   validate:
     name: Report matches a fresh validator run
@@ -102,17 +111,24 @@ jobs:
             ~/.fhir/packages
           key: eehrxf-${{ hashFiles('scripts/eehrxf/profiles.json') }}
       - name: Validate
-        run: python3 scripts/eehrxf/validate.py --report "${RUNNER_TEMP}/validation-report.json" --baseline scripts/eehrxf/validation-report.json
+        run: python3 scripts/eehrxf/validate.py --report "${RUNNER_TEMP}/validation-report.json" --details "${RUNNER_TEMP}/validation-details.json" --baseline scripts/eehrxf/validation-report.json
       - name: Compare with the committed report
         run: |
           set -euo pipefail
           if ! diff -u scripts/eehrxf/validation-report.json "${RUNNER_TEMP}/validation-report.json"; then
-            echo "::error::The committed EEHRxF report differs from a fresh run. Run python3 scripts/eehrxf/validate.py and python3 scripts/eehrxf/build.py, then commit the report, neo4j/register-eehrxf-profiles.cypher and ui/public/mock/eehrxf.json."
+            echo "::error::The committed EEHRxF report differs from a fresh run. Run python3 scripts/eehrxf/validate.py and python3 scripts/eehrxf/build.py, then commit the report and the generated seeds and mocks (neo4j/register-eehrxf-profiles.cypher, neo4j/register-national-profiles.cypher, ui/public/mock/eehrxf.json, ui/public/mock/eehrxf_national.json)."
+            exit 1
+          fi
+          # The viewer on /eehrxf shows these per-resource errors and warnings.
+          if ! diff -q scripts/eehrxf/validation-details.json "${RUNNER_TEMP}/validation-details.json"; then
+            echo "::error::The committed validation details differ from a fresh run. Run python3 scripts/eehrxf/validate.py and python3 scripts/eehrxf/build.py, then commit scripts/eehrxf/validation-details.json and ui/public/eehrxf/validation/."
             exit 1
           fi
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: eehrxf-validation-report
-          path: ${{ runner.temp }}/validation-report.json
+          path: |
+            ${{ runner.temp }}/validation-report.json
+            ${{ runner.temp }}/validation-details.json
           if-no-files-found: warn

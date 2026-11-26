@@ -1,0 +1,180 @@
+{
+  "guides": [
+    {
+      "guideId": "mii-kds-base",
+      "name": "MII Kerndatensatz Basis (Person, Fall, Diagnose, Prozedur)",
+      "publisher": "Medizininformatik-Initiative (MII)",
+      "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+      "status": "published",
+      "home": "https://medizininformatik-initiative.github.io/kerndatensatz-basis/2026.0.1/",
+      "gate": true,
+      "checkedOn": "2026-11-25",
+      "profiles": [
+        {
+          "profileId": "kds-condition-de",
+          "name": "Condition (MII KDS Diagnose)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
+          "baseResource": "Condition",
+          "tested": 52,
+          "passed": 51,
+          "failed": 1,
+          "coverage": "partial",
+          "topIssues": [
+            "1x Condition.code: Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "condition-eu-core",
+            "name": "Condition (EU core)"
+          }
+        },
+        {
+          "profileId": "kds-encounter-de",
+          "name": "Encounter (MII KDS Fall, Kontakt Gesundheitseinrichtung)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
+          "baseResource": "Encounter",
+          "tested": 31,
+          "passed": 30,
+          "failed": 1,
+          "coverage": "partial",
+          "topIssues": [
+            "1x Encounter.class: The Coding provided (http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER) was not found in the value set 'EncounterClassDE'...'http://terminology.hl7.org/CodeSystem/v3-ActCode#EMER ('emergency')'...'http://fhir.de/ValueSe"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "encounter-hdr-eu",
+            "name": "Encounter (EU HDR)"
+          }
+        },
+        {
+          "profileId": "kds-patient-de",
+          "name": "Patient (MII KDS Person)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient",
+          "baseResource": "Patient",
+          "tested": 38,
+          "passed": 35,
+          "failed": 3,
+          "coverage": "partial",
+          "topIssues": [
+            "3x Patient.name[n]: Patient.name:geburtsname.given: max allowed = 0, but found 2 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)",
+            "3x Patient.name[n]: Patient.name:geburtsname.prefix: max allowed = 0, but found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient|2026.0.1)"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "patient-eu-core",
+            "name": "Patient (EU core)"
+          }
+        },
+        {
+          "profileId": "kds-procedure-de",
+          "name": "Procedure (MII KDS Prozedur)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure",
+          "baseResource": "Procedure",
+          "tested": 25,
+          "passed": 24,
+          "failed": 1,
+          "coverage": "partial",
+          "topIssues": [
+            "1x Procedure.code: Constraint failed: sct-ops-1: '...' (defined in https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure)",
+            "1x Procedure.code: Procedure.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)",
+            "1x Procedure: Procedure.performed[x]: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure|2026.0.1)"
+          ],
+          "eehrxfCounterpart": null
+        }
+      ]
+    },
+    {
+      "guideId": "mii-kds-laborbefund",
+      "name": "MII Kerndatensatz Laborbefund",
+      "publisher": "Medizininformatik-Initiative (MII)",
+      "igPackage": "de.medizininformatikinitiative.kerndatensatz.laborbefund#2026.0.3",
+      "status": "published",
+      "home": "https://www.medizininformatik-initiative.de/Kerndatensatz/KDS_Laborbefund_2026/",
+      "gate": true,
+      "checkedOn": "2026-11-25",
+      "profiles": [
+        {
+          "profileId": "kds-lab-diagnostic-report-de",
+          "name": "DiagnosticReport (MII KDS Laborbefund)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab",
+          "baseResource": "DiagnosticReport",
+          "tested": 4,
+          "passed": 4,
+          "failed": 0,
+          "coverage": "full",
+          "topIssues": [],
+          "eehrxfCounterpart": {
+            "profileId": "diagnostic-report-lab-eu",
+            "name": "DiagnosticReport (EU Lab)"
+          }
+        },
+        {
+          "profileId": "kds-lab-observation-de",
+          "name": "Observation (MII KDS Laboruntersuchung)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab",
+          "baseResource": "Observation",
+          "tested": 49,
+          "passed": 28,
+          "failed": 21,
+          "coverage": "partial",
+          "topIssues": [
+            "20x Observation.category[n]: Observation.category.coding: minimum required = 2, but only found 1 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "20x Observation.category[n]: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in ad",
+            "20x Observation: Observation.identifier: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3)",
+            "20x Observation: Slice '...': a matching slice is required, but not found (from https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab|2026.0.3). Note that other slices are allowed in addition to th",
+            "1x Observation.effective.ofType(Period): The Profile '...' definition allows for the type dateTime but found type Period"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "observation-results-lab-eu",
+            "name": "Observation results (EU Lab)"
+          }
+        }
+      ]
+    },
+    {
+      "guideId": "mii-kds-medikation",
+      "name": "MII Kerndatensatz Medikation",
+      "publisher": "Medizininformatik-Initiative (MII)",
+      "igPackage": "de.medizininformatikinitiative.kerndatensatz.medikation#2026.0.1",
+      "status": "published",
+      "home": "https://www.medizininformatik-initiative.de/Kerndatensatz/KDS_Medikation_2026/",
+      "gate": true,
+      "checkedOn": "2026-11-25",
+      "profiles": [
+        {
+          "profileId": "kds-medication-request-de",
+          "name": "MedicationRequest (MII KDS Medikation)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
+          "baseResource": "MedicationRequest",
+          "tested": 47,
+          "passed": 45,
+          "failed": 2,
+          "coverage": "partial",
+          "topIssues": [
+            "2x MedicationRequest.dosageInstruction[n]: Constraint failed: DosageDoseUnitSameCode: '...' (defined in http://ig.fhir.de/igs/medication/StructureDefinition/DosageDE)"
+          ],
+          "eehrxfCounterpart": {
+            "profileId": "medication-request-eu",
+            "name": "MedicationRequest (EU MPD)"
+          }
+        },
+        {
+          "profileId": "kds-medication-statement-de",
+          "name": "MedicationStatement (MII KDS Medikation)",
+          "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+          "baseResource": "MedicationStatement",
+          "tested": 16,
+          "passed": 16,
+          "failed": 0,
+          "coverage": "full",
+          "topIssues": [],
+          "eehrxfCounterpart": null
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "guides": 3,
+    "profiles": 8,
+    "resourcesTested": 262,
+    "resourcesPassed": 233,
+    "passRatePercent": 89
+  }
+}

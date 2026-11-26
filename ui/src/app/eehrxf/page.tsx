@@ -14,6 +14,8 @@ import {
   Layers,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import ValidationViewer from "@/components/eehrxf/ValidationViewer";
+import { BASE_PATH } from "@/lib/static-export";
 import { SignInRequired } from "@/components/SignInRequired";
 import { useT } from "@/lib/i18n/translate";
 
@@ -35,6 +37,9 @@ interface EEHRxFProfile {
   passed: number;
   failed: number;
   topIssues: string[];
+  // Reference examples (scripts/eehrxf/reference_examples.py): shown, never counted
+  referenceTested?: number;
+  referencePassed?: number;
   resourceCount: number;
 }
 
@@ -95,6 +100,44 @@ interface EEHRxFData {
     actUrl: string;
     annexUrl: string;
   } | null;
+}
+
+// German profiles (the MII Kerndatensatz), validated in the same run but
+// never counted as EEHRxF coverage (#1172).
+interface NationalProfile {
+  profileId: string;
+  name: string;
+  canonical: string;
+  baseResource: string;
+  tested: number;
+  passed: number;
+  failed: number;
+  coverage: string;
+  topIssues: string[];
+  eehrxfCounterpart: { profileId: string; name: string } | null;
+}
+
+interface NationalGuide {
+  guideId: string;
+  name: string;
+  publisher: string;
+  igPackage: string;
+  status: string;
+  home: string;
+  gate: boolean;
+  profiles: NationalProfile[];
+}
+
+// What validate.py checked, from ui/public/eehrxf/validation/index.json
+// (scripts/eehrxf/build.py): every source, what it is and how many resources.
+interface ValidatedSource {
+  sourceId: string;
+  label?: string;
+  role?: string;
+  data?: string;
+  generatedBy?: string;
+  files: string[];
+  resources: number;
 }
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -210,7 +253,26 @@ function CoverageMeter({ percent }: { percent: number }) {
   );
 }
 
-function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
+function ViewButton({ onClick }: { onClick: () => void }) {
+  const t = useT("holder");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-xs text-(--text-secondary) underline decoration-dotted hover:text-teal-800 dark:hover:text-teal-300"
+    >
+      {t("View resources")}
+    </button>
+  );
+}
+
+function ProfileRow({
+  profile,
+  onView,
+}: {
+  profile: EEHRxFProfile;
+  onView: (profileId: string) => void;
+}) {
   const t = useT("holder");
   return (
     <div className="py-2 px-3 rounded-sm hover:bg-(--surface-2)/50 transition-colors">
@@ -243,6 +305,22 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
               })}
             </span>
           )}
+          {(profile.referenceTested ?? 0) > 0 && (
+            <span
+              className="text-[11px] text-(--text-secondary) italic"
+              title={t(
+                "A fictional reference example, validated but never counted in coverage",
+              )}
+            >
+              {t("Reference example: {passed}/{tested} pass, not counted", {
+                passed: profile.referencePassed ?? 0,
+                tested: profile.referenceTested ?? 0,
+              })}
+            </span>
+          )}
+          {(profile.tested > 0 || (profile.referenceTested ?? 0) > 0) && (
+            <ViewButton onClick={() => onView(profile.profileId)} />
+          )}
           <StatusBadge status={profile.coverage} />
           {profile.url && (
             <a
@@ -273,7 +351,97 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
   );
 }
 
-function CategoryCard({ category }: { category: EEHRxFCategory }) {
+function NationalGuideCard({
+  guide,
+  onView,
+}: {
+  guide: NationalGuide;
+  onView: (profileId: string) => void;
+}) {
+  const t = useT("holder");
+  return (
+    <div
+      className="bg-(--surface) border border-(--border) rounded-xl p-4"
+      data-testid={`national-guide-${guide.guideId}`}
+    >
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-semibold text-sm text-(--text-primary)">
+          {guide.name}
+        </span>
+        <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm font-mono">
+          {guide.igPackage}
+        </span>
+        <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
+          {guide.gate ? t("Gates CI") : t("Report only")}
+        </span>
+        <a
+          href={guide.home}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300"
+        >
+          <ExternalLink size={12} />
+          {t("Implementation guide")}
+        </a>
+      </div>
+      <p className="text-xs text-(--text-secondary) mt-0.5">
+        {t("Published by {publisher}", { publisher: guide.publisher })}
+      </p>
+      <div className="mt-2 divide-y divide-(--border)">
+        {guide.profiles.map((p) => (
+          <div key={p.profileId} className="py-2">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-(--text-primary) truncate">
+                  {p.name}
+                </div>
+                <div className="text-xs text-(--text-secondary) truncate">
+                  {p.eehrxfCounterpart
+                    ? t("EEHRxF counterpart: {name}", {
+                        name: p.eehrxfCounterpart.name,
+                      })
+                    : t("No EEHRxF counterpart")}
+                </div>
+              </div>
+              {p.tested > 0 && (
+                <span className="text-xs text-(--text-primary) tabular-nums">
+                  {t("{passed}/{tested} pass", {
+                    passed: p.passed,
+                    tested: p.tested,
+                  })}
+                </span>
+              )}
+              {p.tested > 0 && (
+                <ViewButton onClick={() => onView(p.profileId)} />
+              )}
+              <StatusBadge status={p.coverage} />
+            </div>
+            {p.topIssues.length > 0 && (
+              <details className="mt-1">
+                <summary className="text-xs text-(--text-secondary) cursor-pointer">
+                  {t("Why resources fail")}
+                </summary>
+                <ul className="mt-1 ml-4 list-disc text-[11px] text-(--text-secondary) break-words">
+                  {p.topIssues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CategoryCard({
+  category,
+  onView,
+}: {
+  category: EEHRxFCategory;
+  onView: (profileId: string) => void;
+}) {
   const t = useT("holder");
   const [expanded, setExpanded] = useState(category.status !== "none");
 
@@ -357,7 +525,7 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
           </div>
           <div className="divide-y divide-gray-800/50">
             {category.profiles.map((p) => (
-              <ProfileRow key={p.profileId} profile={p} />
+              <ProfileRow key={p.profileId} profile={p} onView={onView} />
             ))}
           </div>
         </div>
@@ -373,6 +541,25 @@ export default function EEHRxFPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [unauthenticated, setUnauthenticated] = useState(false);
+  const [national, setNational] = useState<NationalGuide[]>([]);
+  const [validated, setValidated] = useState<ValidatedSource[]>([]);
+  const [viewing, setViewing] = useState<string | null>(null);
+
+  useEffect(() => {
+    // A static file build.py writes; the page works without it.
+    fetch(`${BASE_PATH}/eehrxf/validation/index.json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setValidated(d?.sources ?? []))
+      .catch(() => setValidated([]));
+  }, []);
+
+  useEffect(() => {
+    // A section of its own; the page works without it.
+    fetchApi("/api/eehrxf/national")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setNational(d?.guides ?? []))
+      .catch(() => setNational([]));
+  }, []);
 
   useEffect(() => {
     fetchApi("/api/eehrxf")
@@ -562,7 +749,7 @@ export default function EEHRxFPage() {
                 </p>
                 <p>
                   {t(
-                    "Sources: the FHIR writer of Klarbefund and epa-ingest, and a seeded Synthea sample of what the hub loads.",
+                    "Sources: four sets of synthetic or fictional data, listed under What we validated.",
                   )}
                 </p>
                 <p className="font-mono text-[11px] break-words flex flex-wrap gap-x-3 gap-y-1">
@@ -610,6 +797,62 @@ export default function EEHRxFPage() {
                   ))}
                 </p>
               </div>
+            )}
+
+            {/* What was validated: every source, synthetic or fictional */}
+            {validated.length > 0 && (
+              <section
+                className="bg-(--surface) border border-(--border) rounded-xl p-5 mb-8 text-xs text-(--text-secondary)"
+                aria-labelledby="eehrxf-validated"
+                data-testid="eehrxf-validated-sources"
+              >
+                <h2
+                  id="eehrxf-validated"
+                  className="font-semibold text-sm text-(--text-primary)"
+                >
+                  {t("What we validated")}
+                </h2>
+                <p className="mt-1 mb-3">
+                  {t(
+                    "All data checked here is synthetic or fictional: no real patient's data is validated or published. Open View resources on any profile to see each resource with its errors and warnings.",
+                  )}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {validated.map((s) => (
+                    <div
+                      key={s.sourceId}
+                      className="border border-(--border) rounded-lg p-3"
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-(--text-primary)">
+                          {s.label ?? s.sourceId}
+                        </span>
+                        <span className="font-mono text-[10px] bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
+                          {s.sourceId}
+                        </span>
+                        <span className="tabular-nums">
+                          {t("{n} resources", { n: s.resources })}
+                        </span>
+                      </div>
+                      {s.role && (
+                        <p className="mt-1 text-(--text-primary)">{s.role}</p>
+                      )}
+                      {s.data && <p className="mt-1">{s.data}</p>}
+                      {s.generatedBy && (
+                        <a
+                          href={`${BLOB}/${s.generatedBy}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 font-mono text-[11px] hover:text-teal-800 dark:hover:text-teal-300"
+                        >
+                          <ExternalLink size={10} />
+                          {s.generatedBy}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* EHDS Timeline */}
@@ -660,9 +903,39 @@ export default function EEHRxFPage() {
             ) : (
               <div className="flex flex-col gap-4">
                 {data?.categories.map((cat) => (
-                  <CategoryCard key={cat.categoryId} category={cat} />
+                  <CategoryCard
+                    key={cat.categoryId}
+                    category={cat}
+                    onView={setViewing}
+                  />
                 ))}
               </div>
+            )}
+
+            {/* German profiles: same resources, never EEHRxF coverage */}
+            {!loading && national.length > 0 && (
+              <section className="mt-8" aria-labelledby="eehrxf-national">
+                <h2
+                  id="eehrxf-national"
+                  className="font-semibold text-sm text-(--text-primary) mb-1"
+                >
+                  {t("German profiles")}
+                </h2>
+                <p className="text-xs text-(--text-secondary) mb-3">
+                  {t(
+                    "Not EEHRxF coverage. The same resources, validated against the core data set of the Medical Informatics Initiative (MII), which the German university hospitals deliver for research. Each profile names the EEHRxF profile it corresponds to.",
+                  )}
+                </p>
+                <div className="flex flex-col gap-3">
+                  {national.map((g) => (
+                    <NationalGuideCard
+                      key={g.guideId}
+                      guide={g}
+                      onView={setViewing}
+                    />
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* Planned guides: tracked, not validated yet */}
@@ -732,6 +1005,13 @@ export default function EEHRxFPage() {
               </section>
             )}
           </>
+        )}
+
+        {viewing && (
+          <ValidationViewer
+            profileId={viewing}
+            onClose={() => setViewing(null)}
+          />
         )}
 
         {/* Reference links */}

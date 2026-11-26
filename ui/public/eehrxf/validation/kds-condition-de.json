@@ -1,0 +1,3226 @@
+{
+  "profileId": "kds-condition-de",
+  "name": "Condition (MII KDS Diagnose)",
+  "section": "national",
+  "canonical": "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
+  "igPackage": "de.medizininformatikinitiative.kerndatensatz.base#2026.0.1",
+  "baseResource": "Condition",
+  "tested": 52,
+  "passed": 51,
+  "warnings": 21,
+  "resources": [
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[3]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-195967001"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "195967001",
+              "display": "Asthma"
+            }
+          ],
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[4]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b70112cd-9b39-889a-b466-d103ff71c95c",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-40055000"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "40055000",
+              "display": "Chronic sinusitis"
+            }
+          ],
+          "text": "Chronic sinusitis"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2013-09-14",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[5]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "493293e4-649c-8d83-a804-7f4f366b9557",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-38341003"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "38341003",
+              "display": "Hypertension"
+            }
+          ],
+          "text": "Hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2015-11-02",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[6]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "f6fd10fa-461c-8167-bae5-5adf56ccf941",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-414916001"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "414916001",
+              "display": "Obesity (BMI 31.2)"
+            }
+          ],
+          "text": "Obesity (BMI 31.2)"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2017-06-20",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[7]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e2a775cd-ee2c-80ea-9be5-1cb0326db1a9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-44054006"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Diabetes mellitus type 2"
+            }
+          ],
+          "text": "Diabetes mellitus type 2"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2018-04-10",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[8]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "049288e3-b192-874c-85a0-b6d986a40bc5",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-73595000"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "73595000",
+              "display": "Stress (finding)"
+            }
+          ],
+          "text": "Stress (finding)"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2020-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary-own-copy.json#entry[9]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b882100d-8d51-86ec-80ca-bfae743d2dc9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-271825005"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "271825005",
+              "display": "Respiratory distress"
+            }
+          ],
+          "text": "Respiratory distress"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[3]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "8b2c9fdd-1e7c-8c8d-b419-c1f4692d9127",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-195967001"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "195967001",
+              "display": "Asthma"
+            }
+          ],
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[4]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b70112cd-9b39-889a-b466-d103ff71c95c",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-40055000"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "40055000",
+              "display": "Chronic sinusitis"
+            }
+          ],
+          "text": "Chronic sinusitis"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2013-09-14",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[5]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "493293e4-649c-8d83-a804-7f4f366b9557",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-38341003"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "38341003",
+              "display": "Hypertension"
+            }
+          ],
+          "text": "Hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2015-11-02",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[6]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "f6fd10fa-461c-8167-bae5-5adf56ccf941",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-414916001"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "414916001",
+              "display": "Obesity (BMI 31.2)"
+            }
+          ],
+          "text": "Obesity (BMI 31.2)"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2017-06-20",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[7]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e2a775cd-ee2c-80ea-9be5-1cb0326db1a9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-44054006"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Diabetes mellitus type 2"
+            }
+          ],
+          "text": "Diabetes mellitus type 2"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2018-04-10",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[8]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "049288e3-b192-874c-85a0-b6d986a40bc5",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-73595000"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "73595000",
+              "display": "Stress (finding)"
+            }
+          ],
+          "text": "Stress (finding)"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2020-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P1-patient-summary.json#entry[9]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b882100d-8d51-86ec-80ca-bfae743d2dc9",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p1-271825005"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "271825005",
+              "display": "Respiratory distress"
+            }
+          ],
+          "text": "Respiratory distress"
+        },
+        "subject": {
+          "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
+        },
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[10]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "f50711d2-afb4-8ba5-b969-8ad25d05ec29",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p2-53741008"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "53741008",
+              "display": "Coronary artery disease"
+            }
+          ],
+          "text": "Coronary artery disease"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "onsetDateTime": "2020-11-30",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[11]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b8306fd6-5408-8bda-a44a-84779f2b89c3",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p2-73430006"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "73430006",
+              "display": "Sleep apnea"
+            }
+          ],
+          "text": "Sleep apnea"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "onsetDateTime": "2021-06-18",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[12]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "92a40ccb-bd7e-8bc5-a582-4d1ec32a66e0",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p2-44054006"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Type 2 diabetes mellitus"
+            }
+          ],
+          "text": "Type 2 diabetes mellitus"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "onsetDateTime": "2022-01-11",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[13]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "ce82b985-d790-8efe-8504-cf8b20f13cee",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p2-90560007"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "90560007",
+              "display": "Gout"
+            }
+          ],
+          "text": "Gout"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "onsetDateTime": "2022-09-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[14]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "d16f278d-f080-8764-a47f-18b5b9094b0f",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p2-84114007"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "84114007",
+              "display": "Heart failure (stage B)"
+            }
+          ],
+          "text": "Heart failure (stage B)"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "onsetDateTime": "2023-02-14",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-patient-summary.json#entry[3]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "a4ef4f3a-44ca-8e16-9e5d-53882becbcf3",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+            "value": "cond-p2-77176002"
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "77176002",
+              "display": "Smoker"
+            }
+          ],
+          "text": "Smoker"
+        },
+        "subject": {
+          "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
+        },
+        "onsetDateTime": "1985-01-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[24]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p2-13644009",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "13644009"
+            }
+          ],
+          "text": "Hypercholesterolaemia"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "onsetDateTime": "2014-07-09",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[25]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p2-13645005",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "13645005"
+            }
+          ],
+          "text": "Chronic obstructive pulmonary disease"
+        },
+        "subject": {
+          "reference": "Patient/P2"
+        },
+        "onsetDateTime": "2018-10-05",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[36]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "fhir-cond-3002",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "38341003"
+            }
+          ],
+          "text": "Essential hypertension"
+        },
+        "subject": {
+          "reference": "Patient/fhir-pat-1002"
+        },
+        "onsetDateTime": "2023-09-12T11:30:00Z",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[3]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p1-195967001",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "195967001"
+            }
+          ],
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "onsetDateTime": "2009-02-27",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[4]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-p1-271825005",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "271825005"
+            }
+          ],
+          "text": "Respiratory distress"
+        },
+        "subject": {
+          "reference": "Patient/P1"
+        },
+        "onsetDateTime": "2021-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[51]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2000-40930008",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "40930008"
+            }
+          ],
+          "text": "Hypothyroidism"
+        },
+        "subject": {
+          "reference": "Patient/patient-2000"
+        },
+        "onsetDateTime": "2020-09-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[60]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2008-38341003",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "38341003"
+            }
+          ],
+          "text": "Essential Hypertension"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "onsetDateTime": "2019-02-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[61]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2008-73211009",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006"
+            }
+          ],
+          "text": "Type 2 Diabetes"
+        },
+        "subject": {
+          "reference": "Patient/patient-2008"
+        },
+        "onsetDateTime": "2023-09-01",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[71]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "pv-pat-001-tendon-rupture",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "415749005"
+            }
+          ],
+          "text": "Rupture of tendon"
+        },
+        "subject": {
+          "reference": "Patient/pv-pat-001"
+        },
+        "onsetDateTime": "2024-03-08",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[72]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "pv-pat-001-uti",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "68566005"
+            }
+          ],
+          "text": "Urinary tract infectious disease"
+        },
+        "subject": {
+          "reference": "Patient/pv-pat-001"
+        },
+        "onsetDateTime": "2024-01-15",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[76]",
+      "passed": true,
+      "issues": [],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "loader-cond-0001",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "195662009"
+            }
+          ],
+          "text": "Acute viral pharyngitis (disorder)"
+        },
+        "subject": {
+          "reference": "Patient/loader-pat-0001"
+        },
+        "onsetDateTime": "2019-04-02T10:00:00+02:00",
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "facade",
+      "origin": "facade-sample.json#entry[83]",
+      "passed": false,
+      "issues": [
+        {
+          "severity": "error",
+          "expression": "Condition.code",
+          "message": "Condition.code.coding: minimum required = 1, but only found 0 (from https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose|2026.0.1)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "sparse-cond-0001",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "code": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/sparse-pat-0001"
+        },
+        "_recordedDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "source": "reference",
+      "origin": "hospital-discharge-report.json#entry[3]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "ref-condition-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "233604007",
+              "display": "Pneumonia"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9"
+        },
+        "encounter": {
+          "reference": "urn:uuid:18feeb35-0097-56d4-9bb7-8170a99702cf"
+        },
+        "onsetDateTime": "2026-03-01",
+        "recordedDate": "2026-03-02"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[0]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "60d4a20b-8d9d-82ca-0d97-eb59cac723b0",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "224299000",
+              "display": "Received higher education (finding)"
+            }
+          ],
+          "text": "Received higher education (finding)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:484024be-e131-dfae-aaeb-330d4bdcb87b"
+        },
+        "onsetDateTime": "1960-08-20T07:03:46+01:00",
+        "recordedDate": "1960-08-20T07:03:46+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[10]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e1bc67b1-606e-3c44-6fac-831b65eb24da",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Diabetes mellitus type 2 (disorder)"
+            }
+          ],
+          "text": "Diabetes mellitus type 2 (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:9185c480-4f26-450d-f438-ec52fbf48125"
+        },
+        "onsetDateTime": "1989-12-09T06:33:09+01:00",
+        "recordedDate": "1989-12-09T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[11]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "d08ce3a5-b85d-58c0-74bb-704fefd209c5",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "80394007",
+              "display": "Hyperglycemia (disorder)"
+            }
+          ],
+          "text": "Hyperglycemia (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:53c67d64-594c-24e6-e82e-bc32f9495818"
+        },
+        "onsetDateTime": "1990-12-15T06:33:09+01:00",
+        "recordedDate": "1990-12-15T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[12]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "def002f0-a040-7540-7ca0-106c18ef71bb",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "302870006",
+              "display": "Hypertriglyceridemia (disorder)"
+            }
+          ],
+          "text": "Hypertriglyceridemia (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:53c67d64-594c-24e6-e82e-bc32f9495818"
+        },
+        "onsetDateTime": "1990-12-15T06:33:09+01:00",
+        "recordedDate": "1990-12-15T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[13]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e3552846-e917-1c3b-062a-e17a7418bb15",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "431856006",
+              "display": "Chronic kidney disease stage 2 (disorder)"
+            }
+          ],
+          "text": "Chronic kidney disease stage 2 (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:09e99d0a-e5ba-49b0-4c19-8be905300de7"
+        },
+        "onsetDateTime": "1992-07-25T07:33:09+02:00",
+        "abatementDateTime": "2004-10-09T09:32:38+02:00",
+        "recordedDate": "1992-07-25T07:33:09+02:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[14]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "83d40c3d-8ef1-d373-ec68-60c2196d703d",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "90781000119102",
+              "display": "Microalbuminuria due to type 2 diabetes mellitus (disorder)"
+            }
+          ],
+          "text": "Microalbuminuria due to type 2 diabetes mellitus (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:09e99d0a-e5ba-49b0-4c19-8be905300de7"
+        },
+        "onsetDateTime": "1992-07-25T07:33:09+02:00",
+        "recordedDate": "1992-07-25T07:33:09+02:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[15]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "4bb29e4a-f247-f24c-5894-098a262c0d4e",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "414545008",
+              "display": "Ischemic heart disease (disorder)"
+            }
+          ],
+          "text": "Ischemic heart disease (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:1218a5ad-ec3a-fb32-0638-04edc70e148e"
+        },
+        "onsetDateTime": "1995-01-13T06:33:09+01:00",
+        "recordedDate": "1995-01-13T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[16]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "1e1da41f-863a-efc2-87f3-dd42661a4f97",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "274531002",
+              "display": "Abnormal findings diagnostic imaging heart+coronary circulat (finding)"
+            }
+          ],
+          "text": "Abnormal findings diagnostic imaging heart+coronary circulat (finding)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:9d9876e3-2288-bb8f-bef9-28f7c038e813"
+        },
+        "onsetDateTime": "1995-01-31T00:06:25+01:00",
+        "recordedDate": "1995-01-31T00:06:25+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[17]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "87d88146-abd5-6c77-bddc-4114536e071e",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "399261000",
+              "display": "History of coronary artery bypass grafting (situation)"
+            }
+          ],
+          "text": "History of coronary artery bypass grafting (situation)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:1b0a7269-d371-7b0a-7603-159518db7491"
+        },
+        "onsetDateTime": "1995-02-23T11:10:39+01:00",
+        "recordedDate": "1995-02-23T11:10:39+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[18]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "1562d6f4-4e65-0aad-8991-9557c3b0299d",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "433144002",
+              "display": "Chronic kidney disease stage 3 (disorder)"
+            }
+          ],
+          "text": "Chronic kidney disease stage 3 (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:c9525d96-bddf-53ee-d49c-66c6953b9131"
+        },
+        "onsetDateTime": "1997-09-27T07:33:09+02:00",
+        "abatementDateTime": "2004-10-09T09:32:38+02:00",
+        "recordedDate": "1997-09-27T07:33:09+02:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[19]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "7da78f1c-14ac-57ce-6c0d-3992a194778a",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "157141000119108",
+              "display": "Proteinuria due to type 2 diabetes mellitus (disorder)"
+            }
+          ],
+          "text": "Proteinuria due to type 2 diabetes mellitus (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:c9525d96-bddf-53ee-d49c-66c6953b9131"
+        },
+        "onsetDateTime": "1997-09-27T07:33:09+02:00",
+        "recordedDate": "1997-09-27T07:33:09+02:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[1]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "b582d9db-8dc6-d7d3-22ae-77832027c1d7",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "40055000",
+              "display": "Chronic sinusitis (disorder)"
+            }
+          ],
+          "text": "Chronic sinusitis (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:75cfcd73-d1e4-d1b5-d1c9-5f4f4ab4946c"
+        },
+        "onsetDateTime": "1965-06-07T06:33:09+01:00",
+        "recordedDate": "1965-06-07T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[2]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "20e1f895-e211-e934-797c-6a32459e7929",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "162864005",
+              "display": "Body mass index 30+ - obesity (finding)"
+            }
+          ],
+          "text": "Body mass index 30+ - obesity (finding)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:9c15e2f6-d97b-d267-375a-ed9030946079"
+        },
+        "onsetDateTime": "1970-09-05T06:33:09+01:00",
+        "recordedDate": "1970-09-05T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[3]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "8a5a8655-9239-1bb2-cd19-8c6435de7477",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "59621000",
+              "display": "Essential hypertension (disorder)"
+            }
+          ],
+          "text": "Essential hypertension (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:f1b3655a-9155-ff62-ffc0-9c5b7335492d"
+        },
+        "onsetDateTime": "1973-09-08T06:33:09+01:00",
+        "recordedDate": "1973-09-08T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[4]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "13955772-7b55-b49d-0312-1ca8b21ff944",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "15777000",
+              "display": "Prediabetes"
+            }
+          ],
+          "text": "Prediabetes"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:f1b3655a-9155-ff62-ffc0-9c5b7335492d"
+        },
+        "onsetDateTime": "1973-09-08T06:33:09+01:00",
+        "recordedDate": "1973-09-08T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[5]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "0fd485b0-f97a-c7c5-2983-b5e0a6340e04",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "271737000",
+              "display": "Anemia (disorder)"
+            }
+          ],
+          "text": "Anemia (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:f1b3655a-9155-ff62-ffc0-9c5b7335492d"
+        },
+        "onsetDateTime": "1973-09-08T06:33:09+01:00",
+        "recordedDate": "1973-09-08T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[6]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "8d09deab-b018-10b2-5e33-a3f78c9bc0b8",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "5689008",
+              "display": "Chronic periodontitis"
+            }
+          ],
+          "text": "Chronic periodontitis"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:2175053f-98c6-8148-d703-175371bba219"
+        },
+        "onsetDateTime": "1975-10-04T06:33:09+01:00",
+        "abatementDateTime": "2007-03-31T08:33:08+02:00",
+        "recordedDate": "1975-10-04T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[7]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "acca1c77-56ef-1e96-ef74-713c2057d002",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "237602007",
+              "display": "Metabolic syndrome X (disorder)"
+            }
+          ],
+          "text": "Metabolic syndrome X (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:610f09c1-7432-e7c7-1afb-2b69218d44d6"
+        },
+        "onsetDateTime": "1980-10-18T06:33:09+01:00",
+        "recordedDate": "1980-10-18T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[8]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e6814ea6-0343-bd58-0125-1be5b839dbec",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "431855005",
+              "display": "Chronic kidney disease stage 1 (disorder)"
+            }
+          ],
+          "text": "Chronic kidney disease stage 1 (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:9185c480-4f26-450d-f438-ec52fbf48125"
+        },
+        "onsetDateTime": "1989-12-09T06:33:09+01:00",
+        "abatementDateTime": "2004-10-09T09:32:38+02:00",
+        "recordedDate": "1989-12-09T06:33:09+01:00"
+      }
+    },
+    {
+      "source": "synthea",
+      "origin": "synthea-sample.json#entry[9]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Condition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Condition",
+        "id": "671260ea-c19e-5ba2-89df-ec2106854d46",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "127013003",
+              "display": "Disorder of kidney due to diabetes mellitus (disorder)"
+            }
+          ],
+          "text": "Disorder of kidney due to diabetes mellitus (disorder)"
+        },
+        "subject": {
+          "reference": "urn:uuid:0bc43445-9c16-6d2d-9b66-1cf7c9147c58"
+        },
+        "encounter": {
+          "reference": "urn:uuid:9185c480-4f26-450d-f438-ec52fbf48125"
+        },
+        "onsetDateTime": "1989-12-09T06:33:09+01:00",
+        "recordedDate": "1989-12-09T06:33:09+01:00"
+      }
+    }
+  ]
+}

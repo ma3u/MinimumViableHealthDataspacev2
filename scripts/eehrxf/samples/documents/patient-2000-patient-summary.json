@@ -279,7 +279,15 @@
     "subject": {
      "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
     },
-    "onsetDateTime": "2020-09-01"
+    "onsetDateTime": "2020-09-01",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -312,6 +320,22 @@
     },
     "subject": {
      "reference": "urn:uuid:ddebefac-7d41-82d6-83ed-2e04ca55a4e2"
+    },
+    "_authoredOn": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    },
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
     }
    }
   },

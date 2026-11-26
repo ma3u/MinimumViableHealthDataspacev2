@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import MermaidDiagram from "@/components/MermaidDiagram";
+import FederationMembers from "@/components/spe/FederationMembers";
 import {
   type CatalogLanguage,
   type MetadataLanguage,
@@ -388,6 +389,9 @@ function CatalogContent() {
             {t("National EHDS rules →")}
           </Link>
         </div>
+
+        {/* The federation's register of members (ADR-100 decision 5) */}
+        <FederationMembers />
 
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">

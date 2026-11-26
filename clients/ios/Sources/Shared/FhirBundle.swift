@@ -52,6 +52,18 @@ public enum FhirWriter {
   /// uses the same database.
   public static let ncbiTaxonomySystem = "http://www.ncbi.nlm.nih.gov/taxonomy"
 
+  /// LOINC's class for laboratory results. The MII Kerndatensatz Laborbefund
+  /// wants it next to FHIR's `laboratory` on every lab Observation, and next
+  /// to v2-0074 `LAB` on a laboratory report. Same as `LAB_STUDIES` in
+  /// services/epa-ingest.
+  static func labStudies() -> JSON { loinc("26436-6", "Laboratory studies (set)") }
+
+  /// Where the identifiers this writer assigns live, as `IDENTIFIER_BASE` in
+  /// services/epa-ingest. They name this transcription of a result or
+  /// report, not the lab's own numbers, which are not on what we read.
+  public static let identifierBase = "https://ehds.mabu.red/fhir/sid"
+  static let v2_0203 = "http://terminology.hl7.org/CodeSystem/v2-0203"
+
   /// Everything the writer needs that is not in the values themselves.
   public struct ReportMeta: Sendable, Equatable {
     /// Logical patient id used in the bundle. Never a real insurance number.
@@ -188,6 +200,25 @@ public enum FhirWriter {
     let status = status(for: source.kind)
     let subject: JSON = ["reference": .string("Patient/\(meta.patientId)")]
 
+    // Who assigned the identifiers below: this writer, named as the
+    // Provenance names it. The MII lab profiles require an assigner on each.
+    let assigner: JSON = ["display": .string("epa-ingest (\(source.extractor))")]
+    func identifier(_ type: String, _ display: String, _ part: String) -> JSON {
+      let kind = part.split(separator: "/").first.map(String.init) ?? part
+      return .array([
+        [
+          "type": [
+            "coding": .array([
+              ["system": .string(v2_0203), "code": .string(type), "display": .string(display)]
+            ])
+          ],
+          "system": .string("\(identifierBase)/epa-ingest-\(kind)"),
+          "value": .string(uuidV5("\(now)|\(source.sourceDocument)|\(part)")),
+          "assigner": assigner,
+        ]
+      ])
+    }
+
     // The laboratory or practice that printed the report, as printed. The
     // German lab profiles want the performer as a reference (#1172), so the
     // printed name becomes an Organization in the bundle, and the reference
@@ -200,11 +231,19 @@ public enum FhirWriter {
       .array([["reference": "Organization/performer-1", "display": .string($0)]])
     }
 
+    // Withheld, and saying so (data-absent-reason `masked`): FHIR's way to
+    // state that a value exists and is kept back for privacy. The EU core
+    // Patient requires a name and a birth date; none is invented.
+    let masked: JSON = [
+      "extension": .array([["url": .string(dataAbsentReason), "valueCode": "masked"]])
+    ]
     // No name, no insurance number, no birth date: this bundle is an extraction
     // artefact, and the ePA already knows who its owner is.
     let patient: JSON = [
       "resourceType": "Patient",
       "id": .string(meta.patientId),
+      "name": .array([masked]),
+      "_birthDate": masked,
     ]
 
     let docRef: JSON = [
@@ -229,17 +268,20 @@ public enum FhirWriter {
       var observation: JSON = [
         "resourceType": "Observation",
         "id": .string("obs-\(index + 1)"),
+        // One per transcribed value (v2-0203 OBI), required by the MII lab profile.
+        "identifier": identifier("OBI", "Observation Instance Identifier", "observation/\(index + 1)"),
         "status": .string(status),
         "extension": .array(provenanceExtensions(source: source, value: value)),
         "category": .array([
           [
-            "coding": .array([
+            "coding": .array(
               [
-                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                "code": .string(category(value)),
-                "display": .string(categoryDisplay[category(value)] ?? ""),
-              ]
-            ])
+                [
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": .string(category(value)),
+                  "display": .string(categoryDisplay[category(value)] ?? ""),
+                ]
+              ] + (category(value) == "laboratory" ? [labStudies()] : []))
           ]
         ]),
         // A quantity LOINC does not code gets a CodeableConcept with `text`
@@ -311,9 +353,27 @@ public enum FhirWriter {
     // A report whose every value is an ECG measurement is an ECG.
     let ecg = isElectrocardiogram(values)
     let kind = ecg ? nil : reportKind(values)
+    // A laboratory report proper: no ECG and none of the other report kinds.
+    let labReport = !ecg && kind == nil
     var report: JSON = [
       "resourceType": "DiagnosticReport",
       "id": "report-1",
+      // The report as this writer issued it (v2-0203 FILL, the filler's
+      // number): the lab's own report number is not on what we read.
+      "identifier": identifier("FILL", "Filler Identifier", "report/1"),
+      // The order the report answers. A printed report does not carry it, so
+      // the reference says it is unknown rather than inventing one; the MII
+      // lab profile requires the element.
+      "basedOn": .array([
+        [
+          "extension": .array([
+            [
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "unknown",
+            ]
+          ])
+        ]
+      ]),
       "status": .string(status),
       "category": .array([
         [
@@ -331,7 +391,7 @@ public enum FhirWriter {
                 "code": .string(kind?.section ?? "LAB"),
                 "display": .string(kind?.sectionDisplay ?? "Laboratory"),
               ]
-          ])
+          ] + (labReport ? [labStudies()] : []))
         ]
       ]),
       "code": {
@@ -352,9 +412,62 @@ public enum FhirWriter {
       "issued": .string(now),
     ]
     if let performer { report["performer"] = performer }
-    report["result"] = .array(
-      observations.map { ["reference": .string("Observation/\($0["id"]?.stringValue ?? "")")] })
+    // A laboratory report's results are its laboratory values: a weight or a
+    // blood pressure printed on the same sheet stays in the bundle, linked by
+    // the Provenance, but is not a lab result (the HL7 Europe lab report).
+    let results: [JSON] = zip(values, observations)
+      .filter { value, _ in !labReport || category(value) == "laboratory" }
+      .map { _, o in ["reference": .string("Observation/\(o["id"]?.stringValue ?? "")")] }
+    report["result"] = .array(results)
     report["presentedForm"] = .array([["title": .string(source.sourceDocument)]])
+
+    // A laboratory report travels as the EU laboratory report: a document
+    // whose Composition comes first, carries the report's identifier and
+    // type, and lists the results; the DiagnosticReport points back to it
+    // (the R5 extension the HL7 Europe guide uses on R4). Other kinds stay
+    // collections. Same as services/epa-ingest.
+    var composition: JSON? = nil
+    if labReport {
+      let reportIdentifier = report["identifier"]
+      var first: JSON = [:]
+      if case let .array(ids)? = reportIdentifier, let id = ids.first {
+        first = ["system": id["system"] ?? .null, "value": id["value"] ?? .null]
+      }
+      var typeCoding: JSON = .null
+      if case let .array(codings)? = report["code"]?["coding"], let c = codings.first {
+        typeCoding = c
+      }
+      composition = [
+        "resourceType": "Composition",
+        "id": "composition-1",
+        "identifier": first,
+        "status": .string(status),
+        "type": ["coding": .array([typeCoding])],
+        "subject": subject,
+        "date": .string(now),
+        "author": performer ?? .array([["display": assigner["display"] ?? .null]]),
+        "title": .string(meta.title ?? "Laboratory report"),
+        "section": .array([
+          [
+            "title": "Laboratory results",
+            "code": ["coding": .array([labStudies()])],
+            // The section in words, as a reader without FHIR sees it.
+            "text": [
+              "status": "generated",
+              "div": .string(
+                narrative(values.filter { category($0) == "laboratory" }.map { $0.raw.label })),
+            ],
+            "entry": .array(results),
+          ]
+        ]),
+      ]
+      report["extension"] = .array([
+        [
+          "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+          "valueReference": ["reference": "Composition/composition-1"],
+        ]
+      ])
+    }
 
     let provenance: JSON = [
       "resourceType": "Provenance",
@@ -402,7 +515,23 @@ public enum FhirWriter {
     // The Organization last, so every other entry keeps the position, and so
     // the fullUrl, it had before there was one.
     let resources =
-      [patient, docRef, report] + observations + [provenance] + (organization.map { [$0] } ?? [])
+      (composition.map { [$0] } ?? []) + [patient, docRef, report] + observations + [provenance]
+      + (organization.map { [$0] } ?? [])
+    var entries: [(fullUrl: String, resource: JSON)] = resources.enumerated().map { index, resource in
+      ("urn:uuid:" + uuidV5("\(now)|\(source.sourceDocument)|entry/\(index)"), resource)
+    }
+    // In a document every reference resolves to an entry's fullUrl: a relative
+    // `Type/id` cannot be matched against a urn:uuid (FHIR R4, Bundle,
+    // resolving references). A collection keeps the relative references.
+    if composition != nil {
+      var urls: [String: String] = [:]
+      for e in entries {
+        if let type = e.resource["resourceType"]?.stringValue, let id = e.resource["id"]?.stringValue {
+          urls["\(type)/\(id)"] = e.fullUrl
+        }
+      }
+      entries = entries.map { ($0.fullUrl, withFullUrls($0.resource, urls)) }
+    }
     return [
       "resourceType": "Bundle",
       // The bundle's own identity, named like its entries.
@@ -410,21 +539,44 @@ public enum FhirWriter {
         "system": "urn:ietf:rfc:3986",
         "value": .string("urn:uuid:" + uuidV5("\(now)|\(source.sourceDocument)|bundle")),
       ],
-      "type": "collection",
+      "type": composition != nil ? "document" : "collection",
       "timestamp": .string(now),
-      "entry": .array(
-        // A urn:uuid must be a UUID (#1144). Named by the report it comes from
-        // (timestamp, source document) and the entry's position, so the same
-        // report gives the same bundle, and the same UUID as
-        // services/epa-ingest. No patient or resource id goes into SHA-1.
-        resources.enumerated().map { index, resource in
-          [
-            "fullUrl": .string(
-              "urn:uuid:" + uuidV5("\(now)|\(source.sourceDocument)|entry/\(index)")),
-            "resource": resource,
-          ]
-        }),
+      // A urn:uuid must be a UUID (#1144). Named by the report it comes from
+      // (timestamp, source document) and the entry's position, so the same
+      // report gives the same bundle, and the same UUID as
+      // services/epa-ingest. No patient or resource id goes into SHA-1.
+      "entry": .array(entries.map { ["fullUrl": .string($0.fullUrl), "resource": $0.resource] }),
     ]
+  }
+
+  static let dataAbsentReason = "http://hl7.org/fhir/StructureDefinition/data-absent-reason"
+
+  /// Every `reference` that names an entry by `Type/id`, as that entry's fullUrl.
+  static func withFullUrls(_ value: JSON, _ urls: [String: String]) -> JSON {
+    switch value {
+    case let .array(items): return .array(items.map { withFullUrls($0, urls) })
+    case let .object(pairs):
+      return .object(
+        pairs.map { pair in
+          if pair.key == "reference", let ref = pair.value.stringValue, let url = urls[ref] {
+            return (key: pair.key, value: .string(url))
+          }
+          return (key: pair.key, value: withFullUrls(pair.value, urls))
+        })
+    default: return value
+    }
+  }
+
+  /// A section's narrative: the printed labels of its results, as a list.
+  /// Same as `narrative` in services/epa-ingest.
+  static func narrative(_ labels: [String]) -> String {
+    let escape = { (text: String) in
+      text.replacingOccurrences(of: "&", with: "&amp;")
+        .replacingOccurrences(of: "<", with: "&lt;")
+        .replacingOccurrences(of: ">", with: "&gt;")
+    }
+    return "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul>"
+      + labels.map { "<li>\(escape($0))</li>" }.joined() + "</ul></div>"
   }
 
   /// Namespace of the bundle entries' `fullUrl`s, the same constant as

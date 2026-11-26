@@ -275,6 +275,16 @@ export function buildPatientSummaryDocument(
     code: codeable(c.code, systemOr(c.system, c.code, SNOMED), c.display),
     subject,
     ...(c.onset ? { onsetDateTime: c.onset } : {}),
+    // When the diagnosis was recorded (MII Kerndatensatz Diagnose). The graph
+    // keeps the onset, a different date, so this one is unknown.
+    _recordedDate: {
+      extension: [
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          valueCode: "unknown",
+        },
+      ],
+    },
   }));
 
   const medications: FhirResource[] = input.medications.map((m) =>
@@ -315,7 +325,29 @@ export function buildPatientSummaryDocument(
             m.display,
           ),
           subject,
-          ...(m.date ? { authoredOn: m.date } : {}),
+          // The EU prescription (MPD) wants the date and the prescriber. The
+          // graph keeps no prescriber and not always a date, so the document
+          // says it does not know, as the FHIR facade does.
+          ...(m.date
+            ? { authoredOn: m.date }
+            : {
+                _authoredOn: {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      valueCode: "unknown",
+                    },
+                  ],
+                },
+              }),
+          requester: {
+            extension: [
+              {
+                url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                valueCode: "unknown",
+              },
+            ],
+          },
           ...(m.dosage ? { dosageInstruction: [{ text: m.dosage }] } : {}),
         },
   );

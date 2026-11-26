@@ -53,7 +53,8 @@ class Filters(unittest.TestCase):
 
         collection = {"resourceType": "Bundle", "type": "collection", "entry": [{"resource": {"resourceType": "Patient"}}]}
         self.assertTrue(validate.matches_filter(doc("11502-2"), "laboratory-report-bundle"))
-        self.assertTrue(validate.matches_filter(collection, "laboratory-report-bundle"))
+        # The writer's other report kinds are collections, no EU lab report.
+        self.assertFalse(validate.matches_filter(collection, "laboratory-report-bundle"))
         self.assertFalse(validate.matches_filter(doc("60591-5"), "laboratory-report-bundle"))
 
     def test_unknown_filter_is_an_error(self):
@@ -197,7 +198,11 @@ class Config(unittest.TestCase):
 
 class LabBundleFilter(unittest.TestCase):
     def test_a_bundle_counts_as_lab_only_with_a_lab_report_in_it(self):
-        lab = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "LAB"}]}]}
+        lab = {
+            "resourceType": "DiagnosticReport",
+            "category": [{"coding": [{"code": "LAB"}]}],
+            "code": {"coding": [{"code": "11502-2"}]},
+        }
         ecg = {"resourceType": "DiagnosticReport", "category": [{"coding": [{"code": "EC"}]}]}
         self.assertTrue(
             validate.matches_filter({"resourceType": "Bundle", "entry": [{"resource": lab}]}, "laboratory-bundle")
@@ -205,6 +210,38 @@ class LabBundleFilter(unittest.TestCase):
         self.assertFalse(
             validate.matches_filter({"resourceType": "Bundle", "entry": [{"resource": ecg}]}, "laboratory-bundle")
         )
+
+
+class LabReportFilter(unittest.TestCase):
+    def test_a_lab_report_needs_category_lab_and_loinc_11502_2(self):
+        def dr(cat, code):
+            return {"category": [{"coding": [{"code": cat}]}], "code": {"coding": [{"code": code}]}}
+
+        self.assertTrue(validate.matches_filter(dr("LAB", "11502-2"), "laboratory-report"))
+        # A CGM summary sits in v2-0074 LAB but is no laboratory report.
+        self.assertFalse(validate.matches_filter(dr("LAB", "107930-0"), "laboratory-report"))
+        self.assertFalse(validate.matches_filter(dr("EC", "11502-2"), "laboratory-report"))
+
+
+class ReferenceExamples(unittest.TestCase):
+    def test_a_reference_example_is_reported_but_never_counted(self):
+        cfg = {"validator": {}}
+        profile = {"profileId": "practitioner-eu-core", "ig": "base", "canonical": "c"}
+        igs = {"base": {"package": "hl7.fhir.eu.base", "version": "2.0.1", "status": "STU 2"}}
+        sources = {"reference": {}, "facade": {}}
+        index = {"a.json": ("practitioner-eu-core", "reference", "x"), "b.json": ("practitioner-eu-core", "facade", "y")}
+        outcomes = {"a.json": [], "b.json": [{"severity": "error", "details": {"text": "boom"}}]}
+        r = validate.profile_results(cfg, igs, [profile], sources, index, outcomes)["practitioner-eu-core"]
+        self.assertEqual((r["tested"], r["passed"], r["failed"]), (1, 0, 1))
+        self.assertEqual(r["bySource"]["reference"], {"tested": 1, "passed": 1})
+
+    def test_the_committed_examples_are_current(self):
+        import subprocess
+
+        rc = subprocess.run(
+            [sys.executable, str(Path(validate.HERE) / "reference_examples.py"), "--check"], capture_output=True
+        ).returncode
+        self.assertEqual(rc, 0, "run python3 scripts/eehrxf/reference_examples.py")
 
 
 class FacadeSource(unittest.TestCase):
@@ -285,6 +322,66 @@ class NationalStaysOffTheEehrxfPage(unittest.TestCase):
         for p in nat["profiles"]:
             self.assertNotIn(p["profileId"], text)
             self.assertNotIn(p["canonical"], text)
+
+
+
+class NationalOutputs(unittest.TestCase):
+    """The German guides marked onPage (the MII Kerndatensatz) get a seed and a mock of their own."""
+
+    def setUp(self):
+        self.cfg = validate.load_config()
+        self.report = json.loads(build.REPORT.read_text(encoding="utf-8"))
+        self.n = build.national_model(self.cfg, self.report)
+
+    def test_every_on_page_profile_and_no_other_is_in_the_national_outputs(self):
+        text = build.national_cypher(self.n) + json.dumps(build.national_mock(self.n))
+        nat = validate.national(self.cfg)
+        for p in nat["profiles"]:
+            if nat["igs"][p["ig"]].get("onPage"):
+                self.assertIn(p["profileId"], text)
+                self.assertIn(p["canonical"], text)
+            else:
+                self.assertNotIn(p["profileId"], text)
+
+    def test_the_national_outputs_name_no_real_organisation_of_the_flag_policy(self):
+        # .claude/rules/code-style.md: gematik only behind NEXT_PUBLIC_DEMO_TK.
+        text = build.national_cypher(self.n) + json.dumps(build.national_mock(self.n))
+        self.assertNotIn("gematik", text.lower())
+
+    def test_every_counterpart_is_an_eehrxf_profile_of_the_same_resource(self):
+        eehrxf = {p["profileId"]: p for p in self.cfg["profiles"]}
+        for p in validate.national(self.cfg)["profiles"]:
+            cp = p.get("eehrxfCounterpart")
+            if cp is None:
+                continue
+            self.assertIn(cp, eehrxf, p["profileId"])
+            self.assertEqual(eehrxf[cp]["baseResource"], p["baseResource"], p["profileId"])
+
+    def test_every_national_guide_names_its_publisher(self):
+        for key, ig in validate.national(self.cfg)["igs"].items():
+            self.assertTrue(ig.get("publisher"), key)
+
+    def test_the_mii_kerndatensatz_is_validated(self):
+        packages = {g["igPackage"].split("#")[0] for g in self.n["guides"]}
+        for module in ("base", "laborbefund", "medikation"):
+            self.assertIn(f"de.medizininformatikinitiative.kerndatensatz.{module}", packages)
+
+    def test_mock_sums_match_the_profiles(self):
+        mock = build.national_mock(self.n)
+        profiles = [p for g in mock["guides"] for p in g["profiles"]]
+        self.assertEqual(mock["summary"]["profiles"], len(profiles))
+        self.assertEqual(mock["summary"]["resourcesTested"], sum(p["tested"] for p in profiles))
+        for p in profiles:
+            self.assertEqual(p["passed"] + p["failed"], p["tested"])
+            self.assertEqual(p["coverage"], build.coverage(p["tested"], p["passed"]))
+
+    def test_an_unknown_counterpart_stops_the_build(self):
+        cfg = json.loads(json.dumps(self.cfg))
+        nat = cfg["national"]
+        on_page = next(p for p in nat["profiles"] if nat["igs"][p["ig"]].get("onPage"))
+        on_page["eehrxfCounterpart"] = "no-such-profile"
+        with self.assertRaises(SystemExit):
+            build.national_model(cfg, self.report)
 
 
 if __name__ == "__main__":

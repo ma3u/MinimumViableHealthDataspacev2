@@ -16,6 +16,17 @@ The decisions are [ADR-037](../ADRs/ADR-037-secure-processing-environment-confid
 (start on demand). The operator's step-by-step is the runbook
 [SPE attestation on Azure](../knowledge/runbooks/spe-attestation-azure.md).
 
+> **Our position on the draft implementing act.** The Commission's draft
+> (Ares(2026)10903532) builds an SPE as a copy per data permit: a new
+> instance, a staging area, an upload by the access body, and a deletion to
+> prove, for every permit. That makes SPEs expensive to run, and it leaves
+> out what data spaces already have: organisational and workload identities,
+> eIDAS 2.0 and machine-readable permits. The hub builds zero trust instead, with
+> one attested workspace per data holder, and each permit as a governed view,
+> a key and a log scope inside it ([ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md), accepted). Section 11 lists the
+> clear points we build first. Our feedback to the Commission is in
+> [#1225](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1225).
+
 ## 1. The idea in one paragraph
 
 Each of the two data holders has a **workspace**: SPE-1 for AlphaKlinik
@@ -147,8 +158,10 @@ Each group has three containers, built from
   `emptyDir` volume `work`.
 - **`neo4j`**: [Neo4j 5.26](https://neo4j.com/release-notes/database/neo4j-5/) Community, [1.5 vCPU](../../scripts/azure/aci/spe-workspace.template.json#L126) and 4 GiB, store in the
   `emptyDir` volume `neo4j-data`, Bolt with TLS required, HTTP off. Neo4j is
-  **a workspace per permit, not a long-lived store** ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision) decision 3): it
-  holds the data only in memory and on ephemeral storage inside the TEE.
+  **not a long-lived store**: it holds the data only in memory and on
+  ephemeral storage inside the TEE. There is one workspace per data holder,
+  and each permit is scoped inside it, not given a workspace of its own
+  ([ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md), which supersedes [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision) decision 3).
 - **`spe-ingest`** (sidecar): loads the extract, applies
   [`neo4j/init-schema.cypher`](../../neo4j/init-schema.cypher) and the SPE's HealthDCAT-AP registration,
   deletes the plaintext, records the attestation, and stays up.
@@ -260,7 +273,46 @@ and what each phase prints; read it before the first run. Two phases protect
 themselves: `--extracts` refuses to re-key while Trustee holds keys unless
 `--rekey`, and `--trustee` keeps a resource policy that Trustee already holds.
 
-## 11. What is not done yet
+## 11. Zero trust instead of a copy per permit
+
+[ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md) sets out what the hub builds next, and why it departs from the
+draft act's copy per permit.
+
+**What changes.**
+
+| Draft act                                                       | The hub, with ADR-101                                                                                        |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| A new instance and staging area per permit (Art. 2(4), 3, 4)    | One attested workspace per data holder; each permit is a governed view, a key and a log scope inside it      |
+| The access body uploads the data into each instance (Art. 4(3)) | The holder's extract is sealed once and decrypted only inside its attested workspace                         |
+| Verification by documentation and audit (Art. 5)                | Verification on every request: the person, the organisation (DCP credential) and the workload (attestation)  |
+| Data-science and collaboration tools in every instance (Art. 6) | An interactive workspace only where the permit asks for one, reading the view, never a copy                  |
+| Delete the instance within six months (Art. 8)                  | At the permit's end, access stops and its key is destroyed; the holder's data stays where it is              |
+| Strong authentication of persons only (Art. 10(4))              | Persons through an EUDI Wallet or the identity provider; organisations and workloads with their own identity |
+
+**Zero trust** means that nothing is trusted because of where it runs or who
+operates it ([NIST SP 800-207](https://csrc.nist.gov/pubs/sp/800/207/final)). Every request is checked against the permit on
+three identities, and the workload's identity is its hardware attestation.
+That is also how the hub reads Art. 5(2): verification throughout the
+permit, not once at the start.
+
+**The clear points first**, in this order:
+
+1. per-permit keys, revoked and destroyed at the permit's end ([#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833));
+2. the permit's ODRL policy enforced as a governed view inside the workspace
+   (cohort, variables, purpose, aggregates or record level, k, the
+   [Art. 71](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_71) opt-out);
+3. small counts masked inside the workspace ([ADR-100](../ADRs/ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md) step 4);
+4. organisation and workload identities from a federation CA and DCP
+   credentials ([ADR-100](../ADRs/ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md) step 3);
+5. EUDI Wallet sign-in bound to SPE access;
+6. a write-once store for the security-relevant logs.
+
+**What it costs in trust.** Two permits in one workspace share a TEE, so
+the separation between them is logical (views, keys, logs), not hardware. An
+access body that requires hardware separation for a permit can still start a
+second workspace for it; ADR-101 makes that the exception.
+
+## 12. What is not done yet
 
 - **The access body does not yet run its own Trustee.** Trustee's shares sit
   in the hub's subscription, so the subscription owner could read them. For
@@ -283,13 +335,15 @@ Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774
 [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716),
 [#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833).
 
-## 12. The decisions, in order
+## 13. The decisions, in order
 
-| ADR                                                                                               | Decision                                                                              | Status                |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------- |
-| [ADR-037](../ADRs/ADR-037-secure-processing-environment-confidential-computing.md)                | Confidential containers with remote attestation, not trust in the operator            | Accepted              |
-| [ADR-052](../ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                                 | AKS with Kata and Azure Attestation                                                   | Superseded by ADR-068 |
-| [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) | CNCF Confidential Containers, a Trustee the access body runs, Neo4j loaded per permit | Accepted (2026-10-30) |
-| [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)                   | Two workspaces as ACI confidential containers; the policy hash is HOST_DATA           | Accepted (2026-11-02) |
-| [ADR-072](../ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                      | Stopped by default, started by a federated query, stopped after 30 idle minutes       | Accepted (2026-11-02) |
-| [ADR-073](../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)                                 | The SEV-SNP TCB is checked against a minimum per component                            | Proposed              |
+| ADR                                                                                               | Decision                                                                                | Status                                     |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [ADR-037](../ADRs/ADR-037-secure-processing-environment-confidential-computing.md)                | Confidential containers with remote attestation, not trust in the operator              | Accepted                                   |
+| [ADR-052](../ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                                 | AKS with Kata and Azure Attestation                                                     | Superseded by ADR-068                      |
+| [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) | CNCF Confidential Containers, a Trustee the access body runs, Neo4j loaded per permit   | Accepted; decision 3 superseded by ADR-101 |
+| [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)                   | Two workspaces as ACI confidential containers; the policy hash is HOST_DATA             | Accepted (2026-11-02)                      |
+| [ADR-072](../ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                      | Stopped by default, started by a federated query, stopped after 30 idle minutes         | Accepted (2026-11-02)                      |
+| [ADR-073](../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)                                 | The SEV-SNP TCB is checked against a minimum per component                              | Proposed                                   |
+| [ADR-100](../ADRs/ADR-100-the-proxy-coordinates-a-federation-of-attested-workspaces.md)           | The proxy coordinates a federation of attested workspaces                               | Accepted (2026-11-25)                      |
+| [ADR-101](../ADRs/ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md)                    | Zero trust, one workspace per holder, a permit as a governed view and a key, not a copy | Accepted (2026-11-26)                      |

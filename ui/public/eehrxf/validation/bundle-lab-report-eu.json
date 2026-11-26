@@ -1,0 +1,3705 @@
+{
+  "profileId": "bundle-lab-report-eu",
+  "name": "Bundle (EU Lab Report)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab",
+  "igPackage": "hl7.fhir.eu.laboratory#2.1.0",
+  "baseResource": "Bundle",
+  "tested": 4,
+  "passed": 4,
+  "warnings": 127,
+  "resources": [
+    {
+      "source": "documents",
+      "origin": "P1-lab-report.json",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[0].resource/*Composition/1cd44f68-13b6-8124-93bc-fce2115db273*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[10].resource/*Provenance/6bbeafe2-04c0-847c-a5ab-b6b847b904ae*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[1].resource/*Patient/80ba9a7f-1428-80e7-887e-ecbdf01ddaa9*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/d923a886-1a38-8ec2-9a23-2ec1e7885816*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/d923a886-1a38-8ec2-9a23-2ec1e7885816*/.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/d923a886-1a38-8ec2-9a23-2ec1e7885816*/.extension[0].value.ofType(Reference)",
+          "message": "Found multiple matching profiles for urn:uuid:1cd44f68-13b6-8124-93bc-fce2115db273 among choices: http://hl7.org/fhir/5.0/StructureDefinition/profile-Composition|0.1.0, http://hl7.org/fhir/StructureDefinition/Composition|4.0.1"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/583b854e-f7ce-826f-8565-59fbd3f1bbef*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/583b854e-f7ce-826f-8565-59fbd3f1bbef*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/583b854e-f7ce-826f-8565-59fbd3f1bbef*/.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/583b854e-f7ce-826f-8565-59fbd3f1bbef*/.referenceRange[0].low",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/583b854e-f7ce-826f-8565-59fbd3f1bbef*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/cf550749-5de4-8bc3-b377-37f45a4810e3*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/cf550749-5de4-8bc3-b377-37f45a4810e3*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/cf550749-5de4-8bc3-b377-37f45a4810e3*/.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/cf550749-5de4-8bc3-b377-37f45a4810e3*/.referenceRange[0].low",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/cf550749-5de4-8bc3-b377-37f45a4810e3*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/c458d317-6699-8cd8-9781-2e359e089e26*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/c458d317-6699-8cd8-9781-2e359e089e26*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/c458d317-6699-8cd8-9781-2e359e089e26*/.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/c458d317-6699-8cd8-9781-2e359e089e26*/.referenceRange[0].low",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/c458d317-6699-8cd8-9781-2e359e089e26*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/15c3a445-61f9-86d9-b155-7c81c411a621*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/15c3a445-61f9-86d9-b155-7c81c411a621*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/15c3a445-61f9-86d9-b155-7c81c411a621*/.referenceRange[0].low",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/15c3a445-61f9-86d9-b155-7c81c411a621*/.referenceRange[0].low",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/15c3a445-61f9-86d9-b155-7c81c411a621*/.value.ofType(Quantity)",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/15c3a445-61f9-86d9-b155-7c81c411a621*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/5adc73fb-afb6-89c9-96e5-e72ce712aaeb*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/5adc73fb-afb6-89c9-96e5-e72ce712aaeb*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/5adc73fb-afb6-89c9-96e5-e72ce712aaeb*/.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/5adc73fb-afb6-89c9-96e5-e72ce712aaeb*/.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/5adc73fb-afb6-89c9-96e5-e72ce712aaeb*/.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[8].resource/*Organization/65f5441b-7758-87a0-ad6c-1bdba801601b*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[9].resource/*Organization/8848dad4-0997-8e64-b221-e073667261a9*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Bundle",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab"
+          ]
+        },
+        "identifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:uuid:bd6ef9d7-dfe0-8395-8fe7-7ad477894066"
+        },
+        "type": "document",
+        "timestamp": "2026-11-20T09:00:00Z",
+        "entry": [
+          {
+            "fullUrl": "urn:uuid:1cd44f68-13b6-8124-93bc-fce2115db273",
+            "resource": {
+              "resourceType": "Composition",
+              "id": "1cd44f68-13b6-8124-93bc-fce2115db273",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Composition-eu-lab"
+                ]
+              },
+              "identifier": {
+                "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+                "value": "lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional"
+              },
+              "status": "final",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laboratory report"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "date": "2026-11-20T09:00:00Z",
+              "author": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "title": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)",
+              "custodian": {
+                "reference": "urn:uuid:8848dad4-0997-8e64-b221-e073667261a9",
+                "display": "EHDS Integration Hub (demo)"
+              },
+              "section": [
+                {
+                  "title": "Laboratory examinations",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "code": "26436-6",
+                        "display": "Laboratory studies (set)"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "status": "generated",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Cholesterol in LDL [Mass/volume] in Serum or Plasma: 132 mg/dL (range 0 - 116 mg/dL (as printed on the report))</li><li>Cholesterol [Mass/volume] in Serum or Plasma: 205 mg/dL (range 0 - 200 mg/dL (as printed on the report))</li><li>Glucose [Mass/volume] in Blood: 142 mg/dL (range 70 - 99 mg/dL (as printed on the report))</li><li>Glomerular filtration rate/1.73 sq M.predicted: 88 mL/min/{1.73_m2} (range &gt; 90 mL/min/{1.73_m2} (as printed on the report))</li><li>Hemoglobin A1c/Hemoglobin.total in Blood: 7.6 % (range 4.0 - 6.0 % (as printed on the report))</li></ul></div>"
+                  },
+                  "entry": [
+                    {
+                      "reference": "urn:uuid:d923a886-1a38-8ec2-9a23-2ec1e7885816"
+                    },
+                    {
+                      "reference": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef"
+                    },
+                    {
+                      "reference": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3"
+                    },
+                    {
+                      "reference": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26"
+                    },
+                    {
+                      "reference": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621"
+                    },
+                    {
+                      "reference": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9",
+            "resource": {
+              "resourceType": "Patient",
+              "id": "80ba9a7f-1428-80e7-887e-ecbdf01ddaa9",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+                  "value": "P1"
+                }
+              ],
+              "name": [
+                {
+                  "text": "Maria Schmidt"
+                }
+              ],
+              "gender": "female",
+              "birthDate": "1979-03-15"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:d923a886-1a38-8ec2-9a23-2ec1e7885816",
+            "resource": {
+              "resourceType": "DiagnosticReport",
+              "id": "d923a886-1a38-8ec2-9a23-2ec1e7885816",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
+                ]
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+                  "valueReference": {
+                    "reference": "urn:uuid:1cd44f68-13b6-8124-93bc-fce2115db273"
+                  }
+                }
+              ],
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+                  "value": "lab-p1-2026-08-21-alphaklinik-berlin-zentrallabor-fictional",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "FILL",
+                        "display": "Filler Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "basedOn": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      "valueCode": "unknown"
+                    }
+                  ]
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                      "code": "LAB",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laboratory report 2026-08-21, AlphaKlinik Berlin, Zentrallabor (fictional)"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "effectiveDateTime": "2026-08-21T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "result": [
+                {
+                  "reference": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef"
+                },
+                {
+                  "reference": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3"
+                },
+                {
+                  "reference": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26"
+                },
+                {
+                  "reference": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621"
+                },
+                {
+                  "reference": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "583b854e-f7ce-826f-8565-59fbd3f1bbef",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p1-2089-1-2026-08-21",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "2089-1",
+                    "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "effectiveDateTime": "2026-08-21T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 132,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 0,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "high": {
+                    "value": 116,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "text": "0 - 116 mg/dL (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "cf550749-5de4-8bc3-b377-37f45a4810e3",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p1-2093-3-2026-08-21",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "2093-3",
+                    "display": "Cholesterol [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "Cholesterol [Mass/volume] in Serum or Plasma"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "effectiveDateTime": "2026-08-21T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 205,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 0,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "high": {
+                    "value": 200,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "text": "0 - 200 mg/dL (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "c458d317-6699-8cd8-9781-2e359e089e26",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p1-2339-0-2026-08-21",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "2339-0",
+                    "display": "Glucose [Mass/volume] in Blood"
+                  }
+                ],
+                "text": "Glucose [Mass/volume] in Blood"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "effectiveDateTime": "2026-08-21T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 142,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 70,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "high": {
+                    "value": 99,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "text": "70 - 99 mg/dL (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "15c3a445-61f9-86d9-b155-7c81c411a621",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p1-33914-3-2026-08-21",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "33914-3",
+                    "display": "Glomerular filtration rate/1.73 sq M.predicted"
+                  }
+                ],
+                "text": "Glomerular filtration rate/1.73 sq M.predicted"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "effectiveDateTime": "2026-08-21T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 88,
+                "unit": "mL/min/{1.73_m2}",
+                "system": "http://unitsofmeasure.org",
+                "code": "mL/min/{1.73_m2}"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 90,
+                    "unit": "mL/min/{1.73_m2}",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mL/min/{1.73_m2}"
+                  },
+                  "text": "> 90 mL/min/{1.73_m2} (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "5adc73fb-afb6-89c9-96e5-e72ce712aaeb",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p1-4548-4-2026-08-21",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "4548-4",
+                    "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+                  }
+                ],
+                "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
+              },
+              "subject": {
+                "reference": "urn:uuid:80ba9a7f-1428-80e7-887e-ecbdf01ddaa9"
+              },
+              "effectiveDateTime": "2026-08-21T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                  "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 7.6,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 4,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "high": {
+                    "value": 6,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "text": "4.0 - 6.0 % (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "65f5441b-7758-87a0-ad6c-1bdba801601b",
+              "name": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:8848dad4-0997-8e64-b221-e073667261a9",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "8848dad4-0997-8e64-b221-e073667261a9",
+              "name": "EHDS Integration Hub (demo)"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:6bbeafe2-04c0-847c-a5ab-b6b847b904ae",
+            "resource": {
+              "resourceType": "Provenance",
+              "id": "6bbeafe2-04c0-847c-a5ab-b6b847b904ae",
+              "target": [
+                {
+                  "reference": "urn:uuid:d923a886-1a38-8ec2-9a23-2ec1e7885816"
+                },
+                {
+                  "reference": "urn:uuid:583b854e-f7ce-826f-8565-59fbd3f1bbef"
+                },
+                {
+                  "reference": "urn:uuid:cf550749-5de4-8bc3-b377-37f45a4810e3"
+                },
+                {
+                  "reference": "urn:uuid:c458d317-6699-8cd8-9781-2e359e089e26"
+                },
+                {
+                  "reference": "urn:uuid:15c3a445-61f9-86d9-b155-7c81c411a621"
+                },
+                {
+                  "reference": "urn:uuid:5adc73fb-afb6-89c9-96e5-e72ce712aaeb"
+                }
+              ],
+              "recorded": "2026-11-20T09:00:00Z",
+              "activity": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                    "code": "CREATE",
+                    "display": "create"
+                  }
+                ],
+                "text": "Values reported by the performing laboratory"
+              },
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "author"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "urn:uuid:65f5441b-7758-87a0-ad6c-1bdba801601b",
+                    "display": "AlphaKlinik Berlin, Zentrallabor (fictional)"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "assembler"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "urn:uuid:8848dad4-0997-8e64-b221-e073667261a9",
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "P2-lab-report.json",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[0].resource/*Composition/b0721372-78af-87b3-8366-e306f2227493*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[10].resource/*Provenance/f6cc87d9-c6bf-8022-a717-38f28ae2d30d*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[1].resource/*Patient/362d1f07-b528-8327-b4ac-4a44daf5fd67*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/42576356-c4e5-81ef-96c0-be5c7930b45b*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/42576356-c4e5-81ef-96c0-be5c7930b45b*/.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/42576356-c4e5-81ef-96c0-be5c7930b45b*/.extension[0].value.ofType(Reference)",
+          "message": "Found multiple matching profiles for urn:uuid:b0721372-78af-87b3-8366-e306f2227493 among choices: http://hl7.org/fhir/5.0/StructureDefinition/profile-Composition|0.1.0, http://hl7.org/fhir/StructureDefinition/Composition|4.0.1"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/5681d160-230a-8295-be19-ea5371764fd2*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/5681d160-230a-8295-be19-ea5371764fd2*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/5681d160-230a-8295-be19-ea5371764fd2*/.referenceRange[0].high",
+          "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/5681d160-230a-8295-be19-ea5371764fd2*/.referenceRange[0].low",
+          "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/5681d160-230a-8295-be19-ea5371764fd2*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mmol/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/2028aca4-9436-8fd6-a703-2f1e00e6d127*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/2028aca4-9436-8fd6-a703-2f1e00e6d127*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/2028aca4-9436-8fd6-a703-2f1e00e6d127*/.referenceRange[0].high",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/2028aca4-9436-8fd6-a703-2f1e00e6d127*/.referenceRange[0].low",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/2028aca4-9436-8fd6-a703-2f1e00e6d127*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/cd14efc1-4653-8989-b3b3-bfd62dba95ff*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/cd14efc1-4653-8989-b3b3-bfd62dba95ff*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/cd14efc1-4653-8989-b3b3-bfd62dba95ff*/.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/cd14efc1-4653-8989-b3b3-bfd62dba95ff*/.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/cd14efc1-4653-8989-b3b3-bfd62dba95ff*/.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/8b3feb6c-4601-875e-934c-88eea758b412*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/8b3feb6c-4601-875e-934c-88eea758b412*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/8b3feb6c-4601-875e-934c-88eea758b412*/.referenceRange[0].low",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/8b3feb6c-4601-875e-934c-88eea758b412*/.referenceRange[0].low",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/8b3feb6c-4601-875e-934c-88eea758b412*/.value.ofType(Quantity)",
+          "message": "UCUM Codes that contain human readable annotations like {1.73_m2} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/8b3feb6c-4601-875e-934c-88eea758b412*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mL/min/{1.73_m2}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.referenceRange[0].high",
+          "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.referenceRange[0].high",
+          "message": "Unable to validate code '{INR}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.referenceRange[0].low",
+          "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.referenceRange[0].low",
+          "message": "Unable to validate code '{INR}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.value.ofType(Quantity)",
+          "message": "UCUM Codes that contain human readable annotations like {INR} can be misleading (e.g. they are ignored when comparing units). Best Practice is not to depend on annotations in the UCUM code, so this usage should be checked"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/6251a2e7-79a1-8965-984f-d8c312ef97d4*/.value.ofType(Quantity)",
+          "message": "Unable to validate code '{INR}' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[8].resource/*Organization/4a6a3f3f-53b9-8e5c-b58c-977d43c04092*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[9].resource/*Organization/a72ff53c-5e14-8926-a2c3-2491b2be71a9*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Bundle",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab"
+          ]
+        },
+        "identifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:uuid:48db8ec3-4b37-8aeb-9a5b-da56e5082712"
+        },
+        "type": "document",
+        "timestamp": "2026-11-20T09:00:00Z",
+        "entry": [
+          {
+            "fullUrl": "urn:uuid:b0721372-78af-87b3-8366-e306f2227493",
+            "resource": {
+              "resourceType": "Composition",
+              "id": "b0721372-78af-87b3-8366-e306f2227493",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Composition-eu-lab"
+                ]
+              },
+              "identifier": {
+                "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+                "value": "lab-p2-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic"
+              },
+              "status": "final",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laboratory report"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "date": "2026-11-20T09:00:00Z",
+              "author": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "title": "Laboratory report 2026-09-08, Limburg Medical Centre, Klinisch Laboratorium (fictional)",
+              "custodian": {
+                "reference": "urn:uuid:a72ff53c-5e14-8926-a2c3-2491b2be71a9",
+                "display": "EHDS Integration Hub (demo)"
+              },
+              "section": [
+                {
+                  "title": "Laboratory examinations",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "code": "26436-6",
+                        "display": "Laboratory studies (set)"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "status": "generated",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Cholesterol in LDL [Moles/volume] in Serum or Plasma: 1.9 mmol/L (range 0 - 3.0 mmol/L (as printed on the report))</li><li>Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma: 420 pg/mL (range 0 - 125 pg/mL (as printed on the report))</li><li>Hemoglobin A1c/Hemoglobin.total in Blood: 6.6 % (range 4.0 - 6.0 % (as printed on the report))</li><li>Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI: 66 mL/min/{1.73_m2} (range &gt; 90 mL/min/{1.73_m2} (as printed on the report))</li><li>INR in Platelet poor plasma by Coagulation assay: 2.8 {INR} (range 0.8 - 1.2 {INR} (as printed on the report))</li></ul></div>"
+                  },
+                  "entry": [
+                    {
+                      "reference": "urn:uuid:42576356-c4e5-81ef-96c0-be5c7930b45b"
+                    },
+                    {
+                      "reference": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2"
+                    },
+                    {
+                      "reference": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127"
+                    },
+                    {
+                      "reference": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff"
+                    },
+                    {
+                      "reference": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412"
+                    },
+                    {
+                      "reference": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67",
+            "resource": {
+              "resourceType": "Patient",
+              "id": "362d1f07-b528-8327-b4ac-4a44daf5fd67",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+                  "value": "P2"
+                }
+              ],
+              "name": [
+                {
+                  "text": "Jan de Vries"
+                }
+              ],
+              "gender": "male",
+              "birthDate": "1965-06-02"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:42576356-c4e5-81ef-96c0-be5c7930b45b",
+            "resource": {
+              "resourceType": "DiagnosticReport",
+              "id": "42576356-c4e5-81ef-96c0-be5c7930b45b",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
+                ]
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+                  "valueReference": {
+                    "reference": "urn:uuid:b0721372-78af-87b3-8366-e306f2227493"
+                  }
+                }
+              ],
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+                  "value": "lab-p2-2026-09-08-limburg-medical-centre-klinisch-laboratorium-fic",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "FILL",
+                        "display": "Filler Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "basedOn": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      "valueCode": "unknown"
+                    }
+                  ]
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                      "code": "LAB",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laboratory report 2026-09-08, Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "effectiveDateTime": "2026-09-08T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "result": [
+                {
+                  "reference": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2"
+                },
+                {
+                  "reference": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127"
+                },
+                {
+                  "reference": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff"
+                },
+                {
+                  "reference": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412"
+                },
+                {
+                  "reference": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "5681d160-230a-8295-be19-ea5371764fd2",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p2-22748-8-2026-09-08",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "22748-8",
+                    "display": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "effectiveDateTime": "2026-09-08T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 1.9,
+                "unit": "mmol/L",
+                "system": "http://unitsofmeasure.org",
+                "code": "mmol/L"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 0,
+                    "unit": "mmol/L",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mmol/L"
+                  },
+                  "high": {
+                    "value": 3,
+                    "unit": "mmol/L",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mmol/L"
+                  },
+                  "text": "0 - 3.0 mmol/L (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "2028aca4-9436-8fd6-a703-2f1e00e6d127",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p2-33762-6-2026-09-08",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "33762-6",
+                    "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "effectiveDateTime": "2026-09-08T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 420,
+                "unit": "pg/mL",
+                "system": "http://unitsofmeasure.org",
+                "code": "pg/mL"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 0,
+                    "unit": "pg/mL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "pg/mL"
+                  },
+                  "high": {
+                    "value": 125,
+                    "unit": "pg/mL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "pg/mL"
+                  },
+                  "text": "0 - 125 pg/mL (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "cd14efc1-4653-8989-b3b3-bfd62dba95ff",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p2-4548-4-2026-09-08",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "4548-4",
+                    "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+                  }
+                ],
+                "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "effectiveDateTime": "2026-09-08T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 6.6,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 4,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "high": {
+                    "value": 6,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "text": "4.0 - 6.0 % (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "8b3feb6c-4601-875e-934c-88eea758b412",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p2-62238-1-2026-09-08",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "62238-1",
+                    "display": "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI"
+                  }
+                ],
+                "text": "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "effectiveDateTime": "2026-09-08T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 66,
+                "unit": "mL/min/{1.73_m2}",
+                "system": "http://unitsofmeasure.org",
+                "code": "mL/min/{1.73_m2}"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 90,
+                    "unit": "mL/min/{1.73_m2}",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mL/min/{1.73_m2}"
+                  },
+                  "text": "> 90 mL/min/{1.73_m2} (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "6251a2e7-79a1-8965-984f-d8c312ef97d4",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "obs-p2-6301-6-2026-09-08",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "final",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "6301-6",
+                    "display": "INR in Platelet poor plasma by Coagulation assay"
+                  }
+                ],
+                "text": "INR in Platelet poor plasma by Coagulation assay"
+              },
+              "subject": {
+                "reference": "urn:uuid:362d1f07-b528-8327-b4ac-4a44daf5fd67"
+              },
+              "effectiveDateTime": "2026-09-08T08:30:00Z",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                  "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 2.8,
+                "unit": "{INR}",
+                "system": "http://unitsofmeasure.org",
+                "code": "{INR}"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 0.8,
+                    "unit": "{INR}",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "{INR}"
+                  },
+                  "high": {
+                    "value": 1.2,
+                    "unit": "{INR}",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "{INR}"
+                  },
+                  "text": "0.8 - 1.2 {INR} (as printed on the report)"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+              "name": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:a72ff53c-5e14-8926-a2c3-2491b2be71a9",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "a72ff53c-5e14-8926-a2c3-2491b2be71a9",
+              "name": "EHDS Integration Hub (demo)"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:f6cc87d9-c6bf-8022-a717-38f28ae2d30d",
+            "resource": {
+              "resourceType": "Provenance",
+              "id": "f6cc87d9-c6bf-8022-a717-38f28ae2d30d",
+              "target": [
+                {
+                  "reference": "urn:uuid:42576356-c4e5-81ef-96c0-be5c7930b45b"
+                },
+                {
+                  "reference": "urn:uuid:5681d160-230a-8295-be19-ea5371764fd2"
+                },
+                {
+                  "reference": "urn:uuid:2028aca4-9436-8fd6-a703-2f1e00e6d127"
+                },
+                {
+                  "reference": "urn:uuid:cd14efc1-4653-8989-b3b3-bfd62dba95ff"
+                },
+                {
+                  "reference": "urn:uuid:8b3feb6c-4601-875e-934c-88eea758b412"
+                },
+                {
+                  "reference": "urn:uuid:6251a2e7-79a1-8965-984f-d8c312ef97d4"
+                }
+              ],
+              "recorded": "2026-11-20T09:00:00Z",
+              "activity": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                    "code": "CREATE",
+                    "display": "create"
+                  }
+                ],
+                "text": "Values reported by the performing laboratory"
+              },
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "author"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "urn:uuid:4a6a3f3f-53b9-8e5c-b58c-977d43c04092",
+                    "display": "Limburg Medical Centre, Klinisch Laboratorium (fictional)"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "assembler"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "urn:uuid:a72ff53c-5e14-8926-a2c3-2491b2be71a9",
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "source": "documents",
+      "origin": "sandbox-klarbefund-lab-report.json",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[0].resource/*Composition/aa53b6b5-7c92-8201-838d-be484c88bcbd*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[1].resource/*Patient/ebb03ed5-7977-8661-a16e-2e631d750b65*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/3ff80604-4485-8d6d-8abf-e92afb3d1ce9*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/3ff80604-4485-8d6d-8abf-e92afb3d1ce9*/.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DiagnosticReport/3ff80604-4485-8d6d-8abf-e92afb3d1ce9*/.extension[0].value.ofType(Reference)",
+          "message": "Found multiple matching profiles for urn:uuid:aa53b6b5-7c92-8201-838d-be484c88bcbd among choices: http://hl7.org/fhir/5.0/StructureDefinition/profile-Composition|0.1.0, http://hl7.org/fhir/StructureDefinition/Composition|4.0.1"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/db7fa497-356d-8d2a-bf15-46271a4d971a*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/db7fa497-356d-8d2a-bf15-46271a4d971a*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/db7fa497-356d-8d2a-bf15-46271a4d971a*/.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/db7fa497-356d-8d2a-bf15-46271a4d971a*/.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*Observation/db7fa497-356d-8d2a-bf15-46271a4d971a*/.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/75769fac-4006-89e6-ab6a-9eadac937ea2*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/75769fac-4006-89e6-ab6a-9eadac937ea2*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/75769fac-4006-89e6-ab6a-9eadac937ea2*/.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/75769fac-4006-89e6-ab6a-9eadac937ea2*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Organization/043ff09c-8699-8baf-9810-a83ecde64247*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Organization/6f4b8317-5263-8262-bb8f-80986240a753*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Provenance/b448998a-8c15-8ff6-9b1e-ad68ca8a6a63*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Bundle",
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab"
+          ]
+        },
+        "identifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:uuid:3c2b7e45-1e71-8537-b062-30ae5a260c37"
+        },
+        "type": "document",
+        "timestamp": "2026-11-20T09:00:00Z",
+        "entry": [
+          {
+            "fullUrl": "urn:uuid:aa53b6b5-7c92-8201-838d-be484c88bcbd",
+            "resource": {
+              "resourceType": "Composition",
+              "id": "aa53b6b5-7c92-8201-838d-be484c88bcbd",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Composition-eu-lab"
+                ]
+              },
+              "identifier": {
+                "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+                "value": "klarbefund-0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19"
+              },
+              "status": "preliminary",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laboratory report"
+              },
+              "subject": {
+                "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
+              },
+              "date": "2026-11-20T09:00:00Z",
+              "author": [
+                {
+                  "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+                  "display": "Praxislabor Musterstadt (fictional)"
+                }
+              ],
+              "title": "Laboratory report 2026-06-02, Praxislabor Musterstadt (fictional)",
+              "custodian": {
+                "reference": "urn:uuid:6f4b8317-5263-8262-bb8f-80986240a753",
+                "display": "EHDS Integration Hub (demo)"
+              },
+              "section": [
+                {
+                  "title": "Laboratory examinations",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "code": "26436-6",
+                        "display": "Laboratory studies (set)"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "status": "generated",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>HbA1c: 5.6 % (range 4,0 - 6,0)</li><li>Cholesterin gesamt: 212 mg/dL (range &lt; 200)</li></ul></div>"
+                  },
+                  "entry": [
+                    {
+                      "reference": "urn:uuid:3ff80604-4485-8d6d-8abf-e92afb3d1ce9"
+                    },
+                    {
+                      "reference": "urn:uuid:db7fa497-356d-8d2a-bf15-46271a4d971a"
+                    },
+                    {
+                      "reference": "urn:uuid:75769fac-4006-89e6-ab6a-9eadac937ea2"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65",
+            "resource": {
+              "resourceType": "Patient",
+              "id": "ebb03ed5-7977-8661-a16e-2e631d750b65",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/base/StructureDefinition/patient-eu-core"
+                ]
+              },
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/patient-record",
+                  "value": "sandbox-demo"
+                }
+              ],
+              "name": [
+                {
+                  "text": "Klarbefund sandbox (fictional)"
+                }
+              ],
+              "gender": "female",
+              "birthDate": "1984-05-17"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:3ff80604-4485-8d6d-8abf-e92afb3d1ce9",
+            "resource": {
+              "resourceType": "DiagnosticReport",
+              "id": "3ff80604-4485-8d6d-8abf-e92afb3d1ce9",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab"
+                ]
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+                  "valueReference": {
+                    "reference": "urn:uuid:aa53b6b5-7c92-8201-838d-be484c88bcbd"
+                  }
+                }
+              ],
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/lab-report",
+                  "value": "klarbefund-0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "FILL",
+                        "display": "Filler Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "basedOn": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      "valueCode": "unknown"
+                    }
+                  ]
+                }
+              ],
+              "status": "preliminary",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                      "code": "LAB",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laboratory report 2026-06-02, Praxislabor Musterstadt (fictional)"
+              },
+              "subject": {
+                "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
+              },
+              "effectiveDateTime": "2026-06-02",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+                  "display": "Praxislabor Musterstadt (fictional)"
+                }
+              ],
+              "result": [
+                {
+                  "reference": "urn:uuid:db7fa497-356d-8d2a-bf15-46271a4d971a"
+                },
+                {
+                  "reference": "urn:uuid:75769fac-4006-89e6-ab6a-9eadac937ea2"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:db7fa497-356d-8d2a-bf15-46271a4d971a",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "db7fa497-356d-8d2a-bf15-46271a4d971a",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "HbA1c 5,6 % 4,0 - 6,0"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+                  "valueString": "1@0.08,0.41,0.84,0.02"
+                }
+              ],
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "sandbox-demo-0d3c6a52-1",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "4548-4",
+                    "display": "HbA1c"
+                  }
+                ],
+                "text": "HbA1c"
+              },
+              "subject": {
+                "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
+              },
+              "effectiveDateTime": "2026-06-02",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+                  "display": "Praxislabor Musterstadt (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 5.6,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 4,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "high": {
+                    "value": 6,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "text": "4,0 - 6,0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:75769fac-4006-89e6-ab6a-9eadac937ea2",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "75769fac-4006-89e6-ab6a-9eadac937ea2",
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/laboratory/StructureDefinition/Observation-resultslab-eu-lab"
+                ]
+              },
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "Cholesterin gesamt 212 mg/dl < 200"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+                  "valueString": "1@0.08,0.44,0.84,0.02"
+                }
+              ],
+              "identifier": [
+                {
+                  "system": "https://ehds.mabu.red/fhir/sid/graph-node",
+                  "value": "sandbox-demo-0d3c6a52-2",
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "assigner": {
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "2093-3",
+                    "display": "Cholesterin gesamt"
+                  }
+                ],
+                "text": "Cholesterin gesamt"
+              },
+              "subject": {
+                "reference": "urn:uuid:ebb03ed5-7977-8661-a16e-2e631d750b65"
+              },
+              "effectiveDateTime": "2026-06-02",
+              "issued": "2026-11-20T09:00:00Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+                  "display": "Praxislabor Musterstadt (fictional)"
+                }
+              ],
+              "valueQuantity": {
+                "value": 212,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              },
+              "referenceRange": [
+                {
+                  "high": {
+                    "value": 200,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "text": "< 200"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "043ff09c-8699-8baf-9810-a83ecde64247",
+              "name": "Praxislabor Musterstadt (fictional)"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:6f4b8317-5263-8262-bb8f-80986240a753",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "6f4b8317-5263-8262-bb8f-80986240a753",
+              "name": "EHDS Integration Hub (demo)"
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:b448998a-8c15-8ff6-9b1e-ad68ca8a6a63",
+            "resource": {
+              "resourceType": "Provenance",
+              "id": "b448998a-8c15-8ff6-9b1e-ad68ca8a6a63",
+              "target": [
+                {
+                  "reference": "urn:uuid:3ff80604-4485-8d6d-8abf-e92afb3d1ce9"
+                },
+                {
+                  "reference": "urn:uuid:db7fa497-356d-8d2a-bf15-46271a4d971a"
+                },
+                {
+                  "reference": "urn:uuid:75769fac-4006-89e6-ab6a-9eadac937ea2"
+                }
+              ],
+              "recorded": "2026-11-20T09:00:00Z",
+              "activity": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                    "code": "CREATE",
+                    "display": "create"
+                  }
+                ],
+                "text": "Values read from the paper report by the Klarbefund app; page and line of each value are on its Observation"
+              },
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "author"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "urn:uuid:043ff09c-8699-8baf-9810-a83ecde64247",
+                    "display": "Praxislabor Musterstadt (fictional)"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "assembler"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "urn:uuid:6f4b8317-5263-8262-bb8f-80986240a753",
+                    "display": "EHDS Integration Hub (demo)"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "identifier": {
+                      "system": "https://ehds.mabu.red/fhir/sid/klarbefund-report",
+                      "value": "0d3c6a52-6a3e-4c55-9d0e-8f1b2a7c4e19"
+                    },
+                    "display": "The paper report scanned in the Klarbefund app"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "source": "klarbefund",
+      "origin": "fhir-golden-bundle.json",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[0].resource/*Composition/composition-1*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[10].resource/*Observation/obs-7*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[10].resource/*Observation/obs-7*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'kg' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[10].resource/*Observation/obs-7*/.value.ofType(Quantity).code",
+          "message": "Unable to validate code without using server because: Resolved system http://unitsofmeasure.org (v3.0.1), but the definition doesn't include any codes, so the code has not been validated"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[11].resource/*Provenance/provenance-1*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[12].resource/*Organization/performer-1*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[14]",
+          "message": "Entry 'urn:uuid:1699b266-eb6e-578c-aee6-d3fdc6079750' isn't reachable by traversing forwards from the Composition. Only Provenance is approved to be used this way (R4 section 3.3.1)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[14]",
+          "message": "Entry 'urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40' isn't reachable by traversing forwards from the Composition. Only Provenance is approved to be used this way (R4 section 3.3.1)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[14]",
+          "message": "Entry 'urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f' isn't reachable by traversing forwards from the Composition. Only Provenance is approved to be used this way (R4 section 3.3.1)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DocumentReference/source-document*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[2].resource/*DocumentReference/source-document*/.content[0].attachment",
+          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*DiagnosticReport/report-1*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*DiagnosticReport/report-1*/.basedOn[0]",
+          "message": "A Reference without an actual reference or identifier should have a display"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*DiagnosticReport/report-1*/.extension[0].value.ofType(Reference)",
+          "message": "Found multiple matching profiles for urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57 among choices: http://hl7.org/fhir/5.0/StructureDefinition/profile-Composition|0.1.0, http://hl7.org/fhir/StructureDefinition/Composition|4.0.1"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[3].resource/*DiagnosticReport/report-1*/.presentedForm[0]",
+          "message": "Attachments have data and/or url, or else SHOULD have either contentType and/or language"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/obs-1*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/obs-1*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/obs-1*/.referenceRange[0].high",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[4].resource/*Observation/obs-1*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/obs-2*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/obs-2*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/obs-2*/.referenceRange[0].high",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/obs-2*/.referenceRange[0].low",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[5].resource/*Observation/obs-2*/.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/obs-3*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/obs-3*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/obs-3*/.referenceRange[0].high",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[6].resource/*Observation/obs-3*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'pg/mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/obs-4*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/obs-4*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/obs-4*/.referenceRange[0].low",
+          "message": "Unable to validate code 'ug/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[7].resource/*Observation/obs-4*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'ug/L' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[8].resource/*Observation/obs-5*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[8].resource/*Observation/obs-5*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[8].resource/*Observation/obs-5*/.value.ofType(Quantity)",
+          "message": "Unable to validate code 'mg/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[9].resource/*Observation/obs-6*/",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[9].resource/*Observation/obs-6*/.component[0].value.ofType(CodeableConcept).coding[0].system",
+          "message": "A definition for CodeSystem 'http://www.ncbi.nlm.nih.gov/taxonomy' could not be found, so the code cannot be validated"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[9].resource/*Observation/obs-6*/.identifier[0].type",
+          "message": "None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type|4.0.1), and a coding SHALL come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://terminology.hl7.org/CodeSystem/v2-0203#OBI)"
+        },
+        {
+          "severity": "warning",
+          "expression": "Bundle.entry[9].resource/*Observation/obs-6*/.value.ofType(Quantity)",
+          "message": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+        }
+      ],
+      "counted": true,
+      "resource": {
+        "resourceType": "Bundle",
+        "identifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:uuid:5dd91b73-4262-5318-ad26-4cbb254abdad"
+        },
+        "type": "document",
+        "timestamp": "2026-09-13T12:00:00.000Z",
+        "entry": [
+          {
+            "fullUrl": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57",
+            "resource": {
+              "resourceType": "Composition",
+              "id": "composition-1",
+              "identifier": {
+                "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+                "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb"
+              },
+              "status": "preliminary",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ]
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "date": "2026-09-13T12:00:00.000Z",
+              "author": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "title": "Laborbefund",
+              "section": [
+                {
+                  "title": "Laboratory results",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "version": "2.83",
+                        "code": "26436-6",
+                        "display": "Laboratory studies (set)"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "status": "generated",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>LDL-Cholesterin</li><li>HbA1c</li><li>NT-proBNP</li><li>Ferritin</li><li>CRP</li><li>Akkermansia muciniphila</li></ul></div>"
+                  },
+                  "entry": [
+                    {
+                      "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
+                    },
+                    {
+                      "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
+                    },
+                    {
+                      "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
+                    },
+                    {
+                      "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
+                    },
+                    {
+                      "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
+                    },
+                    {
+                      "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53",
+            "resource": {
+              "resourceType": "Patient",
+              "id": "example-patient",
+              "name": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      "valueCode": "masked"
+                    }
+                  ]
+                }
+              ],
+              "_birthDate": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "masked"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f",
+            "resource": {
+              "resourceType": "DocumentReference",
+              "id": "source-document",
+              "status": "current",
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "date": "2026-09-13T12:00:00.000Z",
+              "description": "laborbefund-2026-09-04.pdf",
+              "content": [
+                {
+                  "attachment": {
+                    "title": "laborbefund-2026-09-04.pdf",
+                    "creation": "2026-09-04"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40",
+            "resource": {
+              "resourceType": "DiagnosticReport",
+              "id": "report-1",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "FILL",
+                        "display": "Filler Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-report",
+                  "value": "eb2d8010-4f8f-510f-a825-5865b976f1cb",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "basedOn": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                      "valueCode": "unknown"
+                    }
+                  ]
+                }
+              ],
+              "status": "preliminary",
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                      "code": "LAB",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "11502-2",
+                    "display": "Laboratory report"
+                  }
+                ],
+                "text": "Laborbefund"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "result": [
+                {
+                  "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
+                },
+                {
+                  "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
+                },
+                {
+                  "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
+                },
+                {
+                  "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
+                },
+                {
+                  "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
+                },
+                {
+                  "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
+                }
+              ],
+              "presentedForm": [
+                {
+                  "title": "laborbefund-2026-09-04.pdf"
+                }
+              ],
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",
+                  "valueReference": {
+                    "reference": "urn:uuid:a4f037aa-ead1-5869-a0f5-0428dd5f6b57"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-1",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "ab67914e-9f57-5640-8367-fcd83bd0d9fa",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "LDL-Cholesterin  141  mg/dl  < 116"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+                  "valueString": "1@0.0706,0.7525,0.8466,0.0292"
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "2089-1",
+                    "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "LDL-Cholesterin"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 141,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              },
+              "referenceRange": [
+                {
+                  "high": {
+                    "value": 116,
+                    "unit": "mg/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg/dL"
+                  },
+                  "text": "< 116"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-2",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "c6cfe21c-25c2-5cba-b186-5e25b216d501",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "HbA1c  5,4  %  4,0 - 6,0"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+                  "valueString": "1@0.0706,0.6525,0.8466,0.0292"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-verified-by-patient",
+                  "valueDateTime": "2026-09-05T08:01:00Z"
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "4548-4",
+                    "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+                  }
+                ],
+                "text": "HbA1c"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 5.4,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 4,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "high": {
+                    "value": 6,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                  },
+                  "text": "4,0 - 6,0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-3",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "ea95cd06-7533-5802-8969-09e13f9304c5",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "NT-proBNP  1.240  pg/ml  < 125"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+                  "valueString": "1@0.0706,0.5525,0.8466,0.0292"
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "33762-6",
+                    "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "NT-proBNP"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 1240,
+                "unit": "pg/mL",
+                "system": "http://unitsofmeasure.org",
+                "code": "pg/mL"
+              },
+              "referenceRange": [
+                {
+                  "high": {
+                    "value": 125,
+                    "unit": "pg/mL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "pg/mL"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-4",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "c5ca0c8f-c809-56b9-90c8-1918f9ab63df",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "Ferritin  <10  ug/l  30 - 400"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "2276-4",
+                    "display": "Ferritin [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "Ferritin"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 10,
+                "comparator": "<",
+                "unit": "ug/L",
+                "system": "http://unitsofmeasure.org",
+                "code": "ug/L"
+              },
+              "referenceRange": [
+                {
+                  "low": {
+                    "value": 30,
+                    "unit": "ug/L",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "ug/L"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-5",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "c8c0c942-507b-5223-b7f3-a6d765cf83b1",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "CRP  0,31  mg/dl  Erw. unter 0,5"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "1988-5",
+                    "display": "C reactive protein [Mass/volume] in Serum or Plasma"
+                  }
+                ],
+                "text": "CRP"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 0.31,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              },
+              "referenceRange": [
+                {
+                  "text": "Erw. unter 0,5"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-6",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "632ae0a6-7e2d-5430-8e94-c77058bdfe1d",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "Akkermansia muciniphila  3,2  %"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "laboratory",
+                      "display": "Laboratory"
+                    },
+                    {
+                      "system": "http://loinc.org",
+                      "version": "2.83",
+                      "code": "26436-6",
+                      "display": "Laboratory studies (set)"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "not-applicable",
+                    "_valueCode": {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/rendered-value",
+                          "valueString": "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "text": "Akkermansia muciniphila"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 3.2,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://loinc.org",
+                        "version": "2.83",
+                        "code": "41852-5",
+                        "display": "Microorganism or agent identified in Specimen"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://www.ncbi.nlm.nih.gov/taxonomy",
+                        "code": "239935",
+                        "display": "Akkermansia muciniphila"
+                      }
+                    ],
+                    "text": "Akkermansia muciniphila"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:1699b266-eb6e-578c-aee6-d3fdc6079750",
+            "resource": {
+              "resourceType": "Observation",
+              "id": "obs-7",
+              "identifier": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "OBI",
+                        "display": "Observation Instance Identifier"
+                      }
+                    ]
+                  },
+                  "system": "https://ehds.mabu.red/fhir/sid/epa-ingest-observation",
+                  "value": "f3a748ac-9b21-5433-9b9e-2337f2bb0007",
+                  "assigner": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "status": "preliminary",
+              "extension": [
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+                  "valueCode": "ocr-transcribed"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+                  "valueString": "Körpergewicht  80  kg"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+                  "valueDecimal": 0.94
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-verified-by-patient",
+                  "valueDateTime": "2026-09-05T08:00:00Z"
+                },
+                {
+                  "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-original-reading",
+                  "valueString": "Körpergewicht 30 kg"
+                }
+              ],
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                      "code": "vital-signs",
+                      "display": "Vital Signs"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "version": "2.83",
+                    "code": "29463-7",
+                    "display": "Body weight"
+                  }
+                ],
+                "text": "Körpergewicht"
+              },
+              "subject": {
+                "reference": "urn:uuid:93cd7889-eac3-5dbd-9ba6-22f752677c53"
+              },
+              "effectiveDateTime": "2026-09-04",
+              "issued": "2026-09-13T12:00:00.000Z",
+              "performer": [
+                {
+                  "reference": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+                  "display": "Praxis Dr. Muster"
+                }
+              ],
+              "valueQuantity": {
+                "value": 80,
+                "unit": "kg",
+                "system": "http://unitsofmeasure.org",
+                "code": "kg"
+              }
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:d4ef62bd-92f6-5468-a932-3d860678c814",
+            "resource": {
+              "resourceType": "Provenance",
+              "id": "provenance-1",
+              "target": [
+                {
+                  "reference": "urn:uuid:3a33aa98-9a6f-5085-a4d8-6cb0cda3ba40"
+                },
+                {
+                  "reference": "urn:uuid:1240ae50-37a9-501e-8b0c-6f58593e7656"
+                },
+                {
+                  "reference": "urn:uuid:26e5f6f8-c86b-57ad-8f83-90657f4f81a8"
+                },
+                {
+                  "reference": "urn:uuid:c2898370-8a01-58df-9864-ec363399e430"
+                },
+                {
+                  "reference": "urn:uuid:3f579dbc-9ee5-5f07-8553-3abb6527566d"
+                },
+                {
+                  "reference": "urn:uuid:443beaa2-92e0-5a7f-b056-03cdfbe72b4b"
+                },
+                {
+                  "reference": "urn:uuid:9e197cde-22b4-5d67-b7d3-b64e0fd2e681"
+                },
+                {
+                  "reference": "urn:uuid:1699b266-eb6e-578c-aee6-d3fdc6079750"
+                }
+              ],
+              "recorded": "2026-09-13T12:00:00.000Z",
+              "activity": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                    "code": "CREATE",
+                    "display": "create"
+                  }
+                ],
+                "text": "Values transcribed from a scanned document by OCR"
+              },
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                        "code": "assembler"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "display": "epa-ingest (tesseract)"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "urn:uuid:db6eba8c-083e-552f-a9e8-2e3a67bcb22f"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "urn:uuid:840e19d2-8098-5e66-a415-b5e24e18f155",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "performer-1",
+              "name": "Praxis Dr. Muster"
+            }
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/laboratory/StructureDefinition/Bundle-eu-lab"
+          ]
+        }
+      }
+    }
+  ]
+}

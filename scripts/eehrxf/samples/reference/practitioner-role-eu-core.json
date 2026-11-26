@@ -1,0 +1,39 @@
+{
+  "resourceType": "PractitionerRole",
+  "id": "ref-practitioner-role-1",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "identifier": [
+    {
+      "system": "https://ehds.mabu.red/fhir/sid/practitioner-role",
+      "value": "ROLE-0001"
+    }
+  ],
+  "active": true,
+  "practitioner": {
+    "reference": "Practitioner/ref-practitioner-1",
+    "display": "Dr. Lena Vogt (fictional)"
+  },
+  "organization": {
+    "reference": "Organization/alpha-klinik",
+    "display": "AlphaKlinik Berlin (fictional)"
+  },
+  "specialty": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "394802001",
+          "display": "General medicine"
+        }
+      ]
+    }
+  ]
+}

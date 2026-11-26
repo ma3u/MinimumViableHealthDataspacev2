@@ -88,6 +88,12 @@ jobs:
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "true"
 
+      # No broken link goes out: every internal link, image and anchor of the
+      # export must resolve under the base path (scripts/check-site-links.py,
+      # #1277). External URLs are checked weekly in site-links.yml.
+      - name: Check the site's links
+        run: python3 ../scripts/check-site-links.py out --base /MinimumViableHealthDataspacev2
+
       # The reports of the most recent finished nightly run on the branch
       # being built (main, for every real deploy), so a test run on another
       # branch never reaches the site. Missing on the very first run, and then the

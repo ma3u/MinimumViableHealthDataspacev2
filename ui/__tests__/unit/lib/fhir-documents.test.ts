@@ -405,7 +405,23 @@ describe("laboratory report", () => {
   it("is one DiagnosticReport whose identifier is the Composition's", () => {
     const [dr] = resources(doc, "DiagnosticReport");
     expect(resources(doc, "DiagnosticReport")).toHaveLength(1);
-    expect(dr.identifier).toEqual([composition(doc).identifier]);
+    // Same system and value as the Composition (dr-comp-identifier), typed
+    // as the filler's number with the hub as assigner (MII Laborbefund).
+    expect(dr.identifier).toEqual([
+      {
+        ...composition(doc).identifier,
+        type: {
+          coding: [
+            {
+              system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+              code: "FILL",
+              display: "Filler Identifier",
+            },
+          ],
+        },
+        assigner: { display: "EHDS Integration Hub (demo)" },
+      },
+    ]);
     expect(dr.extension).toEqual([
       {
         url: "http://hl7.org/fhir/5.0/StructureDefinition/extension-DiagnosticReport.composition",

@@ -80,6 +80,20 @@ MERGE (lmed:MedicationRequest {id: 'it-omop-loader-med'})
                 lmed.date = '2024-02-04T11:00:00Z'
 MERGE (loader)-[:HAS_MEDICATION]->(lmed)
 
+MERGE (bpp:Patient {id: 'it-omop-bp'})
+  ON CREATE SET bpp.name = 'Testperson Blood Pressure', bpp.gender = 'female',
+                bpp.birthDate = '1975-03-03'
+MERGE (bpo:Observation {id: 'it-omop-bp-panel'})
+  ON CREATE SET bpo.code = '85354-9', bpo.display = 'Blood pressure panel',
+                bpo.category = 'vital-signs', bpo.dateTime = '2024-05-06T08:00:00+02:00',
+                bpo.componentCodes = ['8462-4', '8480-6'],
+                bpo.componentDisplays = ['Diastolic Blood Pressure', 'Systolic Blood Pressure'],
+                bpo.componentValues = [82.0, 131.0],
+                bpo.componentUnits = ['mm[Hg]', 'mm[Hg]'],
+                bpo.componentUcumCodes = ['mm[Hg]', 'mm[Hg]'],
+                bpo.componentAbsentCodes = []
+MERGE (bpp)-[:HAS_OBSERVATION]->(bpo)
+
 MERGE (out:Patient:OptedOut {resourceId: 'it-omop-optedout'})
   ON CREATE SET out.name = 'Testperson Opted Out', out.gender = 'male',
                 out.birthDate = date('1965-04-12')
@@ -270,6 +284,35 @@ describe.skipIf(!BOLT)("neo4j/fhir-to-omop-transform.cypher on Neo4j", () => {
       drug: cdmId("MedicationRequest/it-omop-loader-med"),
       drugStart: "2024-02-04",
     });
+  });
+
+  it("measures a blood pressure panel once per component (#1218)", async () => {
+    const rows = (
+      await tx.run(
+        `MATCH (:Patient {id: 'it-omop-bp'})-[:MAPPED_TO]->(op:OMOPPerson)
+         MATCH (op)-[:HAS_MEASUREMENT]->(m:OMOPMeasurement)
+         RETURN m.measurementId AS id, m.measurementSourceValue AS code,
+                m.valueAsNumber AS value, m.unit AS unit,
+                m.measurementDate AS measured
+         ORDER BY code`,
+      )
+    ).records.map((r) => r.toObject());
+    expect(rows).toEqual([
+      {
+        id: cdmId("Observation/it-omop-bp-panel/component/8462-4"),
+        code: "8462-4",
+        value: 82,
+        unit: "mm[Hg]",
+        measured: "2024-05-06",
+      },
+      {
+        id: cdmId("Observation/it-omop-bp-panel/component/8480-6"),
+        code: "8480-6",
+        value: 131,
+        unit: "mm[Hg]",
+        measured: "2024-05-06",
+      },
+    ]);
   });
 
   it("adopts the rows the graph seed already wrote rather than writing them twice", async () => {

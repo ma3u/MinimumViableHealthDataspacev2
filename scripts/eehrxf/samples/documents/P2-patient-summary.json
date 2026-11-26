@@ -331,7 +331,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "1985-01-01"
+    "onsetDateTime": "1985-01-01",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -382,7 +390,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2010-05-17"
+    "onsetDateTime": "2010-05-17",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -433,7 +449,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2014-07-09"
+    "onsetDateTime": "2014-07-09",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -484,7 +508,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2016-03-22"
+    "onsetDateTime": "2016-03-22",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -535,7 +567,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2017-04-01"
+    "onsetDateTime": "2017-04-01",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -586,7 +626,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2018-10-05"
+    "onsetDateTime": "2018-10-05",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -637,7 +685,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2019-08-03"
+    "onsetDateTime": "2019-08-03",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -688,7 +744,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2020-11-30"
+    "onsetDateTime": "2020-11-30",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -739,7 +803,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2021-06-18"
+    "onsetDateTime": "2021-06-18",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -790,7 +862,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2022-01-11"
+    "onsetDateTime": "2022-01-11",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -841,7 +921,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2022-09-27"
+    "onsetDateTime": "2022-09-27",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -892,7 +980,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "onsetDateTime": "2023-02-14"
+    "onsetDateTime": "2023-02-14",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -926,7 +1022,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2010-05-17"
+    "authoredOn": "2010-05-17",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -960,7 +1064,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2019-08-03"
+    "authoredOn": "2019-08-03",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -994,7 +1106,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2019-08-03"
+    "authoredOn": "2019-08-03",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -1028,7 +1148,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2020-11-30"
+    "authoredOn": "2020-11-30",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -1062,7 +1190,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2022-01-11"
+    "authoredOn": "2022-01-11",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -1096,7 +1232,15 @@
     "subject": {
      "reference": "urn:uuid:b27ee4d6-eb05-82ad-90f5-b5aea6e1a5b0"
     },
-    "authoredOn": "2023-02-14"
+    "authoredOn": "2023-02-14",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   }
  ]

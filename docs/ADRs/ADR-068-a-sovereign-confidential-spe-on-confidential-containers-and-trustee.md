@@ -1,6 +1,6 @@
 # ADR-068: A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit
 
-**Status:** Accepted (2026-10-30)
+**Status:** Accepted (2026-10-30). Decision 3 ("a workspace per permit") superseded by [ADR-101](ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md) (2026-11-26): one attested workspace per data holder, each permit a governed view, a key and a log scope inside it. Decisions 1, 2, 4, 5 and 6 stay in force.
 **Date:** 2026-10-30
 **Supersedes:** [ADR-052](ADR-052-confidential-spe-on-azure-revisited.md) in full. This ADR carries over what still holds from it (the regulation, Azure Container Apps, Contrast, the triggers) and replaces what no longer does (AKS `KataCcIsolation` with Azure Attestation).
 **Keeps:** the pattern of [ADR-037](ADR-037-secure-processing-environment-confidential-computing.md): confidential containers with remote attestation.

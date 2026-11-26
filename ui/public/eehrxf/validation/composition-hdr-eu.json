@@ -1,0 +1,111 @@
+{
+  "profileId": "composition-hdr-eu",
+  "name": "Composition (EU HDR)",
+  "section": "eehrxf",
+  "canonical": "http://hl7.eu/fhir/hdr/StructureDefinition/composition-eu-hdr",
+  "igPackage": "hl7.fhir.eu.hdr#1.0.0",
+  "baseResource": "Composition",
+  "tested": 0,
+  "passed": 0,
+  "warnings": 1,
+  "resources": [
+    {
+      "source": "reference",
+      "origin": "hospital-discharge-report.json#entry[0]",
+      "passed": true,
+      "issues": [
+        {
+          "severity": "warning",
+          "expression": "Composition",
+          "message": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+        }
+      ],
+      "counted": false,
+      "resource": {
+        "resourceType": "Composition",
+        "id": "ref-composition-hdr-1",
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+              "code": "HTEST",
+              "display": "test health data"
+            }
+          ],
+          "profile": [
+            "http://hl7.eu/fhir/hdr/StructureDefinition/composition-eu-hdr"
+          ]
+        },
+        "identifier": {
+          "system": "https://ehds.mabu.red/fhir/sid/discharge-report",
+          "value": "HDR-0001"
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34105-7",
+              "display": "Hospital Discharge summary"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:2ecea97e-4696-52d6-a6f4-0e3e3e969dd9"
+        },
+        "encounter": {
+          "reference": "urn:uuid:18feeb35-0097-56d4-9bb7-8170a99702cf"
+        },
+        "date": "2026-03-09T12:00:00+01:00",
+        "author": [
+          {
+            "reference": "urn:uuid:01866220-b2b1-5998-984f-2b70f2e1e04a"
+          }
+        ],
+        "title": "Hospital discharge report (fictional)",
+        "custodian": {
+          "reference": "urn:uuid:299fca76-c5f8-544f-9d04-8b0decec34bf"
+        },
+        "section": [
+          {
+            "title": "Problem list",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list - Reported"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pneumonia, confirmed, treated in hospital.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:018c7c75-8a2f-5cc7-ab10-6d00075ee1ff"
+              }
+            ]
+          },
+          {
+            "title": "Hospital course",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8648-8",
+                  "display": "Hospital course Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Admitted with fever and cough; seven days of antibiotics; discharged home in good condition.</p></div>"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -19,7 +19,14 @@ Outputs, both generated, never edited by hand:
   Matchbox's `extensions` parameter (Matchbox v4.1.21 does not carry the
   config's extensions into a $validate; see matchbox_config).
 
-    python3 scripts/eehrxf/build.py          # write all four
+- neo4j/register-national-profiles.cypher and ui/public/mock/eehrxf_national.json:
+  the German guides of profiles.json's national section marked onPage (the
+  MII Kerndatensatz) with their validation results and the EEHRxF profile
+  each one corresponds to. Kept apart from the EEHRxF outputs, so a German
+  result is never counted as EEHRxF coverage (#1172). The ePA and MIO guides
+  stay in the report only: the default build names no real organisation.
+
+    python3 scripts/eehrxf/build.py          # write all six
     python3 scripts/eehrxf/build.py --check  # exit 1 if any is out of date
 """
 
@@ -34,10 +41,16 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 CONFIG = HERE / "profiles.json"
 REPORT = HERE / "validation-report.json"
+DETAILS = HERE / "validation-details.json"
+# One file per profile for the resource viewer on /eehrxf, plus an index that
+# says what was validated. Static files, so the GitHub Pages build has them.
+VIEWER_DIR = ROOT / "ui" / "public" / "eehrxf" / "validation"
 CYPHER = ROOT / "neo4j" / "register-eehrxf-profiles.cypher"
 MOCK = ROOT / "ui" / "public" / "mock" / "eehrxf.json"
 MATCHBOX = ROOT / "services" / "matchbox" / "application.yaml"
 EXTENSION_DOMAINS = ROOT / "services" / "neo4j-proxy" / "src" / "fhir-extension-domains.ts"
+NATIONAL_CYPHER = ROOT / "neo4j" / "register-national-profiles.cypher"
+NATIONAL_MOCK = ROOT / "ui" / "public" / "mock" / "eehrxf_national.json"
 
 
 def coverage(tested: int, passed: int) -> str:
@@ -96,6 +109,9 @@ def model(cfg: dict, report: dict) -> dict:
                 "passed": r["passed"],
                 "failed": r["failed"],
                 "bySource": r["bySource"],
+                # Reference examples: validated and shown, never counted (reference_examples.py).
+                "referenceTested": r["bySource"].get("reference", {}).get("tested", 0),
+                "referencePassed": r["bySource"].get("reference", {}).get("passed", 0),
                 "topIssues": issue_lines(r),
                 "coverage": coverage(r["tested"], r["passed"]),
             }
@@ -197,6 +213,8 @@ def cypher(m: dict) -> str:
             f"    p.passed = {q(p['passed'])},",
             f"    p.failed = {q(p['failed'])},",
             f"    p.topIssues = {q(p['topIssues'])},",
+            f"    p.referenceTested = {q(p['referenceTested'])},",
+            f"    p.referencePassed = {q(p['referencePassed'])},",
             f"    p.coverage = {q(p['coverage'])};",
             "",
         ]
@@ -269,6 +287,214 @@ def cypher(m: dict) -> str:
         "",
     ]
     return "\n".join(out)
+
+
+def national_model(cfg: dict, report: dict) -> dict:
+    """The German guides marked onPage and their profiles with results, grouped by guide."""
+    nat = cfg.get("national", {"igs": {}, "profiles": []})
+    results = report.get("national", {}).get("profiles", {})
+    eehrxf = {p["profileId"]: p["name"] for p in cfg["profiles"]}
+    guides = []
+    for key in sorted(nat["igs"]):
+        ig = nat["igs"][key]
+        if not ig.get("onPage"):
+            continue
+        profiles = []
+        for prof in sorted((p for p in nat["profiles"] if p["ig"] == key), key=lambda p: p["profileId"]):
+            r = results.get(prof["profileId"])
+            if r is None or r["canonical"] != prof["canonical"]:
+                raise SystemExit(f"report is stale for {prof['profileId']}: rerun validate.py")
+            cp = prof.get("eehrxfCounterpart")
+            if cp is not None and cp not in eehrxf:
+                raise SystemExit(f"{prof['profileId']}: eehrxfCounterpart {cp} is no EEHRxF profile")
+            profiles.append(
+                {
+                    "profileId": prof["profileId"],
+                    "name": prof["name"],
+                    "canonical": prof["canonical"],
+                    "baseResource": prof["baseResource"],
+                    "tested": r["tested"],
+                    "passed": r["passed"],
+                    "failed": r["failed"],
+                    "coverage": coverage(r["tested"], r["passed"]),
+                    "topIssues": issue_lines(r),
+                    "eehrxfCounterpart": {"profileId": cp, "name": eehrxf[cp]} if cp else None,
+                }
+            )
+        guides.append(
+            {
+                "guideId": key,
+                "name": ig["name"],
+                "publisher": ig["publisher"],
+                "igPackage": f"{ig['package']}#{ig['version']}",
+                "status": ig["status"],
+                "home": ig["home"],
+                "gate": ig["status"].strip().lower() not in ("draft", "ballot"),
+                "checkedOn": ig["checkedOn"],
+                "profiles": profiles,
+            }
+        )
+    return {"guides": guides}
+
+
+def national_cypher(n: dict) -> str:
+    profiles = [p for g in n["guides"] for p in g["profiles"]]
+    out = [
+        "// ============================================================",
+        "// German FHIR profiles and their validation results",
+        "// ============================================================",
+        "// GENERATED by scripts/eehrxf/build.py from scripts/eehrxf/profiles.json",
+        "// (national section) and scripts/eehrxf/validation-report.json. Do not",
+        "// edit by hand.",
+        "//",
+        "// The MII Kerndatensatz, the core data set the data integration",
+        "// centres of the German university hospitals deliver for research.",
+        "// Not EEHRxF: these never count as",
+        "// EEHRxF coverage. CORRESPONDS_TO links a German profile to the EEHRxF",
+        "// profile that covers the same ground, so the graph shows which German",
+        "// profile a resource needs next to the European one.",
+        "//",
+        "// Run after: init-schema.cypher and register-eehrxf-profiles.cypher. Idempotent.",
+        "// ============================================================",
+        "",
+        "// Guides and profiles the config no longer lists",
+        f"MATCH (g:NationalProfileGuide) WHERE NOT g.guideId IN {q([g['guideId'] for g in n['guides']])} DETACH DELETE g;",
+        f"MATCH (p:NationalProfile) WHERE NOT p.profileId IN {q([p['profileId'] for p in profiles])} DETACH DELETE p;",
+        "",
+    ]
+    for g in n["guides"]:
+        out += [
+            f"MERGE (g:NationalProfileGuide {{guideId: {q(g['guideId'])}}})",
+            f"SET g.name = {q(g['name'])},",
+            f"    g.publisher = {q(g['publisher'])},",
+            "    g.country = 'DE',",
+            f"    g.igPackage = {q(g['igPackage'])},",
+            f"    g.status = {q(g['status'])},",
+            f"    g.home = {q(g['home'])},",
+            f"    g.gate = {q(g['gate'])},",
+            f"    g.checkedOn = {q(g['checkedOn'])};",
+            "",
+        ]
+        for p in g["profiles"]:
+            out += [
+                f"MERGE (p:NationalProfile {{profileId: {q(p['profileId'])}}})",
+                f"SET p.name = {q(p['name'])},",
+                "    p.country = 'DE',",
+                f"    p.canonical = {q(p['canonical'])},",
+                f"    p.baseResource = {q(p['baseResource'])},",
+                "    p.fhirVersion = 'R4',",
+                f"    p.tested = {q(p['tested'])},",
+                f"    p.passed = {q(p['passed'])},",
+                f"    p.failed = {q(p['failed'])},",
+                f"    p.topIssues = {q(p['topIssues'])},",
+                f"    p.coverage = {q(p['coverage'])};",
+                f"MATCH (p:NationalProfile {{profileId: {q(p['profileId'])}}})-[r:PUBLISHED_IN|CORRESPONDS_TO]->() DELETE r;",
+                f"MATCH (p:NationalProfile {{profileId: {q(p['profileId'])}}}), "
+                f"(g:NationalProfileGuide {{guideId: {q(g['guideId'])}}}) MERGE (p)-[:PUBLISHED_IN]->(g);",
+            ]
+            if p["eehrxfCounterpart"]:
+                out.append(
+                    f"MATCH (p:NationalProfile {{profileId: {q(p['profileId'])}}}), "
+                    f"(e:EEHRxFProfile {{profileId: {q(p['eehrxfCounterpart']['profileId'])}}}) "
+                    "MERGE (p)-[:CORRESPONDS_TO]->(e);"
+                )
+            out.append("")
+    return "\n".join(out)
+
+
+def national_mock(n: dict) -> dict:
+    """What GET /api/eehrxf/national answers for that graph."""
+    profiles = [p for g in n["guides"] for p in g["profiles"]]
+    tested = sum(p["tested"] for p in profiles)
+    passed = sum(p["passed"] for p in profiles)
+    return {
+        "guides": n["guides"],
+        "summary": {
+            "guides": len(n["guides"]),
+            "profiles": len(profiles),
+            "resourcesTested": tested,
+            "resourcesPassed": passed,
+            "passRatePercent": round(100 * passed / tested) if tested else 0,
+        },
+    }
+
+
+def viewer_files(cfg: dict, report: dict, details: dict) -> dict[Path, str]:
+    """{path: text} for the viewer: every tested resource as validated, with its errors and warnings.
+
+    The resources are rebuilt from the sources the way validate.py wrote them
+    (same candidates, same order, meta.profile set to the profile under test),
+    and joined with validation-details.json by file name. German profiles go in
+    only when their guide is onPage, as for the seed and mock.
+    """
+    sys.path.insert(0, str(HERE))
+    import validate  # noqa: E402  (standard library only, same directory)
+
+    nat = validate.national(cfg)
+    shown = [(p, cfg["igs"][p["ig"]], "eehrxf") for p in cfg["profiles"]] + [
+        (p, nat["igs"][p["ig"]], "national") for p in nat["profiles"] if nat["igs"][p["ig"]].get("onPage")
+    ]
+    sources = validate.collect_sources()
+    results = validate.all_profiles(report)
+    by_file = {e["file"]: e for entries in details["profiles"].values() for e in entries}
+    files: dict[Path, str] = {}
+    index = []
+    for prof, ig, section in shown:
+        pid = prof["profileId"]
+        resources = []
+        counter: dict[str, int] = {}
+        for sid, origin, resource in validate.candidates(prof, sources):
+            n = counter.get(sid, 0)
+            counter[sid] = n + 1
+            fname = validate.file_name(pid, sid, n)
+            entry = by_file.get(fname)
+            if entry is None:
+                raise SystemExit(f"validation-details.json is stale for {fname}: rerun validate.py")
+            r = json.loads(json.dumps(resource))
+            r.setdefault("meta", {})["profile"] = [prof["canonical"]]
+            resources.append(
+                {
+                    **{k: entry[k] for k in ("source", "origin", "passed", "issues")},
+                    "counted": sid not in validate.UNCOUNTED_SOURCES,
+                    "resource": r,
+                }
+            )
+        r = results[pid]
+        summary = {
+            "profileId": pid,
+            "name": prof["name"],
+            "section": section,
+            "canonical": prof["canonical"],
+            "igPackage": f"{ig['package']}#{ig['version']}",
+            "baseResource": prof["baseResource"],
+            "tested": r["tested"],
+            "passed": r["passed"],
+            "warnings": sum(1 for x in resources for i in x["issues"] if i["severity"] == "warning"),
+        }
+        index.append(summary)
+        files[VIEWER_DIR / f"{pid}.json"] = json.dumps({**summary, "resources": resources}, indent=1, ensure_ascii=False) + "\n"
+    srcs = cfg.get("sources", {})
+    files[VIEWER_DIR / "index.json"] = (
+        json.dumps(
+            {
+                "validator": report["validator"],
+                "sources": [
+                    {
+                        "sourceId": sid,
+                        **{k: v for k, v in srcs.get(sid, {}).items() if not k.startswith("$")},
+                        "files": s["files"],
+                        "resources": s["resources"],
+                    }
+                    for sid, s in report["sources"].items()
+                ],
+                "profiles": index,
+            },
+            indent=1,
+            ensure_ascii=False,
+        )
+        + "\n"
+    )
+    return files
 
 
 def matchbox_config(cfg: dict) -> str:
@@ -375,6 +601,8 @@ def mock(m: dict, previous: dict | None) -> dict:
             "passed": p["passed"],
             "failed": p["failed"],
             "topIssues": p["topIssues"],
+            "referenceTested": p["referenceTested"],
+            "referencePassed": p["referencePassed"],
             "resourceCount": counts.get(p["baseResource"], 0),
         }
 
@@ -429,12 +657,16 @@ def main() -> int:
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
     report = json.loads(REPORT.read_text(encoding="utf-8"))
     m = model(cfg, report)
+    nm = national_model(cfg, report)
     previous = json.loads(MOCK.read_text(encoding="utf-8")) if MOCK.exists() else None
     want = {
         CYPHER: cypher(m),
         MOCK: json.dumps(mock(m, previous), indent=2, ensure_ascii=False) + "\n",
         MATCHBOX: matchbox_config(cfg),
         EXTENSION_DOMAINS: extension_domains_ts(cfg),
+        NATIONAL_CYPHER: national_cypher(nm),
+        NATIONAL_MOCK: json.dumps(national_mock(nm), indent=2, ensure_ascii=False) + "\n",
+        **viewer_files(cfg, report, json.loads(DETAILS.read_text(encoding="utf-8"))),
     }
     def same(p: Path, text: str) -> bool:
         if not p.exists():
@@ -445,10 +677,16 @@ def main() -> int:
         return p.read_text(encoding="utf-8") == text
 
     stale = [p for p, text in want.items() if not same(p, text)]
+    # A viewer file of a profile the config no longer lists.
+    orphans = [p for p in VIEWER_DIR.glob("*.json") if p not in want] if VIEWER_DIR.exists() else []
+    stale += orphans
     if args.check:
         for p in stale:
             print(f"out of date: {p.relative_to(ROOT)} (run python3 scripts/eehrxf/build.py)", file=sys.stderr)
         return 1 if stale else 0
+    for p in orphans:
+        p.unlink()
+        print(f"removed {p.relative_to(ROOT)}")
     for p, text in want.items():
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text, encoding="utf-8")

@@ -728,6 +728,14 @@ An HL7 Europe draft the hub plans to track but does not validate yet, such as th
 
 The implementing act that lays down the EEHRxF (Art. 15(1)), whose annexes define the categories (#1205). One node, keyed by its Commission `reference` (`Ares(2026)10884928`, the draft): `title`, `status`, `legalBasis`, `fhirVersion`, `url`, `actUrl`, `annexUrl`, `feedbackFrom`, `feedbackUntil`, `implementationGuideDue`. Each `EEHRxFCategory` names its annex in `annex` and links to the act with `DEFINED_IN`.
 
+#### `NationalProfileGuide`
+
+A German implementation guide the validator checks the same resources against, kept apart from the EEHRxF coverage (#1172, #1261). Only guides marked `onPage` in `scripts/eehrxf/profiles.json` reach the graph, today the three MII Kerndatensatz modules (Basis, Laborbefund, Medikation): `guideId`, `name`, `publisher`, `country` (`DE`), `igPackage`, `status`, `home`, `gate` (whether a new failure fails CI), `checkedOn`. Written by `neo4j/register-national-profiles.cypher`, which `scripts/eehrxf/build.py` generates.
+
+#### `NationalProfile`
+
+One profile of a `NationalProfileGuide` with its validation result: `profileId`, `name`, `country`, `canonical`, `baseResource`, `fhirVersion`, `tested`, `passed`, `failed`, `topIssues`, `coverage`. Never counted as EEHRxF coverage.
+
 **Indexes:**
 
 ```cypher
@@ -736,6 +744,8 @@ CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseR
 CREATE CONSTRAINT eehrxf_validation_run_id IF NOT EXISTS FOR (v:EEHRxFValidationRun) REQUIRE v.runId IS UNIQUE;
 CREATE CONSTRAINT eehrxf_planned_guide_id IF NOT EXISTS FOR (g:EEHRxFPlannedGuide) REQUIRE g.guideId IS UNIQUE;
 CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImplementingAct) REQUIRE a.reference IS UNIQUE;
+CREATE CONSTRAINT national_profile_id IF NOT EXISTS FOR (p:NationalProfile) REQUIRE p.profileId IS UNIQUE;
+CREATE CONSTRAINT national_profile_guide_id IF NOT EXISTS FOR (g:NationalProfileGuide) REQUIRE g.guideId IS UNIQUE;
 ```
 
 #### EEHRxF Relationships
@@ -744,10 +754,14 @@ CREATE CONSTRAINT eehrxf_implementing_act_ref IF NOT EXISTS FOR (a:EEHRxFImpleme
 (:EEHRxFProfile)-[:PART_OF_CATEGORY]->(:EEHRxFCategory)
 (:EEHRxFProfile)-[:DEPENDS_ON]->(:EEHRxFProfile)
 (:EEHRxFCategory)-[:DEFINED_IN]->(:EEHRxFImplementingAct)
+(:NationalProfile)-[:PUBLISHED_IN]->(:NationalProfileGuide)
+(:NationalProfile)-[:CORRESPONDS_TO]->(:EEHRxFProfile)
 ```
 
 - `PART_OF_CATEGORY`: Links a profile to its EHDS priority category
 - `DEPENDS_ON`: Every profile except Bundles builds on the EU core Patient
+- `PUBLISHED_IN`: Links a German profile to its guide
+- `CORRESPONDS_TO`: Links a German profile to the EEHRxF profile that covers the same ground
 
 No relationship links a profile to FHIR nodes: the `PROFILES_RESOURCE` this section used to describe was never created. Coverage comes from validation (#1144).
 
@@ -821,6 +835,13 @@ CREATE INDEX condition_code IF NOT EXISTS FOR (c:Condition) ON (c.code);
 - `effectiveDateTime: DateTime`
 - `issued: DateTime`
 - `interpretation: String[]` — (normal, abnormal, critical, high, low)
+
+What the Synthea loader keeps of a FHIR Observation (#1218):
+
+- `value: Float` and `valueQuantity: Float`: the number, never a string; absent when the source sent none (`neo4j/migrate-observation-values.cypher` converts what an older loader stored)
+- `unit: String`: as the source printed it; `ucumCode: String`: the UCUM code, only when the source marked the unit as UCUM (`system` unitsofmeasure.org). The FHIR facade serves `ucumCode` when present and otherwise maps the printed unit (#1214)
+- `codingSystems`, `codingCodes`, `codingDisplays: String[]`: every coding of `code`, aligned, LOINC first. `code`, `system` and `display` are the first; each LOINC and SNOMED CT coding is also a `CODED_BY` edge
+- `componentCodes`, `componentDisplays`, `componentUnits`, `componentUcumCodes: String[]` and `componentValues: Float[]`: the components, aligned, such as the systolic (8480-6) and diastolic (8462-4) values of a blood pressure panel (85354-9), which has no value of its own. A component sent without a value is named in `componentAbsentCodes`, since a Neo4j list holds no null. The facade serves them as `component`, and the OMOP transform writes one `OMOPMeasurement` per component (step 4b)
 
 Every writer sets `resourceId`, the key of the constraint. The Synthea loader and `scripts/generate-graph-seed.py` merge on `id` and set `resourceId` to the same value, on Patient, Encounter, Condition, MedicationRequest and Procedure too; `neo4j/migrate-clinical-keys.cypher` keys nodes they wrote before #1222 and gives the graph seed's laboratory values (`obs-<patient>-<loinc>`) their unit and a value in the test's range. The date is still `dateTime` or `date` there rather than `effectiveDate`; readers coalesce the variants.
 

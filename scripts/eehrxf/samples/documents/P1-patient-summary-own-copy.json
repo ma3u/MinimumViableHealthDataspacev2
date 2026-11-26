@@ -328,7 +328,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2009-02-27"
+    "onsetDateTime": "2009-02-27",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -379,7 +387,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2013-09-14"
+    "onsetDateTime": "2013-09-14",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -430,7 +446,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2015-11-02"
+    "onsetDateTime": "2015-11-02",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -481,7 +505,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2017-06-20"
+    "onsetDateTime": "2017-06-20",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -532,7 +564,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2018-04-10"
+    "onsetDateTime": "2018-04-10",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -583,7 +623,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2020-01-15"
+    "onsetDateTime": "2020-01-15",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -634,7 +682,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "onsetDateTime": "2021-03-08"
+    "onsetDateTime": "2021-03-08",
+    "_recordedDate": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -848,7 +904,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "authoredOn": "2009-02-27"
+    "authoredOn": "2009-02-27",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -882,7 +946,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "authoredOn": "2015-11-02"
+    "authoredOn": "2015-11-02",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -916,7 +988,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "authoredOn": "2018-04-10"
+    "authoredOn": "2018-04-10",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
@@ -950,7 +1030,15 @@
     "subject": {
      "reference": "urn:uuid:9fcadfa3-8101-830a-b36f-0c0f274143d4"
     },
-    "authoredOn": "2024-09-12"
+    "authoredOn": "2024-09-12",
+    "requester": {
+     "extension": [
+      {
+       "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+       "valueCode": "unknown"
+      }
+     ]
+    }
    }
   },
   {
