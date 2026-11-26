@@ -13,6 +13,10 @@ guidelines ([the mapping](tehdas2-mapping.md)).
 
 [Full screen, every step described](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=secondary): the diagram with a panel per step, its user and its page on the static demo and the live app.
 
+[![The researcher's journey in full screen: twelve steps in five lanes, from registration to the audit report, each marked implemented, partial or planned](../images/screenshots/researcher-journey-full-screen.jpg)](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=secondary)
+
+_The researcher's journey in full screen, 26 November 2026: twelve steps in five lanes (registration and trust, data holder, data user, health data access body, secure processing environment), each marked implemented, partial or planned. Pick a step for its user, its article and its page. [Open it full screen](https://ma3u.github.io/MinimumViableHealthDataspacev2/journeys?flow=secondary)._
+
 All organisations are fictional and all data is synthetic.
 
 **Status**, checked on 26 November 2026 against
