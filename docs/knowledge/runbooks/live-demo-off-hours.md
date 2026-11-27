@@ -13,16 +13,25 @@ Azure triggers it, not GitHub ([ADR-058](../../ADRs/ADR-058-azure-triggers-the-o
 two Container Apps jobs run `scripts/azure/offhours.sh` on Azure's own cron,
 signed in as the managed identity `id-mvhd-offhours`. Nobody logs in for it.
 
-| When (UTC)              | What                                                      | Berlin time            | Who                                    |
-| ----------------------- | --------------------------------------------------------- | ---------------------- | -------------------------------------- |
-| Mon to Fri 05:17        | Start: Postgres, then core apps, EDC, CFM, UI goes online | 07:17 CEST / 06:17 CET | ACA job `mvhd-offhours-start`          |
-| Every day 18:13         | Stop: UI goes offline, all other apps stop, Postgres last | 20:13 CEST / 19:13 CET | ACA job `mvhd-offhours-stop`           |
-| Mon to Fri 06:17        | Start again if the job did not (else nothing)             | 08:17 CEST             | `aca-schedule.yml`, if GitHub fires it |
-| Every day 19:13         | Stop again if the job did not (else nothing)              | 21:13 CEST             | `aca-schedule.yml`, if GitHub fires it |
-| Mon to Fri, 05:00–17:55 | Catalog crawler, every five minutes                       | office hours           |                                        |
-| Berlin public holiday   | No start; the stack stays stopped                         |                        |                                        |
-| Date in `KEEP_UP_DATES` | No evening stop on that date (committed, for events)      |                        |                                        |
-| Before a hold           | No stop at all (see "Hold the stack" below)               |                        |                                        |
+| When (UTC)              | What                                                      | Berlin time                     | Who                                    |
+| ----------------------- | --------------------------------------------------------- | ------------------------------- | -------------------------------------- |
+| Mon to Fri 05:17, 06:17 | Start: Postgres, then core apps, EDC, CFM, UI goes online | 07:17, whichever run falls then | ACA job `mvhd-offhours-start`          |
+| Every day 18:13, 19:13  | Stop: UI goes offline, all other apps stop, Postgres last | 20:13, whichever run falls then | ACA job `mvhd-offhours-stop`           |
+| Mon to Fri 07:17        | Start again if the job did not (else nothing)             | 08:17 CET / 09:17 CEST          | `aca-schedule.yml`, if GitHub fires it |
+| Every day 20:13         | Stop again if the job did not (else nothing)              | 21:13 CET / 22:13 CEST          | `aca-schedule.yml`, if GitHub fires it |
+| Mon to Fri, 05:00–17:55 | Catalog crawler, every five minutes                       | office hours                    |                                        |
+| Berlin public holiday   | No start; the stack stays stopped                         |                                 |                                        |
+| Date in `KEEP_UP_DATES` | No evening stop on that date (committed, for events)      |                                 |                                        |
+
+Azure's cron is UTC, so each job fires at two hours, one for winter time and one
+for summer time. The job passes `BERLIN_HOUR` (20 for the stop, 7 for the
+start), and the run that falls outside that hour logs "the other UTC run does
+it" and does nothing. Until 2026-11-27 the jobs fired once, at the summer
+times, so in winter the stack stopped at 19:13 and started at 06:17. A start by
+hand outside 07:xx Berlin goes through `aca-schedule.yml` (action `start`) or
+`scripts/azure/offhours.sh start`: a plain `az containerapp job start` of the
+start job does nothing then.
+| Before a hold | No stop at all (see "Hold the stack" below) | | |
 
 GitHub's scheduler is not to be relied on: on 2026-10-06 it dropped every
 scheduled run of this repository, and the stack neither started nor stopped.
@@ -70,7 +79,7 @@ az containerapp show -n mvhd-ui -g rg-mvhd-dev --query 'tags."live-demo-hold-unt
 The repository variable `LIVE_DEMO_HOLD_UNTIL` still holds the workflow, but
 **not the Azure job**, which cannot read GitHub variables: use the tag.
 
-Set it **before** 18:13 UTC if you are starting in the afternoon and want to
+Set it **before** 20:13 Berlin if you are starting in the afternoon and want to
 carry on into the evening; then step 2 is not needed, the stack never stops.
 
 ### 2. Start it
@@ -118,7 +127,7 @@ gh workflow run aca-schedule.yml -f action=stop
 ```
 
 Forgot? The first scheduled stop after the hold expires stops it, which is
-18:13 UTC on the day after at the latest. A hold that ends on a Sunday night
+20:13 Berlin on the day after at the latest. A hold that ends on a Sunday night
 leaves the stack running through Monday, which is office hours anyway.
 
 ## What state is it in
