@@ -6,7 +6,7 @@ set -euo pipefail
 #   18-offhours-jobs.sh             identity, roles and both jobs (idempotent)
 #   18-offhours-jobs.sh --ref <sha> only point the jobs at another commit
 #                                   (deploy-azure.yml does this on every deploy)
-#   18-offhours-jobs.sh --check     report, change nothing
+#   18-offhours-jobs.sh --check     report, change nothing; exit 1 missing, 2 az unsure
 #   18-offhours-jobs.sh --dry-run   one execution of mvhd-offhours-check, which signs
 #                                   in and decides both, changing nothing
 #
@@ -78,29 +78,53 @@ done
 [ -n "$REF" ] || REF="$(git -C "$REPO_ROOT" rev-parse origin/main 2>/dev/null || git -C "$REPO_ROOT" rev-parse HEAD)"
 [[ "$REF" =~ ^[0-9a-f]{40}$ ]] || { err "REPO_REF must be a full commit sha, got '${REF}'"; exit 1; }
 
-report() {
-  local entry name
-  for entry in "${JOBS[@]}"; do
-    name="${entry%%|*}"
-    if az containerapp job show -n "$name" -g "$RG" -o none 2>/dev/null; then
-      az containerapp job show -n "$name" -g "$RG" --query "{job:name, cron:properties.configuration.scheduleTriggerConfig.cronExpression, ref:properties.template.containers[0].env[?name=='REPO_REF'].value | [0], identity:keys(identity.userAssignedIdentities)[0]}" -o json
-      az containerapp job execution list -n "$name" -g "$RG" --query "[0:3].{execution:name, status:properties.status, start:properties.startTime}" -o table
-    else
-      echo "  MISSING  ${name}"
-    fi
-  done
+# Whether a job exists: "yes", "no", or the first error line when az could
+# not tell (an expired login, a throttled call). Only a ResourceNotFound
+# means missing; any other failure used to read as MISSING too (2026-11-25).
+job_exists() {
+  local out
+  if out="$(az containerapp job show -n "$1" -g "$RG" -o none 2>&1)"; then
+    echo yes
+  elif grep -qE 'ResourceNotFound|was not found' <<<"$out"; then
+    echo no
+  else
+    grep -m1 '^ERROR' <<<"$out" || echo "az failed: ${out%%$'\n'*}"
+  fi
 }
 
-if [ "$MODE" = check ]; then report; exit 0; fi
+report() {
+  local entry name state rc=0
+  for entry in "${JOBS[@]}"; do
+    name="${entry%%|*}"
+    state="$(job_exists "$name")"
+    if [ "$state" = yes ]; then
+      az containerapp job show -n "$name" -g "$RG" --query "{job:name, cron:properties.configuration.scheduleTriggerConfig.cronExpression, ref:properties.template.containers[0].env[?name=='REPO_REF'].value | [0], identity:keys(identity.userAssignedIdentities)[0]}" -o json
+      az containerapp job execution list -n "$name" -g "$RG" --query "[0:3].{execution:name, status:properties.status, start:properties.startTime}" -o table
+    elif [ "$state" = no ]; then
+      echo "  MISSING  ${name}"
+      rc=1
+    else
+      echo "  UNKNOWN  ${name}: ${state}"
+      rc=2
+    fi
+  done
+  return "$rc"
+}
+
+if [ "$MODE" = check ]; then report; exit $?; fi
 
 if [ "$MODE" = ref ]; then
   for entry in "${JOBS[@]}"; do
     name="${entry%%|*}"
     # A job this script added later (mvhd-spe-idle-stop, ADR-072) exists only
     # once someone ran it in apply mode; the deploy must not fail before that.
-    if ! az containerapp job show -n "$name" -g "$RG" -o none 2>/dev/null; then
+    state="$(job_exists "$name")"
+    if [ "$state" = no ]; then
       warn "${name} does not exist yet: run $0 once (the PIM role) to create it"
       continue
+    elif [ "$state" != yes ]; then
+      err "cannot tell whether ${name} exists: ${state}"
+      exit 2
     fi
     az containerapp job update -n "$name" -g "$RG" --set-env-vars "REPO_REF=${REF}" -o none
     ok "${name} runs ${REF:0:7}"
