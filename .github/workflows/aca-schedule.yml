@@ -9,7 +9,7 @@ name: ACA Off-Hours Scale (Mon-Fri 07-20 Europe/Berlin)
 # ADR-058 (2026-10-07, #595): Azure triggers the stop and the start, not this
 # workflow. GitHub's scheduler dropped every scheduled run of this repository
 # on 2026-10-06, so the stack neither started nor stopped. The ACA jobs
-# mvhd-offhours-stop (18:13 UTC) and mvhd-offhours-start (05:17 UTC, Mon-Fri)
+# mvhd-offhours-stop (20:13 Berlin) and mvhd-offhours-start (07:17 Berlin, Mon-Fri)
 # run scripts/azure/offhours.sh as the managed identity id-mvhd-offhours
 # (scripts/azure/18-offhours-jobs.sh). This workflow runs the same script:
 #   - workflow_dispatch: a start or stop by hand;
@@ -22,9 +22,10 @@ name: ACA Off-Hours Scale (Mon-Fri 07-20 Europe/Berlin)
 # is stopped with everything else.
 on:
   schedule:
-    # UTC; CEST (summer) = UTC+2. The jobs run at 18:13 and 05:17.
-    - cron: "13 19 * * *" # stop fallback:  21:13 Berlin (CEST)
-    - cron: "17 6 * * 1-5" # start fallback: 08:17 Berlin (CEST), Mon-Fri
+    # UTC. The jobs act at 20:13 and 07:17 Berlin (their second UTC run is
+    # 19:13 and 06:17), so the fallback comes an hour after that.
+    - cron: "13 20 * * *" # stop fallback:  21:13 CET, 22:13 CEST
+    - cron: "17 7 * * 1-5" # start fallback: 08:17 CET, 09:17 CEST, Mon-Fri
   workflow_dispatch:
     inputs:
       action:

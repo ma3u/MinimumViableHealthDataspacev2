@@ -182,9 +182,22 @@ hold_until() {
   done | sort -n | tail -1
 }
 
+# The jobs run on UTC cron at two hours, one for winter time and one for
+# summer time, and pass BERLIN_HOUR (20 for the stop, 7 for the start): only
+# the run that falls in that hour in Berlin acts, so the stack keeps ADR-053's
+# 07:00 to 20:00 Berlin all year. Unset (the workflow, a manual
+# offhours.sh), every hour counts.
+at_berlin_hour() {
+  [ -z "${BERLIN_HOUR:-}" ] && return 0
+  [ "$(TZ=Europe/Berlin date +%-H)" = "$BERLIN_HOUR" ] && return 0
+  log "it is $(TZ=Europe/Berlin date +%R) in Berlin and this run is for ${BERLIN_HOUR}:00: the other UTC run does it"
+  return 1
+}
+
 decide() {
   local today
   today=$(TZ=Europe/Berlin date +%F)
+  case "$1" in start|stop) at_berlin_hour || { echo noop; return 0; } ;; esac
   case "$1" in
     start)
       python3 -c "import holidays" 2>/dev/null || python3 -m pip install --quiet holidays >/dev/null 2>&1 \

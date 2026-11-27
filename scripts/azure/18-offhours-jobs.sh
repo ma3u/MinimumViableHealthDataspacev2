@@ -14,8 +14,9 @@ set -euo pipefail
 # neither started nor stopped (#595). These two Container Apps jobs run
 # scripts/azure/offhours.sh on Azure's cron instead:
 #
-#   mvhd-offhours-stop    18:13 UTC daily       (20:13 Berlin in summer time)
-#   mvhd-offhours-start   05:17 UTC Mon to Fri  (07:17 Berlin in summer time)
+#   mvhd-offhours-stop    18:13 and 19:13 UTC daily, acts at 20:13 Berlin
+#   mvhd-offhours-start   05:17 and 06:17 UTC Mon to Fri, acts at 07:17 Berlin
+#                         (BERLIN_HOUR: the run outside that hour does nothing)
 #   mvhd-offhours-check   manual only: signs in and decides both, changes nothing
 #   mvhd-spe-idle-stop    every 15 minutes: stops an SPE workspace nobody has
 #                         queried for 30 minutes (offhours.sh idle-stop, ADR-072)
@@ -55,7 +56,7 @@ source "$SCRIPT_DIR/env.sh"
 IDENTITY="id-mvhd-offhours"
 IMAGE="mcr.microsoft.com/azure-cli:2.91.0"
 REPO="ma3u/MinimumViableHealthDataspacev2"
-JOBS=("mvhd-offhours-stop|13 18 * * *|stop" "mvhd-offhours-start|17 5 * * 1-5|start" "mvhd-offhours-check|manual|decide-all"
+JOBS=("mvhd-offhours-stop|13 18,19 * * *|stop" "mvhd-offhours-start|17 5,6 * * 1-5|start" "mvhd-offhours-check|manual|decide-all"
       "mvhd-spe-idle-stop|*/15 * * * *|idle-stop")
 # ADR-072: what the jobs pass to offhours.sh; set them when running this
 # script to change them (e.g. SPE_START_WITH_STACK=true restores the morning start).
@@ -268,7 +269,8 @@ doc = {"location": "${LOCATION}",
               {"name": "RESOURCE_GROUP", "value": "${RG}"}, {"name": "PG_FLEX_NAME", "value": "${PG_FLEX_NAME}"},
               {"name": "SPE_START_WITH_STACK", "value": "${SPE_START_WITH_STACK}"},
               {"name": "SPE_IDLE_STOP_MINUTES", "value": "${SPE_IDLE_STOP_MINUTES}"},
-              {"name": "SPE_STATUS_URL", "value": "${SPE_STATUS_URL}"}]}]}}}
+              {"name": "SPE_STATUS_URL", "value": "${SPE_STATUS_URL}"},
+              {"name": "BERLIN_HOUR", "value": {"stop": "20", "start": "7"}.get("${action}", "")}]}]}}}
 yaml.safe_dump(doc, open(sys.argv[1], "w"), sort_keys=False)
 PY
   if az containerapp job show -n "$name" -g "$RG" -o none 2>/dev/null; then

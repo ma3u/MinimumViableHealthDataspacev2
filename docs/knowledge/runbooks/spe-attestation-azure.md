@@ -66,7 +66,7 @@ data.
   the script runs it in a linux/amd64 container), `jq`, a clone at the commit
   you want to deploy.
 - The stack is up (`scripts/azure/offhours.sh start` off hours): `--extracts`
-  reads the hub's Neo4j. Working past 18:13 UTC: hold the stack with the tag on
+  reads the hub's Neo4j. Working past 20:13 Berlin: hold the stack with the tag on
   `mvhd-ui`. Set it with `az tag update`; `az resource update`, as the
   off-hours runbook has it, fails on the app's secrets ("value or keyVaultUrl
   and identity should be provided"):
