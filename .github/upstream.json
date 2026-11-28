@@ -66,21 +66,54 @@
     },
     {
       "repo": "eclipse-cfm/cfm",
-      "known": "v0.0.9",
+      "known": "v0.1.0",
       "prerelease": false,
-      "where": "docker-compose.jad.yml (profile cfm), built from the fork below",
-      "issue": 973,
+      "where": "docker-compose.jad.yml (profile cfm): the pmanager image, built from the fork below",
+      "issue": 1285,
       "fork": {
         "repo": "ma3u/cfm",
-        "base": "v0.0.9",
+        "base": "v0.1.0",
         "integration": "mvhd/integration",
-        "tag": "v0.0.9-mvhd.2",
+        "tag": "v0.1.0-mvhd.1",
         "runbook": "docs/knowledge/runbooks/cfm-fork.md",
+        "images": ["pmanager"],
         "patches": [
           {
             "branch": "fix/token-exchange-without-jwtlet",
             "fix": "a",
-            "drop_when": "upstream makes the token exchange's subject_token_type and client authentication configurable (common/tokenexchange/tokenprovider.go)",
+            "drop_when": "upstream makes the token exchange's subject_token_type and client authentication configurable (common/tokenexchange/tokenprovider.go); the launcher half is in cfm-dataspace",
+            "issue": 1043
+          }
+        ],
+        "adr": "docs/ADRs/ADR-102-cfm-runs-from-two-forks.md"
+      }
+    },
+    {
+      "repo": "eclipse-cfm/cfm-dataspace",
+      "known": "v0.1.0",
+      "prerelease": false,
+      "where": "docker-compose.jad.yml (profile cfm): the Tenant Manager and agent images, built from the fork below",
+      "issue": 1285,
+      "fork": {
+        "repo": "ma3u/cfm-dataspace",
+        "base": "v0.1.0",
+        "integration": "mvhd/integration",
+        "tag": "v0.1.0-mvhd.1",
+        "runbook": "docs/knowledge/runbooks/cfm-fork.md",
+        "images": [
+          "tmanager",
+          "jwtletagent",
+          "edcvagent",
+          "ihagent",
+          "regagent",
+          "obagent",
+          "sigletagent"
+        ],
+        "patches": [
+          {
+            "branch": "fix/token-exchange-without-jwtlet",
+            "fix": "a",
+            "drop_when": "every agent's launcher passes its configuration to the token provider (tokenexchange.WithConfig) and the jwtlet and siglet agents start without a token file; needs the cfm half upstream",
             "issue": 1043
           },
           {
@@ -114,7 +147,7 @@
             "issue": 1105
           }
         ],
-        "adr": "docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md"
+        "adr": "docs/ADRs/ADR-102-cfm-runs-from-two-forks.md"
       }
     }
   ]

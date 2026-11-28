@@ -1013,8 +1013,9 @@ services:
   # ---------------------------------------------------------------------------
   # CFM (Connector Fabric Manager), ADR-085, #973. Profile `cfm`.
   # ---------------------------------------------------------------------------
-  # eclipse-cfm/cfm v0.0.9 with seven fixes, from the fork's tag v0.0.9-mvhd.2
-  # (scripts/build-cfm-fork-images.sh builds mvhd/cfm-*:0.0.9-mvhd.2; the fixes and why
+  # eclipse-cfm v0.1.0 with six fixes, from our two forks' tags v0.1.0-mvhd.1:
+  # ma3u/cfm (pmanager) and ma3u/cfm-dataspace (the rest), ADR-102, #1285
+  # (scripts/build-cfm-fork-images.sh builds mvhd/cfm-*:0.1.0-mvhd.1; the fixes and why
   # are in docs/planning/current/issue-973-cfm-0-0-7-spike.md). Tenant Manager,
   # Provision Manager and the six orchestration agents of
   # core-platform-distribution v0.0.39, configured in jad/cfm/. They provision a
@@ -1054,7 +1055,7 @@ services:
 
   cfm7-tmanager:
     profiles: ["cfm"]
-    image: mvhd/cfm-tmanager:0.0.9-mvhd.2
+    image: mvhd/cfm-tmanager:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-tmanager
     command: ["/tmanager", "--mode=debug"]
     environment:
@@ -1075,7 +1076,7 @@ services:
 
   cfm7-pmanager:
     profiles: ["cfm"]
-    image: mvhd/cfm-pmanager:0.0.9-mvhd.2
+    image: mvhd/cfm-pmanager:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-pmanager
     command: ["/pmanager", "--mode=debug"]
     environment:
@@ -1096,7 +1097,7 @@ services:
 
   cfm7-jwtletagent:
     profiles: ["cfm"]
-    image: mvhd/cfm-jwtletagent:0.0.9-mvhd.2
+    image: mvhd/cfm-jwtletagent:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-jwtletagent
     command: ["/jwtletagent", "--mode=debug"]
     environment:
@@ -1115,7 +1116,7 @@ services:
 
   cfm7-edcvagent:
     profiles: ["cfm"]
-    image: mvhd/cfm-edcvagent:0.0.9-mvhd.2
+    image: mvhd/cfm-edcvagent:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-edcvagent
     command: ["/edcvagent", "--mode=debug"]
     environment:
@@ -1134,7 +1135,7 @@ services:
 
   cfm7-ihagent:
     profiles: ["cfm"]
-    image: mvhd/cfm-ihagent:0.0.9-mvhd.2
+    image: mvhd/cfm-ihagent:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-ihagent
     command: ["/ihagent", "--mode=debug"]
     environment:
@@ -1153,7 +1154,7 @@ services:
 
   cfm7-regagent:
     profiles: ["cfm"]
-    image: mvhd/cfm-regagent:0.0.9-mvhd.2
+    image: mvhd/cfm-regagent:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-regagent
     command: ["/regagent", "--mode=debug"]
     environment:
@@ -1172,7 +1173,7 @@ services:
 
   cfm7-obagent:
     profiles: ["cfm"]
-    image: mvhd/cfm-obagent:0.0.9-mvhd.2
+    image: mvhd/cfm-obagent:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-obagent
     command: ["/obagent", "--mode=debug"]
     environment:
@@ -1191,7 +1192,7 @@ services:
 
   cfm7-sigletagent:
     profiles: ["cfm"]
-    image: mvhd/cfm-sigletagent:0.0.9-mvhd.2
+    image: mvhd/cfm-sigletagent:0.1.0-mvhd.1
     container_name: health-dataspace-cfm7-sigletagent
     command: ["/sigletagent", "--mode=debug"]
     environment:
