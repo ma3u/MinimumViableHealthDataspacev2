@@ -31,15 +31,53 @@
 // ==============================================================================
 
 // ── resourceId = id on the six clinical labels ─────────────────────────────
-UNWIND ['Patient', 'Encounter', 'Condition', 'Observation', 'MedicationRequest', 'Procedure'] AS label
-CALL (label) {
-  MATCH (n)
-  WHERE label IN labels(n) AND n.resourceId IS NULL AND n.id IS NOT NULL
-    AND NOT EXISTS { MATCH (t) WHERE label IN labels(t) AND t.resourceId = n.id }
-  SET n.resourceId = n.id
-  RETURN count(n) AS keyed
-}
-RETURN label, keyed;
+// One statement per label, written out, so the planner starts from the label
+// and answers the NOT EXISTS from the resourceId constraint's index. A label
+// held in a variable and tested against labels(n) allowed neither: every node
+// was compared with every other, and on the Azure graph the seed of 2026-11-28
+// stalled here for the job's full hour. On a test graph of 21,000 nodes it
+// took 84 seconds before and 3 after.
+MATCH (n:Patient)
+WHERE n.resourceId IS NULL AND n.id IS NOT NULL
+  AND NOT EXISTS { MATCH (:Patient {resourceId: n.id}) }
+SET n.resourceId = n.id
+WITH count(n) AS keyed
+RETURN 'Patient' AS label, keyed;
+
+MATCH (n:Encounter)
+WHERE n.resourceId IS NULL AND n.id IS NOT NULL
+  AND NOT EXISTS { MATCH (:Encounter {resourceId: n.id}) }
+SET n.resourceId = n.id
+WITH count(n) AS keyed
+RETURN 'Encounter' AS label, keyed;
+
+MATCH (n:Condition)
+WHERE n.resourceId IS NULL AND n.id IS NOT NULL
+  AND NOT EXISTS { MATCH (:Condition {resourceId: n.id}) }
+SET n.resourceId = n.id
+WITH count(n) AS keyed
+RETURN 'Condition' AS label, keyed;
+
+MATCH (n:Observation)
+WHERE n.resourceId IS NULL AND n.id IS NOT NULL
+  AND NOT EXISTS { MATCH (:Observation {resourceId: n.id}) }
+SET n.resourceId = n.id
+WITH count(n) AS keyed
+RETURN 'Observation' AS label, keyed;
+
+MATCH (n:MedicationRequest)
+WHERE n.resourceId IS NULL AND n.id IS NOT NULL
+  AND NOT EXISTS { MATCH (:MedicationRequest {resourceId: n.id}) }
+SET n.resourceId = n.id
+WITH count(n) AS keyed
+RETURN 'MedicationRequest' AS label, keyed;
+
+MATCH (n:Procedure)
+WHERE n.resourceId IS NULL AND n.id IS NOT NULL
+  AND NOT EXISTS { MATCH (:Procedure {resourceId: n.id}) }
+SET n.resourceId = n.id
+WITH count(n) AS keyed
+RETURN 'Procedure' AS label, keyed;
 
 // ── The graph seed's laboratory values: range, unit, name ──────────────────
 UNWIND [
