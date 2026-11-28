@@ -1489,7 +1489,7 @@
       "id": "ADR-102",
       "file": "ADR-102-cfm-runs-from-two-forks.md",
       "title": "CFM runs from two forks, cfm and cfm-dataspace",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

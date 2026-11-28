@@ -2,7 +2,7 @@
 
 Date: 2026-11-28
 
-**Status:** Proposed (2026-11-28)
+**Status:** Accepted (2026-11-28, Matthias Buchhorn; proposed the same day). Runs on the compose stack from both forks' `v0.1.0-mvhd.1`; Azure follows with task 9 of #1285.
 **Supersedes:** [ADR-088](ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md) decision 1 (one fork, one integration tag) and decision 4 (CI builds one fork). ADR-088 decisions 2, 3, 5, 6 and 7 stay in force for both forks.
 **Relates to:** [ADR-085](ADR-085-cfm-stays-as-eclipse-cfm-releases.md), [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md)
 **Tracks:** [#1285](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1285), [#973](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/973)
