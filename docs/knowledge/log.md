@@ -62,3 +62,6 @@
 - 2026-11-28 · `runbooks/cfm-fork.md`: eclipse-cfm v0.1.0 split CFM into cfm and
   cfm-dataspace; both are forked and tagged `v0.1.0-mvhd.1` with the six
   patches, tests green (#1285). The hub still runs `v0.0.9-mvhd.2`.
+- 2026-11-28 · `runbooks/cfm-fork.md`: compose runs CFM `v0.1.0-mvhd.1` from both
+  forks (ADR-102, #1285), onboarding check 12/0; a v0.0.x database needs
+  `orchestration_definitions.compensation_type` added by hand.

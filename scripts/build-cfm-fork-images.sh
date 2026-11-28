@@ -1,50 +1,73 @@
 #!/usr/bin/env bash
 set -euo pipefail
 #
-# Builds the CFM images the compose profile `cfm` runs, from the fork's
-# integration tag (ADR-085, #973): mvhd/cfm-<name>:<version>, e.g.
-# mvhd/cfm-tmanager:0.0.9-mvhd.2. The fork is eclipse-cfm/cfm v0.0.9 with the
-# seven fixes listed in .github/upstream.json (fork.patches);
-# each image is labelled with the commit it was built from.
+# Builds the CFM images the compose profile `cfm` runs, from our forks'
+# integration tags (ADR-085, #973, #1285): mvhd/cfm-<name>:<version>, e.g.
+# mvhd/cfm-tmanager:0.1.0-mvhd.1. Since eclipse-cfm v0.1.0 CFM is two
+# repositories, so the hub has two forks, each a `fork` block in
+# .github/upstream.json with its tag, its patches and the images it builds:
+# ma3u/cfm builds pmanager, ma3u/cfm-dataspace the Tenant Manager and the
+# agents. Each image is labelled with the repository and commit it was built
+# from.
 #
-# Built from a clean export of the tag (git archive), not the working tree, so
-# what runs is what the tag says. Local images only; nothing is pushed.
+# Built from a clean export of each tag (git archive), not the working tree,
+# so what runs is what the tags say. Local images only; nothing is pushed.
 #
-#   scripts/build-cfm-fork-images.sh                 # ../cfm, or clones CFM_REPO
-#   scripts/build-cfm-fork-images.sh /path/to/cfm
-#   CFM_REF=v0.0.9-mvhd.2 scripts/build-cfm-fork-images.sh
+#   scripts/build-cfm-fork-images.sh              # clones in ../<name>, or cloned there
+#   scripts/build-cfm-fork-images.sh /path/to/dir # clones in /path/to/dir/<name>
+#   CFM_REF=v0.1.0-mvhd.1 scripts/build-cfm-fork-images.sh   # another tag, for every fork
 #
 # For a stack in another Docker context, export DOCKER_CONTEXT (e.g. orbstack).
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-CFM_DIR="${1:-${CFM_DIR:-$REPO_ROOT/../cfm}}"
-CFM_REPO="${CFM_REPO:-https://github.com/ma3u/cfm.git}"
-CFM_REF="${CFM_REF:-v0.0.9-mvhd.2}"
-VERSION="${CFM_REF#v}"
-IMAGES=(tmanager pmanager jwtletagent edcvagent ihagent regagent obagent sigletagent)
+FORKS_DIR="${1:-${CFM_FORKS_DIR:-$REPO_ROOT/..}}"
 
-if [[ ! -d "$CFM_DIR/.git" ]]; then
-  echo "No CFM checkout at $CFM_DIR; cloning $CFM_REPO"
-  git clone --quiet "$CFM_REPO" "$CFM_DIR"
-fi
-git -C "$CFM_DIR" fetch --quiet --tags 2>/dev/null || true
-COMMIT="$(git -C "$CFM_DIR" rev-parse --verify "${CFM_REF}^{commit}")" || {
-  echo "$CFM_REF is not in $CFM_DIR" >&2
-  exit 1
-}
+# One line per fork: repository, tag, images.
+FORKS="$(python3 - "$REPO_ROOT/.github/upstream.json" <<'PY'
+import json, sys
+for entry in json.load(open(sys.argv[1]))["repos"]:
+    fork = entry.get("fork")
+    if fork and fork.get("images"):
+        print(fork["repo"], fork["tag"], " ".join(fork["images"]))
+PY
+)"
+[ -n "$FORKS" ] || { echo "no fork with images in .github/upstream.json" >&2; exit 1; }
 
 SRC="$(mktemp -d)"
 trap 'rm -rf "$SRC"' EXIT
-git -C "$CFM_DIR" archive "$CFM_REF" | tar -x -C "$SRC"
+VERSIONS=()
+count=0
+while read -r repo tag images; do
+  ref="${CFM_REF:-$tag}"
+  version="${ref#v}"
+  dir="$FORKS_DIR/${repo#*/}"
+  url="https://github.com/${repo}.git"
+  if [[ ! -d "$dir/.git" ]]; then
+    echo "No checkout at $dir; cloning $url"
+    git clone --quiet "$url" "$dir"
+  fi
+  git -C "$dir" fetch --quiet --tags 2>/dev/null || true
+  commit="$(git -C "$dir" rev-parse --verify "${ref}^{commit}")" || {
+    echo "$ref is not in $dir" >&2
+    exit 1
+  }
+  mkdir -p "$SRC/${repo#*/}"
+  git -C "$dir" archive "$ref" | tar -x -C "$SRC/${repo#*/}"
+  for name in $images; do
+    echo "mvhd/cfm-${name}:${version} from ${repo} ${ref} (${commit:0:12})"
+    docker build --quiet \
+      -f "$SRC/${repo#*/}/docker/Dockerfile.${name}.dockerfile" \
+      --label "org.opencontainers.image.source=${url}" \
+      --label "org.opencontainers.image.revision=${commit}" \
+      --label "org.opencontainers.image.version=${version}" \
+      -t "mvhd/cfm-${name}:${version}" \
+      "$SRC/${repo#*/}" >/dev/null
+    count=$((count + 1))
+  done
+  VERSIONS+=("$version")
+done <<<"$FORKS"
 
-for name in "${IMAGES[@]}"; do
-  echo "mvhd/cfm-${name}:${VERSION} from ${CFM_REF} (${COMMIT:0:12})"
-  docker build --quiet \
-    -f "$SRC/docker/Dockerfile.${name}.dockerfile" \
-    --label "org.opencontainers.image.source=${CFM_REPO}" \
-    --label "org.opencontainers.image.revision=${COMMIT}" \
-    --label "org.opencontainers.image.version=${VERSION}" \
-    -t "mvhd/cfm-${name}:${VERSION}" \
-    "$SRC" >/dev/null
-done
-echo "Built ${#IMAGES[@]} images, mvhd/cfm-*:${VERSION}"
+if [ "$(printf '%s\n' "${VERSIONS[@]}" | sort -u | wc -l)" -ne 1 ]; then
+  echo "warning: the forks' tags differ (${VERSIONS[*]}); compose expects one version" >&2
+fi
+echo "Built ${count} images, mvhd/cfm-*:${VERSIONS[0]}"

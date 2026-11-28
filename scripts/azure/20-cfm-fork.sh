@@ -19,9 +19,9 @@ set -euo pipefail
 # Matthias's go per app and an `az login` first (CLAUDE.md, gotcha 6 for
 # image caching).
 #
-# What runs: the fork's tag in .github/upstream.json (fork.tag), as
+# What runs: the forks' tags in .github/upstream.json (fork.tag), as
 # ${ACR_LOGIN_SERVER}/cfm/<name>:<version>, built with local Docker (buildx)
-# from a clone of that tag. Not `az acr build`: ACR Tasks' dependency scanner
+# from a clone of each tag. Not `az acr build`: ACR Tasks' dependency scanner
 # cannot parse `FROM --platform=$BUILDPLATFORM`, and its git context takes a
 # branch or commit, not a tag. Three apps, as in compose:
 #   mvhd-cfm-tmanager, mvhd-cfm-pmanager   internal ingress on 8080
@@ -57,12 +57,21 @@ IMAGES=(tmanager pmanager jwtletagent edcvagent ihagent regagent obagent sigleta
 CFM_DB="${CFM_DB:-cfm}"
 CLIENT_SECRET_NAME="cfm-agents-client-secret"
 
-read -r FORK_REPO FORK_TAG < <(python3 - "$REPO_ROOT/.github/upstream.json" <<'PY'
+# Since eclipse-cfm v0.1.0 two forks (#1285, ADR-102): ma3u/cfm builds pmanager,
+# ma3u/cfm-dataspace the rest. One line per fork: repository, tag, images.
+FORKS="$(python3 - "$REPO_ROOT/.github/upstream.json" <<'PY'
 import json, sys
-fork = next(e["fork"] for e in json.load(open(sys.argv[1]))["repos"] if "fork" in e)
-print(fork["repo"], fork["tag"])
+for e in json.load(open(sys.argv[1]))["repos"]:
+    f = e.get("fork")
+    if f and f.get("images"):
+        print(f["repo"], f["tag"], " ".join(f["images"]))
 PY
-)
+)"
+FORK_TAG="$(awk 'NR==1 {print $2}' <<<"$FORKS")"
+awk '{print $2}' <<<"$FORKS" | sort -u | wc -l | grep -qx ' *1' || {
+  echo "the forks' tags in .github/upstream.json differ; the apps take one version" >&2
+  exit 1
+}
 CFM_VERSION="${FORK_TAG#v}"
 IMAGE_PREFIX="${ACR_LOGIN_SERVER}/cfm"
 
@@ -219,7 +228,7 @@ report() {
       echo "  absent   app ${name}"
     fi
   done
-  echo "  fork     ${FORK_REPO} ${FORK_TAG}"
+  while read -r repo tag _; do echo "  fork     ${repo} ${tag}"; done <<<"$FORKS"
 }
 
 # Every mode asks Azure. An expired login (AADSTS70043 after the conditional
@@ -245,20 +254,23 @@ case "$MODE" in
   images)
     src=$(mktemp -d)
     trap 'rm -rf "$src"' EXIT
-    git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$FORK_TAG" \
-      "https://github.com/${FORK_REPO}.git" "$src/cfm"
-    commit=$(git -C "$src/cfm" rev-parse HEAD)
     az acr login --name "$ACR_NAME" >/dev/null
-    for name in "${IMAGES[@]}"; do
-      log "cfm/${name}:${CFM_VERSION} from ${FORK_REPO} ${FORK_TAG} (${commit:0:12})"
-      docker buildx build --platform linux/amd64 --push --quiet \
-        -f "$src/cfm/docker/Dockerfile.${name}.dockerfile" \
-        --label "org.opencontainers.image.source=https://github.com/${FORK_REPO}.git" \
-        --label "org.opencontainers.image.revision=${commit}" \
-        --label "org.opencontainers.image.version=${CFM_VERSION}" \
-        -t "${IMAGE_PREFIX}/${name}:${CFM_VERSION}" "$src/cfm" >/dev/null
-      ok "cfm/${name}:${CFM_VERSION}"
-    done
+    while read -r repo tag images; do
+      dir="$src/${repo#*/}"
+      git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$tag" \
+        "https://github.com/${repo}.git" "$dir"
+      commit=$(git -C "$dir" rev-parse HEAD)
+      for name in $images; do
+        log "cfm/${name}:${CFM_VERSION} from ${repo} ${tag} (${commit:0:12})"
+        docker buildx build --platform linux/amd64 --push --quiet \
+          -f "$dir/docker/Dockerfile.${name}.dockerfile" \
+          --label "org.opencontainers.image.source=https://github.com/${repo}.git" \
+          --label "org.opencontainers.image.revision=${commit}" \
+          --label "org.opencontainers.image.version=${CFM_VERSION}" \
+          -t "${IMAGE_PREFIX}/${name}:${CFM_VERSION}" "$dir" >/dev/null
+        ok "cfm/${name}:${CFM_VERSION}"
+      done
+    done <<<"$FORKS"
     ;;
   apps)
     [ -n "${CFM_AZURE_GO:-}" ] || { err "CFM_AZURE_GO names no app; nothing is created without a go per app"; exit 1; }

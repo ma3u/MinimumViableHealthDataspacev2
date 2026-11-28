@@ -1484,6 +1484,12 @@
       "file": "ADR-101-zero-trust-access-in-place-not-a-copy-per-permit.md",
       "title": "The SPE gives zero-trust, permit-scoped access to data in place, not a copy per permit",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-102",
+      "file": "ADR-102-cfm-runs-from-two-forks.md",
+      "title": "CFM runs from two forks, cfm and cfm-dataspace",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1582,7 +1588,7 @@
     "/docs/developer/api": "2026-11-26",
     "/docs/developer/reference": "2026-11-26",
     "/docs/developer/[slug]": "2026-11-26",
-    "/docs/architecture": "2026-11-26",
+    "/docs/architecture": "2026-11-28",
     "/docs/security": "2026-11-26",
     "/docs/security/[slug]": "2026-11-26",
     "/docs/klarbefund": "2026-11-26",

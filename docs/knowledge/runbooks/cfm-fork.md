@@ -59,7 +59,7 @@ replace github.com/eclipse-cfm/cfm => github.com/ma3u/cfm v0.1.0-mvhd.1
 So the cfm tag is cut and pushed first, then the cfm-dataspace one. Both are
 named `v0.1.0-mvhd.<n>` and move together.
 
-Ported on 2026-11-28, tested, pushed, not yet built or run by the hub:
+Ported on 2026-11-28, tested and pushed:
 
 | Fork               | Tag                                                                         | Commit    | `go test -count=1 ./...`                                 |
 | ------------------ | --------------------------------------------------------------------------- | --------- | -------------------------------------------------------- |
@@ -84,11 +84,28 @@ What the port needed, for the next one:
 - `Test_VerifyE2E_LeastPrivilegeNatsUsers` (cfm-dataspace e2e) can fail on
   timing under a parallel run; it passes alone and in the full run.
 
-The hub still runs `v0.0.9-mvhd.2`. The steps from here (the build script
-taking pmanager from cfm and the rest from cfm-dataspace, the compose tags, a
-NATS and `cfm_v007` reset if the namespaced subjects need it,
-`.github/upstream.json`, the ADR that supersedes ADR-088, the local check and
-Azure) are tasks 4 to 9 of #1285.
+Compose runs `v0.1.0-mvhd.1` since 2026-11-28 (#1285, [ADR-102](../../ADRs/ADR-102-cfm-runs-from-two-forks.md)):
+`scripts/build-cfm-fork-images.sh` reads both forks from `.github/upstream.json`
+and builds pmanager from ma3u/cfm and the rest from ma3u/cfm-dataspace;
+`check-cfm-onboarding.sh` 12 passed, 0 failed; the suites at identity 41/0/0, dataspace 37/0/1, health domain 29/0/1. Azure still runs
+`v0.0.9-mvhd.2`.
+
+**Upgrading a CFM database from v0.0.x.** v0.1.0's Provision Manager adds
+`compensation_type` to `orchestration_definitions` only when it creates the
+table; it migrates `namespace` on an existing table, not that column. On a
+database created by v0.0.9 every read of the definitions fails with
+`column "compensation_type" does not exist` (HTTP 500, and `seed-cfm.sh`
+stops at the orchestration definition). Add it once, before or after the new
+pmanager starts; it is idempotent and keeps every row:
+
+```bash
+docker exec health-dataspace-postgres psql -U cp -d cfm_v007 \
+  -c 'ALTER TABLE orchestration_definitions ADD COLUMN IF NOT EXISTS compensation_type VARCHAR(255)'
+```
+
+On Azure the same statement goes to the database `cfm` on the Flexible
+Server before `20-cfm-fork.sh apps`. NATS needed no reset: the JetStream
+data of v0.0.9 stayed, and the namespaced subjects fall into `default`.
 
 ## Rules
 
