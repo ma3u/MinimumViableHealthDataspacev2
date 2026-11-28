@@ -96,6 +96,22 @@ describe("clinical nodes keyed by resourceId (#1222)", () => {
     expect(migration).toContain("SET n.resourceId = n.id");
     expect(migration).toContain("SET pol.policyId = pol.id");
   });
+
+  // A label held in a variable scans every node and compares it with every
+  // other: the Azure seed of 2026-11-28 stalled on it for an hour.
+  it.each(LABELS)(
+    "the migration keys %s from its label and its index",
+    (label) => {
+      expect(migration).toContain(
+        `MATCH (n:${label})\nWHERE n.resourceId IS NULL AND n.id IS NOT NULL\n` +
+          `  AND NOT EXISTS { MATCH (:${label} {resourceId: n.id}) }`,
+      );
+    },
+  );
+
+  it("the migration never matches a label held in a variable", () => {
+    expect(migration).not.toMatch(/IN labels\(/);
+  });
 });
 
 describe("graph seed laboratory values (#1222)", () => {
