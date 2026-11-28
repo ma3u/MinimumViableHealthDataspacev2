@@ -1206,13 +1206,13 @@
                 credentials and its siglet; one call removes them.
               </p>
               <p>
-                Compose: <b>12 of 12</b> (deploy, DSP catalogue, dispose). Azure since 2026-11-20:
-                <b>10 passed, 0 failed</b>.
+                Compose on v0.1.0: <b>12 of 12</b> (deploy, DSP catalogue, dispose). Azure on v0.0.9 since
+                2026-11-20: <b>10 passed, 0 failed</b>.
               </p>
             </div>
             <div class="card fragment" style="--c: var(--amber)">
               <span class="tag">WHY A FORK</span>
-              <h3><code>v0.0.9-mvhd.2</code></h3>
+              <h3><code>v0.1.0-mvhd.1</code></h3>
               <p>
                 The agents get tokens by exchanging a Kubernetes service-account token. Keycloak answers 400
                 "supports access tokens only".
@@ -1223,7 +1223,7 @@
               </p>
               <p>
                 <b>v0.1.0</b> (2026-11-24) splits CFM into <code>cfm</code> and <code>cfm-dataspace</code>.
-                All six patches are still needed, now in two forks: <code>v0.1.0-mvhd.1</code>, tests green.
+                All six patches are still needed, now in two forks; compose runs them, onboarding 12/0.
               </p>
             </div>
           </div>
@@ -1235,6 +1235,8 @@
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-085-cfm-stays-as-eclipse-cfm-releases.md" target="_blank" rel="noopener">ADR-085</a>
             ·
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-088-cfm-runs-from-our-fork-until-upstream-takes-the-patches.md" target="_blank" rel="noopener">ADR-088</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-102-cfm-runs-from-two-forks.md" target="_blank" rel="noopener">ADR-102</a>
             ·
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/cfm-fork.md" target="_blank" rel="noopener">runbook: the CFM fork</a>
             ·
@@ -1251,8 +1253,8 @@
             deployment per participant; on 1.0 it is a participant context, and CFM is how upstream
             creates them. Its model is not tied to Kubernetes; its token exchange is. Upstream moves
             fast: v0.1.0 split CFM into the engine and the dataspace components, and moving our six
-            patches across took an afternoon. The hub still runs v0.0.9-mvhd.2 until the new images
-            pass the onboarding check.
+            patches across took an afternoon, plus one column v0.1.0 forgets to add to an existing
+            database. Compose runs v0.1.0; Azure follows.
           </aside>
         </section>
 
@@ -1634,6 +1636,11 @@
                 <td class="new" colspan="2">Linked Data credentials opt-in (#6242), Vault key names validated (#6249)</td>
                 <td class="todo">Nothing in the gate. A diagnostic script that reads a refusal from the log</td>
               </tr>
+              <tr class="fragment">
+                <td>next</td>
+                <td class="new" colspan="2">On main, not released: extensions load by <code>edc.feature.*</code> (#6277 to #6283)</td>
+                <td class="todo">To check: a runtime with SQL, Vault and NATS set its features before it boots</td>
+              </tr>
             </tbody>
           </table>
           <p class="stand fragment">
@@ -1643,7 +1650,9 @@
           </p>
           <aside class="notes">
             [2:00] State that EDC writes and reads itself moved with it every time. What broke was
-            always a contract we fill in by hand.
+            always a contract we fill in by hand. The next RC will change how a runtime picks its
+            extensions: one image, features chosen by settings. That is exactly the kind of setting
+            our own launchers fill in.
           </aside>
         </section>
 
