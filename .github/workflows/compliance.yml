@@ -779,8 +779,13 @@ jobs:
           # found an English title only, and the baseline reported a
           # regression on every run since #783 (2026-11-01). It only SETs
           # properties on datasets the synthetic set created.
+          # register-national-profiles.cypher registers the MII Kerndatensatz
+          # next to the EEHRxF guides (#1260). Without it `03 Data User/29`
+          # found no German guide, and the baseline reported a regression on
+          # every run since 2026-11-26.
           for f in neo4j/insert-synthetic-schema-data.cypher \
                    neo4j/register-eehrxf-profiles.cypher \
+                   neo4j/register-national-profiles.cypher \
                    neo4j/seed-compliance-matrix.cypher \
                    neo4j/participant-source-init.cypher \
                    neo4j/seed-persona-overview.cypher \

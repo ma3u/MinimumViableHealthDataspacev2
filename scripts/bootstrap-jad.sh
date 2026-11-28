@@ -175,6 +175,7 @@ load_graph_if_empty() {
   "${neo4j[@]}" < neo4j/init-schema.cypher > /dev/null
   for f in neo4j/insert-synthetic-schema-data.cypher \
            neo4j/register-eehrxf-profiles.cypher \
+           neo4j/register-national-profiles.cypher \
            neo4j/seed-compliance-matrix.cypher \
            neo4j/participant-source-init.cypher \
            neo4j/seed-persona-overview.cypher \
