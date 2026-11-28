@@ -1221,6 +1221,10 @@
                 Six patch branches on the release tag, each with Go tests, one of them client credentials
                 for the exchange. Upstream pull requests wait for the contributor agreement.
               </p>
+              <p>
+                <b>v0.1.0</b> (2026-11-24) splits CFM into <code>cfm</code> and <code>cfm-dataspace</code>.
+                All six patches are still needed, now in two forks: <code>v0.1.0-mvhd.1</code>, tests green.
+              </p>
             </div>
           </div>
           <p class="stand fragment">
@@ -1237,11 +1241,18 @@
             <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1043" target="_blank" rel="noopener">#1043</a>
             ·
             <a href="https://github.com/ma3u/cfm" target="_blank" rel="noopener">ma3u/cfm</a>
+            ·
+            <a href="https://github.com/ma3u/cfm-dataspace" target="_blank" rel="noopener">ma3u/cfm-dataspace</a>
+            ·
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1285" target="_blank" rel="noopener">#1285</a>
           </p>
           <aside class="notes">
             [2:00] Multi-tenancy means someone has to create the tenants. On 0.x that was a connector
             deployment per participant; on 1.0 it is a participant context, and CFM is how upstream
-            creates them. Its model is not tied to Kubernetes; its token exchange is.
+            creates them. Its model is not tied to Kubernetes; its token exchange is. Upstream moves
+            fast: v0.1.0 split CFM into the engine and the dataspace components, and moving our six
+            patches across took an afternoon. The hub still runs v0.0.9-mvhd.2 until the new images
+            pass the onboarding check.
           </aside>
         </section>
 

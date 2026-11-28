@@ -59,3 +59,6 @@
   steps of `scripts/azure/23-dataplane.sh` that bring the push data plane
   (ADR-095) to Azure with Event Hubs (ADR-096), the open decision on the proxy's
   replicas, the gap against ADR-096 decision 3, and the rollback.
+- 2026-11-28 · `runbooks/cfm-fork.md`: eclipse-cfm v0.1.0 split CFM into cfm and
+  cfm-dataspace; both are forked and tagged `v0.1.0-mvhd.1` with the six
+  patches, tests green (#1285). The hub still runs `v0.0.9-mvhd.2`.

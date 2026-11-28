@@ -20,14 +20,14 @@ unnecessary is dropped.
 
 ## What is where
 
-| Thing             | Where                                                                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| The fork          | [`ma3u/cfm`](https://github.com/ma3u/cfm), a GitHub fork of eclipse-cfm/cfm                                                     |
-| Local clone       | `../cfm` next to this repository, remote `upstream` = eclipse-cfm/cfm, `origin` = the fork                                      |
-| Patches           | one `fix/*` branch each on the base tag, with Go tests, listed in `.github/upstream.json` (`fork.patches`)                      |
-| Integration       | `mvhd/integration`: the base tag with every patch merged, tagged `<base>-mvhd.<n>` (`fork.tag`)                                 |
-| Images            | `mvhd/cfm-<name>:<base without v>-mvhd.<n>`, built by `scripts/build-cfm-fork-images.sh` from the tag, labelled with its commit |
-| What the hub runs | the image tags in `docker-compose.jad.yml`, profile `cfm`                                                                       |
+| Thing             | Where                                                                                                                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The forks         | [`ma3u/cfm`](https://github.com/ma3u/cfm) (fork of eclipse-cfm/cfm) and, from v0.1.0, [`ma3u/cfm-dataspace`](https://github.com/ma3u/cfm-dataspace) (fork of eclipse-cfm/cfm-dataspace) |
+| Local clones      | `../cfm` and `../cfm-dataspace` next to this repository, remote `upstream` = eclipse-cfm, `origin` = the fork                                                                           |
+| Patches           | one `fix/*` branch each on the base tag, with Go tests, listed in `.github/upstream.json` (`fork.patches`)                                                                              |
+| Integration       | `mvhd/integration`: the base tag with every patch merged, tagged `<base>-mvhd.<n>` (`fork.tag`)                                                                                         |
+| Images            | `mvhd/cfm-<name>:<base without v>-mvhd.<n>`, built by `scripts/build-cfm-fork-images.sh` from the tag, labelled with its commit                                                         |
+| What the hub runs | the image tags in `docker-compose.jad.yml`, profile `cfm`                                                                                                                               |
 
 `<n>` counts changes to the patches on one base: `v0.0.7-mvhd.1`, `.2`, and
 on the next release `v0.0.8-mvhd.1`. A tag is never moved; a new one is made.
@@ -38,6 +38,57 @@ longer adds its option to the Certo agent's launcher, which upstream removes
 image of ours contains. The eight images are the same code as `.1`. It was
 cut because the "Patches on upstream main" check was red on that conflict;
 compose and CI use it, and Azure since 2026-11-20.
+
+## From v0.1.0: two repositories (#1285)
+
+eclipse-cfm v0.1.0 (2026-11-24) split CFM in two
+([eclipse-cfm/cfm#257](https://github.com/eclipse-cfm/cfm/pull/257)):
+
+| Repository                                                                | What is in it                      | Images                                                                            | Our patches                                                                             |
+| ------------------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm)                     | the engine: `common/`, `pmanager`  | pmanager                                                                          | the token provider half of `fix/token-exchange-without-jwtlet` (`common/tokenexchange`) |
+| [eclipse-cfm/cfm-dataspace](https://github.com/eclipse-cfm/cfm-dataspace) | `tmanager`, `agent/`, `dataspace/` | tmanager and the six agents (plus keymanagementagent, which the hub does not run) | all six, the launcher half of the token exchange included                               |
+
+cfm-dataspace imports `github.com/eclipse-cfm/cfm` as a Go module. Its fork
+points that at ours with one commit on `mvhd/integration`:
+
+```
+replace github.com/eclipse-cfm/cfm => github.com/ma3u/cfm v0.1.0-mvhd.1
+```
+
+So the cfm tag is cut and pushed first, then the cfm-dataspace one. Both are
+named `v0.1.0-mvhd.<n>` and move together.
+
+Ported on 2026-11-28, tested, pushed, not yet built or run by the hub:
+
+| Fork               | Tag                                                                         | Commit    | `go test -count=1 ./...`                                 |
+| ------------------ | --------------------------------------------------------------------------- | --------- | -------------------------------------------------------- |
+| ma3u/cfm           | [`v0.1.0-mvhd.1`](https://github.com/ma3u/cfm/tree/v0.1.0-mvhd.1)           | `6ee866c` | 34 packages ok, sqlstore included                        |
+| ma3u/cfm-dataspace | [`v0.1.0-mvhd.1`](https://github.com/ma3u/cfm-dataspace/tree/v0.1.0-mvhd.1) | `7049b40` | 24 packages ok, e2e included, against the pushed cfm tag |
+
+What the port needed, for the next one:
+
+- The patch diffs were taken with `git diff v0.0.9 fix/<name> -- agent tmanager`
+  from the cfm clone and applied with `git apply -3` in cfm-dataspace, with
+  the cfm clone fetched there as a remote so the three-way merge finds the
+  blobs.
+- Conflicts came only from v0.0.10's refactors: launchers now wrap the
+  processor in `vpa.AsActivityProcessor`
+  ([#249](https://github.com/eclipse-cfm/cfm/pull/249)), and `common/model`
+  became `dataspace` ([#250](https://github.com/eclipse-cfm/cfm/pull/250)),
+  with the deploy discriminator in `agent/common/vpa`. The Certo hunks are gone
+  with the agent.
+- To test cfm-dataspace before the cfm tag exists, use a `go.work` outside the
+  repository with `replace github.com/eclipse-cfm/cfm => <local cfm checkout>`
+  and `GOWORK=<that file>`.
+- `Test_VerifyE2E_LeastPrivilegeNatsUsers` (cfm-dataspace e2e) can fail on
+  timing under a parallel run; it passes alone and in the full run.
+
+The hub still runs `v0.0.9-mvhd.2`. The steps from here (the build script
+taking pmanager from cfm and the rest from cfm-dataspace, the compose tags, a
+NATS and `cfm_v007` reset if the namespaced subjects need it,
+`.github/upstream.json`, the ADR that supersedes ADR-088, the local check and
+Azure) are tasks 4 to 9 of #1285.
 
 ## Rules
 
